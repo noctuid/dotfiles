@@ -1,0 +1,56 @@
+!my config file got screwed at somepoint..; will rebuild
+
+! no success here; use urxvt -pe kuake instead
+! yeahconsole*background:black
+! yeahconsole*foreground:green
+! yeahconsole*screenWidth:1152
+! yeahconsole*aniDelay:30
+! yeahconsole*toggleKey:None+Menu
+! yeahconsole*term:urxvt
+
+! fixes most ranger image preview problems.. still get black lines.. no problem when anti aliasing is off
+! with ranger patch rev 2, images are shifted over too far to the left https://github.com/hut/ranger/issues/109
+! this is fixed and a patch is no longer required if using ranger-git from aur; ranger image preview now works in more than just urxvt and xterm.. still works worst in urxvt
+set draw_borders: true
+
+urxvt*cursorBlink:	true
+urxvt*fading:	50
+Xft.antialias:	true
+rxvt*fadeColor:	#000000
+URxvt.keysym.M-u:	perl:url-select:select_next
+URxvt*keysym.Home:	\033[1~
+URxvt*keysym.End:	\033[4~
+URxvt.url-select.launcher:	/usr/bin/firefox -new-tab
+URxvt.url-select.underline:	true
+URxvt*cursorUnderline:	false
+URxvt*urlLauncher:	firefox  
+URxvt*loginShell:	true
+URxvt*termName:	rxvt-unicode
+URxvt*scrollBar:	false
+URxvt*cursorColor:	#F74AC9
+URxvt*saveLines:	0
+URxvt.perl-ext:	default,url-select
+URxvt.colorUL:	#4682B4
+URxvt*font:	xft:inconsolata:size=11
+xrenoise.use_xcursors:	1
+xrenoise.display:	:0
+xrenoise.display_resource:	0x00,0x05,0x78,0xCF,0xEE,0xC3,0x1E,0xD1
+xrenoise.executable_path:	/usr/bin/renoise
+*color12:	#A1BDCE
+*color8:	#505354
+*color5:	#956D9D
+*color1:	#9f6767
+*color13:	#C18FCB
+*color9:	#9f6767
+*color6:	#465457
+*color2:	#6C7E55
+*color14:	#899ca1
+*color10:	#7DB37D
+*color7:	#ccccc6
+*background:	#222222
+*color3:	#d0d293
+*color11:	#feed6c
+*foreground:	#777777
+*color15:	#f8f8f2
+*color4:	#7FA5BD
+*color0:	#222222

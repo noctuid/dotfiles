@@ -1,0 +1,19 @@
+# bindings for colemak: https://github.com/bunnyfly/dotfiles/blob/master/lesskey
+# http://linux.die.net/man/1/lesskey
+#command
+n		forw-line
+N		forw-line-force
+e		back-line
+E		back-line-force
+
+f		forw-screen
+# b		back-screen
+
+/		forw-search
+?		back-search
+k		repeat-search
+K		reverse-search
+
+g		goto-line
+G		goto-end
+%		percent
