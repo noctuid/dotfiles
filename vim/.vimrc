@@ -1,8 +1,11 @@
 " Todo:
-" .everything in TO
 " .plugin to create index based on structure and title
-" .stop using gui tabs
 " .swp files
+" I functionality back?
+" replace i with s finally?
+" get delimit.. to not do "" if right before another word 
+" get space to lock until next keypress (can press space, wait however many seconds and then press finish the sequence without it dissappearing)
+" fix heading crap
 
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
@@ -11,10 +14,11 @@ set runtimepath+=~/.vim/colors
 " turns off vi bompatibility mode for full vim functionality; set first
 set nocompatible
 
-" poor man's dual role I guess (where control is remapped to caps or thumb key)
+" poor man's dual role I guess: (for people who remap control is remapped to caps or thumb key)
 " inoremap <c> Escape
 
-" dissolve"{{{
+" Dissolve {{{
+" Other people's stuff I have stolen:
 " Uncomment the following to have Vim jump to the last position when
 " reopening a file
 " if has("autocmd")
@@ -23,17 +27,15 @@ set nocompatible
 
 " vimcryption : vim -x file; set cryptmethod=blowfish
 
-" Fix email paragraphs (I have no idea what this isfor)
+" Fix email paragraphs (not sure where i got this from.. deletes newlines?)
 " nnoremap <leader>par :%s/^>$//<CR>
 
 " map ;s set invspell spelllang=en<cr
 " map ;ss :set spell spelllang=anonomize<cr>
 " mkspell ~/dotfiles/common/.vim/spell
 
-inoremap <Down> <C-o>gj
-inoremap <Up> <C-o>gk
-
 " http://stackoverflow.com/questions/9458294/open-url-under-cursor-in-vim-with-browser
+" no need with vim wiki for now...
 " nmap <leader>g :call Google()<CR>
 " fun! Google()
 "     let keyword = expand("<cword>")
@@ -73,7 +75,6 @@ inoremap <Up> <C-o>gk
 " #==============================
 " # General {{{
 " #==============================
-" default:
 " error bells are off by default
 " default ; i.e. will show # of lines selected in visual
 set showcmd
@@ -94,7 +95,60 @@ filetype plugin indent on
 " automatically use indentation from previous line
 set autoindent
 
-set history=2000                     " Keep 1000 lines of command line history.
+" Keep 2000 lines of command line history.
+set history=2000                     
+
+" persistent undo history
+set undofile " Save undo's after file closes
+set undodir=~/.vim/undo,/tmp " where to save undo histories
+set undolevels=2000 " How many undos
+set undoreload=2000 " number of lines to save for undo
+
+" http://vim.wikia.com/wiki/Word_wrap_without_line_breaks
+" wrap lines visually when reach the edge
+set wrap 
+" wrap at breakat instead of last character that fits on screen ; can't use with list :(
+" set linebreak
+" set nolist  " list disables linebreak
+
+" disable automatic insertion of newline characters
+set textwidth=0
+set wrapmargin=0
+
+" display tabs and certain whitespace
+set list
+" listchars ;show tabs; show at end of line; ☬⚛⚜⚡☥☣
+" set listchars=tab:  ,nbsp:☣,eol:¬
+" set listchars=tab:\|\ ,nbsp:☣,eol:¬
+set listchars=tab:\!\ ,nbsp:☣,eol:¬
+
+" got rid of tab:>- and replaced with escaped space (using indent guides instead now; not any more ; U+2002 unicode whitespace works as well
+
+" return to last edit position when opening files
+autocmd BufReadPost *
+            \ if line("'\"") > 0 && line("'\"") <= line("$") |
+            \ exe "normal! g`\"" |
+            \ endif
+
+"relative numbers except current line (rnu)
+set number
+set relativenumber
+
+" text formatting; get rid of tc; no autowrap of comments or based on textwidth
+set formatoptions=rw
+set formatoptions-=tc
+" r - insert comment after enter while in insert
+" leaving off o which does comment when press o (this was annoying me)
+
+" for example, stops flickering when have up and down mapped to c-o gk and gj in insert
+" won't redraw while executing macros, registers, and commands that have not been typed (not default)
+set lazyredraw
+
+" (when do things like gg, will move cursor to sol)
+set startofline
+
+" at least 5 lines show below and above cursor ; experimenting with cursor position
+set scrolloff=5
 
 " Session, saving swap, backup settings"{{{
 " to prevent constant annoyance for now:
@@ -105,7 +159,7 @@ set directory=~/.vim/swap//
 
 " save all changed, titled buffers on focus lost; won't notifiy of errors
 " au FocusLost * !silent wa
-" same but only the file that has been changed:
+" same but only the file that has been changed: (error if unnamed.. don't use untitled buffers)
 au FocusLost * update
 
 " autowriteall; save buffer if changed when use various commands (switching buffers, quit, exit, etc.)
@@ -114,7 +168,7 @@ set awa
 "}}}
 
 " Sourcing vimrc"{{{
-
+" Could just combine these..
 " from vim wiki; changed from $MYVIMRC; problem because of symlinking
 augroup AutoReloadVimRC
   au!
@@ -133,25 +187,6 @@ autocmd vimenter * source ~/dotfiles/vim/.vimrc
 
 "}}}
 
-" return to last edit position when opening files
-autocmd BufReadPost *
-            \ if line("'\"") > 0 && line("'\"") <= line("$") |
-            \ exe "normal! g`\"" |
-            \ endif
-
-"relative numbers except current line (rnu)
-set number
-set relativenumber
-
-" text formatting; get rid of tc; no autowrap of comments or based on textwidth
-set formatoptions=rw
-" r - insert comment after enter while in insert
-" leaving off o which does comment when press o (this was annoying me)
-
-" for example, stops flickering when have up and down mapped to c-o gk and gj in insert
-" won't redraw while executing macros, registers, and commands that have not been typed (not default)
-set lazyredraw
-
 " Command mode"{{{
 " when tab completing from command line will show
 set wildmenu
@@ -159,12 +194,6 @@ set wildmenu
 " changes tab behaviour in command line (i.e. list makes every possible choice popup:)
 set wildmode:full
 "}}}
-
-" (when do things like gg, will move cursor to sol)
-set startofline
-
-" at least 5 lines show below and above cursor ; experimenting with cursor position
-set scrolloff=5
 
 " Searching"{{{
 " stop highlighting on escape
@@ -174,7 +203,7 @@ inoremap <esc> <esc>:noh<cr>
 
 " don't move when search
 set noincsearch
-" go back to beginning
+" go back to beginning once reach end
 set wrapscan 
 
 " when searching lower case, will match any case
@@ -182,31 +211,6 @@ set ignorecase
 " won't ignore case if search with upper case
 set smartcase
 "}}}
-
-" persistent undo history
-set undofile " Save undo's after file closes
-set undodir=~/.vim/undo,/tmp " where to save undo histories
-set undolevels=2000 " How many undos
-set undoreload=2000 " number of lines to save for undo
-
-" http://vim.wikia.com/wiki/Word_wrap_without_line_breaks
-" wrap lines visually when reach the edge
-set wrap " wrap at breakat instead of last character that fits on screen ; can't use with list :(
-" set linebreak
-" set nolist  " list disables linebreak
-
-" disable automatic insertion of newline characters
-set textwidth=0
-set wrapmargin=0
-
-" display tabs and certain whitespace
-set list
-" listchars ;show tabs; show at end of line; ☬⚛⚜⚡☥☣
-" set listchars=tab:  ,nbsp:☣,eol:¬
-" set listchars=tab:\|\ ,nbsp:☣,eol:¬
-set listchars=tab:\!\ ,nbsp:☣,eol:¬
-
-" got rid of tab:>- and replaced with escaped space (using indent guides instead now; not any more ; U+2002 unicode whitespace works as well
 
 "}}}
 " #==============================
@@ -225,7 +229,7 @@ autocmd BufEnter *.txt set lbr
 "   set showbreak=···\                   " Line break indicator.
 
 " comment graying in text files
-highlight text guifg=gray
+autocmd BufEnter *.txt highlight text guifg=gray
 autocmd BufEnter *.txt match text /#.*/
 
 " comment my textfiles with octothorpe
@@ -240,8 +244,12 @@ autocmd BufEnter *.txt set spell
 " endif
 
 "}}}
+
 call tcomment#DefineType('pentadactyl',              '" %s'             )
 autocmd BufNewFile,BufRead *.pentadactylrc,*.penta set filetype=pentadactyl
+let g:commentChar = {
+	\   'conf': '#'
+	\}
 "}}}
 " #==============================
 " # Appearance"{{{
@@ -266,6 +274,7 @@ set guifont=Inconsolata\ 11
 set laststatus=2
 "" fav: bubblegum, laederon, murmur, understated, :
 " like normal mode of zenburn,  
+" my combo theme:
 let g:airline_theme='darkfox'
 let g:airline#extensions#tabline#enabled = 1
 
@@ -287,15 +296,14 @@ let g:airline_section_warning = ''
 " let g:airline#extensions#syntastic#enabled = 1
 "}}}
 
-" terminal like tabs (not as ugly: use -=e):
+" terminal like tabs (maybe not as ugly: use -=e):
 " A autoyank contents of visual mode to + register
 " c use console dialogues instead of popups for simple choices
 " also remove menu bar (m), T (toolbar)
 set guioptions=e,P
 set guioptions-=m,T
-" maybe fixes white bar appearing at bottom; maybe seems to?
+" maybe fixes white bar appearing at bottom; seems to work
 set guiheadroom=40
-
 
 " Tab stuff
 " limit amount of tabs for vim:
@@ -311,6 +319,7 @@ set noexpandtab "default; don't convert to spaces
 set shiftwidth=4
 set tabstop=4
 set softtabstop=0
+" I like tabs
 set smarttab
 
 " smart tabs plugin; use tabs only for indent; spaces for allignment
@@ -329,21 +338,22 @@ set foldmethod=marker
 " vnoremap <Space> zf
 "}}}
 " #==============================
-" # Mappings/ Bindings (with accompanying plugin settings)"{{{
+" # General Mappings/ Bindings and Settings "{{{
 " #==============================
-" use ne en as mapps; ee
-" easy motion maybe be useful for a single key instead of 3 to start
+" focus on not using modifiers or hard to reach keys; may add more modifiers in future when remapping progresses for dual and I get more thumb keys
+" main leader/prefix keys (in order of ease): t (not worthy of such a great colemak position and I never use), space (about as easy), comma (not at the point where I need another)
+" let mapleader = "\<space>"
+let mapleader = "t"
+" map <space> <leader>
   
-nnoremap dy db
-
-" colemak/nav mappings modified from here:"{{{
+" Colemak/Navigation Mappings"{{{
+" modified from here:
 " https://github.com/bunnyfly/dotfiles/blob/master/vimrc
 " http://forum.colemak.com/viewtopic.php?id=1808
 " My change: keep i and don't have a dedicated right; continue use s for sneak.. 
 " l for 'last' instead of line
-" if find want i for right, remap sneak to f and f to l
+" if find want i for right, remap i to s, sneak to f and f to l or get rid of f altogether
 
-" HNEI arrows. Swap 'gn'/'ge' and 'n'/'e'.
 " took out l/i and keeping i for insert.. do I ever use right? well I'll stop
 nnoremap n gj|nnoremap e gk|nnoremap gn j|nnoremap ge k
 " In(s)ert. The default s/S is synonymous with cl/cc and is not very useful.
@@ -352,20 +362,18 @@ nnoremap n gj|nnoremap e gk|nnoremap gn j|nnoremap ge k
 " don't just place in the middle; open any folds too
 nnoremap k nzozz|noremap K Nzozz
 " BOL/EOL/Join Lines; took out l to ^ in favor of l for <c-o>
-" logic.. caps l is set to home which is ^ already
+" logic.. caps l is set to home which is ^ already; 0 is easy enough and also have I
 " nnoremap L $|nnoremap <C-l> J
 nnoremap L <c-i>
 " l for last
 nnoremap l <c-o>
-" if start using i for l, change l to f instead of above and uncomment below
 " _r_ = inneR text objects.
 " onoremap r i
-" EOW.
-" TODO: I never use this. Use for something else?
 nnoremap j e|noremap J E
 
 vnoremap n j
 vnoremap e k
+vnoremap i l
 
 " replace K; H and L are pretty useless
 " what of I
@@ -373,12 +381,13 @@ vnoremap e k
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Other Colemak Arrow-Based Mappings
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Switch panes... eh lose I; maybe change
-  noremap H <C-w>h|noremap I <C-w>l|noremap N <C-w>j|noremap E <C-w>k
+" Switch panes... I don't really have enough space to do more than a vsplit; so just NE
+  " noremap H <C-w>h|noremap I <C-w>l|noremap N <C-w>j|noremap E <C-w>k
+noremap N <c-w>h|noremap E <c-w>l
 " Moving windows around.
   noremap <C-w>N <C-w>J|noremap <C-w>E <C-w>K|noremap <C-w>I <C-w>L
 " High/Low/Mid.
-  noremap <C-e> H|noremap <C-n> L|noremap <C-m> M
+" noremap <C-e> H|noremap <C-n> L|noremap <C-m> M
 " Scroll up/down.
 " noremap zn <C-y>|noremap ze <C-e>
 
@@ -387,80 +396,53 @@ nnoremap + <C-a>|nnoremap - <C-x>
 " Jump to exact mark location with ' instead of line.
 " noremap ' `|noremap ` '
 " zT/zB is like zt/zb, but scrolls to the top/bottom quarter of the screen.
-nnoremap <expr> zT 'zt' . winheight(0)/4 . '<C-y>'
-nnoremap <expr> zB 'zb' . winheight(0)/4 . '<C-e>'
+" nnoremap <expr> zT 'zt' . winheight(0)/4 . '<C-y>'
+" nnoremap <expr> zB 'zb' . winheight(0)/4 . '<C-e>'
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" " Diff
-"   nnoremap <silent> <Leader>dt :diffthis<CR>
-"   nnoremap <silent> <Leader>do :diffoff<CR>
-"   nnoremap <silent> <Leader>dd :call DiffToggle()<CR>
-"     function! DiffToggle()
-"       if &diff
-"         diffoff
-" 
-"       else
-"         diffthis
-"       endif
-"     :endfunction
-" 
-" 
+""}}}
 
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" " GUndo
-" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"   let g:gundo_right=1
-"   let g:gundo_preview_bottom=0
-"   let g:gundo_close_on_revert=1
-"   let g:gundo_map_move_older="n"
-"   let g:gundo_map_move_newer="e"
-"   let g:gundo_width=45
-"   let g:gundo_preview_height=10
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" VikWiki
-"
-" To mirror VimWiki from Dropbox folder: ln -s ~/Dropbox/vimwiki ~/.vimwiki
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-  let g:vimwiki_list = [{
-    \    'path':                       '~/.vimwiki/',
-    \    'path_html':                  '~/.vimwikihtml/',
-    \    'maxhi':                      1,
-    \    'css_name':                   'style.css',
-    \    'auto_export':                0,
-    \    'diary_index':                'diary',
-    \    'diary_link_fmt':             '%Y-%m-%d',
-    \    'diary_link_count':           4,
-    \    'diary_header':               'Diary',
-    \    'diary_rel_path':             'diary/',
-    \    'nested_syntaxes':            {},
-    \    'html_header':                '',
-    \    'html_footer':                '',
-    \    'syntax':                     'default',
-    \    'index':                      'index',
-    \    'ext':                        '.wiki',
-    \    'temp':                       0
-    \    }]
-  let g:vimwiki_camel_case = 0                   " Don't automatically make CamelCase words links.
-  noremap <C-S-M-q> @<Plug>VimwikiNextLink       " Avoid <Tab> jumping to next link.
-"}}}
-
-" General Mappings
+" Other General Mappings"{{{
 nnoremap ; :
 nnoremap : ;
 " Y like D
 nnoremap Y y$
 " Sane redo.
 noremap U <C-r>
-" +/- increment and decrement.
+
+nnoremap tw <c-w>c
+" better text file long line nav (use with lazy redraw); up and down between wraps
+inoremap <Down> <C-o>gj
+inoremap <Up> <C-o>gk
+
+nnoremap <leader>k <c-d>|nnoremap <leader>o <c-u>
 
 " Better save mapping; still not there yet
 inoremap <ctrl>s <esc>:w<cr>
 nnoremap <ctrl>s :w<cr>
 inoremap § <esc>:w<cr>
-nnoremap § :w<cr>
+" nnoremap § :w<cr>
+" try to use this instead
+nnoremap <leader>s :w<cr>
+" maybe don't do this though:
+" inoremap <leader>s <esc>:w<cr>
+
+" control backspace behaviour
+inoremap ¸ <c-w>
+cnoremap ¸ <c-w>
+
+" I use a more than A (which I almost never use)
+nnoremap a A
+nnoremap A a
+
+" I probably use V more than v.. going to try this
+nnoremap v V|nnoremap V v
+
+" Quickly edit/reload the vimrc file
+" nnoremap <silent> <leader>ov :e $MYVIMRC<CR>
+nnoremap <leader>. :so ~/.vimrc<CR>
+
+"}}}
 
 " leader table"{{{
 " interestingly enough.. can have single letter and multiple letters (ex b and bn after leader ; delay though)
@@ -472,26 +454,24 @@ nnoremap § :w<cr>
 "e- next tab
 "f- testing
 "i- bundle install
-"E- next tab in history
+"E- next buffer in history
 "n- previous tab
-"N- previous tab in history
-"nt- nerdtree
-"p- ctrlpbuffer
-"P- ctrlp file with usb as directory
+"N- previous buffer in history
+"p- Unite mru n buffer
+"P- unite file
 "q- :q
-"ov open vimrc
 "s source vimcrc
-"tb- toggle tabbar
 "tn- taboo open
 "tr- taboo rename
 "tt- tabnew
-"u- unite
+"u- gundo 
 "x- 'xray' view
 "y- snipmate
 
 
 "}}}
-"space tabble
+"space table
+" space arstdhneio; 1-10gt
 
 " comma table
 " section table; other symbols; or remap control
@@ -499,80 +479,265 @@ nnoremap § :w<cr>
 " :/cabbr table
 " consider using h as a mode/prefix or other letters don't use much 
 
-
+" Plugin Specific"{{{
 " vundle stuff
 nnoremap <leader>i :BundleInstall<cr>
 nnoremap <leader>bc :BundleClean<cr>
+nnoremap <leader>bu :BundleInstall!<cr>
+
+" Gundo
+nnoremap <leader>u :GundoToggle<CR>
+"   let g:gundo_right=1
+"   let g:gundo_preview_bottom=0
+"   let g:gundo_close_on_revert=1
+"   let g:gundo_map_move_older="n"
+"   let g:gundo_map_move_newer="e"
+"   let g:gundo_width=45
+"   let g:gundo_preview_height=10
 
 " tcomment
 map <leader>c <C-_><C-_>
-" fix .conf commenting (txt not working)
-let g:commentChar = {
-	\   'conf': '#',
-	\   'pentadactylrc': '"'
-	\}
 
 " Emmet vim
-" map <leader>y <C-y>,
+" map ty <C-y>,
 
 " quickly open session
 nnoremap <leader>ss :OpenSession
 
-" suboptimal to snippets.. but I want to do in vimrc
-" delimitmate
+" session management:
+" vim-session options (auto save on exit, open saved on open)
+let g:session_autosave_periodic='yes'
+let g:session_autosave='yes'
+let g:session_autoload='yes'
 
-iabbr @n #==============================<cr>#{{{<cr><esc>I#==============================<cr><esc>I<cr><home>#<esc>kkka
+" Sneak settings
+" 1 means use ignorecase or smartcase if set (have smartcase set)
+let g:sneak#use_ic_scs = 1
+let g:sneak#streak = 1
+" for if using s as i
+" nnoremap f <plug>SneakForward
+" nnoremap F <plug>SneakBackward
+" otherwise
+nmap s <Plug>SneakForward
+nmap S <Plug>SneakBackward
 
-iabbr @e #=================<cr>#{{{<cr><esc>I#=================<cr><esc>I<cr><home>#<esc>kkka
+" VimWiki (using like TabsOutliner with pentadactyl)
+let g:vimwiki_list = [{
+    \    'path':                       '~/vimwiki/',
+    \    'path_html':                  '~/vimwikihtml/',
+    \    'maxhi':                      1,
+    \    'css_name':                   'style.css',
+    \    'auto_export':                0,
+    \    'nested_syntaxes':            {},
+    \    'html_header':                '',
+    \    'html_footer':                '',
+    \    'syntax':                     'default',
+    \    'index':                      'index',
+    \    'ext':                        '.wiki',
+    \    'temp':                       0
+    \    }]
+let g:vimwiki_camel_case = 0                   " Don't automatically make CamelCase words links.
 
-iabbr @i #============{{{<cr><home><cr><home>#<esc>kk 
+" Calendar Settings
+let g:calendar_google_calendar = 1
+let g:calendar_google_task = 1
 
+" insertlessly
+" don't fuck with whitespace
+let g:insertlessly_cleanup_trailing_ws = 0
+let g:insertlessly_cleanup_all_ws = 0
+" don't interfere with space bindings
+let g:insertlessly_insert_spaces = 0
+"}}}
 
-" title and folding text expansion; switch to snippets
-" Main heading "{{{
-" iabbr ## #========================================<cr>#<space>{{{<cr>#========================================<cr>}}}<esc>I<esc>kkli
-" Alt Main heading
-iabbr #. #==============================<cr>#<space>{{{<cr>#==============================<cr><cr>#}}}<esc>I<esc>kkkli
-" Sub 1
-iabbr 1# #=================<cr>#<space>{{{<cr>#=================<cr><cr>#}}}<esc>k<bs>kA<left><left><left><left>
-" Sub 2
-iabbr 2# #============<space>{{{<cr><cr>}}}<esc>kkf{i<left>
-" Sub 3
-iabbr 3# #=======
-"Sub 4
-iabbr 4# #==
-"sub 5: #"}}}
-"vim specific
-iabbr #v ========================================<cr>{{{<cr>========================================<cr>#}}}<esc>Vkkk<leader>cjI<esc>li
+" Clipboard Related"{{{
+" use + as default register.. no more different pasting.. still have yank history with unite
+set clipboard=unnamedplus
 
-iabbr #t #==============================<cr>#<space><cr>#==============================<esc>I<esc><cr>V2kzf
+" thanks to shougo for such a versatile and useful plugin; https://github.com/Shougo/unite.vim/issues/415
+" vim is my clipboard manager
+let g:unite_source_history_yank_enable = 1
+let g:unite_source_history_yank_save_clipboard = 1
+let g:unite_source_history_yank_limit = 300
+" nnoremap <space>y :Unite register history/yank<cr>
+nnoremap <space>y :Unite history/yank<cr>
+"}}}
 
+" }}}
+" #==============================
+" Buffer and Tab Management Mappings and Settings"{{{
+"==============================
+" access to hundreds of files in 2-5 keystrokes; no great memorization required
+"see unite
+"tabs"{{{
+" default tab naming behaviour
+let g:taboo_modified_tab_flag='+'
+let g:taboo_tab_format=' %N %m%f '
+let g:taboo_renamed_tab_format=' %N [%f]%m '
 
-" about = ab
-" above = abo|av
-" actual = ac
-" after = af
-" again = ag 
-" all = l
-" almost = lm
-" along = al
-" also = ao 
-" always = aw
-" America = amc
-" and = n 
-" animal = ani|ai
-" another = anr|ae
-" answer = ans|ar
-" any = ne
-" anyway = nw
-" are = r
-" area = aa
-" are you = ru
+nnoremap <leader>tr :TabooRename<space>
+nnoremap <leader>tn :TabooOpen<space>
+
+nnoremap <leader>t :tabnew<cr>
+nnoremap <leader>q :q<cr>
+
+nnoremap <leader>n gT
+nnoremap <leader>e gt
+
+nnoremap <space>a 1gt
+nnoremap <space>r 2gt
+nnoremap <space>s 3gt
+nnoremap <space>t 4gt
+nnoremap <space>d 5gt
+nnoremap <space>h 6gt
+nnoremap <space>n 7gt
+nnoremap <space>e 8gt
+nnoremap <space>i 9gt
+nnoremap <space>o 10gt
+nnoremap <space>w 11gt
+nnoremap <space>f 12gt
+nnoremap <space>p 13gt
+nnoremap <space>l 14gt
+"}}}
+
+"buffkill stuff"{{{
+" move forward and back in buffer history
+nnoremap <leader>N :BB<cr>
+nnoremap <leader>E :BF<cr>
+" delete buffer and leave window open and switch to last used buffer (bufkill)
+nnoremap <leader>d :BD<Return>
+" delete buffer and close window
+nnoremap <leader>D :BD<cr><c-w>c
+" close buffer without closing window
+" http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
+" cabbr bc BClose
+" create a new buffer in current window use :enew new window/buffer without split
+"}}}
+
+" Unite Related"{{{
+" http://www.codeography.com/2013/06/17/replacing-all-the-things-with-unite-vim.html
+" http://eblundell.com/thoughts/2013/08/15/Vim-CtrlP-behaviour-with-Unite.html
+let g:unite_split_rule = "topleft"
+let g:unite_source_buffer_time_format=''
+let g:unite_source_buffer_filename_format=''
+" let g:unite_winheight = 10
+" call unite#filters#matcher_default#use(['matcher_fuzzy'])
+" Todo: 
+" get arstdhneo for buffer quick-match ; esc to get out of
+" can use with tabs :Unite tab and windows
+" let g:unite_enable_use_short_source_names=1
+
+" http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
+" nnoremap <space>/ :Unite ag:.<cr>
+
+" Open bookmark file for most frequently used files
+nnoremap <space><space> :Unite -quick-match bookmark<cr>
+
+" Search open buffers and most recently used
+nnoremap <leader>p :Unite -start-insert buffer file_mru<cr>
+" Search files (cd first)
+nnoremap <leader>P :Unite -start-insert file_rec/async<cr>
+cabbr writ ~/ag-sys/Else/everything/\#Another/ 
+cabbr dot ~/dotfiles
+cabbr ubmark ~/.unite/bookmark/
+
+autocmd FileType unite call s:unite_settings()
+function! s:unite_settings()
+  " let me exit with escape and move with colemak bindings
+  nmap <buffer> <ESC> <Plug>(unite_exit)
+  nmap <buffer> n j
+  nmap <buffer> e k
+endfunction
+
+" nmap cp :let @" = expand("%")<cr>
+" can do ctrl r then % in insert mode instead
+
+" Thanks to Ingo Karkat for answering my question ; http://stackoverflow.com/questions/21125170/grabbing-the-current-tab-name
+cnoreabbr <expr> tabname t:taboo_tab_name
+cnoreabbr <expr> buffername expand('%:t')
+" for use in tabs named in taboo:
+" have a bookmark file for tab names; organize buffers by group (i.e. tab for config; name with taboo and that name matched to a bookmark file)
+nnoremap <buffer> <space>u :Unite -quick-match bookmark:tabname<C-]><cr>
+nnoremap <buffer> <space>U :UniteBookmarkAdd<cr>tabname<c-]><cr>buffername<c-]>
+
+" cycle to next sub category; c for cycle
+" resource to auto change mapping (otherwise won't cycle af first time)
+"stop complaining if not named
+if exists("t:taboo_tab_name")
+	if t:taboo_tab_name == "config"
+		nnoremap <buffer> <space>c :TabooRename conf-music<cr>:so ~/.vimrc<cr>
+	elseif t:taboo_tab_name == "conf-music"
+		nnoremap <buffer> <space>c :TabooRename mail<cr>:so ~/.vimrc<cr>
+	elseif t:taboo_tab_name == "mail"
+		nnoremap <buffer> <space>c :TabooRename config<cr>:so ~/.vimrc<cr>
+	endif
+endif
+
+" old way of doing things:
+" if bufname("%") == "/home/angelic_sedition/dotfiles/common/.mpd/mpd.conf"
+" 	nnoremap <buffer> <space>u :Unite bookmark:config
+" elseif bufname("%") == "/home/angelic_sedition/dotfiles/terminal/.Xdefaults"
+" 	nnoremap <buffer> <space>u :Unite bookmark:config
+" else
+" 	nnoremap <buffer> <space>u :Unite file
+" endif
+
+"}}}
+
+"'x-ray' view; cuc and cul
+nnoremap <leader>x :set cursorcolumn<cr>:set cursorline<cr>
+nnoremap <leader>x :set cursorcolumn!<cr>:set cursorline!<cr>
+
+"}}}
+" #==============================
+"shorthand"{{{
+" working on implementing; not a fan of configuring autokey; this is much easier; use vim and penta for 95% of typing.. will probably add to weechat as well
+iabbr i I
+" http://forum.colemak.com/viewtopic.php?id=1804
+iabbr ab about
+iabbr about ab
+iabbr abo above
+iabbr above abo
+iabbr ac actual
+iabbr actual ac
+iabbr af after
+iabbr after af
+iabbr ag again
+iabbr again ag
+iabbr l all
+iabbr all l
+iabbr lm almost
+iabbr almost lm
+iabbr ao also
+iabbr also ao
+iabbr alw always
+iabbr always alw
+iabbr amc America
+iabbr America amc
+iabbr n and
+iabbr and n
+iabbr ani animal
+iabbr animal ani
+iabbr anr another
+iabbr another anr
+iabbr ans answer
+iabbr answer ans
+iabbr ne any
+iabbr any ne
+iabbr nw anyway
+iabbr anyway nw
+iabbr r are
+iabbr are r
+iabbr aa area
+iabbr area aa
+iabbr ru are you
+iabbr b be
+iabbr be b
+iabbr bc because
+iabbr because bc
 " are you okay with = rukw
 " around = rnd|ro
 " away = ay 
-" be = b 
-" because = bc
 " been = bn 
 " before = bf
 " began = bga|ba
@@ -854,219 +1019,99 @@ iabbr #t #==============================<cr>#<space><cr>#=======================
 " your = ur
 " you're = yr
 " 
-
-" copying with putty just actual text:  :set nonu nolist foldcolumn=0
-"
-" stick with this?
-" inoremap <c-v> <esc>:set paste<cr>"+p<esc>:set nopaste<cr>
-" inoremap  <c-v> <esc>"+p
-" nnoremap <space>v "+p
-
-
-
-" Sneak settings
-" 1 means use ignorecase or smartcase if set (have smartcase set)
-let g:sneak#use_ic_scs = 1
-let g:sneak#streak = 1
-" for if using s as i
-" nnoremap f <plug>SneakForward
-" nnoremap F <plug>SneakBackward
-" otherwise
-nmap s <Plug>SneakForward
-nmap S <Plug>SneakBackward
-
-"==============================
-" Buffer and Tab Management Mappings and Settings"{{{
-"==============================
-" Unite Mappings"{{{
-" add it so that can check what is open from bookmarks
-
-" use + as default register.. no more different pasting.. still have yank history with unite
-set clipboard=unnamedplus
-
-" use unite as clipboard manager
-" thanks to shougo for such a versatile and useful plugin; https://github.com/Shougo/unite.vim/issues/415
-let g:unite_source_history_yank_enable = 1
-let g:unite_source_history_yank_save_clipboard = 1
-let g:unite_source_history_yank_limit = 300
-" nnoremap <space>y :Unite register history/yank<cr>
-nnoremap <space>y :Unite history/yank<cr>
-
- nnoremap <space><space> :Unite -quick-match bookmark<cr>
-
-nnoremap <leader>p :Unite -start-insert buffer file_mru<cr>
-" nnoremap <space>u :Unite -start-insert buffer<cr>
-nnoremap <leader>P :Unite -start-insert file_rec/async<cr>
-cabbr writ ~/ag-sys/Else/everything/\#Another/ 
-
-autocmd FileType unite call s:unite_settings()
-function! s:unite_settings()
-  nmap <buffer> <ESC> <Plug>(unite_exit)
-endfunction
-
-
-
-"fo table
-" nmap cp :let @" = expand("%")<cr>
-" can do ctrl r then % in insert mode instead
-
-" Thanks to Ingo Karkat for answering my question ; http://stackoverflow.com/questions/21125170/grabbing-the-current-tab-name
-cnoreabbr <expr> tabname t:taboo_tab_name
-cnoreabbr <expr> buffername expand('%:t')
-" for use in tabs named in taboo:
-nnoremap <buffer> <space>u :Unite -quick-match bookmark:tabname<C-]><cr>
-nnoremap <buffer> <space>U :UniteBookmarkAdd<cr>tabname<c-]><cr>buffername<c-]>
-" adding new bookmark files to for default file
-cabbr ubmark ~/.unite/bookmark/
-
-" cycle to next sub category; c for cycle
-" resource to auto change mapping
-
-"stop complaining if not named
-if exists("t:taboo_tab_name")
-	if t:taboo_tab_name == "config"
-		nnoremap <buffer> <space>c :TabooRename conf-music<cr>:so ~/.vimrc<cr>
-	elseif t:taboo_tab_name == "conf-music"
-		nnoremap <buffer> <space>c :TabooRename mail<cr>:so ~/.vimrc<cr>
-	elseif t:taboo_tab_name == "mail"
-		nnoremap <buffer> <space>c :TabooRename config<cr>:so ~/.vimrc<cr>
-	endif
-endif
-
-nnoremap <space>a 1gt
-nnoremap <space>r 2gt
-nnoremap <space>s 3gt
-nnoremap <space>t 4gt
-nnoremap <space>d 5gt
-nnoremap <space>h 6gt
-nnoremap <space>n 7gt
-nnoremap <space>e 8gt
-nnoremap <space>i 9gt
-nnoremap <space>o 10gt
-nnoremap <space>w 11gt
-nnoremap <space>f 12gt
-nnoremap <space>p 13gt
-nnoremap <space>l 14gt
-
-" nmap <Leader>bb :ls<CR>:buffer<Space>
-
-let g:unite_split_rule = "topleft"
-" let g:unite_winheight = 10
-
-" nnoremap <space>z :Unite -no-split -start-insert buffer tab file_mru directory_mru<cr>
-
-" call unite#filters#matcher_default#use(['matcher_fuzzy'])
-" http://www.codeography.com/2013/06/17/replacing-all-the-things-with-unite-vim.html
-" http://eblundell.com/thoughts/2013/08/15/Vim-CtrlP-behaviour-with-Unite.html
-" autocmd FileType unite call s:unite_settings()
-"
-" function! s:unite_settings()
-  " let b:SuperTabDisabled=1
-  " imap <buffer> <C-j>   <Plug>(unite_select_next_line)
-  " imap <buffer> <C-k>   <Plug>(unite_select_previous_line)
-  " imap <silent><buffer><expr> <C-x> unite#do_action('split')
-  " imap <silent><buffer><expr> <C-v> unite#do_action('vsplit')
-  " imap <silent><buffer><expr> <C-t> unite#do_action('tabopen')
-
-  " nmap <buffer> <ESC> <Plug>(unite_exit)
-" endfunction
-
-
-" old way of doing things:
-" if bufname("%") == "/home/angelic_sedition/dotfiles/common/.mpd/mpd.conf"
-" 	nnoremap <buffer> <space>u :Unite bookmark:config
-" elseif bufname("%") == "/home/angelic_sedition/dotfiles/terminal/.Xdefaults"
-" 	nnoremap <buffer> <space>u :Unite bookmark:config
-" else
-" 	nnoremap <buffer> <space>u :Unite file
-" endif
-
-" http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
-" nnoremap <space>/ :Unite ag:.<cr>
-
-let g:unite_source_buffer_time_format=''
-let g:unite_source_buffer_filename_format=''
-" todo
-" get arstdhneo for buffer quick-match ; esc to get out of
-" file_mru.. buffer mru automaticarrly
-" allows for bookmarks
-	" let g:unite_source_history_yank_enable = 1
-	" nnoremap <leader>y :<C-u>Unite history/yank<CR>
-" multiple bookmarks make own sourec
-" unite-sources
-" can use with tabs :Unite tab and windows
-" -no-split
-" let g:unite_enable_use_short_source_names=1
-" unite actions
 "}}}
+" #==============================
+"=====================Vundle====================="{{{
+filetype off                   " required!
 
-"'x-ray' view; cuc and cul
-nnoremap <leader>x :set cursorcolumn<cr>:set cursorline<cr>
-nnoremap <leader>x :set cursorcolumn!<cr>:set cursorline!<cr>
+"required
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
 
-"tabs
-nnoremap <leader>tt :tabnew<cr>
-nnoremap <leader>q :q<cr>
+" let Vundle manage Vundle; required
+Bundle 'gmarik/vundle'
 
-"buffkill stuff
-" move forward and back in buffer history
-" maybe replace window navigation
-nnoremap <leader>N :BB<cr>
-nnoremap <leader>E :BF<cr>
-" delete buffer and leave window open and switch to last used buffer (bufkill)
-nnoremap <leader>d :BD<Return>
-" delete buffer and close window
-nnoremap <leader>D :BD<cr><c-w>c
-" close buffer without closing window
-" http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
-" cabbr bc BClose
-" create a new buffer in current window use :enew new window/buffer without split
+" better marks; show and symbols (markers)
+Bundle 'kshenoy/vim-signature'
+" view undo tree 
+Bundle 'sjl/gundo.vim'
+" file linking and formatting/highlighting
+Bundle 'vimwiki/vimwiki' 
+" navigation
+" sneak is generally faster or just as fast
+Bundle 'justinmk/vim-sneak'
+" Bundle 'Lokaltog/vim-easymotion'
+" Bundle 'goldfeld/vim-seek'
 
+" allows repeat (.) with plugins like sneak, surround, vim-abolish, etc.
+Bundle 'tpope/vim-repeat'
+" add newlines with enter
+Bundle 'dahu/Insertlessly'
+Bundle 'tomtom/tcomment_vim'
+Bundle 'bling/vim-airline'
+Bundle 'tpope/vim-surround'
+Bundle 'vim-scripts/Smart-Tabs'
+Bundle 'itchyny/calendar.vim'
+Bundle 'xolox/vim-session'
+" required by vim-session
+Bundle 'xolox/vim-misc'
+" tab renaming
+Bundle 'gcmt/taboo.vim'
+" for buffer history and killing buffers without changing window layout or closing
+Bundle 'bufkill.vim'
+" html generation
+Bundle 'mattn/emmet-vim'
+" auto put ( with ), etc with cursor in middle; won't do in commented lines
+Bundle 'Raimondi/delimitMate'
 
+" tab for insert completion
+" Bundle 'ervandew/supertab'
+" Bundle Shougo/neocomplete.vim
 
+" buffer, mru, and file search
+" no more fuzzy finder, lusty juggler, minbufexpl, buffer explorer, command t, etc. ; just unite
+Bundle 'Shougo/unite.vim'
+" for async file search
+Bundle 'Shougo/vimproc.vim'
 
-" default tab naming behaviour
-let g:taboo_modified_tab_flag='+'
-let g:taboo_tab_format=' %N %m%f '
-let g:taboo_renamed_tab_format=' %N [%f]%m '
+"SnipMate
+Bundle "MarcWeber/vim-addon-mw-utils"
+Bundle "tomtom/tlib_vim"
+Bundle "garbas/vim-snipmate"
+" Optional:
+Bundle "honza/vim-snippets"
 
-nnoremap <leader>tr :TabooRename<space>
-nnoremap <leader>tn :TabooOpen<space>
+" Dead"{{{
+"vim-bufferline pretty much the same thing
+" Bundle "buftabs"
+" don't need anything complicated and like unite better than yankstack cycling
+" Bundle 'maxbrunsfeld/vim-yankstack'
+" Bundle  'YankRing'
 
-" Gundo
-nnoremap <leader>u :GundoToggle<CR>
+" getting rid of nerdtree
+" Bundle 'scrooloose/nerdtree'
+" Bundle 'kien/ctrlp.vim'
 
+" coloured indents; changed mind
+" Bundle 'nathanaelkane/vim-indent-guides'
+" indentline maybe instead of 
 
-" Other Plugin Settings
-" session management:
-" don't need to turn of swp because now will load up all that arent'
-" automatically deleted
-" vim-session options (auto save on exit, open saved on open)
-let g:session_autosave_periodic='yes'
-let g:session_autosave='yes'
-let g:session_autoload='yes'
+" non-GitHub repos
+"fast file opening
+"Bundle 'git://git.wincent.com/command-t.git'
 
-
-
-
+" interesting idea ; would like better if could get rid of flashing
+" Bundle 'vim-scripts/SearchComplete'
 "}}}
-
-
-" Calendar Settings
-let g:calendar_google_calendar = 1
-let g:calendar_google_task = 1
-
-" insertlessly
-let g:insertlessly_cleanup_trailing_ws = 0
-let g:insertlessly_cleanup_all_ws = 0
-
-" Quickly edit/reload the vimrc file
-nnoremap <silent> <leader>ov :e $MYVIMRC<CR>
-nnoremap <leader>s :so ~/.vimrc<CR>
-" $MYVIMRC<CR>
+" Git repos on your local machine (i.e. when working on your own plugin)
+"Bundle 'file:///Users/gmarik/path/to/plugin'
+" ...
+" NOTE: comments after Bundle commands are not allowed.
 "}}}
+" #==============================
+" # Graveyard"{{{
+" #==============================
 
-" temp? graveyard
 " Seek"{{{
 " like remote stuff with seek, but uninstalled for now because was messing with tcomment
 " prevent seek from overriding sneak
@@ -1107,121 +1152,8 @@ nnoremap <leader>s :so ~/.vimrc<CR>
 "TabBar won't auto open (unless x eligible buffersbuffers); seems to have no effect
 " let g:TB_MoreThanOne=0
 "}}}
-"=====================Vundle=====================
-filetype off                   " required!
 
-"required
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
-
-" let Vundle manage Vundle; required
-Bundle 'gmarik/vundle'
-
-"Apearance
-Bundle 'chriskempson/base16-vim'
-
-" don't need anything complicated and like unite better than yankstack cycling
-" Bundle 'maxbrunsfeld/vim-yankstack'
-" Bundle  'YankRing'
-
-" allows repeat (.) with plugins like sneak, surround, vim-abolish, etc.
-Bundle 'tpope/vim-repeat'
-
-" navigation
-" sneak is generally faster or just as fast
-Bundle 'justinmk/vim-sneak'
-Bundle 'Lokaltog/vim-easymotion'
-" Bundle 'goldfeld/vim-seek'
-
-" add newlines with enter
-Bundle 'dahu/Insertlessly'
-
-" getting rid of nerdtree
-" Bundle 'scrooloose/nerdtree'
-
-Bundle 'tomtom/tcomment_vim'
-Bundle 'bling/vim-airline'
-Bundle 'tpope/vim-surround'
-
-Bundle 'xolox/vim-session'
-" required by vim-session
-Bundle 'xolox/vim-misc'
-
-Bundle 'itchyny/calendar.vim'
-
-" tab for insert completion
-" Bundle 'ervandew/supertab'
-
-" buffer, mru, and file search
-" Bundle 'kien/ctrlp.vim'
-" no more fuzzy finder, lusty juggler, minbufexpl, buffer explorer, command t, etc. ; just unite
-Bundle 'Shougo/unite.vim'
-" for async file search
-Bundle 'Shougo/vimproc.vim'
-
-" tab renaming
-Bundle 'gcmt/taboo.vim'
-" for buffer history and killing buffers without changing window layout or closing
-Bundle 'bufkill.vim'
-
-" html generation
-Bundle 'mattn/emmet-vim'
-
-
-" auto put () with (, etc with cursor in middle; won't do in commented lines
-Bundle 'Raimondi/delimitMate'
-
-
-" coloured indents; changed mind
-" Bundle 'nathanaelkane/vim-indent-guides'
-" indentline maybe instead of 
-
-"SnipMate
-Bundle "MarcWeber/vim-addon-mw-utils"
-Bundle "tomtom/tlib_vim"
-Bundle "garbas/vim-snipmate"
-" Optional:
-Bundle "honza/vim-snippets"
-
-" vim-scripts repos
-"vim-bufferline pretty much the same thing
-" Bundle "buftabs"
-
-
-" better marks; show and symbols (markers)
-Bundle 'kshenoy/vim-signature'
-
-" view undo tree 
-Bundle 'sjl/gundo.vim'
-
-" non-GitHub repos
-"fast file opening
-"Bundle 'git://git.wincent.com/command-t.git'
-
-Bundle 'vim-scripts/Smart-Tabs'
-
-" interesting idea ; would like better if could get rid of flashing
-" Bundle 'vim-scripts/SearchComplete'
-
-" Git repos on your local machine (i.e. when working on your own plugin)
-"Bundle 'file:///Users/gmarik/path/to/plugin'
-" ...
-
-" filetype plugin indent on     " required!
-"
-" Brief help
-" :BundleList          - list configured bundles
-" :BundleInstall(!)    - install (update) bundles
-" :BundleSearch(!) foo - search (or refresh cache first) for foo
-" :BundleClean(!)      - confirm (or auto-approve) removal of unused bundles
-"
-" see :h vundle for more details or wiki for FAQ
-" NOTE: comments after Bundle commands are not allowed.
-
-" #==============================
-" # Graveyard
-" #==============================
-
+" nmap <Leader>bb :ls<CR>:buffer<Space>
 " mappings"{{{
 " Control s to save (stop using control unless decide to remap control to better location)
 " :nmap <c-s> :w<cr>
@@ -1285,4 +1217,35 @@ iabbr ## #==========<Space>{{{<cr>#---------------------------------------------
 " let g:buftabs_marker_end = "]"
 " let g:buftabs_marker_modified = "!"
 " "}}}
+" 
+" 
+" "}}}
+
+" Heading Crap (still needs revision..)
+iabbr @n #==============================<cr>#{{{<cr><esc>I#==============================<cr><esc>I<cr><home>#<esc>kkka
+
+iabbr @e #=================<cr>#{{{<cr><esc>I#=================<cr><esc>I<cr><home>#<esc>kkka
+
+iabbr @i #============{{{<cr><home><cr><home>#<esc>kk 
+
+
+" title and folding text expansion; switch to snippets
+" Main heading "{{{
+" iabbr ## #========================================<cr>#<space>{{{<cr>#========================================<cr>}}}<esc>I<esc>kkli
+" Alt Main heading
+iabbr #. #==============================<cr>#<space>{{{<cr>#==============================<cr><cr>#}}}<esc>I<esc>kkkli
+" Sub 1
+iabbr 1# #=================<cr>#<space>{{{<cr>#=================<cr><cr>#}}}<esc>k<bs>kA<left><left><left><left>
+" Sub 2
+iabbr 2# #============<space>{{{<cr><cr>}}}<esc>kkf{i<left>
+" Sub 3
+iabbr 3# #=======
+"Sub 4
+iabbr 4# #==
+"sub 5: #"}}}
+"vim specific
+iabbr #v ========================================<cr>{{{<cr>========================================<cr>#}}}<esc>VkkktcjI<esc>li
+
+iabbr #t #==============================<cr>#<space><cr>#==============================<esc>I<esc><cr>V2kzf
+
 syntax on
