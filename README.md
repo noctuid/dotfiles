@@ -2,6 +2,7 @@ These are my dotfiles. Some are pretty heavily commented. If you have interest i
 # Goals for Configuration & Workflow:
 - Increase efficiency and speed; cut wasted time and movement; get the computer to work with instead of against
 - Reduce/eliminate hand and wrist pain
+
 ## Acheiving This (General Principles)
 - Arch Linux is the choice of distro (however I am working on duplicating my setup on Windows and OSX as well)
   - AUR (I use a lot of packages not in the official repos; bleeding edge); less time spent dealing with program installation; helps with scripting post-arch-install setup
@@ -71,6 +72,7 @@ There already exist programs that are modal by default or only need one set of l
 However, there are many examples of programs that do have extensive keyboard shortcuts that could potentially be useful if their default bindings weren't oriented towards masochists (i.e. photoshop). For some programs, the few available shortcuts can still be massively useful when implemented in vim-like modes (i.e Libre Office).
 
 Solution: Rebind keys to fake the existing keyboard shortcuts
+
 [Video Demonstration With Libre Writer](http://youtu.be/iB1fCASlpY8)
 [Explanation](http://forum.colemak.com/viewtopic.php?id=1817)
 
