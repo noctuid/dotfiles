@@ -20,7 +20,7 @@ echo "On startup, mount usb, connect, reload time (no more), and powerdown".
 #https://wiki.gentoo.org/wiki/Zsh/HOWTO#
 # https://github.com/phallus/arch-files/blob/master/config/.zshrc
 #}}}
- 
+
 # dissolve {{{
 # Aliases# {{{
 # alias gd='git diff'
@@ -101,12 +101,13 @@ export PANEL_HEIGHT=20
 # export BSPWM_HISTORY=/tmp/bspwm.history
 # export BSPWM_STACK=/tmp/bspwm.stack
 # }}}
- 
+
 # add to path# {{{
 # #add ~/bin to $path for any scripts
 export PATH=$PATH:~/bin
+export PATH=$PATH:~/bin/artget.py
 export PATH=$PATH:~/.config/bspwm/panel
- 
+
 # from https://github.com/windelicato/dotfiles/blob/master/.zshrc
 # pathdirs=(
 #     ~/scripts
@@ -432,6 +433,10 @@ bindkey -M vicmd "K" vi-rev-repeat-search
 bindkey -M vicmd "j" vi-forward-word-end
 bindkey -M vicmd "J" vi-forward-blank-word-end
 
+# control backspace
+bindkey -M viins "¸" backward-kill-word
+
+
 # http://unix.stackexchange.com/questions/25765/pasting-from-clipboard-to-vi-enabled-zsh-or-bash-shell
 # paste from the system clipboard with p
 vi-append-x-selection () { RBUFFER=$(xsel -ob </dev/null)$RBUFFER; }
@@ -442,11 +447,36 @@ bindkey -M vicmd p vi-append-x-selection
 # vi-yank-x-selection () { print -rn -- $CUTBUFFER | xsel -i -p; }
 # zle -N vi-yank-x-selection
 # bindkey -a '^Y' vi-yank-x-selection
- 
+
 # for termite link mode from vi cmd mode..
 enter-url-hint() { xdotool key --window Termite control+shift+x }
 zle -N enter-url-hint
 bindkey -a f enter-url-hint
+
+# for re-entering ranger 
+enter-ranger() { xdotool key control+d }
+zle -N enter-ranger
+bindkey -a r enter-ranger
+
+# for tmux copy mode
+enter-copy-mode() { tmux copy-mode }
+zle -N enter-copy-mode
+bindkey -a t enter-copy-mode
+
+# re-enter vim
+#  http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
+fancy-ctrl-z () {
+  if [[ $#BUFFER -eq 0 ]]; then
+    fg
+    zle redisplay
+  else
+    zle push-input
+    zle clear-screen
+  fi
+}
+zle -N fancy-ctrl-z
+# v to re-enter vim
+bindkey -a v fancy-ctrl-z
 
 # history search in vim mode; not sure why I have this or what use it is
 # http://zshwiki.org./home/zle/bindkeys#why_isn_t_control-r_working_anymore
@@ -465,7 +495,7 @@ Desk=~/Desktop
 # will autocomplete from any directory
 
 #}}}
-#========================================
+# #========================================
 # _Aliases# {{{# {{{
 #========================================
 # remember that using && will break when one doesn't succesfully complete
@@ -507,10 +537,13 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 
 # aur with setup:
 # yas grive ; mkdir ~/grive ; cd ~/grive ; grive -a
- 
+
 # pip stuff
 # python-mpd, pylast
 # pip2 install discogs
+# pip2 install requests (for artget)
+# _ easy_isntall requests
+# yas python-mpd2 (for artget
 
 # }}}
 
@@ -535,14 +568,6 @@ alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim'
 # Mounting and External Drives# {{{
 # fdisk -l or mountie to find drive to mount; get mountie working
 
-alias mountdrive='truecrypt /run/media/angelic_sedition/ag-sys/soma ~/ag-sys'
-alias umountdrive='truecrypt -d /run/media/angelic_sedition/ag-sys/soma'
-
-alias mountusb='gvfs-mount -d /dev/sdb1 && mountdrive'
-alias umountusb='umountdrive && gvfs-mount -u /run/media/angelic_sedition/ag-sys'
-alias umountusb2='gvfs-mount -u /run/media/angelic_sedition/ag-sys'
-
-alias mountexthdd='gvfs-mount -d /dev/sdd1'
 
 #rename
 alias -g renameusb='ntfslabel /dev/sdb1'
@@ -558,7 +583,18 @@ alias -g g='git'
 # alias gp='git push origin'
 # alias gh='git checkout'
 alias -g gc='git commit'
-alias -g ga='git add'
+alias gca='git commit -a'
+# git commit -a (autostage all tracked files)
+
+# send to github
+# git remote add origin https://github.com/angelic-sedition/
+alias togh='git push -u origin master'
+# show changes that r unstaged
+alias gd='git diff'
+alias gds='git diff --staged'
+function ga {
+	git add "$1"
+}
 alias gs='git status'
 alias gconf='git config --list'
 alias -g gr="git rm --cached"
@@ -569,7 +605,7 @@ alias -g gr="git rm --cached"
 # z works.. thank god
 # unite > v
 # only for dir jumping
-. ~/bin/z.sh
+# source ~/bin/z.sh
 
 # Fasd stuff (not working)# {{{
 # tried a bunch of different stuff.. installed manually and from repos..
@@ -637,6 +673,7 @@ alias rldjp='xmodmap ~/.Xmodmapjp'
 alias tallmod='xmodmap ~/.Xmodmapqftk' 
 # set caps to escape on tap if have to kill xcape
 alias rldxcape="xcape -e 'Mode_switch=Escape'"
+alias rldxcapejp="xcape -e 'Alt_L=Return'"
 # }}}
 
 #update font caches
@@ -701,7 +738,8 @@ alias tl='tmux list-sessions'
 alias -g wifi='wifi-menu'
 alias sfh='screenfetch'
 alias wee='weechat'
-alias bitl='bitlbee -D'
+alias bitl='sudo bitlbee -D'
+alias mutt='cd ~/Mover && mutt'
 
 # check ip; default gateway / router
 alias gateip='ip route show'
@@ -820,7 +858,7 @@ alias l='ls -lFh'     #size,show type,human readable
 alias la='ls -lAFh'   #long list,show almost all,show type,human readable
 alias lr='ls -tRFh'   #sorted by date,recursive,show type,human readable
 alias lt='ls -ltFh'   #long list,sorted by date,show type,human readable
- 
+
 # these require zsh
 #alias ltd='ls *(m0)' # files & directories modified in last day
 #alias lt='ls *(.m0)' # files (no directories) modified in last day
@@ -972,7 +1010,7 @@ alias musimp='cd ~/Move ; beet import .'
 # beet stats
 # beet lyrics artist (album, etc.)
 # same for fetchart
- 
+
 # beet mpdstats; not working
 
 #}}}
@@ -1032,11 +1070,47 @@ alias -g syncuverworld='rsync -avr --delete ~/Music/UVERworld ~/and/Card/Music'
 # }}}
 # }}}
 #==============================
-# Backup # {{{
+# _Backup & Mounting # {{{
 #==============================
+# All smaller syncs are useless at this point (unless just do to spideroak); test sync time
+# now mount to ag-sys-bk
+alias mountbkdrive='truecrypt /run/media/angelic_sedition/ag-sys/soma ~/ag-sys-bk'
+alias umountbkdrive='truecrypt -d /run/media/angelic_sedition/ag-sys/soma'
+
+# no longer mount soma on usb
+alias mountusb='gvfs-mount -d /dev/sdb1'
+alias umountusb='gvfs-mount -u /run/media/angelic_sedition/ag-sys'
+
+# external backup harddrive
+alias mountexthdd='gvfs-mount -d /dev/sdd1'
+
+# moved main soma off usb to computer (no more annoyances if usb comes out)
+# since mounting to same location (~/ag-sys) don't have to change much
+alias mountsoma='truecrypt ~/grive/soma_ ~/ag-sys/'
+alias umountsoma='truecrypt -d ~/grive/soma_'
+
+# in return added this:
+# full backup to drive
+alias bahamut='mountsoma && sncall && mountbkdrive && fullbktousb && umountbkdrive'
+alias fullbktousb='rsync -avr --delete ~/ag-sys/ ~/ag-sys-bk/'
+
+# Common:
+alias sngdrive='cd ~/grive/ ; grive -V'
+# no longer to usb
+alias syncconfigusb='rsync -avr --delete ~/dotfiles "~/ag-sys/Backup/A#config_files/"'
+alias sncall='syncconfigusb'
+
+# other truecrypt mounting:# {{{
+# mount accts
+alias -g mountacct='truecrypt ~/ag-sys/Else/ACCTS ~/blemish'
+                              # /run/media/angelic_sedition/ag-sys/Else/ACCTS
+alias umountacct='truecrypt -d ~/ag-sys/Else/ACCTS'
+# }}}
+
+
 # big backup
 # rsync -avr /home/angelic_sedition /run/media/angelic_sedition/HD-CEU2\ Backup 
- 
+
 # usb drive must be mounted to truecrypt18.. now ~/ag-sys
 # levels: full, mid , all txt and frequently changing files
 
@@ -1046,15 +1120,20 @@ alias mountpsp='gvfs-mount -d /dev/sdd1'
 alias bktehpsp='rsync -avr --delete /run/media/angelic_sedition/MS0/ /media/truecrypt5/database/Gaming/PSP\ and\ Vita/PSP/PSP\ Backup/'
 # alias umountpsp='gvfs-mount u /run/media'
 # }}}
- 
-# full usb backup to google drive# {{{
-alias bahamut='mountdrive && sncall && mountfullusbbk && fullusbbk && umountfullusbbk && sngdrive'
 
-alias mountfullusbbk='truecrypt ~/grive/soma /media/truecrypt21'
-alias umountfullusbbk='truecrypt -d ~/grive/soma'
-alias fullusbbk='rsync -avr --delete ~/ag-sys/ /media/truecrypt21/'
+# full backup to google drive# {{{
+# this is no longer necessary.. full backup goes reverse direction now
+# alias bahamut='mountdrive && sncall && mountfullusbbk && fullusbbk && umountfullusbbk && sngdrive'
+# alias mountfullusbbk='truecrypt ~/grive/soma /media/truecrypt21'
+# alias umountfullusbbk='truecrypt -d ~/grive/soma'
+# alias fullusbbk='rsync -avr --delete ~/ag-sys/ /media/truecrypt21/'
+
+# if keep the main location in the grive folder; all have to do is umount; depending on how quick this is may 
+alias fullsomabk='umountsoma && sngdrive'
+
+
 # }}}
- 
+
 # about 70 megs; 120meg tc up to date basic backup; second smallest backup but with odt and rtf (rtf is all old stuff)
 # singluttony# {{{
 
@@ -1069,7 +1148,6 @@ alias sngriveusb2="rsync -avr --include='*/' --include='*.txt' --include='*.rb' 
 alias mountgriveusb2='truecrypt ~/grive/usb_bk /media/truecrypt58'
 alias umountgriveusb2='truecrypt -d ~/grive/usb_bk'
 
-alias sngdrive='cd ~/grive/ ; grive -V'
 
 alias singluttony='mountgriveusb2 ; sngriveusb2 ; umountgriveusb2 ; sngdrive'
 
@@ -1095,16 +1173,11 @@ alias umountgriveusb='truecrypt -d ~/grive/smaller_usb_bk'
 # final product for quick backup to harddrive and 
 alias sin='sncall ; mountgriveusb ; sngriveusb ; umountgriveusb ; sngdrive ; snspideroakusb'
 
-
-# sncall='cd ~/dotfiles ; '
-alias sncall='syncconfigusb'
-
-alias syncconfigusb='rsync -avr --delete ~/dotfiles "/home/angelic_sedition/ag-sys/Backup/A#config_files/"'
-# don't put files with passwords into cloud without encrypting
-alias syncconfigdbox='rsync -avr --delete --exclude="private" ~/dotfiles ~/Dropbox/'
 # }}}
 
 # old:
+# don't put files with passwords into cloud without encrypting
+alias syncconfigdbox='rsync -avr --delete --exclude="private" ~/dotfiles ~/Dropbox/'
 # Sync USB to dropbox# {{{
 # idea for just syncind specifc files like txt, pdf, odt, etc.
 # http://credentiality2.blogspot.com/2011/02/using-rsync-to-copy-only-certain.html
@@ -1144,12 +1217,6 @@ alias -g mountdatab2='truecrypt /run/media/angelic_sedition/Windows7/Users/Admin
 alias undatab2='truecrypt -d /run/media/angelic_sedition/Windows7/Users/Admin/Documents/Database2'
 # }}}
 
-# other truecrypt mounting:# {{{
-# mount accts
-alias -g mountacct='truecrypt ~/ag-sys/Else/ACCTS /media/truecrypt7'
-                              # /run/media/angelic_sedition/ag-sys/Else/ACCTS
-alias umountacct='truecrypt -d ~/ag-sys/Else/ACCTS'
-# }}}
 
 # }}}
 #========================================
@@ -1490,16 +1557,17 @@ rk() { curl -v -s -o/dev/null http://10.22.40.35:8098/riak/$1 }
 
 # }}}
 # }}}
- 
+#  
 # Enable autosuggestions automatically# {{{
-zle-line-init() {
-    zle autosuggest-start
-}
-zle -N zle-line-init
-
-source ~/.zsh-autosuggestions/autosuggestions.zsh
- 
+# got messed up again 
+# zle-line-init() {
+#     zle autosuggest-start
+# }
+# zle -N zle-line-init
+#
+# source ~/.zsh-autosuggestions/autosuggestions.zsh
+#
 # # use ctrl+t to toggle autosuggestions(hopefully this wont be needed as
 # # zsh-autosuggestions is designed to be unobtrusive)
 # bindkey '^T' autosuggest-toggle
- # }}}
+# }}}

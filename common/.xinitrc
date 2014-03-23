@@ -40,6 +40,8 @@ conky &
 guake &
 # changed Mode_switch to Control_L
 xcape -e 'Mode_switch=Escape' &
+# redshift; better options at this point than xflux
+redshift -c ~/.config/redshift.conf
 # xscreensaver for locking and power management
 xrdb -merge ~/.Xresources ; /usr/bin/xscreensaver -no-splash &
 xss-lock -- xscreensaver-command -lock &

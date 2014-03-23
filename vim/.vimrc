@@ -6,6 +6,16 @@
 " get delimit.. to not do "" if right before another word 
 " get space to lock until next keypress (can press space, wait however many seconds and then press finish the sequence without it dissappearing)
 " fix heading crap
+" commentstring in ftplugin; list of added .. pentadactyl.vim
+" set up yanking properly in unite
+
+" retrain to stop using caps layer in vim
+nnoremap <up> <nop>
+nnoremap <left> <nop>
+nnoremap <right> <nop>
+nnoremap <down> <nop>
+nnoremap <End> <nop>
+nnoremap <Home> <nop>
 
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
@@ -136,7 +146,7 @@ set relativenumber
 
 " text formatting; get rid of tc; no autowrap of comments or based on textwidth
 set formatoptions=rw
-set formatoptions-=tc
+" set formatoptions-=tc
 " r - insert comment after enter while in insert
 " leaving off o which does comment when press o (this was annoying me)
 
@@ -177,13 +187,20 @@ augroup AutoReloadVimRC
 augroup END
 
 " auto so vimrc on bufread; lack of sucess here...
-augroup AutoReloadVimRC2
-  au!
-  au BufRead so ~/dotfiles/vim/.vimrc
-augroup END
+" works but prevents syntax highlighting from coming on
+" augroup AutoReloadVimRC2
+"   au!
+"   au BufRead * so ~/dotfiles/vim/.vimrc
+" augroup END
 
-" source .vimrc on enter
-autocmd vimenter * source ~/dotfiles/vim/.vimrc
+" source .vimrc on enter; this still slows things down significantly on startup
+" autocmd vimenter * source ~/dotfiles/vim/.vimrc
+" too slow
+" augroup AutoReloadVimRC2
+"   au!
+"
+"   au BufReadPost * so ~/dotfiles/vim/.vimrc
+" augroup END
 
 "}}}
 
@@ -224,13 +241,20 @@ set smartcase
 " Text file settings"{{{
 " remove listchars from txt files in favour of better wrapping (not cutting off halfway in between a word)
 " usually have many long lines in txt files
-autocmd BufEnter *.txt set nolist
-autocmd BufEnter *.txt set lbr
+autocmd BufEnter *.txt setlocal nolist
+autocmd BufEnter *.txt setlocal lbr
 "   set showbreak=···\                   " Line break indicator.
 
 " comment graying in text files
 autocmd BufEnter *.txt highlight text guifg=gray
 autocmd BufEnter *.txt match text /#.*/
+" fix zf
+" autocmd BufEnter *.txt setlocal comments=:# 
+autocmd BufEnter *.txt setlocal commentstring=#\ %s
+" augroup textcommentstring
+"   au!
+"   au BufEnter *.txt setlocal commentstring=#\ %s
+" augroup END
 
 " comment my textfiles with octothorpe
 call tcomment#DefineType('text',              '# %s'             )
@@ -367,6 +391,9 @@ nnoremap k nzozz|noremap K Nzozz
 nnoremap L <c-i>
 " l for last
 nnoremap l <c-o>
+" h for beginning of line
+nnoremap h 0
+
 " _r_ = inneR text objects.
 " onoremap r i
 nnoremap j e|noremap J E
@@ -481,8 +508,9 @@ nnoremap <leader>. :so ~/.vimrc<CR>
 
 " Plugin Specific"{{{
 " vundle stuff
-nnoremap <leader>i :BundleInstall<cr>
+nnoremap <leader>bi :BundleInstall<cr>
 nnoremap <leader>bc :BundleClean<cr>
+" bundle update
 nnoremap <leader>bu :BundleInstall!<cr>
 
 " Gundo
@@ -504,6 +532,7 @@ map <leader>c <C-_><C-_>
 " quickly open session
 nnoremap <leader>ss :OpenSession
 
+
 " session management:
 " vim-session options (auto save on exit, open saved on open)
 let g:session_autosave_periodic='yes'
@@ -513,7 +542,23 @@ let g:session_autoload='yes'
 " Sneak settings
 " 1 means use ignorecase or smartcase if set (have smartcase set)
 let g:sneak#use_ic_scs = 1
+" use streak mode (easy motion highlighting) when > 1 match on screen
 let g:sneak#streak = 1
+" s to go to next S for previous
+let g:sneak#s_next = 1
+" g:sneak#textobject_z = 1
+" hi link SneakPluginTarget ErrorMsg
+hi link SneakStreakTarget ErrorMsg
+" hi link SneakStreakMask Comment
+" nmap f <Plug>Sneak_s
+    " operator-pending-mode
+    " omap z <Plug>Sneak_s
+    " omap Z <Plug>Sneak_S
+" since have all mapped to <c-o>
+
+" colemak chars for sneak mode; take out i for insert; d out to delete
+let g:sneak#target_labels = "arsthneowfpluy/ARSTDHNEIOFPLUY"
+
 " for if using s as i
 " nnoremap f <plug>SneakForward
 " nnoremap F <plug>SneakBackward
@@ -550,9 +595,15 @@ let g:insertlessly_cleanup_all_ws = 0
 let g:insertlessly_insert_spaces = 0
 "}}}
 
-" Clipboard Related"{{{
+" _Clipboard Related"{{{
 " use + as default register.. no more different pasting.. still have yank history with unite
 set clipboard=unnamedplus
+
+" http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
+" maybe change this
+vnoremap <silent> y y`]
+vnoremap <silent> p p`]
+nnoremap <silent> p p`]
 
 " thanks to shougo for such a versatile and useful plugin; https://github.com/Shougo/unite.vim/issues/415
 " vim is my clipboard manager
@@ -564,9 +615,9 @@ nnoremap <space>y :Unite history/yank<cr>
 "}}}
 
 " }}}
-" #==============================
+" ==============================
 " Buffer and Tab Management Mappings and Settings"{{{
-"==============================
+" ==============================
 " access to hundreds of files in 2-5 keystrokes; no great memorization required
 "see unite
 "tabs"{{{
@@ -575,14 +626,17 @@ let g:taboo_modified_tab_flag='+'
 let g:taboo_tab_format=' %N %m%f '
 let g:taboo_renamed_tab_format=' %N [%f]%m '
 
-nnoremap <leader>tr :TabooRename<space>
-nnoremap <leader>tn :TabooOpen<space>
+" save taboo names in session
+set sessionoptions+=tabpages,globals
+
+nnoremap <leader>r :TabooRename<space>
+" nnoremap <leader>tn :TabooOpen<space>
 
 nnoremap <leader>t :tabnew<cr>
 nnoremap <leader>q :q<cr>
 
-nnoremap <leader>n gT
-nnoremap <leader>e gt
+nnoremap N gT
+nnoremap E gt
 
 nnoremap <space>a 1gt
 nnoremap <space>r 2gt
@@ -602,8 +656,8 @@ nnoremap <space>l 14gt
 
 "buffkill stuff"{{{
 " move forward and back in buffer history
-nnoremap <leader>N :BB<cr>
-nnoremap <leader>E :BF<cr>
+nnoremap <leader>l :BB<cr>
+nnoremap <leader>L :BF<cr>
 " delete buffer and leave window open and switch to last used buffer (bufkill)
 nnoremap <leader>d :BD<Return>
 " delete buffer and close window
@@ -614,18 +668,28 @@ nnoremap <leader>D :BD<cr><c-w>c
 " create a new buffer in current window use :enew new window/buffer without split
 "}}}
 
-" Unite Related"{{{
+" _Unite Related"{{{
 " http://www.codeography.com/2013/06/17/replacing-all-the-things-with-unite-vim.html
 " http://eblundell.com/thoughts/2013/08/15/Vim-CtrlP-behaviour-with-Unite.html
 let g:unite_split_rule = "topleft"
 let g:unite_source_buffer_time_format=''
 let g:unite_source_buffer_filename_format=''
+" more mru
+let g:unite_source_file_mru_long_limit = 3000
 " let g:unite_winheight = 10
 " call unite#filters#matcher_default#use(['matcher_fuzzy'])
 " Todo: 
 " get arstdhneo for buffer quick-match ; esc to get out of
 " can use with tabs :Unite tab and windows
 " let g:unite_enable_use_short_source_names=1
+" let g:unite_source_file_rec_max_cache_files = 5000
+
+" colemak
+let g:unite_quick_match_table = {
+      \     'a' : 0, 'r' : 1, 's' : 2, 't' : 3, 'd' : 4, 'h' : 5, 'n' : 6, 'e' : 7, 'i' : 8, 'o' : 9,
+      \     'w' : 10, 'f' : 11, 'p' : 12, 'l' : 13, 'u' : 14, 'y' : 15, 'x' : 16, 'c' : 17, 'v' : 18, 'k' : 19,
+      \     '1' : 20, '2' : 21, '3' : 22, '4' : 23, '5' : 24, '6' : 25, '7' : 26, '8' : 27, '9' : 28, '0' : 29,
+      \ }
 
 " http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
 " nnoremap <space>/ :Unite ag:.<cr>
@@ -635,11 +699,13 @@ nnoremap <space><space> :Unite -quick-match bookmark<cr>
 
 " Search open buffers and most recently used
 nnoremap <leader>p :Unite -start-insert buffer file_mru<cr>
-" Search files (cd first)
-nnoremap <leader>P :Unite -start-insert file_rec/async<cr>
+" Search files (cd first); file_rec/async
+nnoremap <leader>P :Unite -start-insert file<cr>
 cabbr writ ~/ag-sys/Else/everything/\#Another/ 
 cabbr dot ~/dotfiles
 cabbr ubmark ~/.unite/bookmark/
+cabbr ag cd ~/ag-sys/
+cabbr else cd ~/ag-sys/Else/everything/
 
 autocmd FileType unite call s:unite_settings()
 function! s:unite_settings()
@@ -657,7 +723,9 @@ cnoreabbr <expr> tabname t:taboo_tab_name
 cnoreabbr <expr> buffername expand('%:t')
 " for use in tabs named in taboo:
 " have a bookmark file for tab names; organize buffers by group (i.e. tab for config; name with taboo and that name matched to a bookmark file)
-nnoremap <buffer> <space>u :Unite -quick-match bookmark:tabname<C-]><cr>
+
+" doesn't work without sourcing vimrc (or with autocommand to); trying out sourcing first
+nnoremap <buffer> <space>u :so ~/.vimrc<cr>:Unite -quick-match bookmark:tabname<C-]><cr>
 nnoremap <buffer> <space>U :UniteBookmarkAdd<cr>tabname<c-]><cr>buffername<c-]>
 
 " cycle to next sub category; c for cycle
@@ -668,8 +736,11 @@ if exists("t:taboo_tab_name")
 		nnoremap <buffer> <space>c :TabooRename conf-music<cr>:so ~/.vimrc<cr>
 	elseif t:taboo_tab_name == "conf-music"
 		nnoremap <buffer> <space>c :TabooRename mail<cr>:so ~/.vimrc<cr>
-	elseif t:taboo_tab_name == "mail"
+	elseif t:taboo_tab_name == "conf-mail"
 		nnoremap <buffer> <space>c :TabooRename config<cr>:so ~/.vimrc<cr>
+	elseif t:taboo_tab_name == "conf-ranger"
+		nnoremap <buffer> <space>c :TabooRename remap<cr>:so ~/.vimrc<cr>
+		" nnoremap <buffer> <space>u :cd ~/dotfiles<cr>:Unite file<cr>
 	endif
 endif
 
@@ -683,6 +754,24 @@ endif
 " endif
 
 "}}}
+
+" Split bindings
+nnoremap <leader>w <c-w>
+nnoremap <leader>/ :vsplit<cr>
+nnoremap <leader>- :split<cr>
+" already have N and E set to switch between splits
+nnoremap <a-n> <c-w><left>
+nnoremap <a-e> <c-w><right>
+" resize windows (relative.. and dwm.vim is very lacking
+nnoremap <leader>h :vertical resize -5<cr>
+nnoremap <leader>i :vertical resize +5<cr>
+nnoremap <leader>e <c-w><right>
+nnoremap <leader>n <c-w><left>
+" add swap splits
+
+" move tabs
+nnoremap <leader>N :tabm -1<cr>
+nnoremap <leader>E :tabm +1<cr>
 
 "'x-ray' view; cuc and cul
 nnoremap <leader>x :set cursorcolumn<cr>:set cursorline<cr>
@@ -735,15 +824,22 @@ iabbr b be
 iabbr be b
 iabbr bc because
 iabbr because bc
+iabbr bn been
+iabbr been bn
+iabbr bf before
+iabbr before bf
+iabbr bl below
+iabbr below bl
+
+iabbr c can
+iabbr can c
+iabbr cn can't
 " are you okay with = rukw
 " around = rnd|ro
 " away = ay 
-" been = bn 
-" before = bf
 " began = bga|ba
 " begin = bgn|bi
 " being = bng|bg
-" below = bl 
 " best = bs
 " between = bt|tw
 " book = bk
@@ -1064,6 +1160,9 @@ Bundle 'mattn/emmet-vim'
 " auto put ( with ), etc with cursor in middle; won't do in commented lines
 Bundle 'Raimondi/delimitMate'
 
+" all text boxes vim
+Bundle 'ardagnir/pterosaur'
+
 " tab for insert completion
 " Bundle 'ervandew/supertab'
 " Bundle Shougo/neocomplete.vim
@@ -1073,6 +1172,8 @@ Bundle 'Raimondi/delimitMate'
 Bundle 'Shougo/unite.vim'
 " for async file search
 Bundle 'Shougo/vimproc.vim'
+" mru 
+Bundle 'Shougo/neomru.vim'
 
 "SnipMate
 Bundle "MarcWeber/vim-addon-mw-utils"
@@ -1220,6 +1321,18 @@ iabbr ## #==========<Space>{{{<cr>#---------------------------------------------
 " 
 " 
 " "}}}
+ 
+" http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
+" vp doesn't replace paste buffer
+function! RestoreRegister()
+  let @" = s:restore_reg
+  return ''
+endfunction
+function! s:Repl()
+  let s:restore_reg = @"
+  return "p@=RestoreRegister()\<cr>"
+endfunction
+vmap <silent> <expr> p <sid>Repl()
 
 " Heading Crap (still needs revision..)
 iabbr @n #==============================<cr>#{{{<cr><esc>I#==============================<cr><esc>I<cr><home>#<esc>kkka

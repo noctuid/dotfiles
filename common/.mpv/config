@@ -1,0 +1,77 @@
+# default configuration that applies to every file
+[default]
+
+# My Changes {{{
+# screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%f_-_%tH:%tM:%tS
+# F remove extension
+screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
+screenshot-format=png
+
+# }}}
+
+# try to use high quality opengl output, with standard opengl, classic xv, and wayland as fallbacks
+# note: opengl has numerous quality/performance trade-off options.
+# as per the mpv(1), "opengl-hq" is just an alias for "opengl:lscale=lanczos2:dither-depth=auto:fbo-format=rgb16"
+vo=opengl-hq,opengl,xv,wayland
+
+# use alsa for audio output, choose pulse, or oss4 as fallback
+ao=alsa,pulse,oss
+
+# prefer using 5.1 channels audio (defaults to 2 - see mpv --channels=help) 
+# mixing is handled by libavcodec unless using "--af-add=pan" (see below)
+channels=5.1
+
+# scale the subtitles to the 3% of the screen size
+sub-scale=3
+
+# set the window title using the media filename (see Property Expansion section of mpv(1))
+title="${filename}"
+
+# add black borders so the movies have the same aspect ratio of the monitor
+# for wide screen monitors
+vf=expand=::::1:16/9:16
+
+# for non wide screen traditional monitors, alternative to the above item
+#vf=expand=::::1:4/3:16
+
+# disable screensaver
+stop-screensaver="yes"
+
+# execute a command every 30 seconds
+# useful to disable a non-standard-compliant screensavers and to work around buggy behaviours
+# BE WARNED: to avoid dangerous commands is your responsibility
+#heartbeat-cmd="xscreensaver-command -deactivate &" # stop xscreensaver
+
+# custom heartbeat frequency in seconds
+#heartbeat-interval=600
+
+# correct pitch when speed is faster or slower than 1.0
+af=scaletempo
+
+# allow to seek in a file which is still downloading whilst watching it
+# from manpage:"this switch has no effect in the typical case" (usually done automatically by demuxers)
+#idx=yes
+
+# allow to increase the maximal volume to 600%
+#softvol-max=600
+
+# skip displaying some frames to maintain A/V sync on slow systems
+framedrop=yes
+# more intense frame dropping (breaks decoding)
+#framedrop=hard
+
+# gapless audio play
+gapless-audio
+
+# custom terminal seek bar
+term-osd-bar-chars = "──╼ ·"
+
+# profile for up-mixing two channels audio to six channels
+# use --profile 2chto6ch to activate
+[2chto6ch]
+af-add=pan=6:1:0:.4:0:.6:2:0:1:0:.4:.6:2
+
+# profile to down-mixing six channels audio to two channels
+# use --profile 6chto2ch to activate
+[6chto2ch]
+af-add=pan=2:0.7:0:0:0.7:0.5:0:0:0.5:0.6:0.6:0:0
