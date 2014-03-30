@@ -1,4 +1,4 @@
--- my old config from when I use xmonad and xfce
+-- my old config from when I used xmonad and xfce
 -- I don't remember where I found the config for using a prefix key but will put link when I find it
 import XMonad
 import XMonad.Config.Xfce

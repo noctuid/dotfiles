@@ -685,6 +685,7 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 # sudo permission stuff (i.e. fstab.. sudo/wheel/group stuff.. truecrypt without sudo)
 
 # _aur
+# games: yetris
 # compton-git ; conky-lua ; bspwm-git ; 
 # termite-git
 # weechat-git
@@ -761,7 +762,7 @@ alias -g g='git'
 # alias gp='git push origin'
 # alias gh='git checkout'
 alias -g gc='git commit'
-alias gca='git commit -am'
+alias -g gca='git commit -am'
 # git commit -a (autostage all tracked files)
 
 # send to github

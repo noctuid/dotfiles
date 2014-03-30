@@ -1,4 +1,4 @@
-## Do I Actually Use All My Plugins?
+## Do I Actually Use All These?
 
 Always in effect:
 - airline

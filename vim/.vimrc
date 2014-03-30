@@ -1368,7 +1368,6 @@ Bundle 'Shougo/neocomplete.vim'
 
 " tab for insert completion" 
 " Bundle 'ervandew/supertab'
-" Bundle Shougo/neocomplete.vim
 
 " buffer, mru, and file search
 " no more fuzzy finder, lusty juggler, minbufexpl, buffer explorer, command t, etc. ; just unite
