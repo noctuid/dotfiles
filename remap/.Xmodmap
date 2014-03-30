@@ -1,0 +1,63 @@
+! General & symbol remaps
+
+! make key pad - caps if ever need
+keycode 82 = Caps_Lock 
+
+! caps as mode_switch
+keycode 66 = Mode_switch
+! r_alt as altgr
+keycode 65 = ISO_Level3_Shift
+! num lock to as altgr lock
+keycode 77 = ISO_Level3_Lock
+
+! Nav/Extend Layer {{{
+keysym q = q Q Tab S U
+! cedilla bound to <c-w> in insert
+keysym w = w W cedilla
+! tmux prefix key works in a layer
+keysym f = f F grave 
+
+keysym l = l L Home 1 1 exclam
+keysym u = u U End 2 2 at
+keysym y = y Y BackSpace 3 3 numbersign
+
+keysym a = a A Alt_L 
+! section bound in vim as well
+keysym r = r R Escape 
+keysym s = s S Shift_L
+keysym t = t T section section
+keysym d = d D equal
+
+keysym h = h H Left Left
+keysym n = n N Down 4 4 dollar
+keysym e = e E Up Up 5 5 percent 
+keysym i = i I Right 6 6 asciicircum
+keysym o = o O Prior 
+
+keysym k = k K Next A k k
+keysym m = m M NoSymbol NoSymbol 7
+keysym comma = comma less bracketleft parenleft 8
+keysym period = period greater bracketright parenright 9
+keysym slash = slash question backslash 
+
+keycode 65 = space space Return 
+keycode 35 = braceleft braceright
+! }}}
+ 
+! Keypad remaps! {{{
+! insert on keypad is f5
+keycode 90 = F5 
+! change 5 on keypad to up
+keycode 84 = Up
+! make kp down down
+keycode 88 = Down
+! 7/ kp home to -
+keycode 79 = minus
+! 8/ kp_up to +
+keycode 80 = plus
+! change pgup on keypad to control
+keycode 81 = Meta_R
+add control = Meta_R
+! kp / is numlock.. why? I don't know
+keycode 106 = Num_Lock
+! }}}

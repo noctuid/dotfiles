@@ -9,13 +9,173 @@
 " commentstring in ftplugin; list of added .. pentadactyl.vim
 " set up yanking properly in unite
 
+" remap cw and such to ciw
+" sound bindings.. and brightness
+
+" Experimental"{{{
 " retrain to stop using caps layer in vim
-nnoremap <up> <nop>
-nnoremap <left> <nop>
-nnoremap <right> <nop>
-nnoremap <down> <nop>
-nnoremap <End> <nop>
-nnoremap <Home> <nop>
+" nnoremap <up> <nop>
+" nnoremap <left> <nop>
+" nnoremap <right> <nop>
+" nnoremap <down> <nop>
+" nnoremap <End> <nop>
+" nnoremap <Home> <nop>
+" inoremap <up> <nop>
+" inoremap <left> <nop>
+" inoremap <right> <nop>
+" inoremap <down> <nop>
+" inoremap <End> <nop>
+" inoremap <Home> <nop>
+
+if has("gui_running")
+	" wm experementation"{{{
+
+	" "r" is redraw"{{{
+	" worskpace/Destkop switch"{{{
+	nnoremap <silent> ra :silent !bspc desktop -f ^1<cr>
+	nnoremap <silent> rr :silent !bspc desktop -f ^2<cr>
+	nnoremap <silent> rs :silent !bspc desktop -f ^3<cr>
+	nnoremap <silent> rt :silent !bspc desktop -f ^4<cr>
+	nnoremap <silent> rd :silent !bspc desktop -f ^5<cr>
+	nnoremap <silent> rh :silent !bspc desktop -f ^6<cr>
+	nnoremap <silent> rn :silent !bspc desktop -f ^7<cr>
+	nnoremap <silent> re :silent !bspc desktop -f ^8<cr>
+	nnoremap <silent> ri :silent !bspc desktop -f ^9<cr>
+	nnoremap <silent> ro :silent !bspc desktop -f ^10<cr>
+	"}}}
+	" move to destkop"{{{
+	nnoremap <silent> Ra :silent !bspc window -d ^1<cr>
+	nnoremap <silent> Rr :silent !bspc window -d ^2<cr>
+	nnoremap <silent> Rs :silent !bspc window -d ^3<cr>
+	nnoremap <silent> Rt :silent !bspc window -d ^4<cr>
+	nnoremap <silent> Rd :silent !bspc window -d ^5<cr>
+	nnoremap <silent> Rh :silent !bspc window -d ^6<cr>
+	nnoremap <silent> Rn :silent !bspc window -d ^7<cr>
+	nnoremap <silent> Re :silent !bspc window -d ^8<cr>
+	nnoremap <silent> Ri :silent !bspc window -d ^9<cr>
+	nnoremap <silent> Ro :silent !bspc window -d ^10<cr>
+	"}}}
+
+	" moving windows within desktop"{{{
+	" move to biggest
+	nnoremap <silent> rcm :silent !bspc window -s biggest<cr>
+	" directions
+	nnoremap <silent> rch :silent !bspc window -s left<cr>
+	nnoremap <silent> rcn :silent !bspc window -s down<cr>
+	nnoremap <silent> rce :silent !bspc window -s up<cr>
+	nnoremap <silent> rci :silent !bspc window -s right<cr>
+	" circulate 
+	nnoremap <silent> r. :silent !bspc desktop -C forward<cr>
+	nnoremap <silent> r, :silent !bspc desktop -C backward<cr>
+	"}}}
+
+	"resize"{{{
+	nnoremap <silent> rmh :silent !~/bin/less_wm/resize_left.sh<cr>
+	nnoremap <silent> rmn :silent !~/bin/less_wm/resize_down.sh<cr>
+	nnoremap <silent> rme :silent !~/bin/less_wm/resize_up.sh<cr>
+	nnoremap <silent> rmi :silent !~/bin/less_wm/resize_right.sh<cr>
+	"}}}
+	" open urxvt
+	nnoremap <silent> ru :silent !urxvt &<cr>
+
+	"}}}
+
+	" s becomes select/Show/settings"{{{
+	"select
+	nnoremap <silent> sh :!bspc window -f left<cr><esc>
+	nnoremap <silent> sn :!bspc window -f down<cr><esc>
+	nnoremap <silent> se :!bspc window -f up<cr><esc>
+	nnoremap <silent> si :!bspc window -f right<cr><esc>
+	nnoremap <silent> sl :silent !bspc window -f last<cr><esc>
+
+	" monocle toggle
+	nnoremap <silent> st :silent !bspc desktop -l next<cr>
+	nnoremap <silent> ss :!bspc window -t sticky<cr><esc>
+	nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
+
+	" gap up and down
+	nnoremap <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
+	nnoremap <silent> sd :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
+
+	" preselect"{{{
+	nnoremap <silent> sph :silent !bspc window -p left<cr>
+	nnoremap <silent> spn :silent !bspc window -p down<cr>
+	nnoremap <silent> spe :silent !bspc window -p up<cr>
+	nnoremap <silent> spi :silent !bspc window -p right<cr>
+	nnoremap <silent> spx :silent !bspc window -p cancel<cr>
+	nnoremap <silent> spd :silent !bspc desktop -c<cr>
+	"}}}
+	"}}}
+
+	"}}}
+else
+	" tmux experimentation"{{{
+	" "r" is redraw"{{{
+	" window switching"{{{
+	nnoremap <silent> ra :silent !tmux select-window -t 1<cr>
+	nnoremap <silent> rr :silent !tmux select-window -t 2<cr>
+	nnoremap <silent> rs :silent !tmux select-window -t 3<cr>
+	nnoremap <silent> rt :silent !tmux select-window -t 4<cr>
+	nnoremap <silent> rd :silent !tmux select-window -t 5<cr>
+	nnoremap <silent> rh :silent !tmux select-window -t 6<cr>
+	nnoremap <silent> rn :silent !tmux select-window -t 7<cr>
+	nnoremap <silent> re :silent !tmux select-window -t 8<cr>
+	nnoremap <silent> ri :silent !tmux select-window -t 9<cr>
+	nnoremap <silent> ro :silent !tmux select-window -t 10<cr>
+	"}}}
+	" resize panes"{{{
+	nnoremap <silent> rmh :silent !tmux resize-pane -L 10<cr>
+	nnoremap <silent> rmn :silent !tmux resize-pane -D 10<cr>
+	nnoremap <silent> rme :silent !tmux resize-pane -U 10<cr>
+	nnoremap <silent> rmi :silent !tmux resize-pane -R 10<cr>
+	"}}}
+	" circulate
+	" previous
+	nnoremap <silent> r, :silent !tmux swap-pane -U<cr>
+	" next
+	nnoremap <silent> r. :silent !tmux swap-pane -D<cr>
+
+	" new session
+	nnoremap <silent> r_ :silent !tmux new-session<cr>
+
+	" new window 
+	nnoremap <silent> rc :silent !tmux new-window<cr>
+	" kill pane
+	nnoremap <silent> rx :silent !tmux kill-pane<cr>
+	" last window 
+	nnoremap <silent> rl :silent !tmux last-window<cr>
+	" split windows
+	nnoremap <silent> r/ :silent !tmux split-window -h<cr>
+	nnoremap <silent> r- :silent !tmux split-window<cr>
+
+	" break pane
+	nnoremap <silent> r! :silent !tmux break-pane<cr>
+	"}}}
+
+	" "s" is select"{{{
+	" panes"{{{
+	" directions
+	nnoremap <silent> sh :silent !tmux select-pane -L<cr>
+	nnoremap <silent> sn :silent !tmux select-pane -D<cr>
+	nnoremap <silent> se :silent !tmux select-pane -U<cr>
+	nnoremap <silent> si :silent !tmux select-pane -R<cr>
+	" last
+	nnoremap <silent> sl :silent !tmux select-pane -l<cr>
+	" select layout
+	nnoremap <silent> sv :silent !tmux select-layout main-vertical<cr>
+
+	" toggle "monocle" (zoom)
+	nnoremap <silent> st :silent !tmux resize-pane -Z<cr>
+	"}}}
+
+	" select session
+	nnoremap <silent> ss :silent !tmux choose-client<cr>
+	"}}}
+"}}}
+endif
+
+"}}}
+" more terminal bindings
 
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
@@ -379,7 +539,7 @@ let mapleader = "t"
 " if find want i for right, remap i to s, sneak to f and f to l or get rid of f altogether
 
 " took out l/i and keeping i for insert.. do I ever use right? well I'll stop
-nnoremap n gj|nnoremap e gk|nnoremap gn j|nnoremap ge k
+noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
 " In(s)ert. The default s/S is synonymous with cl/cc and is not very useful.
 " nnoremap s i|noremap S I
 " Last search.
@@ -432,6 +592,8 @@ nnoremap + <C-a>|nnoremap - <C-x>
 " Other General Mappings"{{{
 nnoremap ; :
 nnoremap : ;
+vnoremap ; :
+vnoremap : ;
 " Y like D
 nnoremap Y y$
 " Sane redo.
@@ -443,6 +605,7 @@ inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
 
 nnoremap <leader>k <c-d>|nnoremap <leader>o <c-u>
+vnoremap <leader>k <c-d>|vnoremap <leader>o <c-u>
 
 " Better save mapping; still not there yet
 inoremap <ctrl>s <esc>:w<cr>
@@ -539,6 +702,27 @@ let g:session_autosave_periodic='yes'
 let g:session_autosave='yes'
 let g:session_autoload='yes'
 
+" Arpeggioinoremap rsi hello
+" steno with vim
+" Arpeggioinoremap ri <esc>:!bspc window -f right<cr> 
+
+" nnoremap rri <esc>:!bspc window -f right<cr> 
+
+
+" Godlen View settings"{{{
+" " 1. split to tiled windows
+" nmap <silent> <C-L>  <Plug>GoldenViewSplit
+"
+" " 2. quickly switch current window with the main pane
+" " and toggle back
+" nmap <silent> <F8>   <Plug>GoldenViewSwitchMain
+" nmap <silent> <S-F8> <Plug>GoldenViewSwitchToggle
+"
+" " 3. jump to next and previous window
+" nmap <silent> <C-N>  <Plug>GoldenViewNext
+" nmap <silent> <C-P>  <Plug>GoldenViewPrevious
+"}}}
+
 " Sneak settings
 " 1 means use ignorecase or smartcase if set (have smartcase set)
 let g:sneak#use_ic_scs = 1
@@ -563,8 +747,8 @@ let g:sneak#target_labels = "arsthneowfpluy/ARSTDHNEIOFPLUY"
 " nnoremap f <plug>SneakForward
 " nnoremap F <plug>SneakBackward
 " otherwise
-nmap s <Plug>SneakForward
-nmap S <Plug>SneakBackward
+nmap f <Plug>SneakForward
+nmap F <Plug>SneakBackward
 
 " VimWiki (using like TabsOutliner with pentadactyl)
 let g:vimwiki_list = [{
@@ -1127,8 +1311,22 @@ call vundle#rc()
 " let Vundle manage Vundle; required
 Bundle 'gmarik/vundle'
 
+Bundle 'nelstrom/vim-markdown-folding'
+" hybrid chording
+Bundle 'kana/vim-arpeggio'
+
+" show actual line numbers in insert
+Bundle 'myusuf3/numbers.vim'
+
+" for move and sudowrite
+Bundle 'tpope/vim-eunuch'
+" messing around with
+Bundle 'Shougo/vimshell.vim'
+
 " better marks; show and symbols (markers)
 Bundle 'kshenoy/vim-signature'
+" split 
+Bundle 'zhaocai/GoldenView.Vim'
 " view undo tree 
 Bundle 'sjl/gundo.vim'
 " file linking and formatting/highlighting
@@ -1163,7 +1361,12 @@ Bundle 'Raimondi/delimitMate'
 " all text boxes vim
 Bundle 'ardagnir/pterosaur'
 
-" tab for insert completion
+" Shougo
+Bundle 'Shougo/neocomplete.vim'
+" Use neocomplete.
+" let g:neocomplete#enable_at_startup = 1
+
+" tab for insert completion" 
 " Bundle 'ervandew/supertab'
 " Bundle Shougo/neocomplete.vim
 

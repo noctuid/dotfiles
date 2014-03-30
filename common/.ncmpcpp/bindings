@@ -34,8 +34,11 @@ def_key "g"
 def_key "G"
  move_end
 
-def_key ";"
-	execute_command
+# def_key ";"
+# 	execute_command
+
+# def_key ";"
+# 	run_external_command
 
 def_key "k"
  next_found_item

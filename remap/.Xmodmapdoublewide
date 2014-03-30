@@ -1,0 +1,51 @@
+! double wide mod
+keycode 66 = Mode_switch 
+
+keycode 24 = q Q 
+keycode 25 = w W Escape
+keycode 26 = f F grave
+keycode 27 = p P
+keycode 28= g G
+
+keycode 29 = 
+
+!two over
+keycode 31 = j J 
+keycode 32 = l L Home
+keycode 33 = u U End
+keycode 34 = y Y BackSpace
+keycode 35 = semicolon colon
+
+keycode 38 = a A
+keycode 39 = r R
+keycode 40= s S
+keycode 41 = t T
+keycode 42 = d D
+
+keycode 43 = 
+
+keycode 45 = h H Left  
+keycode 46 = n N Down
+keycode 47 = e E Up
+keycode 48 = i I Right
+keycode 36 = o O Prior
+
+!keycode 36 = apostrophe quotedbl  
+
+keycode 52 = z Z
+keycode 53 = x X
+keycode 54 = c C
+keycode 55 = v V
+keycode 56 = b B
+
+keycode 57 = 
+
+keycode 59 = k K Next
+keycode 60 = m M
+keycode 61 = comma less bracketleft
+keycode 62 = period greater bracketright
+!keycode 63 = slash question backslash
+
+keysym s = s S backslash
+
+! vim: set ft=xmodmap:

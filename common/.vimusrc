@@ -1,0 +1,172 @@
+# color scheme# {{{
+# a light-on-dark color scheme
+color tab green black
+color main cyan black
+color ruler green black
+color songstatus blue black
+color playstatus blue black
+color error white red
+color input white black
+color suggestions green black
+# }}}
+# settings# {{{
+set-library-path ~/Music
+song-format %artist% - %title% [%album% %track%]
+# don't rename window based on song
+noautotitle
+# don't remove played songs from the playlist
+noconsume
+# }}}
+
+
+# bindings# {{{
+# quit
+map q :quit<CR>
+
+# tmux bindings #{{{
+unmap r
+unmap t
+unmap s
+# split window works fine
+#  straight from vimrc
+# " replace nnoremap <silent> with map and remove "silent "
+# tmux experimentation#{{{
+# #r# is redraw#{{{
+# # window switching#{{{
+map ra :!~/bin/vimus_tmux.sh a<cr>
+map rr :!~/bin/vimus_tmux.sh r<cr>
+map rs :!~/bin/vimus_tmux.sh s<cr>
+map rt :!~/bin/vimus_tmux.sh t<cr>
+map rd :!~/bin/vimus_tmux.sh d<cr>
+map rh :!~/bin/vimus_tmux.sh h<cr>
+map rn :!~/bin/vimus_tmux.sh n<cr>
+map re :!~/bin/vimus_tmux.sh e<cr>
+map ri :!~/bin/vimus_tmux.sh i<cr>
+map ro :!~/bin/vimus_tmux.sh o<cr>
+# #}}}
+# resize panes#{{{
+map rmh :!~/bin/vimus_tmux.sh rmh<cr>
+map rmn :!~/bin/vimus_tmux.sh rmn<CR>
+map rme :!~/bin/vimus_tmux.sh rme<CR>
+map rmi :!~/bin/vimus_tmux.sh rmi<CR>
+# #}}}
+# circulate
+# previous
+map r, :!~/bin/vimus_tmux.sh r,<CR>
+# next
+map r. :!~/bin/vimus_tmux.sh r.<CR>
+
+# new session
+map r_ :!~/bin/vimus_tmux.sh r_<CR>
+
+# new window 
+map rc :!~/bin/vimus_tmux.sh rc<CR>
+# kill pane
+map rx :!tmux kill-pane<CR>
+# last window 
+map rl :!~/bin/vimus_tmux.sh<CR>
+# split windows
+map r/ :!~/bin/vimus_tmux.sh r/<CR>
+map r- :!~/bin/vimus_tmux.sh r-<CR>
+#
+# break pane
+map r! :!~/bin/vimus_tmux.sh r!<CR>
+# #}}}
+#
+
+# panes#{{{
+# directions
+map sh :!~/bin/vimus_tmux.sh sh<CR>
+map sn :!~/bin/vimus_tmux.sh sn<CR>
+map se :!~/bin/vimus_tmux.sh se<CR>
+map si :!~/bin/vimus_tmux.sh si<CR>
+# last
+map sl :!~/bin/vimus_tmux.sh sl<CR>
+# select layout
+map sv :!~/bin/vimus_tmux.sh sv<CR>
+
+# toggle #monocle# (zoom)
+map st :!~/bin/vimus_tmux.sh st<CR>
+#}}}
+
+# select session
+# just going to not do this one
+# map ss :!tmux choose-client<CR>
+# #}}}
+# #}}}
+
+# General
+map ; :
+map c :clear<CR>
+# next start playing next song; previous
+
+# window-search; window-playlist; library; browser
+map t. :source ~/.vimusrc<CR>
+
+map u :update<CR>
+map ta :!~/bin/albumart_display.sh %<CR>
+map l :!~/bin/lyric_display.sh<CR>
+
+map f :shuffle<cr>
+map . :toggle-repeat<CR>
+# map r :toggle-random<CR>
+# map c :toggle-consume<CR>
+map S :toggle-single<CR>
+
+# movement# {{{
+# colemak
+map h :move-out<CR>
+map n :move-down<CR>
+map e :move-up<CR>
+map i :move-in<CR>
+map gg :move-first<CR>
+map G :move-last<CR>
+map { :move-album-prev<CR>
+map } :move-album-next<CR>
+map tk :scroll-half-page-down<CR>
+map to :scroll-half-page-up<CR>
+# map <C-Y> :scroll-up<CR>
+# map <C-E> :scroll-down<CR>
+# map <C-B> :scroll-page-up<CR>
+# map <PageUp> :scroll-page-up<CR>
+# map <C-F> :scroll-page-down<CR>
+# map <PageDown> :scroll-page-down<CR>
+# }}}
+# tab navigation# {{{
+map x :close<CR>
+# map <C-P> :window-prev<CR>
+# map <C-N> :window-next<CR>
+# instead of numbers for accessing tabs
+map <Space>a :window-playlist<CR>
+map <Space>r :window-library<CR>
+map <Space>s :window-browser<CR>
+map <Space>t :window-search<CR>
+# }}}
+# playback# {{{
+map <CR> :default-action<CR>
+map tt  :toggle<CR>
+map o  :toggle<CR>
+map d :remove<CR>
+map y :copy<CR>
+map p :paste<CR>
+map P :paste-prev<CR>
+map a :add<CR>
+# map  :insert<CR>
+# a already will add album and all songs in browser based on level
+map A :add-album<CR>
+map H :seek -5<CR>
+map I :seek 5<CR>
+map > :next<cr>
+map < :previous<cr>
+map E :volume +5<CR>
+map N :volume -5<CR>
+# }}}
+# search
+# colemak
+map k :search-next<CR>
+map K :search-prev<CR>
+
+# selecting
+map v :visual<CR>
+map <ESC> :novisual<CR>
+# }}}

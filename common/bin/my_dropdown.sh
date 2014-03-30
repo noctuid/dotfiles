@@ -8,6 +8,8 @@
 # .Uses tmux sessions to save state (meaning, it's killing the terminal, not just hiding it and bringing it back)
 # .I've never tested opening something with a sxhkd and a floating window manager (resizing may be more difficult)
 #+
+# Changelog
+# [3.24.13] modified to move to 0 0 before resizing because now bspwm opens floating windows centered
 
 #+
 # Instructions for Adaptation (if you don't understand the script):#{{{
@@ -47,7 +49,7 @@ else
 	# if termite is not open, open it
 	bspc rule -a termite -o floating=on
 	# open termite, resize it/move it how you want (best way; fast), and attach to the "dropdown" tmux session or create it if it doesn't exist; without the sleep, it seems to not work about 7% of the time
-	termite -e "/bin/zsh -c 'sleep 0.01 && xdo resize -w +800 && tmux attach-session -dt dropdown || tmux new-session -s dropdown'"
+	termite -e "/bin/zsh -c 'sleep 0.01 && xdo move -x 0 -y 0 && xdo resize -w +800 && tmux attach-session -dt dropdown || tmux new-session -s dropdown'"
 
 	# I have only tested xdo resize with bspwm; if it doesn't work try wmctrl as detailed here: https://bbs.archlinux.org/viewtopic.php?pid=1351807#p1351807
 

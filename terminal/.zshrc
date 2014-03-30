@@ -107,7 +107,8 @@ export PANEL_HEIGHT=20
 export PATH=$PATH:~/bin
 export PATH=$PATH:~/bin/artget.py
 export PATH=$PATH:~/.config/bspwm/panel
-
+# for vimus
+export PATH=$PATH:/home/angelic_sedition/.cabal/bin
 # from https://github.com/windelicato/dotfiles/blob/master/.zshrc
 # pathdirs=(
 #     ~/scripts
@@ -123,7 +124,7 @@ export PATH=$PATH:/opt/android-sdk
 # }}}
 #========================================
 # Appearance {{{
-##========================================
+#========================================
 # Color Manpages
 # similar to things like colored-man
 export LESS_TERMCAP_mb=$'\E[01;31m'             # begin blinking
@@ -393,6 +394,7 @@ setopt share_history
 #======================================== 
 # enable vi mode on commmand line; no visual
 # http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Standard-Widgets
+# link viins to main.. no option to link vicmd to main?
 bindkey -v
 
 #fix home, end, etc. keys (with vim mode)
@@ -436,7 +438,6 @@ bindkey -M vicmd "J" vi-forward-blank-word-end
 # control backspace
 bindkey -M viins "¸" backward-kill-word
 
-
 # http://unix.stackexchange.com/questions/25765/pasting-from-clipboard-to-vi-enabled-zsh-or-bash-shell
 # paste from the system clipboard with p
 vi-append-x-selection () { RBUFFER=$(xsel -ob </dev/null)$RBUFFER; }
@@ -453,15 +454,17 @@ enter-url-hint() { xdotool key --window Termite control+shift+x }
 zle -N enter-url-hint
 bindkey -a f enter-url-hint
 
+# leader bindings
+bindkey -a -r t
 # for re-entering ranger 
 enter-ranger() { xdotool key control+d }
 zle -N enter-ranger
-bindkey -a r enter-ranger
+bindkey -a tr enter-ranger
 
 # for tmux copy mode
 enter-copy-mode() { tmux copy-mode }
 zle -N enter-copy-mode
-bindkey -a t enter-copy-mode
+bindkey -a v enter-copy-mode
 
 # re-enter vim
 #  http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
@@ -476,9 +479,166 @@ fancy-ctrl-z () {
 }
 zle -N fancy-ctrl-z
 # v to re-enter vim
-bindkey -a v fancy-ctrl-z
+bindkey -a tv fancy-ctrl-z
 
-# history search in vim mode; not sure why I have this or what use it is
+# key sequences won't work if the first key is bound; it won't wait long enough to see if you've pressed the first key
+# Thanks to Raphael Ahrens for explaining this to me: 
+# http://unix.stackexchange.com/questions/122078/how-to-bind-a-key-sequence-to-a-widget-in-vi-cmd-mode-zsh/122088?noredirect=1#122088
+bindkey -a -r r
+bindkey -a -r s
+
+# fuck widgets
+# need to check if some of symbol bindings working
+# tmux experimentation"{{{
+# "r" is redraw"{{{
+# window switching"{{{
+r-a() {tmux select-window -t 1}
+zle -N r-a
+bindkey -a ra r-a 
+
+r-r() {tmux select-window -t 2}
+zle -N r-r
+bindkey -a rr r-r
+
+r-s() {tmux select-window -t 3}
+zle -N r-s
+bindkey -a rs r-s
+
+r-t() {tmux select-window -t 4}
+zle -N r-t
+bindkey -a rt r-t
+
+r-d() {tmux select-window -t 5}
+zle -N r-d
+bindkey -a rd r-d
+
+r-h() {tmux select-window -t 6}
+zle -N r-h
+bindkey -a rh r-h
+
+r-n() {tmux select-window -t 7}
+zle -N r-n
+bindkey -a rn r-n
+
+r-e() {tmux select-window -t 8}
+zle -N r-e
+bindkey -a re r-e
+
+r-e() {tmux select-window -t 9}
+zle -N r-i
+bindkey -a ri r-i
+
+r-o() {tmux select-window -t 10}
+zle -N r-o
+bindkey -a ro r-o
+#}}}
+# resize panes"{{{
+r-m-h() {tmux resize-pane -L 10}
+zle -N r-m-h
+bindkey -a rmh r-m-h
+
+r-m-n() {tmux resize-pane -D 5}
+zle -N r-m-n
+bindkey -a rmn r-m-n
+
+r-m-e() {tmux resize-pane -U 5}
+zle -N r-m-e
+bindkey -a rme r-m-e
+
+r-m-i() {tmux resize-pane -R 10}
+zle -N r-m-i
+bindkey -a rmi r-m-i
+#}}}
+# circulate# {{{
+# previous
+r-.() {tmux swap-pane -U}
+zle -N r-.
+bindkey -a r. r-.
+
+# next
+r-,() {tmux swap-pane -D}
+zle -N r-,
+bindkey -a r, r-,
+# }}}
+# new session
+r-_() {tmux new-session}
+zle -N r-_
+bindkey -a r_ r-_
+
+# new window 
+r-c() {tmux new-window}
+zle -N r-c
+bindkey -a rc r-c
+
+# kill pane
+r-x() {tmux kill-pane}
+zle -N r-x
+bindkey -a rx r-x
+
+# last window 
+r-l() {tmux last-window}
+zle -N r-l
+bindkey -a rl r-l
+
+# split windows
+r-/() {tmux split-window -h}
+zle -N r-/
+bindkey -a r/ r-/
+
+r--() {tmux split-window}
+zle -N r--
+bindkey -a r- r--
+
+# break pane
+r-!() {tmux break-pane}
+zle -N r-!
+bindkey -a r! r-!
+#}}}
+
+# "s" is select"{{{
+# panes"{{{
+# directions
+
+s-h() {tmux select-pane -L}
+zle -N s-h
+bindkey -a sh s-h
+
+s-n() {tmux select-pane -D}
+zle -N s-n
+bindkey -a sn s-n
+
+s-e() {tmux select-pane -U}
+zle -N s-e
+bindkey -a se s-e
+
+s-i() {tmux select-pane -R}
+zle -N s-i
+bindkey -a si s-i
+
+# last
+s-l() {tmux select-pane -l}
+zle -N s-l
+bindkey -a sl s-l
+
+# select layout
+s-v() {tmux select-layout main-vertical}
+zle -N s-v
+bindkey -a sv s-v
+
+# toggle "monocle" (zoom)
+monocle-toggle() {tmux resize-pane -Z}
+zle -N monocle-toggle
+bindkey -a st monocle-toggle
+#}}}
+
+# select session
+s-s() {tmux choose-client}
+zle -N s-s
+bindkey -a ss s-s
+#}}}
+#}}}
+
+
 # http://zshwiki.org./home/zle/bindkeys#why_isn_t_control-r_working_anymore
 bindkey -M viins '^s' history-incremental-search-backward
 bindkey -M vicmd '^s' history-incremental-search-backward
@@ -495,7 +655,7 @@ Desk=~/Desktop
 # will autocomplete from any directory
 
 #}}}
-# #========================================
+#========================================
 # _Aliases# {{{# {{{
 #========================================
 # remember that using && will break when one doesn't succesfully complete
@@ -524,7 +684,7 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 # non-dotfiles that need editing:
 # sudo permission stuff (i.e. fstab.. sudo/wheel/group stuff.. truecrypt without sudo)
 
-# aur
+# _aur
 # compton-git ; conky-lua ; bspwm-git ; 
 # termite-git
 # weechat-git
@@ -534,6 +694,24 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 # chromium-pepper-flash (not in next install)
 # python2-keepass-git (for offlineimap to get pass from keypass)
 # mutt-sidebar
+# ppsspp-git and xboxdrv
+# have to restart to get xboxdrv working it would seem (may have to do setup on site.. idk what fixed it)
+# conky-lua
+# 
+# for vimus:
+# _ pacs ghc cabal-install haddock happy alex
+# cabal update
+# cabal install cabal-install
+# cabal install c2hs
+# cd ~/ && git clone https://github.com/sol/vimus
+# cd vimus
+# cd ncursesw && cabal install && cd ..
+# git clone https://github.com/joachifm/libmpd-haskell
+# (cd libmpd-haskell && cabal install)
+# cabal install && vimus
+# (won't actually want to run vimus in script)
+# had to delete the parsec folder and redo everything then add it to the path:
+# export PATH=$PATH:/home/angelic_sedition/.cabal/bin
 
 # aur with setup:
 # yas grive ; mkdir ~/grive ; cd ~/grive ; grive -a
@@ -549,7 +727,7 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 
 # Startup and Shutdown# {{{
 # startup stuff 
-alias -g st='rldtime ; mountusb ; df -H'
+alias -g start='rldtime ; mountusb ; df -H'
 # get this working without pass
 alias panic='umountusb && umountalltc && poweroff'
 
@@ -563,7 +741,7 @@ alias umountalltc='truecrypt -d'
 
 # symlink all dotfiles with stow
 alias deploy='cd ~/dotfiles ; stow -vt ~/ common terminal private vim'
-alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim'
+alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim remap'
 
 # Mounting and External Drives# {{{
 # fdisk -l or mountie to find drive to mount; get mountie working
@@ -583,7 +761,7 @@ alias -g g='git'
 # alias gp='git push origin'
 # alias gh='git checkout'
 alias -g gc='git commit'
-alias gca='git commit -a'
+alias gca='git commit -am'
 # git commit -a (autostage all tracked files)
 
 # send to github
@@ -658,6 +836,7 @@ alias rld2='echo "Test reload" && . ~/.zshrctest'
 
 alias rldurxvt='xrdb -load ~/.Xdefaults'
 alias rldxdef='rldurxvt'
+alias rldless='lesskey ~/.lesskey'
 
 # xscreensaver after changing xresources
 alias rldxscreen='xrdb -merge ~/.Xresources ; killall xscreensaver ; xscreensaver -no-splash &'
@@ -665,15 +844,16 @@ alias rldxscreen='xrdb -merge ~/.Xresources ; killall xscreensaver ; xscreensave
 # keyboard stuff# {{{
 alias rldxmd='xmodmap ~/.Xmodmap'
 # necessary because when plug in keyboard, it goes to qwerty
-alias rldusbkeyboard='setxkbmap us -variant colemak ; xmodmap ~/.Xmodmaptest2 ; xmodmap ~/.Xmodmap'
+alias rldusbkeyboard='setxkbmap us -variant colemak && xmodmap ~/.Xmod_wide && xmodmap ~/.Xmodmap'
 alias rldkbd='rldusbkeyboard'
 # when using my japanese keyboard with double wide mod n extra thumbkeys
 alias rldjp='xmodmap ~/.Xmodmapjp'
 # test moving everything up:
 alias tallmod='xmodmap ~/.Xmodmapqftk' 
 # set caps to escape on tap if have to kill xcape
-alias rldxcape="xcape -e 'Mode_switch=Escape'"
-alias rldxcapejp="xcape -e 'Alt_L=Return'"
+alias rldxcape="pkill xcape && xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla'"
+# alias rldxcape="xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla;Super_L=grave'"
+# alias rldxcapejp="xcape -e 'Alt_L=Return' && xcape -e 'Hyper_R=cedilla'"
 # }}}
 
 #update font caches
@@ -739,7 +919,8 @@ alias -g wifi='wifi-menu'
 alias sfh='screenfetch'
 alias wee='weechat'
 alias bitl='sudo bitlbee -D'
-alias mutt='cd ~/Mover && mutt'
+alias mutt='cd ~/Move && mutt'
+alias ppss='PPSSPPSDL &'
 
 # check ip; default gateway / router
 alias gateip='ip route show'
@@ -1015,6 +1196,12 @@ alias musimp='cd ~/Move ; beet import .'
 
 #}}}
 #===============
+# _Gaming {{{
+#===============
+# alias xbox='sudo xboxdrv --silent --detach-kernel-driver'
+# alias controller='xbox'
+#}}}
+#===============
 # Android Music Syncing # {{{
 #===============
 # require sudo
@@ -1027,7 +1214,7 @@ alias adbrestart='adb kill-server ; adb start-server'
 alias -g andudevreload='udevadm control --reload-rules'
 
 alias -g andsnmus='andmusconfig1'
-alias -g andmusconfig1='sync30sec ; syncimogen ; syncadtr ; syncbaao ; syncblonde ; syncbrandnew ; syncbmth ; syncchevelle ; synccoldplay ; syncdgd ; syncdeadmau5 ; syncdeftones ; syncfob ; syncffaf ; syncgreenday ; syncimogen ; synckeane ; synclydia ; syncmuse ; syncmcr ; syncofmm ; syncparamore ; syncptv ; syncradiohead ; syncrage ; syncra ; syncsenses ; syncskrillex ; syncsmashingpumpkins ; syncsoad ; synckillers ; syncrja ; syncsleeping ; synctssf ; syncstrokes ; syncthrice ; syncuverworld'
+alias -g andmusconfig1='sync30sec && syncimogen && syncadtr && syncbaao && syncblonde && syncbrandnew && syncbmth && syncchevelle && synccoldplay && syncdgd && syncdeadmau5 && syncdeftones && syncfob && syncffaf && syncgreenday && syncimogen && synckeane && synclydia && syncmuse && syncmcr && syncofmm && syncparamore && syncptv && syncradiohead && syncrage && syncra && syncsenses && syncskrillex && syncsmashingpumpkins && syncsoad && synckillers && syncrja && syncsleeping && synctssf && syncstrokes && syncthrice && syncuverworld'
 
 # by bands:# {{{
 alias -g sync30sec='rsync -avr --delete ~/Music/30\ Seconds\ To\ Mars ~/and/Card/Music'
@@ -1367,24 +1554,24 @@ rk() { curl -v -s -o/dev/null http://10.22.40.35:8098/riak/$1 }
 
 # Other crap# {{{
 # alt prompts# {{{
-# export PROMPT="\[\e[01;31m\]┌─[\t]──[\[\e[01;31m\u\e[01;31m\]]──[\[\e[00;31m\]${HOSTNAME%%.*}\[\e[01;31m\]]:\w$\[\e[01;31m\]\n\[\e[01;37m\]└──\[\e[01;37m\](\[\e[32;1m\]\$(/bin/ls -1 | /usr/bin/wc -l | /bin/sed 's: ::g') files, \$(/usr/bin/ls -lah | /usr/bin/grep -m 1 total | /usr/bin/sed 's/total //')b\[\e[01;37m\])>>\[\e[0m\]"
+# export PROMPT="\[\e[01;31m\]ââ[\t]ââ[\[\e[01;31m\u\e[01;31m\]]ââ[\[\e[00;31m\]${HOSTNAME%%.*}\[\e[01;31m\]]:\w$\[\e[01;31m\]\n\[\e[01;37m\]âââ\[\e[01;37m\](\[\e[32;1m\]\$(/bin/ls -1 | /usr/bin/wc -l | /bin/sed 's: ::g') files, \$(/usr/bin/ls -lah | /usr/bin/grep -m 1 total | /usr/bin/sed 's/total //')b\[\e[01;37m\])>>\[\e[0m\]"
 
 # zsh equivalent of above
 
-# export PS1="%{$bold_color$fg[red]%}┌─[%t]──[%{$bold_color$fg[red]%n$bold_color$fg[red]%}]──[%{$reset_color$fg[red]%}${HOSTNAME%%.*}%{$bold_color$fg[red]%}]:%~$%{$bold_color$fg[red]%}$prompt_newline%{$bold_color$fg[white]%}└──%{$bold_color$fg[white]%}(%{$fg[green]$bold_color%}\$(/bin/ls -1 | /usr/bin/wc -l | /bin/sed 's: ::g') files, \$(/usr/bin/ls -lah | /usr/bin/grep -m 1 total | /usr/bin/sed 's/total //')b%{$bold_color$fg[white]%})>>%{$reset_color%}"
+# export PS1="%{$bold_color$fg[red]%}ââ[%t]ââ[%{$bold_color$fg[red]%n$bold_color$fg[red]%}]ââ[%{$reset_color$fg[red]%}${HOSTNAME%%.*}%{$bold_color$fg[red]%}]:%~$%{$bold_color$fg[red]%}$prompt_newline%{$bold_color$fg[white]%}âââ%{$bold_color$fg[white]%}(%{$fg[green]$bold_color%}\$(/bin/ls -1 | /usr/bin/wc -l | /bin/sed 's: ::g') files, \$(/usr/bin/ls -lah | /usr/bin/grep -m 1 total | /usr/bin/sed 's/total //')b%{$bold_color$fg[white]%})>>%{$reset_color%}"
 
 # from https://github.com/phallus/arch-files/blob/master/config/.zshrc
-# export PS1="%{[38;05;0;48;05;7m%} %3~ %{[38;05;7;48;05;4m%}⮀%{[00m%}%{[38;05;8;48;05;4m%}%{[00m%}%{[38;05;4m%}⮀ %{[00m%}"
+# export PS1="%{?[38;05;0;48;05;7m%} %3~ %{?[38;05;7;48;05;4m%}â®%{?[00m%}%{?[38;05;8;48;05;4m%}%{?[00m%}%{?[38;05;4m%}â® %{?[00m%}"
 
 # from http://crunchbang.org/forums/viewtopic.php?id=31216 
-# export PS1="┌─[ \[\e[1;32m\]\w\[\e[0m\] ]\n└─$ "
+# export PS1="ââ[ \[\e[1;32m\]\w\[\e[0m\] ]\nââ$ "
 # zsh version
-# export PS1="┌─[ %{$bold_color$fg[green]%}%~%{$reset_color%} ]$prompt_newline└─$"
+# export PS1="ââ[ %{$bold_color$fg[green]%}%~%{$reset_color%} ]$prompt_newlineââ$"
 
 
 # from here https://bbs.archlinux.org/viewtopic.php?id=159209
-# export PS1='\[\033[0;36m\]╔═(\[\033[0m\033[0;36m\]\u\[\033[0m\]@\[\033[0;32m\]\h\[\033[0m\033[0;36m\])────(\[\033[0m\]\t \d\[\033[0;36m\])────(\[\033[0m\]\w\[\033[0;36m\])\n\[\033[0;36m\]╚═══[ \[\033[0m\033[0;36m\]\$\[\033[0m\033[0;36m\]]>\[\033[0m\] '
-# export PS1='%{$reset_color$fg[cyan]%}╔═(%{$reset_color$reset_color$fg[cyan]%}%n%{$reset_color%}@%{$reset_color$fg[green]%}%m%{$reset_color$reset_color$fg[cyan]%})────(%{$reset_color%}%t %D{%a %b %d}%{$reset_color$fg[cyan]%})────(%{$reset_color%}%~%{$reset_color$fg[cyan]%})$prompt_newline%{$reset_color$fg[cyan]%}╚═══[ %{$reset_color$reset_color$fg[cyan]%}%#%{$reset_color$reset_color$fg[cyan]%}]>%{$reset_color%} '
+# export PS1='\[\033[0;36m\]ââ(\[\033[0m\033[0;36m\]\u\[\033[0m\]@\[\033[0;32m\]\h\[\033[0m\033[0;36m\])ââââ(\[\033[0m\]\t \d\[\033[0;36m\])ââââ(\[\033[0m\]\w\[\033[0;36m\])\n\[\033[0;36m\]ââââ[ \[\033[0m\033[0;36m\]\$\[\033[0m\033[0;36m\]]>\[\033[0m\] '
+# export PS1='%{$reset_color$fg[cyan]%}ââ(%{$reset_color$reset_color$fg[cyan]%}%n%{$reset_color%}@%{$reset_color$fg[green]%}%m%{$reset_color$reset_color$fg[cyan]%})ââââ(%{$reset_color%}%t %D{%a %b %d}%{$reset_color$fg[cyan]%})ââââ(%{$reset_color%}%~%{$reset_color$fg[cyan]%})$prompt_newline%{$reset_color$fg[cyan]%}ââââ[ %{$reset_color$reset_color$fg[cyan]%}%#%{$reset_color$reset_color$fg[cyan]%}]>%{$reset_color%} '
 # export PS1='%{$fg[magenta]%}%n%{$reset_color%} at %{$fg[yellow]%}%m%{$reset_color%}'
 # }}}
 # graveyard

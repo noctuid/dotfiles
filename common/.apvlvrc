@@ -1,0 +1,156 @@
+" Bindings"{{{
+" navigation
+map n 3j
+map e 3k
+map tk <C-f>
+map to <C-b>
+map E gt
+map te gt
+map N gT
+map tn gT
+
+map ; :
+
+" straight from vimrc
+" replace nnoremap <silent> with map and <cr> with <CR> and remove "silent "
+" wm experementation"{{{
+
+" "r" is redraw"{{{
+" worskpace/Destkop switch"{{{
+map ra :!bspc desktop -f ^1<CR>
+map rr :!bspc desktop -f ^2<CR>
+map rs :!bspc desktop -f ^3<CR>
+map rt :!bspc desktop -f ^4<CR>
+map rd :!bspc desktop -f ^5<CR>
+map rh :!bspc desktop -f ^6<CR>
+map rn :!bspc desktop -f ^7<CR>
+map re :!bspc desktop -f ^8<CR>
+map ri :!bspc desktop -f ^9<CR>
+map ro :!bspc desktop -f ^10<CR>
+"}}}
+" move to destkop"{{{
+map Ra :!bspc window -d ^1<CR>
+map Rr :!bspc window -d ^2<CR>
+map Rs :!bspc window -d ^3<CR>
+map Rt :!bspc window -d ^4<CR>
+map Rd :!bspc window -d ^5<CR>
+map Rh :!bspc window -d ^6<CR>
+map Rn :!bspc window -d ^7<CR>
+map Re :!bspc window -d ^8<CR>
+map Ri :!bspc window -d ^9<CR>
+map Ro :!bspc window -d ^10<CR>
+"}}}
+
+" moving windows within desktop"{{{
+" move to biggest
+map rcm :!bspc window -s biggest<CR>
+" directions
+map rch :!bspc window -s left<CR>
+map rcn :!bspc window -s down<CR>
+map rce :!bspc window -s up<CR>
+map rci :!bspc window -s right<CR>
+" circulate 
+map r. :!bspc desktop -C forward<CR>
+map r, :!bspc desktop -C backward<CR>
+"}}}
+
+"resize"{{{
+map rmh :!~/bin/less_wm/resize_left.sh<CR>
+map rmn :!~/bin/less_wm/resize_down.sh<CR>
+map rme :!~/bin/less_wm/resize_up.sh<CR>
+map rmi :!~/bin/less_wm/resize_right.sh<CR>
+"}}}
+" open urxvt
+map ru :!urxvt &<CR>
+
+"}}}
+
+" s becomes select/Show/settings"{{{
+"select
+map sh :!bspc window -f left<CR><esc>
+map sn :!bspc window -f down<CR><esc>
+map se :!bspc window -f up<CR><esc>
+map si :!bspc window -f right<CR><esc>
+map sl :!bspc window -f last<CR><esc>
+
+" monocle toggle
+map st :!bspc desktop -l next<CR>
+map ss :!bspc window -t sticky<CR><esc>
+map sf :!bspc window -t fullscreen<CR>
+
+" gap up and down
+map su :!bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<CR>
+map sd :!bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<CR>
+
+" preselect"{{{
+map sph :!bspc window -p left<CR>
+map spn :!bspc window -p down<CR>
+map spe :!bspc window -p up<CR>
+map spi :!bspc window -p right<CR>
+map spx :!bspc window -p cancel<CR>
+map spd :!bspc desktop -c<CR>
+"}}}
+"}}}
+
+"}}}
+"}}}
+" Settings"{{{
+
+" zoom value, default is fitwidth
+" zoom has 4 styles
+" a float type number
+" fitwidth
+" fitheight
+" normal
+set zoom=fitwidth
+
+" set command timeout between two key press
+set commandtimeout=2000
+
+" set if use visual mode to select and copy text
+set visualmode = yes
+
+" set if use right and bottom scrollbar
+set scrollbar = yes
+
+" set if use content view
+" set content=yes
+
+" set weather use continuous view 
+" make sure the autoscrollpage is set to "yes" if you want to set this to yes
+" set continuous=yes
+
+" set a pad to continuous page
+" set continuouspad=2
+
+" set if auto scroll page when at the end or begin of one pdf page
+" set autoscrollpage=yes
+
+" set if auto scroll doc from 1st page when goto the last page
+" set autoscrolldoc=yes
+
+" set if disable ~/.apvlvinfo, default is no
+" set noinfo=no
+
+" set pdf object cache size
+" set pdfcache = 4
+
+" set if wrapscan text
+set wrapscan = yes
+
+" set double click action
+" option value is 'word', 'line' or 'page'
+" set doubleclick = page
+
+" set GUI options
+" m means menu, T means toolbar
+" set guioptions = 
+
+" set if use auto reload document
+" > 0 means auto reload after some seconds. = 0 means not auto reload
+" set autoreload = 3
+
+" set if reverted pdf page
+" set reverted = no
+"}}}
+" vim: set ft=vim:

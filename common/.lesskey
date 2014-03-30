@@ -1,5 +1,6 @@
 # bindings for colemak: https://github.com/bunnyfly/dotfiles/blob/master/lesskey
 # http://linux.die.net/man/1/lesskey
+# have to lesskey ~/.lesskey to change bindings
 #command
 n		forw-line
 N		forw-line-force
@@ -17,3 +18,80 @@ K		reverse-search
 g		goto-line
 G		goto-end
 %		percent
+
+# straight from vimrc
+# replace commentchars; replace "nnoremap <silent> " with nothing
+# replace ":silent !" with "shell "
+# replace <cr> with \r
+# tmux experimentation#{{{
+# #r# is redraw#{{{
+# window switching#{{{
+ra shell tmux select-window -t 1\r
+rr shell tmux select-window -t 2\r
+rs shell tmux select-window -t 3\r
+rt shell tmux select-window -t 4\r
+rd shell tmux select-window -t 5\r
+rh shell tmux select-window -t 6\r
+rn shell tmux select-window -t 7\r
+re shell tmux select-window -t 8\r
+ri shell tmux select-window -t 9\r
+ro shell tmux select-window -t 10\r
+#}}}
+# resize panes#{{{
+rmh shell tmux resize-pane -L 10\r
+rmn shell tmux resize-pane -D 5\r
+rme shell tmux resize-pane -U 5\r
+rmi shell tmux resize-pane -R 10\r
+#}}}
+# circulate
+# previous
+r, shell tmux swap-pane -U\r
+# next
+r. shell tmux swap-pane -D\r
+
+# new session
+r_ shell tmux new-session\r
+
+# new window 
+rc shell tmux new-window\r
+# kill pane
+rx shell tmux kill-pane\r
+# last window 
+rl shell tmux last-window\r
+# split windows
+r/ shell tmux split-window -h\r
+r- shell tmux split-window\r
+
+# break pane
+r! shell tmux break-pane\r
+#}}}
+
+# #s# is select#{{{
+# panes#{{{
+# directions
+sh shell tmux select-pane -L\r
+sn shell tmux select-pane -D\r
+se shell tmux select-pane -U\r
+si shell tmux select-pane -R\r
+# last
+sl shell tmux select-pane -l\r
+# select layout
+sv shell tmux select-layout main-vertical\r
+
+# toggle #monocle# (zoom)
+st shell tmux resize-pane -Z\r
+#}}}
+
+# select session
+ss shell tmux choose-client\r
+#}}}
+#}}}
+
+#copy mode (not in vimrc)
+v shell tmux copy-mode\r
+
+#env
+# use smart case
+LESS = -i
+EDITOR = gvim
+LESSCHARSET = utf-8
