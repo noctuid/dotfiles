@@ -70,10 +70,10 @@ if has("gui_running")
 	"}}}
 
 	"resize"{{{
-	nnoremap <silent> rmh :silent !~/bin/less_wm/resize_left.sh<cr>
-	nnoremap <silent> rmn :silent !~/bin/less_wm/resize_down.sh<cr>
-	nnoremap <silent> rme :silent !~/bin/less_wm/resize_up.sh<cr>
-	nnoremap <silent> rmi :silent !~/bin/less_wm/resize_right.sh<cr>
+	nnoremap <silent> rmh :silent !~/bin/resize.sh left<cr>
+	nnoremap <silent> rmn :silent !~/bin/resize.sh down<cr>
+	nnoremap <silent> rme :silent !~/bin/resize.sh up<cr>
+	nnoremap <silent> rmi :silent !~/bin/resize.sh right<cr>
 	"}}}
 	" open urxvt
 	nnoremap <silent> ru :silent !urxvt &<cr>
@@ -82,15 +82,15 @@ if has("gui_running")
 
 	" s becomes select/Show/settings"{{{
 	"select
-	nnoremap <silent> sh :!bspc window -f left<cr><esc>
-	nnoremap <silent> sn :!bspc window -f down<cr><esc>
-	nnoremap <silent> se :!bspc window -f up<cr><esc>
-	nnoremap <silent> si :!bspc window -f right<cr><esc>
-	nnoremap <silent> sl :silent !bspc window -f last<cr><esc>
+	nnoremap <silent> sh :silent !bspc window -f left<cr>
+	nnoremap <silent> sn :silent !bspc window -f down<cr>
+	nnoremap <silent> se :silent !bspc window -f up<cr>
+	nnoremap <silent> si :silent !bspc window -f right<cr>
+	nnoremap <silent> sl :silent !bspc window -f last<cr>
 
 	" monocle toggle
 	nnoremap <silent> st :silent !bspc desktop -l next<cr>
-	nnoremap <silent> ss :!bspc window -t sticky<cr><esc>
+	nnoremap <silent> ss :silent !bspc window -t sticky<cr>
 	nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
 
 	" gap up and down
@@ -484,8 +484,8 @@ let g:airline_section_warning = ''
 " A autoyank contents of visual mode to + register
 " c use console dialogues instead of popups for simple choices
 " also remove menu bar (m), T (toolbar)
-set guioptions=e,P
-set guioptions-=m,T
+set guioptions=P,e,c
+" set guioptions-=m,T,e
 " maybe fixes white bar appearing at bottom; seems to work
 set guiheadroom=40
 
@@ -590,6 +590,7 @@ nnoremap + <C-a>|nnoremap - <C-x>
 ""}}}
 
 " Other General Mappings"{{{
+" change defaults
 nnoremap ; :
 nnoremap : ;
 vnoremap ; :
@@ -620,6 +621,9 @@ nnoremap <leader>s :w<cr>
 " control backspace behaviour
 inoremap ¸ <c-w>
 cnoremap ¸ <c-w>
+nnoremap ¸ daw
+
+inoremap <return> <return><home>
 
 " I use a more than A (which I almost never use)
 nnoremap a A
@@ -631,6 +635,10 @@ nnoremap v V|nnoremap V v
 " Quickly edit/reload the vimrc file
 " nnoremap <silent> <leader>ov :e $MYVIMRC<CR>
 nnoremap <leader>. :so ~/.vimrc<CR>
+
+" fold navigation
+nnoremap ze zk
+nnoremap zn zj
 
 "}}}
 
@@ -952,6 +960,8 @@ nnoremap <leader>i :vertical resize +5<cr>
 nnoremap <leader>e <c-w><right>
 nnoremap <leader>n <c-w><left>
 " add swap splits
+
+" monocle or fullsize window
 
 " move tabs
 nnoremap <leader>N :tabm -1<cr>
@@ -1326,7 +1336,7 @@ Bundle 'Shougo/vimshell.vim'
 " better marks; show and symbols (markers)
 Bundle 'kshenoy/vim-signature'
 " split 
-Bundle 'zhaocai/GoldenView.Vim'
+" Bundle 'zhaocai/GoldenView.Vim'
 " view undo tree 
 Bundle 'sjl/gundo.vim'
 " file linking and formatting/highlighting

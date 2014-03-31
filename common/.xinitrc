@@ -16,19 +16,19 @@ fi
 
 # rldkbd (keyboard remapping)
 setxkbmap us -variant colemak
-xmodmap ~/.Xmodmaptest2
+xmodmap ~/.Xmod_wide
 xmodmap ~/.Xmodmap
 # set background image
 feh --bg-scale "/home/angelic_sedition/wallpaper/tumblr_static_makise.kurisu.full.798633.jpg" 
 
 # fonts for bar and dzen2
 xset +fp /usr/share/fonts/local
+xset +fp ~/.fonts
 xset fp rehash
-
 # run stuff in background# {{{
 # disable mouse when typing
 # i flag will disable for two seconds after last keypress; k ignore modifier keys (i.e. control left click) ; t will only disable scrolling and clicking
-syndaemon -k -i 2 -d & 
+syndaemon -k -i 2 -d &
 
 # set cursor look 
 xsetroot -cursor_name left_ptr &
@@ -51,12 +51,10 @@ xchainkeys &
 # }}}
  
 sxhkd &
-# put this here or in bspwmrc?
-Gvim &
 # start window manager
-exec bspwm
-# exec wm
-
+# exec bspwm
+# for reloading
+exec ~/bin/wm
 #case $1 in
 #	gnome) exec gnome-session;;
 #	kde) exec startkde;;

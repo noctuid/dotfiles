@@ -1,6 +1,7 @@
 #to reload .zshrc :
 # . ~/.zshrc which I made alias for: rld
 # set as default shell by changing /etc/zsh/zprofile ... /etc/profile or just do chsh -s /bin/zsh
+# changed back to bash as login shell; history lock problem
 # TODO:
 # .maybe stop using gvfs-mount and start mounting to media.. simple global search and replace with confirmation for /run/media..etc
 # .stop using usb as main
@@ -97,9 +98,11 @@ export BROWSER=firefox
 # for bar for bspwm
 export PANEL_FIFO="/tmp/panel-fifo"
 export PANEL_HEIGHT=20
-# export BSPWM_TREE=/tmp/bspwm.tree
-# export BSPWM_HISTORY=/tmp/bspwm.history
-# export BSPWM_STACK=/tmp/bspwm.stack
+export BSPWM_TREE=/tmp/bspwm.tree
+export BSPWM_HISTORY=/tmp/bspwm.history
+export PANEL_FIFO=/tmp/panel-fifo
+export PANEL_HEIGHT=24
+export BSPWM_STACK=/tmp/bspwm.stack
 # }}}
 
 # add to path# {{{
@@ -677,13 +680,17 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 
 # to get bar working with bspwn
 # bar that stole from earsplit requires acpi
-# need from aur: bar-aint-recursive, sutils-git, xtitle-git, wkline-git (doesn't work)
+# need from aur: bar-aint-recursive, sutils-git, and xtitle-git 
+# wkline-git (doesn't work)
+# 
+# bar-aint-recursive-git
 
 # yas luakit; then cp /etc/xdg/luakit ~/dotfiles/common/.config
 
 # non-dotfiles that need editing:
 # sudo permission stuff (i.e. fstab.. sudo/wheel/group stuff.. truecrypt without sudo)
 
+# install lemon and uushi
 # _aur
 # games: yetris
 # compton-git ; conky-lua ; bspwm-git ; 
@@ -698,6 +705,7 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 # ppsspp-git and xboxdrv
 # have to restart to get xboxdrv working it would seem (may have to do setup on site.. idk what fixed it)
 # conky-lua
+# 
 # 
 # for vimus:
 # _ pacs ghc cabal-install haddock happy alex
@@ -1175,8 +1183,8 @@ alias nm='ncmpcpp -c ~/.ncmpcpp/config'
 
 mu() {
 	mpd
-	sleep 1
-	nm
+	mpdscribble
+	vimus
 }
 
 #cd ripping (force use config file..; probably not necessary but wasn't automatically using first time tried and haven't changed it since)

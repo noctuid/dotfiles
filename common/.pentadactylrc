@@ -10,6 +10,7 @@
 " iabbr doesn't work properly; some places doesn't work at all ; can't have too many
 " focus lost on youtube; requires click for bindings to start working
 " fix font sizes.. they work in vimp
+" make things not executed in private window
 
 " downloads here; then with ranger..
 cd ~/Move
@@ -20,78 +21,78 @@ cd ~/Move
 
 	" "r" is redraw"{{{
 	" worskpace/Destkop switch"{{{
-	nnoremap <silent> ra :silent !bspc desktop -f ^1<cr><esc>
-	nnoremap <silent> rr :silent !bspc desktop -f ^2<cr><esc>
-	nnoremap <silent> rs :silent !bspc desktop -f ^3<cr><esc>
-	nnoremap <silent> rt :silent !bspc desktop -f ^4<cr><esc>
-	nnoremap <silent> rd :silent !bspc desktop -f ^5<cr><esc>
-	nnoremap <silent> rh :silent !bspc desktop -f ^6<cr><esc>
-	nnoremap <silent> rn :silent !bspc desktop -f ^7<cr><esc>
-	nnoremap <silent> re :silent !bspc desktop -f ^8<cr><esc>
-	nnoremap <silent> ri :silent !bspc desktop -f ^9<cr><esc>
-	nnoremap <silent> ro :silent !bspc desktop -f ^10<cr><esc>
+	nmap -builtin <silent> ra :silent !bspc desktop -f ^1<cr>
+	nmap -builtin <silent> rr :silent !bspc desktop -f ^2<cr>
+	nmap -builtin <silent> rs :silent !bspc desktop -f ^3<cr>
+	nmap -builtin <silent> rt :silent !bspc desktop -f ^4<cr>
+	nmap -builtin <silent> rd :silent !bspc desktop -f ^5<cr>
+	nmap -builtin <silent> rh :silent !bspc desktop -f ^6<cr>
+	nmap -builtin <silent> rn :silent !bspc desktop -f ^7<cr>
+	nmap -builtin <silent> re :silent !bspc desktop -f ^8<cr>
+	nmap -builtin <silent> ri :silent !bspc desktop -f ^9<cr>
+	nmap -builtin <silent> ro :silent !bspc desktop -f ^10<cr>
 	"}}}
 	" move to destkop"{{{
-	nnoremap <silent> Ra :silent !bspc window -d ^1<cr><esc>
-	nnoremap <silent> Rr :silent !bspc window -d ^2<cr><esc>
-	nnoremap <silent> Rs :silent !bspc window -d ^3<cr><esc>
-	nnoremap <silent> Rt :silent !bspc window -d ^4<cr><esc>
-	nnoremap <silent> Rd :silent !bspc window -d ^5<cr><esc>
-	nnoremap <silent> Rh :silent !bspc window -d ^6<cr><esc>
-	nnoremap <silent> Rn :silent !bspc window -d ^7<cr><esc>
-	nnoremap <silent> Re :silent !bspc window -d ^8<cr><esc>
-	nnoremap <silent> Ri :silent !bspc window -d ^9<cr><esc>
-	nnoremap <silent> Ro :silent !bspc window -d ^10<cr>
+	nmap -builtin <silent> Ra :silent !bspc window -d ^1<cr>
+	nmap -builtin <silent> Rr :silent !bspc window -d ^2<cr>
+	nmap -builtin <silent> Rs :silent !bspc window -d ^3<cr>
+	nmap -builtin <silent> Rt :silent !bspc window -d ^4<cr>
+	nmap -builtin <silent> Rd :silent !bspc window -d ^5<cr>
+	nmap -builtin <silent> Rh :silent !bspc window -d ^6<cr>
+	nmap -builtin <silent> Rn :silent !bspc window -d ^7<cr>
+	nmap -builtin <silent> Re :silent !bspc window -d ^8<cr>
+	nmap -builtin <silent> Ri :silent !bspc window -d ^9<cr>
+	nmap -builtin <silent> Ro :silent !bspc window -d ^10<cr>
 	"}}}
 
 	" moving windows within desktop"{{{
 	" move to biggest
-	nnoremap <silent> rcm :silent !bspc window -s biggest<cr>
+	nmap -builtin <silent> rcm :silent !bspc window -s biggest<cr>
 	" directions
-	nnoremap <silent> rch :silent !bspc window -s left<cr>
-	nnoremap <silent> rcn :silent !bspc window -s down<cr>
-	nnoremap <silent> rce :silent !bspc window -s up<cr>
-	nnoremap <silent> rci :silent !bspc window -s right<cr>
+	nmap -builtin <silent> rch :silent !bspc window -s left<cr>
+	nmap -builtin <silent> rcn :silent !bspc window -s down<cr>
+	nmap -builtin <silent> rce :silent !bspc window -s up<cr>
+	nmap -builtin <silent> rci :silent !bspc window -s right<cr>
 	" circulate 
-	nnoremap <silent> r. :silent !bspc desktop -C forward<cr>
-	nnoremap <silent> r, :silent !bspc desktop -C backward<cr>
+	nmap -builtin <silent> r. :silent !bspc desktop -C forward<cr>
+	nmap -builtin <silent> r, :silent !bspc desktop -C backward<cr>
 	"}}}
 
 	"resize"{{{
-	nnoremap <silent> rmh :silent !~/bin/less_wm/resize_left.sh<cr>
-	nnoremap <silent> rmn :silent !~/bin/less_wm/resize_down.sh<cr>
-	nnoremap <silent> rme :silent !~/bin/less_wm/resize_up.sh<cr>
-	nnoremap <silent> rmi :silent !~/bin/less_wm/resize_right.sh<cr>
+	nmap -builtin <silent> rmh :silent !~/bin/resize.sh left<cr>
+	nmap -builtin <silent> rmn :silent !~/bin/resize.sh down<cr>
+	nmap -builtin <silent> rme :silent !~/bin/resize.sh up<cr>
+	nmap -builtin <silent> rmi :silent !~/bin/resize.sh right<cr>
 	"}}}
 	" open urxvt
-	nnoremap <silent> ru :silent !urxvt &<cr>
+	nmap -builtin <silent> ru :silent !urxvt &<cr>
 
 	"}}}
 
 	" s becomes select/Show/settings"{{{
 	"select
-	nnoremap <silent> sh :!bspc window -f left<cr><esc>
-	nnoremap <silent> sn :!bspc window -f down<cr><esc>
-	nnoremap <silent> se :!bspc window -f up<cr><esc>
-	nnoremap <silent> si :!bspc window -f right<cr><esc>
-	nnoremap <silent> sl :silent !bspc window -f last<cr><esc>
+	nmap -builtin <silent> sh :silent !bspc window -f left<cr>
+	nmap -builtin <silent> sn :silent !bspc window -f down<cr>
+	nmap -builtin <silent> se :silent !bspc window -f up<cr>
+	nmap -builtin <silent> si :silent !bspc window -f right<cr>
+	nmap -builtin <silent> sl :silent !bspc window -f last<cr>
 
 	" monocle toggle
-	nnoremap <silent> st :silent !bspc desktop -l next<cr>
-	nnoremap <silent> ss :!bspc window -t sticky<cr><esc>
-	nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
+	nmap -builtin <silent> st :silent !bspc desktop -l next<cr>
+	nmap -builtin <silent> ss :silent !bspc window -t sticky<cr>
+	nmap -builtin <silent> sf :silent !bspc window -t fullscreen<cr>
 
 	" gap up and down
-	nnoremap <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
-	nnoremap <silent> sd :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
+	nmap -builtin <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
+	nmap -builtin <silent> sd :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
 
 	" preselect"{{{
-	nnoremap <silent> sph :silent !bspc window -p left<cr>
-	nnoremap <silent> spn :silent !bspc window -p down<cr>
-	nnoremap <silent> spe :silent !bspc window -p up<cr>
-	nnoremap <silent> spi :silent !bspc window -p right<cr>
-	nnoremap <silent> spx :silent !bspc window -p cancel<cr>
-	nnoremap <silent> spd :silent !bspc desktop -c<cr>
+	nmap -builtin <silent> sph :silent !bspc window -p left<cr>
+	nmap -builtin <silent> spn :silent !bspc window -p down<cr>
+	nmap -builtin <silent> spe :silent !bspc window -p up<cr>
+	nmap -builtin <silent> spi :silent !bspc window -p right<cr>
+	nmap -builtin <silent> spx :silent !bspc window -p cancel<cr>
+	nmap -builtin <silent> spd :silent !bspc desktop -c<cr>
 	"}}}
 	"}}}
 

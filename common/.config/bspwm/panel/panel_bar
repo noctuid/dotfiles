@@ -1,0 +1,82 @@
+#! /bin/sh
+#
+# Example panel for LemonBoy's bar
+# updated for syntax change with my modifications
+# https://github.com/baskerville/bspwm/blob/master/examples/panel/panel_bar
+
+COLOR_STATUS_FG='#6C7A80'
+
+# stop transparency (FF alpha channel)
+COLOR_FOREGROUND='#FF34322E'
+COLOR_BACKGROUND='#FF1232C31'
+
+# old default colours (https://github.com/LemonBoy/bar/blob/3f4ed1600ad1f1bc3a1e838f3c0282ff9b4b1966/config.def.h)
+C_0='#2D3C46'
+C_1='#AC4142'
+C_2='#90A959'
+C_3='#DE935F'
+C_4='#6A9FB5'
+C_5='#AA759F'
+C_7='#6C7A80'
+C_9='#CC6666'
+COLOR_EIGHT='#425059'
+COLOR_NINE='#CC6666'
+
+# bspwm and what looks like arch symbol from uushi
+bspwm="%{B$COLOR_BACKGROUND}%{F$COLOR_EIGHT}%{F$COLOR_NINE} ⮗ bspwm%{F$COLOR_EIGHT}"
+
+while read -r line ; do
+	case $line in
+		S*)
+			# clock output
+			sys_infos="%{F$C_7}${line#?}"
+			;;
+		T*)
+			# xtitle output
+			title="%{F$C_4}⮠ ${line#?} ♠"
+			;;
+		W*)
+			# bspwm internal state
+			wm_infos=""
+			IFS=':'
+			set -- ${line#?}
+			while [ $# -gt 0 ] ; do
+				item=$1
+				name=${item#?}
+				case $item in
+					O*)
+						# focused occupied desktop
+						wm_infos="$wm_infos %{U$C_3}%{+u}${name}%{-u}"
+						;;
+					F*)
+						# focused free desktop
+						wm_infos="$wm_infos %{U$C_4}%{+u}${name}%{-u}"
+						;;
+					U*)
+						# focused urgent desktop
+						wm_infos="$wm_infos %{U$C_9}%{+u}${name}%{-u}"
+						;;
+					o*)
+						# occupied desktop
+						wm_infos="$wm_infos %{F$COLOR_EIGHT}${name}"
+						;;
+					f*)
+						# free desktop
+						wm_infos="$wm_infos %{F$C_7}${name}"
+						;;
+					u*)
+						# urgent desktop
+						wm_infos="$wm_infos %{B$C_1}${name}"
+						;;
+					L*)
+						# layout
+						layout=$(printf "%s" "${name}" | sed 's/\(.\).*/\U\1/')
+						wm_infos="$wm_infos    %{F$C_2}$layout"
+						;;
+				esac
+				shift
+			done
+			;;
+	esac
+	printf "%s\n" "%{l} $bspwm $wm_infos %{c} $title %{r} $sys_infos  "
+done

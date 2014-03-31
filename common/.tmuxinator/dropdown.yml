@@ -1,15 +1,15 @@
 name: dropdown
 root: ~/
-# set-window-option -g pane-base-index 1
+ 
 # pre: sudo bitlbee -D
-# will flash name and then rename to programs (my settings)
+# mutt
 windows:
   - music:
-    - vimus
-  - editor:
-    layout: main-vertical
-    panes:
-        - # empty
-        - ranger
+    - mu
   - chat:
     - weechat
+  - main:
+        layout: even-horizontal
+        panes:
+        - ranger
+        - # empty

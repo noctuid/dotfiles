@@ -1,0 +1,173 @@
+#! /bin/sh
+# my modification of the below two bars
+# https://github.com/baskerville/bspwm/blob/master/examples/panel/panel
+# https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
+
+if [ $(pgrep -cx panel) -gt 1 ] ; then
+	printf "%s\n" "The panel is already running." >&2
+	exit 1
+fi
+
+trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+
+flavor=${1:-bar}
+
+[ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
+mkfifo "$PANEL_FIFO"
+
+# change to bottom padding
+# bspc config top_padding $PANEL_HEIGHT
+bspc config bottom_padding $PANEL_HEIGHT
+
+bspc control --subscribe > "$PANEL_FIFO" &
+xtitle -sf 'T%s' > "$PANEL_FIFO" &
+
+panel_clock()
+{
+        echo  "⭧" $(clock -f '%a %d %I: %M')
+}
+
+# add alpha channel (opacity)
+COLOR_FOREGROUND='#FF34322E'
+COLOR_BACKGROUND='#FF1232C31'
+# old default colours
+C_0='#2D3C46'
+C_1='#AC4142'
+C_2='#90A959'
+C_3='#DE935F'
+C_4='#6A9FB5'
+C_5='#AA759F'
+C_7='#6C7A80'
+C_9='#CC6666'
+
+C_Z='#2A7A9C'
+panel_battery()
+{
+        batStats=$(acpi --battery | cut -d' ' -f3 | sed 's/,//')
+        if [ "$batStats" == "" ]
+        then
+                echo "%{F$C_7}⮃ ⮎ AC"
+        elif [ "$batStats" == "Charging" ]
+        then
+                echo "%{F$C_9}⮃ ⮒" $(acpi --battery | cut -d' ' -f4 | sed 's/%,//')"+"
+        elif [ "$batStats" == "Discharging" ]
+        then
+                echo "%{F$C_1}⮃ ⮑" $(acpi --battery | cut -d' ' -f4 | sed 's/%,//')"-"
+        else    echo "%{F$C_2}⮃ Refreshing..."
+        fi
+
+}
+
+panel_volume()
+{
+        volStatus=$(amixer get Master | tail -n 1 | cut -d '[' -f 4 | sed 's/].*//g')
+        volLevel=$(amixer get Master | tail -n 1 | cut -d '[' -f 2 | sed 's/\%].*//g')
+        headphone=$(amixer -c 0 contents | grep 17 -A 2 | awk 'NR==3 { print $2 }' | cut -d '=' -f 2)
+# doesn't work
+        # if [ "$volStatus" == "on" ] && [ "$headphone" == "off" ];
+        #         then icon="%{F$C_5}⮜"
+        # elif [ "$volStatus" == "on" ] && [ "$headphone" == "on" ];
+        #         then icon="%{F$C_5}⮜"
+        # elif [ "$volStatus" == "off" ] && [ "$headphone" == "on" ];
+        #         then icon="%{F$C_1}⮝"
+        # elif [ "$volStatus" == "off" ] && [ "$headphone" == "off" ];
+        #         then icon="%{F$C_1}⮜"
+        # else icon="%{F$C_1} "
+        # fi
+
+        icon="%{F$C_Z} ⮜"
+        case $volLevel in
+                100)    if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}——————————"
+                        else echo "$icon" "%{F$C_Z}——————————"
+                        fi
+                        ;;
+                [0-9]) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}—%{F$C_0}—————————"
+                        else echo "$icon" "%{F$C_Z}—%{F$C_0}—————————"
+                        fi
+                        ;;
+                1*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}——%{F$C_0}————————"
+                        else echo "$icon" "%{F$C_Z}——%{F$C_0}————————"
+                        fi
+                        ;;
+                2*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}———%{F$C_0}———————"
+                        else echo "$icon" "%{F$C_Z}———%{F$C_0}———————"
+                        fi
+                        ;;
+                3*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}————%{F$C_0}——————"
+                        else echo "$icon" "%{F$C_Z}————%{F$C_0}——————"
+                        fi
+                        ;;
+                4*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}—————%{F$C_0}—————"
+                        else echo "$icon" "%{F$C_Z}—————%{F$C_0}—————"
+                        fi
+                        ;;
+                5*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}——————%{F$C_0}————"
+                        else echo "$icon" "%{F$C_Z}——————%{F$C_0}————"
+                        fi
+                        ;;
+                6*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}———————%{F$C_0}———"
+                        else echo "$icon" "%{F$C_Z}———————%{F$C_0}———"
+                        fi
+                        ;;
+                7*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}————————%{F$C_0}——"
+                        else echo "$icon" "%{F$C_Z}————————%{F$C_0}——"
+                        fi
+                        ;;
+                8*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}——————————%{F$C_0}—"
+                        else echo "$icon" "%{F$C_Z}——————————%{F$C_0}—"
+                        fi
+                        ;;
+                9*) if [ "$volStatus" == "on" ]; then echo "$icon" "%{F$C_5}——————————"
+                        else echo "$icon" "%{F$C_Z}——————————"
+                        fi
+                        ;;
+        esac
+}
+
+
+# modified from: https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/brightnessScript
+panel_brightness()
+{
+brightnessLevel=$(cat /sys/class/backlight/acpi_video0/actual_brightness)
+maxBrightness=$(cat /sys/class/backlight/acpi_video0/max_brightness)
+
+case $brightnessLevel in
+        0)      echo "•○○○○○○○○○○○○○○○";;
+        1)      echo "••○○○○○○○○○○○○○○";;
+        2)      echo "•••○○○○○○○○○○○○○";;
+        3)      echo "••••○○○○○○○○○○○○";;
+        4)      echo "•••••○○○○○○○○○○○";;
+        5)      echo "••••••○○○○○○○○○○";;
+        6)      echo "•••••••○○○○○○○○○";;
+        7)      echo "••••••••○○○○○○○○";;
+        8)      echo "•••••••••○○○○○○○";;
+        9)      echo "••••••••••○○○○○○";;
+        10)     echo "•••••••••••○○○○○";;
+        11)     echo "••••••••••••○○○○";;
+        12)     echo "•••••••••••••○○○";;
+        13)     echo "••••••••••••••○○";;
+        14)     echo "•••••••••••••••○";;
+        15)     echo "••••••••••••••••";;
+esac
+}
+
+while true; do
+		echo "S" "%{F$C_Z}⮃ $(panel_volume) %{F$C_3} ⮃ $(panel_brightness) "$(panel_battery)"%{F$C_5} ⮃ "$(panel_clock) > "$PANEL_FIFO"
+        sleep 0.7s
+done &
+
+case "$flavor" in
+	bar)
+		# change to bar-aint-recursive since using git version
+		# -b to put at bottom
+		# use uushi (support for unicode yay)
+		cat "$PANEL_FIFO" | panel_bar | bar-aint-recursive -b -f "-benis-uushi-medium-r-normal--11-90-75-75-p-58-iso10646-1" x$PANEL_HEIGHT -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" &
+		;;
+	dzen2)
+		FONT_FAMILY='DejaVu Sans'
+		FONT_SIZE=11
+		cat "$PANEL_FIFO" | panel_dzen2 -f "$FONT_FAMILY" -s "$FONT_SIZE" | dzen2 -h $PANEL_HEIGHT -dock -ta l -title-name panel -fn "${FONT_FAMILY}:pixelsize=${FONT_SIZE}" -fg "$COLOR_FOREGROUND" -bg "$COLOR_BACKGROUND" &
+		;;
+esac
+
+wait

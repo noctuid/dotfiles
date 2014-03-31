@@ -1,5 +1,10 @@
 #!/bin/sh
 #https://wiki.archlinux.org/index.php/Bspwm
+# for reloading bspwm without restarting
+if [ -e "$BSPWM_TREE" ] ; then
+	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
+	rm "$BSPWM_TREE" "$BSPWM_HISTORY" "$BSPWM_STACK"
+fi
 
 # Destktops/ Workspaces
 bspc monitor -d I II III IV V VI VII VIII IX X
@@ -27,31 +32,26 @@ bspc config window_gap          8
 bspc config split_ratio         0.60
 bspc config borderless_monocle  true
 bspc config gapless_monocle     true
-bspc focus_follows_pointer      
+bspc focus_follows_pointer      true
 # https://bbs.archlinux.org/viewtopic.php?id=149444&p=38
 bspc config normal_frame_opacity 0.0
 bspc config focused_frame_opacity 0.05
 # cancel presel with another presel
 bspc config auto_cancel true
 
-# padding for bar (set in panel not here)
+# padding for bar (export PANEL_HEIGHT instead)
 # bspc config bottom_padding 20 
 #}}}
 # Window rules:#{{{
 # open firefox when go to second desktop (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
-bspc control --subscribe | awk -F ':' '$<3> ~ /^[FO]/ { exit(system("firefox")); }'
+bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("firefox")); }'
 
 # Can check class name of program with: xprop | grep WM_CLASS
 bspc rule -a guake floating=on
 # bspc rule -a Firefox follow=false
 # bspc rule -a Gvim follow=true
-bspc rule -a Gvim desktop=^1
+# bspc rule -a apvlv dekstop=^3
+# bspc rule -a Gvim desktop=^1
 #}}}
-panel &
 
-# for loop/ reloading rc without quitting windows
-# no success
-# if [ -e "$BSPWM_TREE" ] ; then
-#     bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
-#     rm "$BSPWM_TREE" "$BSPWM_HISTORY" "$BSPWM_STACK"
-# fi
+panel &
