@@ -11,7 +11,12 @@ tmux split-window -h
 tmux select-pane -l && xdotool key Escape && xdotool key control+d && tmux select-pane -l
 # swap to left
 tmux swap-pane -U
-dirname=${1%/*}
+
+escaped=$(printf '%q' "$1")
+dirname=${escaped%/*}
+
 # select last thing in folder (photo) and display
-tmux send-keys "ranger --selectfile='${1}' --cmd='move to=-1' --cmd='display_file'"
+# choosedir doesn't work; get around problems if apostrophe in file names:
+tmux send-keys "cd $dirname && ranger --selectfile='cover.png' --cmd='display_file'"
+# tmux send-keys "echo $dirname"
 tmux send-keys Enter

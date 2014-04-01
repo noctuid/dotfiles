@@ -2,6 +2,10 @@ These are my dotfiles. Some are pretty heavily commented. If you have interest i
 
 My quest is simple. Don't move away from the home row and save the pinkies!
 
+Pictures:
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/clean.png "SCREENSHOT")
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/dirty.png "SCREENSHOT")
+
 # Goals for Configuration & Workflow:
 - Increase efficiency and speed; cut wasted time and movement; get the computer to work with instead of against
 - Reduce/eliminate hand and wrist pain
