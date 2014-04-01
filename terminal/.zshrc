@@ -689,6 +689,8 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 
 # non-dotfiles that need editing:
 # sudo permission stuff (i.e. fstab.. sudo/wheel/group stuff.. truecrypt without sudo)
+# mpd and mpc from official
+# touch ~/.mpd/{mpd.db,mpd.log,mpd.pid,mpdstate}
 
 # install lemon and uushi
 # _aur

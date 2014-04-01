@@ -23,11 +23,14 @@ ask_before_clearing_main_playlist = "yes"
 
 ignore_leading_the = "no"
 
-# visualization
+#visualizer 
 visualizer_fifo_path = "/tmp/mpd.fifo"
-visualizer_output_name = "my_fifo"
-visualizer_sync_interval = "1"
+# visualizer_type = "wave" (spectrum/wave)
 visualizer_type = "spectrum" (spectrum/wave)
+visualizer_look = "◆▋"
+visualizer_sync_interval = "30"
+visualizer_color = "green"
+visualizer_in_stereo = "yes"
 
 # appearance# {{{
 display_bitrate = "yes"

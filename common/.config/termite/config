@@ -12,10 +12,15 @@ dynamic_title = true
 urgent_on_bell = true
 clickable_url = false
 font = Inconsolata 11 
+# font = uushi 10
 scrollback_lines = 1000
 search_wrap = true
 #icon_name = terminal
 #geometry = 640x480
+
+# 0.0: opaque, 1.0: transparent
+# transparency = 0.0
+# pseudo_transparency = false
 
 # "system", "on" or "off"
 cursor_blink = system
@@ -34,17 +39,18 @@ word_chars = -A-Za-z0-9,./?%&#:_=+@~
 #size_hints = false
 
 [colors]
-foreground = #dcdccc
-foreground_bold = #ffffff
-#foreground_dim = #888888
-background = #3f3f3f
-#cursor = #dcdccc
 
 # if unset, will reverse foreground and background
 highlight = #2f2f2f
 
 # pretty sure these are just the defaults
-# colors from color0 to color254 can be set# {{{
+colors from color0 to color254 can be set# {{{
+# 
+foreground = #dcdccc
+foreground_bold = #ffffff
+#foreground_dim = #888888
+background = #3f3f3f
+#cursor = #dcdccc
 color0 = #3f3f3f
 color1 = #705050
 color2 = #60b48a
@@ -62,6 +68,28 @@ color13 = #ec93d3
 color14 = #93e0e3
 color15 = #ffffff
 # }}}
+
+# # alternate colors# {{{
+# color12 =	#A1BDCE
+# color8 =	#505354
+# color5 =	#956D9D
+# color1 =	#9f6767
+# color13 =	#C18FCB
+# color9 =	#9f6767
+# color6 =	#465457
+# color2 =	#6C7E55
+# color14 =	#899ca1
+# color10 =	#7DB37D
+# color7 =	#ccccc6
+# background =	#222222
+# color3 =	#d0d293
+# color11 =	#feed6c
+# foreground =	#777777
+# color15 =	#f8f8f2
+# color4 =	#7FA5BD
+# color0 =	#222222
+# # }}}
+
 [hints]
 #font = Monospace 12
 #foreground = #dcdccc

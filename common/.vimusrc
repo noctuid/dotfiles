@@ -18,7 +18,6 @@ noautotitle
 noconsume
 # }}}
 
-
 # bindings# {{{
 # quit
 map q :quit<CR>
@@ -104,8 +103,12 @@ map c :clear<CR>
 map t. :source ~/.vimusrc<CR>
 
 map u :update<CR>
-map ta :!~/bin/albumart_display.sh %<CR>
-map l :!~/bin/lyric_display.sh<CR>
+# open album art in ranger in split
+map ta :!~/bin/music/albumart_display.sh %<CR>
+# open lyrics in ncmpcpp split
+map l :!~/bin/music/lyric_display.sh<CR>
+# open visualization in ncmppcp split
+map tv :!~/bin/music/visualizer.sh<CR>
 
 map f :shuffle<cr>
 map . :toggle-repeat<CR>
