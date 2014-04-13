@@ -1,14 +1,19 @@
-These are my dotfiles. Some are pretty heavily commented. If you have interest in keyboard ergonomics and remapping, they may be of some interest. This is pretty incomplete at the moment.
+These are my dotfiles. Some are pretty heavily commented. If you have interest in keyboard ergonomics and remapping, they may be of some use. This is pretty incomplete at the moment. The documentation is mainly to allow me to keep track of things, so it may be somewhat incomprehensible if you are not well versed in the ways of the himalayan sand frog.
 
-My quest is simple. Don't move away from the home row and save the pinkies!
+## Pictures:
+- Conky
+- Bar-aint-recursive (panel and panel_bar)
+- Feh to set background
+- tmux powerline (will probably switch to powerline or tmuxline)
 
-Pictures:
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/clean.png "SCREENSHOT")
+
+Visualizations in ncmpcpp and album art of current song in ranger both opened from vimus (see bin/music)
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/dirty.png "SCREENSHOT")
 
 # Goals for Configuration & Workflow:
 - Increase efficiency and speed; cut wasted time and movement; get the computer to work with instead of against
-- Reduce/eliminate hand and wrist pain
+- Reduce/eliminate hand, pinky, and wrist pain
 
 ## Acheiving This (General Principles)
 - Arch Linux is the choice of distro (however I am working on duplicating my setup on Windows and OSX as well)
@@ -17,7 +22,7 @@ Pictures:
 - 99% mouseless setup (1% is activity specific (gaming) or when feeling lazy)
   - Use of keyboard friendly programs (vim (or emacs/evil), pentadactyl, ranger, decent wm, and terminal programs)
   - When there is not an existing keyboard friendly solution, hack one together with macros or faking cursor movement and clicks
-- Navigation should be seemless and out of the way
+- Navigation should be seemless, out of the way, and essentially instantaneous
   - No extra time should be spent getting to the text you want to edit (vim and plugins like sneak, seek, easymotion, or ace jump, etc.)
   - No extra time should be spent getting to the the tabs, workspace, window, etc you want to (proper bindings for window manager, tmux, ranger, vim, firefox, etc.)
   - Use of context based mappings
@@ -69,6 +74,7 @@ Now completed:
 # Cool Things I've Stolen
 ## Use Functions in Ranger
 I use this mainly for things like image rotation, git, and file extraction; ranger serves as a nice interface in many cases. I've only found this to work for functions and not aliases.
+The downside of this is that the shell command is much slower. Because of this, I have duplicated the original and renamed it "quickshell" for bindings (see commands.py).
 
 [source](https://bbs.archlinux.org/viewtopic.php?id=93025&p=34)
 I've modified it for zsh.
@@ -83,6 +89,7 @@ However, there are many examples of programs that do have extensive keyboard sho
 
 Solution: Rebind keys to fake the existing keyboard shortcuts
 [Video Demonstration With Libre Writer](http://youtu.be/iB1fCASlpY8)
+
 [Explanation](http://forum.colemak.com/viewtopic.php?id=1817)
 
 This solution is restricted to X currently. It makes use of xchainkeys for the modal bindings and xdotool and xsendkey to fake the necessary keyboard input. A potentially "software independent" solution would be using tmk firmware to make layers with macros and keys for "mode" (layer) switching. I have not been able to test this.
@@ -121,9 +128,7 @@ Like TO, when the window is closed (with a special d binding), the link will be 
 See bin/to.sh and bin/to_win.sh as well as .pentadactylrc.
 
 ## Block Layout in Vim and Example of Context Bindings
-Will add explanation..
-space bindings
-
+Will add explanation.. see quickvimrc
 
 ## Vim as a Clipboard Manager
 I've tried quite a few clipboard managers without liking any of them. What I really wanted was one with vim bindings, so I ended up deciding just to use vim.
@@ -148,20 +153,37 @@ Since vimus doesn't support things like tag editing (which I never used in ncmpc
 Using conky, for example, to constantly display album art on my desktop never really intersted me. I'd much rather just have the art displayed in the program (in this case, in the same "window" next to it).  I still need to add some features like maybe using mpd-on-change to execute the script every time the song changes.
 
 ## Eliminate Window Management Binding Layer
-This is one of the strangest (and arguably repulsive?) ideas I've had. For me, window management is pretty much split between tmux and bspwm. Bspwm takes care of all my gui windows (and occasionally a terminal window), and tmux takes care of all my terminal sessions, windows, splits, etc.
+See .vimrc and .lesskey for examples
 
-The idea of modal window management has interested me, but modal window management isn't really efficient when most of the time you only execute one wm command (just requires an extra key for escaping as opposed to using a prefix key). It also introduces the problem of knowing whether or not you're in the mode (you'd have to create an indicator if using sxhkd.. not as much a problem with xchainkeys). Obviously, escape can't be used to enter this "window management mode" (with sxhkd this would make escape lose functionality everywhere else). For optimally comfortable window management bindings, I would need 3-4 thumb keys. I don't have that many to spare.. and would rather use letter bindings.
+For me, window management is pretty much split between tmux and bspwm. Bspwm takes care of all my gui windows (and occasionally a terminal window), and tmux takes care of all my terminal sessions, windows, splits, etc.
 
-You'll quickly find yourself running out of room for good places for important keys, especially on a normal keyboard. I decided to test out setting up letter bindings for fun, but because it actually works fairly well, I've been using this regularly lately.. it makes room for other important keys instead of dedicated a whole bunch to window management.
+The idea of modal window management has interested me, but modal window management isn't really efficient when most of the time you only execute one wm command (it just requires an extra key for escaping as opposed to using a prefix key). It introduces other problems as well. Escape can't be used to enter this "window management mode" (with sxhkd this would make escape lose functionality everywhere else). Unlike in vim, "normal mode" would be infrequently entered and immediately exited. Although I am a fan of modality, I do not think modes within modes does anything other than overcomplicate things.
 
-Basically, I've finally stopped using chromium entirely, so now my three most used gui programs (gvim, firefox, and apvlv (infrequently)) all allow for bindings to terminal commands. I decided to try to eliminate the "wm layer" and build parallel wm bindings into the normal mode of each program. "r" becomes "redraw" (maybe not the best mnemonic) and "s" becomes select (two keys I don't use much anyway and can easily get a lot more out of with a prefix key for window management than a single operation key). This means window management is now "builtin" to each program with the illusion of universality. If it doesn't make sense, basically instead of having to use a harder to reach prefix or modifier key for window management like super, alt, grave, etc. you can now just use a letter. Again, trying to do this with sxhkd would result in that letter losing all functionality.
+Instead of trying to mirror this functionality, I've found it most efficient to eliminate window management as a separate entity and just build it in to all my programs just as I would set up bindings for split navigation.
 
-Does it work? Probably not if you use a lot of gui programs. For me, window management is something that should be out of the way and take essentially no time, and this worked a lot better than I thought it would (it replaces 99% use of a dedicated wm key for me). The difference between pressing "super+5" and rd may not seem to be a big deal, but it's been quite noticeable to me. As for speed, I've noticed no speed decrease from gvim and apvlv, though there is sometimes a slight delay with pentadactyl.
+For optimally comfortable and distinct window management bindings, I would need 3-4 thumb keys (2 for bspc; 2 for tmux; in each case 1 where selection is two home row key presses and another where desktop/window(tmux) navigation and movement is 2 home row key presses). I don't have that many to spare and would rather use letter bindings. 
 
-I initially thought this would be impossible to replicate in the terminal, but spent a day testing it, and I have now built tmux bindings into all of my programs (tmux, zsh/readline, less, weechat, ranger, and vimus). See the README in the remap folder for more info.
+I quickly find myself running out of room for good places for important keys, especially on a normal keyboard. I decided to test out setting up letter bindings for fun, but because it actually works fairly well, I've been using this regularly lately.. it makes room for other important keys instead of having as many specifically for window management.
+
+Building bindings into every program instead of using sxhkd and a regular tmux prefix key has the following advantages:
+- The keys used can be on the home row (better position)
+- The same keys can be used in each context (reducing the total number of needed keys) whereas if super is being used for bspc, it cannot also be used for tmux
+Disadvantages:
+- Initial setup time (temporary)
+- You lose two keys for program specific bindings (not a big problem for me)
+- Not as viable if programs that don't allow this sort of rebinding are being used (I'm not using any)
+- Some noticeable delay for some programs (for me just pentadactyl/firefox and I have fixed it somewhat)
+
+My three most used gui programs (gvim, firefox, and apvlv (infrequently)) all allow for bindings to terminal commands. I decided to try to eliminate the "wm layer" and build parallel wm bindings into the normal mode of each program. "r" becomes "redraw," "resize," etc. and "s" becomes select (two keys I don't use much anyway and can easily get a lot more out of with a prefix key for window management than a single operation key). This means window management is now "builtin" to each program with the illusion of universality. If this doesn't make sense, basically instead of having to use a harder to reach prefix or modifier key for window management like super, alt, grave, etc. you can now just use a letter. Again, trying to do this with sxhkd would result in that letter losing all functionality.
+
+Does it work? Probably not if you use a lot of gui programs. For me, window management is something that should be out of the way and take essentially no time, and this worked a lot better than I thought it would (it replaces 99% use of a dedicated wm key for me). The difference between pressing "super+5" and rd may not seem to be a big deal, but it's been quite noticeable to me. As for speed, I've noticed no speed decrease from gvim and apvlv or in any terminal program, though there is sometimes a slight delay with pentadactyl as ":silent" (which is necessary) seems to execute slower. This can be somewhat dealt with by making commands.
+
+I initially thought this would be impossible to replicate in the terminal but spent a day testing it, and I have now built tmux bindings into all of my programs (tmux, zsh/readline, less, weechat, ranger, and vimus). The only downside of this is that obviously readline bindings won't work if you have something running. On the other hand, this isn't that big of a deal because tmux allows use of a prefix key on a layer (i.e. mine is grave, which is mode_switch f for me).
+
+See the README in the remap folder for more info.
 
 ## Emacs With Vim Bindings
-I messed around with emacs for about a day to try to replicate as much of the functionality I have in vim with the same bindings (because I would never use emacs' defaults). I kind of like emacs. The configuration is infinitely more complicated, but I see some interesting possibilities for doing certain things that I will try when I have the time and motivation to configure emacs further. My ~/.emacs may be of use.
+I messed around with emacs for about a day to try to replicate as much of the functionality I have in vim with the same bindings (because I would never use emacs' defaults). Emacs is pretty awesome. The configuration is infinitely more complicated, but I see some interesting possibilities for doing certain things that I will try when I have the time and motivation to configure emacs further. My ~/.emacs may be of use.
 
 # Credit
-Will add
+will add

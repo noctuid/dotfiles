@@ -1,33 +1,26 @@
-#! /bin/sh
-#
-# Example panel for LemonBoy's bar
-# updated for syntax change with my modifications
-# https://github.com/baskerville/bspwm/blob/master/examples/panel/panel_bar
-
-COLOR_STATUS_FG='#FF6C7A80'
+#!/bin/sh
+# Colours {{{
+COLOR_STATUS_FG='#6C7A80'
 
 # stop transparency (FF alpha channel)
 COLOR_FOREGROUND='#FF34322E'
-COLOR_BACKGROUND='#FF232C31'
+COLOR_BACKGROUND='#DD232C31'
 
 # old default colours (https://github.com/LemonBoy/bar/blob/3f4ed1600ad1f1bc3a1e838f3c0282ff9b4b1966/config.def.h)
-C_0='#FF2D3C46'
-C_1='#FFAC4142'
-C_2='#FF90A959'
-C_3='#FFDE935F'
-C_4='#FF6A9FB5'
-C_5='#FFAA759F'
-C_7='#FF6C7A80'
-C_9='#FFCC6666'
-COLOR_EIGHT='#FF425059'
-COLOR_NINE='#FFFF6666'
+C_0='#2D3C46'
+C_1='#AC4142'
+C_2='#90A959'
+C_3='#DE935F'
+C_4='#6A9FB5'
+C_5='#AA759F'
+C_7='#6C7A80'
+C_9='#CC6666'
+COLOR_EIGHT='#425059'
+COLOR_NINE='#CC6666'
 light_pink='#FFD6FC'
-gray_pink='#FFD9CAD7'
-bright_pink='#FFFF78FF'
-
-# bspwm and what looks like arch symbol from uushi
-bspwm="%{B$COLOR_BACKGROUND}%{F$COLOR_EIGHT}%{F$COLOR_NINE} ⮗ bspwm%{F$COLOR_EIGHT}"
-
+gray_pink='#D9CAD7'
+#}}}
+# not using#{{{
 while read -r line ; do
 	case $line in
 		S*)
@@ -49,11 +42,11 @@ while read -r line ; do
 				case $item in
 					O*)
 						# focused occupied desktop
-						wm_infos="$wm_infos %{U$C_3}%{F$bright_pink}%{+u}${name}%{-u}"
+						wm_infos="$wm_infos %{U$C_3}%{F$gray_pink}%{+u}${name}%{-u}"
 						;;
 					F*)
 						# focused free desktop
-						wm_infos="$wm_infos %{U$C_4}%{F$gray_pink}%{+u}${name}%{-u}"
+						wm_infos="$wm_infos %{U$C_4}%{+u}${name}%{-u}"
 						;;
 					U*)
 						# focused urgent desktop
@@ -81,5 +74,6 @@ while read -r line ; do
 			done
 			;;
 	esac
-	printf "%s\n" "%{l} $bspwm $wm_infos %{c} $title %{r} $sys_infos  "
+	printf "%s\n" "$sys_infos"
 done
+#}}}

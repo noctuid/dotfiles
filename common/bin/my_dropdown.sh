@@ -10,7 +10,7 @@
 #+
 # Changelog
 # [3.24.13] modified to move to 0 0 before resizing because now bspwm opens floating windows centered
-
+# [4.6.13] adapted to new bar
 #+
 # Instructions for Adaptation (if you don't understand the script):#{{{
 # .first consider using yeahconsole or an existing wmctrl, scratchpad, or WM dependent script for dropdown (I know awesome has this.. though I could never get any working); urxvt has the -pe kuake option
@@ -49,7 +49,7 @@ else
 	# if termite is not open, open it
 	bspc rule -a termite -o floating=on
 	# open termite, resize it/move it how you want (best way; fast), and attach to the "dropdown" tmux session or create it if it doesn't exist; without the sleep, it seems to not work about 7% of the time
-	termite -e "/bin/zsh -c 'sleep 0.01 && xdo move -x 0 -y 0 && xdo resize -w +800 && tmux attach-session -dt dropdown || tmuxinator dropdown'"
+	termite -e "/bin/zsh -c 'sleep 0.01 && xdo move -x 0 -y 14 && xdo resize -w +800 && tmux attach-session -dt dropdown || tmuxinator dropdown'"
 
 	# I have only tested xdo resize with bspwm; if it doesn't work try wmctrl as detailed here: https://bbs.archlinux.org/viewtopic.php?pid=1351807#p1351807
 

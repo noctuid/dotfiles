@@ -1,0 +1,80 @@
+#!/bin/sh
+# my top bar
+# add mail count etc.
+
+if [ $(pgrep -cx panel2) -gt 1 ] ; then
+	printf "%s\n" "The panel numbered 2 is already running." >&2
+	exit 1
+fi
+
+trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+
+# Colours#{{{
+# add alpha channel (opacity)
+COLOR_FOREGROUND='#FF34322E'
+COLOR_BACKGROUND='#EE232C31'
+# old default colours
+C_0='#DD2D3C46'
+C_1='#FFAC4142'
+C_2='#DD90A959'
+C_3='#DDDE935F'
+C_4='#DD6A9FB5'
+C_5='#DDAA759F'
+C_7='#DD6C7A80'
+C_8='#DD425059'
+C_9='#FFCC6666'
+
+C_Z='#CC2A7A9C'
+# purple='#FF4a024e'
+# purple='#FF2C012E'
+purple='#AA96009E'
+#}}}
+
+[ -e "$PANEL2_FIFO" ] && rm "$PANEL2_FIFO"
+mkfifo "$PANEL2_FIFO"
+
+bspc config top_padding 14
+
+bspc control --subscribe > "$PANEL2_FIFO" &
+# xtitle -sf 'T%s' > "$PANEL2_FIFO" &
+
+# To Show#{{{
+show_song() {
+	mpc current -f "%artist% - %title%"
+}
+
+# Ram Usage#{{{
+memused() {
+	free | grep buffers/cache | awk '{print $3}'
+}
+
+memtotal() { 
+	free | grep Mem | awk '{print $2}'
+}
+
+mempercent() { 
+	echo $(($(memused)*100/$(memtotal)))
+}
+#}}}
+
+cpu_temp() {
+	acpi -t | awk '{print $4}'
+}
+
+mode() {
+	echo "Not Normal Mode"
+}
+
+# add mail count
+
+ag_s="#! ag_s@baphamet: "
+#}}}
+
+while true; do
+	echo "S" "%{l}%{F$purple} $ag_s ⮁%{F$C_5} ⮕ $(show_song) ⮁%{F$C_4} $(mempercent)%% RAM ⮁%{F$C_7} $(cpu_temp)°C⮁ %{c} %{F$C_3}    $(mode)     %{r}%{F$C_1} " > "$PANEL2_FIFO"
+        sleep 2s
+done &
+
+cat "$PANEL2_FIFO" | panel_bar2 | bar-aint-recursive -f "*-stlarch-medium-r-*-*-10-*-*-*-*-*-*-*,-benis-uushi-medium-r-normal--11-90-75-75-p-58-iso10646-1" x$PANEL_HEIGHT -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" &
+
+wait

@@ -19,7 +19,8 @@ setxkbmap us -variant colemak
 xmodmap ~/.Xmod_wide
 xmodmap ~/.Xmodmap
 # set background image
-feh --bg-scale "/home/angelic_sedition/wallpaper/tumblr_static_makise.kurisu.full.798633.jpg" 
+# feh --bg-scale "/home/angelic_sedition/wallpaper/tumblr_static_makise.kurisu.full.798633.jpg" 
+feh --bg-scale "/home/angelic_sedition/wallpaper/dtb wallpaper/10204_darker_than_black_yin.jpg"
 
 # fonts for bar and dzen2
 xset +fp /usr/share/fonts/local
@@ -54,7 +55,7 @@ sxhkd &
 # start window manager
 # exec bspwm
 # for reloading
-exec ~/bin/wm
+exec wm
 #case $1 in
 #	gnome) exec gnome-session;;
 #	kde) exec startkde;;

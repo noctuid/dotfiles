@@ -1,0 +1,13 @@
+The panels are bar aint recursive (see .config/bspwm/panel).
+The conky theme is charley166's lsd theme modified to be made black.
+Fonts are Inconsolata (and maybe -g or -dz; I don't remember) for the terminal, and uushi and stlarch for the panels.
+
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/clean.png "SCREENSHOT")
+
+The tmux statusline was generated with tmuxline and then heavily modified. I've stopped using tmux-powerline and just taken parts of the segments I like (notably the git staged and git modified parts on the left).
+
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/tmux_statusline.png "SCREENSHOT")
+
+I guess you could say I used tmuxline, but I ended up only keeping a few of the colours to match my airline theme. This is what it looked like initially:
+
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/tmuxline.png "SCREENSHOT")

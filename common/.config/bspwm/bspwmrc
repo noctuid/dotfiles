@@ -1,13 +1,15 @@
-#!/bin/sh
+#! /bin/sh
 #https://wiki.archlinux.org/index.php/Bspwm
 # for reloading bspwm without restarting
+
+# Destktops/ Workspaces
+bspc monitor -d I II III IV V VI VII VIII IX X
+
+# fix this
 if [ -e "$BSPWM_TREE" ] ; then
 	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
 	rm "$BSPWM_TREE" "$BSPWM_HISTORY" "$BSPWM_STACK"
 fi
-
-# Destktops/ Workspaces
-bspc monitor -d I II III IV V VI VII VIII IX X
 
 #i.e multi monitor: 
 # bspc monitor DVI-I-1 -d I II III IV
@@ -44,10 +46,10 @@ bspc config auto_cancel true
 #}}}
 # Window rules:#{{{
 # open firefox when go to second desktop (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
-bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("firefox")); }'
+bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("firefox")); }' &
 
 # Can check class name of program with: xprop | grep WM_CLASS
-bspc rule -a guake floating=on
+bspc rule -a guake floating=off
 # bspc rule -a Firefox follow=false
 # bspc rule -a Gvim follow=true
 # bspc rule -a apvlv dekstop=^3
@@ -55,3 +57,4 @@ bspc rule -a guake floating=on
 #}}}
 
 panel &
+panel2 &

@@ -26,8 +26,9 @@ ignoreUninstalledPrograms:False
 font:		*-medium-r-*-140-*-m-*
 dpmsEnabled:	True
 dpmsQuickOff:	True
-dpmsStandby:	0:10:00
-dpmsSuspend:	0:25:00
+# standby later
+dpmsStandby:	0:25:00
+dpmsSuspend:	0:30:00
 dpmsOff:	16:39:00
 grabDesktopImages:  True
 grabVideoFrames:    False

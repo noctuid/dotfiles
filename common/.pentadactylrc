@@ -15,88 +15,179 @@
 " downloads here; then with ranger..
 cd ~/Move
 
-" Experimentation (straight from vimrc; replace nnoremap)
+" faster wm experementation"{{{
 " all window management with "r" and "s"
-	" wm experementation"{{{
+" straight from vimrc; replace nnoremap for bindings; for commands:
+" s/nmap\ \-builtin\ <silent>/command/g
+" s/<cr>//g
+" ree not re
+" see not se
+" stt not st
+" replace r. and r,
 
-	" "r" is redraw"{{{
-	" worskpace/Destkop switch"{{{
-	nmap -builtin <silent> ra :silent !bspc desktop -f ^1<cr>
-	nmap -builtin <silent> rr :silent !bspc desktop -f ^2<cr>
-	nmap -builtin <silent> rs :silent !bspc desktop -f ^3<cr>
-	nmap -builtin <silent> rt :silent !bspc desktop -f ^4<cr>
-	nmap -builtin <silent> rd :silent !bspc desktop -f ^5<cr>
-	nmap -builtin <silent> rh :silent !bspc desktop -f ^6<cr>
-	nmap -builtin <silent> rn :silent !bspc desktop -f ^7<cr>
-	nmap -builtin <silent> re :silent !bspc desktop -f ^8<cr>
-	nmap -builtin <silent> ri :silent !bspc desktop -f ^9<cr>
-	nmap -builtin <silent> ro :silent !bspc desktop -f ^10<cr>
-	"}}}
-	" move to destkop"{{{
-	nmap -builtin <silent> Ra :silent !bspc window -d ^1<cr>
-	nmap -builtin <silent> Rr :silent !bspc window -d ^2<cr>
-	nmap -builtin <silent> Rs :silent !bspc window -d ^3<cr>
-	nmap -builtin <silent> Rt :silent !bspc window -d ^4<cr>
-	nmap -builtin <silent> Rd :silent !bspc window -d ^5<cr>
-	nmap -builtin <silent> Rh :silent !bspc window -d ^6<cr>
-	nmap -builtin <silent> Rn :silent !bspc window -d ^7<cr>
-	nmap -builtin <silent> Re :silent !bspc window -d ^8<cr>
-	nmap -builtin <silent> Ri :silent !bspc window -d ^9<cr>
-	nmap -builtin <silent> Ro :silent !bspc window -d ^10<cr>
-	"}}}
+" :silent !bspc is slow; making a command speeds up significantly
+" commands "{{{
 
-	" moving windows within desktop"{{{
-	" move to biggest
-	nmap -builtin <silent> rcm :silent !bspc window -s biggest<cr>
-	" directions
-	nmap -builtin <silent> rch :silent !bspc window -s left<cr>
-	nmap -builtin <silent> rcn :silent !bspc window -s down<cr>
-	nmap -builtin <silent> rce :silent !bspc window -s up<cr>
-	nmap -builtin <silent> rci :silent !bspc window -s right<cr>
-	" circulate 
-	nmap -builtin <silent> r. :silent !bspc desktop -C forward<cr>
-	nmap -builtin <silent> r, :silent !bspc desktop -C backward<cr>
-	"}}}
+" "r" is redraw"{{{
+" worskpace/Destkop switch"{{{
+command ra :silent !bspc desktop -f ^1
+command rr :silent !bspc desktop -f ^2
+command rs :silent !bspc desktop -f ^3
+command rt :silent !bspc desktop -f ^4
+command rd :silent !bspc desktop -f ^5
+command rh :silent !bspc desktop -f ^6
+command rn :silent !bspc desktop -f ^7
+command ree :silent !bspc desktop -f ^8
+command ri :silent !bspc desktop -f ^9
+command ro :silent !bspc desktop -f ^10
+"}}}
+" move to destkop"{{{
+command Ra :silent !bspc window -d ^1
+command Rr :silent !bspc window -d ^2
+command Rs :silent !bspc window -d ^3
+command Rt :silent !bspc window -d ^4
+command Rd :silent !bspc window -d ^5
+command Rh :silent !bspc window -d ^6
+command Rn :silent !bspc window -d ^7
+command Re :silent !bspc window -d ^8
+command Ri :silent !bspc window -d ^9
+command Ro :silent !bspc window -d ^10
+"}}}
 
-	"resize"{{{
-	nmap -builtin <silent> rmh :silent !~/bin/resize.sh left<cr>
-	nmap -builtin <silent> rmn :silent !~/bin/resize.sh down<cr>
-	nmap -builtin <silent> rme :silent !~/bin/resize.sh up<cr>
-	nmap -builtin <silent> rmi :silent !~/bin/resize.sh right<cr>
-	"}}}
-	" open urxvt
-	nmap -builtin <silent> ru :silent !urxvt &<cr>
+" moving windows within desktop"{{{
+" move to biggest
+command rcm :silent !bspc window -s biggest
+" directions
+command rch :silent !bspc window -s left
+command rcn :silent !bspc window -s down
+command rce :silent !bspc window -s up
+command rci :silent !bspc window -s right
+" circulate 
+command rperiod :silent !bspc desktop -C forward
+command rcomma :silent !bspc desktop -C backward
+"}}}
 
-	"}}}
+"resize"{{{
+command rmh :silent !~/bin/resize.sh left
+command rmn :silent !~/bin/resize.sh down
+command rme :silent !~/bin/resize.sh up
+command rmi :silent !~/bin/resize.sh right
+"}}}
+" open urxvt
+command ru :silent !urxvt &
 
-	" s becomes select/Show/settings"{{{
-	"select
-	nmap -builtin <silent> sh :silent !bspc window -f left<cr>
-	nmap -builtin <silent> sn :silent !bspc window -f down<cr>
-	nmap -builtin <silent> se :silent !bspc window -f up<cr>
-	nmap -builtin <silent> si :silent !bspc window -f right<cr>
-	nmap -builtin <silent> sl :silent !bspc window -f last<cr>
+"}}}
 
-	" monocle toggle
-	nmap -builtin <silent> st :silent !bspc desktop -l next<cr>
-	nmap -builtin <silent> ss :silent !bspc window -t sticky<cr>
-	nmap -builtin <silent> sf :silent !bspc window -t fullscreen<cr>
+" s becomes select/Show/settings"{{{
+"select
+command sh :silent !bspc window -f left
+command sn :silent !bspc window -f down
+command see :silent !bspc window -f up
+command si :silent !bspc window -f right
+command sl :silent !bspc window -f last
 
-	" gap up and down
-	nmap -builtin <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
-	nmap -builtin <silent> sd :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
+" monocle toggle
+command stt :silent !bspc desktop -l next
+command ss :silent !bspc window -t sticky
+command sf :silent !bspc window -t fullscreen
 
-	" preselect"{{{
-	nmap -builtin <silent> sph :silent !bspc window -p left<cr>
-	nmap -builtin <silent> spn :silent !bspc window -p down<cr>
-	nmap -builtin <silent> spe :silent !bspc window -p up<cr>
-	nmap -builtin <silent> spi :silent !bspc window -p right<cr>
-	nmap -builtin <silent> spx :silent !bspc window -p cancel<cr>
-	nmap -builtin <silent> spd :silent !bspc desktop -c<cr>
-	"}}}
-	"}}}
+" gap up and down
+command su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))
+command sd :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))
 
-	"}}}
+" preselect"{{{
+command sph :silent !bspc window -p left
+command spn :silent !bspc window -p down
+command spe :silent !bspc window -p up
+command spi :silent !bspc window -p right
+command spx :silent !bspc window -p cancel
+command spd :silent !bspc desktop -c
+"}}}
+"}}}
+
+"}}}
+
+" wm bindings"{{{
+
+" "r" is redraw"{{{
+" worskpace/Destkop switch"{{{
+nmap -builtin <silent> ra :ra<cr>
+nmap -builtin <silent> rr :rr<cr>
+nmap -builtin <silent> rs :rs<cr>
+nmap -builtin <silent> rt :rt<cr>
+nmap -builtin <silent> rd :rd<cr>
+nmap -builtin <silent> rh :rh<cr>
+nmap -builtin <silent> rn :rn<cr>
+nmap -builtin <silent> re :ree<cr>
+nmap -builtin <silent> ri :ri<cr>
+nmap -builtin <silent> ro :ro<cr>
+"}}}
+" move to destkop"{{{
+nmap -builtin <silent> Ra :Ra<cr>
+nmap -builtin <silent> Rr :Rr<cr>
+nmap -builtin <silent> Rs :Rs<cr>
+nmap -builtin <silent> Rt :Rt<cr>
+nmap -builtin <silent> Rd :Rd<cr>
+nmap -builtin <silent> Rh :Rh<cr>
+nmap -builtin <silent> Rn :Rn<cr>
+nmap -builtin <silent> Re :Re<cr>
+nmap -builtin <silent> Ri :Ri<cr>
+nmap -builtin <silent> Ro :Ro<cr>
+"}}}
+
+" moving windows within desktop"{{{
+" move to biggest
+nmap -builtin <silent> rcm :rcm<cr>
+" directions
+nmap -builtin <silent> rch :rch<cr>
+nmap -builtin <silent> rcn :rcn<cr>
+nmap -builtin <silent> rce :rce<cr>
+nmap -builtin <silent> rci :rci<cr>
+" circulate 
+nmap -builtin <silent> r. :rperiod<cr>
+nmap -builtin <silent> r, :rcomma<cr>
+"}}}
+
+"resize"{{{
+nmap -builtin <silent> rmh :rmh<cr>
+nmap -builtin <silent> rmn :rmn<cr>
+nmap -builtin <silent> rme :rme<cr>
+nmap -builtin <silent> rmi :rmi<cr>
+"}}}
+" open urxvt
+nmap -builtin <silent> ru :ru<cr>
+
+"}}}
+
+" s becomes select/Show/settings"{{{
+"select
+nmap -builtin <silent> sh :sh<cr>
+nmap -builtin <silent> sn :sn<cr>
+nmap -builtin <silent> se :see<cr>
+nmap -builtin <silent> si :si<cr>
+nmap -builtin <silent> sl :sl<cr>
+
+" monocle toggle
+nmap -builtin <silent> st :stt<cr>
+nmap -builtin <silent> ss :ss<cr>
+nmap -builtin <silent> sf :sf<cr>
+
+" gap up and down
+nmap -builtin <silent> su :su<cr>
+nmap -builtin <silent> sd :sd<cr>
+
+" preselect"{{{
+nmap -builtin <silent> sph :sph<cr>
+nmap -builtin <silent> spn :spn<cr>
+nmap -builtin <silent> spe :spe<cr>
+nmap -builtin <silent> spi :spi<cr>
+nmap -builtin <silent> spx :spx<cr>
+nmap -builtin <silent> spd :spd<cr>
+"}}}
+"}}}
+
+"}}}
+"}}}
 
 " some ideas and settings from below: {{{
 " https://github.com/mashiro/dot-files/blob/master/.vimperatorrc
@@ -306,6 +397,9 @@ EOM
 " Colemak Homerow (up and down)
 nmap -builtin n 10<Down>
 nmap -builtin e 10<Up>
+
+nmap -builtin tk <pagedown>
+nmap -builtin to <pageup>
 " left and right on caps layer if need
 nmap -builtin <left> 5<left> 
 nmap -builtin <right> 5<right>
@@ -333,6 +427,7 @@ nmap -builtin L <c-o>
 
 " h for forward in history; H for back
 nmap -builtin h L
+nmap -builtin H l
 " }}}
 " Improve default mappings {{{
 " Swap ; and :
@@ -362,10 +457,13 @@ nmap -builtin o t
 nmap -builtin c O
 nmap -builtin C T
 
+" space for tab switching"{{{
+" context; would be nice to be able to do this without resourcing (I.e. build into each binding)
+nmap <space>w 1gt:so ~/.pentadactylrc<cr>
+nmap <space>f 11gt:so ~/.pentadactylrc<cr>
+nmap <space>p 21gt:so ~/.pentadactylrc<cr>
+nmap <space>l 31gt:so ~/.pentadactylrc<cr>
 
-" space and then comma as "secondary leaders"
-" space for tab switching
-" consider adding ga gr, etc. for 11-20
 nmap <space>a 1gt
 nmap <space>r 2gt
 nmap <space>s 3gt
@@ -377,29 +475,69 @@ nmap <space>e 8gt
 nmap <space>i 9gt
 nmap <space>o 10gt
 
-" temporary solution until context aware:"{{{
-nmap <space>wa 11gt
-nmap <space>wr 12gt
-nmap <space>ws 13gt
-nmap <space>wt 14gt
-nmap <space>wd 15gt
-nmap <space>wh 16gt
-nmap <space>wn 17gt
-nmap <space>we 18gt
-nmap <space>wi 19gt
-nmap <space>wo 20gt
+if tabs.getTab().dactylOrdinal > "10"
+nmap <space>a 11gt
+nmap <space>r 12gt
+nmap <space>s 13gt
+nmap <space>t 14gt
+nmap <space>d 15gt
+nmap <space>h 16gt
+nmap <space>n 17gt
+nmap <space>e 18gt
+nmap <space>i 19gt
+nmap <space>o 20gt
+endif
 
-nmap <space>fa 21gt
-nmap <space>fr 22gt
-nmap <space>fs 23gt
-nmap <space>ft 24gt
-nmap <space>fd 25gt
-nmap <space>fh 26gt
-nmap <space>fn 27gt
-nmap <space>fe 28gt
-nmap <space>fi 29gt
-nmap <space>fo 30gt
+if tabs.getTab().dactylOrdinal > "20"
+nmap <space>a 21gt
+nmap <space>r 22gt
+nmap <space>s 23gt
+nmap <space>t 24gt
+nmap <space>d 25gt
+nmap <space>h 26gt
+nmap <space>n 27gt
+nmap <space>e 28gt
+nmap <space>i 29gt
+nmap <space>o 30gt
+
+if tabs.getTab().dactylOrdinal > "30"
+nmap <space>a 31gt
+nmap <space>r 32gt
+nmap <space>s 33gt
+nmap <space>t 34gt
+nmap <space>d 35gt
+nmap <space>h 36gt
+nmap <space>n 37gt
+nmap <space>e 38gt
+nmap <space>i 39gt
+nmap <space>o 40gt
+endif
 "}}}
+
+" alternative:"{{{
+" nmap <space>wa 11gt
+" nmap <space>wr 12gt
+" nmap <space>ws 13gt
+" nmap <space>wt 14gt
+" nmap <space>wd 15gt
+" nmap <space>wh 16gt
+" nmap <space>wn 17gt
+" nmap <space>we 18gt
+" nmap <space>wi 19gt
+" nmap <space>wo 20gt
+"
+" nmap <space>fa 21gt
+" nmap <space>fr 22gt
+" nmap <space>fs 23gt
+" nmap <space>ft 24gt
+" nmap <space>fd 25gt
+" nmap <space>fh 26gt
+" nmap <space>fn 27gt
+" nmap <space>fe 28gt
+" nmap <space>fi 29gt
+" nmap <space>fo 30gt
+"}}}
+
 " swap d/D; move left when closing tab (see below for d mapping)
 " nmap -builtin D d
 
@@ -408,7 +546,8 @@ nmap <space>fo 30gt
 " swap p/P (so now p will open url from clipboard in new tab/buffer)
 nmap -builtin p P
 nmap -builtin P p
-imap .cl <c-v><c-v>
+imap .yp <c-v><c-v>
+cmap .yp <c-v><c-v>
 
 " yank to sytem clipboard
 vmap -builtin y "+y
@@ -447,6 +586,7 @@ nmap -builtin gE o gmail.com<cr>
 nmap -builtin ga :dialog addons<CR>
 " enter insert and paste
 nmap -builtin gp gi<c-v><c-v>
+nmap -builtin gc :tabopen g <c-v><c-v>
 
 " viewsource in new tab instead of in current
 " nmap -builtin gf :tab viewsource<CR>
@@ -554,7 +694,6 @@ map -ex <Leader>tt    :set showtabline!=always,never
 " }}}
 " }}}
 " }}}
-
 
 " " shorthand"{{{
 " " This is straight from vimrc
@@ -888,4 +1027,86 @@ map -ex <Leader>tt    :set showtabline!=always,never
 " " your = ur
 " " you're = yr
 " " 
+" "}}}
+
+" graveyard
+" " wm experementation"{{{
+"
+" " "r" is redraw"{{{
+" " worskpace/Destkop switch"{{{
+" nmap -builtin <silent> ra :silent !bspc desktop -f ^1<cr>
+" nmap -builtin <silent> rr :silent !bspc desktop -f ^2<cr>
+" nmap -builtin <silent> rs :silent !bspc desktop -f ^3<cr>
+" nmap -builtin <silent> rt :silent !bspc desktop -f ^4<cr>
+" nmap -builtin <silent> rd :silent !bspc desktop -f ^5<cr>
+" nmap -builtin <silent> rh :silent !bspc desktop -f ^6<cr>
+" nmap -builtin <silent> rn :silent !bspc desktop -f ^7<cr>
+" nmap -builtin <silent> re :silent !bspc desktop -f ^8<cr>
+" nmap -builtin <silent> ri :silent !bspc desktop -f ^9<cr>
+" nmap -builtin <silent> ro :silent !bspc desktop -f ^10<cr>
+" "}}}
+" " move to destkop"{{{
+" nmap -builtin <silent> Ra :silent !bspc window -d ^1<cr>
+" nmap -builtin <silent> Rr :silent !bspc window -d ^2<cr>
+" nmap -builtin <silent> Rs :silent !bspc window -d ^3<cr>
+" nmap -builtin <silent> Rt :silent !bspc window -d ^4<cr>
+" nmap -builtin <silent> Rd :silent !bspc window -d ^5<cr>
+" nmap -builtin <silent> Rh :silent !bspc window -d ^6<cr>
+" nmap -builtin <silent> Rn :silent !bspc window -d ^7<cr>
+" nmap -builtin <silent> Re :silent !bspc window -d ^8<cr>
+" nmap -builtin <silent> Ri :silent !bspc window -d ^9<cr>
+" nmap -builtin <silent> Ro :silent !bspc window -d ^10<cr>
+" "}}}
+"
+" " moving windows within desktop"{{{
+" " move to biggest
+" nmap -builtin <silent> rcm :silent !bspc window -s biggest<cr>
+" " directions
+" nmap -builtin <silent> rch :silent !bspc window -s left<cr>
+" nmap -builtin <silent> rcn :silent !bspc window -s down<cr>
+" nmap -builtin <silent> rce :silent !bspc window -s up<cr>
+" nmap -builtin <silent> rci :silent !bspc window -s right<cr>
+" " circulate 
+" nmap -builtin <silent> r. :silent !bspc desktop -C forward<cr>
+" nmap -builtin <silent> r, :silent !bspc desktop -C backward<cr>
+" "}}}
+"
+" "resize"{{{
+" nmap -builtin <silent> rmh :silent !~/bin/resize.sh left<cr>
+" nmap -builtin <silent> rmn :silent !~/bin/resize.sh down<cr>
+" nmap -builtin <silent> rme :silent !~/bin/resize.sh up<cr>
+" nmap -builtin <silent> rmi :silent !~/bin/resize.sh right<cr>
+" "}}}
+" " open urxvt
+" nmap -builtin <silent> ru :silent !urxvt &<cr>
+"
+" "}}}
+"
+" " s becomes select/Show/settings"{{{
+" "select
+" nmap -builtin <silent> sh :silent !bspc window -f left<cr>
+" nmap -builtin <silent> sn :silent !bspc window -f down<cr>
+" nmap -builtin <silent> se :silent !bspc window -f up<cr>
+" nmap -builtin <silent> si :silent !bspc window -f right<cr>
+" nmap -builtin <silent> sl :silent !bspc window -f last<cr>
+"
+" " monocle toggle
+" nmap -builtin <silent> st :!bspc desktop -l next<cr>
+" nmap -builtin <silent> ss :silent !bspc window -t sticky<cr>
+" nmap -builtin <silent> sf :silent !bspc window -t fullscreen<cr>
+"
+" " gap up and down
+" nmap -builtin <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
+" nmap -builtin <silent> sd :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
+"
+" " preselect"{{{
+" nmap -builtin <silent> sph :silent !bspc window -p left<cr>
+" nmap -builtin <silent> spn :silent !bspc window -p down<cr>
+" nmap -builtin <silent> spe :silent !bspc window -p up<cr>
+" nmap -builtin <silent> spi :silent !bspc window -p right<cr>
+" nmap -builtin <silent> spx :silent !bspc window -p cancel<cr>
+" nmap -builtin <silent> spd :silent !bspc desktop -c<cr>
+" "}}}
+" "}}}
+"
 " "}}}

@@ -1,0 +1,65 @@
+" for quick sourcing of exactly what is needed
+" quicker tab navigation
+nnoremap <space>w 1gt:source ~/.quickvimrc<cr>
+nnoremap <space>f 11gt:source ~/.quickvimrc<cr>
+if tabpagenr() < 11
+	nnoremap <space>a 1gt
+	nnoremap <space>r 2gt
+	nnoremap <space>s 3gt
+	nnoremap <space>t 4gt
+	nnoremap <space>d 5gt
+	nnoremap <space>h 6gt
+	nnoremap <space>n 7gt
+	nnoremap <space>e 8gt
+	nnoremap <space>i 9gt
+	nnoremap <space>o 10gt
+elseif tabpagenr() >= 11
+	nnoremap <space>a 11gt
+	nnoremap <space>r 12gt
+	nnoremap <space>s 13gt
+	nnoremap <space>t 14gt
+	nnoremap <space>d 15gt
+	nnoremap <space>h 16gt
+	nnoremap <space>n 17gt
+	nnoremap <space>e 18gt
+	nnoremap <space>i 19gt
+	nnoremap <space>o 20gt
+endif
+
+" Unite stuff
+cnoreabbr <expr> tabname t:taboo_tab_name
+
+cabbr writ cd ~/ag-sys/Else/everything/\#Another/
+cabbr dot cd ~/dotfiles
+cabbr ubmark cd ~/.unite/bookmark/
+cabbr ag cd ~/ag-sys/
+cabbr else cd ~/ag-sys/Else/everything/
+cabbr cdranger cd ~/.config/ranger
+cabbr cdbin cd ~/bin
+
+if exists("t:taboo_tab_name")
+	nnoremap <buffer> <space>u :Unite -quick-match bookmark:tabname<C-]><cr>
+	nnoremap <buffer> <space>U :UniteBookmarkAdd<cr>tabname<c-]><cr>buffername<c-]>
+	if t:taboo_tab_name == 'conf-ranger'
+		nnoremap <buffer> <space>u :cdranger<C-]><cr>:Unite -quick-match file<cr>
+	elseif t:taboo_tab_name == 'bin'
+		cd ~/bin
+		nnoremap <buffer> <space>u :Unite -quick-match file<cr>
+	elseif t:taboo_tab_name == "main"
+		nnoremap <buffer> <space>c :TabooRename mainl<cr>:so ~/.quickvimrc<cr>
+	elseif t:taboo_tab_name == "mainl"
+		nnoremap <buffer> <space>c :TabooRename main<cr>:so ~/.quickvimrc<cr>
+	elseif t:taboo_tab_name == "config"
+		nnoremap <buffer> <space>c :TabooRename conf-music<cr>:so ~/.quickvimrc<cr>
+	elseif t:taboo_tab_name == "conf-music"
+		nnoremap <buffer> <space>c :TabooRename conf-mail<cr>:so ~/.quickvimrc<cr>
+	elseif t:taboo_tab_name == "conf-mail"
+		nnoremap <buffer> <space>c :TabooRename conf-other<cr>:so ~/.quickvimrc<cr>
+	elseif t:taboo_tab_name == "conf-other"
+		nnoremap <buffer> <space>c :TabooRename config<cr>:so ~/.quickvimrc<cr>
+	elseif t:taboo_tab_name == "conf-ranger"
+		nnoremap <buffer> <space>c :TabooRename remap<cr>:so ~/.quickvimrc<cr>
+	elseif t:taboo_tab_name == "dot"
+		nnoremap <buffer> <space>u :cd ~/dotfiles<cr>:Unite file<cr>
+	endif
+endif

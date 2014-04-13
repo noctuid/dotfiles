@@ -6,6 +6,7 @@
 # F remove extension
 screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
 screenshot-format=png
+screenshot-png-compression=5
 
 # }}}
 

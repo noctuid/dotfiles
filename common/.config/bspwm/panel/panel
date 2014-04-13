@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # my modification of the below two bars
 # https://github.com/baskerville/bspwm/blob/master/examples/panel/panel
 # https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
@@ -17,30 +17,31 @@ mkfifo "$PANEL_FIFO"
 
 # change to bottom padding
 # bspc config top_padding $PANEL_HEIGHT
-bspc config bottom_padding $PANEL_HEIGHT
+bspc config bottom_padding 16
 
 bspc control --subscribe > "$PANEL_FIFO" &
 xtitle -sf 'T%s' > "$PANEL_FIFO" &
 
 panel_clock()
 {
-        echo  "⭧" $(clock -f '%a %d %I: %M')
+        echo  "⭧" $(clock -f '%a %d %I: %M%P')
 }
 
 # add alpha channel (opacity)
 COLOR_FOREGROUND='#FF34322E'
-COLOR_BACKGROUND='#FF1232C31'
+COLOR_BACKGROUND='#FF232C31'
 # old default colours
-C_0='#2D3C46'
-C_1='#AC4142'
-C_2='#90A959'
-C_3='#DE935F'
-C_4='#6A9FB5'
-C_5='#AA759F'
-C_7='#6C7A80'
-C_9='#CC6666'
+C_0='#FF2D3C46'
+C_1='#FFAC4142'
+C_2='#FF90A959'
+C_3='#FFDE935F'
+C_4='#FF6A9FB5'
+C_5='#FFAA759F'
+C_7='#FF6C7A80'
+C_9='#FFCC6666'
 
-C_Z='#2A7A9C'
+C_Z='#FF2A7A9C'
+
 panel_battery()
 {
         batStats=$(acpi --battery | cut -d' ' -f3 | sed 's/,//')

@@ -1,0 +1,68 @@
+# use primarily to fix and import albums
+directory: ~/Music
+library: ~/.config/beets/musiclibrary.blb
+
+import:
+    # don't move/copy
+    copy: no
+    # write metadata to songs; don't care so much about beets database at this point as about correct metadata
+    write: yes
+    move: yes
+    resume: ask
+    incremental: no
+    quiet_fallback: skip
+    none_rec_action: ask
+    timid: no
+    log: ~/.config/beets/beetslog.txt
+
+# mpd stats tracks statistics: 
+# install python2-pip then sudo pip2 install python-mpd
+# mpdupdate: auto update mpd index when change beets library
+# add genre based on last.fm
+# for lastgenre, pip2 install pylast
+
+# chroma to actually tag based on audio
+# fromfilename to consider name in tagging
+
+plugins: mpdstats fetchart lyrics lastgenre mpdupdate chroma fromfilename discogs
+
+# for use by mpdstats and mpdupdate
+mpd:
+    host: localhost
+    port: 6600
+
+lastgenre:
+    fallback: ''
+    source: artist
+    count: 4
+
+fetchart:
+    auto: no
+
+lyrics:
+    auto: no
+
+# needed if mpd library in different location
+# mpdstats:
+#    music_directory:
+
+match:
+    strong_rec_thresh: 0.04
+
+art_filename: $album_cover
+
+threaded: yes
+color: yes
+
+list_format_item: $artist - $album - $title
+list_format_album: $albumartist - $album
+
+original_date: no
+per_disc_numbering: no
+
+paths:
+    default: $albumartist/$album%aunique{}/$track $title
+    singleton: Non-Album/$artist/$title
+    comp: Compilations/$album%aunique{}/$track $title
+        
+# vim:set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:

@@ -1,0 +1,495 @@
+# Sxhkd
+
+# https://github.com/windelicato/dotfiles/blob/master/.config/sxhkd/sxhkdrc
+# limits:
+# .chaining isn't perfect (use xchainkeys instead)
+# .can only use level 1 (unshifted) key for prefix (can use keys in layer with modifier though) 
+
+# Reloading# {{{
+# This still needs to be fixed
+# Reload bspwm
+super + alt + {shift + ,_}Escape
+	{bspc quit 1 && pkill panel && pkill panel2,\
+	 bspc query -T > "$BSPWM_TREE"; \
+	    bspc query -H > "$BSPWM_HISTORY"; \
+	    bspc query -S > "$BSPWM_STACK"; \
+	    bspc quit && pkill panel && pkill panel2}
+
+super + shift + q
+	pkill -x panel; bspc quit
+
+# reload panel
+super + control + Escape
+	pkill -x panel; bspc quit
+# }}}
+
+# General# {{{
+# make sxhkd reload its configuration files:
+super + Escape
+    pkill -USR1 -x sxhkd
+
+grave ; Escape
+    pkill -USR1 -x sxhkd
+
+# dmenu
+alt + space
+	dmenu_run -fn 'Droid Sans Mono-10'
+
+# brightness# {{{
+alt + e
+	xbacklight -inc 10
+alt + n
+	xbacklight -dec 10
+# }}}
+
+# volume # {{{
+alt + i
+	amixer -qD pulse sset Master 5%+
+alt + h
+	amixer -qD pulse sset Master 5%-
+# mute
+alt + m
+	amixer -qD pulse sset Master toggle
+# }}}
+
+# Screenshots# {{{
+# fullscreen screen shot; lowered quality
+# add xtitle to name
+Print
+	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_-_%H:%M:%S_$wx$h.png'
+alt + p
+	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_-_%H:%M:%S_$wx$h.png'
+# }}}
+
+# program hotkeys# {{{
+super + Return
+    termite
+
+grave ; g
+	gvim
+
+super + u
+	urxvt
+# }}}
+
+# video click
+alt + k
+	xdotool mousemove 500 300 click 1 ; xdotool mousemove 0 0
+
+# regain focus from flash
+alt + a
+	xdotool mousemove 22 721 click 1
+
+# }}}
+
+# Dropdown Terms# {{{
+super + r
+	guake -t
+
+alt + s
+	sh ~/bin/my_dropdown.sh
+super + s
+	sh ~/bin/my_dropdown.sh
+F10
+	bspc desktop -l monocle && bspc window -t floating
+F11
+	bspc window -t fullscreen
+
+# terminology -f=Inconsolata/12 -G=false -2
+# }}}
+
+# NumPad# {{{
+# See .Xmodmap
+KP_Next
+	bspc window -c
+
+# KP_End + Down
+# 	escape
+ 
+KP_Add
+	bspc control --toggle-visibility
+# }}}
+
+# Window Management
+# My Bindings {{{
+# General# {{{
+# close
+super + w
+	bspc window -c
+
+# kill
+super + W
+	bspc window -k
+
+# cycle layout (monocle=kind of like fullscreen, but within normal area)
+super + t
+    bspc desktop -l next
+alt + {_,shift +} t
+        bspc window -t {floating,fullscreen}
+
+# }}}
+# Selection# {{{
+
+# window cycing
+# super + {n,e}
+# 	bspc window -f {next,prev}
+
+# selection by direction
+super + {h,n,e,i}
+	bspc window -f {left,down,up,right}
+
+# switch last window or desktop
+super + {grave,Tab}
+    bspc {window,desktop} -f last
+# }}}
+# Window Movement# {{{
+# move selected window to biggest space
+super + m
+    bspc window -s biggest
+
+# move window in direction
+super + {H,N,E,I}
+	bspc window -s {left,down,up,right}
+ 
+# switch with last window (works across desktops)
+super + apostrophe
+    bspc window -s last
+
+# cycle windows forward and backward
+super + {comma,period}
+    bspc desktop -C {backward,forward}
+
+# Circulate leaves of tree ; basically flip windows
+alt + {comma,period}
+        bspc desktop -F {horizontal,vertical}
+
+# basically rotate windows, but keep relative size
+alt + shift + {comma,period}
+        bspc desktop -R {90,270}
+# balance
+super + b
+    bspc desktop -B
+# }}}
+# Desktop Movement# {{{
+# move between desktops ([])
+# super + bracket{left,right}
+#     bspc desktop -f {prev,next}
+
+# # Select previous / next desktop
+# alt + {p,n}
+#         bspc desktop -f {prev.occupied,next.occupied} 
+
+# change to desktop or move selected to desktop with shift
+super + {_,shift + }{1-9,0}
+    bspc {desktop -f,window -d} ^{1-9,10}
+# }}}
+# Better Resizing# {{{
+# using caps layer hnei
+super + Left
+	bspc window --edge right -20 || bspc window --edge left -30
+super + Right 
+	bspc window --edge right +20 || bspc window --edge left +30
+super + Down
+	bspc window --edge up +20 || bspc window --edge down +30
+super + Up
+	bspc window --edge up -20 || bspc window --edge down -30
+
+# }}}
+# Preselection# {{{
+# direction to split 
+super + p ; {h,n,e,i}
+    bspc window -p {left,down,up,right}
+
+# cancel.. current; all
+super + p ; {_,shift + }space
+    bspc {window -p cancel,desktop -c}
+
+# }}}
+# Adjustment# {{{
+super + minus
+        bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))
+# 
+super + equal
+        bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))
+# set splitting ratio of current window
+super + ctrl + {1-9}
+    bspc window -r 0.{1-9}
+# }}}
+# Misc# {{{
+# lock
+super + l
+	xscreensaver-command -lock
+	# bspc control --toggle-visibility
+
+# hide all windows
+super + k
+	bspc control --toggle-visibility
+
+# nav to floating window
+alt + o
+	bspc window -f biggest.floating
+
+alt + f
+	bspc window -t private && bspc window -t sticky
+
+# alt + y
+# 	bspc window -t pseudo_tiled
+# }}}
+# Mouse shit# {{{
+# when in float, move and resize window
+super + button{1-3}
+    bspc pointer -g {move,resize_side,resize_corner}
+
+super + !button{1-3}
+    bspc pointer -t %i %i
+
+super + @button{1-3}
+    bspc pointer -u
+
+~button1
+    bspc pointer -g focus
+# }}}
+# }}}
+
+# Example Prefix/Modal Bindings# {{{
+# Notes:# {{{
+# When hit grave, you're now in window management mode and all input will be for bspc commands; to exit, hit escape
+# h,n,e.i (hjkl on qwerty) do all basic selecting, reszing, and movement
+
+# having one colon makes all colons (meaning if you have "grave ; grave : u" and "grave ; grave ; o", the latter will act like "grave ; grave : o")
+# could possibly take advantage of this behaviour:
+# for example if using entirely prefix keys ("grave; o"); can turn immediately to mode by adding something like "grave : u"
+# To have both a Prefix key and a Mode key, you either have to choose a separate key on the physical keyboard (not on the caps layer) or a key to press after the prefix key to enter the mode
+# to use q instead of escape
+# grave ; q   
+# 	xdotool key Escape
+
+# there used to be a glitch where if you had grave prefix bindings (I.e "grave ; o") and added the following, double tapping grave would give about a 5 second period where you could access any "grave : letter" bindings (I.e. repeatedly tapping o)
+grave ; grave : u
+	bspc control --toggle-visibility
+	# xdotool key Escape
+# }}}
+
+# Prefix# {{{
+# General# {{{
+
+# close window
+grave ; x
+	bspc window -c
+# kill window
+grave ; X
+	bspc window -k
+# cycle desktop layout (maybe switch back to t if have)
+grave ; space
+	desktop -l next
+# float window or put into full screen
+#grave ; {s,f}
+#    bspc window -t {floating,fullscreen}
+# 
+# }}}
+# Selection# {{{
+# selection by direction
+grave ; {h,n,e,i}
+	bspc window -f {left,down,up,right}
+
+# window cycing
+grave ; {o,O}
+	bspc window -f {next,prev}
+
+# }}}
+# Movement# {{{
+# move selected window to biggest space
+grave ; m
+    bspc window -s biggest
+# 
+# move window in direction
+grave ; {H,N,E,I}
+	bspc window -s {left,down,up,right}
+
+# switch to last window or desktop
+# grave ; {grave,Tab}
+#     bspc {window,desktop} -f last
+
+# switch with last window (works across desktops)
+grave ; apostrophe
+    bspc window -s last
+
+# cycle windows forward and backward
+grave ; {comma,period}
+    bspc desktop -C {backward,forward}
+
+# Circulate leaves of tree ; basically flip windows
+# this is the caps state of comma,period
+grave ; {bracketleft,bracketright}
+        bspc desktop -F {horizontal,vertical}
+
+# basically rotate windows, but keep relative size
+# caps shifted state
+grave ; {parenleft,parenright}
+        bspc desktop -R {90,270}
+# }}}
+# Resizing# {{{
+grave ; h
+	bspc window --edge right -20 || bspc window --edge left -30
+grave ; i
+	bspc window --edge right +20 || bspc window --edge left +30
+grave ; n
+	bspc window --edge up +20 || bspc window --edge down +30
+grave ; e
+	bspc window --edge up -20 || bspc window --edge down -30
+# }}}
+# Preselection# {{{
+# vi like bindings (a is wrong but I is taken):
+grave ; {a,o,O,A}
+	bspc window -p {left,down,up,right}
+
+grave ; {u,U}
+    bspc {window -p cancel,desktop -c}
+
+# }}}
+# }}}
+grave ; {_,shift + }{1-9,0}
+    bspc {desktop -f,window -d} ^{1-9,10}
+
+grave ; m
+	urxvt
+
+# }}}
+
+# Example Modal interface for open office # {{{
+# NOTE: Unless this has been fixed recently, sxhkd chaining doesn't work perfectly; depth is lacking and if you have a key bound on a certain level it won't work in deeper levels
+# can't change escape key like in xchainkeys
+
+# see my xchainkeys config; I switched to using that right after making this
+
+# doesn't prevent escaping :(
+# grave ; o : @Escape
+# 	xdotool key Escape && xdotool key grave && xdotool key o
+
+# Normal mode# {{{
+# movement
+grave ; o : e
+	xsendkey Up
+grave ; o : n 
+	xsendkey Down
+grave  ; o : h
+	xsendkey Left
+grave ; o : i
+	xsendkey Right
+
+# example of taking a count
+# grave ; o : 5 : n
+	# xsendkey Down && xsendkey Down && xsendkey Down && xsendkey Down && xsendkey Down
+# potentially could do {1-9}; also note that if grave ; {anything including 5} is bound, this WILL NOT work
+
+# by word
+grave ; o : w
+	xsendkey Control+Right
+grave ; o : b
+	xsendkey Control+Left
+
+# gg and G
+grave ; o : g ; g 
+	xsendkey Control+Home
+grave ; o : G
+	xsendkey Control+End && sleep 0.1 && xsendkey Home
+
+# search
+grave ; o : slash
+	xsendkey Control+f; xdotool key Escape
+
+# example finding; doesn't work without sleep (will search for blank)
+# won't work with keys mapped in previous (i.e. i doesn't work after f if have grave ; o : i)
+# not really worth implementing anyway
+# grave ; o : f ; z
+	# xsendkey Control+f && xdotool key Escape && sleep .2 && xsendkey z && xsendkey Return
+
+#undo
+grave ; o : u
+	xsendkey Control+z
+
+# redo
+grave ; o : U
+	xsendkey Control+y
+
+# next suggestion 
+grave ; o : Tab
+	xsendkey Control+Tab
+
+# save
+grave ; o : s
+	xsendkey Control+s
+# }}}
+ 
+#cut, copy, paste# {{{
+grave ; o : p
+	xsendkey Control+v
+
+# delete line (acting like d : d ..  d will keep deleting the ine)
+#grave ; o : d ; d
+#	xsendkey End && xsendkey Shift+Home && xsendkey Delete
+
+# delete word; again, won't work with w
+# grave ; o : d ; c
+	# xsendkey Control+Shift+Right && xsendkey Control+x #xsendkey BackSpace
+
+# delete to end of line
+#grave ; o : D
+#	xsendkey Shift+End && xsendkey BackSpace
+
+# more vim like (delete to end of line without changing cursor position or bringing line from below up
+# maybe not useful since concept of lines in word processor is difference
+grave ; o : D
+	xsendkey Shift+End && xsendkey BackSpace && xsendkey Right && xsendkey Return && xsendkey Up && xsendkey End
+#could also delete to end of sentence with Control+Shift+Delete
+
+# could do all the same with yank (again, except for reusing letters)
+# however can have both these without problem:
+# also note that this won't work if positioned in middle of word (would have to add a control left before which would make it not working for the beginning of a word)
+grave ; o : d ; W
+	xsendkey Control+Shift+Right && xsendkey Left && xsendkey Control+x
+grave ; o ; y ; W
+	xsendkey Control+Shift+Right && xsendkey Left && xsendkey Control+c
+# }}}
+
+# Visual mode# {{{
+# works fine with keys not mapped a chain before
+# move up
+grave ; o : v : comma
+	xsendkey Shift+Up
+# down
+# grave ; o : v : e 
+	# xsendkey Shift+Down
+
+grave ; o : V : E
+	xsendkey Home && xsendkey Control+Shift+Up
+
+grave ; o : V : N
+	xsendkey Home && xsendkey Control+Shift+Down
+
+# yanking; yank text and escape
+grave ; o : V : @Y
+# get back into previous mode.. randomly inserts tilde?
+	xsendkey Control+c && xdotool key Escape && xdotool key grave && xdotool key o
+# 
+# cutting text
+# grave ; o : V : d(i wish)
+	# xsendkey Control+x 
+# }}}
+
+# also see below for more specific shortcuts
+# https://help.libreoffice.org/Writer/Shortcut_Keys_for_Writer
+# }}}
+
+# Graveyard# {{{
+# to do things with xdotool like so need @ (not so with xsendkey)
+# grave ;o : @P
+    # xdotool key --clearmodifiers ctrl+v
+
+# with xte
+# alt + @F2
+    # xte 'keyup Alt_L' 'keyup Alt_R' 'keydown Control_L' 'key c' 'keyup Control_L'
+# or? 
+# @Num_Lock
+    # xte 'keydown Control_L' 'key c' 'keyup Control_L'
+# }}}
