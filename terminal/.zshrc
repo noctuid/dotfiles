@@ -698,6 +698,7 @@ alias nitro='nitrogen "/ag-sys/Customization/wallpaper and icons/wallpaper/#used
 
 # install lemon and uushi
 # _aur
+# ttf-ms-fonts (for times new roman and such)
 # games: yetris
 # compton-git ; conky-lua ; bspwm-git ; 
 # termite-git
@@ -1294,7 +1295,7 @@ alias mountexthdd='gvfs-mount -d /dev/sdd1'
 
 # moved main soma off usb to computer (no more annoyances if usb comes out)
 # since mounting to same location (~/ag-sys) don't have to change much
-alias mountsoma='truecrypt ~/soma_ ~/ag-sys/'
+alias mountsoma='truecrypt ~/grive/soma_ ~/ag-sys/'
 alias umountsoma='truecrypt -d ~/soma_'
 
 # in return added this:

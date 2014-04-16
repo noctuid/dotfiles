@@ -4,7 +4,7 @@ These are my dotfiles. Some are pretty heavily commented. If you have interest i
 - Conky
 - Bar-aint-recursive (panel and panel_bar)
 - Feh to set background
-- tmux powerline (will probably switch to powerline or tmuxline)
+- tmux powerline (I have stopped using it now)
 
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/clean.png "SCREENSHOT")
 

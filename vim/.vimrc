@@ -1,86 +1,22 @@
 " Todo:
-" .plugin to create index based on structure and title
-" .swp files
-" get smartinput to not do "" if right before another word; add rules
-" get space to lock until next keypress (can press space, wait however many seconds and then press finish the sequence without it dissappearing)
-" fix heading crap
-" commentstring in ftplugin; list of added .. pentadactyl.vim
+" add smartinput rules
+" lock space like other keys
 " set up yanking properly in unite
 
-" Dissolve {{{
-" Other people's stuff I have stolen:
-" Uncomment the following to have Vim jump to the last position when
-" reopening a file
-" if has("autocmd")
-"   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-" endif
+" fixes complaining about undefined tcomment variable
+set runtimepath+=~/.vim/bundle/tcomment_vim
+set runtimepath+=~/.vim/colors
+" turns off vi compatibility mode for full vim functionality; set first
+set nocompatible
 
-" nmap cp :let @" = expand("%")<cr>
-" can do ctrl r then % in insert mode instead
-
-" map ;s set invspell spelllang=en<cr
-" map ;ss :set spell spelllang=anonomize<cr>
-" mkspell ~/dotfiles/common/.vim/spell
-
-" " Restore cursor position to where it was before
-" augroup JumpCursorOnEdit
-" au!
-" autocmd BufReadPost *
-" \ if expand("<afile>:p:h") !=? $TEMP |
-" \ if line("'\"") > 1 && line("'\"") <= line("$") |
-" \ let JumpCursorOnEdit_foo = line("'\"") |
-" \ let b:doopenfold = 1 |
-" \ if (foldlevel(JumpCursorOnEdit_foo) > foldlevel(JumpCursorOnEdit_foo - 1)) |
-" \ let JumpCursorOnEdit_foo = JumpCursorOnEdit_foo - 1 |
-" \ let b:doopenfold = 2 |
-" \ endif |
-" \ exe JumpCursorOnEdit_foo |
-" \ endif |
-" \ endif
-" " Need to postpone using "zv" until after reading the modelines.
-" autocmd BufWinEnter *
-" \ if exists("b:doopenfold") |
-" \ exe "normal zv" |
-" \ if(b:doopenfold > 1) |
-" \ exe "+".1 |
-" \ endif |
-" \ unlet b:doopenfold |
-" \ endif
-" augroup END
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Other Colemak Arrow-Based Mappings
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Switch panes... I don't really have enough space to do more than a vsplit; so just NE
-" noremap H <C-w>h|noremap I <C-w>l|noremap N <C-w>j|noremap E <C-w>k
-noremap N <c-w>h|noremap E <c-w>l
-" Moving windows around.
-  noremap <C-w>N <C-w>J|noremap <C-w>E <C-w>K|noremap <C-w>I <C-w>L
-" High/Low/Mid.
-" noremap <C-e> H|noremap <C-n> L|noremap <C-m> M
-" Scroll up/down.
-" noremap zn <C-y>|noremap ze <C-e>
-
-" +/- increment and decrement.
-nnoremap + <C-a>|nnoremap - <C-x>
-" Jump to exact mark location with ' instead of line.
-" noremap ' `|noremap ` '
-" zT/zB is like zt/zb, but scrolls to the top/bottom quarter of the screen.
-" nnoremap <expr> zT 'zt' . winheight(0)/4 . '<C-y>'
-" nnoremap <expr> zB 'zb' . winheight(0)/4 . '<C-e>'
-
-
-
-"}}}
- 
 " Experimental"{{{
 " retrain to stop using caps layer in vim
-" nnoremap <up> <nop>
-" nnoremap <left> <nop>
+nnoremap <up> <nop>
+nnoremap <left> <nop>
 " nnoremap <right> <nop>
-" nnoremap <down> <nop>
-" nnoremap <End> <nop>
-" nnoremap <Home> <nop>
+nnoremap <down> <nop>
+nnoremap <End> <nop>
+nnoremap <Home> <nop>
 " inoremap <up> <nop>
 " inoremap <left> <nop>
 " inoremap <right> <nop>
@@ -236,16 +172,6 @@ nnoremap <silent> ss :silent !tmux choose-client<cr>
 endif
 
 "}}}
-
-" fixes complaining about undefined tcomment variable
-set runtimepath+=~/.vim/bundle/tcomment_vim
-set runtimepath+=~/.vim/colors
-" turns off vi bompatibility mode for full vim functionality; set first
-set nocompatible
-
-" poor man's dual role I guess: (for people who remap control is remapped to caps or thumb key)
-" inoremap <c> Escape
-
 " #==============================
 " # General {{{
 " #==============================
@@ -253,7 +179,7 @@ set nocompatible
 " error bells are off by default
 " default ; i.e. will show # of lines selected in visual
 set showcmd
-" (show matching brackets ; default)
+" (show matching brackets; default)
 set showmatch
 
 set modeline
@@ -261,10 +187,6 @@ set modeline
 " enable utf8
 set encoding=utf8
 set termencoding=utf-8
-
-" keeps buffer contents in memory
-" undo history doesn't go away if change buffers
-set hidden
 
 " filetype based indentation..
 filetype plugin indent on
@@ -275,6 +197,8 @@ set autoindent
 " Keep 2000 lines of command line history.
 set history=2000
 
+" keeps buffer contents in memory (undo history doesn't go away if change buffers)
+set hidden
 " persistent undo history
 set undofile " Save undo's after file closes
 set undodir=~/.vim/undo,/tmp " where to save undo histories
@@ -284,9 +208,6 @@ set undoreload=3000 " number of lines to save for undo
 " http://vim.wikia.com/wiki/Word_wrap_without_line_breaks
 " wrap lines visually when reach the edge
 set wrap
-" wrap at breakat instead of last character that fits on screen ; can't use with list :(
-" set linebreak
-" set nolist " list disables linebreak
 
 " disable automatic insertion of newline characters
 set textwidth=0
@@ -295,10 +216,7 @@ set wrapmargin=0
 " display tabs and certain whitespace
 set list
 " listchars ;show tabs; show at end of line; ☬⚛⚜⚡☥☣
-" set listchars=tab:  ,nbsp:☣,eol:¬
-" set listchars=tab:\|\ ,nbsp:☣,eol:¬
 set listchars=tab:\!\ ,nbsp:☣,eol:¬
-" got rid of tab:>- and replaced with escaped space (U+2002 unicode whitespace works as well)
 
 "relative numbers except current line (rnu); using numbers vim plugin as well
 set number
@@ -308,16 +226,16 @@ set relativenumber
 set formatoptions=rw
 " set formatoptions-=tc
 " r - insert comment after enter while in insert
-" leaving off o which does comment when press o (this was annoying me)
+" leaving off o which adds comment char on o
 
-" for example, stops flickering when have up and down mapped to c-o gk and gj in insert
 " won't redraw while executing macros, registers, and commands that have not been typed (not default)
+" for example, stops flickering when have up and down mapped to c-o gk and gj in insert
 set lazyredraw
 
 " (when do things like gg, will move cursor to sol)
 set startofline
 
-" at least 5 lines show below and above cursor ; experimenting with cursor position
+" at least 5 lines show below and above cursor; experimenting with cursor position
 set scrolloff=5
 
 " return to last edit position when opening files
@@ -341,16 +259,15 @@ vmap <silent> <expr> p <sid>Repl()
 "}}}
 
 " Session, saving, swap, backup settings"{{{
-" to prevent constant annoyance for now:
+" to prevent annoyance for now:
 set noswapfile
-
 " save swap files here; // to avoid collisions (files with same name will be named based on path)
-set directory=~/.vim/swap//
+" set directory=~/.vim/swap//
 
-" save all changed, titled buffers on focus lost; won't notifiy of errors
-" au FocusLost * !silent wa
-" same but only the file that has been changed: (error if unnamed.. don't use untitled buffers)
+" auto save on focus lost if buffer changed (error if unnamed.. don't use untitled buffers)
 au FocusLost * update
+" save on insert leave (if changed; fix for unite)
+" au InsertLeave * update
 
 " autowriteall; save buffer if changed when use various commands (switching buffers, quit, exit, etc.)
 set awa
@@ -358,23 +275,17 @@ set awa
 "}}}
 
 " Sourcing vimrc"{{{
-" Could just combine these..
-" from vim wiki; changed from $MYVIMRC; problem because of symlinking
+" from vim wiki
 augroup AutoReloadVimRC
   au!
 " automatically reload vimrc when it's saved
   au BufWritePost ~/dotfiles/vim/.vimrc so ~/.vimrc
 augroup END
 
-" works but prevents syntax highlighting from coming on?
-" augroup AutoReloadVimRC2
-" au!
-" au BufRead * so ~/dotfiles/vim/.vimrc
-" augroup END
-
-" source .vimrc on enter; this still slows things down significantly on startup
+" source .vimrc on enter; this still slows things down significantly on startup; change to quickvimrc?
 " autocmd vimenter * source ~/dotfiles/vim/.vimrc
-" too slow
+
+" too slow; change to quickvimrc?
 " augroup AutoReloadVimRC2
 " au!
 
@@ -415,14 +326,11 @@ set smartcase
 " #==============================
 " # Specific Filetype Settings"{{{
 " #==============================
-" can also add file specific settings to ~/.vim/after/ftplugin; html.vim or
-" python.vim for example; use setlocal instead
-" or better yet, use auto commands
+" can also add file specific settings to ~/.vim/after/ftplugin; html.vim or python.vim for example; use setlocal instead
 " see http://stackoverflow.com/questions/1889602/multiple-vim-configurations
 
 " Text file settings"{{{
-" remove listchars from txt files in favour of better wrapping (not cutting off halfway in between a word)
-" usually have many long lines in txt files
+" remove listchars from txt files in favour of better wrapping (not cutting off halfway in between a word) for long lines
 autocmd BufEnter *.txt setlocal nolist
 autocmd BufEnter *.txt setlocal lbr
 " set showbreak=···\ " Line break indicator.
@@ -448,6 +356,16 @@ autocmd BufEnter *.txt set spell
 
 "}}}
 
+" Tex file settings"{{{
+autocmd BufEnter *.tex setlocal nolist
+autocmd BufEnter *.tex setlocal lbr
+autocmd BufEnter *.tex setlocal textwidth=0
+
+" spell check tex files
+autocmd BufEnter *.tex set spell
+
+"}}}
+
 call tcomment#DefineType('pentadactyl', '" %s' )
 autocmd BufNewFile,BufRead *.pentadactylrc,*.penta set filetype=pentadactyl
 let g:commentChar = {
@@ -470,45 +388,17 @@ if has("gui_running")
 	set guifont=Inconsolata\ 11
 endif
 
-
-  " let g:tmuxline_separators = {
-  "     \ 'left' : '',
-  "     \ 'left_alt': '>',
-  "     \ 'right' : '',
-  "     \ 'right_alt' : '<',
-  "     \ 'space' : ' '}
-  " " custom preset with left-justified window list
-  " let g:tmuxline_preset = {
-  "     \'a'       : '#S',
-  "     \'b'       : '#W',
-  "     \'c'       : '#H',
-  "     \'win'     : '#I #W',
-  "     \'cwin'    : '#I #W',
-  "     \'x'       : '%a',
-  "     \'y'       : '#W %R',
-  "     \'z'       : '#H',
-  "     \'options' : {'status-justify' : 'left'}}
-  "
-  " custom preset with shell commands
-"  let g:tmuxline_preset = {
-"       \'a'    : '#S',
-"       \'c'    : ['#(whoami)', '#(uptime  | cut -d " " -f 1,2,3)'],
-"       \'win'  : ['#I', '#W'],
-"       \'cwin' : ['#I', '#W', '#F'],
-"       \'x'    : '#(date)',
-"       \'y'    : ['%R', '%a', '%Y'],
-"       \'z'    : '#H'}
-"
 " Airline theme "{{{
 " airline always present
 set laststatus=2
 " my custom combination theme:
 let g:airline_theme='darkfox'
+" tabline won't work with taboo
 " let g:airline#extensions#tabline#enabled = 1
 " let g:airline#extensions#tabline#left_sep = ' '
 " let g:airline#extensions#tabline#left_alt_sep = '|'
 
-" old vim-powerline symbols
+" old vim-powerline symbols; needs fixing
 let g:airline_left_sep = '⮀'
 " let g:airline_left_alt_sep = '⮁'
 let g:airline_right_sep = '⮂'
@@ -517,7 +407,7 @@ let g:airline_right_sep = '⮂'
 " let g:airline_symbols.branch = '⭠'
 " let g:airline_symbols.readonly = '⭤'
 
-" turn off mixed indent, trailing space.. add syntastic
+" turn off mixed indent, trailing space
 let g:airline_section_warning = ''
 
 " vcs integration
@@ -533,7 +423,7 @@ let g:airline#extensions#syntastic#enabled = 1
 if has("gui_running")
 	set guioptions=P,c,e
 " set guioptions-=m,T,e
-" maybe fixes white bar appearing at bottom; seems to work
+" kind of fixes white bar appearing at bottom; seems to work
 	set guiheadroom=40
 endif
 
@@ -563,17 +453,13 @@ set smarttab
 " #==============================
 set foldmethod=marker
 " indent folding for python
-" set foldmethod=indent
-" The vnoremap is good for manual mapping. In your ftplugin, add set foldmethod=indent for Python. Then, in your .vimrc, set foldmethod=manual. Now, you can fold in both Python and non-Python with spacebar mapping
-" set foldnestmax=2
-" nnoremap <Space> za
-" vnoremap <Space> zf
+"au BufEnter *.py set foldmethod=indent
 "}}}
 " #==============================
 " # General Mappings/ Bindings and Settings "{{{
 " #==============================
 " focus on not using modifiers or hard to reach keys; may add more modifiers in future when remapping progresses for dual and I get more thumb keys
-" main leader/prefix keys (in order of ease): t (not worthy of such a great colemak position and I never except for dt and such which is not affected) and space (about as ease)
+" main leader/prefix keys (in order of ease): t (not worthy of such a great colemak position and I never except for dt and such which is not affected) and space (about as easy)
 " let mapleader = "\<space>"
 let mapleader = "t"
 
@@ -673,7 +559,7 @@ cnoremap ¸ <c-w>
 nnoremap ¸ daw
 " inoremap ... <c-u>
 
-" keep cursor at beginning of line after hitting enter
+" keep cursor at beginning of line after hitting enter; fix
 inoremap <return> <return><home>
 
 " source vimrc
@@ -720,7 +606,6 @@ onoremap il( :<c-u>normal! F)vi(<cr>
 "tt- tabnew
 "u- gundo
 "x- 'xray' view
-"y- snipmate
 ".- source vimrc
 
 "}}}
@@ -733,7 +618,6 @@ onoremap il( :<c-u>normal! F)vi(<cr>
 " y- yank history
 
 "'x-ray' view; cuc and cul
-nnoremap <leader>x :set cursorcolumn<cr>:set cursorline<cr>
 nnoremap <leader>x :set cursorcolumn!<cr>:set cursorline!<cr>
 
 " Plugin Specific"{{{
@@ -762,13 +646,12 @@ let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 "
 let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
 
-
 " If you want :UltiSnipsEdit to split your window.
-" let g:UltiSnipsEditSplit="vertical"
+let g:UltiSnipsEditSplit="vertical"
 "}}}
 
 " Use neocomplete."{{{
-" let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#enable_at_startup = 1
 " Use smartcase.
 let g:neocomplete#enable_smart_case = 1
 " Set minimum syntax keyword length.
@@ -789,7 +672,15 @@ let g:gundo_map_move_newer="e"
 map <leader>c <C-_><C-_>
 
 " Emmet vim
-" map ty <C-y>,
+map <leader>y <C-y>,
+
+" from bling/dotvim
+" syntastic "{{{
+let g:syntastic_error_symbol = '✗'
+let g:syntastic_style_error_symbol = '✠'
+let g:syntastic_warning_symbol = '∆'
+let g:syntastic_style_warning_symbol = '≈'
+"}}}
 
 " session management:"{{{
 " quickly open session
@@ -970,7 +861,7 @@ let g:unite_quick_match_table = {
   \ }
 
 " http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
-" nnoremap <space>/ :Unite ag:.<cr>
+nnoremap <space>/ :Unite ag:.<cr>
 
 " Open bookmark file for most frequently used files
 nnoremap <space><space> :Unite -quick-match bookmark<cr>
@@ -1024,6 +915,7 @@ if exists("t:taboo_tab_name")
 	elseif t:taboo_tab_name == "mainl"
 		nnoremap <buffer> <space>c :TabooRename main<cr>:so ~/.quickvimrc<cr>
 
+	" conf cycle
 	elseif t:taboo_tab_name == "config"
 		nnoremap <buffer> <space>c :TabooRename conf-music<cr>:so ~/.quickvimrc<cr>
 	elseif t:taboo_tab_name == "conf-music"
@@ -1032,9 +924,6 @@ if exists("t:taboo_tab_name")
 		nnoremap <buffer> <space>c :TabooRename conf-other<cr>:so ~/.quickvimrc<cr>
 	elseif t:taboo_tab_name == "conf-other"
 		nnoremap <buffer> <space>c :TabooRename config<cr>:so ~/.quickvimrc<cr>
-
-	elseif t:taboo_tab_name == "conf-ranger"
-		nnoremap <buffer> <space>c :TabooRename remap<cr>:so ~/.quickvimrc<cr>
 
 	elseif t:taboo_tab_name == "dot"
 		nnoremap <buffer> <space>u :cd ~/dotfiles<cr>:Unite file<cr>
@@ -1069,60 +958,61 @@ nnoremap <leader>E :tabm +1<cr>
 " "shorthand"{{{
 " " working on implementing; not a fan of configuring autokey; this is much easier; use vim and penta for 95% of typing.. will probably add to weechat as well
 " " get pterosaur working as iabbr is horribly broken in pentadactyl
+" add for only txt files
 "
-" iabbr i I
-" " http://forum.colemak.com/viewtopic.php?id=1804
-" iabbr ab about
-" iabbr about ab
-" iabbr abo above
-" iabbr above abo
-" iabbr ac actual
-" iabbr actual ac
-" iabbr af after
-" iabbr after af
-" iabbr ag again
-" iabbr again ag
-" iabbr l all
-" iabbr all l
-" iabbr lm almost
-" iabbr almost lm
-" iabbr ao also
-" iabbr also ao
-" iabbr alw always
-" iabbr always alw
-" iabbr amc America
-" iabbr America amc
-" iabbr n and
-" iabbr and n
-" iabbr ani animal
-" iabbr animal ani
-" iabbr anr another
-" iabbr another anr
-" iabbr ans answer
-" iabbr answer ans
-" iabbr ne any
-" iabbr any ne
-" iabbr nw anyway
-" iabbr anyway nw
-" iabbr r are
-" iabbr are r
-" iabbr aa area
-" iabbr area aa
-" iabbr ru are you
-" iabbr b be
-" iabbr be b
-" iabbr bc because
-" iabbr because bc
-" iabbr bn been
-" iabbr been bn
-" iabbr bf before
-" iabbr before bf
-" iabbr bl below
-" iabbr below bl
-"
-" iabbr c can
-" iabbr can c
-" iabbr cn can't
+iabbr i I
+" http://forum.colemak.com/viewtopic.php?id=1804
+iabbr ab about
+iabbr about ab
+iabbr abo above
+iabbr above abo
+iabbr ac actual
+iabbr actual ac
+iabbr af after
+iabbr after af
+iabbr ag again
+iabbr again ag
+iabbr l all
+iabbr all l
+iabbr lm almost
+iabbr almost lm
+iabbr ao also
+iabbr also ao
+iabbr alw always
+iabbr always alw
+iabbr amc America
+iabbr America amc
+iabbr n and
+iabbr and n
+iabbr ani animal
+iabbr animal ani
+iabbr anr another
+iabbr another anr
+iabbr ans answer
+iabbr answer ans
+iabbr ne any
+iabbr any ne
+iabbr nw anyway
+iabbr anyway nw
+iabbr r are
+iabbr are r
+iabbr aa area
+iabbr area aa
+iabbr ru are you
+iabbr b be
+iabbr be b
+iabbr bc because
+iabbr because bc
+iabbr bn been
+iabbr been bn
+iabbr bf before
+iabbr before bf
+iabbr bl below
+iabbr below bl
+
+iabbr c can
+iabbr can c
+iabbr cn can't
 " " are you okay with = rukw
 " " around = rnd|ro
 " " away = ay
@@ -1522,4 +1412,69 @@ NeoBundleCheck
 
 "}}}
 
+" Dissolve {{{
+" poor man's dual role I guess: (for people who remap control is remapped to caps or thumb key)
+" inoremap <c> Escape
+" Other people's stuff I have stolen:
+" Uncomment the following to have Vim jump to the last position when
+" reopening a file
+" if has("autocmd")
+"   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+" endif
+
+" nmap cp :let @" = expand("%")<cr>
+" can do ctrl r then % in insert mode instead
+
+" map ;s set invspell spelllang=en<cr
+" map ;ss :set spell spelllang=anonomize<cr>
+" mkspell ~/dotfiles/common/.vim/spell
+
+" " Restore cursor position to where it was before
+" augroup JumpCursorOnEdit
+" au!
+" autocmd BufReadPost *
+" \ if expand("<afile>:p:h") !=? $TEMP |
+" \ if line("'\"") > 1 && line("'\"") <= line("$") |
+" \ let JumpCursorOnEdit_foo = line("'\"") |
+" \ let b:doopenfold = 1 |
+" \ if (foldlevel(JumpCursorOnEdit_foo) > foldlevel(JumpCursorOnEdit_foo - 1)) |
+" \ let JumpCursorOnEdit_foo = JumpCursorOnEdit_foo - 1 |
+" \ let b:doopenfold = 2 |
+" \ endif |
+" \ exe JumpCursorOnEdit_foo |
+" \ endif |
+" \ endif
+" " Need to postpone using "zv" until after reading the modelines.
+" autocmd BufWinEnter *
+" \ if exists("b:doopenfold") |
+" \ exe "normal zv" |
+" \ if(b:doopenfold > 1) |
+" \ exe "+".1 |
+" \ endif |
+" \ unlet b:doopenfold |
+" \ endif
+" augroup END
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Other Colemak Arrow-Based Mappings
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Switch panes... I don't really have enough space to do more than a vsplit; so just NE
+" noremap H <C-w>h|noremap I <C-w>l|noremap N <C-w>j|noremap E <C-w>k
+noremap N <c-w>h|noremap E <c-w>l
+" Moving windows around.
+  noremap <C-w>N <C-w>J|noremap <C-w>E <C-w>K|noremap <C-w>I <C-w>L
+" High/Low/Mid.
+" noremap <C-e> H|noremap <C-n> L|noremap <C-m> M
+" Scroll up/down.
+" noremap zn <C-y>|noremap ze <C-e>
+
+" +/- increment and decrement.
+nnoremap + <C-a>|nnoremap - <C-x>
+" Jump to exact mark location with ' instead of line.
+" noremap ' `|noremap ` '
+" zT/zB is like zt/zb, but scrolls to the top/bottom quarter of the screen.
+" nnoremap <expr> zT 'zt' . winheight(0)/4 . '<C-y>'
+" nnoremap <expr> zB 'zb' . winheight(0)/4 . '<C-e>'
+
+"}}}
 syntax on

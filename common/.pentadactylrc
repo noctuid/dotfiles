@@ -265,6 +265,7 @@ silent qmark w http://www.wikipedia.org/
 
 silent qmark q http://quora.com/
 silent qmark s http://stumbleupon.com/
+silent qmark S http://myanimelist.net/clubs.php?cid=27907 
 
 silent qmark t http://www.tumblr.com/dashboard/
 silent qmark T http://twitter.com/home/
@@ -513,7 +514,6 @@ nmap <space>i 39gt
 nmap <space>o 40gt
 endif
 "}}}
-
 " alternative:"{{{
 " nmap <space>wa 11gt
 " nmap <space>wr 12gt
@@ -553,9 +553,8 @@ cmap .yp <c-v><c-v>
 vmap -builtin y "+y
 nmap -builtin Y "+Y
 
-" I never use marks, but always use quickmarks
-nmap -builtin "'" gn
-nmap -builtin '"' go
+" nmap -builtin "'" go
+" nmap -builtin '"' gn
 
 " U list closed tabs
 nmap -builtin U :undo<Space>
@@ -606,7 +605,7 @@ nmap -builtin <esc> <esc>:noh<cr>
 
 " Leader Bindings {{{
 " reload
-nmap -builtin <leader>. :so ~/.pentadactylrc<cr>
+nmap -builtin <leader>. :source ~/.pentadactylrc<cr>
 
 nmap -builtin <Leader>p :private winopen<CR>
 
@@ -645,7 +644,7 @@ nmap -builtin <leader>U -s :!~/bin/firebug_fake_key.sh<cr>:firebug tab net<cr>
 " maybe add titles or more formatting
 
 command -nargs=* to !~/bin/to.sh <args>
-nmap -builtin <space>u -s <yank-location> :to add
+nmap -builtin <space>u -s <yank-location> :silent to add 
 " :!~/bin/to.sh <args>
 " !~/bin/to.sh buffer.URL <args>
 
