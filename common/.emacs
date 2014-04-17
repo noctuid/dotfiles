@@ -95,7 +95,154 @@
 
 
 ;; closest thing to sneak, easymotion, etc.
-(define-key evil-normal-state-map "s" 'ace-jump-word-mode)
+; (define-key evil-normal-state-map "s" 'ace-jump-word-mode)
+
+;; TODO: make silent
+;; gui emacs likes to get screwed up and doesn't work with certain commands
+;; unmap "r" and "s"
+(define-key evil-normal-state-map "s" nil)
+(define-key evil-normal-state-map "r" nil)
+(define-key evil-normal-state-map "R" nil)
+;; equiv of if has gui running
+(if (display-graphic-p)
+    (progn
+    ;; if gui
+    ;; wm experimentation;{{{
+    ;; "r" is redraw;{{{
+    ;; worskpace/Destkop switch"{{{
+    (define-key evil-normal-state-map (kbd "ra") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^1"))))
+    (define-key evil-normal-state-map (kbd "rr") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^2"))))
+    (define-key evil-normal-state-map (kbd "rs") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^3"))))
+    (define-key evil-normal-state-map (kbd "rs") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^4"))))
+    (define-key evil-normal-state-map (kbd "rd") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^5"))))
+    (define-key evil-normal-state-map (kbd "rh") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^6"))))
+    (define-key evil-normal-state-map (kbd "rn") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^7"))))
+    (define-key evil-normal-state-map (kbd "re") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^8"))))
+    (define-key evil-normal-state-map (kbd "ri") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^9"))))
+    (define-key evil-normal-state-map (kbd "ro") (lambda () (interactive) (shell-command (concat "bspc desktop -f ^10"))))
+    ;;}}}
+    ;; move to desktop;{{{
+    (define-key evil-normal-state-map (kbd "Ra") (lambda () (interactive) (shell-command (concat "bspc window -d ^1"))))
+    (define-key evil-normal-state-map (kbd "Rr") (lambda () (interactive) (shell-command (concat "bspc window -d ^2"))))
+    (define-key evil-normal-state-map (kbd "Rs") (lambda () (interactive) (shell-command (concat "bspc window -d ^3"))))
+    (define-key evil-normal-state-map (kbd "Rt") (lambda () (interactive) (shell-command (concat "bspc window -d ^4"))))
+    (define-key evil-normal-state-map (kbd "Rd") (lambda () (interactive) (shell-command (concat "bspc window -d ^5"))))
+    (define-key evil-normal-state-map (kbd "Rh") (lambda () (interactive) (shell-command (concat "bspc window -d ^6"))))
+    (define-key evil-normal-state-map (kbd "Rn") (lambda () (interactive) (shell-command (concat "bspc window -d ^7"))))
+    (define-key evil-normal-state-map (kbd "Re") (lambda () (interactive) (shell-command (concat "bspc window -d ^8"))))
+    (define-key evil-normal-state-map (kbd "Ri") (lambda () (interactive) (shell-command (concat "bspc window -d ^9"))))
+    (define-key evil-normal-state-map (kbd "Ro") (lambda () (interactive) (shell-command (concat "bspc window -d ^10"))))
+    ;;}}}
+
+    ;; moving windows within desktop {{{
+    ;; move to biggest
+    (define-key evil-normal-state-map (kbd "rcm") (lambda () (interactive) (shell-command (concat "bspc window -s biggest"))))
+    ;; directional
+    (define-key evil-normal-state-map (kbd "rch") (lambda () (interactive) (shell-command (concat "bspc window -s left"))))
+    (define-key evil-normal-state-map (kbd "rcn") (lambda () (interactive) (shell-command (concat "bspc window -s down"))))
+    (define-key evil-normal-state-map (kbd "rce") (lambda () (interactive) (shell-command (concat "bspc window -s up"))))
+    (define-key evil-normal-state-map (kbd "rci") (lambda () (interactive) (shell-command (concat "bspc window -s right"))))
+    ;; circulate
+    (define-key evil-normal-state-map (kbd "r\.") (lambda () (interactive) (shell-command (concat "bspc desktop -C forward"))))
+    (define-key evil-normal-state-map (kbd "r\,") (lambda () (interactive) (shell-command (concat "bspc desktop -C backward"))))
+    ;; }}} 
+    ;; resize
+    (define-key evil-normal-state-map (kbd "rmh") (lambda () (interactive) (shell-command (concat "~/bin/resize.sh left"))))
+    (define-key evil-normal-state-map (kbd "rmn") (lambda () (interactive) (shell-command (concat "~/bin/resize.sh down"))))
+    (define-key evil-normal-state-map (kbd "rme") (lambda () (interactive) (shell-command (concat "~/bin/resize.sh up"))))
+    (define-key evil-normal-state-map (kbd "rmi") (lambda () (interactive) (shell-command (concat "~/bin/resize.sh right"))))
+    ;; other
+    (define-key evil-normal-state-map (kbd "ru") (lambda () (interactive) (shell-command (concat "urxvt &"))))
+    ;;}}}
+    ;; "s" is select/show/settings
+    ;; select;{{{
+    (define-key evil-normal-state-map (kbd "sh") (lambda () (interactive) (shell-command (concat "bspc window -f left"))))
+    (define-key evil-normal-state-map (kbd "sn") (lambda () (interactive) (shell-command (concat "bspc window -f down"))))
+    (define-key evil-normal-state-map (kbd "se") (lambda () (interactive) (shell-command (concat "bspc window -f up"))))
+    (define-key evil-normal-state-map (kbd "si") (lambda () (interactive) (shell-command (concat "bspc window -f right"))))
+    (define-key evil-normal-state-map (kbd "sl") (lambda () (interactive) (shell-command (concat "bspc window -f last"))))
+    ;;}}}
+    ;; monocle toggle 
+    (define-key evil-normal-state-map (kbd "st") (lambda () (interactive) (shell-command (concat "bspc desktop -l next"))))
+    (define-key evil-normal-state-map (kbd "ss") (lambda () (interactive) (shell-command (concat "bspc window -t sticky"))))
+    (define-key evil-normal-state-map (kbd "sf") (lambda () (interactive) (shell-command (concat "bspc window -t fullscreen"))))
+    ;; gap up and down
+    (define-key evil-normal-state-map (kbd "su") (lambda () (interactive) (shell-command (concat "bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))"))))
+    (define-key evil-normal-state-map (kbd "sd") (lambda () (interactive) (shell-command (concat "bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))"))))
+    ;; preselect;{{{
+    (define-key evil-normal-state-map (kbd "sph") (lambda () (interactive) (shell-command (concat "bspc window -p left"))))
+    (define-key evil-normal-state-map (kbd "spn") (lambda () (interactive) (shell-command (concat "bspc window -p down"))))
+    (define-key evil-normal-state-map (kbd "spe") (lambda () (interactive) (shell-command (concat "bspc window -p up"))))
+    (define-key evil-normal-state-map (kbd "spi") (lambda () (interactive) (shell-command (concat "bspc window -p right"))))
+    (define-key evil-normal-state-map (kbd "spx") (lambda () (interactive) (shell-command (concat "bspc window -p cancel"))))
+    (define-key evil-normal-state-map (kbd "spd") (lambda () (interactive) (shell-command (concat "bspc desktop -c"))))
+    ;;}}}
+    ;;}}}
+      )
+    ;; else tmux;{{{
+    ;; "r" is redraw;{{{
+    ;; window switching;{{{
+    (define-key evil-normal-state-map (kbd "ra") (lambda () (interactive) (shell-command (concat "tmux select-window -t 1"))))
+    (define-key evil-normal-state-map (kbd "rr") (lambda () (interactive) (shell-command (concat "tmux select-window -t 2"))))
+    (define-key evil-normal-state-map (kbd "rs") (lambda () (interactive) (shell-command (concat "tmux select-window -t 3"))))
+    (define-key evil-normal-state-map (kbd "rt") (lambda () (interactive) (shell-command (concat "tmux select-window -t 4"))))
+    (define-key evil-normal-state-map (kbd "rd") (lambda () (interactive) (shell-command (concat "tmux select-window -t 5"))))
+    (define-key evil-normal-state-map (kbd "rh") (lambda () (interactive) (shell-command (concat "tmux select-window -t 6"))))
+    (define-key evil-normal-state-map (kbd "rn") (lambda () (interactive) (shell-command (concat "tmux select-window -t 7"))))
+    (define-key evil-normal-state-map (kbd "re") (lambda () (interactive) (shell-command (concat "tmux select-window -t 8"))))
+    (define-key evil-normal-state-map (kbd "ri") (lambda () (interactive) (shell-command (concat "tmux select-window -t 9"))))
+    (define-key evil-normal-state-map (kbd "ro") (lambda () (interactive) (shell-command (concat "tmux select-window -t 10"))))
+    ;;}}}
+
+    ;; resize panes"{{{
+    (define-key evil-normal-state-map (kbd "rmh") (lambda () (interactive) (shell-command (concat "tmux resize-pane -L 10"))))
+    (define-key evil-normal-state-map (kbd "rmn") (lambda () (interactive) (shell-command (concat "tmux resize-pane -D 10"))))
+    (define-key evil-normal-state-map (kbd "rme") (lambda () (interactive) (shell-command (concat "tmux resize-pane -U 10"))))
+    (define-key evil-normal-state-map (kbd "rmi") (lambda () (interactive) (shell-command (concat "tmux resize-pane -R 10"))))
+    ;;}}}
+
+    ;; circulate
+    ;; previous
+    (define-key evil-normal-state-map (kbd "r\,") (lambda () (interactive) (shell-command (concat "tmux swap-pane -U"))))
+    ;; next
+    (define-key evil-normal-state-map (kbd "r\.") (lambda () (interactive) (shell-command (concat "tmux swap-pane -D"))))
+    ;; new session
+    (define-key evil-normal-state-map (kbd "r\_") (lambda () (interactive) (shell-command (concat "tmux new-session"))))
+    ;; new window
+    (define-key evil-normal-state-map (kbd "rc") (lambda () (interactive) (shell-command (concat "tmux new-window"))))
+    ;; kill pane
+    (define-key evil-normal-state-map (kbd "rx") (lambda () (interactive) (shell-command (concat "tmux kill-pane"))))
+    ;; last window
+    (define-key evil-normal-state-map (kbd "rl") (lambda () (interactive) (shell-command (concat "tmux last-window"))))
+    ;; split windows
+    (define-key evil-normal-state-map (kbd "r\/") (lambda () (interactive) (shell-command (concat "tmux split-window -h"))))
+    (define-key evil-normal-state-map (kbd "r\-") (lambda () (interactive) (shell-command (concat "tmux split-window"))))
+    ;; break pane
+    (define-key evil-normal-state-map (kbd "r\!") (lambda () (interactive) (shell-command (concat "tmux break-pane"))))
+    ;;}}}
+    ;; "s" is select;{{{
+    ;; directional
+    (define-key evil-normal-state-map (kbd "sh")
+                (lambda ()
+                  (interactive)
+                  (shell-command (concat "tmux select-pane -L"))))
+    
+      )
+    (define-key evil-normal-state-map (kbd "sn") (lambda () (interactive) (shell-command (concat "tmux select-pane -D"))))
+    (define-key evil-normal-state-map (kbd "se") (lambda () (interactive) (shell-command (concat "tmux select-pane -U"))))
+    (define-key evil-normal-state-map (kbd "si") (lambda () (interactive) (shell-command (concat "tmux select-pane -R"))))
+    ;; last
+    (define-key evil-normal-state-map (kbd "sl") (lambda () (interactive) (shell-command (concat "tmux select-pane -l"))))
+
+    ;; select layout
+    (define-key evil-normal-state-map (kbd "sv") (lambda () (interactive) (shell-command (concat "tmux select-layout main-vertical"))))
+    ;; toggle "monocle" (zoom)
+    (define-key evil-normal-state-map (kbd "st") (lambda () (interactive) (shell-command (concat "tmux resize-pane -Z"))))
+
+    ;; select session
+    (define-key evil-normal-state-map (kbd "ss") (lambda () (interactive) (shell-command (concat "tmux choose-client"))))
+    ;;}}}
+    ;;}}}
 
 ;; use projectile even without project
 (setq projectile-require-project-root nil)
