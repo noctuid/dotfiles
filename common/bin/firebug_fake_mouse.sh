@@ -3,11 +3,12 @@
 # start video and wait for firebug to load it
 xdotool mousemove 519 326 && xdotool click 1 && sleep 3
 
-# use firebug to copy content of direct vid link
-# click twice (required in insert mode to open menu)
-xdotool mousemove 282 685 && xdotool click 3 && xdotool click 3
+# to prevent other menu from coming up, return to normal mode
+xdotool key Escape
+# open menu and copy link
+xdotool mousemove 284 693 && xdotool click 3
 sleep 0.2
-xdotool mousemove 367 422 && xdotool click 1
+xdotool mousemove 376 430 && xdotool click 1
 # stop video playing in broswser
 xdotool mousemove 519 326 && xdotool click 1 && sleep 0.2
 xdotool key Escape
