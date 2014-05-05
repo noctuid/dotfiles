@@ -56,9 +56,9 @@ alt + m
 # fullscreen screen shot; lowered quality
 # add xtitle to name
 Print
-	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_-_%H:%M:%S_$wx$h.png'
+	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
 alt + p
-	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_-_%H:%M:%S_$wx$h.png'
+	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
 # }}}
 
 # program hotkeys# {{{
