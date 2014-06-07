@@ -15,19 +15,15 @@ flavor=${1:-bar}
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
 
-# change to bottom padding
 # bspc config top_padding $PANEL_HEIGHT
-bspc config bottom_padding 16
+bspc config top_padding 16
 
 bspc control --subscribe > "$PANEL_FIFO" &
 xtitle -sf 'T%s' > "$PANEL_FIFO" &
 
-panel_clock()
-{
-        echo  "⭧" $(clock -f '%a %d %I: %M%P')
-}
 
-# add alpha channel (opacity)
+# Colours#{{{
+# add alpha channel (opacity); no opacity
 COLOR_FOREGROUND='#FF34322E'
 COLOR_BACKGROUND='#FF232C31'
 # old default colours
@@ -41,6 +37,17 @@ C_7='#FF6C7A80'
 C_9='#FFCC6666'
 
 C_Z='#FF2A7A9C'
+# bright_pink='#FFFF78FF'
+bright_pink='#FFE300E3'
+better_purple='#FFA84D95'
+other='#FF7A52D1'
+lighter_orange='#FFF2AB4E'
+#}}}
+
+panel_clock()
+{
+        echo  "⭧" $(clock -f '%a %d %I: %M%P')
+}
 
 panel_battery()
 {
@@ -126,7 +133,8 @@ panel_volume()
 }
 
 
-# modified from: https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/brightnessScript
+# modified from: https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/
+# brightnessScript
 panel_brightness()
 {
 brightnessLevel=$(cat /sys/class/backlight/acpi_video0/actual_brightness)
@@ -152,17 +160,33 @@ case $brightnessLevel in
 esac
 }
 
+# Ram Usage#{{{
+# add ram percent
+memused() {
+	free | grep buffers/cache | awk '{print $3}'
+}
+
+memtotal() { 
+	free | grep Mem | awk '{print $2}'
+}
+
+mempercent() { 
+	echo "$(($(memused)*100/$(memtotal)))"
+}
+#}}}
+
 while true; do
-		echo "S" "%{F$C_Z}⮃ $(panel_volume) %{F$C_3} ⮃ $(panel_brightness) "$(panel_battery)"%{F$C_5} ⮃ "$(panel_clock) > "$PANEL_FIFO"
+	echo "S" "%{F$other}⮃ $(mempercent)%% RAM %{F$C_Z}⮃ $(panel_volume) %{F$C_3}⮃ $(panel_brightness) "$(panel_battery)"%{F$better_purple} ⮃ "$(panel_clock) > "$PANEL_FIFO"
         sleep 0.7s
+
 done &
 
 case "$flavor" in
 	bar)
 		# change to bar-aint-recursive since using git version
 		# -b to put at bottom
-		# use uushi (support for unicode yay)
-		cat "$PANEL_FIFO" | panel_bar | bar-aint-recursive -b -f "-benis-uushi-medium-r-normal--11-90-75-75-p-58-iso10646-1" x$PANEL_HEIGHT -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" &
+		# use uushi font
+		cat "$PANEL_FIFO" | panel_bar | bar-aint-recursive -f "-benis-uushi-medium-r-normal--11-90-75-75-p-58-iso10646-1" x$PANEL_HEIGHT -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" &
 		;;
 	dzen2)
 		FONT_FAMILY='DejaVu Sans'

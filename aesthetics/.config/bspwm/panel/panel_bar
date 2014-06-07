@@ -4,8 +4,8 @@
 # updated for syntax change with my modifications
 # https://github.com/baskerville/bspwm/blob/master/examples/panel/panel_bar
 
+# Colours#{{{
 COLOR_STATUS_FG='#FF6C7A80'
-
 # stop transparency (FF alpha channel)
 COLOR_FOREGROUND='#FF34322E'
 COLOR_BACKGROUND='#FF232C31'
@@ -14,6 +14,7 @@ COLOR_BACKGROUND='#FF232C31'
 C_0='#FF2D3C46'
 C_1='#FFAC4142'
 C_2='#FF90A959'
+lighter_green='#FFA9D152'
 C_3='#FFDE935F'
 C_4='#FF6A9FB5'
 C_5='#FFAA759F'
@@ -24,11 +25,19 @@ COLOR_NINE='#FFFF6666'
 light_pink='#FFD6FC'
 gray_pink='#FFD9CAD7'
 bright_pink='#FFFF78FF'
+other='#FF7A52D1'
+lighter_c_4='#FF78B3CC'
+#}}}
 
-# bspwm and what looks like arch symbol from uushi
+# bspwm and arch symbol from uushi
 bspwm="%{B$COLOR_BACKGROUND}%{F$COLOR_EIGHT}%{F$COLOR_NINE} ⮗ bspwm%{F$COLOR_EIGHT}"
 
 while read -r line ; do
+	cpu_temp="%{F$lighter_green}$(acpi -t | awk '{print $4}')°C"
+	song=$(mpc current -f "%artist% - %title%")
+	# cut anything in parens from song title
+	songy=${song%(*}
+	song_final="%{F$lighter_green}⮕ $songy"
 	case $line in
 		S*)
 			# clock output
@@ -36,7 +45,9 @@ while read -r line ; do
 			;;
 		T*)
 			# xtitle output
-			title="%{F$C_4}⮠ ${line#?} ♠"
+			title=$(echo "${line#?}" | cut -c 1-70)
+			title_final="%{F$lighter_c_4}⮠ ${title%-*} ♠"
+			# title="%{F$other}⮠ ${line#?} ♠"
 			;;
 		W*)
 			# bspwm internal state
@@ -74,12 +85,12 @@ while read -r line ; do
 					L*)
 						# layout
 						layout=$(printf "%s" "${name}" | sed 's/\(.\).*/\U\1/')
-						wm_infos="$wm_infos    %{F$C_2}$layout"
+						wm_infos="$wm_infos  %{F$C_2}$layout"
 						;;
 				esac
 				shift
 			done
 			;;
 	esac
-	printf "%s\n" "%{l} $bspwm $wm_infos %{c} $title %{r} $sys_infos  "
+	printf "%s\n" "%{l}$bspwm $wm_infos  $song_final %{c} $title_final %{r} $sys_infos"
 done

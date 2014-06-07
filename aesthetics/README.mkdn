@@ -1,4 +1,4 @@
-The panels are bar aint recursive (see .config/bspwm/panel). The current one is based on the default bspwm bar and esn89's bar.
+The panels are bar aint recursive (see .config/bspwm/panel). The current one is based on the default bspwm bar and esn89's bar (just panel). The top panel from the old screenshot is panel2.
 The conky theme is charley166's lsd theme (I've modified it to create a black version as well).
 Fonts used are Inconsolata (and maybe -g or -dz; I don't remember) for the terminal, and uushi and stlarch for the panels.
 I'm using feh to set the background.
