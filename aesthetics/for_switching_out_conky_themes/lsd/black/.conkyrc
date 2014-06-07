@@ -106,6 +106,9 @@ draw_shades no
 # change to black
 default_color 000000
 default_shade_color 000000
+# white
+# default_color ffffff
+# default_shade_color ffffff
 color0 00d9ff
 color1 ffffff
 color2 ffffff

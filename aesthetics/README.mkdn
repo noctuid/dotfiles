@@ -1,6 +1,7 @@
-The panels are bar aint recursive (see .config/bspwm/panel).
-The conky theme is charley166's lsd theme modified to be made black.
-Fonts are Inconsolata (and maybe -g or -dz; I don't remember) for the terminal, and uushi and stlarch for the panels.
+The panels are bar aint recursive (see .config/bspwm/panel). The current one is based on the default bspwm bar and esn89's bar.
+The conky theme is charley166's lsd theme (I've modified it to create a black version as well).
+Fonts used are Inconsolata (and maybe -g or -dz; I don't remember) for the terminal, and uushi and stlarch for the panels.
+I'm using feh to set the background.
 
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/clean.png "SCREENSHOT")
 

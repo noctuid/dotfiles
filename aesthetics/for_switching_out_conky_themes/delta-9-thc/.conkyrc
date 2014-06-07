@@ -1,0 +1,36 @@
+update_interval 1
+total_run_times 0
+net_avg_samples 1
+cpu_avg_samples 1
+imlib_cache_size 0
+double_buffer yes
+no_buffers yes
+use_xft yes
+xftfont Zekton:size=9
+override_utf8_locale yes
+text_buffer_size 2048
+own_window_class Conky
+own_window yes
+own_window_type override
+own_window_transparent yes
+own_window_hints undecorated,sticky,skip_taskbar,skip_pager
+alignment tr
+gap_x 40
+gap_y 50
+minimum_size 450 245
+default_bar_size 30 8
+draw_shades no
+default_color ffffff
+default_shade_color 000000
+color0 00d9ff
+color1 ffffff
+color2 ffffff
+
+TEXT
+${voffset 55}${goto 240}${font Zekton:style=bold:size=30}${time %H:%M}
+${goto 60}${voffset -60}${font Zekton:style=Bold:size=9}CPU 
+${goto 63}${font Zekton:style=Bold:size=9}${color1}${cpu cpu0}%
+${goto 88}${voffset 30}${font Zekton:style=Bold:size=9}${color1}HDused${goto 180}RAM${goto 240}Temperature
+${goto 88}${voffset 0}${font Zekton:style=Bold:size=9}${color1}${fs_used /}${goto 185}${memperc}%${goto 260}${acpitemp}°C
+
+${image ~/.conky/delta-9-thc.png -p 0,0 -s 450x245}

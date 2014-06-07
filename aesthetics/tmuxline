@@ -26,9 +26,10 @@ setw -g window-status-activity-fg 'colour250'
 setw -g window-status-separator ''
 setw -g window-status-bg 'colour234'
 
-set -g status-left '#[fg=colour16,bg=colour253,bold] #S:#I.#P #[fg=colour253,bg=colour239,nobold,nounderscore,noitalics]⮀#[fg=colour198,bg=colour239] #h #[fg=colour239,bg=colour236]⮀ #[fg=colour152,bg=colour236] #(~/bin/tmux/git_staged.sh) #[fg=colour247,bg=colour236]⮁#[fg=colour152,bg=colour236] #(~/bin/tmux/git_modified.sh) #[fg=colour236,bg=colour232]⮀ #[fg=colour232,bg=colour238]⮀'
+set -g status-left "#[fg=colour236,bg=colour253,bold] #S:#I.#P #[fg=colour253,bg=colour239,nobold,nounderscore,noitalics]⮀#[fg=colour197,bg=colour239] #h #[fg=colour239,bg=colour236]⮀ #[fg=colour116,bg=colour236] #(~/bin/tmux/git_staged.sh) #[fg=colour247,bg=colour236]⮁#[fg=colour116,bg=colour236] #(~/bin/tmux/git_modified.sh) #[fg=colour236,bg=colour232]⮀ #[fg=colour232,bg=colour238]⮀"
+# #(acpi -t | awk '{print $4}') 
 
-set -g status-right "#[fg=colour232,bg=colour238,nobold,nounderscore,noitalics]⮂#[fg=colour134,bg=colour232] ⮕ #(mpc current) #[fg=colour236,bg=colour232]⮂#[fg=colour152,bg=colour236] ⯆ #(~/bin/tmux/ram.sh)%% #[fg=colour239,bg=colour236]⮂#[fg=colour197,bg=colour239]⮠ #(acpi --battery | awk '{print $4}' | sed 's/,//') #[fg=colour253,bg=colour239,nobold,nounderscore,noitalics]⮂#[fg=colour235,bg=colour253] #(date +'%m.%d.%y%l:%M%P')"
+set -g status-right "#[fg=colour232,bg=colour238,nobold,nounderscore,noitalics]⮂#[fg=colour104,bg=colour232] ⮕ #(~/bin/tmux/current_song.sh) #[fg=colour236,bg=colour232]⮂#[fg=colour116,bg=colour236] ⯆ #(~/bin/tmux/ram.sh)%% #[fg=colour239,bg=colour236]⮂#[fg=colour197,bg=colour239]⮠ #(acpi --battery | awk '{print $4}' | sed 's/,//') #[fg=colour253,bg=colour239,nobold,nounderscore,noitalics]⮂#[fg=colour236,bg=colour253,bold] #(date +'%m.%d.%y%l:%M%P')"
 
 # setw -g window-status-format '#[fg=colour244,bg=colour234] #I#[fg=colour250,bg=colour234] #W ⮁ '
 # setw -g window-status-current-format '#[fg=colour234,bg=colour234,nobold,nounderscore,noitalics]⮁#[fg=colour31,bg=colour234,bold]#I #W #[fg=colour31,bg=colour234,nobold,nounderscore,noitalics]⮁'
