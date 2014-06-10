@@ -3,12 +3,19 @@ The conky theme is charley166's lsd theme (I've modified it to create a black ve
 Fonts used are Inconsolata (and maybe -g or -dz; I don't remember) for the terminal, and uushi and stlarch for the panels.
 I'm using feh to set the background.
 
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/clean.png "SCREENSHOT")
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/clean.png "Clean Desktop")
 
+Termite and pentadactyl colours:
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/term_and_penta_colours.png "Term and Penta Colours")
+
+My homepage (modified from [gokoururi's homepage](https://github.com/gokoururi/homepage)):
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/homepage.png "HOMEPAGE")
+
+Not that useful, but it looks nice. The only thing I've done is added an extra column with blue coloring, changed the links, changed the favicon, added a bunch of renders to the `mascots` folder, and added an extra 'i', a hyphen, and an actual ellpsis character…
+
+Older:
 The tmux statusline was generated with tmuxline and then heavily modified. I've stopped using tmux-powerline and just taken parts of the segments I like (notably the git staged and git modified parts on the left).
-
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/tmux_statusline.png "SCREENSHOT")
 
 I guess you could say I used tmuxline, but I ended up only keeping a few of the colours to match my airline theme. This is what it looked like initially:
-
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/tmuxline.png "SCREENSHOT")
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/tmuxline.png "Tmuxline")
