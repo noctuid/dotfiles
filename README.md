@@ -74,7 +74,7 @@ Now completed:
 # Cool Things I've Stolen
 ## Use Functions in Ranger
 I use this mainly for things like image rotation, git, and file extraction; ranger serves as a nice interface in many cases. I've only found this to work for functions and not aliases.
-The downside of this is that the shell command is much slower. Because of this, I have duplicated the original and renamed it "quickshell" for bindings (see `commands.py`). I'll probably reverse the naming at some point to leave the default "shell" command the same.
+The downside of this is that the shell command is much slower. Because of this, I have duplicated the original and renamed the new shell command to "showshell."
 
 [source](https://bbs.archlinux.org/viewtopic.php?id=93025&p=34)
 I've modified it for zsh.
@@ -127,7 +127,7 @@ Pentadactyl already has :w and ;s which allow for typing out file path with tab 
 
 See [this post](http://angelic-sedition.github.io/blog/2014/04/30/using-ranger-for-downloads/) for more detailed information and other possibilities.
 
-I really wish I could do this for uploads as well. If anyone knows a good way to universally obsolete the upload gui, please let me know. Right now, I do image uploads from the commandline and paste in the file location (after yanking it in ranger) to the upload gui when I have to use it (see the above link for more information).
+I really wish I could do this for uploads as well. If anyone knows a good way to universally obsolete the upload gui, please let me know. I've gotten an "upload file: " prompt with pentadactyl after link hinting the top left of a website I wasn't even logged into once; though I couldn't find any information on this. Right now, I do image uploads from the commandline and paste in the file location (after yanking it in ranger) to the upload gui when I have to use it (see the above link for more information).
 
 ## Tabs Outliner Replacement
 One reason I stuck with Chromium for so long is because of this extension. I used to use things like pocket, evernote webclipper, other read later extensions, and even bookmarks for anything I wanted to look at later. I found it better to just save links in an organized structure with TO and save anything I wanted to keep as html and incorporate it into my folder structure. I thought of several possibilities for replacing this functionality with pentadactyl (tab groups and session saving; stuff with bookmarks) and decided to use vimwiki as in interface for saved links. Basically, I created a script that saves the current link to a .wiki file by the title of the argument you give it. Saving all tabs can be done with pentadactyl's :tabdo command. Another binding opens an instance of vim for the index.wiki file. Enter opens links. I still need to add automatic addition of new .wiki files to the index.wiki file. I may work on automatic naming based on tab groups similar to what I do with unite sometime in the future. I may add a more "tree style" like structure in the future.

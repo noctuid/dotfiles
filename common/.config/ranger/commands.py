@@ -228,7 +228,7 @@ class chain(Command):
             self.fm.execute_console(command)
 
 
-class shell(Command):
+class slowershell(Command):
     escape_macros_for_shell = True
 
     def execute(self):
@@ -273,9 +273,8 @@ class shell(Command):
             return (before_word + ' ' + file.shell_escaped_basename \
                     for file in self.fm.thisdir.files \
                     if file.shell_escaped_basename.startswith(start_of_word))
-            
-# add quickshell; no sourcing zshrc
-class quickshell(Command):
+# don't source zshrc
+class shell(Command):
     escape_macros_for_shell = True
 
     def execute(self):
