@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Example for $XDG_CONFIG_HOME/sxiv/exec/image-info
+# Called by sxiv(1) whenever an image gets loaded,
+# with the name of the image file as its first argument.
+# The output is displayed in sxiv's status bar.
+
+s=" | " # field separator
+
+filename=$(basename "$1")
+filesize=$(du -Hh "$1" | cut -f 1)
+
+geometry=$(identify -format '%wx%h' "$1[0]")
+
+tags=$(exiv2 -q -P v -g "Iptc.Application2.Keywords" "$1" | tr '\n' ',')
+tags=${tags%,}
+
+echo "${filesize}${s}${geometry}${tags:+$s}${tags}${s}${filename}"
