@@ -3,7 +3,10 @@
 " lock space like other keys
 " set up yanking properly in unite
 " better vertigo bindings?
+" fix tabnew binding speed
 " a lot..
+" consider: nnoremap ; q:i
+" better split bindings
 
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
@@ -904,7 +907,6 @@ let g:taboo_renamed_tab_format=' %N [%f]%m '
 set sessionoptions+=tabpages,globals
 
 nnoremap <leader>r :TabooRename<space>
-" nnoremap <leader>tn :TabooOpen<space>
 
 " source so that <space>u will work
 nnoremap <leader>t :tabnew<cr>
@@ -1512,8 +1514,8 @@ NeoBundle 'tpope/vim-repeat'
 NeoBundle 'kana/vim-arpeggio'
 NeoBundle 'Shougo/vimshell.vim'
 " all text boxes vim
-NeoBundle 'ardagnir/pterosaur'
-NeoBundle 'ardagnir/eventloop.vim'
+NeoBundle 'ardagnir/shadowvim'
+" NeoBundle 'ardagnir/eventloop.vim'
 "  calendar
 NeoBundle 'itchyny/calendar.vim'
 

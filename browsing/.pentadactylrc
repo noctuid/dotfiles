@@ -535,6 +535,8 @@ map -builtin <leader>t gH
 nmap -builtin <esc> <esc>:noh<cr>
 
 " Leader Bindings {{{
+" toggle pterosaur
+nmap -ex <leader>v set fullvim!
 " reload
 nmap -ex <leader>. source ~/.pentadactylrc
 nmap -ex <leader>s source ~/.pentadactylrc
