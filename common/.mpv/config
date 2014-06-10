@@ -7,8 +7,8 @@
 screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
 screenshot-format=png
 screenshot-png-compression=5
-
-# }}}
+sub-scale=1
+ }}}
 
 # try to use high quality opengl output, with standard opengl, classic xv, and wayland as fallbacks
 # note: opengl has numerous quality/performance trade-off options.
@@ -23,7 +23,7 @@ ao=alsa,pulse,oss
 channels=5.1
 
 # scale the subtitles to the 3% of the screen size
-sub-scale=3
+# sub-scale=3
 
 # set the window title using the media filename (see Property Expansion section of mpv(1))
 title="${filename}"
