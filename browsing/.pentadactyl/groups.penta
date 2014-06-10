@@ -1,0 +1,123 @@
+" TODO:
+" different passthrough (less) for children
+
+" feedkeys only works with pentadactyl it seems
+" Tumblr"{{{
+group tumblr -description "Custom Tumblr Mappings" -locations tumblr.com/dashboard,tumblr.com/.*/drafts
+set passkeys+=tumblr.com/dashboard:jkq
+set passkeys+=tumblr.com/blog/.*/drafts:jkq
+" colemak up and down
+silent nmap -group tumblr -ex n silent !xsendkey j
+silent nmap -group tumblr -ex e silent !xsendkey k
+
+" go to dashboard
+silent nmap -group tumblr -ex gh open tumblr.com
+" go to drafts
+silent nmap -group tumblr -ex gd open tumblr.com/drafts
+" go to messages
+silent nmap -group tumblr -ex gm open tumblr.com/messages
+" go to settings
+silent nmap -group tumblr -ex gs open tumblr.com/settings
+
+" tag post
+silent nmap -group tumblr -ex m silent !xsendkey comma && xsendkey t && xsendkey Escape
+" q to queue
+" save as draft
+silent nmap -group tumblr -ex v silent !xsendkey comma && xsendkey d && xsendkey Escape
+" reblog
+silent nmap -group tumblr -ex R silent !xsendkey comma && xsendkey r && xsendkey Escape
+" like
+silent nmap -group tumblr -ex i silent !xsendkey comma && xsendkey l && xsendkey Escape
+
+"}}}
+
+" Twitter"{{{
+group twitter -description "Custom Twitter Mappings" -locations twitter.com
+
+set passkeys+=twitter.com/:jk.?<cr>,gh,gn,ga,gr,gd,gf,gl,gm,gs,gu
+" colemak up and down
+silent nmap -group twitter -ex n silent !xsendkey j
+silent nmap -group twitter -ex e silent !xsendkey k
+
+" compose (probably will never use)
+silent nmap -group twitter -ex c silent !xsendkey comma && xsendkey n
+
+" f favourite
+silent nmap -group twitter -ex i
+" r reply
+silent nmap -group twitter -ex R
+" t retweet
+silent nmap -group twitter -ex x
+"}}}
+
+" MAL"{{{
+group MAL -description "Custom MAL GOTOs" -locations myanimelist.net
+
+" export list
+silent nmap -group MAL -ex ge open myanimelist.net/panel.php?go=export
+" go to inbox
+silent nmap -group MAL -ex gI open http://myanimelist.net/mymessages.php
+silent nmap -group MAL -ex gh open http://myanimelist.net/panel.php
+silent nmap -group MAL -ex gf open http://myanimelist.net/forum/
+silent nmap -group MAL -ex ga open http://myanimelist.net/topanime.php
+silent nmap -group MAL -ex gm open http://myanimelist.net/topmanga.php 
+silent nmap -group MAL -ex gc open http://myanimelist.net/clubs.php?action=myclubs
+ "}}}
+
+" Reddit"{{{
+group reddit -description "Custom Reddit GOTOs" -locations reddit.com
+
+" for RES
+set passkeys+=reddit.com:?;neGkKixcCaz<cr>
+ 
+silent nmap -group reddit -ex gh open http://www.reddit.com/
+silent nmap -group reddit -ex gv open http://www.reddit.com/r/vim/
+silent nmap -group reddit -ex gu open http://www.reddit.com/r/unixporn 
+silent nmap -group reddit -ex gc open http://www.reddit.com/r/commandline/
+silent nmap -group reddit -ex gt open http://www.reddit.com/r/tmux
+silent nmap -group reddit -ex gf open http://www.reddit.com/r/animegifs
+silent nmap -group reddit -ex ga open http://www.reddit.com/r/anime
+
+silent nmap -group reddit -ex gI open http://www.reddit.com/message/inbox/
+silent nmap -group reddit -ex gC open http://www.reddit.com/message/compose/
+" settings
+silent nmap -group reddit -ex gs open https://ssl.reddit.com/prefs/
+ "}}}
+
+" 4chan"{{{
+group chan -description "eh" -locations 4chan.org
+" passkeys for 4chan X
+set passkeys+=4chan.org/(a|b|c|d|e|g|gif|h|lit|mu|are|u|v|y)/:hneikKxXacm
+" different passthrough on threads; need to figure out how to do
+" set passkeys+=4chan.org/.*/*:hikKxXacm
+
+" download 4chan thread images; choose single shot or not
+" silent nmap -group chan -builtin <leader>f y:silent !~/bin/dlf.sh chan <c-v><c-v> 
+silent nmap -group chan -ex <leader>f execute "silent !~/bin/dlf.sh 4chan " + buffer.URL + " &"
+
+" Gotos
+silent nmap -group chan -ex ga open http://www.4chan.com/a
+silent nmap -group chan -ex gc open http://www.4chan.com/c
+silent nmap -group chan -ex gG open http://www.4chan.com/gif
+silent nmap -group chan -ex gh open http://www.4chan.com/h
+silent nmap -group chan -ex gT open http://www.4chan.com/g
+silent nmap -group chan -ex gw open http://www.4chan.com/w
+silent nmap -group chan -ex gy open http://www.4chan.com/y
+
+"}}}
+
+" Fakku"{{{
+group fakku -description "Happiness" -locations fakku.net
+" passkeys (for webcomic reader)
+set passkeys+=fakku.net/(doujinshi|manga)/.*/*#*/:hneibmxk.<right><left>
+
+" Downloading from fakku
+silent nmap -group fakku -ex <leader>f execute "silent !~/bin/dlf.sh fakku " + buffer.URL + " &"
+"}}}
+
+" Gelbooru"{{{
+group gel -description "jelly" -locations gelbooru.com
+silent nmap -group gel -ex <leader>f execute 'silent !~/bin/dlf.sh gel "' + buffer.URL + '" &'
+
+silent nmap -ex <leader>F silent !~/bin/dlf.sh
+"}}}

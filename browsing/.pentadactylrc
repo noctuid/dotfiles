@@ -1,0 +1,1024 @@
+" todo : 
+" gmail beeping?
+" fucking bookmark folders
+" working tab groups
+
+" downloads here; then with ranger..
+silent cd ~/Move
+
+" some sources: {{{
+" https://github.com/mashiro/dot-files/blob/master/.vimperatorrc
+" https://github.com/w0ng/dotfiles/blob/master/.pentadactylrc
+" https://github.com/joedicastro/dotfiles/blob/master/pentadactyl/pentadactylrc
+" "}}}
+" #==============================
+" WM Experementation"{{{
+" #==============================
+" use -ex for ex commands; -builtin with : and <cr> will make significantly slower; this is essentially instantaneous
+" straight from vimrc with following search and replace:
+" change nnoremap to nmap
+" change <silent> to -ex
+" remove : and <cr>
+
+" "r" is redraw"{{{
+" worskpace/Destkop switch"{{{
+nmap -ex ra silent !bspc desktop -f ^1
+nmap -ex rr silent !bspc desktop -f ^2
+nmap -ex rs silent !bspc desktop -f ^3
+nmap -ex rt silent !bspc desktop -f ^4
+nmap -ex rd silent !bspc desktop -f ^5
+nmap -ex rh silent !bspc desktop -f ^6
+nmap -ex rn silent !bspc desktop -f ^7
+nmap -ex re silent !bspc desktop -f ^8
+nmap -ex ri silent !bspc desktop -f ^9
+nmap -ex ro silent !bspc desktop -f ^10
+"}}}
+" move to destkop"{{{
+nmap -ex Ra silent !bspc window -d ^1
+nmap -ex Rr silent !bspc window -d ^2
+nmap -ex Rs silent !bspc window -d ^3
+nmap -ex Rt silent !bspc window -d ^4
+nmap -ex Rd silent !bspc window -d ^5
+nmap -ex Rh silent !bspc window -d ^6
+nmap -ex Rn silent !bspc window -d ^7
+nmap -ex Re silent !bspc window -d ^8
+nmap -ex Ri silent !bspc window -d ^9
+nmap -ex Ro silent !bspc window -d ^10
+"}}}
+
+" moving windows within desktop"{{{
+" move to biggest
+nmap -ex rcm silent !bspc window -s biggest
+" directions
+nmap -ex rch silent !bspc window -s left
+nmap -ex rcn silent !bspc window -s down
+nmap -ex rce silent !bspc window -s up
+nmap -ex rci silent !bspc window -s right
+" circulate
+nmap -ex r. silent !bspc desktop -C forward
+nmap -ex r, silent !bspc desktop -C backward
+"}}}
+
+"resize"{{{
+nmap -ex rmh silent !~/bin/resize.sh left
+nmap -ex rmn silent !~/bin/resize.sh down
+nmap -ex rme silent !~/bin/resize.sh up
+nmap -ex rmi silent !~/bin/resize.sh right
+"}}}
+" open urxvt
+nmap -ex ru silent !urxvt &
+
+" close window
+nmap -ex rx silent !bspc window -c
+"}}}
+
+" s becomes select/Show/settings"{{{
+"select
+nmap -ex sh silent !bspc window -f left
+nmap -ex sn silent !bspc window -f down
+nmap -ex se silent !bspc window -f up
+nmap -ex si silent !bspc window -f right
+nmap -ex sl silent !bspc window -f last
+
+" monocle toggle
+nmap -ex st silent !bspc desktop -l next
+nmap -ex ss silent !bspc window -t sticky
+nmap -ex sf silent !bspc window -t fullscreen
+
+" gap up and down
+nmap -ex su silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))
+nmap -ex sd silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))
+
+" preselect"{{{
+nmap -ex sph silent !bspc window -p left
+nmap -ex spn silent !bspc window -p down
+nmap -ex spe silent !bspc window -p up
+nmap -ex spi silent !bspc window -p right
+nmap -ex spx silent !bspc window -p cancel
+nmap -ex spd silent !bspc desktop -c
+"}}}
+"}}}
+
+"}}}
+" #==============================
+" Actual Firefox Settings (about:config)"{{{
+" #==============================
+set! browser.download.dir=/home/angelic_sedition/Move
+set! browser.newtab.url=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
+set! browser.startup.homepage=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
+"}}}
+" #==============================
+" # QuickMarks {{{
+" #==============================
+silent qmark a https://bbs.archlinux.org/
+silent qmark b http://www.dustloop.com/forums/index.php?/forum/63-blazblue/
+silent qmark c http://forum.colemak.com/ 
+silent qmark e http://www.exitpath-levelmakers.forumotion.com/
+silent qmark E https://ep-sys.appspot.com/login.jsp
+silent qmark f http://www.4chan.org/
+silent qmark F http://www.fakku.net/
+silent qmark g http://www.geekhack.org/
+silent qmark G http://www.gelbooru.com
+silent qmark h https://www.github.com/
+silent qmark H http://news.ycombinator.com/news
+silent qmark i http://www.ign.com/games/vita?sortBy=score&sortOrder=desc
+silent qmark k http://kissanime.com/Search/Anime
+silent qmark l http://www.last.fm/
+silent qmark L http://www.lifehacker.com/
+silent qmark m http://myanimelist.net
+silent qmark p http://pixiv.net/
+silent qmark M https://mail.google.com/mail/
+silent qmark q http://quora.com/
+silent qmark r http://reddit.com/  
+silent qmark R http://redditbooru.com/
+silent qmark s http://myanimelist.net/clubs.php?cid=27907 
+silent qmark S http://stumbleupon.com/
+silent qmark t http://www.tumblr.com/dashboard/
+silent qmark T http://twitter.com/home/
+silent qmark v http://www.reddit.com/r/vim/
+silent qmark w http://www.wololo.net
+silent qmark y http://youtube.com/
+
+"}}}
+" #==============================
+" BMarks {{{
+" #==============================
+" https://github.com/mashiro/dot-files/blob/master/.vimperatorrc
+" this is specifically for custom search bookmarks and such; edited because bookmarks.isBookmarked is deprecated apparently
+javascript <<EOM
+function bmark(title, url, keyword) {
+	if (!bookmarkcache.isBookmarked(url)) {
+		bookmarks.add(false, title, url, keyword, ['keyword'], false);
+	}
+}
+
+bmark('Amazon', 'http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s','am')
+bmark('Arch Wiki', 'http://wiki.archlinux.org/index.php?search=%s', 'aw')
+bmark('Post to Twitter', 'http://twitter.com/home?status=%s', 'tweet')
+bmark('Quickly Get to Subreddit', 'http://www.reddit.com/r/%s/', 'r')
+bmark('Rotten Tomatoes Search', 'http://www.rottentomatoes.com/search/?search=%s', 'rt')
+bmark('Duck Duck Go', 'http://duckduckgo.com/?q=%s', 'd')
+bmark('Search Anime4fun', 'http://www.anime4fun.com/search?keyword=%s', 'aff')
+bmark('Search Azlyrics', 'http://search.azlyrics.com/cgi-bin/azseek.cgi?q=%s', 'az')
+bmark('Search Fakku', 'http://www.fakku.net/search/%s', 'fk')
+//search tags
+bmark('Search Fluffy.is', 'http://fluffy.is/search.php?folders=&name=%s', 'fl')
+bmark('Search Full Fights', 'http://anime.fullfights.org/?s=%s', 'fu')
+bmark('Search Gelbooru', 'http://gelbooru.com/index.php?page=post&s=list&tags=%s', 'gel');
+bmark('Search Github', 'http://github.com/search?q=%s', 'gh')
+bmark('Search GoGo', 'http://www.gogoanime.com/?s=%s', 'gg')
+bmark('Search MAL', 'http://myanimelist.net/anime.php?q=%s', 'mal')
+bmark('Search Tumblr', 'http://www.tumblr.com/search/%s', 't')
+bmark('Search Youtube', 'http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search', 'y')
+bmark('Startpage', 'https://startpage.com/do/metasearch.pl?q=%s', 's')
+bmark('YubNub', 'http://yubnub.org/parser/parse?command=%s', 'yubnub');
+
+/*
+
+gines
+" alternative syntax:
+" silent bma -tags searchengine -title 'Arch Wiki' http://wiki.archlinux.org/index.php?search=%s -k aw
+  
+http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND
+
+deviantart search
+http://www.deviantart.com/?q=%s
+
+zerochan
+http://www.zerochan.net/%s
+
+alt to gim
+http://www.googleimageripper.com/#!/?search=true&key=puppies&page_start=1&safemode=on&tbs=any&silu=yes&autoremove_not_found=yes
+*/
+EOM
+" other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
+" useful mostly for stuff that combines things like mash, split, weird piping stuff, etc.
+" }}} 
+
+" Bookmarklets: "{{{
+" translate bar: http://googlesystem.blogspot.com/2009/11/google-translation-bar.html
+" using s3.. not ideal
+
+command bml-readability -description "Bookmarklet: Make webpage readable using readability" open javascript:(%28function%28%29%7Bwindow.baseUrl%3D%27http%3A//www.readability.com%27%3Bwindow.readabilityToken%3D%27%27%3Bvar%20s%3Ddocument.createElement%28%27script%27%29%3Bs.setAttribute%28%27type%27%2C%27text/javascript%27%29%3Bs.setAttribute%28%27charset%27%2C%27UTF-8%27%29%3Bs.setAttribute%28%27src%27%2CbaseUrl%2B%27/bookmarklet/read.js%27%29%3Bdocument.documentElement.appendChild%28s%29%3B%7D%29%28%29)
+
+command bml-twitter -description "Bookmarklet: Share on Twitter" open javascript:(function(){window.twttr=window.twttr||{};var%20D=550,A=450,C=screen.height,B=screen.width,H=Math.round((B/2)-(D/2)),G=0,F=document,E;if(C>A){G=Math.round((C/2)-(A/2))}window.twttr.shareWin=window.open('http://twitter.com/share','','left='+H+',top='+G+',width='+D+',height='+A+',personalbar=0,toolbar=0,scrollbars=1,resizable=1');E=F.createElement('script');E.src='http://platform.twitter.com/bookmarklets/share.js?v=1';F.getElementsByTagName('head')[0].appendChild(E)}());
+
+command bml-grid -description "Show Grid" open javascript:void(myDiv=document.createElement('div'));void(myBody=document.getElementsByTagName('body')%5B0%5D);void(myDiv.style.background='url(http://www.andybudd.com/images/layoutgrid.png)');void(myDiv.style.position='absolute');void(myDiv.style.width='100%');void(myDiv.style.height='100%');void(myDiv.style.top='0');void(myDiv.style.left='0');void(myBody.appendChild(myDiv));
+
+command bml-reddit-submit-link -description "Submit Current Link to Reddit" open javascript:(function(){location.href='http://reddit.com/submit?url='+location.href+'&title='+encodeURIComponent(document.title)})();
+
+command bml-tumblr-share -descripiton "Share Current Page to Tumblr" open javascript:var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://www.tumblr.com/share',l=d.location,e=encodeURIComponent,p='?v=3&u='+e(l.href)%20+'&t='+e(d.title)%20+'&s='+e(s),u=f+p;try{if(!/^(.*.)?tumblr[^.]*$/.test(l.host))throw(0);tstbklt();}catch(z){a%20=function(){if(!w.open(u,'t','toolbar=0,resizable=0,status=1,width=450,height=430'))l.href=u;};if(/Firefox/.test(navigator.userAgent))setTimeout(a,0);else%20a();}void(0)
+
+"}}}
+" #==============================
+" # General Pentadactyl Settings {{{
+" #==============================
+" Set the external editor
+" editor:gvim -f +<line> +"sil! call cursor(0, <column>)" <file>
+set editor='/usr/bin/gvim -f +<line> <file>'
+
+" no smooth scroll
+set scs=1
+set scrolltime=0
+
+" open addons, h, extoptions, javascript, downloads, and prefs in a new tab
+set newtab=all
+" if there is a popup to be opened (not blocked), open in new tab
+set popups=tab
+" don't open external at end (this with tab-options plugin)
+" set tabopen=link:right,orphan:groupright,external:right
+" 
+if plugins.dactylTabOptionsDev
+" set tabclose=opener,previous,left,right
+set to=link:right,orphan:right,external:right
+endif
+
+set hintkeys=rstneiowfpluy
+
+" Search
+set noincfind
+set hlfind
+" replaces ignorecase and smartcase
+set findcase=smart
+
+set titlestring="Pentadactyl"
+
+" message history size
+set messages=100
+set verbose=1
+
+" items completed at :open
+" store command line history
+set history=1000
+
+" despotic.. in allowing focus change
+set strictfocus='chrome:*':laissez-faire,*:despotic
+
+" Set the default motor search (see bookmark)
+set defsearch=yubnub
+
+" }}}
+" #==============================
+" # _Appearance"{{{
+" #==============================
+colorscheme custom
+" only show the tab bar when there are multiple tabs
+set showtabline=multitab
+" added n for tab number (easier nav); C command line outside of status line; M messages outside status line; r right scrollbar (as a reference point); s for status bar
+set guioptions=CMrns
+
+" for command mode
+hi Normal -a font-family: Inconsolata !important; font-size: 9pt !important;
+" i.e. for -- PASS THROUGH -- and commandline typing
+hi FontFixed -a font-size:12px !important; font-family:"Inconsolata" !important;
+
+" Style: Minimalistic Tabs {{{
+" got this from one of the links above; not mine
+" changed colors
+style -name minitabs chrome://* <<EOM
+  #TabsToolbar toolbarbutton {
+    display: none !important;
+  }
+  .tabbrowser-tabs {
+    background: #1d282c !important;
+  }
+  .tabbrowser-tab {
+    -moz-appearance: none !important;
+    -moz-border-radius: 0 !important;
+    background: #1d282c !important;
+    border: none !important;
+    color: #707880 !important;
+    font-family: Cousine;
+    font-size: 9pt !important;
+    height: 18px !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    padding: 0 0.5ex !important;
+  }
+  .tabbrowser-tab:not([pinned]) {
+    max-width: 125px !important;
+    min-width: 125px !important;
+  }
+  .tabbrowser-tab:not([fadein]) {
+    max-width: 1px !important;
+    min-width: 1px !important;
+  }
+  .tabbrowser-tab:hover {
+    background: #F0C674 !important;
+    color: #282A2E !important;
+  }
+  .tabbrowser-tab[selected] {
+    background: #282A2E !important;
+    color: #F0C674 !important;
+  }
+EOM
+
+"}}}
+" }}}
+" #==============================
+" # Mappings/ Bindings {{{
+" #==============================
+nmap -builtin <c-w> <nop>
+" https://github.com/bunnyfly/dotfiles/blob/master/pentadactylrc
+" Colemak"{{{
+" normal/visual modes {{{
+nmap -builtin n 15<Down>
+nmap -builtin e 15<Up>
+
+map -builtin tk <pagedown>
+map -builtin to <pageup>
+
+" left and right on caps layer if ever actually needed
+nmap -builtin <left> 5<left> 
+nmap -builtin <right> 5<right>
+" visual mode, normal up and down
+vmap -builtin n <Down>
+vmap -builtin e <Up>
+
+" tab switching
+nmap -builtin N gT
+nmap -builtin E gt
+
+" tab moving
+nmap -ex <leader>e tabm +1
+nmap -ex <leader>n tabm -1
+
+" search next
+map -builtin k n
+map -builtin K N
+" last tab
+map -builtin l <C-^>
+" last position on page
+map -builtin L <c-o>
+"}}}
+
+" fix caret mode bindings:"{{{
+map -builtin -modes=caret n j
+map -builtin -modes=caret e k
+map -builtin -modes=caret i l
+map -builtin -modes=caret k n
+map -builtin -modes=caret K N
+"}}}
+"}}}
+
+" Improve default mappings {{{
+" Swap ; and :
+map -builtin ; :
+map -builtin : ;
+
+"swap m and M?
+" open quickmark in newtab
+nmap -builtin "'" gn
+nmap -builtin '"' go
+
+" back in browser history
+nmap -builtin h H
+" forward in browser history
+nmap -builtin H L
+
+" control backspace behaviour (this is caps w/cedilla>
+imap -builtin ¸ <c-w>
+cmap -builtin ¸ <c-w>
+
+" use t as leader and change o O to tabopen open
+" s for search is useless since using yubnub and customs; don't need to type anything; replaced in wm bindings
+map t <leader>
+" new tab used more often
+nmap -builtin o t
+nmap -builtin O o
+" change current url.. usually to change numbers at end
+nmap -builtin c O
+nmap -builtin C T
+
+" space for tab switching"{{{
+" context; would be nice to be able to do this without resourcing (I.e. build into each binding)
+nmap -builtin <space>q 1gt:source ~/.quickpenta<cr>
+nmap -builtin <space>w 11gt:source ~/.quickpenta<cr>
+nmap -builtin <space>f 21gt:source ~/.quickpenta<cr>
+nmap -builtin <space>p 31gt:source ~/.quickpenta<cr>
+nmap -builtin <space>g 41gt:source ~/.quickpenta<cr>
+
+if tabs.getTab().dactylOrdinal < "11"
+nmap <space>a 1gt
+nmap <space>r 2gt
+nmap <space>s 3gt
+nmap <space>t 4gt
+nmap <space>d 5gt
+nmap <space>h 6gt
+nmap <space>n 7gt
+nmap <space>e 8gt
+nmap <space>i 9gt
+nmap <space>o 10gt
+endif
+
+if tabs.getTab().dactylOrdinal > "10"
+nmap <space>a 11gt
+nmap <space>r 12gt
+nmap <space>s 13gt
+nmap <space>t 14gt
+nmap <space>d 15gt
+nmap <space>h 16gt
+nmap <space>n 17gt
+nmap <space>e 18gt
+nmap <space>i 19gt
+nmap <space>o 20gt
+endif
+
+if tabs.getTab().dactylOrdinal > "20"
+nmap <space>a 21gt
+nmap <space>r 22gt
+nmap <space>s 23gt
+nmap <space>t 24gt
+nmap <space>d 25gt
+nmap <space>h 26gt
+nmap <space>n 27gt
+nmap <space>e 28gt
+nmap <space>i 29gt
+nmap <space>o 30gt
+endif
+
+if tabs.getTab().dactylOrdinal > "30"
+nmap <space>a 31gt
+nmap <space>r 32gt
+nmap <space>s 33gt
+nmap <space>t 34gt
+nmap <space>d 35gt
+nmap <space>h 36gt
+nmap <space>n 37gt
+nmap <space>e 38gt
+nmap <space>i 39gt
+nmap <space>o 40gt
+endif
+" "}}}
+
+" swap d/D; move left when closing tab (see below for D mapping)
+nmap -builtin d D
+" sometimes a blank tab won't close and pentadactyl keys stop working; use this:
+nmap -ex gd js config.tabbrowser.removeTab(tabs.getTab())
+
+" swap p/P (new tab)
+" don't think "+ actually works here
+" nmap -builtin p "+P
+" nmap -builtin P "+p
+nmap -builtin p :tabopen <c-v><c-v><cr>
+nmap -builtin P :open <c-v><c-v><cr>
+imap .yp <c-v><c-v>
+cmap .yp <c-v><c-v>
+
+" yank to sytem clipboard
+" everything else might be unecessary; need to test
+js editor.defaultRegister="+"
+vmap -builtin y "+y
+nmap -builtin Y "+Y
+
+" U list closed tabs
+nmap -builtin U :undo<Space>
+
+" reload (I can't think of any situation in which macros would be useful..)
+nmap -builtin q r
+" hard refresh
+nmap -builtin Q R
+" stop reload
+nmap -ex > stop
+
+" auto add -tags option when adding bookmarks; would do this with folder option, but it does not exist ._.
+nmap -builtin a a<Space>-tags<Space>
+
+" swap full zoom and text zoom mapping (non cap is full zoom)
+nmap -builtin zi ZI
+nmap -builtin zm ZM
+nmap -builtin zo ZO
+nmap -builtin zr ZR
+nmap -builtin zz zZ
+nmap -builtin Zi zi
+nmap -builtin Zm zm
+nmap -builtin Zo zo
+nmap -builtin Zr zr
+nmap -builtin Zz zz
+" only use v in caret mode
+nmap -builtin v ZI
+nmap -builtin V ZO
+
+" }}}
+ 
+" Custom web bindings"{{{
+au Enter * source ~/.pentadactyl/groups.penta
+
+" pass all keys 'mode' (i.e. on reddit, 4chan, gmail, and other places with custom bindings)
+nmap -builtin , <pass-all-keys>
+
+"}}}
+
+" GOTOs {{{
+" by default, gn, gg, gb, gi, go, gP, gf, gh, gt, gu taken
+" gf- source F (with editor); gh homepage; gi- last used input field; gn- quickmark in newtab; gu parent directory; go jump to quickmark; gP open url from clipboard in background buffer
+" gu parent directory; gU root
+nmap -ex ge tabopen gmail.com
+nmap -ex gE open gmail.com
+"" open addons manager
+nmap -ex ga dialog addons
+" enter insert and paste
+nmap -builtin gp gi<c-v><c-v>
+nmap -builtin gc :tabopen g <c-v><c-v>
+nmap -ex gr rehash
+nmap -ex gs pageinfo
+
+" viewsource in new tab instead of in current
+nmap -ex gf tabopen viewsource
+"}}}
+
+" Leader mappings
+map -builtin <leader>t gH
+
+" Other
+" turn off highlight search
+nmap -builtin <esc> <esc>:noh<cr>
+
+" Leader Bindings {{{
+" reload
+nmap -ex <leader>. source ~/.pentadactylrc
+nmap -ex <leader>s source ~/.pentadactylrc
+
+nmap -ex <leader>p private winopen
+
+" stream all videos in _mpv {{{
+" For Youtube, Dailymotion, etc.:
+" http://www-users.cs.umn.edu/~oztekin/software/noflash/
+" from official repos: youtube-viewer (mplayer, vlc, mpv), minitube, 
+" ytmp from aur or youtube-viewer-git or youtube-pl or minitube-git.. megastreamd.. consoletube for vlc.. smtube
+
+" https://github.com/mpv-player/mpv/issues/481
+
+" simple youtube playing:
+" mpv already plays highest quality by default; I use a userscript to prevent autoplay
+nmap -ex <leader>y execute "silent !mpv " + buffer.URL + " &"
+" nmap -builtin y:silent !mpv <c-v><c-v> &<cr>
+" alternatively can use this if need something more sophisticated https://github.com/SirCmpwn/dotfiles/blob/master/scripts/youtube-view
+
+" Approach everywhere else: get the direct video link and then just mpv <link>
+"NOTE: This is mouse position/window location/screensize dependent and will not work for anyone else without the proper adjustments
+
+" My convoluted solution:
+" fake control+shift+c to open firebug console (because the firebug penta plugin doesn't work properly unless firebug has been opened first in that window)
+" then use it to get video link and send to mpv with clicks (I'm sure there's a better way to get the direct link than faking clicks, but it works)
+
+" play in mpv; needs firebug console open
+nmap -ex <leader>u silent !~/bin/pentadactyl/firebug_fake_mouse.sh
+" open firebug console on net tab (will remain open for same site in that window even with tab/url changes)
+nmap -builtin <leader>U :!~/bin/pentadactyl/firebug_fake_key.sh &<cr>:firebug tab net<cr>
+
+" }}}
+
+" Tabs Outliner Replacement for Mass Url Saving {{{
+" todo :
+" automatically send to file based on tab group name... like unite bookmarks except not for permanent links.. work through later and delete
+" vim mapping to open all links in file at once.. instead of doing a repeat for enter down for the number of lines
+" maybe add titles or more formatting
+
+command -nargs=* to !~/bin/to.sh <args>
+nmap -builtin <space>u <yank-location> :silent to add 
+
+" open saved tabs wiki
+nmap -ex <space>U !~/bin/to_win.sh
+
+" :tabdo to loop overtabs so to add all would do :tabdo to add
+
+" when close a buffer, delete the corresponding link if it exists
+" got working; can replace yank-location with y
+nmap -builtin D y:silent to delete<cr>D
+
+" }}}
+
+" Better Ranger Integration:"{{{ 
+" turn ranger popup on file save on and off
+nmap -ex <leader>r silent !~/bin/ranger/ranger_browser_fm.sh toggle
+" see autocommands and corresponding script
+"}}}
+
+" https://github.com/covin/pentadactylrc/blob/master/pentadactylrc
+" hide tabline
+map -ex <leader>b set showtabline!=always,never
+
+" }}}
+" }}}
+
+" autocommands
+au Enter * :source ~/.pentadactyl/autocommands
+
+" cookie management {{{
+" export cookies with https://addons.mozilla.org/en-US/firefox/addon/export-cookies/ 
+" (using for wget)
+nmap -js <leader>c exportCookies()
+    " set cookieaccept=samesite
+    " set cookielifetime=default
+    " map <Leader>c   :cookies<Space>
+    " map <A-c>       :cookies<Space><A-Tab>
+    " map -builtin <Leader>cr  :sanitize cookies
+" }}}
+
+" Dissolve {{{
+
+" tabgroup stuff I wish worked"{{{
+" nmap -builtin vn :tgroup-new<Space>
+" nmap -builtin vm :tgroup-move<Space>
+" nmap -builtin vs :tgroup-switch<Space>
+" nmap -builtin vd :tgroup-delete<Space>
+"" display tabgroup title on statusline
+" js <<EOF
+" overlay.overlayObject(statusline, {
+"     updateTabCount: function updateTabCount(delayed) {
+"         updateTabCount.superapply(this, arguments);
+"         if (!delayed) {
+"             let title = "";
+"             let groups = services.sessionStore.getWindowValue(window, "tabview-groups");
+"             if (groups) {
+"                 let active = JSON.parse(groups).activeGroupId;
+"                 let groupData = services.sessionStore.getWindowValue(window, "tabview-group");
+"                 title = JSON.parse(groupData)[active].title;
+"             }
+"             if (title) this.widgets.tabcount.value = "(" + title + ")" + this.widgets.tabcount.value;
+"         }
+"     }
+" });
+" EOF
+"}}}
+" quick access to firefox dialogs {{{
+" shortcut to firefox dialogs
+map -builtin <leader>d :dialog<space>
+" show download dialog
+map -ex <Leader>dd dialog downloads
+" }}}
+" dissolve {{{
+
+    " " ----- no-script integration ----- "
+    " :command ns-revoke -nargs=0
+    "             \ :set nst=
+    "             \ :echo "[no-script] temporary permissions have been revoked"
+
+    " set noscript-list=address
+    " "noscript short-cuts
+    " "noscript-sites
+    " map -b <Leader>ss  :set nss!=
+    " "noscript-tempsites
+    " map -b <A-s>       :set nst!=<A-Tab>
+    " map -b <Leader>st  :set nst!=
+    " " list tempsites
+    " map -b <Leader>sl  :set nst<CR>
+    " " remove tempsites
+    " map -b <Leader>sr  :ns-revoke<CR>
+    " "noscript-object
+    " map -b <Leader>so  :set nso!=<A-Tab>
+    " "noscript-untrusted
+    " map -b <Leader>su  :set nsu!=<A-Tab>
+" }}}
+"https://groups.google.com/forum/#!topic/pentadactyl/ba2t4KYKztg
+" try the following for proxies:
+" // get the proxy id (mode) for the currently activated proxy 
+" :echo FoxyProxy.mode 
+" 
+" // change proxy setting to the given proxy id (first argument) 
+" :js FoxyProxy.setMode(2787409772, false, false); 
+
+
+" view_source.editor.external: Change this to true. view_source.editor.path: Change this to the explicit path to your editor of choice. 
+
+"" display download
+" nmap -builtin ,d :downloads<CR>
+
+"" about:config
+" nmap -builtin ,c :tabopen about:config<CR>
+
+" }}}
+
+" graveyard"{{{
+" use pterosaur with vim iabbr instead
+" " shorthand"{{{
+" " http://forum.colemak.com/viewtopic.php?id=1804
+" iabbr ab about
+" iabbr about ab
+" iabbr abo above
+" iabbr above abo
+" iabbr ac actual
+" iabbr actual ac
+" iabbr af after
+" iabbr after af
+" iabbr ag again
+" iabbr again ag
+" iabbr l all
+" iabbr all l
+" iabbr lm almost
+" iabbr almost lm
+" iabbr ao also
+" iabbr also ao
+" iabbr alw always
+" iabbr always alw
+" iabbr amc America
+" iabbr America amc
+" iabbr n and
+" iabbr and n
+" iabbr ani animal
+" iabbr animal ani
+" iabbr anr another
+" iabbr another anr
+" iabbr ans answer
+" iabbr answer ans
+" iabbr ne any
+" iabbr any ne
+" iabbr nw anyway
+" iabbr anyway nw
+" iabbr r are
+" iabbr are r
+" iabbr aa area
+" iabbr area aa
+" iabbr ru are you
+" iabbr b be
+" iabbr be b
+" iabbr bc because
+" iabbr because bc
+" " are you okay with = rukw
+" " around = rnd|ro
+" " away = ay 
+" " been = bn 
+" " before = bf
+" " began = bga|ba
+" " begin = bgn|bi
+" " being = bng|bg
+" " below = bl 
+" " best = bs
+" " between = bt|tw
+" " book = bk
+" " both = bo|bh
+" " but - bu
+" " by the way = btw
+" " call = cl
+" " came = ca
+" " can = c
+" " can't = cn
+" " change = ch
+" " children = chd
+" " city = cy
+" " close = cs
+" " come = cm
+" " could = cd
+" " country = cty
+" " different = df
+" " does = ds
+" " doing = dg
+" " done = dn
+" " don't = d
+" " down = dw
+" " each = e|ea
+" " earth = erh
+" " easy = es
+" " eight = 8
+" " English = en|eng
+" " enough = nf
+" " even = ev|vn
+" " ever = er
+" " every = ey
+" " example = x
+" " family = fml
+" " father = ftr|fhr
+" " feet = f3|f8
+" " find = fd
+" " finding = fdg
+" " fine = fn
+" " first = fs
+" " five = 5
+" " follow = fl
+" " follower = flr
+" " food = fod|fu
+" " foot = ft
+" " for = f
+" " for example = fx
+" " forget = fg
+" " form = fo
+" " found = fnd|fw
+" " four = 4
+" " from = fm
+" " future = fut
+" " gave = gv|ga
+" " get = g
+" " girl = gl
+" " give = gi 
+" " going = gg
+" " good = gd
+" " great = g8
+" " ground = gr
+" " group = gp
+" " grow = gw
+" " hadn't = hdt
+" " happen = hpn|ha
+" " happened = hpd
+" " happening = hpng
+" " hasn't = hst
+" " hate = h8
+" " have = h
+" " haven't = ht
+" " having = hg
+" " head = hd
+" " hear = h3
+" " help = hp
+" " here = hr
+" " high = hh
+" " home = hm
+" " hope = ho
+" " hoping = hpg
+" " house = hs
+" " how = hw
+" " I'm = m
+" " image = img
+" " imagine = mgn|imgn
+" " important = imp|ip
+" " Indian = idn
+" " into = nt|i2
+" " is it = zt
+" " it is = tz
+" " it's = s
+" " just = j
+" " keep = kp
+" " kind = kd
+" " kind of = kf
+" " know = kw|kn
+" " large = lg
+" " later = lr
+" " lead = ld
+" " learn = lrn|l3
+" " learned = lrd|lrnd
+" " leave = lev
+" " left = le
+" " letter = ler
+" " life = lf
+" " light = lt
+" " like = lk
+" " line = ln
+" " list = ls
+" " little = ll
+" " live = li
+" " look = lc
+" " love = lv
+" " made = md
+" " make = mk
+" " manage = mg
+" " many = mn
+" " mean = m3
+" " might = mt
+" " mile = mi
+" " miss = mis
+" " more = mr (remove full stop from postfixes)
+" " most = mo
+" " mother = mot
+" " mountain = mtn
+" " move = mv
+" " much = mc
+" " must = ms
+" " name = na
+" " near = nr
+" " need = nd
+" " never = nv
+" " next = nx
+" " night = nit
+" " nine = 9
+" " number = nm
+" " often = ofn
+" " okay = k
+" " okay so = ks
+" " okay so now = ksn
+" " one = 1
+" " only = ol|oy|nl
+" " other = ot
+" " over = ov
+" " page = pg
+" " paper = pp
+" " part = pt
+" " people = p
+" " picture = pic
+" " place = pl
+" " plant = plt
+" " play = p3|pla
+" " please = ps|pz
+" " point = pn 
+" " probably = pr|prl|prb
+" " problem = pb
+" " question = qn
+" " quick = qk
+" " quickly = qkl|ql
+" " quite = q
+" " read = rd
+" " really = ry
+" " reason = rs
+" " right = ri|rit|rt
+" " river = rv
+" " run = rn
+" " said = sd
+" " same = sa
+" " say = sy
+" " says = sz
+" " school = scl
+" " second = sc
+" " see = se
+" " seen = sen
+" " sentence = stc
+" " seven = 7
+" " should = shd
+" " shouldn't = sht|shn
+" " show = sh
+" " side = sid
+" " sign = s9
+" " single = sng
+" " six = 6
+" " small = sml
+" " some = sm
+" " someone = som|smn
+" " something = sg
+" " sometimes = st
+" " soon = sn
+" " sorry = sry
+" " sort of = sf
+" " sound = snd
+" " speak = spk
+" " spell = sp|spl
+" " spelling = spg|splg
+" " start = sta
+" " state = stt
+" " statement = stm
+" " stay = sty
+" " steal = stl
+" " still = sl
+" " stop = stp
+" " story = soy|sto
+" " study = sdy
+" " such = su
+" " sure = sr
+" " take = t8
+" " talk = tlk
+" " tell = tl
+" " than = ta
+" " thank you = tu|tku
+" " thanks = tx|thx|tns
+" " that = tt
+" " the = t
+" " their = ter
+" " them = tm
+" " then = tn
+" " there = tr
+" " these = tes
+" " they = ty
+" " thing = tg|thg
+" " think = tnk|tk
+" " this = ts
+" " those = tos
+" " though = th
+" " thought = tht
+" " three = 3
+" " through = thr
+" " time = ti
+" " to be = tb
+" " together = tog
+" " took = tok
+" " tree = t3
+" " two = 2
+" " under = ndr|udr
+" " until = til
+" " use = z
+" " very = v
+" " wait = w8
+" " walk = wa
+" " want = wu
+" " was = o
+" " watch = wch
+" " water = wat|wtr|wer
+" " week = wek
+" " well = w3
+" " well done = wld
+" " went = w9
+" " were = wr
+" " we've = wev|wv
+" " what = wt
+" " what's = ws
+" " when = wn
+" " where = wh
+" " which = wi
+" " while = wli|whl
+" " white = wht
+" " whole = hl
+" " why = y
+" " why did = yd
+" " will = wl
+" " with = w
+" " without = wo
+" " work = wk
+" " world = wrl
+" " would = wd
+" " yeah = yea
+" " year = y3
+" " yes = ye
+" " you = u
+" " you'd = ud
+" " young = yg
+" " your = ur
+" " you're = yr
+" " 
+" "}}}
+" au DownloadPost * js CommandExMode().open("!echo " + BROWSER_NEW_TAB_URL + " > ~/bin/ranger/browser_type.txt")
+"}}}
