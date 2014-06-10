@@ -1,0 +1,41 @@
+#!/bin/bash
+# http://www.reddit.com/r/reactiongifs/comments/x55z9/after_i_learned_how_to_make_large_well_compressed/
+# http://superuser.com/questions/556029/how-do-i-convert-a-video-to-gif-using-ffmpeg-with-reasonable-quality
+# TODO:
+# add output naming option
+
+mkdir -p ~/database/Move/gif/frames
+cd ~/database/Move/gif
+
+# remove filetype extension
+filename=$(echo "$1" | sed 's/\.[^\.]*$//')
+
+# remove previous frames
+rm frames/*
+
+if [ "$1" == '-h' ];then
+	# so I can remember easily later
+	echo "conv_gif.sh file default [y/n to gifsicle] [optimize level]"
+	echo "or"
+	echo "file width fps fuzz [y/n to gifsicle] [optimize level]"
+elif [ "$2" == "default" ];then
+	# create frames from video
+	ffmpeg -i $1 -vf scale=600:-1 -r 10 frames/ffout%03d.png
+	# make gif
+	convert -fuzz 1.6% -delay 1/10 -loop 0 frames/*.png -layers OptimizePlus -layers OptimizeTransparency ${filename}.gif
+	if [ "$3" == "y" ];then
+		optimization_level=$4
+		gifsicle -O$optimization_level --colors 256 ${filename}.gif > ${filename}_gifsicled.gif
+	fi
+else
+	width=$2
+	fps=$3
+	fuzz_percent=$4
+	ffmpeg -i $1 -vf scale=$width:-1 -r $fps frames/ffout%03d.png
+	convert -fuzz $fuzz_percent% -delay 1/$fps -loop 0 frames/*.png -layers OptimizePlus -layers OptimizeTransparency ${filename}.gif
+	if [ "$5" == "y" ]
+	then
+		optimization_level=$6
+		gifsicle -O$optimization_level --colors 256 ${filename}.gif > ${filename}_gifsicled.gif
+	fi
+fi
