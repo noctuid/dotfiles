@@ -4,7 +4,7 @@
 
 # Destktops/ Workspaces
 bspc monitor -d I II III IV V VI VII VIII IX X
-
+ 
 # fix this
 if [ -e "$BSPWM_TREE" ] ; then
 	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
@@ -47,14 +47,25 @@ bspc config auto_cancel true
 # Window rules:#{{{
 # open firefox when go to second desktop (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
 bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("firefox")); }' &
+# for rest of desktops, open gvim when empty
+bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$4 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$5 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$6 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$7 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$8 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$9 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$10 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$11 ~ /^F/ { system("gvim &"); }' &
 
 # Can check class name of program with: xprop | grep WM_CLASS
-bspc rule -a guake floating=off
+bspc rule -a guake floating=on
+bspc rule -a gimp floating=off
 # bspc rule -a Firefox follow=false
-# bspc rule -a Gvim follow=true
 # bspc rule -a apvlv dekstop=^3
 # bspc rule -a Gvim desktop=^1
 #}}}
-
 panel &
-panel2 &
+# panel2 &
+# start gvim on first desktop on startup
+gvim &
