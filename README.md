@@ -1,14 +1,14 @@
 **Dotfiles**
+
 These are my dotfiles. Some are pretty heavily commented. If you have interest in keyboard ergonomics and remapping, they may be of some use. This repo is pretty incomplete at the moment. The documentation is mainly to allow me to keep track of things, so it may be somewhat incomprehensible if you are not well versed in the ways of the himalayan sand frog. Also note that I am not a programmer and some of my scripts are probably done or written badly.
 
 ## Pictures:
-Some words of wisdom from Tatsuya:
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/keyboard_ftw.gif "SCREENSHOT")
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/keyboard_ftw.gif "Words of wisdom from Tatsuya")
 
 See aesthetics for more info on theming, panels, etc.
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/clean.png "SCREENSHOT")
 
-Visualizations in ncmpcpp and album art of current song in ranger (outdated) both opened from vimus (see below and bin/music)
+Visualizations in ncmpcpp and album art of current song in ranger (outdated) both opened from vimus (see below and `bin/music`)
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/dirty.png "SCREENSHOT")
 
 # Goals for Configuration & Workflow:
@@ -63,7 +63,7 @@ Visualizations in ncmpcpp and album art of current song in ranger (outdated) bot
 - Implement more shorthand and completion; still considering the potential viability of plover
 
 Now completed:
-- Script to display album art in terminal split (see below and bin/albumart_display.sh)
+- Script to display album art in terminal split (see below and `bin/albumart_display.sh`)
 - Got Pterosaur working
 
 ## Of Less Importance
@@ -74,12 +74,13 @@ Now completed:
 # Cool Things I've Stolen
 ## Use Functions in Ranger
 I use this mainly for things like image rotation, git, and file extraction; ranger serves as a nice interface in many cases. I've only found this to work for functions and not aliases.
-The downside of this is that the shell command is much slower. Because of this, I have duplicated the original and renamed it "quickshell" for bindings (see commands.py). I'll probably reverse the naming at some point to leave the default "shell" command the same.
+The downside of this is that the shell command is much slower. Because of this, I have duplicated the original and renamed it "quickshell" for bindings (see `commands.py`). I'll probably reverse the naming at some point to leave the default "shell" command the same.
 
 [source](https://bbs.archlinux.org/viewtopic.php?id=93025&p=34)
 I've modified it for zsh.
-In commands.py, replace with the following under class shell(Command)
-            self.fm.execute_command("zsh -c 'source ~/.zshrc;" + command + "'", flags=flags)
+In `commands.py`, replace with the following under `class shell(Command):`
+        
+	self.fm.execute_command("zsh -c 'source ~/.zshrc;" + command + "'", flags=flags)
 
 # Some (Possibly) Interesting Things I Do:
 ## Create a Modal Interface For Programs That Don't Support Rebinding
@@ -94,7 +95,7 @@ Solution: Rebind keys to fake the existing keyboard shortcuts
 
 This solution is restricted to X currently (though something similar could probably done with AHK). It makes use of xchainkeys for the modal bindings and xdotool and xsendkey to fake the necessary keyboard input. A potentially "software independent" solution would be to use tmk firmware to make layers with macros and keys for "mode" (layer) switching. I have not been able to test this.
 
-See remap/.xchainkeys for an example configuration for Libre Writer. (Note that I have started using LaTeX with vim for basic documents and have found it surprisingly easier to do most things I was using Libre Writer for.)
+See `remap/.xchainkeys` for an example configuration for Libre Writer. (Note that I have started using LaTeX with vim for basic documents and have found it surprisingly easier to do most things I was using Libre Writer for.)
 
 ## Make Any Terminal Emulator Dropdown
 This is really just an idea that will require a lot of changes for someone else using it with different programs. The basic idea is to use a tmux session to save the terminal state and then actually kill or open a terminal and reattach. 
@@ -103,7 +104,7 @@ Sure there's guake, tilde, xfce4-term, yakuake, finalterm (*throws up*) and solu
 
 [Video Demonstration](http://youtu.be/3yhX_y1VdWE)
 
-See bin/my_dropdown.sh for the script
+See `bin/my_dropdown.sh` for the script
 
 ## Stream Any Video in MPV
 Existing solutions for playing videos in the player of your choice (i.e. mplayer or vlc) are limited in what they work with. There are quite a few programs that allow this for a few sites such as youtube and daily motion (consider as youtube-viewer and using quvi), but I'd rather use mpv with all its features (keybindings for screenshots, seeking, etc.) than send just fake clicks to pause and play videos where things like [noflash](http://www-users.cs.umn.edu/~oztekin/software/noflash/) don't work.
@@ -113,9 +114,9 @@ This is a relatively simple thing to do in actuality. The reason existing soluti
 There's almost certianly a much better way to do this, but I only know how to get this link manually: you open up firebug (or control+shift+j in chrome) and go to the net/media tab. When you play the video, the direct link will show up. What I've done is scripted the opening of the firebug window, the clicking on the video to start it, the clicking on the firebug window to copy that link, and then the opening of the link in mpv. This is mouse location dependent; the areas that need to be clicked will depend on screen size, window size, and firebug window size (all of these are constant for me but may be a problem if you use a floating wm; then again, if you're using a floating wm, you might not care about having to manually copy the link in the first place). I use this extensively, and it works quickly and consistently for me for almost every site/video player I've tried. A nice thing about firebug is that there is a wide range where you can click beside and below the media popup where it will allow you to copy the link.
 
 See 
-.bin/firebug_fake_mouse
-.bin/firebug_fake_key
-.the corresponding section in my .pentadactylrc (search undescore MPV)
+`bin/firebug_fake_mouse.sh`
+`bin/firebug_fake_key.sh`
+the corresponding section in my `.pentadactylrc` (search undescore MPV)
 Requirements: Pentadactyl, MPV, Firefox, and xdotool
 Some problems: Occasionally the video will quit in the middle or the buffering will be slow (it's the site's fault). For some sites, the played video won't be betected (I've only encountered this on two websites out of the 15+ I've truied).
 
@@ -133,10 +134,10 @@ One reason I stuck with Chromium for so long is because of this extension. I use
 
 Like TO, when the window is closed (with a special d binding), the link will be deleted from any of the .wiki files it is in.
 
-See bin/to.sh and bin/to_win.sh as well as common/.pentadactylrc.
+See `bin/to.sh` and `bin/to_win.sh` as well as `common/.pentadactylrc.`
 
 ## Block Layout in Vim and Example of Context Bindings
-Will add explanation.. see quickvimrc, quickpenta, groups.penta (site specific bindings), etc.
+Will add explanation.. see `.quickvimrc`, `.quickpenta`, `groups.penta` (site specific bindings), etc.
 
 ## Vim as a Clipboard Manager
 I've tried quite a few clipboard managers without liking any of them. What I really wanted was one with vim bindings, so I ended up deciding just to use vim.
@@ -145,10 +146,10 @@ Also, y and p are my universal copy paste bindings. I don't use c-v and c-c, and
 
 There's also easyclip, which I find nicer than yank stack or yank ring even though I don't use it
 
-Search underscore clipboard in my vimrc.
+Search underscore clipboard in my `.vimrc`.
 
 ## Termite Link Hinting and Remapping:
-Currently, termite does not support rebindings from the config file. I use colemak and prefer tmux copy mode, so this isn't that much of a problem for me. However, I really prefer termite's link hinting to things like urlview and urlscan. I usually only use link hinting in weechat, so I've bound f in normal mode (see my vimode.py fork) to bin/link_hint.sh to fake the key combo necessary to open the url hint window. I have a zsh binding, and for everything else I've bound it to tmux prefix-f (which I'll probably never use).
+Currently, termite does not support rebindings from the config file. I use colemak and prefer tmux copy mode, so this isn't that much of a problem for me. However, I really prefer termite's link hinting to things like urlview and urlscan. I usually only use link hinting in weechat, so I've bound f in normal mode (see my vimode.py fork) to `bin/link_hint.sh` to fake the key combo necessary to open the url hint window. I have a zsh binding, and for everything else I've bound it to tmux prefix-f (which I'll probably never use).
 
 ## Display Lyrics and Album Art With MPD (glitchy)
 Before I used ncmpcpp, I used cmus. I like the idea of having vi-like key bindings to begin with, but I could never get scrobbling working and like mpd a lot. However, to be frank, ncmpcpp has the worst binding capabilities of any tui program I use extensively (it's really pitiful), so I've recently switched to [vimus](https://github.com/vimus/vimus). I had some trouble installing it at first, and though it may not have as complex a ui as ncmpcpp, it has all the functionality I need as well as some interesting default bindings (like visual yanking and pasting of songs and appending/insertion of songs to the playlist) and support for multikey bindings.
@@ -158,8 +159,10 @@ I now have it working so that it will update the album art without manually hitt
 
 I've also bound a key to display the lyrics of the currently playing song in ncmpcpp in a tmux split.
 
+See `bin/music`
+
 ## Home Row Window Mangement (Eliminate the Window Management Binding Layer)
-See .vimrc and .lesskey for examples
+See `.vimrc` and `.lesskey` for examples.
 
 For me, window management is pretty much split between tmux and bspwm. Bspwm takes care of all my gui windows (and occasionally a terminal window), and tmux takes care of all my terminal sessions, windows, splits, etc.
 
@@ -189,11 +192,11 @@ I initially thought this would be impossible to replicate in the terminal but sp
 See the README in the remap folder for more info.
 
 ## Emacs With Vim Bindings
-I messed around with emacs for about a day to try to replicate as much of the functionality I have in vim with the same bindings (because I would never use emacs' defaults). Emacs is pretty awesome. The configuration is infinitely more complicated, but I see some interesting possibilities for doing certain things that I will try when I have the time and motivation to configure emacs further. My ~/.emacs may be of use.
+I messed around with emacs for about a day to try to replicate as much of the functionality I have in vim with the same bindings (because I would never use emacs' defaults). Emacs is pretty awesome. The configuration is infinitely more complicated, but I see some interesting possibilities for doing certain things that I will try when I have the time and motivation to configure emacs further. My `.emacs` may be of use.
 
 ## Make Gifs in MPV
 I thought it would be efficient to set up bindings within mpv to create gifs. I previously made a basic script to convert an existing video to a gif in mpv by having a binding to mark the start time and a binding to mark the end time. It's probably best to use the original video file for creating frames, but I've found it much easier (and really without any downside in terms of quality) to just record the active window (usually mpv in fullscren) using ffmpeg and convert that video into a gif instead using ffmpeg and imagemagick's convert. This is nice because it works for anything in mpv, even if you're streaming it (i.e. youtube videos). With bindings set up outside of mpv using a hotkey program (i.e. sxhkd), it can be used for any window (i.e. a fullscreen web player) to make a gif not of indecent size with a lack of much hassle.
 
-See bin/mpv/
+See `bin/mpv/`
 # Credit
 will add
