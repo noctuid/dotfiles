@@ -1,0 +1,19 @@
+{
+	"autoindent": true,
+	"caret_wide": true,
+	"close_windows_when_empty": true,
+	"color_scheme": "Packages/Color Scheme - Default/SpaceCadet.tmTheme",
+	"draw_white_space": "all",
+	"font_face": "Inconsolata",
+	"font_size": 11,
+	"ignored_packages":
+	[
+		"Vintage"
+	],
+	"remember_open_files": true,
+	"save_on_focus_lost": true,
+	"spell_check": true,
+	"tab_size": 4,
+	"translate_tabs_to_spaces": false,
+	"trim_trailing_white_space_on_save": true
+}
