@@ -1,0 +1,7 @@
+# overriding CTRL+t 'c' to start terminator instead of xterm
+bind c exec urxvt
+
+# keyboard config on startup
+exec setxkb us -variant colemak
+exec xmodmap -quiet ~/.Xmodmap
+
