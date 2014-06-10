@@ -1,0 +1,134 @@
+set cm=blowfish
+
+" no backups
+set nobackup nowritebackup
+
+" don't use viminfo (not encrypted)
+set viminfo=
+" no swapfiles, don't save undos to disk; don't save command history
+set noswapfile noundofile noshelltemp history=0
+
+" when searching lower case, will match any case
+set ignorecase
+" won't ignore case if search with upper case
+set smartcase
+
+" colemak and basic navigation
+noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
+
+" don't just place in the middle; open folds too
+nnoremap <silent> k nzozz|nnoremap <silent> K Nzozz
+
+" fold navigation for colemak
+nnoremap ze zk
+nnoremap zn zj
+
+" nnoremap tk
+" nnoremap to
+
+
+nnoremap ; :
+nnoremap : ;
+vnoremap ; :
+vnoremap : ;
+" Y like D
+nnoremap Y y$
+" Sane redo.
+noremap U <C-r>
+
+nnoremap L <c-i>
+" l for last
+nnoremap l <c-o>
+
+" I use a more than A
+nnoremap a A
+nnoremap A a
+
+" I use V more than v.. going to try this; can also double tap v now for visual
+nnoremap v V|nnoremap V v
+
+set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+" enable status line always
+set laststatus=2
+" now set it up to change the status line based on mode
+" http://vim.wikia.com/wiki/Change_statusline_color_to_show_insert_or_normal_mode
+if version >= 700
+  au InsertEnter * hi StatusLine term=reverse ctermbg=5 gui=undercurl guisp=Magenta
+  au InsertLeave * hi StatusLine term=reverse ctermfg=0 ctermbg=2 gui=bold,reverse
+endif
+set showcmd
+colorscheme darkrobot
+
+set number
+
+set clipboard=unnamedplus
+
+" tmux experimentation"{{{
+" "r" is redraw"{{{
+" window switching"{{{
+nnoremap <silent> ra :silent !tmux select-window -t 1<cr>
+nnoremap <silent> rr :silent !tmux select-window -t 2<cr>
+nnoremap <silent> rs :silent !tmux select-window -t 3<cr>
+nnoremap <silent> rt :silent !tmux select-window -t 4<cr>
+nnoremap <silent> rd :silent !tmux select-window -t 5<cr>
+nnoremap <silent> rh :silent !tmux select-window -t 6<cr>
+nnoremap <silent> rn :silent !tmux select-window -t 7<cr>
+nnoremap <silent> re :silent !tmux select-window -t 8<cr>
+nnoremap <silent> ri :silent !tmux select-window -t 9<cr>
+nnoremap <silent> ro :silent !tmux select-window -t 10<cr>
+"}}}
+" resize panes"{{{
+nnoremap <silent> rmh :silent !tmux resize-pane -L 10<cr>
+nnoremap <silent> rmn :silent !tmux resize-pane -D 10<cr>
+nnoremap <silent> rme :silent !tmux resize-pane -U 10<cr>
+nnoremap <silent> rmi :silent !tmux resize-pane -R 10<cr>
+"}}}
+" circulate
+" previous
+nnoremap <silent> r, :silent !tmux swap-pane -U<cr>
+" next
+nnoremap <silent> r. :silent !tmux swap-pane -D<cr>
+
+" new session
+nnoremap <silent> r_ :silent !tmux new-session<cr>
+
+" new window
+nnoremap <silent> rc :silent !tmux new-window<cr>
+" kill pane
+nnoremap <silent> rx :silent !tmux kill-pane<cr>
+" last window
+nnoremap <silent> rl :silent !tmux last-window<cr>
+" split windows
+nnoremap <silent> r/ :silent !tmux split-window -h<cr>
+nnoremap <silent> r- :silent !tmux split-window<cr>
+
+" break pane
+nnoremap <silent> r! :silent !tmux break-pane<cr>
+"}}}
+
+" "s" is select"{{{
+" panes"{{{
+" directions
+nnoremap <silent> sh :silent !tmux select-pane -L<cr>
+nnoremap <silent> sn :silent !tmux select-pane -D<cr>
+nnoremap <silent> se :silent !tmux select-pane -U<cr>
+nnoremap <silent> si :silent !tmux select-pane -R<cr>
+" last
+nnoremap <silent> sl :silent !tmux select-pane -l<cr>
+" select layout
+nnoremap <silent> sv :silent !tmux select-layout main-vertical<cr>
+
+" toggle "monocle" (zoom)
+nnoremap <silent> st :silent !tmux resize-pane -Z<cr>
+
+" bspwm
+" bspwm monocle (for dropdown terms)
+nnoremap <silent> sm :silent !bspc desktop -l monocle && bspc window -t floating<cr>
+nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
+
+"}}}
+
+" select session
+nnoremap <silent> ss :silent !tmux choose-client<cr>
+"}}}
+"}}}

@@ -2,6 +2,8 @@
 " add smartinput rules
 " lock space like other keys
 " set up yanking properly in unite
+" better vertigo bindings?
+" a lot..
 
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
@@ -9,7 +11,96 @@ set runtimepath+=~/.vim/colors
 " turns off vi compatibility mode for full vim functionality; set first
 set nocompatible
 
+"" Don't save backups of *.gpg files"{{{
+set backupskip+=*.gpg
+
+augroup encrypted
+  au!
+  " Disable swap files, and set binary file format before reading the file
+  " To avoid that parts of the file is saved to .viminfo when yanking or
+  " deleting, empty the 'viminfo' option.
+  autocmd BufReadPre,FileReadPre *.gpg
+    \ setlocal noswapfile noundofile noshelltemp history=0 viminfo= bin
+  " Decrypt the contents after reading the file, reset binary file format
+  " and run any BufReadPost autocmds matching the file name without the .gpg
+  " extension
+  autocmd BufReadPost,FileReadPost *.gpg
+    \ execute "'[,']!gpg --decrypt --default-recipient-self" |
+    \ setlocal nobin |
+    \ execute "doautocmd BufReadPost " . expand("%:r")
+  " Set binary file format and encrypt the contents before writing the file
+  autocmd BufWritePre,FileWritePre *.gpg
+    \ setlocal bin |
+    \ '[,']!gpg --encrypt --default-recipient-self
+  " After writing the file, do an :undo to revert the encryption in the
+  " buffer, and reset binary file format
+  autocmd BufWritePost,FileWritePost *.gpg
+    \ silent u |
+    \ setlocal nobin
+augroup END
+
+"}}}
+
+" vim as password manager"{{{
+" using truecrypt container with blowfish encrypted text file... makes sense? probably not
+" use the vpass alias with .encrypted_vimrc not this (no loading of plugins); I guess this is useful if accidentally open the buffer
+
+" no backup or writebackup for vault files
+set backupskip+=*.vault
+
+augroup vaultencrypted
+  au!
+  " Disable swap files, saving to disk of undo history, writing to disk of commands
+  " To avoid that parts of the file is saved to .viminfo when yanking or deleting, empty the 'viminfo' option.
+    " \ setlocal noswapfile noundofile noshelltemp history=0 viminfo=
+  autocmd BufReadPre,FileReadPre,BufEnter *.vault
+    \ setlocal noswapfile cm=blowfish noundofile noshelltemp viminfo= 
+augroup END
+
+autocmd BufEnter *.vault nmap <buffer> yy yi{
+
+"}}}
+
 " Experimental"{{{
+" " Compatible with ranger 1.4.2 through 1.6.*
+"
+" Add ranger as a file chooser in vim"{{{ "
+" https://github.com/hut/ranger/blob/master/doc/examples/vim_file_chooser.vim
+" If you add this code to the .vimrc, ranger can be started using the command
+" ":RagerChooser" or the keybinding "<leader>r". Once you select one or more
+" files, press enter and ranger will quit again and vim will open the selected
+" files.
+
+if !has("gui_running")
+function! RangeChooser()
+    let temp = tempname()
+" The option "--choosefiles" was added in ranger 1.5.1. Use the next line
+" with ranger 1.4.2 through 1.5.0 instead.
+"exec 'silent !ranger --choosefile=' . shellescape(temp)
+    exec 'silent !ranger --choosefiles=' . shellescape(temp)
+    if !filereadable(temp)
+" Nothing to read.
+        return
+    endif
+    let names = readfile(temp)
+    if empty(names)
+" Nothing to open.
+        return
+    endif
+" Edit the first item.
+    exec 'edit ' . fnameescape(names[0])
+" Add any remaning items to the arg list/buffer list.
+    for name in names[1:]
+        exec 'argadd ' . fnameescape(name)
+    endfor
+    redraw!
+endfunction
+
+command! -bar RangerChooser call RangeChooser()
+nnoremap <leader>R :<C-U>RangerChooser<CR>
+endif
+"}}}
+
 " retrain to stop using caps layer in vim
 nnoremap <up> <nop>
 nnoremap <left> <nop>
@@ -26,6 +117,8 @@ nnoremap <Home> <nop>
 
 if has("gui_running")
 " wm experementation"{{{
+" nnoremap <leader>a :silent !xsendkey -window 0x300002 p<cr>
+nnoremap <silent> <leader>a :silent !bspc window -f left && xsendkey p && bspc window -f last<cr>
 
 " "r" is redraw"{{{
 " worskpace/Destkop switch"{{{
@@ -75,6 +168,8 @@ nnoremap <silent> rmi :silent !~/bin/resize.sh right<cr>
 " open urxvt
 nnoremap <silent> ru :silent !urxvt &<cr>
 
+" close window
+nnoremap <silent> rx :silent !bspc window -c<cr>
 "}}}
 
 " s becomes select/Show/settings"{{{
@@ -163,6 +258,12 @@ nnoremap <silent> sv :silent !tmux select-layout main-vertical<cr>
 
 " toggle "monocle" (zoom)
 nnoremap <silent> st :silent !tmux resize-pane -Z<cr>
+
+" bspwm
+" bspwm monocle (for dropdown terms)
+nnoremap <silent> sm :silent !bspc desktop -l monocle && bspc window -t floating<cr>
+nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
+
 "}}}
 
 " select session
@@ -238,6 +339,9 @@ set startofline
 " at least 5 lines show below and above cursor; experimenting with cursor position
 set scrolloff=5
 
+" open folds on search and jumping to marks
+set foldopen=search,mark
+
 " return to last edit position when opening files
 autocmd BufReadPost *
             \ if line("'\"") > 0 && line("'\"") <= line("$") |
@@ -305,10 +409,10 @@ set wildmode:full
 " Searching"{{{
 " stop highlighting on escape
 set hlsearch
-nnoremap <esc> :noh<cr><esc>
 
-" this causes arrow keys to make As and Bs in insert mode in terminal vim
+" this causes arrow keys to make As and Bs in insert/normal mode in terminal vim
 if has("gui_running")
+	nnoremap <esc> :noh<cr><esc>
 	inoremap <esc> <esc>:noh<cr>
 endif
 " don't move when search
@@ -330,44 +434,41 @@ set smartcase
 " see http://stackoverflow.com/questions/1889602/multiple-vim-configurations
 
 " Text file settings"{{{
-" remove listchars from txt files in favour of better wrapping (not cutting off halfway in between a word) for long lines
-autocmd BufEnter *.txt setlocal nolist
-autocmd BufEnter *.txt setlocal lbr
-" set showbreak=···\ " Line break indicator.
-
-" comment graying in text files
-autocmd BufEnter *.txt highlight text guifg=gray
-autocmd BufEnter *.txt match text /#.*/
-
-" fix zf (folding now uses right comment char)
-" autocmd BufEnter *.txt setlocal comments=:#
-autocmd BufEnter *.txt setlocal commentstring=#\ %s
 
 " comment my textfiles with octothorpe
 call tcomment#DefineType('text', '# %s' )
-" spell check text files
-autocmd BufEnter *.txt set spell
 
-" spelling
-" if v:version >= 700
-" " Enable spell check for text files
-" autocmd BufNewFile,BufRead *.txt setlocal spell spelllang=en
-" endif
+augroup text_autocommands
+	au!
+	" remove listchars from txt files in favour of better wrapping (not cutting off halfway in between a word) for long lines
+	autocmd BufEnter *.txt setlocal nolist
+	autocmd BufEnter *.txt setlocal lbr
+	" set showbreak=···\ " Line break indicator.
+
+	" comment graying in text files
+	autocmd BufEnter *.txt highlight text guifg=gray
+	autocmd BufEnter *.txt match text /#.*/
+
+	" fix zf (folding now uses right comment char)
+	" autocmd BufEnter *.txt setlocal comments=:#
+	autocmd BufEnter *.txt setlocal commentstring=#\ %s
+
+	" Enable spell check for text files
+	autocmd BufNewFile,BufRead *.txt setlocal spell spelllang=en
+augroup END
 
 "}}}
 
+" autocmd BufNewFile,BufRead *.markdown setlocal spell spelllang=en
 " Tex file settings"{{{
 autocmd BufEnter *.tex setlocal nolist
 autocmd BufEnter *.tex setlocal lbr
 autocmd BufEnter *.tex setlocal textwidth=0
 
-" spell check tex files
-autocmd BufEnter *.tex set spell
-
 "}}}
 
 call tcomment#DefineType('pentadactyl', '" %s' )
-autocmd BufNewFile,BufRead *.pentadactylrc,*.penta set filetype=pentadactyl
+autocmd BufNewFile,BufRead *.pentadactylrc,*penta set filetype=pentadactyl
 let g:commentChar = {
 \ 'conf': '#'
 \}
@@ -472,8 +573,8 @@ let mapleader = "t"
 
 noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
 
-" don't just place in the middle; open folds too
-nnoremap <silent> k nzozz|nnoremap <silent> K Nzozz
+" don't just place in the middle; open folds recursively 
+nnoremap <silent> k nzOzz|nnoremap <silent> K NzOzz
 
 " BOL/EOL/Join Lines; took out l to ^ in favor of l for <c-o>
 " nnoremap L $|nnoremap <C-l> J
@@ -538,10 +639,12 @@ nnoremap cW caW
 nnoremap yW yaW
 
 "}}}
-
 " better text file long line nav (use with lazy redraw); up and down between wraps
 inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
+
+" for pterosaur; was this fixed?
+inoremap qq <esc>
 
 " jump up and down
 nnoremap <leader>k <c-d>|nnoremap <leader>o <c-u>
@@ -635,6 +738,8 @@ nnoremap <leader>ga :Gwrite<cr>
 nnoremap <leader>gs :Gstatus<cr>
 nnoremap <leader>gc :Gcommit<cr>
 nnoremap <leader>gr :Gread<cr>
+" nnoremap <leader>gR :Gremove<cr>
+" git rm --cached
 "}}}
 
 " Snippets and Completion"{{{ 
@@ -651,14 +756,14 @@ let g:UltiSnipsEditSplit="vertical"
 "}}}
 
 " Use neocomplete."{{{
-let g:neocomplete#enable_at_startup = 1
+" let g:neocomplete#enable_at_startup = 1
 " Use smartcase.
 let g:neocomplete#enable_smart_case = 1
 " Set minimum syntax keyword length.
 let g:neocomplete#sources#syntax#min_keyword_length = 3
 let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
-inoremap ` <c-u>
+" inoremap ` <c-u>
 "}}}
 
 "}}}
@@ -744,6 +849,19 @@ let g:insertlessly_cleanup_trailing_ws = 0
 let g:insertlessly_cleanup_all_ws = 0
 " don't interfere with space bindings
 let g:insertlessly_insert_spaces = 0
+
+" Vertigo
+" colemak
+let g:Vertigo_homerow = 'arstdhneio'
+nnoremap <silent> N :<C-U>VertigoDown n<CR>
+vnoremap <silent> N :<C-U>VertigoDown v<CR>
+onoremap <silent> N :<C-U>VertigoDown o<CR>
+nnoremap <silent> E :<C-U>VertigoUp n<CR>
+vnoremap <silent> E :<C-U>VertigoUp v<CR>
+onoremap <silent> E :<C-U>VertigoUp o<CR>
+let g:Vertigo_onedigit_method = 'smart3'
+" let g:Vertigo_homerow_onedigit = 'ARSTDHNEIO'
+
 "}}}
 
 " _Clipboard Related"{{{
@@ -759,9 +877,12 @@ nnoremap <silent> p p`]
 " thanks to shougo for such a versatile and useful plugin; https://github.com/Shougo/unite.vim/issues/415
 " vim is my clipboard manager
 let g:unite_source_history_yank_enable = 1
+" saves things in clipboard register even if not yanked in vim (causes duplicates with unnamedplus; slightly annoying)
 let g:unite_source_history_yank_save_clipboard = 1
-let g:unite_source_history_yank_limit = 300
-" nnoremap <space>y :Unite register history/yank<cr>
+" don't save yanks to disk
+let g:unite_source_history_yank_file=""
+" let g:unite_source_history_yank_file=$HOME.'/.unite/history_yank'
+" let g:unite_source_history_yank_limit = 300
 nnoremap <space>y :Unite history/yank<cr>
 "}}}
 
@@ -790,8 +911,8 @@ nnoremap <leader>t :tabnew<cr>
 "}}}
 
 " quicker tab navigation"{{{
-nnoremap N gT
-nnoremap E gt
+" nnoremap N gT
+" nnoremap E gt
 " can add <buffer> and then source vimrc on bufenter instead but that causes a huge slowdown
 nnoremap <space>w 1gt:source ~/.quickvimrc<cr>
 nnoremap <space>f 11gt:source ~/.quickvimrc<cr>
@@ -955,12 +1076,16 @@ nnoremap <leader>E :tabm +1<cr>
 
 "}}}
 " #==============================
-" "shorthand"{{{
-" " working on implementing; not a fan of configuring autokey; this is much easier; use vim and penta for 95% of typing.. will probably add to weechat as well
-" " get pterosaur working as iabbr is horribly broken in pentadactyl
+"shorthand"{{{
+" working on implementing; not a fan of configuring autokey; this is much easier; use vim and penta for 95% of typing.. will probably add to weechat as well
+" get pterosaur working as iabbr is horribly broken in pentadactyl
 " add for only txt files
+" 
 "
-iabbr i I
+autocmd FileType text call s:shorthand()
+function! s:shorthand()
+	iabbr <buffer> i I
+endfunction
 " http://forum.colemak.com/viewtopic.php?id=1804
 iabbr ab about
 iabbr about ab
@@ -1353,6 +1478,8 @@ NeoBundle 'vimwiki/vimwiki'
 NeoBundle 'sjl/gundo.vim'
 " html generation
 NeoBundle 'mattn/emmet-vim'
+" password syntax highlighting/hiding stuff
+NeoBundle 'aaronbieber/vim-vault'
 
 "}}}
 
@@ -1386,7 +1513,12 @@ NeoBundle 'kana/vim-arpeggio'
 NeoBundle 'Shougo/vimshell.vim'
 " all text boxes vim
 NeoBundle 'ardagnir/pterosaur'
+NeoBundle 'ardagnir/eventloop.vim'
+"  calendar
 NeoBundle 'itchyny/calendar.vim'
+
+NeoBundle 'dhruvasagar/vim-table-mode'
+NeoBundle 'prendradjaja/vim-vertigo'
 "}}}
 
 " Text Object and Operator Stuff"{{{
@@ -1402,7 +1534,6 @@ NeoBundle 'tpope/vim-surround'
 "if ever need more than <c-w>r
 "https://github.com/wesQ3/vim-windowswap
 "}}}
-
  " Required:
  filetype plugin indent on
 
@@ -1460,7 +1591,7 @@ NeoBundleCheck
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Switch panes... I don't really have enough space to do more than a vsplit; so just NE
 " noremap H <C-w>h|noremap I <C-w>l|noremap N <C-w>j|noremap E <C-w>k
-noremap N <c-w>h|noremap E <c-w>l
+" noremap N <c-w>h|noremap E <c-w>l
 " Moving windows around.
   noremap <C-w>N <C-w>J|noremap <C-w>E <C-w>K|noremap <C-w>I <C-w>L
 " High/Low/Mid.
