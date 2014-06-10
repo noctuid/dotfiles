@@ -1,6 +1,6 @@
 {
-  "version": "3.20.12",
-  "date": 1399573876020,
+  "version": "3.20.13",
+  "date": 1402382331593,
   "Conf": {
     "Desktop Notifications": false,
     "404 Redirect": true,
@@ -78,7 +78,7 @@
     "MD5": "",
     "sauces": "https://www.google.com/searchbyimage?image_url=%TURL\nhttp://iqdb.org/?url=%TURL\n#//tineye.com/search?url=%TURL\n#http://saucenao.com/search.php?url=%TURL\n#http://3d.iqdb.org/?url=%TURL\n#http://regex.info/exif.cgi?imgurl=%URL\n# uploaders:\n#http://imgur.com/upload?url=%URL;text:Upload to imgur\n#http://ompldr.org/upload?url1=%URL;text:Upload to ompldr\n# \"View Same\" in archives:\n#//archive.foolz.us/_/search/image/%MD5/;text:View same on foolz\n#//archive.foolz.us/%board/search/image/%MD5/;text:View same on foolz /%board/\n#//archive.installgentoo.net/%board/image/%MD5;text:View same on installgentoo /%board/",
     "Custom CSS": false,
-    "Index Mode": "catalog",
+    "Index Mode": "all pages",
     "Previous Index Mode": "all pages",
     "Index Sort": "filecount",
     "Index Size": "small",
@@ -109,9 +109,8 @@
     "Eqn tags": "",
     "Math tags": "",
     "Submit QR": "",
-    "Update": "r",
+    "Update": "",
     "Watch": "w",
-    "Expand image": "x",
     "Expand image": "m",
     "Expand images": "Shift+x",
     "Front page": "0",
@@ -119,9 +118,9 @@
     "Next page": "k",
     "Previous page": "Shift+k",
     "Search form": "f",
-    "Paged mode": "c",
+    "Paged mode": "p",
     "All pages mode": "a",
-    "Catalog mode": "p",
+    "Catalog mode": "c",
     "Cycle sort type": "y",
     "Next thread": "n",
     "Previous thread": "e",
@@ -140,30 +139,65 @@
     "Interval": 30,
     "pinnedThreads": {
       "boards": {},
-      "lastChecked": 1399571213199
+      "lastChecked": 1402380860621
     },
     "hiddenPosts": {
       "boards": {},
-      "lastChecked": 1399573722349
+      "lastChecked": 1402380860629
     },
     "lastReadPosts": {
       "boards": {
-        "a": {
-          "106918244": 106921752,
-          "106904814": 106907311,
-          "106929965": 106930235,
-          "106931940": 106933765
+        "h": {
+          "3741433": 3741654,
+          "3743580": 3743581,
+          "3736575": 3736584,
+          "3737589": 3737605,
+          "3740454": 3740457,
+          "3731451": 3733377,
+          "3732941": 3744085,
+          "3741443": 3741447,
+          "3705100": 3705102,
+          "3731168": 3732541,
+          "3729697": 3742976,
+          "3720676": 3720697,
+          "3729716": 3745873,
+          "3728418": 3745869,
+          "3705665": 3744465
+        },
+        "c": {
+          "2205047": 2205049
+        },
+        "gif": {
+          "6311818": 6311941,
+          "6302275": 6311633,
+          "6297446": 6303314,
+          "6305006": 6305461,
+          "6300880": 6311980,
+          "6310165": 6312016,
+          "6311175": 6311990,
+          "6298111": 6311870,
+          "6275816": 6311861,
+          "6304080": 6311943,
+          "6301231": 6311160,
+          "6290462": 6310706,
+          "6310990": 6311391,
+          "6311007": 6311508,
+          "6292638": 6292831,
+          "6271442": 6312000
+        },
+        "v": {
+          "247339741": 247340178
         }
       },
-      "lastChecked": 1399571330789
+      "lastChecked": 1402380867506
     },
     "yourPosts": {
       "boards": {},
-      "lastChecked": 1399571213599
+      "lastChecked": 1402380860630
     },
     "watchedThreads": {
       "boards": {},
-      "lastChecked": 1399571213613
+      "lastChecked": 1402380860640
     },
     "selectedArchives": {}
   }

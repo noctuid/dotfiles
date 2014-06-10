@@ -120,4 +120,4 @@ group gel -description "jelly" -locations gelbooru.com
 silent nmap -group gel -ex <leader>f execute 'silent !~/bin/dlf.sh gel "' + buffer.URL + '" &'
 
 silent nmap -ex <leader>F silent !~/bin/dlf.sh
-"}}}
+"}}}…

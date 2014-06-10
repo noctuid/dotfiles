@@ -1,0 +1,3 @@
+To go beyond just pentadactyl bindings, I've started using site specific bindings for frequently used sites to cut down on keystrokes. 
+
+This involves a combination of site specific passthroughs either for sites that have existing bindings (i.e. twitter, gmail, tumblr (extended with xkit), etc.; see `groups.penta`) or possibly in combination userscripts that add bindings like 4chanX, RES, Webcomic Reader (bindings for pretty much any gallery/comic/image site), YT Center (allows for youtube bindings without clicking on the video and the video grabbing focus), etc. (see `userscript_settings`).
