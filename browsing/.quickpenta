@@ -1,53 +1,53 @@
 " reload context bindings
 
 if tabs.getTab().dactylOrdinal < "11"
-nmap <space>a 1gt
-nmap <space>r 2gt
-nmap <space>s 3gt
-nmap <space>t 4gt
-nmap <space>d 5gt
-nmap <space>h 6gt
-nmap <space>n 7gt
-nmap <space>e 8gt
-nmap <space>i 9gt
-nmap <space>o 10gt
+nmap -builtin <space>a 1gt
+nmap -builtin <space>r 2gt
+nmap -builtin <space>s 3gt
+nmap -builtin <space>t 4gt
+nmap -builtin <space>d 5gt
+nmap -builtin <space>h 6gt
+nmap -builtin <space>n 7gt
+nmap -builtin <space>e 8gt
+nmap -builtin <space>i 9gt
+nmap -builtin <space>o 10gt
 endif
 
 if tabs.getTab().dactylOrdinal > "10"
-nmap <space>a 11gt
-nmap <space>r 12gt
-nmap <space>s 13gt
-nmap <space>t 14gt
-nmap <space>d 15gt
-nmap <space>h 16gt
-nmap <space>n 17gt
-nmap <space>e 18gt
-nmap <space>i 19gt
-nmap <space>o 20gt
+nmap -builtin <space>a 11gt
+nmap -builtin <space>r 12gt
+nmap -builtin <space>s 13gt
+nmap -builtin <space>t 14gt
+nmap -builtin <space>d 15gt
+nmap -builtin <space>h 16gt
+nmap -builtin <space>n 17gt
+nmap -builtin <space>e 18gt
+nmap -builtin <space>i 19gt
+nmap -builtin <space>o 20gt
 endif
 
 if tabs.getTab().dactylOrdinal > "20"
-nmap <space>a 21gt
-nmap <space>r 22gt
-nmap <space>s 23gt
-nmap <space>t 24gt
-nmap <space>d 25gt
-nmap <space>h 26gt
-nmap <space>n 27gt
-nmap <space>e 28gt
-nmap <space>i 29gt
-nmap <space>o 30gt
+nmap -builtin <space>a 21gt
+nmap -builtin <space>r 22gt
+nmap -builtin <space>s 23gt
+nmap -builtin <space>t 24gt
+nmap -builtin <space>d 25gt
+nmap -builtin <space>h 26gt
+nmap -builtin <space>n 27gt
+nmap -builtin <space>e 28gt
+nmap -builtin <space>i 29gt
+nmap -builtin <space>o 30gt
 endif
 
 if tabs.getTab().dactylOrdinal > "30"
-nmap <space>a 31gt
-nmap <space>r 32gt
-nmap <space>s 33gt
-nmap <space>t 34gt
-nmap <space>d 35gt
-nmap <space>h 36gt
-nmap <space>n 37gt
-nmap <space>e 38gt
-nmap <space>i 39gt
-nmap <space>o 40gt
+nmap -builtin <space>a 31gt
+nmap -builtin <space>r 32gt
+nmap -builtin <space>s 33gt
+nmap -builtin <space>t 34gt
+nmap -builtin <space>d 35gt
+nmap -builtin <space>h 36gt
+nmap -builtin <space>n 37gt
+nmap -builtin <space>e 38gt
+nmap -builtin <space>i 39gt
+nmap -builtin <space>o 40gt
 endif

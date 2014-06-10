@@ -1,11 +1,28 @@
 " TODO:
 " different passthrough (less) for children
+" add other sites to comic group
+
+" passkeys passes any binding that include the letter
+" i.e. if pass i with passkeys, gi won't work; using groups with pass fixes that
 
 " feedkeys only works with pentadactyl it seems
+
+" Image Bindings"{{{
+group image -description "Image viewing mappings" -locations .*\.jpg,.*\.jpeg,.*\.png,.*\.gif
+nmap -group image -builtin e ZI
+nmap -group image -builtin n ZO
+"}}}
+
 " Tumblr"{{{
 group tumblr -description "Custom Tumblr Mappings" -locations tumblr.com/dashboard,tumblr.com/.*/drafts
-set passkeys+=tumblr.com/dashboard:jkq
-set passkeys+=tumblr.com/blog/.*/drafts:jkq
+
+" passkeys but not if in other binding
+" set passkeys+=tumblr.com/dashboard:jkq
+" set passkeys+=tumblr.com/blog/.*/drafts:jkq
+silent nmap -group tumblr j <pass>
+silent nmap -group tumblr k <pass>
+silent nmap -group tumblr q <pass>
+
 " colemak up and down
 silent nmap -group tumblr -ex n silent !xsendkey j
 silent nmap -group tumblr -ex e silent !xsendkey k
@@ -35,6 +52,7 @@ silent nmap -group tumblr -ex i silent !xsendkey comma && xsendkey l && xsendkey
 group twitter -description "Custom Twitter Mappings" -locations twitter.com
 
 set passkeys+=twitter.com/:jk.?<cr>,gh,gn,ga,gr,gd,gf,gl,gm,gs,gu
+
 " colemak up and down
 silent nmap -group twitter -ex n silent !xsendkey j
 silent nmap -group twitter -ex e silent !xsendkey k
@@ -68,8 +86,23 @@ silent nmap -group MAL -ex gc open http://myanimelist.net/clubs.php?action=myclu
 group reddit -description "Custom Reddit GOTOs" -locations reddit.com
 
 " for RES
-set passkeys+=reddit.com:?;neGkKixcCaz<cr>
- 
+" passkeys"{{{
+" set passkeys+=reddit.com:?GinekKxcCz<cr>
+silent nmap -group reddit ? <pass>
+silent nmap -group reddit G <pass>
+silent nmap -group reddit i <pass>
+silent nmap -group reddit n <pass>
+silent nmap -group reddit e <pass>
+silent nmap -group reddit k <pass>
+silent nmap -group reddit K <pass>
+silent nmap -group reddit a <pass>
+silent nmap -group reddit x <pass>
+silent nmap -group reddit c <pass>
+silent nmap -group reddit C <pass>
+silent nmap -group reddit z <pass>
+silent nmap -group reddit <cr> <pass>
+ "}}}
+
 silent nmap -group reddit -ex gh open http://www.reddit.com/
 silent nmap -group reddit -ex gv open http://www.reddit.com/r/vim/
 silent nmap -group reddit -ex gu open http://www.reddit.com/r/unixporn 
@@ -86,30 +119,58 @@ silent nmap -group reddit -ex gs open https://ssl.reddit.com/prefs/
 
 " 4chan"{{{
 group chan -description "eh" -locations 4chan.org
-" passkeys for 4chan X
-set passkeys+=4chan.org/(a|b|c|d|e|g|gif|h|lit|mu|are|u|v|y)/:hneikKxXacm
-" different passthrough on threads; need to figure out how to do
-" set passkeys+=4chan.org/.*/*:hikKxXacm
+" different bindings for threads
+group chanthread -description "eh" -locations boards.4chan.org/(a|b|c|d|e|g|gif|h|lit|mu|r|u|v|y)/thread/*
+
+" pass keys"{{{
+silent nmap -group chan h <pass>
+silent nmap -group chan n <pass>
+silent nmap -group chan e <pass>
+silent nmap -group chan i <pass>
+silent nmap -group chan k <pass>
+silent nmap -group chan K <pass>
+silent nmap -group chan x <pass>
+silent nmap -group chan X <pass>
+silent nmap -group chan a <pass>
+silent nmap -group chan c <pass>
+silent nmap -group chan m <pass>
+" don't pass n and e on threads; takes precedence; don't know why (test order of mappings and group definitions; maybe because it's a subdomain), but it works
+silent nmap -group chanthread -builtin n 15<down>
+silent nmap -group chanthread -builtin e 15<up>
+" "}}}
 
 " download 4chan thread images; choose single shot or not
 " silent nmap -group chan -builtin <leader>f y:silent !~/bin/dlf.sh chan <c-v><c-v> 
 silent nmap -group chan -ex <leader>f execute "silent !~/bin/dlf.sh 4chan " + buffer.URL + " &"
 
 " Gotos
-silent nmap -group chan -ex ga open http://www.4chan.com/a
-silent nmap -group chan -ex gc open http://www.4chan.com/c
-silent nmap -group chan -ex gG open http://www.4chan.com/gif
-silent nmap -group chan -ex gh open http://www.4chan.com/h
-silent nmap -group chan -ex gT open http://www.4chan.com/g
-silent nmap -group chan -ex gw open http://www.4chan.com/w
-silent nmap -group chan -ex gy open http://www.4chan.com/y
+silent nmap -group chan -ex ga open http://www.4chan.org/a
+silent nmap -group chan -ex gC open http://www.4chan.org/c
+silent nmap -group chan -ex gG open http://www.4chan.org/gif
+silent nmap -group chan -ex gh open http://www.4chan.org/h
+silent nmap -group chan -ex gT open http://www.4chan.org/g
+silent nmap -group chan -ex gw open http://www.4chan.org/w
+silent nmap -group chan -ex gy open http://www.4chan.org/y
 
 "}}}
 
 " Fakku"{{{
 group fakku -description "Happiness" -locations fakku.net
+group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/*#*/
 " passkeys (for webcomic reader)
-set passkeys+=fakku.net/(doujinshi|manga)/.*/*#*/:hneibmxk.<right><left>
+" set passkeys+=fakku.net/(doujinshi|manga)/.*/*#*/:hneibmxk.<right><left>
+
+" only pass keys on actual image pages"{{{
+silent nmap -group comic h <pass>
+silent nmap -group comic n <pass>
+silent nmap -group comic e <pass>
+silent nmap -group comic i <pass>
+silent nmap -group comic b <pass>
+silent nmap -group comic m <pass>
+silent nmap -group comic x <pass>
+silent nmap -group comic k <pass>
+silent nmap -group comic . <pass>
+"}}}
 
 " Downloading from fakku
 silent nmap -group fakku -ex <leader>f execute "silent !~/bin/dlf.sh fakku " + buffer.URL + " &"
