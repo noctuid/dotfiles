@@ -1,6 +1,9 @@
 # Sxhkd
-
 # https://github.com/windelicato/dotfiles/blob/master/.config/sxhkd/sxhkdrc
+# TODO:
+# get bspwm reload working
+# 
+# add this point, sxhkd is mostly just for basic program binding and basic wm bindings
 # limits:
 # .chaining isn't perfect (use xchainkeys instead)
 # .can only use level 1 (unshifted) key for prefix (can use keys in layer with modifier though) 
@@ -15,8 +18,8 @@ super + alt + {shift + ,_}Escape
 	    bspc query -S > "$BSPWM_STACK"; \
 	    bspc quit && pkill panel && pkill panel2}
 
-super + shift + q
-	pkill -x panel; bspc quit
+# super + shift + q
+	# pkill -x panel; bspc quit
 
 # reload panel
 super + control + Escape
@@ -30,6 +33,10 @@ super + Escape
 
 grave ; Escape
     pkill -USR1 -x sxhkd
+
+# firefox
+alt + f
+	firefox
 
 # dmenu
 alt + space
@@ -50,6 +57,9 @@ alt + h
 # mute
 alt + m
 	amixer -qD pulse sset Master toggle
+# play/pause
+alt + o
+	mpc toggle
 # }}}
 
 # Screenshots# {{{
@@ -57,8 +67,14 @@ alt + m
 # add xtitle to name
 Print
 	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
+	# needs fixing:
+	# sh ~/bin/screenshot.sh
+
 alt + p
 	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
+
+# alt + g
+# 	ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -r 30 -s 1366x768 -i :0.0 -acodec pcm_s16le -vcodec libx264 -preset ultrafast -crf 0 -threads 0 output.mkv
 # }}}
 
 # program hotkeys# {{{
@@ -80,6 +96,11 @@ alt + k
 alt + a
 	xdotool mousemove 22 721 click 1
 
+alt + q
+	pkill ffmpeg
+alt + Q
+	sh ~/bin/mpv/ffmpeg_gif.sh
+
 # }}}
 
 # Dropdown Terms# {{{
@@ -90,6 +111,11 @@ alt + s
 	sh ~/bin/my_dropdown.sh
 super + s
 	sh ~/bin/my_dropdown.sh
+
+F1
+	sh ~/bin/dropdown_two.sh
+
+# not in use
 F10
 	bspc desktop -l monocle && bspc window -t floating
 F11
@@ -226,11 +252,11 @@ super + k
 	bspc control --toggle-visibility
 
 # nav to floating window
-alt + o
+alt + F
 	bspc window -f biggest.floating
 
-alt + f
-	bspc window -t private && bspc window -t sticky
+# alt + f
+# 	bspc window -t private && bspc window -t sticky
 
 # alt + y
 # 	bspc window -t pseudo_tiled
