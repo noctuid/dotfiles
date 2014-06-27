@@ -1002,56 +1002,7 @@ nmap <buffer> n j
 nmap <buffer> e k
 endfunction
 
-" Thanks to Ingo Karkat for answering my question ; http://stackoverflow.com/questions/21125170/grabbing-the-current-tab-name
-cnoreabbr <expr> tabname t:taboo_tab_name
-cnoreabbr <expr> buffername expand('%:t')
-
-cabbr writ cd ~/ag-sys/Else/everything/\#Another/
-cabbr dot cd ~/dotfiles
-cabbr ubmark cd ~/.unite/bookmark/
-cabbr ag cd ~/ag-sys/
-cabbr else cd ~/ag-sys/Else/everything/
-cabbr cdranger cd ~/.config/ranger
-cabbr cdbin cd ~/bin
-
-" <space>u for bookmark file corresponding to tab name
- 
-" resource to auto change mapping (otherwise won't cycle after first time)
-"stop complaining if not named
-if exists("t:taboo_tab_name")
-
-	" open the bookmarks folder for the tab name; takes care of all frequently accessed files
-	nnoremap <buffer> <space>u :Unite -quick-match bookmark:tabname<C-]><cr>
-	"  add a file to the bookmarks folder for the tab name/category
-	nnoremap <buffer> <space>U :UniteBookmarkAdd<cr>tabname<c-]><cr>buffername<c-]>
-
-	" folder instead of bookmarks (no reason to make bookmarks that correspond exactly to folder
-	if t:taboo_tab_name == 'conf-ranger'
-		nnoremap <buffer> <space>u :cdranger<C-]><cr>:Unite -quick-match file<cr>
-	elseif t:taboo_tab_name == 'bin'
-		cd ~/bin
-		nnoremap <buffer> <space>u :Unite -quick-match file<cr>
-
-	" 2 way cycle between 2 main categories
-	elseif t:taboo_tab_name == "main"
-		nnoremap <buffer> <space>c :TabooRename mainl<cr>:so ~/.quickvimrc<cr>
-	elseif t:taboo_tab_name == "mainl"
-		nnoremap <buffer> <space>c :TabooRename main<cr>:so ~/.quickvimrc<cr>
-
-	" conf cycle
-	elseif t:taboo_tab_name == "config"
-		nnoremap <buffer> <space>c :TabooRename conf-music<cr>:so ~/.quickvimrc<cr>
-	elseif t:taboo_tab_name == "conf-music"
-		nnoremap <buffer> <space>c :TabooRename conf-mail<cr>:so ~/.quickvimrc<cr>
-	elseif t:taboo_tab_name == "conf-mail"
-		nnoremap <buffer> <space>c :TabooRename conf-other<cr>:so ~/.quickvimrc<cr>
-	elseif t:taboo_tab_name == "conf-other"
-		nnoremap <buffer> <space>c :TabooRename config<cr>:so ~/.quickvimrc<cr>
-
-	elseif t:taboo_tab_name == "dot"
-		nnoremap <buffer> <space>u :cd ~/dotfiles<cr>:Unite file<cr>
-	endif
-endif
+source ~/.navigation.vim
 "}}}
 
 " Split bindings"{{{
