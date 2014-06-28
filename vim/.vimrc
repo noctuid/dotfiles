@@ -856,12 +856,15 @@ let g:insertlessly_insert_spaces = 0
 " Vertigo
 " colemak
 let g:Vertigo_homerow = 'arstdhneio'
-nnoremap <silent> N :<C-U>VertigoDown n<CR>
-vnoremap <silent> N :<C-U>VertigoDown v<CR>
-onoremap <silent> N :<C-U>VertigoDown o<CR>
-nnoremap <silent> E :<C-U>VertigoUp n<CR>
-vnoremap <silent> E :<C-U>VertigoUp v<CR>
-onoremap <silent> E :<C-U>VertigoUp o<CR>
+
+nnoremap <silent> <leader>n :<C-U>VertigoDown n<CR>
+vnoremap <silent> <leader>n :<C-U>VertigoDown v<CR>
+onoremap <silent> <leader>n :<C-U>VertigoDown o<CR>
+
+nnoremap <silent> <leader>e :<C-U>VertigoUp n<CR>
+vnoremap <silent> <leader>e :<C-U>VertigoUp v<CR>
+onoremap <silent> <leader>e :<C-U>VertigoUp o<CR>
+
 let g:Vertigo_onedigit_method = 'smart3'
 " let g:Vertigo_homerow_onedigit = 'ARSTDHNEIO'
 
@@ -1005,7 +1008,7 @@ endfunction
 source ~/.navigation.vim
 "}}}
 
-" Split bindings"{{{
+" Splits"{{{
 nnoremap <leader>w <c-w>
 " r after above to swap
 nnoremap <leader>/ :vsplit<cr>
@@ -1013,14 +1016,16 @@ nnoremap <leader>- :split<cr>
 " already have N and E set to switch between splits
 nnoremap <a-n> <c-w><left>
 nnoremap <a-e> <c-w><right>
-" resize windows (relative.. and dwm.vim is very lacking
-nnoremap <leader>h :vertical resize -8<cr>
-nnoremap <leader>i :vertical resize +8<cr>
-nnoremap <leader>e <c-w><right>
-nnoremap <leader>n <c-w><left>
+nnoremap <leader>h <c-w><left>
+nnoremap <leader>i <c-w><right>
 
 " 'monocle'
 nnoremap <silent> <leader>m :ZoomWin<cr>
+
+let g:eighties_enabled = 1
+let g:eighties_minimum_width = 100
+let g:eighties_extra_width = 0 " Increase this if you want some extra room
+let g:eighties_compute = 1 " Disable this if you just want the minimum + extra
 
 "}}}
 " move tabs
@@ -1472,6 +1477,7 @@ NeoBundle 'itchyny/calendar.vim'
 
 NeoBundle 'dhruvasagar/vim-table-mode'
 NeoBundle 'prendradjaja/vim-vertigo'
+NeoBundle 'justincampbell/vim-eighties'
 "}}}
 
 " Text Object and Operator Stuff"{{{
