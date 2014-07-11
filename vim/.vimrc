@@ -740,9 +740,40 @@ nnoremap <leader>bl :NeoBundleList<cr>
 nnoremap <leader>ga :Gwrite<cr>
 nnoremap <leader>gs :Gstatus<cr>
 nnoremap <leader>gc :Gcommit<cr>
-nnoremap <leader>gr :Gread<cr>
+nnoremap <leader>gd :Gdiff<cr>
+" :nnoremap <buffer> o do
+" from previous commit
+" nnoremap <leader>gr :Gread<cr>
+nnoremap <leader>gm :Gmove<space>
 " nnoremap <leader>gR :Gremove<cr>
 " git rm --cached
+" in visual modetoo
+autocmd BufRead fugitive\:* xnoremap <buffer> dp :diffput<cr>|xnoremap <buffer> do :diffget<cr>
+" bindings for git status window
+autocmd FileType gitcommit nmap <buffer> n <c-n>|nmap <buffer> e <c-p>
+
+" gitgutter"{{{
+" don't set up default mappings
+let g:gitgutter_map_keys = 0
+nnoremap <leader>gg :GitGutterToggle<cr>
+nnoremap <leader>gG :GitGutterLineHighlightsToggle<cr>
+" hunks don't work well for me; use :Gdiff instead
+" nmap <Leader>gh <Plug>GitGutterStageHunk
+" nmap <Leader>gH <Plug>GitGutterRevertHunk
+" repeatable hunk navigation
+nmap <leader>gn <Plug>GitGutterNextHunk<leader>;silent! call repeat#set("\<Plug>GitGutterNextHunk", v:count)<cr>
+nmap <leader>ge <Plug>GitGutterPrevHunk<leader>;silent! call repeat#set("\<Plug>GitGutterPrevHunk", v:count)<cr>
+"}}}
+
+" vim-signify settings "{{{
+" which vcs and order
+" let g:signify_vcs_list = [ 'git' ]
+" let g:signify_disable_by_default = 0
+"
+" nmap <leader>gn <plug>(signify-next-hunk)
+" nmap <leader>ge <plug>(signify-prev-hunk)
+" let g:signify_mapping_toggle_highlight = '<leader>gh'
+"}}}
 "}}}
 
 " Snippets and Completion"{{{ 
