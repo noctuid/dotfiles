@@ -820,6 +820,22 @@ let g:gundo_map_move_newer="e"
 " tcomment
 map <leader>c <C-_><C-_>
 
+" Tabular
+" vnoremap <leader>a :Tabularize<space>
+" :Tabularize /=
+" :Tabularize /=\zs
+
+" Easy Allign
+" Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
+vmap <leader>a <Plug>(EasyAlign)
+" Start interactive EasyAlign for a motion/text object (e.g. <Leader>aip)
+nmap <Leader>a <Plug>(EasyAlign)
+
+" table mode
+let g:table_mode_map_prefix = '<leader>m'
+let g:table_mode_toggle_map = 'm'
+silent! nunmap <leader>tt
+
 " Emmet vim
 map <leader>y <C-y>,
 
@@ -1521,6 +1537,8 @@ NeoBundle 'itchyny/calendar.vim'
 
 NeoBundle 'dhruvasagar/vim-table-mode'
 NeoBundle 'prendradjaja/vim-vertigo'
+" NeoBundle 'godlygeek/tabular'
+NeoBundle 'junegunn/vim-easy-align'
 NeoBundle 'justincampbell/vim-eighties'
 "}}}
 
