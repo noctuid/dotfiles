@@ -614,6 +614,9 @@ vnoremap t; :
 vnoremap : ;
 " Y like D
 nnoremap Y y$
+" yank paragraph
+" http://hashrocket.com/blog/posts/8-great-vim-mappings
+nnoremap yp yap<S-}>p
 " Sane redo.
 noremap U <C-r>
 
@@ -913,10 +916,13 @@ let g:Vertigo_onedigit_method = 'smart3'
 set clipboard=unnamedplus
 
 " http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
-" move to end after yank or paste; maybe change this
+" move to end after yank or paste; similar to gp but won't go to next line
 vnoremap <silent> y y`]
 vnoremap <silent> p p`]
 nnoremap <silent> p p`]
+" since have above, change gp to past on new line
+nnoremap gp :pu<cr>
+
 
 " thanks to shougo for such a versatile and useful plugin; https://github.com/Shougo/unite.vim/issues/415
 " vim is my clipboard manager
