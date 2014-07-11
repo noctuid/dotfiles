@@ -601,9 +601,16 @@ nnoremap zn zj
 
 " Other General Mappings"{{{
 " change defaults"{{{
-nnoremap ; :
+nnoremap ; q:i
 nnoremap : ;
-vnoremap ; :
+nnoremap <leader>; :
+" use escape in "normal" to exit:
+autocmd CmdwinEnter * nnoremap <buffer> <esc> <c-w>c
+" enter in "normal" to execute command under cursor and re-enter q:
+autocmd CmdwinEnter * nnoremap <buffer> <cr> <cr>q:
+
+vnoremap ; q:i
+vnoremap t; :
 vnoremap : ;
 " Y like D
 nnoremap Y y$
