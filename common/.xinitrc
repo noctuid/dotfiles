@@ -2,11 +2,6 @@
 # ~/.xinitrc
 #
 # Executed by startx (run your window manager from here)
-
-# if [ -s ~/.Xmodmap ]; then
-#     xmodmap ~/.Xmodmap
-# fi
-
 if [ -d /etc/X11/xinit/xinitrc.d ]; then
         for f in /etc/X11/xinit/xinitrc.d/*; do
                 [ -x "$f" ] && . "$f"
@@ -19,17 +14,19 @@ setxkbmap us -variant colemak
 xmodmap ~/.Xmod_wide
 xmodmap ~/.Xmodmap
 # set background image
-# feh --bg-scale "/home/angelic_sedition/wallpaper/tumblr_static_makise.kurisu.full.798633.jpg" 
-feh --bg-scale "/home/angelic_sedition/wallpaper/dtb wallpaper/10204_darker_than_black_yin.jpg"
+feh --bg-scale /home/angelic_sedition/wallpaper/anime/mekukacity/ene_by_ti7503-d7kkbe8.png
 
-# fonts for bar and dzen2
+# font stuff
 xset +fp /usr/share/fonts/local
 xset +fp ~/.fonts
 xset fp rehash
+# faster key repeat rate and shorter delay (default is 660 25); messing around with
+xset r rate 300 35
+
 # run stuff in background# {{{
 # disable mouse when typing
-# i flag will disable for two seconds after last keypress; k ignore modifier keys (i.e. control left click) ; t will only disable scrolling and clicking
-syndaemon -k -i 2 -d &
+# i flag will disable for one second after last keypress; k ignore modifier keys (i.e. control left click) ; t will only disable scrolling and clicking
+syndaemon -k -i 1 -d &
 
 # set cursor look 
 xsetroot -cursor_name left_ptr &
@@ -39,30 +36,33 @@ xsetroot -cursor_name left_ptr &
 compton --config ~/.compton.conf -b &
 conky &
 guake &
-# changed Mode_switch to Control_L
+
 xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
 
 # redshift; better options at this point than xflux
 redshift -c ~/.config/redshift.conf &
 # xscreensaver for locking and power management
-xrdb -merge ~/.Xresources ; /usr/bin/xscreensaver -no-splash &
-xss-lock -- xscreensaver-command -lock &
+# xrdb -merge ~/.Xresources ; /usr/bin/xscreensaver -no-splash &
+# xss-lock -- xscreensaver-command -lock &
+xss-lock -- physlock &
 # virtual modal interfaces
 xchainkeys &
+# auto mount usbs and such
+devmon &
+# preload &
 # }}}
  
 sxhkd &
 # start window manager
 # exec bspwm
 # for reloading
-exec wm
-#case $1 in
-#	gnome) exec gnome-session;;
-#	kde) exec startkde;;
-#	xfce) exec startxfce4;;
-#	awesome) exec awesome;;
-#	cinnamon) exec cinnamon;;
-#	ratpoison) exec /usr/bin/ratpoison;;
-#	bspwm) sxhkd && exec bspwm;;
-#	*) exec startxfce4;;
-#esac
+# exec wm
+case $1 in
+	# xless) termite -e "/bin/zsh -c 'xless'";;
+	# xless) termite -e "xwit -resize 1366 768";;
+	xless) termite --geometry=1366x768 --exec="zsh -c '. ~/.zshrc && xless'";;
+	# cinnamon) exec cinnamon;;
+	# ratpoison) exec /usr/bin/ratpoison;;
+	# vb) VirtualBox -startvm "Windows 7" -fullscreen;;
+	*) exec wm;;
+esac
