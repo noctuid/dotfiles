@@ -1,21 +1,6 @@
 #! /bin/sh
 #https://wiki.archlinux.org/index.php/Bspwm
-# for reloading bspwm without restarting
 
-# Destktops/ Workspaces
-bspc monitor -d I II III IV V VI VII VIII IX X
- 
-# fix this
-if [ -e "$BSPWM_TREE" ] ; then
-	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
-	rm "$BSPWM_TREE" "$BSPWM_HISTORY" "$BSPWM_STACK"
-fi
-
-#i.e multi monitor: 
-# bspc monitor DVI-I-1 -d I II III IV
-# bspc monitor DVI-I-2 -d V VI VII
-# bspc monitor DP-1 -d VIII IX X
-# You can use `xrandr -q` or `bspc query -M` to find the monitor names.
 # colors#{{{
 # bspc config normal_border_color "#504339"
 # bspc config active_border_color "#6BBFAD"
@@ -24,31 +9,50 @@ fi
 # bspc config urgent_border_color "#504339"
 bspc config presel_border_color "#B0FFF2"
 bspc config focused_border_color "#d0d293"
+# bspc config focused_border_color "#87875F"
 bspc config normal_border_color "#000000"
 bspc config active_border_color "#555753"
 bspc config urgent_border_color "#4e9a06"
 #}}}
 # settings#{{{
-bspc config border_width        2
-bspc config window_gap          8
 bspc config split_ratio         0.60
 bspc config borderless_monocle  true
 bspc config gapless_monocle     true
 bspc focus_follows_pointer      true
+# cancel presel with another presel
+bspc config auto_cancel         true
+bspc config ignore_emwh_focus   true
+bspc config border_width        2
+bspc config window_gap          8
 # https://bbs.archlinux.org/viewtopic.php?id=149444&p=38
 bspc config normal_frame_opacity 0.0
 bspc config focused_frame_opacity 0.05
-# cancel presel with another presel
-bspc config auto_cancel true
 
 # padding for bar (export PANEL_HEIGHT instead)
 # bspc config bottom_padding 20 
 #}}}
+
+# Destktops/ Workspaces
+#i.e multi monitor: #{{{
+# bspc monitor DVI-I-1 -d I II III IV
+# bspc monitor DVI-I-2 -d V VI VII
+# bspc monitor DP-1 -d VIII IX X
+# You can use `xrandr -q` or `bspc query -M` to find the monitor names.
+#}}}
+bspc monitor -d I II III IV V VI VII VIII IX X
+# for reloading bspwm without losing window structure
+if [ -e "$BSPWM_TREE" ] ; then
+	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
+	rm "$BSPWM_TREE" "$BSPWM_HISTORY" "$BSPWM_STACK"
+fi
+
 # Window rules:#{{{
-# open firefox when go to second desktop (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
-bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("firefox")); }' &
+# open firefox when go to third desktop for first time (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
+# only problem is that if reload with super alt esc, these will open again; moving them elsewhere messes up things
+bspc control --subscribe | awk -F ':' '$4 ~ /^[FO]/ { exit(system("firefox &")); }' &
+bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("gvim &")); }' &
 # for rest of desktops, open gvim when empty
-bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("gvim &"); }' &
+# bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("gvim &"); }' &
 bspc control --subscribe | awk -F ':' '$4 ~ /^F/ { system("gvim &"); }' &
 bspc control --subscribe | awk -F ':' '$5 ~ /^F/ { system("gvim &"); }' &
 bspc control --subscribe | awk -F ':' '$6 ~ /^F/ { system("gvim &"); }' &
@@ -60,12 +64,10 @@ bspc control --subscribe | awk -F ':' '$11 ~ /^F/ { system("gvim &"); }' &
 
 # Can check class name of program with: xprop | grep WM_CLASS
 bspc rule -a guake floating=on
-bspc rule -a gimp floating=off
 # bspc rule -a Firefox follow=false
-# bspc rule -a apvlv dekstop=^3
-# bspc rule -a Gvim desktop=^1
+bspc rule -a apvlv dekstop=^5
+bspc rule -a gimp desktop=^4 floating=off
 #}}}
 panel &
 # panel2 &
-# start gvim on first desktop on startup
-gvim &
+bspc desktop -f ^2

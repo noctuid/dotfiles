@@ -3,27 +3,20 @@
 # TODO:
 # get bspwm reload working
 # 
-# add this point, sxhkd is mostly just for basic program binding and basic wm bindings
+# add this point, sxhkd is mostly just for basic program binding and backup wm bindings
 # limits:
 # .chaining isn't perfect (use xchainkeys instead)
 # .can only use level 1 (unshifted) key for prefix (can use keys in layer with modifier though) 
 
 # Reloading# {{{
-# This still needs to be fixed
 # Reload bspwm
-super + alt + {shift + ,_}Escape
-	{bspc quit 1 && pkill panel && pkill panel2,\
-	 bspc query -T > "$BSPWM_TREE"; \
+# super alt esc to reload; add shift to just quit 
+super + alt + {_,shift + }Escape
+	{bspc query -T > "$BSPWM_TREE"; \
 	    bspc query -H > "$BSPWM_HISTORY"; \
-	    bspc query -S > "$BSPWM_STACK"; \
-	    bspc quit && pkill panel && pkill panel2}
+	        bspc quit && pkill panel,\
+	 bspc quit 1}
 
-# super + shift + q
-	# pkill -x panel; bspc quit
-
-# reload panel
-super + control + Escape
-	pkill -x panel; bspc quit
 # }}}
 
 # General# {{{
