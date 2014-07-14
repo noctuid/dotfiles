@@ -1,13 +1,12 @@
-" Todo:
-" add smartinput rules
-" lock space like other keys
+" Todo:"{{{
+" fix smartinput rules
+" add unconditional paste?
+" fix airline in term
 " set up yanking properly in unite
-" better vertigo bindings?
-" fix tabnew binding speed
-" a lot..
-" consider: nnoremap ; q:i
-" better split bindings
-
+" arpeggio
+"}}}
+" An important note:
+" since nnoremap doesn't work when binding to <Plug> mappings, there is often <leader>; instead of :
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
 set runtimepath+=~/.vim/colors
@@ -65,44 +64,8 @@ autocmd BufEnter *.vault nmap <buffer> yy yi{
 "}}}
 
 " Experimental"{{{
-" " Compatible with ranger 1.4.2 through 1.6.*
-"
-" Add ranger as a file chooser in vim"{{{ "
-" https://github.com/hut/ranger/blob/master/doc/examples/vim_file_chooser.vim
-" If you add this code to the .vimrc, ranger can be started using the command
-" ":RagerChooser" or the keybinding "<leader>r". Once you select one or more
-" files, press enter and ranger will quit again and vim will open the selected
-" files.
-
-if !has("gui_running")
-function! RangeChooser()
-    let temp = tempname()
-" The option "--choosefiles" was added in ranger 1.5.1. Use the next line
-" with ranger 1.4.2 through 1.5.0 instead.
-"exec 'silent !ranger --choosefile=' . shellescape(temp)
-    exec 'silent !ranger --choosefiles=' . shellescape(temp)
-    if !filereadable(temp)
-" Nothing to read.
-        return
-    endif
-    let names = readfile(temp)
-    if empty(names)
-" Nothing to open.
-        return
-    endif
-" Edit the first item.
-    exec 'edit ' . fnameescape(names[0])
-" Add any remaning items to the arg list/buffer list.
-    for name in names[1:]
-        exec 'argadd ' . fnameescape(name)
-    endfor
-    redraw!
-endfunction
-
-command! -bar RangerChooser call RangeChooser()
-nnoremap <leader>R :<C-U>RangerChooser<CR>
-endif
-"}}}
+" for pterosaur; was this fixed?
+inoremap qq <esc>
 
 " retrain to stop using caps layer in vim
 nnoremap <up> <nop>
@@ -111,17 +74,18 @@ nnoremap <left> <nop>
 nnoremap <down> <nop>
 nnoremap <End> <nop>
 nnoremap <Home> <nop>
-" inoremap <up> <nop>
-" inoremap <left> <nop>
-" inoremap <right> <nop>
-" inoremap <down> <nop>
-" inoremap <End> <nop>
-" inoremap <Home> <nop>
+inoremap <up> <nop>
+inoremap <left> <nop>
+inoremap <right> <nop>
+inoremap <down> <nop>
+inoremap <End> <nop>
+inoremap <Home> <nop>
 
+nmap s <nop>
+nmap r <nop>
 if has("gui_running")
 " wm experementation"{{{
-" nnoremap <leader>a :silent !xsendkey -window 0x300002 p<cr>
-nnoremap <silent> <leader>a :silent !bspc window -f left && xsendkey p && bspc window -f last<cr>
+" nnoremap <silent> <leader>a :silent !bspc window -f left && xsendkey p && bspc window -f last<cr>
 
 " "r" is redraw"{{{
 " worskpace/Destkop switch"{{{
@@ -190,7 +154,7 @@ nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
 
 " gap up and down
 nnoremap <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
-nnoremap <silent> sd :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
+nnoremap <silent> sU :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
 
 " preselect"{{{
 nnoremap <silent> sph :silent !bspc window -p left<cr>
@@ -276,6 +240,11 @@ nnoremap <silent> ss :silent !tmux choose-client<cr>
 endif
 
 "}}}
+
+" plugin unmaps"{{{
+" table mode
+autocmd VimEnter * silent! nunmap <leader>tt
+"}}}
 " #==============================
 " # General {{{
 " #==============================
@@ -285,6 +254,8 @@ endif
 set showcmd
 " (show matching brackets; default)
 set showmatch
+
+set foldmethod=marker
 
 set modeline
 
@@ -303,7 +274,7 @@ set history=2000
 
 " keeps buffer contents in memory (undo history doesn't go away if change buffers)
 set hidden
-" persistent undo history
+" persistent undo history (even if close buffer)
 set undofile " Save undo's after file closes
 set undodir=~/.vim/undo,/tmp " where to save undo histories
 set undolevels=3000 " How many undos
@@ -339,11 +310,16 @@ set lazyredraw
 " (when do things like gg, will move cursor to sol)
 set startofline
 
-" at least 5 lines show below and above cursor; experimenting with cursor position
+" at least 5 lines show below and above cursor
 set scrolloff=5
 
-" open folds on search and jumping to marks
-set foldopen=search,mark
+" open folds on jumping to marks
+set foldopen+=mark
+
+" turn off timeout; default is 1000
+set notimeout
+" this messes up airline in term vim ^
+" set timeoutlen=50
 
 " return to last edit position when opening files
 autocmd BufReadPost *
@@ -373,8 +349,6 @@ set noswapfile
 
 " auto save on focus lost if buffer changed (error if unnamed.. don't use untitled buffers)
 au FocusLost * update
-" save on insert leave (if changed; fix for unite)
-" au InsertLeave * update
 
 " autowriteall; save buffer if changed when use various commands (switching buffers, quit, exit, etc.)
 set awa
@@ -385,19 +359,9 @@ set awa
 " from vim wiki
 augroup AutoReloadVimRC
   au!
-" automatically reload vimrc when it's saved
+  " automatically reload vimrc when it's saved
   au BufWritePost ~/dotfiles/vim/.vimrc so ~/.vimrc
 augroup END
-
-" source .vimrc on enter; this still slows things down significantly on startup; change to quickvimrc?
-" autocmd vimenter * source ~/dotfiles/vim/.vimrc
-
-" too slow; change to quickvimrc?
-" augroup AutoReloadVimRC2
-" au!
-
-" au BufReadPost * so ~/dotfiles/vim/.vimrc
-" augroup END
 
 "}}}
 
@@ -410,7 +374,6 @@ set wildmode:full
 "}}}
 
 " Searching"{{{
-" stop highlighting on escape
 set hlsearch
 
 " this causes arrow keys to make As and Bs in insert/normal mode in terminal vim
@@ -420,7 +383,7 @@ if has("gui_running")
 endif
 " don't move when search
 set noincsearch
-" go back to beginning once reach end
+" go back to beginning of buffer once reach end
 set wrapscan
 
 " when searching lower case, will match any case
@@ -429,12 +392,27 @@ set ignorecase
 set smartcase
 "}}}
 
+" Spacing/Indentation Stuff "{{{
+" super tab for conversion
+" Only hard tab for indent:
+set noexpandtab "default; don't convert to spaces
+set shiftwidth=4
+set tabstop=4
+set softtabstop=0
+" I like tabs
+set smarttab
+
+" smart tabs plugin; use tabs only for indent; spaces for allignment
+" will insert spaces when use tab not at beginning of line
+
+"}}}
+
 "}}}
 " #==============================
-" # Specific Filetype Settings"{{{
+" # Specific Filetype Settings {{{
 " #==============================
 " can also add file specific settings to ~/.vim/after/ftplugin; html.vim or python.vim for example; use setlocal instead
-" see http://stackoverflow.com/questions/1889602/multiple-vim-configurations
+" http://stackoverflow.com/questions/1889602/multiple-vim-configurations
 
 " Text file settings"{{{
 
@@ -453,7 +431,6 @@ augroup text_autocommands
 	autocmd BufEnter *.txt match text /#.*/
 
 	" fix zf (folding now uses right comment char)
-	" autocmd BufEnter *.txt setlocal comments=:#
 	autocmd BufEnter *.txt setlocal commentstring=#\ %s
 
 	" Enable spell check for text files
@@ -462,7 +439,6 @@ augroup END
 
 "}}}
 
-" autocmd BufNewFile,BufRead *.markdown setlocal spell spelllang=en
 " Tex file settings"{{{
 autocmd BufEnter *.tex setlocal nolist
 autocmd BufEnter *.tex setlocal lbr
@@ -470,8 +446,19 @@ autocmd BufEnter *.tex setlocal textwidth=0
 
 "}}}
 
+" markdown
+autocmd BufNewFile,BufRead *.markdown setlocal spell spelllang=en
+
+" python
+autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=80 smarttab expandtab
+" indent folding for python
+"au BufEnter *.py set foldmethod=indent
+
+" pentadactyl
 call tcomment#DefineType('pentadactyl', '" %s' )
 autocmd BufNewFile,BufRead *.pentadactylrc,*penta set filetype=pentadactyl
+
+" comment char for .conf files
 let g:commentChar = {
 \ 'conf': '#'
 \}
@@ -482,12 +469,12 @@ let g:commentChar = {
 " syntax highlighting works when put at end but not here..
 " syntax on
 
-" see vivify; favourites: darkrobot, railscasts, **molokai, etc.
-colorscheme darkrobot
+colorscheme seoul256
 set t_Co=256
 if has("gui_running")
 	set guicursor=a:blinkon900-blinkoff600 " Slow down cursor blinking speed
-	colorscheme molokai
+	" colorscheme molokai
+	colorscheme gruvbox
 	set background=dark
 	set guifont=Inconsolata\ 11
 endif
@@ -495,6 +482,7 @@ endif
 " Airline theme "{{{
 " airline always present
 set laststatus=2
+
 " my custom combination theme:
 let g:airline_theme='darkfox'
 " tabline won't work with taboo
@@ -533,38 +521,13 @@ endif
 
 " Tab stuff
 " limit amount of tabs for vim:
-" set tabpagemax=50
+" set tabpagemax=15
 
-"}}}
-" #==============================
-" # Spacing/Indentation Stuff "{{{
-" #==============================
-" super tab for conversion
-" Only hard tab for indent:
-set noexpandtab "default; don't convert to spaces
-set shiftwidth=4
-set tabstop=4
-set softtabstop=0
-" I like tabs
-set smarttab
-
-" smart tabs plugin; use tabs only for indent; spaces for allignment
-" will insert spaces when use tab not at beginning of line
-
-" "}}}
-" #==============================
-" # Folding"{{{
-" #==============================
-set foldmethod=marker
-" indent folding for python
-"au BufEnter *.py set foldmethod=indent
 "}}}
 " #==============================
 " # General Mappings/ Bindings and Settings "{{{
 " #==============================
-" focus on not using modifiers or hard to reach keys; may add more modifiers in future when remapping progresses for dual and I get more thumb keys
-" main leader/prefix keys (in order of ease): t (not worthy of such a great colemak position and I never except for dt and such which is not affected) and space (about as easy)
-" let mapleader = "\<space>"
+" make colemak t more useful
 let mapleader = "t"
 
 " Colemak/Navigation Mappings"{{{
@@ -578,6 +541,7 @@ noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
 
 " don't just place in the middle; open folds recursively 
 nnoremap <silent> k nzOzz|nnoremap <silent> K NzOzz
+" xnoremap <silent> K :<c-u>call <SID>next('N', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
 
 " BOL/EOL/Join Lines; took out l to ^ in favor of l for <c-o>
 " nnoremap L $|nnoremap <C-l> J
@@ -586,6 +550,10 @@ nnoremap L <c-i>
 nnoremap l <c-o>
 " h for beginning of line
 " nnoremap h 0
+
+" High/Low/Mid.
+" never use gm or select mode; would rather have go to middle of buffer not line
+noremap gh H|noremap gm M|noremap gl L
 
 nnoremap j e|noremap J E
 
@@ -617,6 +585,12 @@ nnoremap Y y$
 " yank paragraph
 " http://hashrocket.com/blog/posts/8-great-vim-mappings
 nnoremap yp yap<S-}>p
+
+" because I hate Q; apply macro
+nnoremap Q @q
+vnoremap Q :norm @q<cr>
+" ma=ip`a
+
 " Sane redo.
 noremap U <C-r>
 
@@ -625,7 +599,13 @@ nnoremap a A
 nnoremap A a
 
 " I use V more than v.. going to try this; can also double tap v now for visual
-nnoremap v V|nnoremap V v
+nnoremap v V|nnoremap V v|nnoremap <leader>v <c-v>
+
+" I don't ever use ga; map to go to end of line (works with wrapping)
+nnoremap ga g$
+" swap
+nnoremap g0 g^
+nnoremap g^ g0
 
 " camelcase motion as default
 map <silent> w <Plug>CamelCaseMotion_w
@@ -638,103 +618,67 @@ sunmap j
 " default iw
 omap <silent> iw <Plug>CamelCaseMotion_iw
 xmap <silent> iw <Plug>CamelCaseMotion_iw
-omap <silent> ib <Plug>CamelCaseMotion_ib
-xmap <silent> ib <Plug>CamelCaseMotion_ib
+" using ib with anyblock
+" omap <silent> ib <Plug>CamelCaseMotion_ib
+" xmap <silent> ib <Plug>CamelCaseMotion_ib
 omap <silent> ie <Plug>CamelCaseMotion_ie
 xmap <silent> ie <Plug>CamelCaseMotion_ie
-
-" use much more frequently
-nnoremap dw daw
-nnoremap cw caw
-nnoremap yw yaw
-nnoremap dW daW
-nnoremap cW caW
-nnoremap yW yaW
 
 "}}}
 " better text file long line nav (use with lazy redraw); up and down between wraps
 inoremap <Down> <C-o>gj
 inoremap <Up> <C-o>gk
 
-" for pterosaur; was this fixed?
-inoremap qq <esc>
-
 " jump up and down
-nnoremap <leader>k <c-d>|nnoremap <leader>o <c-u>
+nnoremap <Plug>MuchUp <c-u>
+nnoremap <Plug>MuchDown <c-d>
+nmap <leader>k <Plug>MuchDown<leader>;silent! call repeat#set("\<Plug>MuchDown", v:count)<cr>
+nmap <leader>o <Plug>MuchUp<leader>;silent! call repeat#set("\<Plug>MuchUp", v:count)<cr>
 vnoremap <leader>k <c-d>|vnoremap <leader>o <c-u>
 
-" Better save mapping; still not there yet
-inoremap § <esc>:w<cr>
-nnoremap § :w<cr>
-" try to use this instead
+" save; save on insert leaver?
 nnoremap <leader>s :w<cr>
+nnoremap <leader>q :q<cr>
 
 " control backspace behaviour
 inoremap ¸ <c-w>
 cnoremap ¸ <c-w>
 nnoremap ¸ daw
-" inoremap ... <c-u>
+inoremap .¸ <c-u>
+
+" paste in insert
+inoremap .yp <c-r>+
 
 " keep cursor at beginning of line after hitting enter; fix
 inoremap <return> <return><home>
 
 " source vimrc
-nnoremap <leader>. :so ~/.vimrc<CR>
-"}}}
-
-" operator, text object, etc. table:
-" t- to
-" z- sneak
-" s- surrounding
-" x- exchange
-" aw, iw (camelcase)
-" iq- quote
-" s- sentence
-" space (for punctuation)
-
-" remote
-" http://learnvimscriptthehardway.stevelosh.com/chapters/15.html
-" inside next, last paren
-onoremap in( :<c-u>normal! f(vi(<cr>
-onoremap il( :<c-u>normal! F)vi(<cr>
-
-" leader table"{{{
-" interestingly enough.. can have single letter and multiple letters (ex b and bn after leader ; delay though)
-"bc- neobundle clean
-"bu- neobundle update
-"c- tcomment
-"d- BD
-"D- close window too
-"e- next tab
-"E- next buffer in history
-"g- fugitive bindings
-"i- neobundle install
-"l- back in buffer history
-"L- forward in buffer history
-"n- previous tab
-"N- previous buffer in history
-"p- Unite mru and buffer
-"P- unite file
-"q- :q
-"s- save
-"tn- taboo open
-"tr- taboo rename
-"tt- tabnew
-"u- gundo
-"x- 'xray' view
-".- source vimrc
-
-"}}}
-
-"space table
-" space arstdhneio; 1-10gt or 11-20gt
-" wfp to switch between "sections"
-" u- show unite bookmarks for tab name
-" U- add unite bookmark
-" y- yank history
+nnoremap <leader>. :so ~/.vimrc<cr>
+" source current buffer
+nnoremap g. :so %<cr>
 
 "'x-ray' view; cuc and cul
 nnoremap <leader>x :set cursorcolumn!<cr>:set cursorline!<cr>
+"}}}
+
+" _Spell correct"{{{
+nnoremap <leader>z 1z=
+" repeatable correct last or next mispelled word
+nnoremap <Plug>CorrectNextMispell ]s1z=
+nnoremap <Plug>CorrectPreviousMispell [s1z=
+" add word to spellfile
+nnoremap <Plug>AddNextMispell ]szg
+nnoremap <Plug>AddPreviousMispell [szg
+" goto sleep is useless
+" goto next mispelled word and correct with first option
+nmap gsc <Plug>CorrectNextMispell<leader>;silent! call repeat#set("\<Plug>CorrectNextMispell", v:count)<cr>
+nmap gSc <Plug>CorrectPreviousMispell<leader>;silent! call repeat#set("\<Plug>CorrectPreviousMispell", v:count)<cr>
+" go to the next mispelled word and add to spellfile
+nmap gsa <Plug>AddNextMispell<leader>;silent! call repeat#set("\<Plug>AddNextMispell", v:count)<cr>
+nmap gSa <Plug>AddPreviousMispell<leader>;silent! call repeat#set("\<Plug>AddPreviousMispell", v:count)<cr>
+" mark word a wrong
+" nnoremap gsm zw
+"}}}
 
 " Plugin Specific"{{{
 " NeoBundle stuff"{{{
@@ -746,21 +690,49 @@ nnoremap <leader>bs :Unite neobundle/search<cr>
 nnoremap <leader>bl :NeoBundleList<cr>
 "}}}
 
-" Fugitive/git"{{{
+" Git Related"{{{
+" Follow symlinks when opening a file"{{{
+" Sources:
+"  - https://github.com/tpope/vim-fugitive/issues/147#issuecomment-7572351
+"  - http://www.reddit.com/r/vim/comments/yhsn6/is_it_possible_to_work_around_the_symlink_bug/c5w91qw
+" Echoing a warning does not appear to work:
+"   echohl WarningMsg | echo "Resolving symlink." | echohl None |
+function! MyFollowSymlink(...)
+  let fname = a:0 ? a:1 : expand('%')
+  if getftype(fname) != 'link'
+    return
+  endif
+  let resolvedfile = fnameescape(resolve(fname))
+  exec 'file ' . resolvedfile
+endfunction
+command! FollowSymlink call MyFollowSymlink()
+
+autocmd BufReadPost * call MyFollowSymlink(expand('<afile>'))
+"}}}
+
+" Fugitive"{{{
 nnoremap <leader>ga :Gwrite<cr>
 nnoremap <leader>gs :Gstatus<cr>
 nnoremap <leader>gc :Gcommit<cr>
 nnoremap <leader>gd :Gdiff<cr>
-" :nnoremap <buffer> o do
-" from previous commit
+" get previous commit
 " nnoremap <leader>gr :Gread<cr>
 nnoremap <leader>gm :Gmove<space>
 " nnoremap <leader>gR :Gremove<cr>
 " git rm --cached
-" in visual modetoo
-autocmd BufRead fugitive\:* xnoremap <buffer> dp :diffput<cr>|xnoremap <buffer> do :diffget<cr>
-" bindings for git status window
-autocmd FileType gitcommit nmap <buffer> n <c-n>|nmap <buffer> e <c-p>
+
+" https://github.com/PonderingGrower/dotfiles/blob/master/.vimrc
+augroup fugitive_settings
+    autocmd!
+	" same bindings for merging diffs as in normal mode
+    autocmd BufRead fugitive://* xnoremap <buffer> dp :diffput<cr>
+    autocmd BufRead fugitive://* xnoremap <buffer> do :diffget<cr>
+	" easy diff update
+    autocmd BufRead fugitive://* xnoremap <buffer> du :diffupdate<cr>
+	" bindings for git status window
+	autocmd FileType gitcommit nmap <buffer> n <c-n>|nmap <buffer> e <c-p>
+augroup END
+"}}}
 
 " gitgutter"{{{
 " don't set up default mappings
@@ -771,45 +743,19 @@ nnoremap <leader>gG :GitGutterLineHighlightsToggle<cr>
 " nmap <Leader>gh <Plug>GitGutterStageHunk
 " nmap <Leader>gH <Plug>GitGutterRevertHunk
 " repeatable hunk navigation
-nmap <leader>gn <Plug>GitGutterNextHunk<leader>;silent! call repeat#set("\<Plug>GitGutterNextHunk", v:count)<cr>
-nmap <leader>ge <Plug>GitGutterPrevHunk<leader>;silent! call repeat#set("\<Plug>GitGutterPrevHunk", v:count)<cr>
+nmap <leader>gn <Plug>GitGutterNextHunkzO<leader>;silent! call repeat#set("\<Plug>GitGutterNextHunkzO", v:count)<cr>
+nmap <leader>ge <Plug>GitGutterPrevHunkzO<leader>;silent! call repeat#set("\<Plug>GitGutterPrevHunkzO", v:count)<cr>
 "}}}
 
 " vim-signify settings "{{{
-" which vcs and order
+" " which vcs and order
 " let g:signify_vcs_list = [ 'git' ]
 " let g:signify_disable_by_default = 0
-"
+" "
 " nmap <leader>gn <plug>(signify-next-hunk)
 " nmap <leader>ge <plug>(signify-prev-hunk)
 " let g:signify_mapping_toggle_highlight = '<leader>gh'
 "}}}
-"}}}
-
-" Snippets and Completion"{{{ 
-" UltiSnips"{{{
-" Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-"
-let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
-
-" If you want :UltiSnipsEdit to split your window.
-let g:UltiSnipsEditSplit="vertical"
-"}}}
-
-" Use neocomplete."{{{
-" let g:neocomplete#enable_at_startup = 1
-" Use smartcase.
-let g:neocomplete#enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 3
-let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
-
-" inoremap ` <c-u>
-"}}}
-
 "}}}
 
 " Gundo
@@ -834,7 +780,6 @@ nmap <Leader>a <Plug>(EasyAlign)
 " table mode
 let g:table_mode_map_prefix = '<leader>m'
 let g:table_mode_toggle_map = 'm'
-silent! nunmap <leader>tt
 
 " Emmet vim
 map <leader>y <C-y>,
@@ -849,7 +794,7 @@ let g:syntastic_style_warning_symbol = '≈'
 
 " session management:"{{{
 " quickly open session
-nnoremap <leader>ss :OpenSession
+" nnoremap <leader>ss :OpenSession
 " vim-session options (auto save on exit, open saved on open)
 let g:session_autosave_periodic='yes'
 let g:session_autosave='yes'
@@ -863,15 +808,18 @@ let g:sneak#use_ic_scs = 1
 let g:sneak#streak = 1
 " s to go to next S for previous
 let g:sneak#s_next = 1
-let g:sneak#textobject_z = 1
+let g:sneak#textobject_z = 0
 
 " hi link SneakPluginTarget ErrorMsg
 hi link SneakStreakTarget ErrorMsg
 " hi link SneakStreakMask Comment
 " nmap f <Plug>Sneak_s
+" visual mode
+xmap f <Plug>Sneak_s
+xmap F <Plug>Sneak_S
 " operator-pending-mode
-" omap z <Plug>Sneak_s
-" omap Z <Plug>Sneak_S
+omap f <Plug>Sneak_s
+omap F <Plug>Sneak_S
 " nice since have "l" mapped to <c-o>
 
 " colemak chars for sneak mode; take out i for insert; d out to delete
@@ -902,8 +850,18 @@ let g:vimwiki_camel_case = 0                   " Don't automatically make CamelC
 " Calendar Settings
 let g:calendar_google_calendar = 1
 let g:calendar_google_task = 1
+" nnoremap <cr>c :Calendar -position=tab<cr>
 
-" insertlessly
+autocmd FileType calendar call s:calendar_settings()
+function! s:calendar_settings()
+" colemak nav
+nmap <buffer> h <Plug>(calendar_left)
+nmap <buffer> n <Plug>(calendar_down)
+nmap <buffer> e <Plug>(calendar_up)
+" nmap <buffer> i <Plug>(calendar_right)
+endfunction
+
+" insertlessly (get rid of ?)
 " don't fuck with whitespace
 let g:insertlessly_cleanup_trailing_ws = 0
 let g:insertlessly_cleanup_all_ws = 0
@@ -925,6 +883,96 @@ onoremap <silent> <leader>e :<C-U>VertigoUp o<CR>
 let g:Vertigo_onedigit_method = 'smart3'
 " let g:Vertigo_homerow_onedigit = 'ARSTDHNEIO'
 
+" vimshell"{{{
+" Use current directory as vimshell prompt.
+let g:vimshell_prompt_expr =
+\ 'escape(fnamemodify(getcwd(), ":~").">", "\\[]()?! ")." "'
+let g:vimshell_prompt_pattern = '^\%(\f\|\\.\)\+> '
+
+" let g:vimshell_no_default_keymappings=0
+
+autocmd FileType vimshell call s:vimshell_mappings()
+function! s:vimshell_mappings()
+	" Normal mode key-mappings."{{{
+	" Execute command.
+	nmap <buffer> <CR> <Plug>(vimshell_enter)
+	" Hide vimshell.
+	" nmap <buffer> q <Plug>(vimshell_hide)
+	" Exit vimshell.
+	nmap <buffer> Q <Plug>(vimshell_exit)
+	" Move to previous prompt.
+	nmap <buffer> <leader>e <Plug>(vimshell_previous_prompt)
+	" Move to next prompt.
+	nmap <buffer> <leader>n <Plug>(vimshell_next_prompt)
+	" Paste this prompt.
+	" nmap <buffer> <C-y> <Plug>(vimshell_paste_prompt)
+	" Search end argument.
+	nmap <buffer> E <Plug>(vimshell_move_end_argument)
+	" Change line.
+	nmap <buffer> cc <Plug>(vimshell_change_line)
+	" Delete line.
+	nmap <buffer> dd <Plug>(vimshell_delete_line)
+	" Start insert.
+	nmap <buffer> I <Plug>(vimshell_insert_head)
+	nmap <buffer> i <Plug>(vimshell_insert_enter)
+	" swapped
+	nmap <buffer> A <Plug>(vimshell_append_enter)
+	nmap <buffer> a <Plug>(vimshell_append_end)
+	nmap <buffer> ^ <Plug>(vimshell_move_head)
+	" Interrupt.
+	nmap <buffer> q <Plug>(vimshell_interrupt)
+	nmap <buffer> <C-k> <Plug>(vimshell_hangup)
+	" Clear.
+	nmap <buffer> <leader>c <Plug>(vimshell_clear)
+	" Execute background.
+	" nmap <buffer> <C-z> <Plug>(vimshell_execute_by_background)
+
+	" History completion.
+	nmap <buffer> <space><space> <Plug>(vimshell_history_unite)
+	"}}}
+	" Visual mode key-mappings."{{{
+	" Move to previous prompt.
+	vmap <buffer> <leader>e <Plug>(vimshell_select_previous_prompt)
+	" Move to next prompt.
+	vmap <buffer> <leader>n <Plug>(vimshell_select_next_prompt)
+	"}}}
+	" Insert mode key-mappings."{{{
+	" Execute command.
+	inoremap <expr> <SID>(bs-ctrl-])
+		\ getline('.')[col('.') - 2] ==# "\<C-]>" ? "\<BS>" : ''
+	imap <buffer> <C-]> <C-]><SID>(bs-ctrl-])
+	imap <buffer> <CR> <C-]><Plug>(vimshell_enter)
+
+	" inoremap <buffer><expr> <C-p> pumvisible() ? "\<C-p>" :
+	" 	\ <SID>start_history_complete()
+	" inoremap <buffer><expr> <C-n> pumvisible() ? "\<C-n>" :
+	" 	\ <SID>start_history_complete()
+	inoremap <buffer><expr> <Up> pumvisible() ? "\<C-p>" :
+		\ <SID>start_history_complete()
+	inoremap <buffer><expr> <Down> pumvisible() ? "\<C-n>" :
+		\ <SID>start_history_complete()
+
+	" Command completion.
+	imap <buffer> <TAB> <Plug>(vimshell_command_complete)
+	" Move to Beginning of command.
+	imap <buffer> <C-a> <Plug>(vimshell_move_head)
+	" Delete all entered characters in the current line.
+	imap <buffer> <C-u> <Plug>(vimshell_delete_backward_line)
+	" Delete previous word characters in the current line.
+	imap <buffer> ¸ <Plug>(vimshell_delete_backward_word)
+	" Push current line to stack.
+	imap <silent><buffer><expr> <C-z> vimshell#mappings#smart_map(
+		\ "\<Plug>(vimshell_push_current_line)",
+		\ "\<Plug>(vimshell_execute_by_background)")
+	" Insert last word.
+	" imap <buffer> <C-t> <Plug>(vimshell_insert_last_word)
+	" Interrupt.
+	imap <buffer> <C-c> <Plug>(vimshell_interrupt)
+	" Delete char.
+	imap <buffer> <BS> <Plug>(vimshell_delete_backward_char)
+	"}}}
+endfunction
+"}}}
 "}}}
 
 " _Clipboard Related"{{{
@@ -936,14 +984,13 @@ set clipboard=unnamedplus
 vnoremap <silent> y y`]
 vnoremap <silent> p p`]
 nnoremap <silent> p p`]
-" since have above, change gp to past on new line
+" since have above, change gp to paste on new line
 nnoremap gp :pu<cr>
-
 
 " thanks to shougo for such a versatile and useful plugin; https://github.com/Shougo/unite.vim/issues/415
 " vim is my clipboard manager
 let g:unite_source_history_yank_enable = 1
-" saves things in clipboard register even if not yanked in vim (causes duplicates with unnamedplus; slightly annoying)
+" saves things in clipboard register even if not yanked in vim 
 let g:unite_source_history_yank_save_clipboard = 1
 " don't save yanks to disk
 let g:unite_source_history_yank_file=""
@@ -954,11 +1001,12 @@ nnoremap <space>y :Unite history/yank<cr>
 
 " }}}
 " ==============================
-" Buffer and Tab Management Mappings and Settings"{{{
+" Buffer, Window, and Tab Management Mappings and Settings"{{{
 " ==============================
-" access to hundreds of files in 2-5 keystrokes via bookmarks and folder specific file search based on tab name/Topic; no significant memorization required
-"see unite
-"tabs"{{{
+source ~/.navigation.vim
+" source so that <space>u will work
+nnoremap <leader>t :tabnew<cr>
+nnoremap <space>x <c-w>c
 
 " Taboo"{{{
 " default tab naming behaviour
@@ -971,58 +1019,24 @@ set sessionoptions+=tabpages,globals
 
 nnoremap <leader>r :TabooRename<space>
 
-" source so that <space>u will work
-nnoremap <leader>t :tabnew<cr>
 "}}}
 
-" quicker tab navigation"{{{
-" nnoremap N gT
-" nnoremap E gt
-" can add <buffer> and then source vimrc on bufenter instead but that causes a huge slowdown
-nnoremap <space>w 1gt:source ~/.quickvimrc<cr>
-nnoremap <space>f 11gt:source ~/.quickvimrc<cr>
-nnoremap <space>p 12gt:source ~/.quickvimrc<cr>
-if tabpagenr() < 11
-	nnoremap <space>a 1gt
-	nnoremap <space>r 2gt
-	nnoremap <space>s 3gt
-	nnoremap <space>t 4gt
-	nnoremap <space>d 5gt
-	nnoremap <space>h 6gt
-	nnoremap <space>n 7gt
-	nnoremap <space>e 8gt
-	nnoremap <space>i 9gt
-	nnoremap <space>o 10gt
-elseif tabpagenr() >= 10
-	nnoremap <space>a 11gt
-	nnoremap <space>r 12gt
-	nnoremap <space>s 13gt
-	nnoremap <space>t 14gt
-	nnoremap <space>d 15gt
-	nnoremap <space>h 16gt
-	nnoremap <space>n 17gt
-	nnoremap <space>e 18gt
-	nnoremap <space>i 19gt
-	nnoremap <space>o 20gt
-endif
-
-"}}}
-"}}}
-nnoremap <leader>q :q<cr>
-
-"buffkill stuff"{{{
+"bufkill stuff"{{{
 " move forward and back in buffer history (for window)
 nnoremap <leader>l :BB<cr>
 nnoremap <leader>L :BF<cr>
 " delete buffer and leave window open and switch to last used buffer (bufkill)
 nnoremap <leader>d :BD<Return>
 " delete buffer and close window
-nnoremap <leader>D :BD<cr><c-w>c
+" nnoremap <leader>D :BD<cr><c-w>c
 " close buffer without closing window
 " http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
 " cabbr bc BClose
 " create a new buffer in current window use :enew new window/buffer without split
 "}}}
+
+" Wipeout (close buffers not open in windows/tabs)
+nnoremap <leader>W :Wipeout<cr>
 
 " _Unite Related"{{{
 " http://www.codeography.com/2013/06/17/replacing-all-the-things-with-unite-vim.html
@@ -1050,7 +1064,7 @@ let g:unite_quick_match_table = {
 nnoremap <space>/ :Unite ag:.<cr>
 
 " Open bookmark file for most frequently used files
-nnoremap <space><space> :Unite -quick-match bookmark<cr>
+" nnoremap <space><space> :Unite -quick-match bookmark<cr>
 
 " Search open buffers and most recently used
 nnoremap <leader>p :Unite -start-insert buffer file_mru<cr>
@@ -1059,13 +1073,14 @@ nnoremap <leader>P :Unite -start-insert file<cr>
 
 autocmd FileType unite call s:unite_settings()
 function! s:unite_settings()
-" let me exit with escape and move with colemak bindings
-nmap <buffer> <ESC> <Plug>(unite_exit)
-nmap <buffer> n j
-nmap <buffer> e k
+	" let me exit with escape and move with colemak bindings
+	nmap <buffer> <ESC> <Plug>(unite_exit)
+	nmap <buffer> n j
+	" nmap <buffer> n <Plug>(unite_skip_cursor_down)
+	nmap <buffer> e k
+	" nmap <buffer> e <Plug>(unite_skip_cursor_up)
 endfunction
 
-source ~/.navigation.vim
 "}}}
 
 " Splits"{{{
@@ -1073,14 +1088,16 @@ nnoremap <leader>w <c-w>
 " r after above to swap
 nnoremap <leader>/ :vsplit<cr>
 nnoremap <leader>- :split<cr>
-" already have N and E set to switch between splits
-nnoremap <a-n> <c-w><left>
-nnoremap <a-e> <c-w><right>
 nnoremap <leader>h <c-w><left>
 nnoremap <leader>i <c-w><right>
 
+" split navigation (backup)
+noremap H <C-w>h|noremap N <C-w>j|noremap E <C-w>k
+" Moving windows around. (if ever needed)
+noremap <C-w>N <C-w>J|noremap <C-w>E <C-w>K|noremap <C-w>I <C-w>L
+
 " 'monocle'
-nnoremap <silent> <leader>m :ZoomWin<cr>
+nnoremap <silent> <leader>f :ZoomWin<cr>
 
 let g:eighties_enabled = 1
 let g:eighties_minimum_width = 100
@@ -1094,350 +1111,381 @@ nnoremap <leader>E :tabm +1<cr>
 
 "}}}
 " #==============================
-"shorthand"{{{
-" working on implementing; not a fan of configuring autokey; this is much easier; use vim and penta for 95% of typing.. will probably add to weechat as well
-" get pterosaur working as iabbr is horribly broken in pentadactyl
-" add for only txt files
-" 
-"
-autocmd FileType text call s:shorthand()
-function! s:shorthand()
-	iabbr <buffer> i I
-endfunction
-" http://forum.colemak.com/viewtopic.php?id=1804
-iabbr ab about
-iabbr about ab
-iabbr abo above
-iabbr above abo
-iabbr ac actual
-iabbr actual ac
-iabbr af after
-iabbr after af
-iabbr ag again
-iabbr again ag
-iabbr l all
-iabbr all l
-iabbr lm almost
-iabbr almost lm
-iabbr ao also
-iabbr also ao
-iabbr alw always
-iabbr always alw
-iabbr amc America
-iabbr America amc
-iabbr n and
-iabbr and n
-iabbr ani animal
-iabbr animal ani
-iabbr anr another
-iabbr another anr
-iabbr ans answer
-iabbr answer ans
-iabbr ne any
-iabbr any ne
-iabbr nw anyway
-iabbr anyway nw
-iabbr r are
-iabbr are r
-iabbr aa area
-iabbr area aa
-iabbr ru are you
-iabbr b be
-iabbr be b
-iabbr bc because
-iabbr because bc
-iabbr bn been
-iabbr been bn
-iabbr bf before
-iabbr before bf
-iabbr bl below
-iabbr below bl
+" # Operators, Text Objects, etc."{{{
+" #==============================
+" Narrow Region"{{{
+" thanks to ddungtang for pointing me to this plugin:
+" http://www.reddit.com/r/vim/comments/298049/question_on_repetitively_making_changes_to_the/
+" just to get rid of normal mode mapping the plugin makes by default
+nmap <Leader>ZXY <Plug>NrrwrgnDo
+" for changing the same areas across multiple lines
+" open selected text, delete all of it, map escape to save changes and close win
+xmap S <Plug>NrrwrgnDodG;inoremap <buffer> <lt>esc> <lt>esc>:wq<lt>cr><cr>
+"}}}
+" https://github.com/beloglazov/vim-textobj-quotes
+xmap q iq
+omap q iq
 
-iabbr c can
-iabbr can c
-iabbr cn can't
-" " are you okay with = rukw
-" " around = rnd|ro
-" " away = ay
-" " began = bga|ba
-" " begin = bgn|bi
-" " being = bng|bg
-" " best = bs
-" " between = bt|tw
-" " book = bk
-" " both = bo|bh
-" " but - bu
-" " by the way = btw
-" " call = cl
-" " came = ca
-" " can = c
-" " can't = cn
-" " change = ch
-" " children = chd
-" " city = cy
-" " close = cs
-" " come = cm
-" " could = cd
-" " country = cty
-" " different = df
-" " does = ds
-" " doing = dg
-" " done = dn
-" " don't = d
-" " down = dw
-" " each = e|ea
-" " earth = erh
-" " easy = es
-" " eight = 8
-" " English = en|eng
-" " enough = nf
-" " even = ev|vn
-" " ever = er
-" " every = ey
-" " example = x
-" " family = fml
-" " father = ftr|fhr
-" " feet = f3|f8
-" " find = fd
-" " finding = fdg
-" " fine = fn
-" " first = fs
-" " five = 5
-" " follow = fl
-" " follower = flr
-" " food = fod|fu
-" " foot = ft
-" " for = f
-" " for example = fx
-" " forget = fg
-" " form = fo
-" " found = fnd|fw
-" " four = 4
-" " from = fm
-" " future = fut
-" " gave = gv|ga
-" " get = g
-" " girl = gl
-" " give = gi
-" " going = gg
-" " good = gd
-" " great = g8
-" " ground = gr
-" " group = gp
-" " grow = gw
-" " hadn't = hdt
-" " happen = hpn|ha
-" " happened = hpd
-" " happening = hpng
-" " hasn't = hst
-" " hate = h8
-" " have = h
-" " haven't = ht
-" " having = hg
-" " head = hd
-" " hear = h3
-" " help = hp
-" " here = hr
-" " high = hh
-" " home = hm
-" " hope = ho
-" " hoping = hpg
-" " house = hs
-" " how = hw
-" " I'm = m
-" " image = img
-" " imagine = mgn|imgn
-" " important = imp|ip
-" " Indian = idn
-" " into = nt|i2
-" " is it = zt
-" " it is = tz
-" " it's = s
-" " just = j
-" " keep = kp
-" " kind = kd
-" " kind of = kf
-" " know = kw|kn
-" " large = lg
-" " later = lr
-" " lead = ld
-" " learn = lrn|l3
-" " learned = lrd|lrnd
-" " leave = lev
-" " left = le
-" " letter = ler
-" " life = lf
-" " light = lt
-" " like = lk
-" " line = ln
-" " list = ls
-" " little = ll
-" " live = li
-" " look = lc
-" " love = lv
-" " made = md
-" " make = mk
-" " manage = mg
-" " many = mn
-" " mean = m3
-" " might = mt
-" " mile = mi
-" " miss = mis
-" " more = mr (remove full stop from postfixes)
-" " most = mo
-" " mother = mot
-" " mountain = mtn
-" " move = mv
-" " much = mc
-" " must = ms
-" " name = na
-" " near = nr
-" " need = nd
-" " never = nv
-" " next = nx
-" " night = nit
-" " nine = 9
-" " number = nm
-" " often = ofn
-" " okay = k
-" " okay so = ks
-" " okay so now = ksn
-" " one = 1
-" " only = ol|oy|nl
-" " other = ot
-" " over = ov
-" " page = pg
-" " paper = pp
-" " part = pt
-" " people = p
-" " picture = pic
-" " place = pl
-" " plant = plt
-" " play = p3|pla
-" " please = ps|pz
-" " point = pn
-" " probably = pr|prl|prb
-" " problem = pb
-" " question = qn
-" " quick = qk
-" " quickly = qkl|ql
-" " quite = q
-" " read = rd
-" " really = ry
-" " reason = rs
-" " right = ri|rit|rt
-" " river = rv
-" " run = rn
-" " said = sd
-" " same = sa
-" " say = sy
-" " says = sz
-" " school = scl
-" " second = sc
-" " see = se
-" " seen = sen
-" " sentence = stc
-" " seven = 7
-" " should = shd
-" " shouldn't = sht|shn
-" " show = sh
-" " side = sid
-" " sign = s9
-" " single = sng
-" " six = 6
-" " small = sml
-" " some = sm
-" " someone = som|smn
-" " something = sg
-" " sometimes = st
-" " soon = sn
-" " sorry = sry
-" " sort of = sf
-" " sound = snd
-" " speak = spk
-" " spell = sp|spl
-" " spelling = spg|splg
-" " start = sta
-" " state = stt
-" " statement = stm
-" " stay = sty
-" " steal = stl
-" " still = sl
-" " stop = stp
-" " story = soy|sto
-" " study = sdy
-" " such = su
-" " sure = sr
-" " take = t8
-" " talk = tlk
-" " tell = tl
-" " than = ta
-" " thank you = tu|tku
-" " thanks = tx|thx|tns
-" " that = tt
-" " the = t
-" " their = ter
-" " them = tm
-" " then = tn
-" " there = tr
-" " these = tes
-" " they = ty
-" " thing = tg|thg
-" " think = tnk|tk
-" " this = ts
-" " those = tos
-" " though = th
-" " thought = tht
-" " three = 3
-" " through = thr
-" " time = ti
-" " to be = tb
-" " together = tog
-" " took = tok
-" " tree = t3
-" " two = 2
-" " under = ndr|udr
-" " until = til
-" " use = z
-" " very = v
-" " wait = w8
-" " walk = wa
-" " want = wu
-" " was = o
-" " watch = wch
-" " water = wat|wtr|wer
-" " week = wek
-" " well = w3
-" " well done = wld
-" " went = w9
-" " were = wr
-" " we've = wev|wv
-" " what = wt
-" " what's = ws
-" " when = wn
-" " where = wh
-" " which = wi
-" " while = wli|whl
-" " white = wht
-" " whole = hl
-" " why = y
-" " why did = yd
-" " will = wl
-" " with = w
-" " without = wo
-" " work = wk
-" " world = wrl
-" " would = wd
-" " yeah = yea
-" " year = y3
-" " yes = ye
-" " you = u
-" " you'd = ud
-" " young = yg
-" " your = ur
-" " you're = yr
+" using this, not tpope's surround
+map <silent>sa <Plug>(operator-surround-append)
+map <silent>sd <Plug>(operator-surround-delete)
+map <silent>sc <Plug>(operator-surround-replace)
+
+" delete or replace most inner surround
+" if you use vim-textobj-anyblock
+nmap <silent> sdd <Plug>(operator-surround-delete)<Plug>(textobj-anyblock-a)
+nmap <silent> scc <Plug>(operator-surround-replace)<Plug>(textobj-anyblock-a)
+
+" remote; unecessary because of TextObjectify
+" http://learnvimscriptthehardway.stevelosh.com/chapters/15.html
+" inside next, last paren
+" onoremap in( :<c-u>normal! f(vi(<cr>
+" onoremap il( :<c-u>normal! F)vi(<cr>
+
+"}}}
+" #==============================
+" "shorthand"{{{
+" " working on implementing
+" " w/ pterosaur working as iabbr is horribly broken in pentadactyl
 " "
-" "}}}
+" autocmd FileType text call s:shorthand()
+" function! s:shorthand()
+" 	iabbr <buffer> i I
+" 	iabbr <buffer> l all
+" 	iabbr <buffer> n and
+" 	iabbr <buffer> all l
+" 	iabbr <buffer> and n
+" 	iabbr <buffer> r are
+" 	iabbr <buffer> are r
+" 	iabbr <buffer> b be
+" 	iabbr <buffer> be b
+" 	iabbr <buffer> c can
+" 	iabbr <buffer> can c
+" endfunction
+" " http://forum.colemak.com/viewtopic.php?id=1804
+" iabbr ab about
+" iabbr about ab
+" iabbr abo above
+" iabbr above abo
+" iabbr ac actual
+" iabbr actual ac
+" iabbr af after
+" iabbr after af
+" iabbr ag again
+" iabbr again ag
+" iabbr lm almost
+" iabbr almost lm
+" iabbr ao also
+" iabbr also ao
+" iabbr alw always
+" iabbr always alw
+" iabbr amc America
+" iabbr America amc
+" iabbr ani animal
+" iabbr animal ani
+" iabbr anr another
+" iabbr another anr
+" iabbr ans answer
+" iabbr answer ans
+" iabbr ne any
+" iabbr any ne
+" iabbr nw anyway
+" iabbr anyway nw
+" iabbr aa area
+" iabbr area aa
+" iabbr ru are you
+" iabbr bc because
+" iabbr because bc
+" iabbr bn been
+" iabbr been bn
+" iabbr bf before
+" iabbr before bf
+" iabbr bl below
+" iabbr below bl
+"
+" iabbr cn can't
+" " " are you okay with = rukw
+" " " around = rnd|ro
+" " " away = ay
+" " " began = bga|ba
+" " " begin = bgn|bi
+" " " being = bng|bg
+" " " best = bs
+" " " between = bt|tw
+" " " book = bk
+" " " both = bo|bh
+" " " but - bu
+" " " by the way = btw
+" " " call = cl
+" " " came = ca
+" " " can = c
+" " " can't = cn
+" " " change = ch
+" " " children = chd
+" " " city = cy
+" " " close = cs
+" " " come = cm
+" " " could = cd
+" " " country = cty
+" " " different = df
+" " " does = ds
+" " " doing = dg
+" " " done = dn
+" " " don't = d
+" " " down = dw
+" " " each = e|ea
+" " " earth = erh
+" " " easy = es
+" " " eight = 8
+" " " English = en|eng
+" " " enough = nf
+" " " even = ev|vn
+" " " ever = er
+" " " every = ey
+" " " example = x
+" " " family = fml
+" " " father = ftr|fhr
+" " " feet = f3|f8
+" " " find = fd
+" " " finding = fdg
+" " " fine = fn
+" " " first = fs
+" " " five = 5
+" " " follow = fl
+" " " follower = flr
+" " " food = fod|fu
+" " " foot = ft
+" " " for = f
+" " " for example = fx
+" " " forget = fg
+" " " form = fo
+" " " found = fnd|fw
+" " " four = 4
+" " " from = fm
+" " " future = fut
+" " " gave = gv|ga
+" " " get = g
+" " " girl = gl
+" " " give = gi
+" " " going = gg
+" " " good = gd
+" " " great = g8
+" " " ground = gr
+" " " group = gp
+" " " grow = gw
+" " " hadn't = hdt
+" " " happen = hpn|ha
+" " " happened = hpd
+" " " happening = hpng
+" " " hasn't = hst
+" " " hate = h8
+" " " have = h
+" " " haven't = ht
+" " " having = hg
+" " " head = hd
+" " " hear = h3
+" " " help = hp
+" " " here = hr
+" " " high = hh
+" " " home = hm
+" " " hope = ho
+" " " hoping = hpg
+" " " house = hs
+" " " how = hw
+" " " I'm = m
+" " " image = img
+" " " imagine = mgn|imgn
+" " " important = imp|ip
+" " " Indian = idn
+" " " into = nt|i2
+" " " is it = zt
+" " " it is = tz
+" " " it's = s
+" " " just = j
+" " " keep = kp
+" " " kind = kd
+" " " kind of = kf
+" " " know = kw|kn
+" " " large = lg
+" " " later = lr
+" " " lead = ld
+" " " learn = lrn|l3
+" " " learned = lrd|lrnd
+" " " leave = lev
+" " " left = le
+" " " letter = ler
+" " " life = lf
+" " " light = lt
+" " " like = lk
+" " " line = ln
+" " " list = ls
+" " " little = ll
+" " " live = li
+" " " look = lc
+" " " love = lv
+" " " made = md
+" " " make = mk
+" " " manage = mg
+" " " many = mn
+" " " mean = m3
+" " " might = mt
+" " " mile = mi
+" " " miss = mis
+" " " more = mr (remove full stop from postfixes)
+" " " most = mo
+" " " mother = mot
+" " " mountain = mtn
+" " " move = mv
+" " " much = mc
+" " " must = ms
+" " " name = na
+" " " near = nr
+" " " need = nd
+" " " never = nv
+" " " next = nx
+" " " night = nit
+" " " nine = 9
+" " " number = nm
+" " " often = ofn
+" " " okay = k
+" " " okay so = ks
+" " " okay so now = ksn
+" " " one = 1
+" " " only = ol|oy|nl
+" " " other = ot
+" " " over = ov
+" " " page = pg
+" " " paper = pp
+" " " part = pt
+" " " people = p
+" " " picture = pic
+" " " place = pl
+" " " plant = plt
+" " " play = p3|pla
+" " " please = ps|pz
+" " " point = pn
+" " " probably = pr|prl|prb
+" " " problem = pb
+" " " question = qn
+" " " quick = qk
+" " " quickly = qkl|ql
+" " " quite = q
+" " " read = rd
+" " " really = ry
+" " " reason = rs
+" " " right = ri|rit|rt
+" " " river = rv
+" " " run = rn
+" " " said = sd
+" " " same = sa
+" " " say = sy
+" " " says = sz
+" " " school = scl
+" " " second = sc
+" " " see = se
+" " " seen = sen
+" " " sentence = stc
+" " " seven = 7
+" " " should = shd
+" " " shouldn't = sht|shn
+" " " show = sh
+" " " side = sid
+" " " sign = s9
+" " " single = sng
+" " " six = 6
+" " " small = sml
+" " " some = sm
+" " " someone = som|smn
+" " " something = sg
+" " " sometimes = st
+" " " soon = sn
+" " " sorry = sry
+" " " sort of = sf
+" " " sound = snd
+" " " speak = spk
+" " " spell = sp|spl
+" " " spelling = spg|splg
+" " " start = sta
+" " " state = stt
+" " " statement = stm
+" " " stay = sty
+" " " steal = stl
+" " " still = sl
+" " " stop = stp
+" " " story = soy|sto
+" " " study = sdy
+" " " such = su
+" " " sure = sr
+" " " take = t8
+" " " talk = tlk
+" " " tell = tl
+" " " than = ta
+" " " thank you = tu|tku
+" " " thanks = tx|thx|tns
+" " " that = tt
+" " " the = t
+" " " their = ter
+" " " them = tm
+" " " then = tn
+" " " there = tr
+" " " these = tes
+" " " they = ty
+" " " thing = tg|thg
+" " " think = tnk|tk
+" " " this = ts
+" " " those = tos
+" " " though = th
+" " " thought = tht
+" " " three = 3
+" " " through = thr
+" " " time = ti
+" " " to be = tb
+" " " together = tog
+" " " took = tok
+" " " tree = t3
+" " " two = 2
+" " " under = ndr|udr
+" " " until = til
+" " " use = z
+" " " very = v
+" " " wait = w8
+" " " walk = wa
+" " " want = wu
+" " " was = o
+" " " watch = wch
+" " " water = wat|wtr|wer
+" " " week = wek
+" " " well = w3
+" " " well done = wld
+" " " went = w9
+" " " were = wr
+" " " we've = wev|wv
+" " " what = wt
+" " " what's = ws
+" " " when = wn
+" " " where = wh
+" " " which = wi
+" " " while = wli|whl
+" " " white = wht
+" " " whole = hl
+" " " why = y
+" " " why did = yd
+" " " will = wl
+" " " with = w
+" " " without = wo
+" " " work = wk
+" " " world = wrl
+" " " would = wd
+" " " yeah = yea
+" " " year = y3
+" " " yes = ye
+" " " you = u
+" " " you'd = ud
+" " " young = yg
+" " " your = ur
+" " " you're = yr
+" " "
+" " "}}}
 " #==============================
 " # NeoBundle {{{
 " #==============================
@@ -1457,34 +1505,60 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 NeoBundle 'myusuf3/numbers.vim'
 " better marks; show and symbols (markers) in gutter
 NeoBundle 'kshenoy/vim-signature'
-" gitgutter
+" git info
 NeoBundle 'airblade/vim-gitgutter'
+" NeoBundle 'mhinz/vim-signify'
 " tab renaming
 NeoBundle 'gcmt/taboo.vim'
 " statusline
 NeoBundle 'bling/vim-airline'
 " linter
 NeoBundle 'scrooloose/syntastic'
+" rainbow parens
+" will use same colors again across multiple indented lines (find something that doesnt?)
+NeoBundle 'oblitum/rainbow'
+" NeoBundle 'amdt/vim-niji'
+" colorschemes
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'sjl/badwolf'
+NeoBundle 'junegunn/seoul256.vim'
+NeoBundle 'morhetz/gruvbox'
+
 "}}}
 
 " Most Used"{{{
 " unite related"{{{
 NeoBundle 'Shougo/unite.vim'
 " for async file search
-NeoBundle 'Shougo/vimproc.vim'
+" NeoBundle 'Shougo/vimproc.vim'
+let vimproc_updcmd = has('win64') ?
+      \ 'tools\\update-dll-mingw 64' : 'tools\\update-dll-mingw 32'
+execute "NeoBundle 'Shougo/vimproc.vim'," . string({
+      \ 'build' : {
+      \     'windows' : vimproc_updcmd,
+      \     'cygwin' : 'make -f make_cygwin.mak',
+      \     'mac' : 'make -f make_mac.mak',
+      \     'unix' : 'make -f make_unix.mak',
+      \    },
+      \ })
 " mru
 NeoBundle 'Shougo/neomru.vim'
 "}}}
-" sneak
+" easymotion pretty much does everything now; but for simplicity:
+" sneak a 2 letter multiline find
 NeoBundle 'justinmk/vim-sneak'
+" like other plugins.. but X char find (basically like a search)
+" NeoBundle 't9md/vim-smalls'
 " fugitive 
 NeoBundle 'tomtom/tcomment_vim'
 NeoBundle 'xolox/vim-session'
 " required by vim-session
 NeoBundle 'xolox/vim-misc'
+
 NeoBundle 'tpope/vim-fugitive'
 " for buffer history and killing buffers without changing window layout or closing
 NeoBundle 'bufkill.vim'
+" alternatively: https://github.com/Soares/butane.vim
 "}}}
 
 " Case Specific/ Occasional"{{{
@@ -1504,6 +1578,9 @@ NeoBundle 'aaronbieber/vim-vault'
 " Other"{{{
 " folding in markdown files
 NeoBundle 'nelstrom/vim-markdown-folding'
+" haskell
+" NeoBundle 'kana/vim-filetype-haskell'
+" NeoBundle 'ag/vim2hs'
 " add newlines with enter; backspace in normal
 NeoBundle 'dahu/Insertlessly'
 NeoBundle 'vim-scripts/Smart-Tabs'
@@ -1512,6 +1589,7 @@ NeoBundle 'bkad/CamelCaseMotion'
 " 'monocle' view for splits
 NeoBundle 'regedarek/ZoomWin'
 NeoBundle 'Shougo/neocomplete.vim'
+" NeoBundle 'Shougo/neosnippet.vim'
 NeoBundle 'SirVer/ultisnips'
 " Optional
 NeoBundle "honza/vim-snippets"
@@ -1530,26 +1608,61 @@ NeoBundle 'tpope/vim-repeat'
 NeoBundle 'kana/vim-arpeggio'
 NeoBundle 'Shougo/vimshell.vim'
 " all text boxes vim
-NeoBundle 'ardagnir/shadowvim'
+NeoBundle 'ardagnir/vimbed'
 " NeoBundle 'ardagnir/eventloop.vim'
 "  calendar
 NeoBundle 'itchyny/calendar.vim'
 
 NeoBundle 'dhruvasagar/vim-table-mode'
 NeoBundle 'prendradjaja/vim-vertigo'
+
+NeoBundle 'chrisbra/NrrwRgn'
+" close all buffer not open in windows 
+NeoBundle 'wipeout'
+
 " NeoBundle 'godlygeek/tabular'
 NeoBundle 'junegunn/vim-easy-align'
+
+" automatic split resizing
 NeoBundle 'justincampbell/vim-eighties'
+
+NeoBundle 'junegunn/fzf'
+
+" improved / search
+" NeoBundle 'junegunn/vim-oblique'
+" required for above
+" NeoBundle 'junegunn/vim-pseudocl'
+
+" NeoBundle 'szw/vim-ctrlspace'
+
 "}}}
 
 " Text Object and Operator Stuff"{{{
-" punctuation text objects
-NeoBundle 'kurkale6ka/vim-pairs'
+" cx(text objext) then cx(text object) to exchange (or . to repeat)
 NeoBundle 'tommcdo/vim-exchange'
-NeoBundle 'tpope/vim-surround'
-" NeoBundle 'rhysd/vim-operator-surround'
-" required for above
-" NeoBundle 'kana/vim-operator-user'
+
+" if do something like i{ seek for {} if outside of like vim already does with i'
+" make i' work for multiple lines like i{ would
+NeoBundle 'paradigm/TextObjectify'
+" adds ic, iC, ac, aC text objects; great for quickly working with columns/visual blocks
+NeoBundle 'coderifous/textobj-word-column.vim'
+" adds text object io and ao for indentation whitespace
+NeoBundle 'glts/vim-textobj-indblock'
+" iq and aq for ', ", and `
+" NeoBundle 'beloglazov/vim-textobj-quotes'
+" punctuation text objects (also gives iq and aq);i.e. gives %; i<space> will work for any
+NeoBundle 'kurkale6ka/vim-pairs'
+" required for other stuff
+NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'kana/vim-operator-user'
+" NeoBundle 'tpope/vim-surround'
+" using this instead because works well with text objects (i.e. ic) and makes more sense than doing something like ysiW:
+" gives sa{any text object} (surround append), sd, and sc
+NeoBundle 'rhysd/vim-operator-surround'
+" match closest '', "", (), {}, [] or <> with ib and ab
+NeoBundle 'rhysd/vim-textobj-anyblock'
+" gives il and al for lines
+NeoBundle 'kana/vim-textobj-line'
 "}}}
 
 "if ever need more than <c-w>r
@@ -1565,68 +1678,109 @@ NeoBundleCheck
 "}}}
 
 " Dissolve {{{
-" poor man's dual role I guess: (for people who remap control is remapped to caps or thumb key)
-" inoremap <c> Escape
-" Other people's stuff I have stolen:
-" Uncomment the following to have Vim jump to the last position when
-" reopening a file
-" if has("autocmd")
-"   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-" endif
-
-" nmap cp :let @" = expand("%")<cr>
-" can do ctrl r then % in insert mode instead
-
 " map ;s set invspell spelllang=en<cr
 " map ;ss :set spell spelllang=anonomize<cr>
 " mkspell ~/dotfiles/common/.vim/spell
+" 
+" Snippets and Completion"{{{ 
+" UltiSnips"{{{
+" let g:UltiSnipsExpandTrigger="<c-Tab>"
+" let g:UltiSnipsJumpForwardTrigger="<cr>"
+" let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
+" If you want :UltiSnipsEdit to split your window.
+let g:UltiSnipsEditSplit="vertical"
+"}}}
 
-" " Restore cursor position to where it was before
-" augroup JumpCursorOnEdit
-" au!
-" autocmd BufReadPost *
-" \ if expand("<afile>:p:h") !=? $TEMP |
-" \ if line("'\"") > 1 && line("'\"") <= line("$") |
-" \ let JumpCursorOnEdit_foo = line("'\"") |
-" \ let b:doopenfold = 1 |
-" \ if (foldlevel(JumpCursorOnEdit_foo) > foldlevel(JumpCursorOnEdit_foo - 1)) |
-" \ let JumpCursorOnEdit_foo = JumpCursorOnEdit_foo - 1 |
-" \ let b:doopenfold = 2 |
-" \ endif |
-" \ exe JumpCursorOnEdit_foo |
-" \ endif |
-" \ endif
-" " Need to postpone using "zv" until after reading the modelines.
-" autocmd BufWinEnter *
-" \ if exists("b:doopenfold") |
-" \ exe "normal zv" |
-" \ if(b:doopenfold > 1) |
-" \ exe "+".1 |
-" \ endif |
-" \ unlet b:doopenfold |
-" \ endif
-" augroup END
+" Use neocomplete."{{{
+" let g:neocomplete#enable_at_startup = 1
+" Use smartcase.
+let g:neocomplete#enable_smart_case = 1
+" Set minimum syntax keyword length.
+let g:neocomplete#sources#syntax#min_keyword_length = 4
+let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Other Colemak Arrow-Based Mappings
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Switch panes... I don't really have enough space to do more than a vsplit; so just NE
-" noremap H <C-w>h|noremap I <C-w>l|noremap N <C-w>j|noremap E <C-w>k
-" noremap N <c-w>h|noremap E <c-w>l
-" Moving windows around.
-  noremap <C-w>N <C-w>J|noremap <C-w>E <C-w>K|noremap <C-w>I <C-w>L
-" High/Low/Mid.
-" noremap <C-e> H|noremap <C-n> L|noremap <C-m> M
-" Scroll up/down.
-" noremap zn <C-y>|noremap ze <C-e>
+" Define dictionary.
+let g:neocomplete#sources#dictionary#dictionaries = {
+    \ 'default' : '',
+    \ 'vimshell' : $HOME.'/.vimshell_hist',
+    \ }
 
-" +/- increment and decrement.
-nnoremap + <C-a>|nnoremap - <C-x>
-" Jump to exact mark location with ' instead of line.
-" noremap ' `|noremap ` '
-" zT/zB is like zt/zb, but scrolls to the top/bottom quarter of the screen.
-" nnoremap <expr> zT 'zt' . winheight(0)/4 . '<C-y>'
-" nnoremap <expr> zB 'zb' . winheight(0)/4 . '<C-e>'
+" <CR>: close popup and save indent.
+inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+  return neocomplete#close_popup() . "\<CR>"
+  " For no inserting <CR> key.
+  " return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+endfunction
+
+" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+" <TAB>: completion
+augroup TabWithNeocomplete
+" something in vimrc messes this up.. so doing this
+	au!
+	" https://github.com/Shougo/neocomplete.vim/issues/32
+	au Bufenter * inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
+		\ <SID>check_back_space() ? "\<TAB>" :
+		\ neocomplete#start_manual_complete()
+	function! s:check_back_space()
+	let col = col('.') - 1
+	return !col || getline('.')[col - 1]  =~ '\s'
+	endfunction
+augroup END
+" imap `     <Plug>(neosnippet_expand_or_jump)
+" smap `     <Plug>(neosnippet_expand_or_jump)
+" xmap `     <Plug>(neosnippet_expand_target)
+" " Enable snipMate compatibility feature.
+" let g:neosnippet#enable_snipmate_compatibility = 1
+" " Tell Neosnippet about the other snippets
+" let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+
+"}}}
+"}}}
+" 
+" Control space stuff"{{{
+" let g:ctrlspace_use_tabline=1
+" let g:ctrlspace_set_default_mapping=0
+" g:ctrlspace_default_mapping_key = "<space><space>"
+" g:ctrlspace_use_mouse_and_arrows = 0
+" g:ctrlspace_project_root_markers
+" g:ctrlspace_unicode_font 
+" g:ctrlspace_search_resonators
+
+" Allows you to set characters which will be used to increase search accurancy. If such resonator is found next to the searched sequence, it increases the search score. For example, consider following files: zzzabczzz.txt, zzzzzzabc.txt, and zzzzz.abc.txt. If you search for abc with default resonators, you will get the last file as the top relevant item, because there are two resonators (dots) next to the searched sequence. Next you would get the middle one (one dot around abc), and then the first one (no resonators at all). You can disable this behavior completely by providing an empty array. Default value: ['.', '/', '\', '_', '-']
+
+" if g:ctrlspace_unicode_font
+"   let g:ctrlspace_symbols = {
+"         \ "cs"      : "⌗",
+"         \ "tab"     : "⊙",
+"         \ "all"     : "∷",
+"         \ "open"    : "◎",
+"         \ "tabs"    : "○",
+"         \ "c_tab"   : "●",
+"         \ "load"    : "⋮ → ∙",
+"         \ "save"    : "∙ → ⋮",
+"         \ "prv"     : "⌕",
+"         \ "s_left"  : "›",
+"         \ "s_right" : "‹"
+"         \ }
+" else
+"   let g:ctrlspace_symbols = {
+"         \ "cs"      : "#",
+"         \ "tab"     : "TAB",
+"         \ "all"     : "ALL",
+"         \ "open"    : "OPEN",
+"         \ "tabs"    : "-",
+"         \ "c_tab"   : "+",
+"         \ "load"    : "LOAD",
+"         \ "save"    : "SAVE",
+"         \ "prv"     : "*",
+"         \ "s_left"  : "[",
+"         \ "s_right" : "]"
+"         \ }
+" endif
+"}}}
 
 "}}}
 syntax on
+au FileType c,cpp,lisp call rainbow#load()
