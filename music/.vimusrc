@@ -1,10 +1,10 @@
 # color scheme# {{{
 # a light-on-dark color scheme
 color tab green black
-color main cyan black
+color main blue black
 color ruler green black
-color songstatus blue black
-color playstatus blue black
+color songstatus cyan black
+color playstatus cyan black
 color error white red
 color input white black
 color suggestions green black
@@ -71,7 +71,6 @@ map r- :!~/bin/vimus_tmux.sh r-<CR>
 # break pane
 map r! :!~/bin/vimus_tmux.sh r!<CR>
 # #}}}
-#
 
 # panes#{{{
 # directions
@@ -86,6 +85,11 @@ map sv :!~/bin/vimus_tmux.sh sv<CR>
 
 # toggle #monocle# (zoom)
 map st :!~/bin/vimus_tmux.sh st<CR>
+# bspwm monocle
+map sm :!~/bin/vimus_tmux.sh sm<CR>
+# fullscreen
+map sf :!~/bin/vimus_tmux.sh sf<CR>
+
 #}}}
 
 # select session
@@ -104,7 +108,7 @@ map t. :source ~/.vimusrc<CR>
 
 map u :update<CR>
 # open album art in ranger in split
-map ta :!~/bin/music/albumart_display.sh %<CR>
+map ta :!~/bin/music/albumart_display.sh % &<CR>
 # open lyrics in ncmpcpp split
 map l :!~/bin/music/lyric_display.sh<CR>
 # open visualization in ncmppcp split
@@ -154,9 +158,9 @@ map y :copy<CR>
 map p :paste<CR>
 map P :paste-prev<CR>
 map a :add<CR>
-# map  :insert<CR>
+map A :insert<CR>
 # a already will add album and all songs in browser based on level
-map A :add-album<CR>
+# map A :add-album<CR>
 map H :seek -5<CR>
 map I :seek 5<CR>
 map > :next<cr>
