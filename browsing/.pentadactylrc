@@ -338,7 +338,7 @@ map -builtin tk <pagedown>
 map -builtin to <pageup>
 
 " left and right on caps layer if ever actually needed
-nmap -builtin <left> 5<left> 
+nmap -builtin <left> 5<left>
 nmap -builtin <right> 5<right>
 " visual mode, normal up and down
 vmap -builtin n <Down>
