@@ -1,4 +1,10 @@
 " reload context bindings
+nmap <space> <nop>
+nmap -builtin <space>q 1gt
+nmap -builtin <space>w 11gt
+nmap -builtin <space>f 21gt
+nmap -builtin <space>p 31gt
+nmap -builtin <space>g 41gt
 
 if tabs.getTab().dactylOrdinal < "11"
 nmap -builtin <space>a 1gt
@@ -51,3 +57,25 @@ nmap -builtin <space>e 38gt
 nmap -builtin <space>i 39gt
 nmap -builtin <space>o 40gt
 endif
+
+" tabgroup specific bindings:"{{{
+" works though I'm not sure if it's useful
+" js <<EOF
+" let leGroupTitle = "";
+" let groups = services.sessionStore.getWindowValue(window, "tabview-groups");
+" if (groups) {
+" 	let active = JSON.parse(groups).activeGroupId;
+" 	let groupData = services.sessionStore.getWindowValue(window, "tabview-group");
+" 	leGroupTitle = JSON.parse(groupData)[active].title;
+" }
+" EOF
+"
+" if leGroupTitle == "animu_y_mango"
+" " can't use bar even with -ex
+" " nmap -ex ,, open myanimelist.com|normal gi
+" nmap -ex ,, open myanimelist.com
+" " nmap -builtin ,m
+" " nmap -builtin ,a
+" " elseif leGroupTitle == "main"
+" endif
+"}}}

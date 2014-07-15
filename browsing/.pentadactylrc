@@ -1,7 +1,8 @@
 " todo : 
-" gmail beeping?
 " fucking bookmark folders
-" working tab groups
+" get caret hints working; better caret mode 
+" set shell = zsh
+" grabbing feed with pageinfo
 
 " downloads here; then with ranger..
 silent cd ~/Move
@@ -12,13 +13,14 @@ silent cd ~/Move
 " https://github.com/joedicastro/dotfiles/blob/master/pentadactyl/pentadactylrc
 " "}}}
 " #==============================
-" WM Experementation"{{{
+" # WM Experementation"{{{
 " #==============================
 " use -ex for ex commands; -builtin with : and <cr> will make significantly slower; this is essentially instantaneous
 " straight from vimrc with following search and replace:
 " change nnoremap to nmap
 " change <silent> to -ex
 " remove : and <cr>
+nmap r <nop>
 
 " "r" is redraw"{{{
 " worskpace/Destkop switch"{{{
@@ -87,7 +89,7 @@ nmap -ex sf silent !bspc window -t fullscreen
 
 " gap up and down
 nmap -ex su silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))
-nmap -ex sd silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))
+nmap -ex sU silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))
 
 " preselect"{{{
 nmap -ex sph silent !bspc window -p left
@@ -99,13 +101,18 @@ nmap -ex spd silent !bspc desktop -c
 "}}}
 "}}}
 
+nmap -ex <leader>a silent !bspc window -f left && xsendkey p && bspc window -f last
 "}}}
 " #==============================
-" Actual Firefox Settings (about:config)"{{{
+" # Actual Firefox Settings (about:config)"{{{
 " #==============================
 set! browser.download.dir=/home/angelic_sedition/Move
 set! browser.newtab.url=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
 set! browser.startup.homepage=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
+
+" close dta when downloads are complete
+set! extensions.dta.closedta=true
+
 "}}}
 " #==============================
 " # QuickMarks {{{
@@ -127,6 +134,7 @@ silent qmark l http://www.last.fm/
 silent qmark L http://www.lifehacker.com/
 silent qmark m http://myanimelist.net
 silent qmark p http://pixiv.net/
+silent qmark P http://pururin.com/
 silent qmark M https://mail.google.com/mail/
 silent qmark q http://quora.com/
 silent qmark r http://reddit.com/  
@@ -141,10 +149,11 @@ silent qmark y http://youtube.com/
 
 "}}}
 " #==============================
-" BMarks {{{
+" # BMarks {{{
 " #==============================
 " https://github.com/mashiro/dot-files/blob/master/.vimperatorrc
 " this is specifically for custom search bookmarks and such; edited because bookmarks.isBookmarked is deprecated apparently
+
 javascript <<EOM
 function bmark(title, url, keyword) {
 	if (!bookmarkcache.isBookmarked(url)) {
@@ -343,13 +352,57 @@ nmap -builtin E gt
 nmap -ex <leader>e tabm +1
 nmap -ex <leader>n tabm -1
 
+nmap -builtin <leader>m :tabattach<space>
+
+" tab group setup
+nmap -builtin ,ks :tgroup-title main<cr>:tgroup-new animu_y_mango<cr>
+
+" TabGroupie.js"{{{
+" magically started working for me
+nmap -builtin vn :tgroup-new<Space>
+" move current tab to a different group
+nmap -builtin vm :tgroup-move<Space>
+" get tab from another tab group
+nmap -builtin vg :tgroup-get<Space>
+" switch to a different tab group
+nmap -builtin vs :tgroup-switch<Space>
+nmap -builtin <space>v :tgroup-switch<Space>
+" switch to next tab group
+nmap -builtin <space><space> :tgroup-switch<space><tab><cr>
+" rename group
+nmap -builtin vr :tgroup-title<Space>
+nmap -builtin vd :tgroup-delete<Space>
+" display tabgroup title on statusline
+"https://github.com/azuwis/.pentadactyl/blob/master/rc
+js <<EOF
+overlay.overlayObject(statusline, {
+    updateTabCount: function updateTabCount(delayed) {
+        updateTabCount.superapply(this, arguments);
+        if (!delayed) {
+            let title = "";
+            let groups = services.sessionStore.getWindowValue(window, "tabview-groups");
+            if (groups) {
+                let active = JSON.parse(groups).activeGroupId;
+                let groupData = services.sessionStore.getWindowValue(window, "tabview-group");
+                title = JSON.parse(groupData)[active].title;
+            }
+            if (title) this.widgets.tabcount.value = "(" + title + ")" + this.widgets.tabcount.value;
+        }
+    }
+});
+EOF
+"}}}
+
 " search next
 map -builtin k n
 map -builtin K N
 " last tab
 map -builtin l <C-^>
 " last position on page
-map -builtin L <c-o>
+map -builtin <leader>l <c-o>
+nmap -builtin <leader>L <c-i>
+" last ex command
+nmap -builtin <leader>; @:
 "}}}
 
 " fix caret mode bindings:"{{{
@@ -391,64 +444,7 @@ nmap -builtin c O
 nmap -builtin C T
 
 " space for tab switching"{{{
-" context; would be nice to be able to do this without resourcing (I.e. build into each binding)
-nmap -builtin <space>q 1gt:source ~/.quickpenta<cr>
-nmap -builtin <space>w 11gt:source ~/.quickpenta<cr>
-nmap -builtin <space>f 21gt:source ~/.quickpenta<cr>
-nmap -builtin <space>p 31gt:source ~/.quickpenta<cr>
-nmap -builtin <space>g 41gt:source ~/.quickpenta<cr>
-
-if tabs.getTab().dactylOrdinal < "11"
-nmap -builtin <space>a 1gt
-nmap -builtin <space>r 2gt
-nmap -builtin <space>s 3gt
-nmap -builtin <space>t 4gt
-nmap -builtin <space>d 5gt
-nmap -builtin <space>h 6gt
-nmap -builtin <space>n 7gt
-nmap -builtin <space>e 8gt
-nmap -builtin <space>i 9gt
-nmap -builtin <space>o 10gt
-endif
-
-if tabs.getTab().dactylOrdinal > "10"
-nmap -builtin <space>a 11gt
-nmap -builtin <space>r 12gt
-nmap -builtin <space>s 13gt
-nmap -builtin <space>t 14gt
-nmap -builtin <space>d 15gt
-nmap -builtin <space>h 16gt
-nmap -builtin <space>n 17gt
-nmap -builtin <space>e 18gt
-nmap -builtin <space>i 19gt
-nmap -builtin <space>o 20gt
-endif
-
-if tabs.getTab().dactylOrdinal > "20"
-nmap -builtin <space>a 21gt
-nmap -builtin <space>r 22gt
-nmap -builtin <space>s 23gt
-nmap -builtin <space>t 24gt
-nmap -builtin <space>d 25gt
-nmap -builtin <space>h 26gt
-nmap -builtin <space>n 27gt
-nmap -builtin <space>e 28gt
-nmap -builtin <space>i 29gt
-nmap -builtin <space>o 30gt
-endif
-
-if tabs.getTab().dactylOrdinal > "30"
-nmap -builtin <space>a 31gt
-nmap -builtin <space>r 32gt
-nmap -builtin <space>s 33gt
-nmap -builtin <space>t 34gt
-nmap -builtin <space>d 35gt
-nmap -builtin <space>h 36gt
-nmap -builtin <space>n 37gt
-nmap -builtin <space>e 38gt
-nmap -builtin <space>i 39gt
-nmap -builtin <space>o 40gt
-endif
+source ~/.navigation.penta
 " "}}}
 
 " swap d/D; move left when closing tab (see below for D mapping)
@@ -496,8 +492,8 @@ nmap -builtin Zo zo
 nmap -builtin Zr zr
 nmap -builtin Zz zz
 " only use v in caret mode
-nmap -builtin v ZI
-nmap -builtin V ZO
+" nmap -builtin v ZI
+" nmap -builtin V ZO
 
 " }}}
  
@@ -506,6 +502,7 @@ au Enter * source ~/.pentadactyl/groups.penta
 
 " pass all keys 'mode' (i.e. on reddit, 4chan, gmail, and other places with custom bindings)
 nmap -builtin , <pass-all-keys>
+silent nmap -ex <leader>F silent !~/bin/dlf.sh
 
 "}}}
 
@@ -524,13 +521,15 @@ nmap -builtin gC :tabopen g <c-v><c-v>
 nmap -ex gr rehash
 nmap -ex gs pageinfo
 
-" viewsource in new tab instead of in current
-nmap -ex gf tabopen viewsource
+" viewsource in external editor
+nmap -ex gf viewsource
 "}}}
 
 " Leader mappings
 map -builtin <leader>t gH
-map -builtin <space><space> gH
+" image hinting
+map -builtin ti ;I
+map -builtin tI ;i
 
 " Other
 " turn off highlight search
@@ -541,7 +540,6 @@ nmap -builtin <esc> <esc>:noh<cr>
 nmap -ex <leader>v set fullvim!
 " reload
 nmap -ex <leader>. source ~/.pentadactylrc
-nmap -ex <leader>s source ~/.pentadactylrc
 
 nmap -ex <leader>p private winopen
 
@@ -556,6 +554,12 @@ nmap -ex <leader>p private winopen
 " simple youtube playing:
 " mpv already plays highest quality by default; I use a userscript to prevent autoplay
 nmap -ex <leader>y execute "silent !mpv " + buffer.URL + " &"
+
+" download instead
+nmap -ex <leader>Y execute "silent !youtube-dl --restrict-filenames -o '~/Move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s' " + buffer.URL + " &"
+" just audio
+nmap -ex <leader>A execute "silent !youtube-dl --restrict-filenames --extract-audio -o '~/Move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s' " + buffer.URL + " &"
+
 " nmap -builtin y:silent !mpv <c-v><c-v> &<cr>
 " alternatively can use this if need something more sophisticated https://github.com/SirCmpwn/dotfiles/blob/master/scripts/youtube-view
 
@@ -593,10 +597,16 @@ nmap -builtin D y:silent to delete<cr>D
 
 " }}}
 
-" Better Ranger Integration:"{{{ 
+" Saving/ Ranger Integration:"{{{ 
 " turn ranger popup on file save on and off
 nmap -ex <leader>r silent !~/bin/ranger/ranger_browser_fm.sh toggle
 " see autocommands and corresponding script
+
+" i.e. for images; difference from :w<cr> is that this will save in the current directory (pwd); then close tab
+nmap -builtin <leader>w :w <tab><cr>d
+" download hinting
+nmap -builtin <leader>s ;s
+
 "}}}
 
 " https://github.com/covin/pentadactylrc/blob/master/pentadactylrc
@@ -621,31 +631,6 @@ nmap -js <leader>c exportCookies()
 " }}}
 
 " Dissolve {{{
-
-" tabgroup stuff I wish worked"{{{
-" nmap -builtin vn :tgroup-new<Space>
-" nmap -builtin vm :tgroup-move<Space>
-" nmap -builtin vs :tgroup-switch<Space>
-" nmap -builtin vd :tgroup-delete<Space>
-"" display tabgroup title on statusline
-" js <<EOF
-" overlay.overlayObject(statusline, {
-"     updateTabCount: function updateTabCount(delayed) {
-"         updateTabCount.superapply(this, arguments);
-"         if (!delayed) {
-"             let title = "";
-"             let groups = services.sessionStore.getWindowValue(window, "tabview-groups");
-"             if (groups) {
-"                 let active = JSON.parse(groups).activeGroupId;
-"                 let groupData = services.sessionStore.getWindowValue(window, "tabview-group");
-"                 title = JSON.parse(groupData)[active].title;
-"             }
-"             if (title) this.widgets.tabcount.value = "(" + title + ")" + this.widgets.tabcount.value;
-"         }
-"     }
-" });
-" EOF
-"}}}
 " quick access to firefox dialogs {{{
 " shortcut to firefox dialogs
 map -builtin <leader>d :dialog<space>
