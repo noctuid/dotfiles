@@ -792,13 +792,11 @@ let g:syntastic_warning_symbol = '∆'
 let g:syntastic_style_warning_symbol = '≈'
 "}}}
 
-" session management:"{{{
-" quickly open session
-" nnoremap <leader>ss :OpenSession
-" vim-session options (auto save on exit, open saved on open)
-let g:session_autosave_periodic='yes'
-let g:session_autosave='yes'
-let g:session_autoload='yes'
+" Obsession"{{{
+" obsession already automatically saves
+" autoload on enter
+" silent to ignore locked syntastic values
+au VimEnter * silent! source ~/.vim/sessions/main.vim
 "}}}
 
 " Sneak settings"{{{
@@ -1551,9 +1549,8 @@ NeoBundle 'justinmk/vim-sneak'
 " NeoBundle 't9md/vim-smalls'
 " fugitive 
 NeoBundle 'tomtom/tcomment_vim'
-NeoBundle 'xolox/vim-session'
-" required by vim-session
-NeoBundle 'xolox/vim-misc'
+" vim-session is being screwy... try obsess
+NeoBundle 'tpope/vim-obsession'
 
 NeoBundle 'tpope/vim-fugitive'
 " for buffer history and killing buffers without changing window layout or closing
