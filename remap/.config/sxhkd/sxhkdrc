@@ -107,7 +107,7 @@ super + s
 	~/bin/hide_show.sh termite
 
 F1
-	sh ~/bin/dropdown_two.sh
+	~/bin/hide_show.sh Terminology
 
 # not in use
 F10
