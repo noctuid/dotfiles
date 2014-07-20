@@ -97,14 +97,18 @@ This solution is restricted to X currently (though something similar could proba
 
 See `remap/.xchainkeys` for an example configuration for Libre Writer. (Note that I have started using LaTeX with vim for basic documents and have found it surprisingly easier to do most things I was using Libre Writer for.)
 
-## Make Any Terminal Emulator Dropdown
-This is really just an idea that will require a lot of changes for someone else using it with different programs. The basic idea is to use a tmux session to save the terminal state and then actually kill or open a terminal and reattach. 
+## Make Any Terminal Emulator Dropdown Regardless of Window Manager
+Sure there's guake, tilde, xfce4-term, yakuake, finalterm (*throws up*) and solutions for urxvt (-pe quake), xterm (yeahconsole), and specific window managers (using wmctrl, scratchpad solutions, etc.). The benefit of this is that the idea can be adapted to different window managers and terminal emulators.
 
-Sure there's guake, tilde, xfce4-term, yakuake, finalterm (*throws up*) and solutions for urxvt (-pe quake), xterm (yeahconsole), and specific window managers. I use guake sometimes, but I primarily like termite and use bspwm. The benefit of this is that the idea can be adapted to different window managers and terminal emulators. A downside is that it can be slower than something like guake to open when a lot of RAM is being used. You can also see it being resized if you're not using fade in with your compositing manager, which is kind of ugly.
+When I switched from primarily guake to termite, I wanted to find a way to use termite as a dropdown term. Originally, I decided to use tmux sesison and just close the window or open a new one and reattach.
 
 [Video Demonstration](http://youtu.be/3yhX_y1VdWE)
 
-See `bin/my_dropdown.sh` for the script
+See `not_in_use/my_dropdown.sh` for the script.
+
+I recently came across a simpler, faster solution that uses xdotool's windowunmap. Anyone interested in adapting the script will still have to deal with resizing/window placement, but it eliminates the need to actually kill the terminal and reattach with tmux (which can get slower with high RAM usage). It's also a true toggle unlike the previous script which requires an extra hotkey press to close in the case that it loses focus without special focus rules in place or some other workaround.
+
+See `bin/hide_show.sh` for my modified version of [quiv's mapunmap script](https://bbs.archlinux.org/viewtopic.php?pid=1436909#p1436909) and [this blog post](http://angelic-sedition.github.io/blog/2014/07/19/make-any-terminal-emulator-a-quake-style-dropdown/) where go into more detail.
 
 ## Stream Any Video in MPV
 Existing solutions for playing videos in the player of your choice (i.e. mplayer or vlc) are limited in what they work with. There are quite a few programs that allow this for a few sites such as youtube and daily motion (consider as youtube-viewer and using quvi), but I'd rather use mpv with all its features (keybindings for screenshots, seeking, etc.) than send just fake clicks to pause and play videos where things like [noflash](http://www-users.cs.umn.edu/~oztekin/software/noflash/) don't work.

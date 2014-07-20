@@ -101,9 +101,10 @@ super + r
 	guake -t
 
 alt + s
-	sh ~/bin/my_dropdown.sh
+	~/bin/hide_show.sh termite
+
 super + s
-	sh ~/bin/my_dropdown.sh
+	~/bin/hide_show.sh termite
 
 F1
 	sh ~/bin/dropdown_two.sh
