@@ -447,7 +447,7 @@ autocmd BufEnter *.tex setlocal textwidth=0
 "}}}
 
 " markdown
-autocmd BufNewFile,BufRead *.markdown setlocal spell spelllang=en
+autocmd FileType mkd setlocal spell spelllang=en
 
 " python
 autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=80 smarttab expandtab
@@ -880,6 +880,21 @@ onoremap <silent> <leader>e :<C-U>VertigoUp o<CR>
 
 let g:Vertigo_onedigit_method = 'smart3'
 " let g:Vertigo_homerow_onedigit = 'ARSTDHNEIO'
+"}}}
+
+" Vim Markdown
+" let g:vim_markdown_no_default_key_mappings=1
+" let g:vim_markdown_folding_disabled=1
+autocmd FileType mkd call s:mkd_mappings()
+function! s:mkd_mappings()
+" share leader m with table mode
+nnoremap <leader>mt :Toc<cr>
+" experimenting with this; normally just use zn ze but don't really like the way it folds it
+nmap <leader>mn <Plug>(Markdown_MoveToNextHeader)<leader>;silent! call repeat#set("\<Plug>Markdown_MoveToNextHeader", v:count)<cr>
+nmap <leader>me <Plug>(Markdown_MoveToPreviousHeader);silent! call repeat#set("\<Plug>Markdown_MoveToPreviousHeader", v:count)<cr>
+nmap <leader>mc <Plug>(Markdown_MoveToCurHeader);silent! call repeat#set("\<Plug>Markdown_MoveToCurHeader", v:count)<cr>
+nmap <leader>mu <Plug>(Markdown_MoveToParentHeader);silent! call repeat#set("\<Plug>Markdown_MoveToParentHeader", v:count)<cr>
+endfunction
 
 " vimshell"{{{
 " Use current directory as vimshell prompt.
@@ -1573,8 +1588,10 @@ NeoBundle 'aaronbieber/vim-vault'
 "}}}
 
 " Other"{{{
-" folding in markdown files
-NeoBundle 'nelstrom/vim-markdown-folding'
+" markdown folding, syntax highlighting, and navigation
+NeoBundle 'plasticboy/vim-markdown'
+" folding in markdown files (like better than above but stopped working)
+" NeoBundle 'nelstrom/vim-markdown-folding'
 " haskell
 " NeoBundle 'kana/vim-filetype-haskell'
 " NeoBundle 'ag/vim2hs'
