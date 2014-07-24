@@ -17,6 +17,10 @@ super + alt + {_,shift + }Escape
 	        bspc quit && pkill panel,\
 	 bspc quit 1}
 
+# reload keyboad layout (if screw it up and can't type)
+Insert
+	setxkbmap us -variant colemak && xmodmap ~/.Xmod_wide && xmodmap ~/.Xmodmap
+
 # }}}
 
 # General# {{{
@@ -37,9 +41,9 @@ alt + space
 
 # brightness# {{{
 alt + e
-	xbacklight -inc 10
+	light -As "acpi_video0" 10
 alt + n
-	xbacklight -dec 10
+	light -Us "acpi_video0" 10
 # }}}
 
 # volume # {{{
@@ -88,6 +92,9 @@ alt + k
 # regain focus from flash
 alt + a
 	xdotool mousemove 22 721 click 1
+# regain from menu
+alt + A
+	xdotool mousemove 22 721 click 3
 
 alt + q
 	pkill ffmpeg
@@ -101,6 +108,9 @@ super + r
 	guake -t
 
 alt + s
+	~/bin/hide_show.sh termite
+
+alt + t
 	~/bin/hide_show.sh termite
 
 super + s
@@ -144,8 +154,8 @@ super + W
 # cycle layout (monocle=kind of like fullscreen, but within normal area)
 super + t
     bspc desktop -l next
-alt + {_,shift +} t
-        bspc window -t {floating,fullscreen}
+alt + T
+        bspc window -t fullscreen
 
 # }}}
 # Selection# {{{
