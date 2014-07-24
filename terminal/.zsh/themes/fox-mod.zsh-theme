@@ -5,11 +5,16 @@
 #http://hamberg.no/erlend/posts/2010-10-17-show-current-vi-mode-in-zsh-prompt.html
 
 #%{$fg_bold[blue]%}%n%{$reset_color%}%{$fg[magenta]%}☮%{$fg_bold[red]%}%M%{$reset_color%}%{$fg[cyan]%}]%{$fg[white]%}-%{$fg[cyan]%}(
-PROMPT='%{$fg[magenta]%}┌[%{$fg[blue]%}%~%{$reset_color%}%{$fg[magenta]%}]%{$reset_color%}$(git_prompt_info)
+PROMPT='%{$fg[magenta]%}┌[%{$fg[blue]%}%~%{$reset_color%}%{$fg[magenta]%}]$(git_prompt_info)$(file_number)
 %{$fg[magenta]%}└$(prompt_char)%{$fg_bold[cyan]%}% % %{$reset_color%} '
 RPS1='${VIMODE}'
 
-# pretty much the only way I've found to get this working with zsh autosuggestions# {{{
+function file_number() {
+	# http://www.maketecheasier.com/8-useful-and-interesting-bash-prompts
+	echo "%{$fg[magenta]%}-|%{$fg[green]%}$(/bin/ls -1 | /usr/bin/wc -l | /bin/sed 's: ::g') files%{$fg[cyan]%},%{$fg[green]%} $(/bin/ls -lah | /bin/grep -m 1 total | /bin/sed 's/total //')%{$fg[magenta]%}|"
+}
+
+# pretty much the only way I've found to get this working with zsh autosuggestions (which I no longer use)# {{{
 # set VIMODE according to the current mode (default “[i]”)
 VIMODE='[-- INSERT --]'
 function zle-keymap-select {
@@ -26,7 +31,7 @@ function prompt_char {
 # }}}
 # vcs# {{{
 ZSH_THEME_GIT_PROMPT_PREFIX="-[%{$reset_color%}%{$fg[white]%}git://%{$fg_bold[white]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}%{$fg[cyan]%}]-"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}%{$fg[magenta]%}]"
 ZSH_THEME_GIT_PROMPT_DIRTY=" %{$fg[red]%}✗%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_CLEAN=" %{$fg[green]%}✔%{$reset_color%}"
 # ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[green]%}?"
