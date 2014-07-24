@@ -39,7 +39,7 @@ bspc config focused_frame_opacity 0.05
 # bspc monitor DP-1 -d VIII IX X
 # You can use `xrandr -q` or `bspc query -M` to find the monitor names.
 #}}}
-bspc monitor -d I II III IV V VI VII VIII IX X
+bspc monitor LVDS1 -d I II III IV V VI VII VIII IX
 # for reloading bspwm without losing window structure
 if [ -e "$BSPWM_TREE" ] ; then
 	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
