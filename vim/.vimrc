@@ -483,6 +483,12 @@ endif
 " airline always present
 set laststatus=2
 
+" add current session name to statusline
+"http://stackoverflow.com/questions/11374047/adding-the-current-session-filename-in-the-statusline add current session name to statusline
+let g:airline_section_x = airline#section#create(['filetype', ' %{fnamemodify(v:this_session, ":t")}'])
+let g:airline_section_z = airline#section#create(['%02p%% : %l: %c', ' %{WordCount()}'])
+" let g:airline_section_z = airline#section#create(['%{WordCount()}'])
+  " let g:airline_section_z       (percentage, line number, column number)
 " my custom combination theme:
 let g:airline_theme='darkfox'
 " tabline won't work with taboo
@@ -792,11 +798,24 @@ let g:syntastic_warning_symbol = '∆'
 let g:syntastic_style_warning_symbol = '≈'
 "}}}
 
-" Obsession"{{{
-" obsession already automatically saves
-" autoload on enter
-" silent to ignore locked syntastic values
-au VimEnter * silent! source ~/.vim/sessions/main.vim
+" vim-session:"{{{
+" quickly open session
+" nnoremap <leader>ss :OpenSession
+let g:session_autosave_periodic='yes'
+let g:session_autosave='yes'
+" automatically load  ~/.vim/sessions/default.vim
+let g:session_autoload='yes'
+"}}}
+" sessions"{{{
+" function! s:session_load_lock()
+" 	if filereadable(expand("~/.vim/sessions/main.vim.lock"))
+" 		echo "main.vim is locked"
+" 	else
+" 		silent! source ~/.vim/sessions/main.vim
+" 		!touch ~/.vim/sessions/main.vim.lock
+" 		au VimLeavePre * !rm ~/.vim/sessions/main.vim.lock
+" 	endif
+" endfunction
 "}}}
 
 " Sneak settings"{{{
@@ -1564,8 +1583,13 @@ NeoBundle 'justinmk/vim-sneak'
 " NeoBundle 't9md/vim-smalls'
 " fugitive 
 NeoBundle 'tomtom/tcomment_vim'
-" vim-session is being screwy... try obsess
-NeoBundle 'tpope/vim-obsession'
+
+" NeoBundle 'tpope/vim-obsession'
+" NeoBundle 'manuel-colmenero/vim-simple-session'
+
+NeoBundle 'xolox/vim-session'
+NeoBundle 'xolox/vim-misc'
+
 
 NeoBundle 'tpope/vim-fugitive'
 " for buffer history and killing buffers without changing window layout or closing
