@@ -1,41 +1,32 @@
-# This tmux statusbar config was created by tmuxline.vim
-# on Thu, 10 Apr 2014
+set -g pane-active-border-fg 'red'
+set -g pane-border-fg 'colour231'
 
-# heavily modified from generated config
-
-set -g status-bg 'colour238'
-set -g message-command-fg 'colour231'
-set -g status-justify 'left'
-set -g status-left-length '100'
-set -g status 'on'
-set -g pane-active-border-fg 'colour254'
-set -g message-bg 'colour31'
-set -g status-right-length '100'
-set -g status-right-attr 'none'
-set -g message-fg 'colour231'
-set -g message-command-bg 'colour31'
-set -g status-attr 'none'
-set -g status-utf8 'on'
-set -g pane-border-fg 'colour240'
-set -g status-left-attr 'none'
-setw -g window-status-fg 'colour250'
 setw -g window-status-attr 'none'
 setw -g window-status-activity-bg 'colour234'
 setw -g window-status-activity-attr 'none'
 setw -g window-status-activity-fg 'colour250'
-setw -g window-status-separator ''
+setw -g window-status-separator '|'
 setw -g window-status-bg 'colour234'
 
-set -g status-left "#[fg=colour236,bg=colour253,bold] #S:#I.#P #[fg=colour253,bg=colour239,nobold,nounderscore,noitalics]⮀#[fg=colour197,bg=colour239] #h #[fg=colour239,bg=colour236]⮀ #[fg=colour116,bg=colour236] #(~/bin/tmux/git_staged.sh) #[fg=colour247,bg=colour236]⮁#[fg=colour116,bg=colour236] #(~/bin/tmux/git_modified.sh) #[fg=colour236,bg=colour232]⮀ #[fg=colour232,bg=colour238]⮀"
-# #(acpi -t | awk '{print $4}') 
+set -g status-left "#[fg=colour232,bg=colour239,nobold,nounderscore,noitalics] #S:#I.#P|#[fg=colour31,italics]#h#[fg=colour232,noitalics]|#(~/bin/tmux/git_staged.sh) #(~/bin/tmux/git_modified.sh) #[fg=colour232,bg=colour236]⮀"
 
-set -g status-right "#[fg=colour232,bg=colour238,nobold,nounderscore,noitalics]⮂#[fg=colour104,bg=colour232] ⮕ #(~/bin/tmux/current_song.sh) #[fg=colour236,bg=colour232]⮂#[fg=colour116,bg=colour236] ⯆ #(~/bin/tmux/ram.sh)%% #[fg=colour239,bg=colour236]⮂#[fg=colour197,bg=colour239]⮠ #(acpi --battery | awk '{print $4}' | sed 's/,//') #[fg=colour253,bg=colour239,nobold,nounderscore,noitalics]⮂#[fg=colour236,bg=colour253,bold] #(date +'%m.%d.%y%l:%M%P')"
+set -g status-right "#[fg=colour232,bg=colour236]⮂#[fg=colour232,bg=colour239] ⮕ #(~/bin/tmux/current_song.sh) |⯆ #(~/bin/tmux/ram.sh)%%|⮠ #(acpi --battery | awk '{print $4}' | sed 's/,//')|#(date +'%m.%d.%y%l:%M%P')"
 
-# setw -g window-status-format '#[fg=colour244,bg=colour234] #I#[fg=colour250,bg=colour234] #W ⮁ '
-# setw -g window-status-current-format '#[fg=colour234,bg=colour234,nobold,nounderscore,noitalics]⮁#[fg=colour31,bg=colour234,bold]#I #W #[fg=colour31,bg=colour234,nobold,nounderscore,noitalics]⮁'
-setw -g window-status-format '#[fg=colour29,bg=colour238] #I #W '
-setw -g window-status-current-format '#[fg=colour250,bg=red] #I #W '
+setw -g window-status-format '#[fg=colour232,bg=colour238] #I #W '
+setw -g window-status-current-format '#[fg=colour232,bg=colour31] #I #W '
 
+set -g status 'on'
+set -g status-utf8 'on'
+set -g status-bg 'colour236'
+set -g status-fg 'colour232'
+set -g status-left-length '100'
+set -g status-right-length '100'
+set -g status-attr 'none'
+set -g status-left-attr 'none'
+set -g status-right-attr 'none'
 set-option -g status-justify "centre"
-set-option -g status-left-length 60
-set-option -g status-right-length 90
+
+set -g message-bg 'colour31'
+set -g message-fg 'colour231'
+set -g message-command-fg 'colour231'
+set -g message-command-bg 'colour31'
