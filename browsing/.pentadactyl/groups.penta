@@ -4,9 +4,10 @@
 " setl
 
 " passkeys passes any binding that include the letter
-" i.e. if pass i with passkeys, gi won't work; using groups with pass fixes that
+" i.e. if pass i with passkeys, gi won't work; using groups with pass fixes this
 
-" feedkeys only works with pentadactyl it seems
+" feedkeys will work for passing keys but must enter --pass through-- first (<pass-all-keys>; i've mapped it to ,)
+" (:normal won't work)
 
 " Image Bindings"{{{
 group image -description "Image viewing mappings" -locations .*\.jpg,.*\.jpeg,.*\.png,.*\.gif
@@ -21,18 +22,25 @@ nmap -group image -builtin b <left>
 " Tumblr"{{{
 group tumblr -description "Custom Tumblr Mappings" -locations tumblr.com/dashboard,tumblr.com/.*/drafts
 
-" passkeys but not if in other binding
-" set passkeys+=tumblr.com/dashboard:jkq
-" set passkeys+=tumblr.com/blog/.*/drafts:jkq
-silent nmap -group tumblr j <pass>
-" scrolling with longer posts
-silent nmap -group tumblr k 15k
-" silent nmap -group tumblr q <pass>
-
 " colemak up and down
-silent nmap -group tumblr -ex n silent !xsendkey j
-silent nmap -group tumblr -ex e silent !xsendkey comma && xsendkey k && xsendkey Escape
+silent nmap -group tumblr -ex n feedkeys ,j<ec>
+silent nmap -group tumblr -ex e feedkeys ,k<ec>
+" scrolling with longer posts
+silent nmap -group tumblr k 15<down>
 
+" tag post (then can hit enter to reblog)
+silent nmap -group tumblr -ex mt feedkeys ,t<esc>gi
+" queue (with xkit?; default is E)
+" silent nmap -group tumblr -ex mq feedkeys ,q<esc>
+" save as draft
+silent nmap -group tumblr -ex md feedkeys ,d<esc>
+" reblog (also an xkit one I believe; default is R)
+silent nmap -group tumblr -ex mr feedkeys ,r<esc>
+" like
+silent nmap -group tumblr -ex i feedkeys ,l<esc>
+" n show notes
+
+" GOTOS:"{{{
 " go to dashboard
 silent nmap -group tumblr -ex gh open tumblr.com
 " go to drafts
@@ -41,37 +49,29 @@ silent nmap -group tumblr -ex gd open tumblr.com/drafts
 silent nmap -group tumblr -ex gm open tumblr.com/messages
 " go to settings
 silent nmap -group tumblr -ex gs open tumblr.com/settings
-
-" tag post
-silent nmap -group tumblr -ex m silent !xsendkey comma && xsendkey t && xsendkey Escape
-" q to queue
-" save as draft
-silent nmap -group tumblr -ex v silent !xsendkey comma && xsendkey d && xsendkey Escape
-" reblog
-silent nmap -group tumblr -ex R silent !xsendkey comma && xsendkey r && xsendkey Escape
-" like
-silent nmap -group tumblr -ex i silent !xsendkey comma && xsendkey l && xsendkey Escape
-
+"}}}
+"
 "}}}
 
 " Twitter"{{{
-group twitter -description "Custom Twitter Mappings" -locations twitter.com
+" twitter bindings hardly work (require clicking on the keyboard shortcuts option then stop working after certain actions)
 
-set passkeys+=twitter.com/:jk.?<cr>,gh,gn,ga,gr,gd,gf,gl,gm,gs,gu
+group twitter -description "Custom Twitter Mappings" -locations twitter.com
+" set passkeys+=twitter.com/:?<cr>,gh,gn,ga,gr,gd,gf,gl,gm,gs,gu
 
 " colemak up and down
-silent nmap -group twitter -ex n silent !xsendkey j
-silent nmap -group twitter -ex e silent !xsendkey k
+" silent nmap -group twitter -ex n feedkeys ,j<esc>
+" silent nmap -group twitter -ex e feedkeys ,k<esc>
 
 " compose (probably will never use)
-silent nmap -group twitter -ex c silent !xsendkey comma && xsendkey n
+" silent nmap -group twitter -ex c feedkeys ,n<esc>gi
 
 " f favourite
-silent nmap -group twitter -ex i
+" silent nmap -group twitter -ex i
 " r reply
-silent nmap -group twitter -ex R
+" silent nmap -group twitter -ex R
 " t retweet
-silent nmap -group twitter -ex x
+" silent nmap -group twitter -ex x
 "}}}
 
 " MAL"{{{
