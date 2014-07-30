@@ -369,6 +369,7 @@ nmap -builtin vs :tgroup-switch<Space>
 nmap -builtin <space>v :tgroup-switch<Space>
 " switch to next tab group
 nmap -builtin <space><space> :tgroup-switch<space><tab><cr>
+nmap -builtin ve :tgroup-switch email<cr>
 " rename group
 nmap -builtin vr :tgroup-title<Space>
 nmap -builtin vd :tgroup-delete<Space>
