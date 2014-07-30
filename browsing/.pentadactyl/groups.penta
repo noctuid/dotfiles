@@ -126,7 +126,7 @@ silent nmap -group reddit -ex gs open https://ssl.reddit.com/prefs/
 " 4chan"{{{
 group chan -description "eh" -locations 4chan.org
 " different bindings for threads
-group chanthread -description "eh" -locations boards.4chan.org/(a|b|c|d|e|g|gif|h|lit|mu|r|u|v|y)/thread/*
+group chanthread -description "eh" -locations 4chan.org/(a|b|c|d|e|g|gif|h|lit|mu|r|u|v|w|y)/thread/.*
 
 " pass keys"{{{
 silent nmap -group chan h <pass>
