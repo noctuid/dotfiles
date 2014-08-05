@@ -483,12 +483,30 @@ endif
 " airline always present
 set laststatus=2
 
-" add current session name to statusline
-"http://stackoverflow.com/questions/11374047/adding-the-current-session-filename-in-the-statusline add current session name to statusline
-let g:airline_section_x = airline#section#create(['filetype', ' %{fnamemodify(v:this_session, ":t")}'])
-let g:airline_section_z = airline#section#create(['%02p%% : %l: %c', ' %{WordCount()}'])
-" let g:airline_section_z = airline#section#create(['%{WordCount()}'])
-  " let g:airline_section_z       (percentage, line number, column number)
+" http://stackoverflow.com/questions/114431/fast-word-count-function-in-vim
+function! WordCount()
+  let s:old_status = v:statusmsg
+  let position = getpos(".")
+  exe ":silent normal g\<c-g>"
+  let stat = v:statusmsg
+  let s:word_count = 0
+  if stat != '--No lines in buffer--'
+    let s:word_count = str2nr(split(v:statusmsg)[11])
+    let v:statusmsg = s:old_status
+  end
+  call setpos('.', position)
+  return s:word_count 
+endfunction
+
+if has("gui_running")
+	" add current session name to statusline
+	"http://stackoverflow.com/questions/11374047/adding-the-current-session-filename-in-the-statusline add current session name to statusline
+	let g:airline_section_x = airline#section#create(['filetype', ' %{fnamemodify(v:this_session, ":t")}'])
+	let g:airline_section_z = airline#section#create(['%02p%% : %l: %c', ' %{WordCount()}'])
+	" let g:airline_section_z = airline#section#create(['%{WordCount()}'])
+	  " let g:airline_section_z       (percentage, line number, column number)
+endif
+
 " my custom combination theme:
 let g:airline_theme='darkfox'
 " tabline won't work with taboo
