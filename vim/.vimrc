@@ -1129,7 +1129,7 @@ let g:unite_source_grep_command = "ag"
 " ag is recursive; does not need -r
 let g:unite_source_grep_recursive_opt = ""
 let g:unite_source_grep_default_opts =
-	  \ '--line-numbers --nocolor --nogroup --hidden --ignore ' .
+	  \ '--smart-case --line-numbers --nocolor --nogroup --hidden --ignore ' .
 	  \  '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
 
 " search current buffer wth ag and display results in unite window
