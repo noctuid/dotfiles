@@ -778,6 +778,23 @@ nmap <leader>ge <Plug>GitGutterPrevHunkzO<leader>;silent! call repeat#set("\<Plu
 "}}}
 "}}}
 
+" Goyo & Limelight"{{{
+" toggle goyo
+nnoremap <leader>gy :Goyo<cr>
+" settings
+let g:goyo_width = 100
+" limelight
+function! GoyoBefore()
+  Limelight
+endfunction
+
+function! GoyoAfter()
+  Limelight!
+endfunction
+
+let g:goyo_callbacks = [function('GoyoBefore'), function('GoyoAfter')]
+"}}}
+
 " Gundo
 nnoremap <leader>u :GundoToggle<CR>
 let g:gundo_map_move_older="n"
@@ -1740,6 +1757,9 @@ NeoBundle 'justincampbell/vim-eighties'
 
 NeoBundle 'junegunn/fzf'
 
+" distraction free writing
+NeoBundle 'junegunn/goyo.vim'
+NeoBundle 'junegunn/limelight.vim'
 " improved / search
 " NeoBundle 'junegunn/vim-oblique'
 " required for above
