@@ -1111,7 +1111,16 @@ let g:unite_quick_match_table = {
   \ }
 
 " http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
-nnoremap <space>/ :Unite ag:.<cr>
+let g:unite_source_grep_command = "ag"
+" ag is recursive; does not need -r
+let g:unite_source_grep_recursive_opt = ""
+let g:unite_source_grep_default_opts =
+	  \ '--line-numbers --nocolor --nogroup --hidden --ignore ' .
+	  \  '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
+
+nnoremap <space>/ :Unite grep:.<cr>
+" search for last searched term in unite window
+nnoremap <space>? :Unite grep:%<cr><c-r>/<cr>
 
 " Open bookmark file for most frequently used files
 " nnoremap <space><space> :Unite -quick-match bookmark<cr>
