@@ -820,6 +820,11 @@ let g:table_mode_toggle_map = 'm'
 " Emmet vim
 map <leader>y <C-y>,
 
+" auto-pairs
+" use closing bracket to jump outside even if not next char
+let g:AutoPairsFlyMode = 1
+let g:AutoPairsShortcutBackInsert = '<M-b>'
+
 " from bling/dotvim
 " syntastic "{{{
 let g:syntastic_error_symbol = '✗'
@@ -1736,9 +1741,10 @@ NeoBundle 'Shougo/neocomplete.vim'
 NeoBundle 'SirVer/ultisnips'
 " Optional
 NeoBundle "honza/vim-snippets"
-" auto put ( with ), etc with cursor in middle; won't do in commented lines
-" NeoBundle 'Raimondi/delimitMate'
-NeoBundle 'kana/vim-smartinput'
+
+" smart auto closing
+NeoBundle 'jiangmiao/auto-pairs'
+
 "}}}
 
 " Misc"{{{
