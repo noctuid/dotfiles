@@ -626,7 +626,7 @@ nnoremap A a
 nnoremap v V|nnoremap V v|nnoremap <leader>v <c-v>
 
 " I don't ever use ga; map to go to end of line (works with wrapping)
-nnoremap ga g$
+" nnoremap ga g$
 " swap
 nnoremap g0 g^
 nnoremap g^ g0
@@ -1110,6 +1110,7 @@ let g:unite_quick_match_table = {
   \ '1' : 20, '2' : 21, '3' : 22, '4' : 23, '5' : 24, '6' : 25, '7' : 26, '8' : 27, '9' : 28, '0' : 29,
   \ }
 
+" silver searcher {{{
 " http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
 let g:unite_source_grep_command = "ag"
 " ag is recursive; does not need -r
@@ -1118,9 +1119,32 @@ let g:unite_source_grep_default_opts =
 	  \ '--line-numbers --nocolor --nogroup --hidden --ignore ' .
 	  \  '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
 
+" search current buffer wth ag and display results in unite window
+nnoremap <leader>/ :Unite grep:%<cr>
+" use last search
+nnoremap <leader>? :Unite grep:%<cr><c-r>/<cr>
+" search recursively
 nnoremap <space>/ :Unite grep:.<cr>
-" search for last searched term in unite window
-nnoremap <space>? :Unite grep:%<cr><c-r>/<cr>
+nnoremap <space>? :Unite grep:.<cr><c-r>/<cr>
+
+" ag motion with kana's operator user
+map ga <Plug>(operator-ag)
+map gA <Plug>(operator-ag-recursive)
+
+call operator#user#define('ag', 'Ag_motion')
+function! Ag_motion(motion_wise)
+	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
+	execute 'normal!' '`[' . v . '`]y' 
+	execute "Unite grep:%::" . fnameescape(getreg('+'))
+endfunction
+
+call operator#user#define('ag-recursive', 'Ag_motion_recursive')
+function! Ag_motion_recursive(motion_wise)
+	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
+	execute 'normal!' '`[' . v . '`]y' 
+	execute "Unite grep:.::" . fnameescape(getreg('+'))
+endfunction
+" }}}
 
 " Open bookmark file for most frequently used files
 " nnoremap <space><space> :Unite -quick-match bookmark<cr>
@@ -1145,7 +1169,7 @@ endfunction
 " Splits"{{{
 nnoremap <leader>w <c-w>
 " r after above to swap
-nnoremap <leader>/ :vsplit<cr>
+nnoremap <leader>' :vsplit<cr>
 nnoremap <leader>- :split<cr>
 nnoremap <leader>h <c-w><left>
 nnoremap <leader>i <c-w><right>
