@@ -498,14 +498,13 @@ function! WordCount()
   return s:word_count 
 endfunction
 
-if has("gui_running")
+autocmd VimEnter * call s:airline_sections_custom()
+function! s:airline_sections_custom()
 	" add current session name to statusline
 	"http://stackoverflow.com/questions/11374047/adding-the-current-session-filename-in-the-statusline add current session name to statusline
 	let g:airline_section_x = airline#section#create(['filetype', ' %{fnamemodify(v:this_session, ":t")}'])
 	let g:airline_section_z = airline#section#create(['%02p%% : %l: %c', ' %{WordCount()}'])
-	" let g:airline_section_z = airline#section#create(['%{WordCount()}'])
-	  " let g:airline_section_z       (percentage, line number, column number)
-endif
+endfunction
 
 " my custom combination theme:
 let g:airline_theme='darkfox'
@@ -1131,14 +1130,14 @@ nnoremap <space>? :Unite grep:.<cr><c-r>/<cr>
 map ga <Plug>(operator-ag)
 map gA <Plug>(operator-ag-recursive)
 
-call operator#user#define('ag', 'Ag_motion')
+autocmd VimEnter * call operator#user#define('ag', 'Ag_motion')
+autocmd VimEnter * call operator#user#define('ag-recursive', 'Ag_motion_recursive')
 function! Ag_motion(motion_wise)
 	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
 	execute 'normal!' '`[' . v . '`]y' 
 	execute "Unite grep:%::" . fnameescape(getreg('+'))
 endfunction
 
-call operator#user#define('ag-recursive', 'Ag_motion_recursive')
 function! Ag_motion_recursive(motion_wise)
 	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
 	execute 'normal!' '`[' . v . '`]y' 
