@@ -585,7 +585,6 @@ nnoremap j e|noremap J E
 " keep in visual
 vnoremap n j
 vnoremap e k
-vnoremap i l
 
 " fold navigation for colemak
 nnoremap ze zk
@@ -1220,10 +1219,12 @@ xmap S <Plug>NrrwrgnDodG;inoremap <buffer> <lt>esc> <lt>esc>:wq<lt>cr><cr>
 "}}}
 
 " letters instead of symbols {{{
-" https://github.com/beloglazov/vim-textobj-quotes
-" ',", and `
-xmap q iq
-omap q iq
+
+" paRens
+omap ir i(
+omap ar a(
+vmap ir i(
+vmap ar a(
 
 " angle brackets (not noremap because text objectify)
 omap ia i<
@@ -1231,16 +1232,29 @@ omap aa a<
 vmap ia i<
 vmap aa a<
 
-omap ir i[
-omap ar a[
-vmap ir i[
-vmap ar a[
+" sqUare
+omap iu i[
+omap au a[
+vmap iu i[
+vmap au a[
 
 " kurly
 omap ik i{
 omap ak a{
 vmap ik i{
 vmap ak a{
+
+" shorten when possible (e.g. not for word) for i or a
+" https://github.com/beloglazov/vim-textobj-quotes
+" ',", and `
+omap q iq
+xmap q iq
+omap r i(
+xmap r i(
+omap u i[
+xmap u i[
+omap k i{
+" k for viual star
 
 " also have anyblock
 
