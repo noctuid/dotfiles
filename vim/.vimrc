@@ -244,6 +244,8 @@ endif
 " plugin unmaps"{{{
 " table mode
 autocmd VimEnter * silent! nunmap <leader>tt
+" replace camelcase's ib map
+autocmd VimEnter * omap ib <Plug>(textobj-anyblock-i)|xmap ib <Plug>(textobj-anyblock-i)
 "}}}
 " #==============================
 " # General {{{
@@ -1204,14 +1206,41 @@ nmap <Leader>ZXY <Plug>NrrwrgnDo
 " open selected text, delete all of it, map escape to save changes and close win
 xmap S <Plug>NrrwrgnDodG;inoremap <buffer> <lt>esc> <lt>esc>:wq<lt>cr><cr>
 "}}}
+
+" letters instead of symbols {{{
 " https://github.com/beloglazov/vim-textobj-quotes
+" ',", and `
 xmap q iq
 omap q iq
+
+" angle brackets (not noremap because text objectify)
+omap ia i<
+omap aa a<
+vmap ia i<
+vmap aa a<
+
+omap ir i[
+omap ar a[
+vmap ir i[
+vmap ar a[
+
+" kurly
+omap ik i{
+omap ak a{
+vmap ik i{
+vmap ak a{
+
+" also have anyblock
+
+" }}}
 
 " using this, not tpope's surround
 map <silent>sa <Plug>(operator-surround-append)
 map <silent>sd <Plug>(operator-surround-delete)
 map <silent>sc <Plug>(operator-surround-replace)
+
+nmap saw saiW'
+nmap sal sail"
 
 " delete or replace most inner surround
 " if you use vim-textobj-anyblock
@@ -1751,6 +1780,8 @@ NeoBundle 'rhysd/vim-operator-surround'
 NeoBundle 'rhysd/vim-textobj-anyblock'
 " gives il and al for lines
 NeoBundle 'kana/vim-textobj-line'
+" gives ae and ie for entire buffer
+NeoBundle 'kana/vim-textobj-entire'
 "}}}
 
 "if ever need more than <c-w>r
