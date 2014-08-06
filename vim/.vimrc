@@ -640,14 +640,9 @@ sunmap w
 sunmap b
 sunmap j
 
-" default iw
-omap <silent> iw <Plug>CamelCaseMotion_iw
-xmap <silent> iw <Plug>CamelCaseMotion_iw
-" using ib with anyblock
-" omap <silent> ib <Plug>CamelCaseMotion_ib
-" xmap <silent> ib <Plug>CamelCaseMotion_ib
-omap <silent> ie <Plug>CamelCaseMotion_ie
-xmap <silent> ie <Plug>CamelCaseMotion_ie
+" default iw (camelcase's iw deletes spaces like aw and newline chars)
+omap <silent> iw <Plug>CamelCaseMotion_ie
+xmap <silent> iw <Plug>CamelCaseMotion_ie
 
 "}}}
 " better text file long line nav (use with lazy redraw); up and down between wraps
