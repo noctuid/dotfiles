@@ -378,11 +378,6 @@ set wildmode:full
 " Searching"{{{
 set hlsearch
 
-" this causes arrow keys to make As and Bs in insert/normal mode in terminal vim
-if has("gui_running")
-	nnoremap <esc> :noh<cr><esc>
-	inoremap <esc> <esc>:noh<cr>
-endif
 " don't move when search
 set noincsearch
 " go back to beginning of buffer once reach end
@@ -565,10 +560,14 @@ let mapleader = "t"
 noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
 
 " don't just place in the middle; open folds recursively 
-nnoremap <silent> k nzOzz|nnoremap <silent> K NzOzz
-" xnoremap <silent> K :<c-u>call <SID>next('N', 1)<BAR>if &hlsearch<BAR>set hlsearch<BAR>endif<cr>
+nmap k <Plug>(Oblique-n)zvzz
+nmap K <Plug>(Oblique-N)zvzz
+" get rid of visual mode mappings for n
+xmap Qq <Plug>(Oblique-n)
+xmap QQ <Plug>(Oblique-N)
+" center and open enough folds after search
+autocmd User Oblique normal! zvzz
 
-" BOL/EOL/Join Lines; took out l to ^ in favor of l for <c-o>
 " nnoremap L $|nnoremap <C-l> J
 nnoremap L <c-i>
 " l for last
@@ -1781,9 +1780,9 @@ NeoBundle 'junegunn/fzf'
 NeoBundle 'junegunn/goyo.vim'
 NeoBundle 'junegunn/limelight.vim'
 " improved / search
-" NeoBundle 'junegunn/vim-oblique'
+NeoBundle 'junegunn/vim-oblique'
 " required for above
-" NeoBundle 'junegunn/vim-pseudocl'
+NeoBundle 'junegunn/vim-pseudocl'
 
 " NeoBundle 'szw/vim-ctrlspace'
 
