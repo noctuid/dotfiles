@@ -203,6 +203,7 @@ EOM
 " other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
 " useful mostly for stuff that combines things like mash, split, weird piping stuff, etc.
 " }}} 
+command fbugopen -description "open firebug console" emenu View.Firebug
 
 " Bookmarklets: "{{{
 " translate bar: http://googlesystem.blogspot.com/2009/11/google-translation-bar.html
@@ -568,13 +569,12 @@ nmap -ex <leader>A execute "silent !youtube-dl --restrict-filenames --extract-au
 "NOTE: This is mouse position/window location/screensize dependent and will not work for anyone else without the proper adjustments
 
 " My convoluted solution:
-" fake control+shift+c to open firebug console (because the firebug penta plugin doesn't work properly unless firebug has been opened first in that window)
-" then use it to get video link and send to mpv with clicks (I'm sure there's a better way to get the direct link than faking clicks, but it works)
+" use firebug to get video link and send to mpv with clicks (I'm sure there's a better way to get the direct link than faking clicks, but it works)
 
 " play in mpv; needs firebug console open
 nmap -ex <leader>u silent !~/bin/pentadactyl/firebug_fake_mouse.sh
 " open firebug console on net tab (will remain open for same site in that window even with tab/url changes)
-nmap -builtin <leader>U :!~/bin/pentadactyl/firebug_fake_key.sh &<cr>:firebug tab net<cr>
+nmap -ex <leader>U fbugopen|firebug tab net
 
 " }}}
 
