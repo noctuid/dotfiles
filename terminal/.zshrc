@@ -691,7 +691,7 @@ alias rld='echo "The Matrix has been reloaded" && . ~/.zshrc'
 # keyboard stuff# {{{
 alias rldxmd='xmodmap ~/.Xmodmap'
 # necessary because when plug in keyboard, it goes to qwerty
-alias rldusbkeyboard='setxkbmap us -variant colemak && xmodmap ~/.Xmod_wide && xmodmap ~/.Xmodmap'
+alias rldusbkeyboard='setxkbmap us -variant colemak && xmodmap ~/.Xmodmap_wide && xmodmap ~/.Xmodmap'
 alias rldkbd='rldusbkeyboard'
 # when using japanese keyboard with double wide mod and extra thumbkeys
 alias rldjp='xmodmap ~/.Xmodmapjp'

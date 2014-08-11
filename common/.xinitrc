@@ -11,7 +11,7 @@ fi
 
 # rldkbd (keyboard remapping)
 setxkbmap us -variant colemak
-xmodmap ~/.Xmod_wide
+xmodmap ~/.Xmodmap_wide
 xmodmap ~/.Xmodmap
 # set background image
 feh --bg-scale /home/angelic_sedition/wallpaper/anime/mekukacity/ene_by_ti7503-d7kkbe8.png
