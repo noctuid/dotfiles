@@ -618,7 +618,7 @@ map -ex <leader>b set showtabline!=always,never
 " }}}
 
 " autocommands
-au Enter * :source ~/.pentadactyl/autocommands
+au Enter * :source ~/.pentadactyl/autocommands.penta
 
 " cookie management {{{
 " export cookies with https://addons.mozilla.org/en-US/firefox/addon/export-cookies/ 
