@@ -1082,10 +1082,6 @@ alias -g syncuverworld='rsync -vr --delete ~/Music/UVERworld ~/and/Card/Music'
 # _Backup & Mounting # {{{
 #===============
 # ** Entire section needs to be redone to get rid of gvfs-mount and mounts to /run/media as well as to make everything a function that checks if the proper things are mounted before doing anything
-mounthelp() {
-	echo "mountusb - mount /dev/sdb1 using gvfs"
-	echo "mountsoma - "
-}
 bkhelp() {
 	echo "snconf - sync dotfiles & vimwiki to ag-sys"
 	echo "bahamutonl - (*make sure nothing else is mounted to ~/ag-sys-bk) sync soma to google drive"
@@ -1106,13 +1102,6 @@ alias ej="sudo eject /dev/sr0"
 alias umountalltc='truecrypt -d'
 # }}}
 
-# no longer mount soma on usb
-alias mountusb='gvfs-mount -d /dev/sdb1'
-alias umountusb='gvfs-mount -u /run/media/angelic_sedition/ag-sys'
-alias mountsdc='gvfs-mount -d /dev/sdc1'
-
-# external backup harddrive
-alias mountexthdd='gvfs-mount -d /dev/sdd1'
 
 # moved main soma off usb to computer (no more annoyances if usb comes out)
 # since mounting to same location (~/ag-sys) don't have to change much
