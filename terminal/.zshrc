@@ -1081,166 +1081,216 @@ alias -g syncuverworld='rsync -vr --delete ~/Music/UVERworld ~/and/Card/Music'
 #===============
 # _Backup & Mounting # {{{
 #===============
-# ** Entire section needs to be redone to get rid of gvfs-mount and mounts to /run/media as well as to make everything a function that checks if the proper things are mounted before doing anything
-bkhelp() {
-	echo "snconf - sync dotfiles & vimwiki to ag-sys"
-	echo "bahamutonl - (*make sure nothing else is mounted to ~/ag-sys-bk) sync soma to google drive"
-	echo "before switch OS:"
-	echo "bahamut - (*mountusb first) full soma sync from computer to usb (beforehand: mounts comp soma, runs snconf, mounts soma from usb)"
-	echo "Other:"
-	echo "sin - small/quick online encrypted backup"
-	echo ""
+# add back dropbox
+function bkhelp() {
+	echo "
+	sndot            - sync dotfiles & vimwiki to ag-sys
+	bahamut (online) - backup soma to usb (or ~/grive and sync to google drive)
+	sin              - small/quick online encrypted backup
+	singluttony      - larger minimal online backup
+	snhometoexternal - sync ~/ to external hard drive
+	syncdatab        - sync Datab to external hard drive
+	snpspbk          - backup psp memcard to database
+	snpspdata        - backup psp savedata to database
+	"
 }
 
 # Mounting# {{{
 # unmount most recent external drive
-alias uned='devmon -c'
+alias uned="devmon -c"
 # unmount all external
-alias uneda='devmon -u'
+alias uneda="devmon -u"
 # eject disk
 alias ej="sudo eject /dev/sr0"
-alias umountalltc='truecrypt -d'
+alias umountalltc="truecrypt -t -d"
 # }}}
 
+# TC mounting# {{{
+function mount_tc() {
+	tc_volume=$1
+	mount_point=$2
+	if [ "$(truecrypt -t -l | grep $tc_volume)" != "" ];then
+		echo "Already mounted."
+	else
+		if [ ! -f $tc_volume ];then
+			echo "Error. The specified path ($tc_volume) for the tc volume does not exist."
+			kill -INT $$
+		elif [ "$(ls -A $mount_point)" ];then
+			echo "Error. Files exist in ($mount_point). Move/delete them."
+			kill -INT $$
+		else
+			mkdir -p $mount_point
+			truecrypt -t $tc_volume $mount_point
+		fi
+	fi
+}
 
-# moved main soma off usb to computer (no more annoyances if usb comes out)
-# since mounting to same location (~/ag-sys) don't have to change much
-alias mountsoma='truecrypt ~/soma_ ~/ag-sys/'
-alias umountsoma='truecrypt -d ~/soma_'
+# alias -g mountacct='truecrypt ~/ag-sys/Else/ACCTS ~/blemish'
+# may do for other mounting w/ pass
+mountacct() {
+	truecrypt -p "$(gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | grep accts | awk '{print $2}')" ~/ag-sys/Else/ACCTS ~/blemish
+}
 
-# in return added this:
-# soma backup to usb drive
-alias bahamut='mountsoma ; snconf ; mountbkdrive ; fullbk ; umountbkdrive'
-alias fullbk='rsync -avr --delete ~/ag-sys/ ~/ag-sys-bk/'
-# now mount to ag-sys-bk
-alias mountbkdrive='truecrypt /run/media/angelic_sedition/ag-sys/soma ~/ag-sys-bk'
-alias umountbkdrive='truecrypt -d /run/media/angelic_sedition/ag-sys/soma'
-
-# soma backup to google drive# {{{
-alias bahamutonl='mountsoma ; snconf ; mountonlfullusbbk ; fullbkonl ; umountonlfullusbbk && sngdrive'
-alias fullbkonl='rsync -avr --delete ~/ag-sys/ ~/ag-sys-bk-onl/'
-alias mountonlfullusbbk='truecrypt ~/grive/soma ~/ag-sys-bk-onl'
-alias umountonlfullusbbk='truecrypt -d ~/grive/soma'
-
-# }}}
-
-# Common:
-alias sngdrive='cd ~/grive/ ; grive -V'
-# no longer to usb
-alias syncconfigusb="rsync -avr --delete --exclude='.antigen/*' --exclude='bundle/*' ~/dotfiles ~/ag-sys/Backup/A\#config_files/ && rsync -avr --delete ~/vimwiki ~/ag-sys/Backup/A\#config_files/"
-alias snconf='syncconfigusb'
-
-
-# smallest/quick encrypted backup to harddrive and gdrive and spider oak
-# 18mb tc# {{{
-alias sngriveusb="rsync -avr --exclude='Portable/*' --exclude='Gaming/*' --exclude='Large/*' --exclude='.themes/*' --exclude='tmux-powerline/*' --exclude='bundle/*' --exclude='.weechat/*' --exclude='undo/*' --include='*/' --include='*.txt' --include='*.rb' --include='*.py' --include='*.pl' --include='*.hs' --include='*.lua' --include='*.ini' --include='*.conf' --include='*config*' --include='*.zsh_history' --include='*.yaml' --include='*.Xmodmap*' --include='*.Xdefaults' --include='.Xresources' --include='.emacs' --include='.gitconfig' --include='.lesskey' --include='*xscreensaver*' --include='dotfiles/**rc' --include='.unite/*' --include='sessions/*' --include='TO\ Backup/*' --include='bin/**sh' --include='termite/*' --include='ncmpcpp/*' --exclude='*' --prune-empty-dirs ~/ag-sys/ ~/smallest_bk"
-
-# takes about 3 and a half minutes to sync
-alias snspideroaksmallest="SpiderOak --batchmode --backup='~/grive/smaller_usb_bk'"
-alias snspider="SpiderOak --batchmode --backup='~/grive/smaller_usb_bk'"
-
-# to add: dropboxsync
-
-alias mountgriveusb='truecrypt ~/grive/smaller_usb_bk ~/smallest_bk'
-alias umountgriveusb='truecrypt -d ~/grive/smaller_usb_bk'
-
-# final product for quick backup to harddrive and 
-alias sin='snconf ; mountgriveusb ; sngriveusb ; umountgriveusb && sngdrive ; snspideroaksmallest'
+alias umountacct="truecrypt -t -d ~/ag-sys/Else/ACCTS"
 
 # }}}
 
-# about 70 megs; 120meg tc up to date basic backup; second smallest backup but with odt and rtf (rtf is all old stuff)
+# Shared# {{{
+alias mountsoma="mount_tc $HOME/soma_ $HOME/ag-sys/"
+alias umountsoma="truecrypt -t -d ~/soma_"
+# sync ~/grive to google drive
+alias sngdrive="cd ~/grive/ ; grive -V"
+
+function sndot() {
+	rsync -avrh --progress --delete --exclude={".antigen/*","bundle/*","elpa/*",".mpd/log"} ~/dotfiles ~/ag-sys/Backup/
+	rsync -avrh --progress --delete ~/vimwiki ~/ag-sys/Backup/
+}
+# }}}
+
+# soma backup# {{{
+# now mount to ag-sys-bk; change from run media
+alias mountbkdrivesoma="mount_tc /media/ag-sys/soma $HOME/ag-sys-bk"
+alias umountbkdrivesoma="truecrypt -t -d /media/ag-sys/soma"
+
+alias mountbkonlsoma="mount_tc $HOME/grive/soma_bk $HOME/ag-sys-bk-onl"
+alias umountbkonlsoma="truecrypt -t -d ~/grive/soma_bk"
+
+function bahamut() {
+	# http://stackoverflow.com/questions/1885525/how-do-i-prompt-a-user-for-confirmation-in-bash-script
+	echo "Using --delete with rsync. Continue? (y/n)"
+	# read is different for zsh
+	read -q REPLY
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+		kill -INT $$
+	fi
+	mountsoma && sndot
+	if [ "$1" == "online" ];then
+		mountbkonlsoma && \
+		rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk-onl
+		umountbkonlsoma
+		sngdrive
+	else
+		# to usb
+		mountbkdrivesoma && \
+		rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk
+		umountbkdrivesoma
+	fi
+}
+
+# }}}
+
+# quick net backup# {{{
+# add grive option
+# ~9mb
+ 
+alias mountsmallestbktc="mount_tc $HOME/grive/smallest_soma_bk $HOME/smallest_bk"
+alias umountsmallestbktc="truecrypt -t -d ~/grive/smallest_soma_bk"
+
+function sin() {
+	mountsoma && sndot ; mountsmallestbktc && \
+	rsync -avrh --exclude={".Trash/*",".git/*","Portable/*","Gaming/*","Large/*",".themes/*","tmux-powerline/*","bundle/*",".weechat/*","undo/*","Customization/win/*","chats/*"} --include={"*/","*.txt","*.rb","*.py","*.pl","*.hs","*.lua","*.el","*.cpp","*.js","*.penta","*.vim","*.ini","*.xml","*.conf","*.json","*.ytcs","*.tex","*.md","*.mkd","*.mkdn","*config*","*.zsh_history","*.yaml","*.Xmodmap*","*.Xdefaults",".Xresources",".emacs",".gitconfig",".lesskey","xboxdrv",".gtkrc-2.0","*xscreensaver*","*tmuxline*","*keymap*","*navigation*","dotfiles/**rc",".unite/*","TO\ Backup/*","bin/**sh","termite/*","ncmpcpp/*","herbstluftwm/*","ranger/*","surfraw/*",".abook/*","root/*","sxiv/**","panel/**"} --exclude='*' --prune-empty-dirs ~/ag-sys/ ~/smallest_bk
+	umountsmallestbktc && SpiderOak --batchmode --backup='~/grive/smallest_soma_bk'
+}
+# }}}
+
 # singluttony# {{{
+# next most frequently changed/ updated filetypes
+# about 80 megs; 120meg tc up to date basic backup; second smallest backup but with odt, rtf, html, and some pdf (rtf is all old stuff)
+alias mountsmallbktc="mount_tc $HOME/grive/small_soma_bk $HOME/small_bk"
+alias umountsmallbktc="truecrypt -d ~/grive/small_soma_bk"
 
-# added html stuff (forums/) and weechat because doesn't fit in other (including logs)
-alias sngriveusb2="rsync -avr --include='*/' --include='*.txt' --include='*.rb' --include='*.py' --include='*.pl' --include='*.odt' --include='.weechat/**' --include='forums/**' --include='*.rtf' --include='*.doc' --include='*.docx' --exclude='*' --prune-empty-dirs ~/ag-sys/ /media/truecrypt58"
-
-# part of incremental restore I did on data loss
-# alias otrestore="rsync -avr --include='*/' --include='*.odt' --include='*.rtf' --exclude='*' /media/truecrypt58/Else/everything/ ~/temptstow/Else/everything"
-# sync all that hasn't been taken care of
-# alias ot2restore="rsync -auvr --include='*/' --exclude='*.odt' --exclude='*.rb' --exclude='*.py' --exclude='*.txt' --exclude='*.rtf' include='*' /media/truecrypt3/Else/everything/ ~/temptstow/Else/everything"
-
-alias mountgriveusb2='truecrypt ~/grive/usb_bk /media/truecrypt58'
-alias umountgriveusb2='truecrypt -d ~/grive/usb_bk'
-
-
-alias singluttony='mountgriveusb2 ; sngriveusb2 ; umountgriveusb2 ; sngdrive'
-
-# chron and --delete... accidental deletion; don't do
-# }}}
-
-
-# other truecrypt mounting:# {{{
-# mount accts
-alias -g mountacct='truecrypt ~/ag-sys/Else/ACCTS ~/blemish'
-alias umountacct='truecrypt -d ~/ag-sys/Else/ACCTS'
-# }}}
-
-# big backup; needs fixing
-# add delete flag after dealing with mail
-# add music back; sort out tc stuff
-# rsync -avr --exclude='Datab' --exclude='soma*' --exclude='Steam/*' --exclude='.mail/*' --exclude='.wine/*' --exclude='.wine_64/*' --exclude='Music/*' --exclude='VirtualBox\ VMs/*' --exclude='ag-sys/*' --exclude='My\ Games/*' /home/angelic_sedition /run/media/angelic_sedition/HD-CEU2\ Backup
-
-# usb drive must be mounted to truecrypt18.. now ~/ag-sys
-# levels: full, mid , all txt and frequently changing files
-
-# psp backup 16gb mem card...# {{{
-# make sure connected to sdd1.. bottom right usb slot
-# alias mountpsp='gvfs-mount -d /dev/sdd1'
-alias bktehpsp='rsync -avr --delete /run/media/angelic_sedition/MS0/ ~/database/database/Gaming/PSP\ and\ Vita/PSP/PSP\ Backup/'
-# alias umountpsp='gvfs-mount u /run/media'
-
-# save databackup
-alias bksavedata='rsync -avr --delete /run/media/angelic_sedition/B056-729D/PSP/SAVEDATA/ ~/database/database/Gaming/PSP\ and\ Vita/PSP/PSP\ Backup/PSP/SAVEDATA/'
-# }}}
-# 
-
-
-# old:
-# don't put files with passwords into cloud without encrypting
-alias syncconfigdbox='rsync -avr --delete --exclude="private" ~/dotfiles ~/Dropbox/'
-# Sync USB to dropbox# {{{
-# idea for just syncind specifc files like txt, pdf, odt, etc.
-# http://credentiality2.blogspot.com/2011/02/using-rsync-to-copy-only-certain.html
-# alias syncsmalldbx='rsync -avr --include='*/' --include='*.txt' --include='*.rb' --include='*.py' --include='*.rb' --exclude='*' --prune-empty-dirs "/run/media/angelic_sedition/ag-sys/Else" /media/truecrypt3/'
-
-#MAKE SURE usb backup is open in truecrypt 3 before running
-
-# # mount, sync, dismount
-# alias -g syncdbox='mountdboxusb ; snctodbx ' 
-# 
-# alias -g mountdboxusb='truecrypt ~/Dropbox/corebackup/USB_Backup /media/truecrypt3'
-# alias -g umountdboxusb='truecrypt -d ~/Dropbox/corebackup/USB_Backup'
-# 
-# # Core Backup ; as of 1.11.14 about 1.8+ gigs
-# # truecrypt container is 2.44gb.. ensure have enough room on dbox
-# alias snctodbx='syncelse ; syncbackup ; syncportable ; syncschool'
-# 
-# alias syncelse='rsync -avr --delete "~/ag-sys/Else" /media/truecrypt3/'
-# alias syncbackup='rsync -avr --delete "~/ag-sys/Backup" /media/truecrypt3/'
-# alias syncportable='rsync -avr --delete "~/ag-sys/Portable/Sync" /media/truecrypt3/'
-# alias syncschool='rsync -avr --delete "~/ag-sys/School" /media/truecrypt3/'
+function singluttony() {
+	mountsoma && sndot ; mountsmallbktc && \
+	rsync -avrh --exclude={".Trash/*","School/older/*","immunization/*","Library/*","Dictionary/*","*other/**.pdf","Gaming/**.pdf","Programming/**.pdf","Languages/*","\#\#*/**.pdf"} --include={"*/","*.txt","*.odt",".weechat/**","forums/**","*.rtf","*.doc","*.docx","*.pdf","*.html","_used_pics/*"} --exclude='*' --prune-empty-dirs ~/ag-sys/ ~/small_bk
+	umountsmallbktc && SpiderOak --batchmode --backup='~/grive/small_soma_bk'
+}
 
 # }}}
+
+# home backup# {{{
+# add music back; smarter soma sync; add important from mail, wine, etc.
+# add more useless dirs to exclude
+function snhometoexternal() {
+	echo "Using --delete with rsync. Continue? (y/n)"
+	read -q REPLY
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+		echo
+	else
+		if [ -d /media/HD-CEU2\ Backup/home_folder ];then
+			rsync -avrh --progress --delete --exclude={".cache/*","grive/*","Dropbox/*","Datab","soma*","Steam/*",".mail/*",".wine/*",".wine_64/*","Music/*","VirtualBox\ VMs/*","ag-sys/*","database/*","blemish/*","private/*","*bk/*","Games/*",".local/share/*"} --prune-empty-dirs ~/ /media/HD-CEU2\ Backup/home_folder
+		else
+			echo "Error. External hard drive is not mounted or directory is named differently."
+		fi
+	fi
+}
+ # }}}
 
 # backup database to external harddrive# {{{
-# alias -g syncdatab='mountexthdd ; mountdatab ; mountbkdatab ; sndatab ; umountbkdatab'
-alias -g syncdatab='mountdatab ; mountbkdatab ; sndatab ; umountbkdatab'
+alias mountdatab="mount_tc $HOME/Datab $HOME/database"
+alias umountdatab="truecrypt -d ~/Datab"
 
-alias -g mountdatab='truecrypt ~/Datab ~/database'
-alias -g umountdatab='truecrypt -d ~/Datab'
+alias mountbkdatab="mount_tc /media/HD-CEU2\ Backup/Datab $HOME/database-bk"
+alias umountbkdatab="truecrypt -d /media/HD-CEU2\ Backup/Datab"
 
-alias -g mountbkdatab='truecrypt /run/media/angelic_sedition/HD-CEU2\ Backup/Datab /media/truecrypt6'
-alias sndatab='rsync -avr --delete ~/database/ /media/truecrypt6/'
-# rysnc -avr --exclude='echii/*' ~/database/ /media/truecrypt6
-# --exclude='.antigen/*' 
-alias umountbkdatab='truecrypt -d /run/media/angelic_sedition/HD-CEU2\ Backup/Datab'
+function syncdatab() {
+	echo "Using --delete with rsync. Continue? (y/n)"
+	read -q REPLY
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+		echo
+	else
+		mountdatab && mountbkdatab && \
+		rsync -avrh --progress --delete ~/database/ ~/database-bk
+		umountbkdatab
+	fi
+}
 
-# for easy unmount from term
-alias undatab'truecrypt -d /run/media/angelic_sedition/Windows7/Users/Admin/Documents/Datab'
+# }}}
 
-alias -g mountdatab2='truecrypt /run/media/angelic_sedition/Windows7/Users/Admin/Documents/Database2 /media/truecrypt12'
-alias undatab2='truecrypt -d /run/media/angelic_sedition/Windows7/Users/Admin/Documents/Database2'
+# psp backup {{{
+# vita
+alias cm="qcma --verbose"
+
+# leave out psp isos?
+snpspbk() {
+	echo "Using --delete with rsync. Continue? (y/n)"
+	read -q REPLY
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+		echo
+	else
+		if [ -d /media/MS0/ ];then
+			mountdatab && \
+			rsync -avrh --progress --delete /media/MS0/ ~/database/database/Gaming/handheld/PSP/PSP\ Backup/
+		else
+			echo "Error. PSP is not mounted or directory is named differently."
+		fi
+	fi
+}
+
+# save databackup
+snpspdata() {
+	echo "Using --delete with rsync. Continue? (y/n)"
+	read -q REPLY
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+		echo
+	else
+		if [ -d /media/MS0/ ];then
+			mountdatab && \
+			rsync -avrh --progress --delete /media/MS0/SAVEDATA ~/database/database/Gaming/handheld/PSP/savedata/
+		else
+			echo "Error. PSP is not mounted or directory is named differently."
+		fi
+	fi
+}
 # }}}
 
 # }}}
