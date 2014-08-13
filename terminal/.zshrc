@@ -753,6 +753,26 @@ gvir() {
 # set wallpaper
 alias bgset='imlibsetroot -s w -p c'
 
+# switch conky theme
+function conkylight() {
+	pkill conky
+	rm -r ~/dotfiles/aesthetics/.conky
+	rm ~/dotfiles/aesthetics/.conkyrc
+	cp -r ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/white/.conky ~/dotfiles/aesthetics
+	cp ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/white/.conkyrc ~/dotfiles/aesthetics
+	restow
+	conky &
+}
+function conkydark() {
+	pkill conky
+	rm -r ~/dotfiles/aesthetics/.conky
+	rm ~/dotfiles/aesthetics/.conkyrc
+	cp -r ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/black/.conky ~/dotfiles/aesthetics
+	cp ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/black/.conkyrc ~/dotfiles/aesthetics
+	restow
+	conky &
+}
+
 # Show history
 alias history='fc -l 1'
 
