@@ -40,10 +40,10 @@ case "$1" in
 
 # set current image to background
 "b")
-	feh --bg-scale "$2" ;;
+	imlibsetroot -s w -p c "$2" ;;
 # echo command to do so to clipboard
 "B")
-	echo -n 'feh --bg-scale '$2'' | xsel -bi ;;
+	echo -n 'imlibsetroot -s w -p c '$2'' | xsel -bi ;;
 
 # put current image in trash
 "D")

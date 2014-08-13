@@ -751,7 +751,7 @@ gvir() {
 }
 
 # set wallpaper
-alias bgset='feh --bg-scale'
+alias bgset='imlibsetroot -s w -p c'
 
 # Show history
 alias history='fc -l 1'

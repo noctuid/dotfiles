@@ -14,7 +14,7 @@ setxkbmap us -variant colemak
 xmodmap ~/.Xmodmap_wide
 xmodmap ~/.Xmodmap
 # set background image
-feh --bg-scale /home/angelic_sedition/wallpaper/anime/mekukacity/ene_by_ti7503-d7kkbe8.png
+imlibsetroot -s w -p c /home/angelic_sedition/wallpaper/anime/yosuga_no_sora/605007.jpg
 
 # font stuff
 xset +fp /usr/share/fonts/local
