@@ -48,19 +48,29 @@ fi
 
 # Window rules:#{{{
 # open firefox when go to third desktop for first time (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
-# only problem is that if reload with super alt esc, these will open again; moving them elsewhere messes up things
-bspc control --subscribe | awk -F ':' '$4 ~ /^[FO]/ { exit(system("firefox &")); }' &
+# only problem is that if reload bspwm, these will open again; moving them elsewhere messes up things
 bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("gvim &")); }' &
-# for rest of desktops, open gvim when empty
-# bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$4 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$5 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$6 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$7 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$8 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$9 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$10 ~ /^F/ { system("gvim &"); }' &
-bspc control --subscribe | awk -F ':' '$11 ~ /^F/ { system("gvim &"); }' &
+bspc control --subscribe | awk -F ':' '$4 ~ /^[FO]/ { exit(system("firefox &")); }' &
+# for all desktops, setup home row navigation bindings on empty desktops
+bspc control --subscribe | awk -F ':' '$2 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$4 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$5 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$6 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$7 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$8 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$9 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$10 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+# revert as soon as desktop is occupied
+bspc control --subscribe | awk -F ':' '$2 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$3 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$4 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$5 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$6 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$7 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$8 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$9 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+bspc control --subscribe | awk -F ':' '$10 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
 
 # Can check class name of program with: xprop | grep WM_CLASS
 bspc rule -a guake floating=on

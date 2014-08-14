@@ -1,0 +1,93 @@
+# reload normal config (if other bspc subcribes break)
+super + Escape
+    pkill sxhkd && sxhkd
+
+# desktop switching
+r ; {a,r,s,t,d,h,n,e,i,o}
+    bspc desktop -f ^{1-9,10}
+
+super + {_,shift + }{1-9,0}
+    bspc {desktop -f,window -d} ^{1-9,10}
+
+# launcher
+space
+	dmenu_run -fn 'Droid Sans Mono-10'
+
+Return
+	synapse
+
+# dmenu stuff
+
+# program opening (2 keys so less likely to accidentally open; will test single keys later)
+o ; f
+	firefox
+
+o ; a
+	apvlv
+
+o ; {g,v}
+	{gvim,gvim}
+
+# keep bindings# {{{
+# Dropdown Terms# {{{
+super + r
+	guake -t
+
+alt + s
+	~/bin/hide_show.sh termite
+
+alt + t
+	~/bin/hide_show.sh termite
+
+F1
+	~/bin/hide_show.sh Terminology
+
+# not in use
+F10
+	bspc desktop -l monocle && bspc window -t floating
+F11
+	bspc window -t fullscreen
+
+# terminology -f=Inconsolata/12 -G=false -2
+# }}}
+
+# brightness# {{{
+alt + e
+	light -As "acpi_video0" 10
+alt + n
+	light -Us "acpi_video0" 10
+# }}}
+
+# volume/music # {{{
+alt + i
+	amixer -qD pulse sset Master 5%+
+alt + h
+	amixer -qD pulse sset Master 5%-
+# mute
+alt + m
+	amixer -qD pulse sset Master toggle
+# play/pause
+alt + o
+	mpc toggle
+# previous song
+alt + u
+	mpc prev
+# next song
+alt + y
+	mpc next
+
+# }}}
+
+# Screenshots# {{{
+# fullscreen screen shot; lowered quality
+# add xtitle to name
+Print
+	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
+	# needs fixing:
+	# sh ~/bin/screenshot.sh
+
+alt + p
+	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
+
+# }}}
+# }}}
