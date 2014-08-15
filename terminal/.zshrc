@@ -296,6 +296,9 @@ bindkey -a u undo
 bindkey -a U redo
 bindkey '^?' backward-delete-char
 bindkey '^H' backward-delete-char
+# swap
+bindkey -a a vi-add-eol
+bindkey -a A vi-add-next
 
 # colemak (https://github.com/bunnyfly/dotfiles/blob/master/zshrc)# {{{
 bindkey -M vicmd "h" backward-char
