@@ -1285,6 +1285,16 @@ nmap <silent> scc <Plug>(operator-surround-replace)<Plug>(textobj-anyblock-a)
 
 "}}}
 " #==============================
+" # Abbreviations"{{{
+" #==============================
+" python
+autocmd FileType python call s:python_abbreviations()
+function! s:python_abbreviations()
+	inoreabbr <buffer> shb #!/usr/bin/env python3
+endfunction
+" 
+" "}}}
+" #==============================
 " # NeoBundle {{{
 " #==============================
 " Required:
