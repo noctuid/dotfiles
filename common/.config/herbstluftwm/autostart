@@ -2,8 +2,12 @@
 
 # this is a simple config for herbstluftwm
 
+# hc() {
+#     herbstclient "$@"
+# }
+
 hc() {
-    herbstclient "$@"
+    cmds="$cmds , $@"
 }
 
 hc emit_hook reload
@@ -171,6 +175,7 @@ herbstclient set tree_style '╾│ ├└╼─┐'
 # or simply:
 # hc detect_monitors
 
+herbstclient chain $cmds &
 # find the panel
 panel=~/.config/herbstluftwm/panel.sh
 [ -x "$panel" ] || panel=/etc/xdg/herbstluftwm/panel.sh
