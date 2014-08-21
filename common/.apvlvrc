@@ -1,16 +1,29 @@
 " Bindings"{{{
+" apvlv requires capitalized <>
 " navigation
 map n 3j
 map e 3k
-map tk <C-f>
-map to <C-b>
-map E gt
-map te gt
-map N gT
-map tn gT
+map i l
+map tk <C-d>
+map to <C->
 map k n
 map K N
 
+map zo zO
+map zi zI
+
+map y <C-f>
+map u <C-b>
+
+" just o for open, and in new tab by default (don't plan on using this)
+map o t
+map O o
+
+" quickmarks
+map " '
+map 'h :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/haskell/lyah.pdf<CR>
+map 'p :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/python/thinkpython_for_python_3.pdf<CR>
+map 'c :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/c/The.C.Programming.Language.2nd.Edition.pdf<CR>
 map ; :
 
 " straight from vimrc
