@@ -1288,6 +1288,10 @@ nmap <silent> scc <Plug>(operator-surround-replace)<Plug>(textobj-anyblock-a)
 " # Abbreviations"{{{
 " #==============================
 " python
+" command! Calico !bspc window --presel right && ~/_school/Calico/StartCalico &
+nnoremap <a-l> :let @+=expand("%:p")<cr>:!~/bin/calico.sh exec_graphics &<cr>
+nnoremap <a-L> :let @+=expand("%:p")<cr>:!~/bin/calico.sh exec &<cr>
+" nnoremap <a-w> :let @+="~/empty.py"<cr>:!~/bin/calico.sh start &<cr>
 autocmd FileType python call s:python_abbreviations()
 function! s:python_abbreviations()
 	inoreabbr <buffer> shb #!/usr/bin/env python3
