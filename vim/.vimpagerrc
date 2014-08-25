@@ -1,0 +1,122 @@
+" opts
+set ws
+set ic scs
+" want to see percent of file
+set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+" enable status line always
+set laststatus=2
+set showcmd
+set clipboard=unnamedplus
+
+" bindings"{{{
+" get rid of some of vimpager's bindings
+noremap w w
+noremap b b
+noremap / /
+noremap g g
+noremap y y
+noremap v v
+
+" p for percent and q to quit are nice
+
+" colemak and basic navigation
+noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
+" can't edit so
+nnoremap i l
+
+nnoremap <silent> k nzz|nnoremap <silent> K Nzz
+
+nnoremap tk <c-d>
+nnoremap to <c-u>
+nnoremap d <c-d>
+nnoremap u <c-u>
+nnoremap <space> <c-f>
+" 
+cnoremap ¸ <c-w>
+cnoremap .yp <c-r>+
+
+" l for last
+nnoremap L <c-i>
+nnoremap l <c-o>
+
+nnoremap ; :
+vnoremap ; :
+vnoremap v V
+
+" Y like D
+nnoremap Y y$
+" Sane redo.
+noremap U <C-r>
+
+" tmux experimentation"{{{
+" "r" is redraw"{{{
+" window switching"{{{
+nnoremap <silent> ra :silent !tmux select-window -t 1<cr>:redraw!<cr>
+nnoremap <silent> rr :silent !tmux select-window -t 2<cr>:redraw!<cr>
+nnoremap <silent> rs :silent !tmux select-window -t 3<cr>:redraw!<cr>
+nnoremap <silent> rt :silent !tmux select-window -t 4<cr>:redraw!<cr>
+nnoremap <silent> rd :silent !tmux select-window -t 5<cr>:redraw!<cr>
+nnoremap <silent> rh :silent !tmux select-window -t 6<cr>:redraw!<cr>
+nnoremap <silent> rn :silent !tmux select-window -t 7<cr>:redraw!<cr>
+nnoremap <silent> re :silent !tmux select-window -t 8<cr>:redraw!<cr>
+nnoremap <silent> ri :silent !tmux select-window -t 9<cr>:redraw!<cr>
+nnoremap <silent> ro :silent !tmux select-window -t 10<cr>:redraw!<cr>
+"}}}
+" resize panes"{{{
+nnoremap <silent> rmh :silent !tmux resize-pane -L 10<cr>
+nnoremap <silent> rmn :silent !tmux resize-pane -D 10<cr>
+nnoremap <silent> rme :silent !tmux resize-pane -U 10<cr>
+nnoremap <silent> rmi :silent !tmux resize-pane -R 10<cr>
+"}}}
+" circulate
+" previous
+nnoremap <silent> r, :silent !tmux swap-pane -U<cr>
+" next
+nnoremap <silent> r. :silent !tmux swap-pane -D<cr>
+
+" new session
+nnoremap <silent> r_ :silent !tmux new-session<cr>
+
+" new window
+nnoremap <silent> rc :silent !tmux new-window<cr>:redraw!<cr>
+" kill pane
+nnoremap <silent> rx :silent !tmux kill-pane<cr>
+" last window
+nnoremap <silent> rl :silent !tmux last-window<cr>:redraw!<cr>
+" split windows
+nnoremap <silent> r/ :silent !tmux split-window -h<cr>:redraw!<cr>
+nnoremap <silent> r- :silent !tmux split-window<cr>:redraw!<cr>
+
+" break pane
+nnoremap <silent> r! :silent !tmux break-pane<cr>
+"}}}
+
+" "s" is select"{{{
+" panes"{{{
+" directions
+nnoremap <silent> sh :silent !tmux select-pane -L<cr>:redraw!<cr>
+nnoremap <silent> sn :silent !tmux select-pane -D<cr>:redraw!<cr>
+nnoremap <silent> se :silent !tmux select-pane -U<cr>:redraw!<cr>
+nnoremap <silent> si :silent !tmux select-pane -R<cr>:redraw!<cr>
+" last
+nnoremap <silent> sl :silent !tmux select-pane -l<cr>:redraw!<cr>
+" select layout
+nnoremap <silent> sv :silent !tmux select-layout main-vertical<cr>:redraw!<cr>
+
+" toggle "monocle" (zoom)
+nnoremap <silent> st :silent !tmux resize-pane -Z<cr>
+
+" bspwm
+" bspwm monocle (for dropdown terms)
+nnoremap <silent> sm :silent !bspc desktop -l monocle && bspc window -t floating<cr>
+nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
+
+"}}}
+
+" select session
+nnoremap <silent> ss :silent !tmux choose-client<cr>
+"}}}
+"}}}
+"}}}
+colorscheme seoul256
+"vim: ft=vim:

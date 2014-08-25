@@ -20,11 +20,9 @@
 # Export# {{{
 #==============================
 export EDITOR=vim
-export PAGER=less
-# verbose and smart case search
-export LESS="-iM"
-# less > more.. and most doesn't wrap?
-# consider https://github.com/rkitover/vimpager at some point; less works great so probably uneccesary
+# export PAGER=less
+# export LESS="-iM"
+export PAGER=vimpager
 
 export BROWSER=firefox
 
