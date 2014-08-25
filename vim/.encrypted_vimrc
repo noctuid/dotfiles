@@ -23,9 +23,13 @@ nnoremap <silent> k nzozz|nnoremap <silent> K Nzozz
 nnoremap ze zk
 nnoremap zn zj
 
-" nnoremap tk
-" nnoremap to
+nnoremap tk <c-d>
+nnoremap to <c-u>
+" nnoremap ts :w<cr>
 
+" l for last
+nnoremap L <c-i>
+nnoremap l <c-o>
 
 nnoremap ; :
 nnoremap : ;
@@ -66,16 +70,16 @@ set clipboard=unnamedplus
 " tmux experimentation"{{{
 " "r" is redraw"{{{
 " window switching"{{{
-nnoremap <silent> ra :silent !tmux select-window -t 1<cr>
-nnoremap <silent> rr :silent !tmux select-window -t 2<cr>
-nnoremap <silent> rs :silent !tmux select-window -t 3<cr>
-nnoremap <silent> rt :silent !tmux select-window -t 4<cr>
-nnoremap <silent> rd :silent !tmux select-window -t 5<cr>
-nnoremap <silent> rh :silent !tmux select-window -t 6<cr>
-nnoremap <silent> rn :silent !tmux select-window -t 7<cr>
-nnoremap <silent> re :silent !tmux select-window -t 8<cr>
-nnoremap <silent> ri :silent !tmux select-window -t 9<cr>
-nnoremap <silent> ro :silent !tmux select-window -t 10<cr>
+nnoremap <silent> ra :silent !tmux select-window -t 1<cr>:redraw!<cr>
+nnoremap <silent> rr :silent !tmux select-window -t 2<cr>:redraw!<cr>
+nnoremap <silent> rs :silent !tmux select-window -t 3<cr>:redraw!<cr>
+nnoremap <silent> rt :silent !tmux select-window -t 4<cr>:redraw!<cr>
+nnoremap <silent> rd :silent !tmux select-window -t 5<cr>:redraw!<cr>
+nnoremap <silent> rh :silent !tmux select-window -t 6<cr>:redraw!<cr>
+nnoremap <silent> rn :silent !tmux select-window -t 7<cr>:redraw!<cr>
+nnoremap <silent> re :silent !tmux select-window -t 8<cr>:redraw!<cr>
+nnoremap <silent> ri :silent !tmux select-window -t 9<cr>:redraw!<cr>
+nnoremap <silent> ro :silent !tmux select-window -t 10<cr>:redraw!<cr>
 "}}}
 " resize panes"{{{
 nnoremap <silent> rmh :silent !tmux resize-pane -L 10<cr>
@@ -93,14 +97,14 @@ nnoremap <silent> r. :silent !tmux swap-pane -D<cr>
 nnoremap <silent> r_ :silent !tmux new-session<cr>
 
 " new window
-nnoremap <silent> rc :silent !tmux new-window<cr>
+nnoremap <silent> rc :silent !tmux new-window<cr>:redraw!<cr>
 " kill pane
 nnoremap <silent> rx :silent !tmux kill-pane<cr>
 " last window
-nnoremap <silent> rl :silent !tmux last-window<cr>
+nnoremap <silent> rl :silent !tmux last-window<cr>:redraw!<cr>
 " split windows
-nnoremap <silent> r/ :silent !tmux split-window -h<cr>
-nnoremap <silent> r- :silent !tmux split-window<cr>
+nnoremap <silent> r/ :silent !tmux split-window -h<cr>:redraw!<cr>
+nnoremap <silent> r- :silent !tmux split-window<cr>:redraw!<cr>
 
 " break pane
 nnoremap <silent> r! :silent !tmux break-pane<cr>
@@ -109,14 +113,14 @@ nnoremap <silent> r! :silent !tmux break-pane<cr>
 " "s" is select"{{{
 " panes"{{{
 " directions
-nnoremap <silent> sh :silent !tmux select-pane -L<cr>
-nnoremap <silent> sn :silent !tmux select-pane -D<cr>
-nnoremap <silent> se :silent !tmux select-pane -U<cr>
-nnoremap <silent> si :silent !tmux select-pane -R<cr>
+nnoremap <silent> sh :silent !tmux select-pane -L<cr>:redraw!<cr>
+nnoremap <silent> sn :silent !tmux select-pane -D<cr>:redraw!<cr>
+nnoremap <silent> se :silent !tmux select-pane -U<cr>:redraw!<cr>
+nnoremap <silent> si :silent !tmux select-pane -R<cr>:redraw!<cr>
 " last
-nnoremap <silent> sl :silent !tmux select-pane -l<cr>
+nnoremap <silent> sl :silent !tmux select-pane -l<cr>:redraw!<cr>
 " select layout
-nnoremap <silent> sv :silent !tmux select-layout main-vertical<cr>
+nnoremap <silent> sv :silent !tmux select-layout main-vertical<cr>:redraw!<cr>
 
 " toggle "monocle" (zoom)
 nnoremap <silent> st :silent !tmux resize-pane -Z<cr>
