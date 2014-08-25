@@ -158,8 +158,8 @@ setopt correct
 setopt correctall
 # }}}
 # ========== Completion ==========# {{{
-# complete aliases (default I think)
-setopt completealiases
+# if on, tab completion will just show files/dirs instead of normal completions with aliases
+unsetopt completealiases
 
 # When completing from the middle of a word, move the cursor to the end of the word; haven't noticed staying in middle of word even when unset; confusion
 unsetopt always_to_end
