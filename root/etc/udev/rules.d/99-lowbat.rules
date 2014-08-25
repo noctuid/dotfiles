@@ -1,0 +1,7 @@
+# warn when battery is low
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="15", RUN+="/usr/bin/notify-send -u low 'Low battery!'"
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="10", RUN+="/usr/bin/notify-send -u low 'Low battery!'"
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="8", RUN+="/usr/bin/notify-send -u low 'Low battery!'"
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="6", RUN+="/usr/bin/notify-send -u low 'Low battery!'"
+
+# SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="4", RUN+="/usr/bin/systemctl suspend"
