@@ -17,6 +17,38 @@
 # https://github.com/phallus/arch-files/blob/master/config/.zshrc
 #}}}
 #==============================
+# Antigen (Plugins) {{{
+#==============================
+# takes care of installation and sourcing
+# installed from aur
+source /usr/share/zsh/scripts/antigen/antigen.zsh
+
+# using for theme and completion
+antigen bundle robbyrussell/oh-my-zsh lib/
+
+# Bundles from the default repo (robbyrussell's oh-my-zsh).
+# antigen bundle command-not-found
+
+# Syntax highlighting bundle.
+antigen bundle zsh-users/zsh-syntax-highlighting
+
+# extra completions (e.g. ag and cabal)
+antigen bundle zsh-users/zsh-completions src/
+#
+# up and down will go through history based on what you have typed
+antigen bundle zsh-users/zsh-history-substring-search
+
+# text objects for normal mode (eh mostly useful for cc.. maybe gU)
+antigen bundle hchbaw/opp.zsh
+#
+# # Load the theme (frome omz/themes folder)
+antigen theme fox-mod
+#
+# # Tell antigen that you're done.
+antigen apply
+
+# #}}}
+#==============================
 # Export# {{{
 #==============================
 export EDITOR=vim
@@ -88,33 +120,6 @@ export LESS_TERMCAP_us=$'\E[01;32m'             # begin underline
 # see my custom theme in /terminal/.zsh/themes
 
 #see termite config for term colours
-#}}}
-#==============================
-# Antigen (Plugins) {{{
-#==============================
-# takes care of installation and sourcing
-# installed from aur
-source /usr/share/zsh/scripts/antigen/antigen.zsh
-# Load the oh-my-zsh's library.
-antigen use oh-my-zsh
-
-# Bundles from the default repo (robbyrussell's oh-my-zsh).
-antigen bundle command-not-found
-
-# Syntax highlighting bundle.
-antigen bundle zsh-users/zsh-syntax-highlighting
-
-# up and down will go through history based on what you have typed
-antigen bundle zsh-users/zsh-history-substring-search
-
-# text objects for normal mode
-# antigen bundle hchbaw/opp.zsh
-
-# Load the theme (frome omz/themes folder)
-antigen theme fox-mod
-
-# Tell antigen that you're done.
-antigen apply
 #}}}
 #==============================
 # Options {{{
