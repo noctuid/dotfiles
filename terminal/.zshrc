@@ -1377,8 +1377,8 @@ rtf2txt() {
 # sanitize - set file/directory owner and permissions to normal values (644/755)
 # Usage: sanitize <file>
 sanitize() {
-    chmod -R u=rwX,go=rX "$@"
-    chown -R ${USER}.users "$@"
+    sudo chmod -R u=rwX,go=rX "$@"
+    sudo chown -R ${USER}.users "$@"
 }
 
 # Random# {{{
