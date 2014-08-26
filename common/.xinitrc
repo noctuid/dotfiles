@@ -41,10 +41,6 @@ xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
 
 # redshift; better options at this point than xflux
 redshift -c ~/.config/redshift.conf &
-# xscreensaver for locking and power management
-# xrdb -merge ~/.Xresources ; /usr/bin/xscreensaver -no-splash &
-# xss-lock -- xscreensaver-command -lock &
-xss-lock -- physlock &
 # virtual modal interfaces
 xchainkeys &
 # auto mount usbs and such

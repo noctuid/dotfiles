@@ -1,0 +1,10 @@
+[Unit]
+Description=Lock X session using slimlock
+
+[Service]
+User=angelic_sedition
+Environment=Display=:0
+ExecStart=/usr/bin/slimlock
+
+[Install]
+WantedBy=sleep.target
