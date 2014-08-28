@@ -1,0 +1,9 @@
+function m() {
+	mkdir -p $1
+	# cd $1 # I wish
+}
+
+sanitize() {
+    sudo chmod -R u=rwX,go=rX "$@"
+    sudo chown -R ${USER}.users "$@"
+}
