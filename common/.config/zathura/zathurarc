@@ -1,5 +1,5 @@
 # to use with tabbed:
-# tabbed zathura --reparent; -x desn't work
+# tabbed zathura --reparent; -x doesn't work
 
 # bindings# {{{
 # index
@@ -54,7 +54,7 @@ map [normal] <Space>t feedkeys ":exec xsendkey Control+3"<Return>
 map [normal] <Space>d feedkeys ":exec xsendkey Control+4"<Return>
 
 unmap t
-map [normal] tt feedkeys ":exec /home/angelic_sedition/bin/zathura/new_tabbed.sh new"<Return>
+map [normal] tt feedkeys ":exec /home/angelic_sedition/bin/zathura/new_tabbed.sh"<Return>
 # unmap '
 # won't let me map '
 # quickmarks
