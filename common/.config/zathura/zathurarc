@@ -1,0 +1,191 @@
+# to use with tabbed:
+# tabbed zathura --reparent; -x desn't work
+
+# bindings# {{{
+# index
+map [index] q quit
+# naviation
+map [index] n navigate_index down
+map [index] e navigate_index up
+map [index] i navigate_index expand
+
+# normal# {{{
+# wtf, I know; if there's a better way to do this without changing the scroll step, it's not in the documentation (hell, this isn't either)
+map [normal] % scroll down
+map [normal] n feedkeys 5%
+map [normal] ^ scroll up
+map [normal] e feedkeys 5^
+map [normal] tk scroll half-down
+map [normal] to scroll half-up
+
+map [normal] h navigate previous
+map [normal] i navigate next
+
+map [normal] l jumplist backward
+map [normal] L jumplist forward
+
+map [normal] k search forward
+map [normal] K search backward
+
+# zoom
+map [normal] u zoom out
+map [normal] y zoom in
+map [normal] w adjust_window best-fit
+map [normal] j adjust_window width
+
+# boomarks (different from markes; can be more than one letter)
+map [normal] a focus_inputbar ":bmark "
+map [normal] b focus_inputbar ":blist "
+map [normal] d focus_inputbar ":bdelete "
+
+map [normal] td toggle_page_mode 2
+
+map [normal] ; focus_inputbar :
+
+# visual mode does nothing currently
+# map [normal] v change_mode visual
+
+unmap <Space>
+# tab switching (with tabbed)
+map [normal] <Space>a feedkeys ":exec xsendkey Control+0"<Return>
+map [normal] <Space>r feedkeys ":exec xsendkey Control+1"<Return>
+map [normal] <Space>s feedkeys ":exec xsendkey Control+2"<Return>
+map [normal] <Space>t feedkeys ":exec xsendkey Control+3"<Return>
+map [normal] <Space>d feedkeys ":exec xsendkey Control+4"<Return>
+
+unmap t
+map [normal] tt feedkeys ":exec /home/angelic_sedition/bin/zathura/new_tabbed.sh new"<Return>
+# unmap '
+# won't let me map '
+# quickmarks
+map [normal] th feedkeys ":open ~/ag-sys/Large/Library/Books/programming/haskell/lyah.pdf"<Tab><Return>
+map [normal] tp feedkeys ":open ~/ag-sys/Large/Library/Books/programming/python/thinkpython_for_python_3.pdf"<Tab><Return>
+map [normal] tc feedkeys ":open ~/ag-sys/Large/Library/Books/programming/c/The.C.Programming.Language.2nd.Edition.pdf"<Tab><Return>
+map [normal] tr feedkeys ":open ~/school/LCRCalicoV2.pdf"<Tab><Return>
+# }}}
+# 
+# same as vimrc with following search and replaces:
+# change " to #
+# change nnoremap to map [normal]
+# remove <silent>
+# change :silent ! to feedkeys ":exec
+# map <cr> to "<Return>
+# wm experementation#{{{
+unmap r
+unmap s
+# #r# is redraw#{{{
+# worskpace/Destkop switch#{{{
+map [normal] ra feedkeys ":exec bspc desktop -f ^1"<Return>
+map [normal] rr feedkeys ":exec bspc desktop -f ^2"<Return>
+map [normal] rs feedkeys ":exec bspc desktop -f ^3"<Return>
+map [normal] rt feedkeys ":exec bspc desktop -f ^4"<Return>
+map [normal] rd feedkeys ":exec bspc desktop -f ^5"<Return>
+map [normal] rh feedkeys ":exec bspc desktop -f ^6"<Return>
+map [normal] rn feedkeys ":exec bspc desktop -f ^7"<Return>
+map [normal] re feedkeys ":exec bspc desktop -f ^8"<Return>
+map [normal] ri feedkeys ":exec bspc desktop -f ^9"<Return>
+map [normal] ro feedkeys ":exec bspc desktop -f ^10"<Return>
+#}}}
+# move to destkop#{{{
+map [normal] Ra feedkeys ":exec bspc window -d ^1"<Return>
+map [normal] Rr feedkeys ":exec bspc window -d ^2"<Return>
+map [normal] Rs feedkeys ":exec bspc window -d ^3"<Return>
+map [normal] Rt feedkeys ":exec bspc window -d ^4"<Return>
+map [normal] Rd feedkeys ":exec bspc window -d ^5"<Return>
+map [normal] Rh feedkeys ":exec bspc window -d ^6"<Return>
+map [normal] Rn feedkeys ":exec bspc window -d ^7"<Return>
+map [normal] Re feedkeys ":exec bspc window -d ^8"<Return>
+map [normal] Ri feedkeys ":exec bspc window -d ^9"<Return>
+map [normal] Ro feedkeys ":exec bspc window -d ^10"<Return>
+#}}}
+
+# moving windows within desktop#{{{
+# move to biggest
+map [normal] rcm feedkeys ":exec bspc window -s biggest"<Return>
+# directions
+map [normal] rch feedkeys ":exec bspc window -s left"<Return>
+map [normal] rcn feedkeys ":exec bspc window -s down"<Return>
+map [normal] rce feedkeys ":exec bspc window -s up"<Return>
+map [normal] rci feedkeys ":exec bspc window -s right"<Return>
+# circulate
+map [normal] r. feedkeys ":exec bspc desktop -C forward"<Return>
+map [normal] r, feedkeys ":exec bspc desktop -C backward"<Return>
+#}}}
+
+#resize#{{{
+map [normal] rmh feedkeys ":exec ~/bin/resize.sh left"<Return>
+map [normal] rmn feedkeys ":exec ~/bin/resize.sh down"<Return>
+map [normal] rme feedkeys ":exec ~/bin/resize.sh up"<Return>
+map [normal] rmi feedkeys ":exec ~/bin/resize.sh right"<Return>
+#}}}
+# open urxvt
+map [normal] ru feedkeys ":exec urxvt &"<Return>
+
+# close window
+map [normal] rx feedkeys ":exec bspc window -c"<Return>
+#}}}
+
+# s becomes select/Show/settings#{{{
+#select
+map [normal] sh feedkeys ":exec bspc window -f left"<Return>
+map [normal] sn feedkeys ":exec bspc window -f down"<Return>
+map [normal] se feedkeys ":exec bspc window -f up"<Return>
+map [normal] si feedkeys ":exec bspc window -f right"<Return>
+map [normal] sl feedkeys ":exec bspc window -f last"<Return>
+
+# monocle toggle
+map [normal] st feedkeys ":exec bspc desktop -l next"<Return>
+map [normal] ss feedkeys ":exec bspc window -t sticky"<Return>
+map [normal] sf feedkeys ":exec bspc window -t fullscreen"<Return>
+
+# gap up and down
+map [normal] su feedkeys ":exec bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))"<Return>
+map [normal] sU feedkeys ":exec bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))"<Return>
+
+# preselect#{{{
+map [normal] sph feedkeys ":exec bspc window -p left"<Return>
+map [normal] spn feedkeys ":exec bspc window -p down"<Return>
+map [normal] spe feedkeys ":exec bspc window -p up"<Return>
+map [normal] spi feedkeys ":exec bspc window -p right"<Return>
+map [normal] spx feedkeys ":exec bspc window -p cancel"<Return>
+map [normal] spd feedkeys ":exec bspc desktop -c"<Return>
+#}}}
+#}}}
+
+#}}}
+# }}}
+
+# fullscreen# {{{
+# めんどくさい
+# I'll do this later..
+map [fullscreen] n scroll down
+map [fullscreen] e scroll up
+# }}}
+
+# settings
+set zoom-step 20
+set n-completion-items 20
+set incremental-search true
+
+# copy to clipboard
+set selection-clipboard clipboard
+
+# appearance
+set statusbar-bg "#1d282c"
+# default; padding when statsubar opend (:something)
+set statusbar-v-padding 2
+set statusbar-h-padding 8
+# blank space between pages
+set page-padding 2
+# default
+set adjust-open best-fit
+set show-scrollbars false
+# default; on abort (<esc>) clear higlight (like :nohl)
+set abort-clear-search true
+
+# don't make window title fullpath
+set window-title-basename true
+# don't show fullpath in status bar
+# set statusbar-basename true
+ 
+# set database sqlite
