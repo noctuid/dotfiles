@@ -1,19 +1,24 @@
 " Bindings"{{{
 " apvlv requires capitalized <>
 " navigation
+" as far as I'm aware, you can't bind differently for visual or index
 map n 3j
 map e 3k
-map i l
+
 map tk <C-d>
-map to <C->
+map to <C-u>
+map i <C-f>
+map h <C-b>
+
 map k n
 map K N
 
-map zo zO
-map zi zI
+map u zo
+map y zi
+map w zw
+map j zh
 
-map y <C-f>
-map u <C-b>
+map ; :
 
 " just o for open, and in new tab by default (don't plan on using this)
 map o t
@@ -24,7 +29,11 @@ map " '
 map 'h :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/haskell/lyah.pdf<CR>
 map 'p :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/python/thinkpython_for_python_3.pdf<CR>
 map 'c :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/c/The.C.Programming.Language.2nd.Edition.pdf<CR>
-map ; :
+map 'r :open /home/angelic_sedition/school/LCRCalicoV2.pdf<CR>
+
+" space bindings
+" gt doesn't behave like vim; 3gt is gt 3 times not go to third tab
+" map <Space>a 1gt
 
 " straight from vimrc
 " replace nnoremap <silent> with map and <cr> with <CR> and remove "silent "
@@ -95,7 +104,7 @@ map sf :!bspc window -t fullscreen<CR>
 
 " gap up and down
 map su :!bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<CR>
-map sd :!bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<CR>
+map sU :!bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<CR>
 
 " preselect"{{{
 map sph :!bspc window -p left<CR>
@@ -108,7 +117,9 @@ map spd :!bspc desktop -c<CR>
 "}}}
 
 "}}}
+
 "}}}
+
 " Settings"{{{
 
 " zoom value, default is fitwidth
@@ -123,49 +134,42 @@ set zoom=fitwidth
 set commandtimeout=2000
 
 " set if use visual mode to select and copy text
-set visualmode = yes
+set visualmode=yes
+
+set autoreload=1
 
 " set if use right and bottom scrollbar
-set scrollbar = yes
+set scrollbar=no
 
-" set if use content view
-" set content=yes
+" don't start with index
+set content=no
 
-" set weather use continuous view 
-" make sure the autoscrollpage is set to "yes" if you want to set this to yes
-" set continuous=yes
+" show bottom of one page and top of next without jut directly skipping
+set autoscrollpage=yes
+set continuous=yes
 
 " set a pad to continuous page
-" set continuouspad=2
+set continuouspad=2
 
-" set if auto scroll page when at the end or begin of one pdf page
-" set autoscrollpage=yes
-
-" set if auto scroll doc from 1st page when goto the last page
-" set autoscrolldoc=yes
+" can scroll from last page from first
+set autoscrolldoc=yes
 
 " set if disable ~/.apvlvinfo, default is no
-" set noinfo=no
+" store info about current location in documents so will load there
+set noinfo=no
 
 " set pdf object cache size
 " set pdfcache = 4
 
 " set if wrapscan text
-set wrapscan = yes
+set wrapscan=yes
 
 " set double click action
 " option value is 'word', 'line' or 'page'
-" set doubleclick = page
+set doubleclick=line
 
 " set GUI options
 " m means menu, T means toolbar
-" set guioptions = 
-
-" set if use auto reload document
-" > 0 means auto reload after some seconds. = 0 means not auto reload
-" set autoreload = 3
-
-" set if reverted pdf page
-" set reverted = no
+set guioptions=
 "}}}
 " vim: set ft=vim:
