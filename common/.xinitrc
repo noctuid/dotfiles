@@ -22,6 +22,10 @@ xset +fp ~/.fonts
 xset fp rehash
 # faster key repeat rate and shorter delay (default is 660 25); messing around with
 xset r rate 300 35
+# energy star features on
+xset +dpms
+# standby after 2 minutes; suspend after 5 minutes; never off
+xset dpms 120 300 0
 
 # run stuff in background# {{{
 # disable mouse when typing
@@ -41,22 +45,18 @@ xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
 
 # redshift; better options at this point than xflux
 redshift -c ~/.config/redshift.conf &
-# virtual modal interfaces
+# backup hotkey program
 xchainkeys &
 # auto mount usbs and such
 devmon &
 # preload &
 # }}}
- 
 sxhkd &
+
 # start window manager
-# exec bspwm
-# for reloading
-# exec wm
 case $1 in
-	# xless) termite -e "/bin/zsh -c 'xless'";;
-	# xless) termite -e "xwit -resize 1366 768";;
 	xless) termite --geometry=1366x768 --exec="zsh -c '. ~/.zshrc && xless'";;
+	hlwm) exec herbstluftwm --locked;;
 	# cinnamon) exec cinnamon;;
 	# ratpoison) exec /usr/bin/ratpoison;;
 	# vb) VirtualBox -startvm "Windows 7" -fullscreen;;
