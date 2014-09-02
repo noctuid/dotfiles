@@ -1,0 +1,413 @@
+# Sources:
+# * http://stevelosh.com/blog/2012/10/the-homely-mutt/#mutt
+# https://wiki.archlinux.org/index.php/mutt
+# http://www.bartbania.com/index.php/consolify-your-gmail-with-mutt/
+# http://lifehacker.com/5574557/how-to-use-the-fast-and-powerful-mutt-email-client-with-gmail
+
+# Paths# {{{
+# set alias_file       = ~/.mutt/alias
+set header_cache     = ~/.mutt/cache/headers
+set message_cachedir = ~/.mutt/cache/bodies
+set certificate_file = ~/.mutt/certificates
+# specify what to use to open attachments
+set mailcap_path     = ~/.mutt/mailcap
+set tmpdir           = ~/.mutt/temp
+# set signature        = ~/.mutt/sig
+set folder = "~/.mail"
+# }}}
+
+# General Settings {{{
+set mbox_type = Maildir
+set charset = "utf-8"
+# don't ask to press a key
+set wait_key = no
+# minimum time between scans; don't check (using mbsync)
+set mail_check = 0
+# don't ask for confirmation to delete mails
+set delete
+# don't ask for comfirmation to append a message to an existing mailbox
+unset confirmappend
+# quit without confirmation
+set quit
+# when set, if don't read new mail will show up as old unread; unset
+unset mark_old
+# bell on new mails
+set beep_new
+# strip headers and eval mimes when piping
+set pipe_decode
+# strip headers and eval mimes before searching
+set thorough_search
+# wrap at word end
+set smart_wrap
+# start wrapped lines with +
+set markers
+# Retain 5 lines of previous page when scrolling.
+set pager_context=5
+# status bar on top
+set status_on_top
+# show mutt version at startup
+push <show-version>
+# don't ask to move after reading
+set move = no
+# must explicitly use tag-prefix for functions to apply to tagged
+# if set, they will automatically apply to tagged
+unset auto_tag
+# }}}
+
+# Sending Mail (msmtp)# {{{
+# no -a.. will default to default set in rc; but can just change email in header and will use that email instead
+set sendmail = 'msmtp'
+
+# Composing#{{{
+# generate from header
+set use_from = yes
+# mutt will pass address in from header (if envelope_from_address is unset)
+# to $sendmail using the -f switch; not useful if -f switch already set to something; previously called envelope_from
+set use_envelope_from
+# reply to Reply to: field
+set reply_to
+# reply as whomever it was to; overrides from value
+set reverse_name
+# don't ask for cc before opening vim (default)
+set askcc = no
+
+# Use vim as editor; start on line 9; enable spelling
+set editor="vim \"+set spell\" +/^$/ +9"
+# allow editing of headers
+set edit_headers
+
+# Contacts with Abook
+set query_command= "abook --mutt-query '%s'"
+macro index,pager  a "<pipe-message>abook --add-email-quiet<return>" "Add this sender to Abook"
+# tab completion for adresses
+bind editor        <Tab> complete-query
+# }}}
+
+# don't put sent messages in sent folder (gmail does)
+unset record
+# don't save copies of outgoing messages
+unset copy
+# very encryption
+set ssl_force_tls = yes
+# wait for mail to send before regaining control
+set sendmail_wait = 0
+# }}}
+
+# Accounts# {{{
+# https://wiki.archlinux.org/index.php/mutt#Multiple_accounts
+## ACCOUNT1
+source "~/.muttnoctrc"
+# Here we use the $folder variable that has just been set in the sourced file.
+# We must set it right now otherwise the 'folder' variable will change in the next sourced file.
+folder-hook "~/.mail/nocturnalartifice" 'source ~/.muttnoctrc'
+
+## ACCOUNT2
+# source "~/.muttschoolrc"
+folder-hook "~/.mail/school" 'source ~/.muttschoolrc'
+# }}}
+
+# will show in sidebar
+# specifies folders that can recieve mail and will be checked for new messages
+mailboxes "+nocturnalartifice/Inbox" "+nocturnalartifice/[Gmail]/.Starred" "+nocturnalartifice/[Gmail]/.Sent Mail" "+nocturnalartifice/[Gmail]/.All Mail" "+nocturnalartifice/[Gmail]/.Trash"
+# Appearance {{{
+source ~/.mutt/colors.muttrc
+# Sidebar Settings# {{{
+# not currently using sidebar patch
+# set sidebar_delim=│
+# set sidebar_visible = yes
+# set sidebar_width   = 34
+# color sidebar_new color221 color233
+# }}}
+# Status Bar# {{{
+set status_chars  = " *%A"
+set status_format = "───[ Folder: %f ]───[%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]───%>─%?p?( %p postponed )?───"
+# }}}
+# Header Options # {{{
+ignore *
+# show only these headers
+unignore from: to: cc: date: subject:
+unhdr_order *
+# in this order
+hdr_order from: to: cc: date: subject:
+# }}}
+# Index View Options# {{{
+# show number intead of "feb"
+set date_format = "%m/%d/%y"
+#https://heipei.net/2009/09/10/mutt-threading-like-a-pro/
+#[flags] (will show how many folded if folded) date, from, (file size) subject
+set index_format = "[%Z] %?M?+&?%2M %D  %-20.20F (%4c) %s"
+# like gmail
+set sort = threads
+# group trheads by "in reply to:" and references and don't group if just have same subject
+set strict_threads
+# newest messages at top
+set sort_aux = reverse-last-date-received
+set sort_browser="reverse-date"
+# don't collapse a thread if it has unread messages
+unset collapse_unread
+# jump to next unread when uncollapsing a thread
+set uncollapse_jump
+# thread based on regex
+set sort_re
+# regex used to recognize replies when threading
+set reply_regexp = "^(([Rr][Ee]?(\[[0-9]+\])?: *)?(\[[^]]+\] *)?)*"
+# }}}
+# Pager View Options# {{{
+# number of index lines to show when in message
+set pager_index_lines = 4
+set pager_context = 3
+# go to next message with <next-page> if at end of a message
+unset pager_stop
+set menu_scroll
+# blank lines to bottom of screen padded with tilde ~
+set tilde
+# regex to detect quoted
+set quote_regexp = "^( {0,4}[>|:#%]| {0,4}[a-z0-9]+[>|]+)+"
+# order of preference used by mutt to determine which part of a multipart/alternative body to display
+alternative_order text/plain text/enriched text/html
+# automatically convert to plain text when viewing
+auto_view text/html
+# }}}
+# Compose View Options# {{{
+# put -- \n before sig
+set sig_dashes
+# skip compose when replying
+set fast_reply
+# save attachments on outgoing along with the body
+set fcc_attach
+# when set, forwarded message will be sent as separate; unset will include in main body
+unset mime_forward
+# controls decoding to plain text when above unset
+set forward_decode
+# include message in forwards; with mime_forward unset, will be quoted with indent_sring
+set forward_quote
+# format of subject when forwarding
+set forward_format = "Fwd: %s"
+# format of quoting header; before message included in a reply
+set attribution = "On %d, %n wrote:"
+# include message replying to in replies
+set include
+# }}}
+# }}}
+
+# Bindings# {{{
+# c to compose; recall postponed or postpone (in compose)
+# P jump to parent thread: parent-message
+# R group-reply
+# T tag messages matching a pattern; tag-pattern
+# V show-version
+# v view attachment
+# w set and W clear-flag
+# d delete-message (archive)
+# f forward-message
+# b bounce-message
+# l limit (filter)
+
+# Valid  maps are: generic, alias, attach, browser, editor, index, compose, pager, pgp, postpone, mix
+
+# macro index,pager A "<save-message>=$mbox<enter>" "Archive Message"
+# require trash patch
+# macro index,pager y "<enter-command>unset trash\n <delete-message>" "Gmail archive message"
+# macro index,pager d "<enter-command>set trash=\""\n <delete-message>" "Gmail delete message"
+
+# Pager Key Bindings# {{{
+bind pager gg top
+bind pager G  bottom
+bind pager e  previous-line
+bind pager n  next-line
+bind pager <esc> exit
+bind pager h exit
+bind pager i next-undeleted
+bind pager to half-up
+bind pager tk half-down
+bind index ty next-unread-mailbox
+# hide and show quoted parts in message
+bind pager tq toggle-quoted
+# trigger termite link hinting
+macro pager tf "<shell-escape>~/bin/link_hint.sh &<enter>"
+# }}}
+# Postpone/ compose offline# {{{
+# p instead of y
+bind compose p postpone-message
+# recall drafts
+bind index p recall-message
+# }}}
+# Tagging# {{{
+#Select Conversation
+bind generic x tag-entry
+bind index x tag-thread
+bind pager x tag-message
+# }}}
+# Index# {{{
+# quit without saving changes
+bind index Q exit
+# toggle whether changes to the mailbox will be written on exit
+# bind index % noop
+# (un)archive all messages in thread
+bind index D delete-thread
+bind index U undelete-thread
+# mark current thread as read
+bind index tr read-thread
+# toggle thread
+bind index <space> collapse-thread
+# Saner copy/move dialogs
+macro index C "<copy-message>?<toggle-mailboxes>" "copy a message to a mailbox"
+macro index M "<save-message>?<toggle-mailboxes>" "move a message to a mailbox"
+# save changes to mailbox (i.e. deleted messages; unread/read messages); also tab
+# bind index <tab> sync-mailbox
+bind index ts sync-mailbox
+# navigation
+bind index gg first-entry
+bind index G last-entry
+# colemak
+bind index,query,browser,attach n next-entry
+bind index,query,browser,attach e previous-entry
+bind index tn next-thread
+bind index te previous-thread
+# bind index N next-subthread
+# bind index E previous-subthread
+bind index \e noop
+# previously display headers
+bind index h display-toggle-weed
+bind index i display-message
+
+# notmuch search; switch back to mutt-kz?
+# macro index t/ \
+# "<enter-command>set my_old_pipe_decode=\$pipe_decode my_old_wait_key=\$wait_key nopipe_decode nowait_key<enter>\
+# <shell-escape>notmuch-mutt -r --prompt search<enter>\
+# <change-folder-readonly>`echo ${XDG_CACHE_HOME:-$HOME/.cache}/notmuch/mutt/results`<enter>\
+# <enter-command>set pipe_decode=\$my_old_pipe_decode wait_key=\$my_old_wait_key<enter>" \
+    # "notmuch: search mail"
+
+# Sync email # add reindex with notmuch
+macro index o "<shell-escape>mbsync -q -a nocturnal<enter>" "download mail"
+macro index O "<shell-escape>mbsync -c ~/.school_mbsyncrc -a school<enter>" "download mail"
+
+# limiting (default l)
+macro index L "<limit>all\n" "show all messages (undo limit)"
+# tag by pattern
+bind index tl tag-pattern
+# option to sort by date, from, etc.
+bind index X sort-mailbox
+
+bind index \; enter-command
+# apply next function to tagged messages
+bind index \: tag-prefix
+
+# }}}
+# Index and Pager# {{{
+# compose a new message
+bind index,pager c mail
+# reply
+bind index,pager m reply
+bind index,pager R group-reply
+bind index,pager y next-unread
+bind index,pager Y previous-unread
+
+# equivalent to gmail star; toggle important flag
+bind index,pager S flag-message
+
+bind pager,index k search-next
+bind pager,index K search-opposite
+# }}}
+# Editor# {{{
+# already bound above
+# bind editor <Tab> complete-query
+# bind editor ^T complete
+
+# god dammit let me exit line editor; first enter is necessary or will just type out "<shell-escape>.." into the editor as a header, search term, etc.
+# mutt is gay and doesn't offer a binding for this and a macro for control g with just type out ^G
+# macro editor \e "<enter><shell-escape>xdotool key control+g<enter>"
+macro editor \e "<enter><shell-escape>xsendkey Control+g<enter>"
+
+# <c-w>
+bind editor ¸ kill-word
+bind editor <space> noop
+# }}}
+# Attach# {{{
+bind attach s save-entry
+# View attachments properly.
+bind attach <return> view-mailcap
+# }}}
+# }}}
+
+# Ctrl-R to mark all as read
+# macro index \Cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "mark all messages as read"
+# Sidebar Navigation {{{
+# bind index,pager tn   sidebar-next
+# bind index,pager <space> sidebar-next
+# bind index,pager te     sidebar-prev
+# bind index,pager ti  sidebar-open
+# }}}
+
+# wm experimentation# {{{
+# straight from vimrc; change " to #; nnoremap <silent> to macro index; :silent to "; <cr> to <return>"
+# tmux experimentation#{{{
+# #r# is redraw#{{{
+# window switching#{{{
+macro index ra "!tmux select-window -t 1<return>"
+macro index rr "!tmux select-window -t 2<return>"
+macro index rs "!tmux select-window -t 3<return>"
+macro index rt "!tmux select-window -t 4<return>"
+macro index rd "!tmux select-window -t 5<return>"
+macro index rh "!tmux select-window -t 6<return>"
+macro index rn "!tmux select-window -t 7<return>"
+macro index re "!tmux select-window -t 8<return>"
+macro index ri "!tmux select-window -t 9<return>"
+macro index ro "!tmux select-window -t 10<return>"
+#}}}
+# resize panes#{{{
+macro index rmh "!tmux resize-pane -L 10<return>"
+macro index rmn "!tmux resize-pane -D 10<return>"
+macro index rme "!tmux resize-pane -U 10<return>"
+macro index rmi "!tmux resize-pane -R 10<return>"
+#}}}
+# circulate
+# previous
+macro index r, "!tmux swap-pane -U<return>"
+# next
+macro index r. "!tmux swap-pane -D<return>"
+
+# new session
+macro index r_ "!tmux new-session<return>"
+
+# new window
+macro index rc "!tmux new-window<return>"
+# kill pane
+macro index rx "!tmux kill-pane<return>"
+# last window
+macro index rl "!tmux last-window<return>"
+# split windows
+macro index r/ "!tmux split-window -h<return>"
+macro index r- "!tmux split-window<return>"
+
+# break pane
+macro index r! "!tmux break-pane<return>"
+#}}}
+
+# #s# is select#{{{
+# panes#{{{
+# directions
+macro index sh "!tmux select-pane -L<return>"
+macro index sn "!tmux select-pane -D<return>"
+macro index se "!tmux select-pane -U<return>"
+macro index si "!tmux select-pane -R<return>"
+# last
+macro index sl "!tmux select-pane -l<return>"
+# select layout
+macro index sv "!tmux select-layout main-vertical<return>"
+
+# toggle #monocle# (zoom)
+macro index st "!tmux resize-pane -Z<return>"
+# bspwm monocle
+macro index sm "!bspc desktop -l monocle && bspc window -t floating<return>"
+# fullscreen
+macro index sf "!bspc window -t fullscreen<return>"
+
+#}}}
+
+# select session
+macro index ss "!tmux choose-client<return>"
+#}}}
+#}}}
+# }}}
