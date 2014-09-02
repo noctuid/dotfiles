@@ -175,8 +175,14 @@ mempercent() {
 }
 #}}}
 
+mail_count()
+{
+	# unread/total in inbox
+	echo "$(find ~/.mail/nocturnalartifice/Inbox/new -type f | wc -l)/$(find ~/.mail/nocturnalartifice/Inbox/cur -type f | wc -l)"
+}
+
 while true; do
-	echo "S" "%{F$other}⮃ $(mempercent)%% RAM %{F$C_Z}⮃ $(panel_volume) %{F$C_3}⮃ $(panel_brightness) "$(panel_battery)"%{F$better_purple} ⮃ "$(panel_clock) > "$PANEL_FIFO"
+	echo "S" "%{F$other}⮃ $(mempercent)%% RAM %{F$C_Z}⮃ $(panel_volume) %{F$C_3}⮃ $(panel_brightness) "$(panel_battery)"%{F$better_purple} ⮃ "$(panel_clock) %{F$C_7}⮃ $(mail_count) > "$PANEL_FIFO"
         sleep 0.7s
 
 done &
@@ -186,7 +192,7 @@ case "$flavor" in
 		# change to bar-aint-recursive since using git version
 		# -b to put at bottom
 		# use uushi font
-		cat "$PANEL_FIFO" | panel_bar | bar-aint-recursive -f "-benis-uushi-medium-r-normal--11-90-75-75-p-58-iso10646-1" x$PANEL_HEIGHT -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" &
+		cat "$PANEL_FIFO" | panel_bar | bar-aint-recursive -f "*-stlarch-medium-r-*-*-10-*-*-*-*-*-*-*,-benis-uushi-medium-r-normal--11-90-75-75-p-58-iso10646-1" x$PANEL_HEIGHT -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" &
 		;;
 	dzen2)
 		FONT_FAMILY='DejaVu Sans'
