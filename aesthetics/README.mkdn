@@ -13,6 +13,11 @@ My homepage (modified from [gokoururi's homepage](https://github.com/gokoururi/h
 
 Not that useful, but it looks nice. The only thing I've done is added an extra column with blue coloring, changed the links, changed the favicon, added a bunch of renders to the `mascots` folder, and added an extra 'i', a hyphen, and an actual ellpsis character…
 
+Current tmux statusline:
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/newtmuxline.png "tmuxline")
+
+See `slimlock/` for my slimlock theme (I'm just using slim lock; no display manager).
+
 Older:
 The tmux statusline was generated with tmuxline and then heavily modified. I've stopped using tmux-powerline and just taken parts of the segments I like (notably the git staged and git modified parts on the left).
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/tmux_statusline.png "SCREENSHOT")

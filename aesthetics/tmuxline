@@ -10,7 +10,7 @@ setw -g window-status-bg 'colour234'
 
 set -g status-left "#[fg=colour232,bg=colour239,nobold,nounderscore,noitalics] #S:#I.#P|#[fg=colour31,italics]#h#[fg=colour232,noitalics]|#(~/bin/tmux/git_staged.sh) #(~/bin/tmux/git_modified.sh) #[fg=colour232,bg=colour236]⮀"
 
-set -g status-right "#[fg=colour232,bg=colour236]⮂#[fg=colour232,bg=colour239] ⮕ #(~/bin/tmux/current_song.sh) |⯆ #(~/bin/tmux/ram.sh)%%|⮠ #(acpi --battery | awk '{print $4}' | sed 's/,//')|#(date +'%m.%d.%y%l:%M%P')"
+set -g status-right "#[fg=colour232,bg=colour236]⮂#[fg=colour232,bg=colour239] ⮕ #(~/bin/tmux/current_song.sh) |⯆ #(~/bin/tmux/ram.sh)%%|⮠ #(acpi --battery | awk '{print $4}' | sed 's/,//')|#(date +'%m.%d.%y|%l:%M%P')"
 
 setw -g window-status-format '#[fg=colour232,bg=colour238] #I #W '
 setw -g window-status-current-format '#[fg=colour232,bg=colour31] #I #W '
