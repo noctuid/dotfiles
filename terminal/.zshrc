@@ -727,6 +727,30 @@ alias fixhwclock='rldtime && hwclock --systohc'
 
 alias rldsxhkd='pkill -USR1 -x sxhkd'
 
+# rld bspwm empty desktop bindings
+rldemptyb() {
+	# for all desktops, setup home row navigation bindings on empty desktops
+	bspc control --subscribe | awk -F ':' '$2 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$4 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$5 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$6 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$7 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$8 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$9 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	bspc control --subscribe | awk -F ':' '$10 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
+	# revert as soon as desktop is occupied
+	bspc control --subscribe | awk -F ':' '$2 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$3 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$4 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$5 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$6 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$7 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$8 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$9 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+	bspc control --subscribe | awk -F ':' '$10 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
+}
+
 #}}}
 #===============
 # General/Random {{{
