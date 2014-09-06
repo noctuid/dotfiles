@@ -50,8 +50,6 @@ redshift -c ~/.config/redshift.conf &
 xchainkeys &
 # auto mount usbs and such
 devmon &
-# the other preload!
-preload &
 sxhkd &
 
 # start window manager
