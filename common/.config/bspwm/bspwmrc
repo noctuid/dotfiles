@@ -26,7 +26,8 @@ bspc config border_width        2
 bspc config window_gap          8
 # https://bbs.archlinux.org/viewtopic.php?id=149444&p=38
 bspc config normal_frame_opacity 0.0
-bspc config focused_frame_opacity 0.05
+bspc config remove_disabled_monitors true
+bspc config remove_unplugged_monitors true
 
 # padding for bar (export PANEL_HEIGHT instead)
 # bspc config bottom_padding 20 
