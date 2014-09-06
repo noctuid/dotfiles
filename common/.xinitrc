@@ -24,10 +24,11 @@ xset fp rehash
 xset r rate 300 35
 # energy star features on
 xset +dpms
-# standby after 2 minutes; suspend after 5 minutes; never off
-xset dpms 120 300 0
+# standby suspend and off; no difference for lcds apparently; blank screen after 5 minutes of inactivity
+xset dpms 0 0 300
+# sleep after 20 minutes activity
+xautolock -time 20 -locker "pm-suspend" -detectsleep &
 
-# run stuff in background# {{{
 # disable mouse when typing
 # i flag will disable for one second after last keypress; k ignore modifier keys (i.e. control left click) ; t will only disable scrolling and clicking
 syndaemon -k -i 1 -d &
@@ -49,8 +50,8 @@ redshift -c ~/.config/redshift.conf &
 xchainkeys &
 # auto mount usbs and such
 devmon &
-# preload &
-# }}}
+# the other preload!
+preload &
 sxhkd &
 
 # start window manager
