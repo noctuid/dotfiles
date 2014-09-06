@@ -17,8 +17,6 @@ export PATH=$PATH:~/bin
 
 export BROWSER="firefox"
 
-# For gnome keyring
-export GNOME_KEYRING_CONTROL GNOME_KEYRING_PID GPG_AGENT_INFO SSH_AUTH_SOCK
 #}}}
 
 # If not running interactively, don't do anything

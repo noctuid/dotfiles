@@ -66,8 +66,6 @@ export PANEL_HEIGHT=20
 # export BSPWM_HISTORY=/tmp/bspwm.history
 # export BSPWM_STACK=/tmp/bspwm.stack
 
-# For gnome keyring; using gpg for passwords for getting/sending mail
-export GNOME_KEYRING_CONTROL GNOME_KEYRING_PID GPG_AGENT_INFO SSH_AUTH_SOCK
 
 # }}}
 #==============================
