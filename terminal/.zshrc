@@ -932,6 +932,13 @@ eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
 alias v='f -e vim'
 alias o='a -e xdg-open'
 
+# copy jump paste instead of cp ./.. /fullpath
+# http://youtu.be/qTl7vzL_vDU?list=UUkf4VIqu3Acnfzuk3kRIFwA
+# I had no idea this existed
+alias c="xclip-copyfile"
+alias p="xclip-pastefile"
+alias m="xclip-cutfile"
+
 # copying dir with shell command
 # (need to install xclip or alternatively use xsel)
 # copy working directory to clipboard
