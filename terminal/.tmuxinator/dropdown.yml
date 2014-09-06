@@ -1,15 +1,23 @@
 name: dropdown
 root: ~/
  
-# pre: sudo bitlbee -D
-# mutt
+# pre: mpd ~/.mpd/mpd.conf && mpdscribble
 windows:
   - music:
-    - mu
+    - mpd ~/.mpd/mpd.conf && mpdscribble && vimus
   - chat:
     - weechat
   - main:
         layout: even-horizontal
         panes:
-        - ranger
-        - # empty
+        - mountsoma && ranger --cmd="tab_new ~/dotfiles" --cmd="tab_new ~/Move" --cmd="tab_new ~/ag-sys/Else/everything" --cmd="tab_new /media" --cmd="tab_move 0 1"
+        - tmux select-window -t 3 && tmux select-pane -t 1
+  - mail:
+    - mutt
+  - vim:
+      - vim --servername termgeneral
+  # - net:
+  #       layout: even-horizontal
+  #       panes:
+  #       - w3m
+  #       - # empty
