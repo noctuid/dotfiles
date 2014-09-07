@@ -16,7 +16,7 @@ flavor=${1:-bar}
 mkfifo "$PANEL_FIFO"
 
 # bspc config top_padding $PANEL_HEIGHT
-bspc config top_padding 16
+bspc config top_padding 14
 
 bspc control --subscribe > "$PANEL_FIFO" &
 xtitle -sf 'T%s' > "$PANEL_FIFO" &
@@ -177,7 +177,7 @@ mempercent() {
 
 mail_count()
 {
-	# unread/total in inbox
+	# unread/just in inbox
 	echo "$(find ~/.mail/nocturnalartifice/Inbox/new -type f | wc -l)/$(find ~/.mail/nocturnalartifice/Inbox/cur -type f | wc -l)"
 }
 
