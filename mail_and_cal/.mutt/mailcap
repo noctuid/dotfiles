@@ -1,7 +1,9 @@
 # for opening attachments
 # MS Word documents
 # don't send me any of these
-application/msword; lowriter %s "-"
+application/msword; antiword %s; copiousoutput
+# application/msword; lowriter %s "-"
+
 
 # Images
 image/jpg; sxiv %s jpg
