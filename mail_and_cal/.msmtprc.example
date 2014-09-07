@@ -1,0 +1,32 @@
+# https://wiki.archlinux.org/index.php/Msmtp
+# Accounts will inherit settings from this section
+defaults
+auth             on
+tls              on
+tls_trust_file   /usr/share/ca-certificates/mozilla/Thawte_Premium_Server_CA.crt
+# logfile ~/.msmtp.los
+
+# A first gmail address
+account        school
+host           smtp.gmail.com
+port           587
+protocol       smtp
+from           someemail@gmail.com
+user           someemail@gmail.com
+passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | grep school | awk '{print $2}'"
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+
+# an email setup sending for with gmail in accounts/import (e.g. .edu that forwards without dedicated mailbox)
+# may have to setup for tls/ port 587
+account anotheremail
+host smtp.gmail.com
+port 587
+protocol smtp
+from someaddress@somewhere.edu
+user sameemailasabove@gmail.com
+passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | grep school | awk '{print $2}'"
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+
+# Set a default account
+# don't set; so won't accidentally send with wrong account; will fail
+# account default : none
