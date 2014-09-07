@@ -224,7 +224,7 @@ bind index ty next-unread-mailbox
 # hide and show quoted parts in message
 bind pager tq toggle-quoted
 # trigger termite link hinting
-macro pager tf "<shell-escape>~/bin/link_hint.sh &<enter>"
+macro pager f "<shell-escape>~/bin/link_hint.sh &<enter>"
 # }}}
 # Postpone/ compose offline# {{{
 # p instead of y
@@ -300,6 +300,7 @@ bind index \: tag-prefix
 bind index,pager c mail
 # reply
 bind index,pager m reply
+bind index,pager tf forward-message
 bind index,pager R group-reply
 bind index,pager y next-unread
 bind index,pager Y previous-unread
