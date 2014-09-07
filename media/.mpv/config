@@ -3,8 +3,11 @@
 
 # My Changes {{{
 # screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%f_-_%tH:%tM:%tS
-# F remove extension
-screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
+# F title with removed extension
+# screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
+
+# for long filenames with characters that give "error writing screenshot":
+screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS
 screenshot-format=png
 screenshot-png-compression=5
 sub-scale=1
@@ -26,7 +29,7 @@ channels=5.1
 # sub-scale=3
 
 # set the window title using the media filename (see Property Expansion section of mpv(1))
-title="${filename}"
+title="mpv - ${filename}"
 
 # add black borders so the movies have the same aspect ratio of the monitor
 # for wide screen monitors
