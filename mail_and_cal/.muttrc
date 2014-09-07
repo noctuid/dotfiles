@@ -345,69 +345,69 @@ bind attach <return> view-mailcap
 # tmux experimentation#{{{
 # #r# is redraw#{{{
 # window switching#{{{
-macro index ra "!tmux select-window -t 1<return>"
-macro index rr "!tmux select-window -t 2<return>"
-macro index rs "!tmux select-window -t 3<return>"
-macro index rt "!tmux select-window -t 4<return>"
-macro index rd "!tmux select-window -t 5<return>"
-macro index rh "!tmux select-window -t 6<return>"
-macro index rn "!tmux select-window -t 7<return>"
-macro index re "!tmux select-window -t 8<return>"
-macro index ri "!tmux select-window -t 9<return>"
-macro index ro "!tmux select-window -t 10<return>"
+macro index,pager ra "!tmux select-window -t 1<return>"
+macro index,pager rr "!tmux select-window -t 2<return>"
+macro index,pager rs "!tmux select-window -t 3<return>"
+macro index,pager rt "!tmux select-window -t 4<return>"
+macro index,pager rd "!tmux select-window -t 5<return>"
+macro index,pager rh "!tmux select-window -t 6<return>"
+macro index,pager rn "!tmux select-window -t 7<return>"
+macro index,pager re "!tmux select-window -t 8<return>"
+macro index,pager ri "!tmux select-window -t 9<return>"
+macro index,pager ro "!tmux select-window -t 10<return>"
 #}}}
 # resize panes#{{{
-macro index rmh "!tmux resize-pane -L 10<return>"
-macro index rmn "!tmux resize-pane -D 10<return>"
-macro index rme "!tmux resize-pane -U 10<return>"
-macro index rmi "!tmux resize-pane -R 10<return>"
+macro index,pager rmh "!tmux resize-pane -L 10<return>"
+macro index,pager rmn "!tmux resize-pane -D 10<return>"
+macro index,pager rme "!tmux resize-pane -U 10<return>"
+macro index,pager rmi "!tmux resize-pane -R 10<return>"
 #}}}
 # circulate
 # previous
-macro index r, "!tmux swap-pane -U<return>"
+macro index,pager r, "!tmux swap-pane -U<return>"
 # next
-macro index r. "!tmux swap-pane -D<return>"
+macro index,pager r. "!tmux swap-pane -D<return>"
 
 # new session
-macro index r_ "!tmux new-session<return>"
+macro index,pager r_ "!tmux new-session<return>"
 
 # new window
-macro index rc "!tmux new-window<return>"
+macro index,pager rc "!tmux new-window<return>"
 # kill pane
-macro index rx "!tmux kill-pane<return>"
+macro index,pager rx "!tmux kill-pane<return>"
 # last window
-macro index rl "!tmux last-window<return>"
+macro index,pager rl "!tmux last-window<return>"
 # split windows
-macro index r/ "!tmux split-window -h<return>"
-macro index r- "!tmux split-window<return>"
+macro index,pager r/ "!tmux split-window -h<return>"
+macro index,pager r- "!tmux split-window<return>"
 
 # break pane
-macro index r! "!tmux break-pane<return>"
+macro index,pager r! "!tmux break-pane<return>"
 #}}}
 
 # #s# is select#{{{
 # panes#{{{
 # directions
-macro index sh "!tmux select-pane -L<return>"
-macro index sn "!tmux select-pane -D<return>"
-macro index se "!tmux select-pane -U<return>"
-macro index si "!tmux select-pane -R<return>"
+macro index,pager sh "!tmux select-pane -L<return>"
+macro index,pager sn "!tmux select-pane -D<return>"
+macro index,pager se "!tmux select-pane -U<return>"
+macro index,pager si "!tmux select-pane -R<return>"
 # last
-macro index sl "!tmux select-pane -l<return>"
+macro index,pager sl "!tmux select-pane -l<return>"
 # select layout
-macro index sv "!tmux select-layout main-vertical<return>"
+macro index,pager sv "!tmux select-layout main-vertical<return>"
 
 # toggle #monocle# (zoom)
-macro index st "!tmux resize-pane -Z<return>"
+macro index,pager st "!tmux resize-pane -Z<return>"
 # bspwm monocle
-macro index sm "!bspc desktop -l monocle && bspc window -t floating<return>"
+macro index,pager sm "!bspc desktop -l monocle && bspc window -t floating<return>"
 # fullscreen
-macro index sf "!bspc window -t fullscreen<return>"
+macro index,pager sf "!bspc window -t fullscreen<return>"
 
 #}}}
 
 # select session
-macro index ss "!tmux choose-client<return>"
+macro index,pager ss "!tmux choose-client<return>"
 #}}}
 #}}}
 # }}}
