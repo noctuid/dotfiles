@@ -48,6 +48,9 @@ elif [ "$1" == "r_" ]; then
 # new window
 elif [ "$1" == "rc" ]; then
 	tmux new-window && tmux select-window -l && xdotool key Escape && xdotool key control+d && tmux select-window -l
+# kill pane
+elif [ "$1" == "rx" ]; then
+	tmux kill-pane
 # last window
 elif [ "$1" == "rl" ]; then
 	tmux select-window -l && tmux select-window -l && xdotool key Escape && xdotool key control+d && tmux select-window -l
