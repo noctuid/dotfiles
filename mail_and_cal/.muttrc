@@ -109,18 +109,20 @@ folder-hook "~/.mail/nocturnalartifice" 'source ~/.muttnoctrc'
 folder-hook "~/.mail/school" 'source ~/.muttschoolrc'
 # }}}
 
-# will show in sidebar; not sure if really necessary.. not using for other account
-# specifies folders that can recieve mail and will be checked for new messages
-mailboxes "+nocturnalartifice/Inbox" "+nocturnalartifice/[Gmail]/.Starred" "+nocturnalartifice/[Gmail]/.Sent Mail" "+nocturnalartifice/[Gmail]/.All Mail" "+nocturnalartifice/[Gmail]/.Trash"
-
 # Appearance {{{
 source ~/.mutt/colors.muttrc
 # Sidebar Settings# {{{
-# not currently using sidebar patch
-# set sidebar_delim=│
-# set sidebar_visible = yes
-# set sidebar_width   = 34
-# color sidebar_new color221 color233
+macro index tb "<enter-command>toggle sidebar_visible<enter><refresh>"
+macro pager tb "<enter-command>toggle sidebar_visible<enter><redraw-screen>"
+# set sidebar_format = 
+# only show last part of path
+set sidebar_shortpath = yes
+set sidebar_delim = ' │'
+# indent subfolders
+set sidebar_folderindent = no
+set sidebar_visible = yes
+set sidebar_width   = 34
+color sidebar_new color221 color233
 # }}}
 # Status Bar# {{{
 set status_chars  = " *%A"
@@ -335,12 +337,6 @@ bind attach <return> view-mailcap
 
 # Ctrl-R to mark all as read
 # macro index \Cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "mark all messages as read"
-# Sidebar Navigation {{{
-# bind index,pager tn   sidebar-next
-# bind index,pager <space> sidebar-next
-# bind index,pager te     sidebar-prev
-# bind index,pager ti  sidebar-open
-# }}}
 
 # wm experimentation# {{{
 # straight from vimrc; change " to #; nnoremap <silent> to macro index; :silent to "; <cr> to <return>"
@@ -412,4 +408,12 @@ macro index,pager sf "!bspc window -t fullscreen<return>"
 macro index,pager ss "!tmux choose-client<return>"
 #}}}
 #}}}
+# }}}
+
+# not in use
+# Sidebar Navigation {{{
+# bind index,pager tn   sidebar-next
+# bind index,pager <space> sidebar-next
+# bind index,pager te     sidebar-prev
+# bind index,pager ti  sidebar-open
 # }}}

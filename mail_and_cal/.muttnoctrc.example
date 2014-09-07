@@ -18,6 +18,10 @@ set mbox = "nocturnalartifice/[Gmail]/.All Mail"
 # tells mutt what messages are from you and addressed to youth
 alternates myalternate email addresses
 
+# for showing in sidebar
+# specifies folders that can recieve mail and will be checked for new messages
+mailboxes "+nocturnalartifice/Inbox" "+nocturnalartifice/[Gmail]/.Starred" "+nocturnalartifice/[Gmail]/.Sent Mail" "+nocturnalartifice/[Gmail]/.All Mail" "+nocturnalartifice/[Gmail]/.Trash"
+
 # actually move to trash
 macro index,pager td "<save-message>=nocturnalartifice/[Gmail]/.Trash<enter>" "Trash Message"
 
