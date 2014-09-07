@@ -1,0 +1,22 @@
+# for opening attachments
+# MS Word documents
+# don't send me any of these
+application/msword; lowriter %s "-"
+
+# Images
+image/jpg; sxiv %s jpg
+image/jpeg; sxiv %s jpg
+image/pjpeg; sxiv %s jpg
+image/png; sxiv %s png
+image/gif; sxiv %s gif
+
+# PDFs
+application/pdf; apvlv %s pdf
+# application/pdf; zathura %s pdf
+
+# HTML
+text/html; firefox %s html
+
+# Unidentified files
+# http://linsec.ca/Using_mutt_on_OS_X#mailcap
+application/octet-stream; ~/.mutt/view_attachment.sh %s "-"
