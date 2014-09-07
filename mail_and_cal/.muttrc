@@ -19,6 +19,8 @@ set folder = "~/.mail"
 # General Settings {{{
 set mbox_type = Maildir
 set charset = "utf-8"
+# don't pause when displaying messages after expunging or changing folders
+set sleep_time = 0
 # don't ask to press a key
 set wait_key = no
 # minimum time between scans; don't check (using mbsync)
@@ -61,8 +63,9 @@ set sendmail = 'msmtp'
 # Composing#{{{
 # generate from header
 set use_from = yes
-# mutt will pass address in from header (if envelope_from_address is unset)
+# mutt will pass address in from header (if envelope_from_address is unset and use_envelope_from is set)
 # to $sendmail using the -f switch; not useful if -f switch already set to something; previously called envelope_from
+unset envelope_from_address
 set use_envelope_from
 # reply to Reply to: field
 set reply_to
@@ -106,9 +109,10 @@ folder-hook "~/.mail/nocturnalartifice" 'source ~/.muttnoctrc'
 folder-hook "~/.mail/school" 'source ~/.muttschoolrc'
 # }}}
 
-# will show in sidebar
+# will show in sidebar; not sure if really necessary.. not using for other account
 # specifies folders that can recieve mail and will be checked for new messages
 mailboxes "+nocturnalartifice/Inbox" "+nocturnalartifice/[Gmail]/.Starred" "+nocturnalartifice/[Gmail]/.Sent Mail" "+nocturnalartifice/[Gmail]/.All Mail" "+nocturnalartifice/[Gmail]/.Trash"
+
 # Appearance {{{
 source ~/.mutt/colors.muttrc
 # Sidebar Settings# {{{
@@ -208,7 +212,8 @@ set include
 # macro index,pager A "<save-message>=$mbox<enter>" "Archive Message"
 # require trash patch
 # macro index,pager y "<enter-command>unset trash\n <delete-message>" "Gmail archive message"
-# macro index,pager d "<enter-command>set trash=\""\n <delete-message>" "Gmail delete message"
+# macro index,pager td "<enter-command>set trash=\""\n <delete-message>" "Gmail delete message"
+# 
 
 # Pager Key Bindings# {{{
 bind pager gg top
@@ -278,10 +283,6 @@ bind index i display-message
 # <change-folder-readonly>`echo ${XDG_CACHE_HOME:-$HOME/.cache}/notmuch/mutt/results`<enter>\
 # <enter-command>set pipe_decode=\$my_old_pipe_decode wait_key=\$my_old_wait_key<enter>" \
     # "notmuch: search mail"
-
-# Sync email # add reindex with notmuch
-macro index o "<shell-escape>mbsync -q -a nocturnal<enter>" "download mail"
-macro index O "<shell-escape>mbsync -c ~/.school_mbsyncrc -a school<enter>" "download mail"
 
 # limiting (default l)
 macro index L "<limit>all\n" "show all messages (undo limit)"
