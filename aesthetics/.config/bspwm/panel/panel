@@ -178,7 +178,7 @@ mempercent() {
 mail_count()
 {
 	# unread/just in inbox
-	echo "$(find ~/.mail/nocturnalartifice/Inbox/new -type f | wc -l)/$(find ~/.mail/nocturnalartifice/Inbox/cur -type f | wc -l)"
+	echo "$(find ~/.mail/school/Inbox/new -type f | wc -l)/$(find ~/.mail/school/Inbox/cur -type f | wc -l) | $(find ~/.mail/nocturnalartifice/Inbox/new -type f | wc -l)/$(find ~/.mail/nocturnalartifice/Inbox/cur -type f | wc -l)"
 }
 
 while true; do
