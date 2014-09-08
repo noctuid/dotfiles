@@ -88,6 +88,12 @@ super + u
 # video click
 alt + k
 	xdotool mousemove 500 300 click 1 ; xdotool mousemove 0 0
+	
+alt + c
+	xdotool mousemove 33 572 click 1
+
+alt + C
+	xdotool click 3
 
 # regain focus from flash
 alt + a
