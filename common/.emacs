@@ -363,8 +363,10 @@
 (setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
 (setq savehist-file "~/.emacs.d/tmp/savehist")
 
-
-
+;; general settings;{{{
+;; don't ask; follow symlinks to file under version control
+(setq vc-follow-symlinks "t")
+;;}}}
 
 ;; vim like folding ({{{}}}); folding.el; not in melpa
 ;; total pain, so going to do later
