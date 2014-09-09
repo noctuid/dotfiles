@@ -328,6 +328,21 @@
 (define-key evil-normal-state-map "gt" 'elscreen-next) ;next tab
 (define-key evil-normal-state-map "gT" 'elscreen-previous) ;previous tab
 
+;; after using elscreen-goto, resource the file
+(defun load-emacs-navigation () (load-file "~/.emacs.d/navigation.el"))
+;; (add-hook 'elscreen-goto-hook 'load-emacs-navigation)
+(eval-after-load "elscreen" (add-hook 'elscreen-goto-hook 'load-emacs-navigation))
+
+(define-key evil-normal-state-map (kbd "SPC a") (lambda () (interactive) (elscreen-goto 0)))
+(define-key evil-normal-state-map (kbd "SPC r") (lambda () (interactive) (elscreen-goto 1)))
+(define-key evil-normal-state-map (kbd "SPC s") (lambda () (interactive) (elscreen-goto 2)))
+(define-key evil-normal-state-map (kbd "SPC t") (lambda () (interactive) (elscreen-goto 3)))
+(define-key evil-normal-state-map (kbd "SPC d") (lambda () (interactive) (elscreen-goto 4)))
+(define-key evil-normal-state-map (kbd "SPC h") (lambda () (interactive) (elscreen-goto 5)))
+(define-key evil-normal-state-map (kbd "SPC n") (lambda () (interactive) (elscreen-goto 6)))
+(define-key evil-normal-state-map (kbd "SPC e") (lambda () (interactive) (elscreen-goto 7)))
+(define-key evil-normal-state-map (kbd "SPC i") (lambda () (interactive) (elscreen-goto 8)))
+(define-key evil-normal-state-map (kbd "SPC o") (lambda () (interactive) (elscreen-goto 9)))
 ;; kill ring
 (define-key evil-normal-state-map (kbd "SPC y") 'browse-kill-ring)
 
