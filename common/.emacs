@@ -313,14 +313,14 @@
            (set-face-foreground 'mode-line (cdr color))))))
 
 ;; more vim like tabs; http://www.emacswiki.org/emacs/Evil;;{{{
-(define-key evil-normal-state-map (kbd "\\ t") 'elscreen-create) ;create tab
+(define-key evil-normal-state-map (kbd "t t") 'elscreen-create) ;create tab
 
 ;; kill buffer; keep open window/tab
-(define-key evil-normal-state-map (kbd "\\ d") (kbd "M-x kill-buffer RET"))
+(define-key evil-normal-state-map (kbd "t d") (kbd "M-x kill-buffer RET"))
 
-(define-key evil-normal-state-map (kbd "\\ D") 'elscreen-kill) ;kill tab
+(define-key evil-normal-state-map (kbd "t D") 'elscreen-kill) ;kill tab
 ;; rename
-(define-key evil-normal-state-map (kbd "\\ r") 'elscreen-screen-nickname)
+(define-key evil-normal-state-map (kbd "t r") 'elscreen-screen-nickname)
 
 (define-key evil-normal-state-map "gt" 'elscreen-next) ;next tab
 (define-key evil-normal-state-map "gT" 'elscreen-previous) ;previous tab
@@ -331,10 +331,10 @@
 ;; bookmark based on tabs
 
 ;; buffer search
-(define-key evil-normal-state-map (kbd "\\ p") 'helm-mini)
+(define-key evil-normal-state-map (kbd "t p") 'helm-mini)
 
 ;; file search (ctrlp like)
-(define-key evil-normal-state-map (kbd "\\ P") 'helm-find-files)
+(define-key evil-normal-state-map (kbd "t P") 'helm-find-files)
 
 ;;helm mode.. show as type completion so now.. if do :help f will show functions in helm window and change as type
 (helm-mode 1)
@@ -389,7 +389,7 @@
 
 ;; keybindings (see evil-maps.el)
 ;; reload emacs config; tested and works.. I wonder if change M-x to : would work..
-(define-key evil-normal-state-map (kbd "\\ s") (kbd "M-x load-file RET ~/.emacs RET"))
+(define-key evil-normal-state-map (kbd "t s") (kbd "M-x load-file RET ~/.emacs RET"))
 
 ;; swap ; and :
 (define-key evil-normal-state-map ";" 'evil-ex)
