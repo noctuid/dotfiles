@@ -23,6 +23,7 @@
 (defvar packages-list
   '(rainbow-mode
     evil
+    flycheck
     undo-tree
     surround
     ; evil-numbers
@@ -66,6 +67,8 @@
 ;; elscreen
 (elscreen-start)
 (global-linum-mode 1)
+;; start flycheck
+(add-hook 'after-init-hook #'global-flycheck-mode)
 
 ;; terminal emacs can't access x libraries and clipboard.. wtf?
 ;; http://comments.gmane.org/gmane.emacs.vim-emulation/2019
