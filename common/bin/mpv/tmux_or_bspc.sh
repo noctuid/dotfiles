@@ -91,8 +91,7 @@ if [ "$title" == "mpv" ]; then
 		bspc window -f last
 	# monocle toggle
 	elif [ "$1" == "st" ]; then
-		bspc window -t next
-
+		bspc desktop -l next
 	elif [ "$1" == "su" ]; then
 		bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))
 	elif [ "$1" == "sU" ]; then
