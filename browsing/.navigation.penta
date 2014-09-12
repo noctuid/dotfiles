@@ -58,6 +58,110 @@ nmap -builtin <space>i 39gt
 nmap -builtin <space>o 40gt
 endif
 
+if tabs.getTab().dactylOrdinal > "40"
+nmap -builtin <space>a 41gt
+nmap -builtin <space>r 42gt
+nmap -builtin <space>s 43gt
+nmap -builtin <space>t 44gt
+nmap -builtin <space>d 45gt
+nmap -builtin <space>h 46gt
+nmap -builtin <space>n 47gt
+nmap -builtin <space>e 48gt
+nmap -builtin <space>i 49gt
+nmap -builtin <space>o 50gt
+endif
+
+if tabs.getTab().dactylOrdinal > "50"
+nmap -builtin <space>a 51gt
+nmap -builtin <space>r 52gt
+nmap -builtin <space>s 53gt
+nmap -builtin <space>t 54gt
+nmap -builtin <space>d 55gt
+nmap -builtin <space>h 56gt
+nmap -builtin <space>n 57gt
+nmap -builtin <space>e 58gt
+nmap -builtin <space>i 59gt
+nmap -builtin <space>o 60gt
+endif
+
+if tabs.getTab().dactylOrdinal > "60"
+nmap -builtin <space>a 61gt
+nmap -builtin <space>r 62gt
+nmap -builtin <space>s 63gt
+nmap -builtin <space>t 64gt
+nmap -builtin <space>d 65gt
+nmap -builtin <space>h 66gt
+nmap -builtin <space>n 67gt
+nmap -builtin <space>e 68gt
+nmap -builtin <space>i 69gt
+nmap -builtin <space>o 70gt
+endif
+
+if tabs.getTab().dactylOrdinal > "70"
+nmap -builtin <space>a 71gt
+nmap -builtin <space>r 72gt
+nmap -builtin <space>s 73gt
+nmap -builtin <space>t 74gt
+nmap -builtin <space>d 75gt
+nmap -builtin <space>h 76gt
+nmap -builtin <space>n 77gt
+nmap -builtin <space>e 78gt
+nmap -builtin <space>i 79gt
+nmap -builtin <space>o 80gt
+endif
+
+if tabs.getTab().dactylOrdinal > "80"
+nmap -builtin <space>a 81gt
+nmap -builtin <space>r 82gt
+nmap -builtin <space>s 83gt
+nmap -builtin <space>t 84gt
+nmap -builtin <space>d 85gt
+nmap -builtin <space>h 86gt
+nmap -builtin <space>n 87gt
+nmap -builtin <space>e 88gt
+nmap -builtin <space>i 89gt
+nmap -builtin <space>o 90gt
+endif
+
+if tabs.getTab().dactylOrdinal > "90"
+nmap -builtin <space>a 91gt
+nmap -builtin <space>r 92gt
+nmap -builtin <space>s 93gt
+nmap -builtin <space>t 94gt
+nmap -builtin <space>d 95gt
+nmap -builtin <space>h 96gt
+nmap -builtin <space>n 97gt
+nmap -builtin <space>e 98gt
+nmap -builtin <space>i 99gt
+nmap -builtin <space>o 100gt
+endif
+
+if tabs.getTab().dactylOrdinal > "100"
+nmap -builtin <space>a 101gt
+nmap -builtin <space>r 102gt
+nmap -builtin <space>s 103gt
+nmap -builtin <space>t 104gt
+nmap -builtin <space>d 105gt
+nmap -builtin <space>h 106gt
+nmap -builtin <space>n 107gt
+nmap -builtin <space>e 108gt
+nmap -builtin <space>i 109gt
+nmap -builtin <space>o 110gt
+endif
+
+if tabs.getTab().dactylOrdinal > "110"
+nmap -builtin <space>a 111gt
+nmap -builtin <space>r 112gt
+nmap -builtin <space>s 113gt
+nmap -builtin <space>t 114gt
+nmap -builtin <space>d 115gt
+nmap -builtin <space>h 116gt
+nmap -builtin <space>n 117gt
+nmap -builtin <space>e 118gt
+nmap -builtin <space>i 119gt
+nmap -builtin <space>o 120gt
+endif
+
 " tabgroup specific bindings:"{{{
 " works though I'm not sure if it's useful
 " js <<EOF
