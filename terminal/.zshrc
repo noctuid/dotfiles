@@ -1358,49 +1358,6 @@ snpspdata() {
 #===============
 # Other Functions# {{{
 #===============
-# my conversion function # {{{
-# [1.11.14]
-# requirements: 
-# unoconv
-# directories should not have . in the name
-
-# run and convert all rtf files to txt and moves them to folder you ran it in/graveyard in parallel folder structure
-# ifs is internal field separator.. turn into array
-# http://stackoverflow.com/questions/11393817/bash-read-lines-in-file-into-an-array
-# for removing text from string: % 
-# http://tldp.org/LDP/abs/html/string-manipulation.html
-
-# exlude graveyard from search 
-# maybe add flag for exclude
-rtf2txt() {
-	# create an array for all rtf files (recrusive)
-	IFS=$'\r\n' files=($(find . -name "*.rtf" -not -path "*/graveyard*" -not -path "*/zDissolve*"))
-	basedir=$(pwd)
-	bin="/graveyard"
-	crap="."
-	# -p creates directory and all needed ones up to it and won't fail if exists
-	# http://stackoverflow.com/questions/59838/how-to-check-if-a-directory-exists-in-a-shell-script
-	mkdir -p graveyard
-	movedir=$basedir$bin
-	for file in $files
-	do
-		# convert rtf to txt file
-		unoconv -f txt $file
-		# get the parallel location to move the rtf file to by removing filename.rtf 
-		subdir=$(echo ${file%/*.rtf})
-		finaldir=$movedir$subdir
-		# remove period at end
-		finaldir=$(echo ${finaldir//[.]/})
-		# create finaldir if doesn't exist:
-		mkdir -p $finaldir
-		# move the file to graveyard
-		mv $file $finaldir
-		# ## removes longest match from beginning 
-		filename=$(echo ${file##*/})
-		echo "Converted and moved $filename"
-	done
-}
-# }}}
 
 # from: https://github.com/z1lt0id/awesome/blob/master/.bashrc 
 # sanitize - set file/directory owner and permissions to normal values (644/755)
