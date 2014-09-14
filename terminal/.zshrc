@@ -927,7 +927,7 @@ alias zshot="scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'"
 # Directory Stuff {{{
 #===============
 # start using fasd again with tab completion
-# have a (any), s (show), d (directory), z (cd), etc
+# have a (any), s (show), removed d (directory), z (cd), etc
 eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
 alias v='f -e vim'
 alias o='a -e xdg-open'
@@ -937,7 +937,7 @@ alias o='a -e xdg-open'
 # I had no idea this existed
 alias c="xclip-copyfile"
 alias p="xclip-pastefile"
-alias m="xclip-cutfile"
+alias d="xclip-cutfile"
 
 # copying dir with shell command
 # (need to install xclip or alternatively use xsel)
