@@ -881,6 +881,14 @@ nmap F <Plug>SneakBackward
 "}}}
 
 " VimWiki (using like TabsOutliner with pentadactyl)"{{{
+" tww to go to index
+" tws select from multiple wikis
+autocmd FileType vimwiki call s:vimwiki_keys()
+function! s:vimwiki_keys()
+	nmap <buffer> i <Plug>VimwikiFollowLink
+	nmap <buffer> h <Plug>VimwikiGoBackLink
+endfunction
+
 let g:vimwiki_list = [{
     \    'path':                       '~/vimwiki/',
     \    'path_html':                  '~/vimwikihtml/',

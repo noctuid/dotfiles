@@ -4,6 +4,7 @@
 # bound in .pentadactylrc for saving of urls to vimwiki files (for easy opening and viewing in vim)
 # also bound so that when close a tab with d any corresponding urls will be removed from list (like in TO)
 
+cd ~/vimwiki
 url=$(xsel -b)
 
 if [ "$1" == "add" ]; then
@@ -31,4 +32,16 @@ elif [ "$1" == "delete" ]; then
 		# remove bak files
 		rm ~/vimwiki/*.bak
 	done
+elif [ "$1" == "open_win" ]; then
+	bspc rule -a termite -o floating=true center=true
+	termite -e "vim -c 'nnoremap q :q<cr>' index.wiki" &
 fi
+
+# empty index and add all wiki files to
+cat /dev/null > index.wiki
+for file in *.wiki
+do
+	# get rid of wiki extension
+	item=${file/\.wiki/}
+	printf '%s\n' "$item" >> index.wiki
+done

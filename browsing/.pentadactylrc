@@ -589,10 +589,10 @@ nmap -ex <leader>U fbugopen|firebug tab net
 " maybe add titles or more formatting
 
 command -nargs=* to !~/bin/to.sh <args>
-nmap -builtin <space>u <yank-location> :silent to add 
+nmap -builtin <space>u <yank-location>:silent to add 
 
 " open saved tabs wiki
-nmap -ex <space>U !~/bin/to_win.sh
+nmap -ex <space>U silent !~/bin/to.sh open_win
 
 " :tabdo to loop overtabs so to add all would do :tabdo to add
 
