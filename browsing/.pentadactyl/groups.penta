@@ -169,7 +169,7 @@ silent nmap -group chan -ex gy open http://www.4chan.org/y
 " Fakku & Friends{{{
 " passkeys (for webcomic reader) https://github.com/ameboide/webcomic_reader
 group fakku -description "Happiness" -locations fakku.net
-group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/(read)\#.*,pururin.com/view/.*,e-hentai.org/s/.*,batoto.net/read.*
+group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/(read)\#.*,pururin.com/view/.*,e-hentai.org/s/.*,bato\.to/read/.*
 group pururin -description "Purr" -locations pururin.com
 
 " only pass keys on actual image pages"{{{
@@ -191,10 +191,12 @@ silent nmap -group comic x <pass>
 silent nmap -group comic > <pass>
 " refresh
 silent nmap -group comic . <pass>
+" boomark 
+silent nmap -group comic a <pass>
 
-" silent nmap -group comic k ZI
-" silent nmap -group comic K ZO
-" silent nmap -group comic u ZO
+" zoom in and out; don't really need yank or text search since just pictures
+silent nmap -group comic k ZI
+silent nmap -group comic y ZO
 "}}}
 
 " Downloads with webcomic reader (using dta; works with any site supported by the userscript)
