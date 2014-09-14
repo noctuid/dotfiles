@@ -57,6 +57,12 @@ alt + m
 # play/pause
 alt + o
 	mpc toggle
+# next/prev
+alt + u
+	mpc prev
+alt + y
+	mpc next
+#
 # }}}
 
 # Screenshots# {{{
