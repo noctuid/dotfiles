@@ -118,8 +118,9 @@ set! extensions.dta.closedta=true
 " # QuickMarks {{{
 " #==============================
 silent qmark a https://bbs.archlinux.org/
-silent qmark b http://www.dustloop.com/forums/index.php?/forum/63-blazblue/
-silent qmark c http://forum.colemak.com/ 
+silent qmark A http://www.anime4fun.com/
+silent qmark b http://bato.to/
+silent qmark B http://www.dustloop.com/forums/index.php?/forum/63-blazblue/
 silent qmark e http://www.exitpath-levelmakers.forumotion.com/
 silent qmark E https://ep-sys.appspot.com/login.jsp
 silent qmark f http://www.4chan.org/
@@ -133,6 +134,7 @@ silent qmark k http://kissanime.com/Search/Anime
 silent qmark l http://www.last.fm/
 silent qmark L http://www.lifehacker.com/
 silent qmark m http://myanimelist.net
+silent qmark n http://fuwanovel.org/
 silent qmark p http://pixiv.net/
 silent qmark P http://pururin.com/
 silent qmark M https://mail.google.com/mail/
@@ -163,19 +165,21 @@ function bmark(title, url, keyword) {
 
 bmark('Amazon', 'http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s','am')
 bmark('Arch Wiki', 'http://wiki.archlinux.org/index.php?search=%s', 'aw')
+bmark('Duck Duck Go', 'http://duckduckgo.com/?q=%s', 'd')
 bmark('Post to Twitter', 'http://twitter.com/home?status=%s', 'tweet')
 bmark('Quickly Get to Subreddit', 'http://www.reddit.com/r/%s/', 'r')
 bmark('Rotten Tomatoes Search', 'http://www.rottentomatoes.com/search/?search=%s', 'rt')
-bmark('Duck Duck Go', 'http://duckduckgo.com/?q=%s', 'd')
 bmark('Search Anime4fun', 'http://www.anime4fun.com/search?keyword=%s', 'aff')
 bmark('Search Azlyrics', 'http://search.azlyrics.com/cgi-bin/azseek.cgi?q=%s', 'az')
 bmark('Search Fakku', 'http://www.fakku.net/search/%s', 'fk')
 //search tags
+bmark('Search Batoto', 'http://bato.to/search?name_cond=c&name=%s', 'bt')
 bmark('Search Fluffy.is', 'http://fluffy.is/search.php?folders=&name=%s', 'fl')
 bmark('Search Full Fights', 'http://anime.fullfights.org/?s=%s', 'fu')
 bmark('Search Gelbooru', 'http://gelbooru.com/index.php?page=post&s=list&tags=%s', 'gel');
 bmark('Search Github', 'http://github.com/search?q=%s', 'gh')
 bmark('Search GoGo', 'http://www.gogoanime.com/?s=%s', 'gg')
+bmark('Search with Hoogle', 'http://www.haskell.org/hoogle/?hoogle=%s', 'hg')
 bmark('Search MAL', 'http://myanimelist.net/anime.php?q=%s', 'mal')
 bmark('Search Tumblr', 'http://www.tumblr.com/search/%s', 't')
 bmark('Search Youtube', 'http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search', 'y')
