@@ -32,63 +32,63 @@ unmap s
 # tmux experimentation#{{{
 # #r# is redraw#{{{
 # # window switching#{{{
-map ra :!~/bin/vimus_tmux.sh a<cr>
-map rr :!~/bin/vimus_tmux.sh r<cr>
-map rs :!~/bin/vimus_tmux.sh s<cr>
-map rt :!~/bin/vimus_tmux.sh t<cr>
-map rd :!~/bin/vimus_tmux.sh d<cr>
-map rh :!~/bin/vimus_tmux.sh h<cr>
-map rn :!~/bin/vimus_tmux.sh n<cr>
-map re :!~/bin/vimus_tmux.sh e<cr>
-map ri :!~/bin/vimus_tmux.sh i<cr>
-map ro :!~/bin/vimus_tmux.sh o<cr>
+map ra :!~/bin/tmux/vimus_tmux.sh a<cr>
+map rr :!~/bin/tmux/vimus_tmux.sh r<cr>
+map rs :!~/bin/tmux/vimus_tmux.sh s<cr>
+map rt :!~/bin/tmux/vimus_tmux.sh t<cr>
+map rd :!~/bin/tmux/vimus_tmux.sh d<cr>
+map rh :!~/bin/tmux/vimus_tmux.sh h<cr>
+map rn :!~/bin/tmux/vimus_tmux.sh n<cr>
+map re :!~/bin/tmux/vimus_tmux.sh e<cr>
+map ri :!~/bin/tmux/vimus_tmux.sh i<cr>
+map ro :!~/bin/tmux/vimus_tmux.sh o<cr>
 # #}}}
 # resize panes#{{{
-map rmh :!~/bin/vimus_tmux.sh rmh<cr>
-map rmn :!~/bin/vimus_tmux.sh rmn<CR>
-map rme :!~/bin/vimus_tmux.sh rme<CR>
-map rmi :!~/bin/vimus_tmux.sh rmi<CR>
+map rmh :!~/bin/tmux/vimus_tmux.sh rmh<cr>
+map rmn :!~/bin/tmux/vimus_tmux.sh rmn<CR>
+map rme :!~/bin/tmux/vimus_tmux.sh rme<CR>
+map rmi :!~/bin/tmux/vimus_tmux.sh rmi<CR>
 # #}}}
 # circulate
 # previous
-map r, :!~/bin/vimus_tmux.sh r,<CR>
+map r, :!~/bin/tmux/vimus_tmux.sh r,<CR>
 # next
-map r. :!~/bin/vimus_tmux.sh r.<CR>
+map r. :!~/bin/tmux/vimus_tmux.sh r.<CR>
 
 # new session
-map r_ :!~/bin/vimus_tmux.sh r_<CR>
+map r_ :!~/bin/tmux/vimus_tmux.sh r_<CR>
 
 # new window 
-map rc :!~/bin/vimus_tmux.sh rc<CR>
+map rc :!~/bin/tmux/vimus_tmux.sh rc<CR>
 # kill pane
 map rx :!tmux kill-pane<CR>
 # last window 
-map rl :!~/bin/vimus_tmux.sh<CR>
+map rl :!~/bin/tmux/vimus_tmux.sh<CR>
 # split windows
-map r/ :!~/bin/vimus_tmux.sh r/<CR>
-map r- :!~/bin/vimus_tmux.sh r-<CR>
+map r/ :!~/bin/tmux/vimus_tmux.sh r/<CR>
+map r- :!~/bin/tmux/vimus_tmux.sh r-<CR>
 #
 # break pane
-map r! :!~/bin/vimus_tmux.sh r!<CR>
+map r! :!~/bin/tmux/vimus_tmux.sh r!<CR>
 # #}}}
 
 # panes#{{{
 # directions
-map sh :!~/bin/vimus_tmux.sh sh<CR>
-map sn :!~/bin/vimus_tmux.sh sn<CR>
-map se :!~/bin/vimus_tmux.sh se<CR>
-map si :!~/bin/vimus_tmux.sh si<CR>
+map sh :!~/bin/tmux/vimus_tmux.sh sh<CR>
+map sn :!~/bin/tmux/vimus_tmux.sh sn<CR>
+map se :!~/bin/tmux/vimus_tmux.sh se<CR>
+map si :!~/bin/tmux/vimus_tmux.sh si<CR>
 # last
-map sl :!~/bin/vimus_tmux.sh sl<CR>
+map sl :!~/bin/tmux/vimus_tmux.sh sl<CR>
 # select layout
-map sv :!~/bin/vimus_tmux.sh sv<CR>
+map sv :!~/bin/tmux/vimus_tmux.sh sv<CR>
 
 # toggle #monocle# (zoom)
-map st :!~/bin/vimus_tmux.sh st<CR>
+map st :!~/bin/tmux/vimus_tmux.sh st<CR>
 # bspwm monocle
-map sm :!~/bin/vimus_tmux.sh sm<CR>
+map sm :!~/bin/tmux/vimus_tmux.sh sm<CR>
 # fullscreen
-map sf :!~/bin/vimus_tmux.sh sf<CR>
+map sf :!~/bin/tmux/vimus_tmux.sh sf<CR>
 
 #}}}
 
