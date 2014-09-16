@@ -1,0 +1,53 @@
+.zsh_history
+.bash_history
+*.swp
+*~
+*log
+*log.txt
+*.pickle
+*.blb
+.lyrics
+# addressbook
+.abook/
+__pycache__/
+.unite/
+**/.vim/sessions/
+**/.vim/undo/
+**.ncmpcpp/artists/
+**/ranger/plugins/
+**/ranger/bookmarks
+**/ranger/tagged
+**/ranger/history
+.mpd/
+!mpd.conf
+!playlists/
+.weechat/
+!.weechatrc
+.mutt/
+!mailcap
+.muttnoctrc
+.muttschoolrc
+.school_mbsyncrc
+
+# other people's unmodified plugins/things
+*antigen/
+**./vim/bundle/
+common/.emacs.d/
+!navigation.el
+browsing/.pentadactyl/plugins
+.fonts
+artget.py
+dl/
+imgur/
+scripts/other/
+
+# ignore all colorschemes but mine
+aesthetics/.pentadactyl/colors/
+!colors/custom.penta
+**/.vim/colors/
+
+# not storing conky themes here
+.conky/
+aesthetics/.conkyrc
+
+/private
