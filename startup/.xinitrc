@@ -46,10 +46,18 @@ xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
 
 # redshift; better options at this point than xflux
 redshift -c ~/.config/redshift.conf &
-# backup hotkey program
-xchainkeys &
 # auto mount usbs and such
 devmon &
+# start mpd and mpdscribble
+# MPD daemon start (if no other user instance exists)
+# https://wiki.archlinux.org/index.php/Music_Player_Daemon
+[ ! -s ~/.config/mpd/pid ] && mpd &
+pidof mpdscribble >& /dev/null
+if [ $? -ne 0 ]; then
+ mpdscribble &
+fi
+# backup hotkey program
+xchainkeys &
 sxhkd &
 
 # start window manager

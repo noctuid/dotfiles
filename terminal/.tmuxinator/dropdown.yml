@@ -1,10 +1,10 @@
 name: dropdown
 root: ~/
  
-# pre: mpd ~/.mpd/mpd.conf && mpdscribble
+pre: mpd ~/.mpd/mpd.conf && mpdscribble
 windows:
   - music:
-    - mpd ~/.mpd/mpd.conf && mpdscribble && vimus
+    - vimus
   - chat:
     - weechat
   - main:
