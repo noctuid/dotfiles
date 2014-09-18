@@ -110,6 +110,9 @@ set! browser.download.dir=/home/angelic_sedition/Move
 set! browser.newtab.url=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
 set! browser.startup.homepage=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
 
+" a new setting to move cache to same location as profile for use with profile-sync-daemon
+set! browser.cache.disk.parent_directory=/home/angelic_sedition/.mozilla/firefox/v7w4b13j.normal/cache
+
 " close dta when downloads are complete
 set! extensions.dta.closedta=true
 

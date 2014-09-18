@@ -1,4 +1,4 @@
-# services have enabled (I don't actually run this)
+# services have enabled (I don't actually run this) with systemd
 
 # internet
 systemctl enable netctl-auto@wlp3s0.service
@@ -18,6 +18,9 @@ systemctl enable cups.service
 
 # preloading for commonly used appliations
 systemctl enable preload.service
+
+# putting firefox profile in RAm
+systemctl enable psd.service
 
 # who doesn't love cron?
 systemctl enable cronie.service
