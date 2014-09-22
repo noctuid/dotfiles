@@ -38,12 +38,17 @@ case "$1" in
 	bspc window -c ;;
 #}}}
 
-# set current image to background
-"b")
+# set current image to background; width
+"w")
 	imlibsetroot -s w -p c "$2" ;;
 # echo command to do so to clipboard
-"B")
+"W")
 	echo -n 'imlibsetroot -s w -p c '$2'' | xsel -bi ;;
+# set current image to background; height
+"b")
+	imlibsetroot -s h -p c "$2" ;;
+"B")
+	echo -n 'imlibsetroot -s h -p c '$2'' | xsel -bi ;;
 
 # put current image in trash
 "D")
