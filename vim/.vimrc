@@ -963,8 +963,21 @@ let g:vimshell_prompt_expr =
 \ 'escape(fnamemodify(getcwd(), ":~").">", "\\[]()?! ")." "'
 let g:vimshell_prompt_pattern = '^\%(\f\|\\.\)\+> '
 
-" let g:vimshell_no_default_keymappings=0
+" use instead of netrw (e.g. with gf or if use vim to open a dir)
+let g:vimfiler_as_default_explorer = 1
+autocmd FileType vimfiler call s:vimfiler_mappings()
+function! s:vimfiler_mappings()
+	" colemak
+	map <buffer> n <Plug>(vimfiler_loop_cursor_down)
+	map <buffer> e <Plug>(vimfiler_loop_cursor_up)
+	map <buffer> gn <Plug>(vimfiler_jump_last_child)
+	map <buffer> ge <Plug>(vimfiler_jump_first_child)
+	map <buffer> i <Plug>(vimfiler_smart_l)
+	map <buffer> o <Plug>(vimfiler_edit_file)
+	map <buffer> q <Plug>(vimfiler_exit)
+endfunction
 
+" let g:vimshell_no_default_keymappings=0
 autocmd FileType vimshell call s:vimshell_mappings()
 function! s:vimshell_mappings()
 	" Normal mode key-mappings."{{{
@@ -1434,6 +1447,7 @@ NeoBundle 'tpope/vim-repeat'
 " hybrid chording
 NeoBundle 'kana/vim-arpeggio'
 NeoBundle 'Shougo/vimshell.vim'
+NeoBundle "Shougo/vimfiler.vim"
 " all text boxes vim
 NeoBundle 'ardagnir/vimbed'
 " NeoBundle 'ardagnir/eventloop.vim'
