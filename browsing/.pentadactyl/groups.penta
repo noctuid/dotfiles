@@ -1,18 +1,20 @@
 " TODO:
-" make mutt and gmail bindings as similar as possible
-" add other sites to comic group
 " setl
 " site specific ti (i.e. 4chan v gel)
 " add clicks to get focus right immediately (i.e. on reddit); or change from despotic?
 " restrict g* bindings (no gt or gb or..); add keys to leave alone section
- 
- " only remap keys when their functionality is replaced or not necessary for the site
 
+" only remap keys when their functionality is replaced or not necessary for the site
+
+" NOTE:
 " passkeys passes any binding that include the letter
 " i.e. if pass i with passkeys, gi won't work; using groups with pass fixes this
 
-" feedkeys will work for passing keys but must enter --pass through-- first (<pass-all-keys>; i've mapped it to ,); sadly no -m passthrough (passthrough mode) which messes up some things
-" (:normal won't work)
+" NOTE:
+" For using custom mappings through pentadactyl (e.g. a site supports mappings, but you can't change them; you can bind a key to send a different keypress to firefox)
+" sadly, feedkeys cannot feed directly to firefox (no -m passthrough); it still can be used, but it's pretty useless because sites often won't detect all or any keypresses after sending a key to enter passthrough (have to do something like feedkeys <pass-all-keys>somekeys<esc> or <pass-next-key>j .. and may be slow or not work)
+" because you can't feed to firefox, might as well just nmap <key> <pass-next-key><key> (which suffers from the same problems; works for some sites.. sometimes doesn't work at all; when it does work, it's slow)
+" fastest way I have found is just to fake the key bindings without using pentadactyl (xdotool or xsendkey); using a hideous combination of both
 
 " Image Bindings"{{{
 group image -description "Image viewing mappings" -locations .*\.jpg,.*\.jpeg,.*\.png,.*\.gif
@@ -28,22 +30,31 @@ nmap -group image -builtin b <left>
 group tumblr -description "Custom Tumblr Mappings" -locations tumblr.com/dashboard,tumblr.com/.*/drafts
 
 " colemak up and down
-silent nmap -group tumblr -ex n feedkeys ,j<ec>
-silent nmap -group tumblr -ex e feedkeys ,k<ec>
-" scrolling with longer posts
-silent nmap -group tumblr k 15<down>
+" doesn't work:
+" silent nmap -group tumblr -ex n feedkeys ,j<ec>
+" silent nmap -group tumblr -builtin n <pass-next-key>j
+silent nmap -group tumblr -ex n silent !xsendkey Control+v && xsendkey j
+silent nmap -group tumblr -ex e silent !xsendkey Control+v && xsendkey k
+" scrolling with longer posts; click after so tumblr's bindings work again
+" using builtin with ex commands is extremely slow; this doesn't have a noticeable slowdown
+nmap -ex gB silent !xdotool mousemove 33 572 click 1
+silent nmap -group tumblr k 15<down>gB
 
-" tag post (then can hit enter to reblog)
-silent nmap -group tumblr -ex mt feedkeys ,t<esc>gi
+" tag post (then can hit enter to reblog); takes a bunch of escapes to get out of if needed though
+silent nmap -group tumblr -builtin mt <pass-next-key>t
 " queue (with xkit?; default is E)
-" silent nmap -group tumblr -ex mq feedkeys ,q<esc>
+silent nmap -group tumblr -ex mq feedkeys <pass-next-key>q
 " save as draft
-silent nmap -group tumblr -ex md feedkeys ,d<esc>
+" I don't really see a difference in speed
+" silent nmap -group tumblr -builtin md <pass-next-key>d
+silent nmap -group tumblr -ex md feedkeys <pass-next-key>d
+" 
 " reblog (also an xkit one I believe; default is R)
-silent nmap -group tumblr -ex mr feedkeys ,r<esc>
-" like
-silent nmap -group tumblr -ex i feedkeys ,l<esc>
-" n show notes
+silent nmap -group tumblr -ex mr feedkeys <pass-next-key>r
+" like; this doesn't work with builtin or feedkeys
+silent nmap -group tumblr -ex i silent !xsendkey Control+v && xsendkey l
+" n show notes; already have gn mapped to '
+silent nmap -group tumblr -ex gn silent !xsendkey Control+v && xsendkey n
 
 " GOTOS:"{{{
 " go to dashboard
@@ -58,32 +69,11 @@ silent nmap -group tumblr -ex gs open tumblr.com/settings
 "
 "}}}
 
-" Twitter"{{{
-" twitter bindings hardly work (require clicking on the keyboard shortcuts option then stop working after certain actions)
-
-group twitter -description "Custom Twitter Mappings" -locations twitter.com
-" set passkeys+=twitter.com/:?<cr>,gh,gn,ga,gr,gd,gf,gl,gm,gs,gu
-
-" colemak up and down
-" silent nmap -group twitter -ex n feedkeys ,j<esc>
-" silent nmap -group twitter -ex e feedkeys ,k<esc>
-
-" compose (probably will never use)
-" silent nmap -group twitter -ex c feedkeys ,n<esc>gi
-
-" f favourite
-" silent nmap -group twitter -ex i
-" r reply
-" silent nmap -group twitter -ex R
-" t retweet
-" silent nmap -group twitter -ex x
-"}}}
-
 " MAL"{{{
 group MAL -description "Custom MAL GOTOs" -locations myanimelist.net
 
 " export list
-silent nmap -group MAL -ex ge open myanimelist.net/panel.php?go=export
+silent nmap -group MAL -ex gE open myanimelist.net/panel.php?go=export
 " go to inbox
 silent nmap -group MAL -ex gI open http://myanimelist.net/mymessages.php
 silent nmap -group MAL -ex gh open http://myanimelist.net/panel.php
@@ -99,8 +89,7 @@ group reddit -description "Custom Reddit GOTOs" -locations reddit.com
 " for RES
 " passkeys"{{{
 " set passkeys+=reddit.com:?GinekKxcCz<cr>
-silent nmap -group reddit ? <pass>
-silent nmap -group reddit G <pass>
+" silent nmap -group reddit ? <pass>
 silent nmap -group reddit i <pass>
 silent nmap -group reddit n <pass>
 silent nmap -group reddit e <pass>
@@ -166,11 +155,9 @@ silent nmap -group chan -ex gy open http://www.4chan.org/y
 
 "}}}
 
-" Fakku & Friends{{{
+" Manga and Doujinshi{{{
 " passkeys (for webcomic reader) https://github.com/ameboide/webcomic_reader
-group fakku -description "Happiness" -locations fakku.net
 group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/(read)\#.*,pururin.com/view/.*,e-hentai.org/s/.*,bato\.to/read/.*
-group pururin -description "Purr" -locations pururin.com
 
 " only pass keys on actual image pages"{{{
 " prev image
@@ -187,7 +174,7 @@ silent nmap -group comic b <pass>
 silent nmap -group comic m <pass>
 " toggle slide show
 silent nmap -group comic x <pass>
-" toggle layout
+" toggle layout; almost always use minimal
 silent nmap -group comic > <pass>
 " refresh
 silent nmap -group comic . <pass>
@@ -200,13 +187,14 @@ silent nmap -group comic y ZO
 "}}}
 
 " Downloads with webcomic reader (using dta; works with any site supported by the userscript)
-silent nmap -group comic <leader>f -ex dta|silent !~/bin/dlf.sh comic
+silent nmap -group comic <leader>f -ex dta|silent !~/bin/pentadactyl/dlf.sh comic
 
-" Downloading from fakku (broken T_T)
+" Downloading from fakku (broken)
 " silent nmap -group fakku -ex <leader>f execute "silent !~/bin/dlf.sh fakku " + buffer.URL + " &"
 
 " other manga downloaders:
-" jiaweihli manga_donwloader
+" jiaweihli/manga_downloader ; looks to be the best for downloading series.. couldn't get working well though)
+
 " mangarack; manga crawler; hey mang!
 " https://gist.github.com/cympfh/9641089
 "}}}
@@ -217,116 +205,141 @@ silent nmap -group gel -ex <leader>f execute 'silent !~/bin/dlf.sh gel "' + buff
 
 "}}}…
 
-" Gmail "{{{
-" (use more default bindings since using in own tabgroup; no tabopen, c, etc. needed)
-" fix regex or just get rid of gglobal, since ginbox matches everything
-group ginbox -description "gmail inbox, starred, etc." -locations google.com/mail/#.*
-group gconv -description "gmail messages/conversations" -locations google.com/mail/.*/.*
-group gglobal -description "all of gmail" -locations mail.google.com
 
-" Navigation"{{{
-" up and down inbox (redrawing (of blue line) is slow as fuck)
-silent nmap -group ginbox -ex n feedkeys ,j<esc>
-silent nmap -group ginbox -ex e feedkeys ,k<esc>
-silent nmap -group ginbox k 15<down>
-" conversation (later defined takes precedent I believe (ginbox will match in gconv))
-silent nmap -group gconv -ex n feedkeys ,n<esc>
-silent nmap -group gconv -ex e feedkeys ,p<esc>
-silent nmap -group gconv -ex k silent !xsendkey comma && xsendkey k && xsendkey Escape
-silent nmap -group gconv -ex K silent !xsendkey comma && xsendkey j && xsendkey Escape
-" enter and exit conversations/mails
-silent nmap -group ginbox -ex i silent !xsendkey comma && xsendkey o && xsendkey Escape
-" refresh; back to threadlist
-silent nmap -group gconv -ex h feedkeys ,u<esc>
-" open message in inbox; collapse/expand thread in conv
-silent nmap -group gglobal -ex <cr> feedkeys ,<cr><esc>
+" Not using:
+" Graveyard"{{{
+" Twitter"{{{
+" twitter bindings hardly work (require clicking on the keyboard shortcuts option then stop working after certain actions)
 
-" GOTOS:"{{{
-" go to forums
-silent nmap -group ginbox -ex gf feedkeys ,`<esc>
-" go to primary
-silent nmap -group gglobal -ex gh feedkeys ,gi<esc>
-" go to archived
-silent nmap -group gglobal ga <pass>
-" starred
-silent nmap -group gglobal gs <pass>
-" contacts list
-" silent nmap -group gglobal gc <pass>
-" drafts
-silent nmap -group gglobal gd <pass>
-"gl search with label: entered
-" sent mail
-silent nmap -group gglobal gt <pass>
+" group twitter -description "Custom Twitter Mappings" -locations twitter.com
+" set passkeys+=twitter.com/:?<cr>,gh,gn,ga,gr,gd,gf,gl,gm,gs,gu
+
+" colemak up and down
+" silent nmap -group twitter -ex n feedkeys ,j<esc>
+" silent nmap -group twitter -ex e feedkeys ,k<esc>
+
+" compose (probably will never use)
+" silent nmap -group twitter -ex c feedkeys ,n<esc>gi
+
+" f favourite
+" silent nmap -group twitter -ex i
+" r reply
+" silent nmap -group twitter -ex R
+" t retweet
+" silent nmap -group twitter -ex x
 "}}}
-"}}}
-
-" sending"{{{
-" reply
-silent nmap -group gconv -ex o feedkeys ,r<esc>
-silent nmap -group gconv -ex O feedkeys ,R<esc>
-" compose (C/d)
-silent nmap -group ginbox -ex c feedkeys ,C
-" current window
-silent nmap -group ginbox -ex C feedkeys ,c<esc>
-" forward (mail forward)
-silent nmap -group gglobal -ex mf feedkeys ,f<esc>
-silent nmap -group gglobal -ex mF feedkeys ,F<esc>
-"}}}
-
-" search; only pass in inbox
-silent nmap -group ginbox -ex / feedkeys ,/<esc>gi
-" search people q
-silent nmap -group ginbox -ex ? feedkeys ,q<esc>gi
-
-" undo actions (i.e. archiving something; anything that gives the undo popup); must use immediately after
-silent nmap -group gglobal -ex u feedkeys ,z<esc>
-
-" Message Movement, Labelling, etc."{{{
-" archive conversations
-silent nmap -group ginbox -ex a feedkeys ,e<esc>
-" (remove from current view; archives if in inbox; removes label if in label; moves to inbox if in trash (same if in spam); if in starred, removes star)
-silent nmap -group gglobal y <pass>
-
-" check a box
-silent nmap -group ginbox x <pass>
-" marking"{{{
-" mark as important
-silent nmap -group gglobal -ex mi feedkeys ,+<esc>
-" unimportant (less)
-silent nmap -group gglobal -ex ml feedkeys ,-<esc>
-" mark as read (_ same except only works in message)
-silent nmap -group gglobal -ex mr feedkeys ,I<esc>
-" unread
-silent nmap -group gglobal -ex mu feedkeys ,U<esc>
-" mute a conversation
-silent nmap -group gglobal -ex mm feedkeys ,m<esc>
-" mark as spam
-silent nmap -group gglobal -ex md feedkeys ,!<esc>
-" rotate superstar
-silent nmap -group gglobal -ex ms feedkeys ,s<esc>
-" add convo to tasks
-silent nmap -group gglobal -ex mt feedkeys ,T<esc>
-"}}}
-" move conversation from inbox to different label,spam or trash 
-silent nmap -group gglobal -ex ma feedkeys ,v<esc>
-" open more menu
-silent nmap -group gglobal . <pass>
-
-" open labels menu to label a conversation (must have selected emails or be in one)
-" opens group button to group contacts in contacts
-silent nmap -group ginbox -ex l feedkeys ,l<esc>gi
-"}}}
-
-" No dedicated key (use passthrough if ever necessary)"{{{
-" # to delete
-" a reply to all recipients
-" A
-" gk tasks
-" gp make phone call
-"*a select all
-"*u select all unread
-"*r select all read
-"*s select all starred
-"*t unstarred
-"}}}
-"}}}
+" " Gmail "{{{
+" " switched to mutt completely.. gmail hates pentadactyl when composing too (gi doesn't work)
+" " (use more default bindings since using in own tabgroup; no tabopen, c, etc. needed)
+" " fix regex or just get rid of gglobal, since ginbox matches everything
+" group ginbox -description "gmail inbox, starred, etc." -locations google.com/mail/#.*
+" group gconv -description "gmail messages/conversations" -locations google.com/mail/.*/.*
+" group gglobal -description "all of gmail" -locations mail.google.com
+"
+" " Navigation"{{{
+" " up and down inbox (redrawing (of blue line) is slow as fuck)
+" silent nmap -group ginbox -builtin n <c-v>j
+" silent nmap -group ginbox -builtin e <c-v>k
+" silent nmap -group ginbox k 15<down>
+" " conversation (later defined takes precedent I believe (ginbox will match in gconv))
+" silent nmap -group gconv -builtin n <pass-next-key>n
+" silent nmap -group gconv -builtin e <pass-next-key>p
+" silent nmap -group gconv -ex k silent !xsendkey comma && xsendkey k && xsendkey Escape
+" silent nmap -group gconv -ex K silent !xsendkey comma && xsendkey j && xsendkey Escape
+" " enter and exit conversations/mails
+" silent nmap -group ginbox -ex i silent !xsendkey comma && xsendkey o && xsendkey Escape
+" " refresh; back to threadlist
+" silent nmap -group gconv -ex h  ,u<esc>
+" " open message in inbox; collapse/expand thread in conv
+" silent nmap -group gglobal -ex <cr> feedkeys ,<cr><esc>
+"
+" " GOTOS:"{{{
+" " go to forums
+" silent nmap -group ginbox -ex gf feedkeys ,`<esc>
+" " go to primary
+" silent nmap -group gglobal -ex gh feedkeys ,gi<esc>
+" " go to archived
+" silent nmap -group gglobal ga <pass>
+" " starred
+" silent nmap -group gglobal gs <pass>
+" " contacts list
+" " silent nmap -group gglobal gc <pass>
+" " drafts
+" silent nmap -group gglobal gd <pass>
+" "gl search with label: entered
+" " sent mail
+" silent nmap -group gglobal gt <pass>
+" "}}}
+" "}}}
+"
+" " sending"{{{
+" " reply
+" silent nmap -group gconv -ex o feedkeys ,r<esc>
+" silent nmap -group gconv -ex O feedkeys ,R<esc>
+" " compose (C/d)
+" silent nmap -group ginbox -ex c feedkeys ,C
+" " current window
+" silent nmap -group ginbox -ex C feedkeys ,c<esc>
+" " forward (mail forward)
+" silent nmap -group gglobal -ex mf feedkeys ,f<esc>
+" silent nmap -group gglobal -ex mF feedkeys ,F<esc>
+" "}}}
+"
+" " search; only pass in inbox
+" silent nmap -group ginbox -ex / feedkeys ,/<esc>gi
+" " search people q
+" silent nmap -group ginbox -ex ? feedkeys ,q<esc>gi
+"
+" " undo actions (i.e. archiving something; anything that gives the undo popup); must use immediately after
+" silent nmap -group gglobal -ex u feedkeys ,z<esc>
+"
+" " Message Movement, Labelling, etc."{{{
+" " archive conversations
+" silent nmap -group ginbox -ex a feedkeys ,e<esc>
+" " (remove from current view; archives if in inbox; removes label if in label; moves to inbox if in trash (same if in spam); if in starred, removes star)
+" silent nmap -group gglobal y <pass>
+"
+" " check a box
+" silent nmap -group ginbox x <pass>
+" " marking"{{{
+" " mark as important
+" silent nmap -group gglobal -ex mi feedkeys ,+<esc>
+" " unimportant (less)
+" silent nmap -group gglobal -ex ml feedkeys ,-<esc>
+" " mark as read (_ same except only works in message)
+" silent nmap -group gglobal -ex mr feedkeys ,I<esc>
+" " unread
+" silent nmap -group gglobal -ex mu feedkeys ,U<esc>
+" " mute a conversation
+" silent nmap -group gglobal -ex mm feedkeys ,m<esc>
+" " mark as spam
+" silent nmap -group gglobal -ex md feedkeys ,!<esc>
+" " rotate superstar
+" silent nmap -group gglobal -ex ms feedkeys ,s<esc>
+" " add convo to tasks
+" silent nmap -group gglobal -ex mt feedkeys ,T<esc>
+" "}}}
+" " move conversation from inbox to different label,spam or trash 
+" silent nmap -group gglobal -ex ma feedkeys ,v<esc>
+" " open more menu
+" silent nmap -group gglobal . <pass>
+"
+" " open labels menu to label a conversation (must have selected emails or be in one)
+" " opens group button to group contacts in contacts
+" silent nmap -group ginbox -ex l feedkeys ,l<esc>gi
+" "}}}
+"
+" " No dedicated key (use passthrough if ever necessary)"{{{
+" " # to delete
+" " a reply to all recipients
+" " A
+" " gk tasks
+" " gp make phone call
+" "*a select all
+" "*u select all unread
+" "*r select all read
+" "*s select all starred
+" "*t unstarred
+" "}}}
+" "}}}
+" "}}}
