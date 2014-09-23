@@ -123,7 +123,7 @@ alt + s
 	~/bin/hide_show.sh termite
 
 alt + t
-	~/bin/hide_show.sh termite
+	~/bin/hide_show.sh urxvt
 
 super + s
 	~/bin/hide_show.sh termite

@@ -634,6 +634,7 @@ books=~/ag-sys/Large/Library/Books
 #==============================
 # _Aliases {{{
 #==============================
+alias tvim="vim -c 'color badwolf|hi Normal ctermfg=252 ctermbg=none'"
 #===============
 # Startup and Shutdown# {{{
 #===============
