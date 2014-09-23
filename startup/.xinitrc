@@ -14,7 +14,7 @@ setxkbmap us -variant colemak
 xmodmap ~/.Xmodmap_wide
 xmodmap ~/.Xmodmap
 # set background image
-imlibsetroot -s w -p c /home/angelic_sedition/wallpaper/anime/yosuga_no_sora/605007.jpg
+imlibsetroot -s h -p c /home/angelic_sedition/wallpaper/anime/1398022103628.jpg
 
 # font stuff
 xset +fp /usr/share/fonts/local
@@ -22,6 +22,8 @@ xset +fp ~/.fonts
 xset fp rehash
 # faster key repeat rate and shorter delay (default is 660 25); messing around with
 xset r rate 300 35
+# die bell
+xset -b
 # energy star features on
 xset +dpms
 # standby suspend and off; no difference for lcds apparently; blank screen after 5 minutes of inactivity
@@ -43,6 +45,12 @@ conky &
 guake &
 
 xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
+
+# japanese input
+export XMODIFIERS=@im=SCIM
+export GTK_IM_MODULE="scim"
+export QT_IM_MODULE="scim"
+scim -d
 
 # redshift; better options at this point than xflux
 redshift -c ~/.config/redshift.conf &
