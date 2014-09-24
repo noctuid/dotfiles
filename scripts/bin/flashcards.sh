@@ -23,8 +23,8 @@ If no cardset is given, will list existing cardsets.
 }
 
 function review_card() {
-# order non-blank lines randomly
-IFS=$'\n'; review_lines=($(grep . $card_set | shuf))
+# order non-blank/non-"comment" lines randomly
+IFS=$'\n'; review_lines=($(grep -vw '^\s*$\|#' $card_set | shuf))
 for line in "${review_lines[@]}";do
 	if [ "$side" == "left" ]; then
 		echo $line | awk -F ':' '{ print $1 }'
