@@ -349,11 +349,47 @@ set noswapfile
 " save swap files here; // to avoid collisions (files with same name will be named based on path)
 " set directory=~/.vim/swap//
 
-" auto save on focus lost if buffer changed (error if unnamed.. don't use untitled buffers)
+" backup before overwriting file and keep backup file
+set writebackup backup
+" backup dir does not have // :(
+set backupdir=~/.vim/tmp
+set bkc=auto
+set backupskip+=*EDITMSG
+
+" http://vim.wikia.com/wiki/Keep_incremental_backups_of_edited_files
+fun! NewInitBex()
+  let &bex = '-' . strftime("(%m_%d)-{%H_%M}~")
+endfun
+augroup KeepSomeBackups
+	au!
+" changes backup extension before writing file so old backup isn't deleted if has been a minute
+	au BufWritePre * call NewInitBex()
+	" delete files older than a day
+	" http://askubuntu.com/questions/413529/delete-files-older-than-one-year-on-linux
+	au BufWritePost * silent !find ~/.vim/tmp* -mtime +1 -delete &
+augroup END
+
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-207
+" Make those folders automatically if they don't already exist.
+if !isdirectory(expand(&undodir))
+    call mkdir(expand(&undodir), "p")
+endif
+if !isdirectory(expand(&backupdir))
+    call mkdir(expand(&backupdir), "p")
+endif
+" if !isdirectory(expand(&directory))
+"     call mkdir(expand(&directory), "p")
+" endif
+
+" auto save current buffer on focus lost if buffer changed (error if unnamed.. don't use untitled buffers)
 au FocusLost * update
+" all changed buffers and don't complain; locks up vim.. slow as fuck
+" au FocusLost * :silent !wall
 
 " autowriteall; save buffer if changed when use various commands (switching buffers, quit, exit, etc.)
 set awa
+" don't autoreload a file when changed outside of vim; prompt
+set noautoread
 
 "}}}
 
