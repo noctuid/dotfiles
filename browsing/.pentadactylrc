@@ -116,6 +116,9 @@ set! browser.cache.disk.parent_directory=/home/angelic_sedition/.mozilla/firefox
 " close dta when downloads are complete
 set! extensions.dta.closedta=true
 
+" more undos
+set! browser.sessionstore.max_tabs_undo=100
+
 "}}}
 " #==============================
 " # QuickMarks {{{
