@@ -1033,7 +1033,19 @@ let g:Vertigo_onedigit_method = 'smart3'
 " let g:Vertigo_homerow_onedigit = 'ARSTDHNEIO'
 "}}}
 
-" Vim Markdown
+" vim bookmarks"{{{
+" center when jumping to bookmark
+let g:bookmark_center = 1
+" let g:bookmark_auto_save_file = '~/.vim/.vim-bookmarks'
+let g:bookmark_save_per_working_dir = 1
+let g:bookmark_auto_save = 1
+nmap mn <plug>BookmarkNext<leader>;silent! call repeat#set("\<Plug>BookmarkNext", v:count)<cr>
+nmap me <plug>BookmarkPrev<leader>;silent! call repeat#set("\<Plug>BookmarkPrev", v:count)<cr>
+"}}}
+
+" Vim Markdown"{{{
+let g:markdown_fold_style = 'stacked'
+
 " let g:vim_markdown_no_default_key_mappings=1
 " let g:vim_markdown_folding_disabled=1
 autocmd FileType mkd call s:mkd_mappings()
@@ -1500,6 +1512,10 @@ NeoBundle 'mattn/emmet-vim'
 " password syntax highlighting/hiding stuff
 NeoBundle 'aaronbieber/vim-vault'
 
+"}}}
+
+" Writing"{{{
+NeoBundle 'MattesGroeger/vim-bookmarks'
 "}}}
 
 " Other"{{{
