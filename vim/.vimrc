@@ -560,6 +560,7 @@ endif
 set laststatus=2
 
 " http://stackoverflow.com/questions/114431/fast-word-count-function-in-vim
+" also see http://naperwrimo.org/wiki/index.php?title=Vim_for_Writers
 function! WordCount()
   let s:old_status = v:statusmsg
   let position = getpos(".")
@@ -579,7 +580,7 @@ function! s:airline_sections_custom()
 	" add current session name to statusline
 	"http://stackoverflow.com/questions/11374047/adding-the-current-session-filename-in-the-statusline add current session name to statusline
 	let g:airline_section_x = airline#section#create(['filetype', ' %{fnamemodify(v:this_session, ":t")}'])
-	let g:airline_section_z = airline#section#create(['%02p%% : %l: %c', ' %{WordCount()}'])
+	let g:airline_section_z = airline#section#create(['%02p%% : %l: %c', ' %{WordCount()}w'])
 endfunction
 
 " my custom combination theme:
@@ -594,17 +595,27 @@ let g:airline_left_sep = '⮀'
 " let g:airline_left_alt_sep = '⮁'
 let g:airline_right_sep = '⮂'
 " let g:airline_right_alt_sep = '⮃'
-" below resulting in error on startup; font problem?
-" let g:airline_symbols.branch = '⭠'
-" let g:airline_symbols.readonly = '⭤'
 
+if !exists('g:airline_symbols')
+let g:airline_symbols = {}
+endif
+let g:airline_powerline_fonts = 1
+let g:airline_symbols.branch = '⭠'
+let g:airline_symbols.readonly = '⭤'
+" 
 " turn off mixed indent, trailing space
 let g:airline_section_warning = ''
 
+" integrate with nrrwrgn
+let g:airline#extensions#nrrwrgn#enabled = 1
+
 " vcs integration
 let g:airline#extensions#branch#enabled = 1
+" show summary of changed hunks (gitgutter and vim-signify)
+let g:airline#extensions#hunks#enabled = 1
 " syntastic
 let g:airline#extensions#syntastic#enabled = 1
+
 "}}}
 
 " terminal like tabs (maybe not as ugly: use -=e):
