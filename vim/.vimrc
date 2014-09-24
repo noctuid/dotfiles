@@ -252,12 +252,24 @@ autocmd VimEnter * omap ib <Plug>(textobj-anyblock-i)|xmap ib <Plug>(textobj-any
 " #==============================
 " General General "{{{
 " error bells are off by default
-" default ; i.e. will show # of lines selected in visual
-set showcmd
-" (show matching brackets; default)
-set showmatch
+
+" filetype based indentation..
+filetype plugin indent on
+
+"relative numbers except current line (rnu); using numbers vim plugin as well
+set number relativenumber
+
+" set titlestring based on file
+set title
+" default; show mode, highlight matching brackets, and show keys in bottom right
+set showcmd showmode showmatch
 
 set foldmethod=marker
+set foldcolumn=1
+" open folds on jumping to marks
+set foldopen+=mark
+
+" set diffopt=filler,vertical,noicase,noiwhite,context:3
 
 set modeline
 
@@ -265,22 +277,23 @@ set modeline
 set encoding=utf8
 set termencoding=utf-8
 
-" filetype based indentation..
-filetype plugin indent on
-
 " automatically use indentation from previous line
 set autoindent
+
+" automatically cd to dir current file is in
+set autochdir
+
+" default; :s/// replaces one; /g replace all; /gg replace one
+set nogdefault
+
+" can select past eol in visual block if one line is longer
+set virtualedit=block
 
 " Keep 2000 lines of command line history.
 set history=2000
 
-" keeps buffer contents in memory (undo history doesn't go away if change buffers)
+" keeps buffer contents in memory (undo history doesn't go away if change buffers and not saving undo history)
 set hidden
-" persistent undo history (even if close buffer)
-set undofile " Save undo's after file closes
-set undodir=~/.vim/undo,/tmp " where to save undo histories
-set undolevels=3000 " How many undos
-set undoreload=3000 " number of lines to save for undo
 
 " http://vim.wikia.com/wiki/Word_wrap_without_line_breaks
 " wrap lines visually when reach the edge
@@ -293,17 +306,29 @@ set wrapmargin=0
 " display tabs and certain whitespace
 set list
 " listchars ;show tabs; show at end of line; ☬⚛⚜⚡☥☣
-set listchars=tab:\!\ ,nbsp:☣,eol:¬
-
-"relative numbers except current line (rnu); using numbers vim plugin as well
-set number
-set relativenumber
+set listchars=tab:\!\ ,nbsp:☣,eol:¬,extends:❯,precedes:❮
+set showbreak=↪\ 
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-141
+" show trailing whitespace
+augroup trailing
+    au!
+    au InsertEnter * :set listchars-=trail:⌴
+    au InsertLeave * :set listchars+=trail:⌴
+augroup END
 
 " text formatting; get rid of tc; no autowrap of comments or based on textwidth
-set formatoptions=rw
+" l- don't break lines in insert mode
+" j- remove comment char when joining lines
 " set formatoptions-=tc
 " r - insert comment after enter while in insert
 " leaving off o which adds comment char on o
+set formatoptions=rwlj
+
+" don't add two spaces when joining a line that ends with.,?, or !
+set nojoinspaces
+
+" allow backspacing over autoindent, linebreaks, and start of insert
+set bs=2
 
 " won't redraw while executing macros, registers, and commands that have not been typed (not default)
 " for example, stops flickering when have up and down mapped to c-o gk and gj in insert
@@ -315,13 +340,12 @@ set startofline
 " at least 5 lines show below and above cursor
 set scrolloff=5
 
-" open folds on jumping to marks
-set foldopen+=mark
-
 " turn off timeout; default is 1000
 set notimeout
-" this messes up airline in term vim ^
-" set timeoutlen=50
+" fix airline mode changes without screwing up remaps of default letter keys (without this, using escape to exit insert mode won't change airline to display normal mode immediately)
+" ttimeout only applies to keycodes (so changes to default vim keys (e.g. using r in multikey bindings) that can't be unmapped won't be a problem)
+set ttimeout
+set ttimeoutlen=10
 
 " return to last edit position when opening files
 autocmd BufReadPost *
@@ -348,6 +372,16 @@ vmap <silent> <expr> p <sid>Repl()
 set noswapfile
 " save swap files here; // to avoid collisions (files with same name will be named based on path)
 " set directory=~/.vim/swap//
+
+" persistent undo history (even if close buffer)
+" Save undo's after file closes
+set undofile
+" where to save undo histories
+set undodir=~/.vim/undo//
+" How many undos
+set undolevels=3000
+" save whole buffer for undo on reload if number of lines is smaller than
+set undoreload=10000
 
 " backup before overwriting file and keep backup file
 set writebackup backup
@@ -406,6 +440,15 @@ augroup END
 " Command mode"{{{
 " when tab completing from command line will show
 set wildmenu
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-153
+set wildignore+=.hg,.git,.svn                    " Version control
+set wildignore+=*.aux,*.out,*.toc                " LaTeX intermediate files
+set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg   " binary images
+set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest " compiled object files
+set wildignore+=*.spl                            " compiled spelling word lists
+set wildignore+=*.sw?                            " Vim swap files
+set wildignore+=*.DS_Store                       " OSX bullshit
+set wildignore+=*.pyc                            " Python byte code
 
 " changes tab behaviour in command line (i.e. list makes every possible choice popup:)
 set wildmode:full
@@ -414,8 +457,8 @@ set wildmode:full
 " Searching"{{{
 set hlsearch
 
-" don't move when search
-set noincsearch
+" fine I'll incsearch
+set incsearch
 " go back to beginning of buffer once reach end
 set wrapscan
 
