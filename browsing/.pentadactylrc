@@ -213,9 +213,17 @@ EOM
 " other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
 " useful mostly for stuff that combines things like mash, split, weird piping stuff, etc.
 " }}} 
+" #==============================
+" # Addon Commands and Bookmarklets"{{{
+" #==============================
+command dta -description "open downthemall window" emenu Tools.DownThemAll! Tools.DownThemAll!...
+command disab -description "disable addblock edge for current page" emenu Tools.Adblock Edge.Disable on this page only
 command fbugopen -description "open firebug console" emenu View.Firebug
+" kind of works some of the time; disabled
+" command translate -description "translate page with s3" emenu Tools.S3.Google Translator.Translate the page
+command print -description "print page" emenu File.Print…
 
-" Bookmarklets: "{{{
+" bookmarklets"{{{
 " translate bar: http://googlesystem.blogspot.com/2009/11/google-translation-bar.html
 " using s3.. not ideal
 
@@ -228,6 +236,7 @@ command bml-grid -description "Show Grid" open javascript:void(myDiv=document.cr
 command bml-reddit-submit-link -description "Submit Current Link to Reddit" open javascript:(function(){location.href='http://reddit.com/submit?url='+location.href+'&title='+encodeURIComponent(document.title)})();
 
 command bml-tumblr-share -descripiton "Share Current Page to Tumblr" open javascript:var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://www.tumblr.com/share',l=d.location,e=encodeURIComponent,p='?v=3&u='+e(l.href)%20+'&t='+e(d.title)%20+'&s='+e(s),u=f+p;try{if(!/^(.*.)?tumblr[^.]*$/.test(l.host))throw(0);tstbklt();}catch(z){a%20=function(){if(!w.open(u,'t','toolbar=0,resizable=0,status=1,width=450,height=430'))l.href=u;};if(/Firefox/.test(navigator.userAgent))setTimeout(a,0);else%20a();}void(0)
+"}}}
 
 "}}}
 " #==============================
