@@ -29,10 +29,10 @@ for line in "${review_lines[@]}";do
 	if [ "$side" == "left" ]; then
 		echo $line | awk -F ':' '{ print $1 }'
 		read -n 1 && printf "\n"
-		echo $line | awk -F ':' '{ print $2 }' | tr -d ' '
+		echo $line | awk -F ':' '{ print $2 }' | sed 's/^ *//'
 		echo "------------"
 	else
-		echo $line | awk -F ':' '{ print $2 }' | tr -d ' '
+		echo $line | awk -F ':' '{ print $2 }' | sed 's/^ *//'
 		read -n 1 && printf "\n"
 		echo $line | awk -F ':' '{ print $1 }'
 		echo "------------"
