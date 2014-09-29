@@ -1,0 +1,9 @@
+#compdef flashcards
+
+_arguments \
+'-d[card directory]: :_files -/' \
+'-n[create set]' \
+'-e[edit set]' \
+'-s[side to show first]: :(left right)' \
+'-r[show right first]' \
+':card set name:_path_files -W ~/.cards'

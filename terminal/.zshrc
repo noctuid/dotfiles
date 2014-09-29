@@ -49,6 +49,20 @@ antigen apply
 
 # #}}}
 #==============================
+# Completion Settings# {{{
+#==============================
+# http://askql.wordpress.com/2011/01/11/zsh-writing-own-completion/
+# add custom completion scripts
+fpath=(~/.zsh/completion $fpath)
+ 
+# compsys initialization
+autoload -U compinit
+compinit
+ 
+# show completion menu when number of options is at least 2
+zstyle ':completion:*' menu select=2
+# }}}
+#==============================
 # Export# {{{
 #==============================
 export EDITOR=vim
