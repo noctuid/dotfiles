@@ -879,7 +879,7 @@ alias starwars='telnet towel.blinkenlights.nl'
 alias fort='fortune -a'
 alias gfort='fort | gayt'
 # matrix like visual thing
-alias hack='cat /dev/urandom | hexdump -c'
+alias hack='hexdump -c /dev/urandom'
 
 alias fuck='echo;gayt "fuck you too";echo'
 #toilet
