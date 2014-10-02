@@ -255,12 +255,8 @@ set newtab=all
 " if there is a popup to be opened (not blocked), open in new tab
 set popups=tab
 " don't open external at end (this with tab-options plugin)
-" set tabopen=link:right,orphan:groupright,external:right
+au Enter * set tabopen=link:right,orphan:right,external:right
 " 
-if plugins.dactylTabOptionsDev
-" set tabclose=opener,previous,left,right
-set to=link:right,orphan:right,external:right
-endif
 
 set hintkeys=rstneiowfpluy
 
