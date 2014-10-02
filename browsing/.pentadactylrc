@@ -3,6 +3,7 @@
 " get caret hints working; better caret mode 
 " set shell = zsh
 " grabbing feed with pageinfo
+" fix tabgroupie...
 
 " downloads here; then with ranger..
 silent cd ~/Move
@@ -377,24 +378,30 @@ nmap -ex <leader>n tabm -1
 nmap -builtin <leader>m :tabattach<space>
 
 " tab group setup
-nmap -builtin ,ks :tgroup-title main<cr>:tgroup-new animu_y_mango<cr>
+nmap -builtin <leader>,s :tgroup-title main<cr>:tgroup-new animu_y_mango<cr>:tgroup-new prog<cr>:tgroup-new school<cr>
 
 " TabGroupie.js"{{{
-" magically started working for me
-nmap -builtin vn :tgroup-new<Space>
+" breaks easily; yay no longer maintained just when I want it! (https://github.com/eri451/TabGroupie/issues/10)
+" https://github.com/eri451/TabGroupie
+" new group (https://github.com/eri451/TabGroupie/issues/9)
+nmap -builtin vn :tgroup-new<space>
+" move tab to a different group without switching to that group
+nmap -builtin vm :tabattach<space>-group<space>
 " move current tab to a different group
-nmap -builtin vm :tgroup-move<Space>
+nmap -builtin vM :tgroup-move<space>
 " get tab from another tab group
-nmap -builtin vg :tgroup-get<Space>
+nmap -builtin vg :tgroup-get<space>
 " switch to a different tab group
-nmap -builtin vs :tgroup-switch<Space>
-nmap -builtin <space>v :tgroup-switch<Space>
-" switch to next tab group
-nmap -builtin <space><space> :tgroup-switch<space><tab><cr>
-nmap -builtin ve :tgroup-switch email<cr>
+nmap -builtin vs :tgroup-switch<space>
+nmap -builtin <space><space> :tgroup-switch<space>
+" specific tab group switching
+nmap -builtin vv :tgroup-switch main<cr>
+nmap -builtin va :tgroup-switch animu_y_mango<cr>
+nmap -builtin vp :tgroup-switch prog<cr>
+nmap -builtin vw :tgroup-switch school<cr>
 " rename group
-nmap -builtin vr :tgroup-title<Space>
-nmap -builtin vd :tgroup-delete<Space>
+nmap -builtin vr :tgroup-title<space>
+nmap -builtin vd :tgroup-delete<space>
 " display tabgroup title on statusline
 "https://github.com/azuwis/.pentadactyl/blob/master/rc
 js <<EOF
