@@ -8,7 +8,7 @@ if [ -n "$1" ]; then
 	if [ "$1" == "termite" ]; then
 		(xdotool search --onlyvisible --classname $1 windowactivate && xdo hide -n $1) ||\
 		(bspc rule -a $1 -o floating=on && xdotool search --classname $1 windowmap) ||\
-		(bspc rule -a $1 -o floating=on && $1 -e "/bin/zsh -c 'sleep 0.01 && xdo move -x 0 -y 16 && xdo resize -w +800 && tmux attach-session -dt dropdown || tmuxinator dropdown'" &)
+		(bspc rule -a $1 -o floating=on && $1 -e "/bin/zsh -c 'sleep 0.01 && xdo move -x 0 -y 14 && xdo resize -w +800 && tmux attach-session -dt dropdown || tmuxinator dropdown'" &)
 	elif [ "$1" == "Terminology" ]; then
 		# inconsolata font; no visual bell; 256 colors
 		# window class is main for some bizzare reason
