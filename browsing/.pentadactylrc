@@ -127,6 +127,7 @@ silent qmark a https://bbs.archlinux.org/
 silent qmark A http://www.anime4fun.com/
 silent qmark b http://bato.to/
 silent qmark B http://www.dustloop.com/forums/index.php?/forum/63-blazblue/
+silent qmark c http://forum.colemak.com/ 
 silent qmark e http://www.exitpath-levelmakers.forumotion.com/
 silent qmark E https://ep-sys.appspot.com/login.jsp
 silent qmark f http://www.4chan.org/
@@ -175,11 +176,14 @@ bmark('Duck Duck Go', 'http://duckduckgo.com/?q=%s', 'd')
 bmark('Post to Twitter', 'http://twitter.com/home?status=%s', 'tweet')
 bmark('Quickly Get to Subreddit', 'http://www.reddit.com/r/%s/', 'r')
 bmark('Rotten Tomatoes Search', 'http://www.rottentomatoes.com/search/?search=%s', 'rt')
+bmark('Search Albums', 'http://www.allmusic.com/search/all/%s', 'mus')
 bmark('Search Anime4fun', 'http://www.anime4fun.com/search?keyword=%s', 'aff')
 bmark('Search Azlyrics', 'http://search.azlyrics.com/cgi-bin/azseek.cgi?q=%s', 'az')
-bmark('Search Fakku', 'http://www.fakku.net/search/%s', 'fk')
+bmark('Search Deviantart', 'http://www.deviantart.com/?q=%s', 'dv')
+// bmark('Search Fakku', 'http://www.fakku.net/search/%s', 'fk')
 //search tags
 bmark('Search Batoto', 'http://bato.to/search?name_cond=c&name=%s', 'bt')
+bmark('Search Baka Renders', 'http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND', 'bkr')
 bmark('Search Fluffy.is', 'http://fluffy.is/search.php?folders=&name=%s', 'fl')
 bmark('Search Full Fights', 'http://anime.fullfights.org/?s=%s', 'fu')
 bmark('Search Gelbooru', 'http://gelbooru.com/index.php?page=post&s=list&tags=%s', 'gel');
@@ -187,24 +191,16 @@ bmark('Search Github', 'http://github.com/search?q=%s', 'gh')
 bmark('Search GoGo', 'http://www.gogoanime.com/?s=%s', 'gg')
 bmark('Search with Hoogle', 'http://www.haskell.org/hoogle/?hoogle=%s', 'hg')
 bmark('Search MAL', 'http://myanimelist.net/anime.php?q=%s', 'mal')
+bmark('Search MAL for manga', 'http://myanimelist.net/manga.php?q=%s', 'mmal')
 bmark('Search Tumblr', 'http://www.tumblr.com/search/%s', 't')
 bmark('Search Youtube', 'http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search', 'y')
+bmark('Search ZeroChan', 'http://www.zerochan.net/%s', 'zch');
 bmark('Startpage', 'https://startpage.com/do/metasearch.pl?q=%s', 's')
 bmark('YubNub', 'http://yubnub.org/parser/parse?command=%s', 'yubnub');
 
 /*
-
-gines
 " alternative syntax:
 " silent bma -tags searchengine -title 'Arch Wiki' http://wiki.archlinux.org/index.php?search=%s -k aw
-  
-http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND
-
-deviantart search
-http://www.deviantart.com/?q=%s
-
-zerochan
-http://www.zerochan.net/%s
 
 alt to gim
 http://www.googleimageripper.com/#!/?search=true&key=puppies&page_start=1&safemode=on&tbs=any&silu=yes&autoremove_not_found=yes
@@ -237,6 +233,16 @@ command bml-reddit-submit-link -description "Submit Current Link to Reddit" open
 
 command bml-tumblr-share -descripiton "Share Current Page to Tumblr" open javascript:var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://www.tumblr.com/share',l=d.location,e=encodeURIComponent,p='?v=3&u='+e(l.href)%20+'&t='+e(d.title)%20+'&s='+e(s),u=f+p;try{if(!/^(.*.)?tumblr[^.]*$/.test(l.host))throw(0);tstbklt();}catch(z){a%20=function(){if(!w.open(u,'t','toolbar=0,resizable=0,status=1,width=450,height=430'))l.href=u;};if(/Firefox/.test(navigator.userAgent))setTimeout(a,0);else%20a();}void(0)
 "}}}
+
+" javascript custom searches
+" thanks to mdegat01; I remember when lifehacker used to be interesting
+" http://jsfiddle.net/mdegat01/WSLak/
+" http://lifehacker.com/5973225/four-more-custom-searches-you-should-enable-in-your-browser-right-now
+command! customsearch -description "more custom search options" -nargs=1 open javascript:var url='<args>';if(!String.prototype.trim){String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,'')}}(function(u,m,h,n){var WC={'e':m[1]||n,'h':h||n,'q':(m[1]||h)?(h+' '+m[1]).trim():n,'d':window.location.hostname,'u':window.location.href,'t':document.title,'l':n};var w='[';for(var key in WC){if(WC.hasOwnProperty(key)){w+=key}}w+=']';var re=new RegExp('%((?:\\('+w+'(?:\\|\\|'+w+')+\\))|'+w+')','g');var sU=function(p){if(p){WC.l=p.coords.latitude+'%20'+p.coords.longitude}u=u.replace(re,function(match,p1,off,str){return encodeURIComponent((eval(p1.replace(new RegExp(w,'g'),'WC.$&'))||''))});switch((m[2]||'c').toLowerCase()){case'w':window.open(u,'Omnibar Window','toolbar=0,status=0,resizable=1,width=1100,height=762');break;case't':window.open(u,'_blank');break;default:window.location.href=u;break}};var lTest=/%(?:\([^)]*)?\bl\b/.test(u);if(navigator.geolocation&&lTest){navigator.geolocation.getCurrentPosition(sU)}else{if(lTest){alert('Geolocation%20is%20not%20supported%20by%20this%20browser.')}sU()}})(url,(/^(.*?)([wtc])?$/i.exec('%s')),((window.getSelection?window.getSelection():(document.getSelection?document.getSelection():(document.selection?document.selection.createRange().text:document.selection)))));
+
+command viewgcache,vgc -description "view google cache of page" customsearch http://www.google.com/search?q=cache:%u
+
+command getdirections,gdr -description "get directions from current location with google maps" customsearch http://www.google.com/maps?saddr=%l&daddr=%q
 
 "}}}
 " #==============================
