@@ -3,9 +3,11 @@
 " get caret hints working; better caret mode 
 " set shell = zsh
 " grabbing feed with pageinfo
+" tabdo and url saving.. give save/Delete binding a count
+" a tabgroup where most urls are blacklisted?
 " fix tabgroupie...
 
-" downloads here; then with ranger..
+" downloads here (doesn't work in private mode for some reason)
 silent cd ~/Move
 
 " some sources: {{{
@@ -147,7 +149,7 @@ silent qmark p http://pixiv.net/
 silent qmark P http://pururin.com/
 silent qmark M https://mail.google.com/mail/
 silent qmark q http://quora.com/
-silent qmark r http://reddit.com/  
+silent qmark r http://reddit.com/
 silent qmark R http://redditbooru.com/
 silent qmark s http://myanimelist.net/clubs.php?cid=27907 
 silent qmark S http://stumbleupon.com/
@@ -281,7 +283,7 @@ set verbose=1
 
 " items completed at :open
 " store command line history
-set history=1000
+set history=3000
 
 " despotic.. in allowing focus change
 set strictfocus='chrome:*':laissez-faire,*:despotic
@@ -500,12 +502,16 @@ nmap -builtin Y "+Y
 " U list closed tabs
 nmap -builtin U :undo<Space>
 
-" reload (I can't think of any situation in which macros would be useful..)
+" reload (macros not useful so often)
 nmap -builtin q r
 " hard refresh
 nmap -builtin Q R
 " stop reload
 nmap -ex > stop
+" macro
+nmap -builtin <leader>q qq
+" playback
+nmap -builtin <leader>Q @q
 
 " auto add -tags option when adding bookmarks; would do this with folder option, but it does not exist ._.
 nmap -builtin a a<Space>-tags<Space>
@@ -529,6 +535,9 @@ nmap -builtin Zz zz
  
 " Custom web bindings"{{{
 au Enter * source ~/.pentadactyl/groups.penta
+" delete all groups (turn on/off site specific mappings)
+" nmap -ex <leader>G delgroup!
+" nmap -ex <leader>g source ~/.pentadactyl/groups.penta
 
 " pass all keys 'mode' (i.e. on reddit, 4chan, gmail, and other places with custom bindings)
 nmap -builtin , <pass-all-keys>
@@ -558,8 +567,8 @@ nmap -ex gf viewsource
 " Leader mappings
 map -builtin <leader>t gH
 " image hinting
-map -builtin ti ;I
-map -builtin tI ;i
+map -builtin <leader>i ;I
+map -builtin <leader>I ;i
 
 " Other
 " turn off highlight search
@@ -616,7 +625,7 @@ command -nargs=* to !~/bin/to.sh <args>
 nmap -builtin <space>u <yank-location>:silent to add 
 
 " open saved tabs wiki
-nmap -ex <space>U silent !~/bin/to.sh open_win
+nmap -ex <space>U silent to open_win
 
 " :tabdo to loop overtabs so to add all would do :tabdo to add
 
@@ -631,8 +640,10 @@ nmap -builtin D y:silent to delete<cr>D
 nmap -ex <leader>r silent !~/bin/ranger/ranger_browser_fm.sh toggle
 " see autocommands and corresponding script
 
-" i.e. for images; difference from :w<cr> is that this will save in the current directory (pwd); then close tab
-nmap -builtin <leader>w :w <tab><cr>d
+" i.e. for images; difference from :w<cr> is that this will save in the current directory (pwd) for non-private windows
+" nmap -builtin <leader>w :w <tab><cr>d
+" command savedel -count -description "save current page and close tab" <count>normal! :w ~/database/move/<tab><cr>D
+nmap -builtin <leader>w :w ~/database/move/<tab><cr>d
 " download hinting
 nmap -builtin <leader>s ;s
 
@@ -646,7 +657,7 @@ map -ex <leader>b set showtabline!=always,never
 " }}}
 
 " autocommands
-au Enter * :source ~/.pentadactyl/autocommands.penta
+au Enter * source ~/.pentadactyl/autocommands.penta
 
 " cookie management {{{
 " export cookies with https://addons.mozilla.org/en-US/firefox/addon/export-cookies/ 
@@ -707,336 +718,3 @@ map -ex <Leader>dd dialog downloads
 " nmap -builtin ,c :tabopen about:config<CR>
 
 " }}}
-
-" graveyard"{{{
-" use pterosaur with vim iabbr instead
-" " shorthand"{{{
-" " http://forum.colemak.com/viewtopic.php?id=1804
-" iabbr ab about
-" iabbr about ab
-" iabbr abo above
-" iabbr above abo
-" iabbr ac actual
-" iabbr actual ac
-" iabbr af after
-" iabbr after af
-" iabbr ag again
-" iabbr again ag
-" iabbr l all
-" iabbr all l
-" iabbr lm almost
-" iabbr almost lm
-" iabbr ao also
-" iabbr also ao
-" iabbr alw always
-" iabbr always alw
-" iabbr amc America
-" iabbr America amc
-" iabbr n and
-" iabbr and n
-" iabbr ani animal
-" iabbr animal ani
-" iabbr anr another
-" iabbr another anr
-" iabbr ans answer
-" iabbr answer ans
-" iabbr ne any
-" iabbr any ne
-" iabbr nw anyway
-" iabbr anyway nw
-" iabbr r are
-" iabbr are r
-" iabbr aa area
-" iabbr area aa
-" iabbr ru are you
-" iabbr b be
-" iabbr be b
-" iabbr bc because
-" iabbr because bc
-" " are you okay with = rukw
-" " around = rnd|ro
-" " away = ay 
-" " been = bn 
-" " before = bf
-" " began = bga|ba
-" " begin = bgn|bi
-" " being = bng|bg
-" " below = bl 
-" " best = bs
-" " between = bt|tw
-" " book = bk
-" " both = bo|bh
-" " but - bu
-" " by the way = btw
-" " call = cl
-" " came = ca
-" " can = c
-" " can't = cn
-" " change = ch
-" " children = chd
-" " city = cy
-" " close = cs
-" " come = cm
-" " could = cd
-" " country = cty
-" " different = df
-" " does = ds
-" " doing = dg
-" " done = dn
-" " don't = d
-" " down = dw
-" " each = e|ea
-" " earth = erh
-" " easy = es
-" " eight = 8
-" " English = en|eng
-" " enough = nf
-" " even = ev|vn
-" " ever = er
-" " every = ey
-" " example = x
-" " family = fml
-" " father = ftr|fhr
-" " feet = f3|f8
-" " find = fd
-" " finding = fdg
-" " fine = fn
-" " first = fs
-" " five = 5
-" " follow = fl
-" " follower = flr
-" " food = fod|fu
-" " foot = ft
-" " for = f
-" " for example = fx
-" " forget = fg
-" " form = fo
-" " found = fnd|fw
-" " four = 4
-" " from = fm
-" " future = fut
-" " gave = gv|ga
-" " get = g
-" " girl = gl
-" " give = gi 
-" " going = gg
-" " good = gd
-" " great = g8
-" " ground = gr
-" " group = gp
-" " grow = gw
-" " hadn't = hdt
-" " happen = hpn|ha
-" " happened = hpd
-" " happening = hpng
-" " hasn't = hst
-" " hate = h8
-" " have = h
-" " haven't = ht
-" " having = hg
-" " head = hd
-" " hear = h3
-" " help = hp
-" " here = hr
-" " high = hh
-" " home = hm
-" " hope = ho
-" " hoping = hpg
-" " house = hs
-" " how = hw
-" " I'm = m
-" " image = img
-" " imagine = mgn|imgn
-" " important = imp|ip
-" " Indian = idn
-" " into = nt|i2
-" " is it = zt
-" " it is = tz
-" " it's = s
-" " just = j
-" " keep = kp
-" " kind = kd
-" " kind of = kf
-" " know = kw|kn
-" " large = lg
-" " later = lr
-" " lead = ld
-" " learn = lrn|l3
-" " learned = lrd|lrnd
-" " leave = lev
-" " left = le
-" " letter = ler
-" " life = lf
-" " light = lt
-" " like = lk
-" " line = ln
-" " list = ls
-" " little = ll
-" " live = li
-" " look = lc
-" " love = lv
-" " made = md
-" " make = mk
-" " manage = mg
-" " many = mn
-" " mean = m3
-" " might = mt
-" " mile = mi
-" " miss = mis
-" " more = mr (remove full stop from postfixes)
-" " most = mo
-" " mother = mot
-" " mountain = mtn
-" " move = mv
-" " much = mc
-" " must = ms
-" " name = na
-" " near = nr
-" " need = nd
-" " never = nv
-" " next = nx
-" " night = nit
-" " nine = 9
-" " number = nm
-" " often = ofn
-" " okay = k
-" " okay so = ks
-" " okay so now = ksn
-" " one = 1
-" " only = ol|oy|nl
-" " other = ot
-" " over = ov
-" " page = pg
-" " paper = pp
-" " part = pt
-" " people = p
-" " picture = pic
-" " place = pl
-" " plant = plt
-" " play = p3|pla
-" " please = ps|pz
-" " point = pn 
-" " probably = pr|prl|prb
-" " problem = pb
-" " question = qn
-" " quick = qk
-" " quickly = qkl|ql
-" " quite = q
-" " read = rd
-" " really = ry
-" " reason = rs
-" " right = ri|rit|rt
-" " river = rv
-" " run = rn
-" " said = sd
-" " same = sa
-" " say = sy
-" " says = sz
-" " school = scl
-" " second = sc
-" " see = se
-" " seen = sen
-" " sentence = stc
-" " seven = 7
-" " should = shd
-" " shouldn't = sht|shn
-" " show = sh
-" " side = sid
-" " sign = s9
-" " single = sng
-" " six = 6
-" " small = sml
-" " some = sm
-" " someone = som|smn
-" " something = sg
-" " sometimes = st
-" " soon = sn
-" " sorry = sry
-" " sort of = sf
-" " sound = snd
-" " speak = spk
-" " spell = sp|spl
-" " spelling = spg|splg
-" " start = sta
-" " state = stt
-" " statement = stm
-" " stay = sty
-" " steal = stl
-" " still = sl
-" " stop = stp
-" " story = soy|sto
-" " study = sdy
-" " such = su
-" " sure = sr
-" " take = t8
-" " talk = tlk
-" " tell = tl
-" " than = ta
-" " thank you = tu|tku
-" " thanks = tx|thx|tns
-" " that = tt
-" " the = t
-" " their = ter
-" " them = tm
-" " then = tn
-" " there = tr
-" " these = tes
-" " they = ty
-" " thing = tg|thg
-" " think = tnk|tk
-" " this = ts
-" " those = tos
-" " though = th
-" " thought = tht
-" " three = 3
-" " through = thr
-" " time = ti
-" " to be = tb
-" " together = tog
-" " took = tok
-" " tree = t3
-" " two = 2
-" " under = ndr|udr
-" " until = til
-" " use = z
-" " very = v
-" " wait = w8
-" " walk = wa
-" " want = wu
-" " was = o
-" " watch = wch
-" " water = wat|wtr|wer
-" " week = wek
-" " well = w3
-" " well done = wld
-" " went = w9
-" " were = wr
-" " we've = wev|wv
-" " what = wt
-" " what's = ws
-" " when = wn
-" " where = wh
-" " which = wi
-" " while = wli|whl
-" " white = wht
-" " whole = hl
-" " why = y
-" " why did = yd
-" " will = wl
-" " with = w
-" " without = wo
-" " work = wk
-" " world = wrl
-" " would = wd
-" " yeah = yea
-" " year = y3
-" " yes = ye
-" " you = u
-" " you'd = ud
-" " young = yg
-" " your = ur
-" " you're = yr
-" " 
-" "}}}
-" au DownloadPost * js CommandExMode().open("!echo " + BROWSER_NEW_TAB_URL + " > ~/bin/ranger/browser_type.txt")
-"}}}
