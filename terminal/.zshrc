@@ -852,6 +852,7 @@ alias tl='tmux list-sessions'
 
 # Other Program Aliases
 alias -g wifi='wifi-menu'
+alias brolink="node ~/.vim/bundle/browserlink.vim/brolink/brolink.js"
 alias sfh='screenfetch'
 alias wee='weechat'
 alias nb='newsbeuter'

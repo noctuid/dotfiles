@@ -908,6 +908,9 @@ let g:table_mode_toggle_map = 'm'
 
 " Emmet vim
 map <leader>y <C-y>,
+" just for html and css
+let g:user_emmet_install_global = 0
+autocmd FileType html,css EmmetInstall
 
 " auto-pairs
 " use closing bracket to jump outside even if not next char
@@ -1509,6 +1512,14 @@ NeoBundle 'vimwiki/vimwiki'
 NeoBundle 'sjl/gundo.vim'
 " html generation
 NeoBundle 'mattn/emmet-vim'
+
+" reload html page displayed in browser when changes
+NeoBundle 'jaxbot/browserlink.vim'
+" alt:
+" guard and guard-livereload
+" live reload browser plugin and NeoBundle 'flomotlik/vim-livereload'
+" vimfox
+
 " password syntax highlighting/hiding stuff
 NeoBundle 'aaronbieber/vim-vault'
 
