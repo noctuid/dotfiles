@@ -141,7 +141,7 @@ silent nmap -group chanthread -builtin e 15<up>
 
 " download 4chan thread images; choose single shot or not
 " silent nmap -group chan -builtin <leader>f y:silent !~/bin/dlf.sh chan <c-v><c-v> 
-silent nmap -group chan -ex <leader>f execute "silent !~/bin/dlf.sh 4chan " + buffer.URL + " &"
+silent nmap -group chan -ex <leader>f execute "silent !~/bin/pentadactyl/dlf.sh 4chan " + buffer.URL + " &"
 
 " Gotos
 silent nmap -group chan -ex ga open http://www.4chan.org/a
@@ -201,7 +201,7 @@ silent nmap -group comic <leader>f -ex dta|silent !~/bin/pentadactyl/dlf.sh comi
 
 "Gelbooru"{{{
 group gel -description "jelly" -locations gelbooru.com
-silent nmap -group gel -ex <leader>f execute 'silent !~/bin/dlf.sh gel "' + buffer.URL + '" &'
+silent nmap -group gel -ex <leader>f execute 'silent !~/bin/pentadactyl/dlf.sh gel "' + buffer.URL + '" &'
 
 "}}}…
 
