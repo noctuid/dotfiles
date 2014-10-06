@@ -1,6 +1,7 @@
 #
 # ~/.bashrc
 #
+# still have bash as startup shell
 
 # export#{{{
 # export for bspwm reloading
@@ -9,7 +10,7 @@ export BSPWM_HISTORY=/tmp/bspwm.history
 export BSPWM_STACK=/tmp/bspwm.stack
 
 export PANEL_FIFO="/tmp/panel-fifo"
-export PANEL_HEIGHT=20
+export PANEL_HEIGHT=14
 export PANEL_FIFO=/tmp/panel-fifo
 export PANEL2_FIFO=/tmp/panel-fifo2
 export PATH=$PATH:~/.config/bspwm/panel

@@ -79,12 +79,13 @@ export PAGER=vimpager
 export BROWSER=firefox
 
 # for bar for bspwm
+# if ever start using zsh as startup shell and a second panel again
 export PANEL_FIFO="/tmp/panel-fifo"
 export PANEL2_FIFO="/tmp/panel-fifo2"
-# export PANEL_HEIGHT=14
-# export BSPWM_TREE=/tmp/bspwm.tree
-# export BSPWM_HISTORY=/tmp/bspwm.history
-# export BSPWM_STACK=/tmp/bspwm.stack
+export PANEL_HEIGHT=14
+export BSPWM_TREE=/tmp/bspwm.tree
+export BSPWM_HISTORY=/tmp/bspwm.history
+export BSPWM_STACK=/tmp/bspwm.stack
 
 # }}}
 #==============================
