@@ -60,11 +60,11 @@ antigen apply
 # http://askql.wordpress.com/2011/01/11/zsh-writing-own-completion/
 # add custom completion scripts
 fpath=(~/.zsh/completion $fpath)
- 
+
 # compsys initialization
 autoload -U compinit
 compinit
- 
+
 # show completion menu when number of options is at least 2
 zstyle ':completion:*' menu select=2
 # }}}
@@ -129,7 +129,9 @@ export LESS_TERMCAP_so=$'\E[01;44;33m'          # begin standout-mode - info box
 export LESS_TERMCAP_ue=$'\E[0m'                 # end underline
 export LESS_TERMCAP_us=$'\E[01;32m'             # begin underline
 
-#========== Prompt ==========
+#===============
+# Prompt
+#===============
 # using custom with antigen (see antigen)
 
 # show vi mode
@@ -168,7 +170,11 @@ setopt interactive_comments
 
 #no beeps
 setopt no_beep
-# ===== Prompt# {{{
+
+# }}}
+#===============
+# Prompt {{{
+#===============
 # Enable parameter expansion, command substitution, and arithmetic expansion in the prompt
 #without, theme doesn't work.. just get $fg.. crap
 setopt prompt_subst
@@ -176,13 +182,17 @@ setopt prompt_subst
 # unset will keep showing "insert" on each line as the rprompt for mode
 setopt transient_rprompt
 # }}}
-# ========== Correction ==========# {{{
+#===============
+# Correction {{{
+#===============
 #spell check commands and offer correction (pdw > pwd)
 setopt correct
 #spell check arguments
 setopt correctall
 # }}}
-# ========== Completion ==========# {{{
+#===============
+# Completion {{{
+#===============
 # if on, tab completion will just show files/dirs instead of normal completions with aliases
 unsetopt completealiases
 
@@ -209,7 +219,9 @@ setopt auto_list
 # ex: completes to Desktop/ from Dktop with cursor before k)
 setopt complete_in_word
 # }}}
-# ========== Globbing ==========# {{{
+#===============
+# Globbing {{{
+#===============
 # treat #, ~, and ^ as part of patterns for filename generation; ex ^ negates following pattern (ls -d ^*.c)
 #ls *.png~Selection_005.png now will exclude that file frome results
 #http://www.refining-linux.org/archives/37/ZSH-Gem-2-Extended-globbing-and-expansion/
@@ -222,7 +234,10 @@ setopt extended_glob
 #I don't know if I want this unset or set; if unset and do something like ls D* it will add anything that matches that to the line (ex ls Desktop/ Downloads/); with it set, it will behave like ls D(tab) except it will move to the choices immediately without another tab.. even though have it set otherwise so maybe if want that option instead of setting menu_complete can add a wildcard?; does the same with param stuff; not sure if it's supposed to be like this
 setopt GLOB_COMPLETE
 # }}}
-#==========Pushd Stuff and Dir Stack=====see dh alias# {{{
+#===============
+# Pushd Stuff and Dir Stack{{{
+#===============
+# see dh alias
 #http://zsh.sourceforge.net/Intro/intro_6.html
 DIRSTACKSIZE=8
 
@@ -244,8 +259,9 @@ setopt pushd_ignore_dups
 # No more annoying pushd messages
 setopt PUSHD_SILENT
 # }}}
-# ========== History ==========# {{{
-# HISTORY
+#===============
+# History {{{
+#===============
 # lots of it
 HISTSIZE=100000
 SAVEHIST=100000
@@ -282,7 +298,6 @@ setopt hist_ignore_dups
 # imports new commands and appends typed commands to history
 setopt share_history
 
-# }}}
 # }}}
 #===============
 #}}}
@@ -414,13 +429,16 @@ bindkey -a v enter-copy-mode
 
 # 'leader' bindings
 bindkey -a -r t
+
 # run man page of current command on cli and keep there when exit manpage
 bindkey -a tm run-help
+
 # for re-entering ranger # {{{
 enter-ranger() { xdotool key control+d }
 zle -N enter-ranger
 bindkey -a tr enter-ranger
 # }}}
+
 # re-enter vim# {{{
 #  http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
 fancy-ctrl-z () {
