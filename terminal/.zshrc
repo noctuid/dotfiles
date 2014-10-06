@@ -91,26 +91,24 @@ export BSPWM_STACK=/tmp/bspwm.stack
 #==============================
 # Path {{{
 #==============================
-# add ~/bin to $path for any scripts
-export PATH=$PATH:~/bin
-export Path=$PATH:~/.local/bin
-# export PATH=$PATH:~/bin/artget.py
-export PATH=$PATH:~/bin/mpv
-export PATH=$PATH:~/.config/bspwm/panel
-# for vimus
-export PATH=$PATH:/home/angelic_sedition/.cabal/bin
 # from https://github.com/windelicato/dotfiles/blob/master/.zshrc
-# pathdirs=(
-#     ~/scripts
-# )
-# for dir in $pathdirs; do
-#     if [ -d $dir ]; then
-#         path+=$dir
-#     fi
-# done
+pathdirs=(
+	# for personal scripts
+	~/bin
+	~/.local/bin
+	~/bin/mpv
+	~/.config/bspwm/panel
+	# for vimus
+	~/.cabal/bin
+	# for adb
+	/opt/android-sdk
+)
 
-# so can use adb
-export PATH=$PATH:/opt/android-sdk
+for dir in $pathdirs; do
+    if [ -d $dir ]; then
+        path+=$dir
+    fi
+done
 
 # for rbenv
 eval "$(rbenv init -)"
