@@ -1,9 +1,14 @@
 # set as default shell by changing /etc/zsh/zprofile ... /etc/profile or just do chsh -s /bin/zsh
 # changed back to bash as login shell; history lock problem
 # TODO:
-# make paste binding escape chars like c-s-v does
-# fix android mounting
-# rewrite entire backup section
+# make paste binding that escapes characters
+# equivalent of iabbr
+# navigation.zsh
+# clear binding; --insert -- more visible
+
+
+# for testing startup time
+# zmodload zsh/zprof
 
 # Sources:# {{{
 # Some settings or stuff got from here:
@@ -16,6 +21,7 @@
 #https://wiki.gentoo.org/wiki/Zsh/HOWTO#
 # https://github.com/phallus/arch-files/blob/master/config/.zshrc
 #}}}
+
 #==============================
 # Antigen (Plugins) {{{
 #==============================
@@ -38,13 +44,13 @@ antigen bundle zsh-users/zsh-completions src/
 # up and down will go through history based on what you have typed
 antigen bundle zsh-users/zsh-history-substring-search
 
-# text objects for normal mode (eh mostly useful for cc.. maybe gU)
-antigen bundle hchbaw/opp.zsh
-#
-# # Load the theme (frome omz/themes folder)
+# text objects for normal mode (eh mostly useful for cc.. maybe gU; too much of a pain)
+# antigen bundle hchbaw/opp.zsh
+
+# Load the theme (frome omz/themes folder)
 antigen theme fox-mod
-#
-# # Tell antigen that you're done.
+
+# Tell antigen that you're done.
 antigen apply
 
 # #}}}
@@ -75,11 +81,10 @@ export BROWSER=firefox
 # for bar for bspwm
 export PANEL_FIFO="/tmp/panel-fifo"
 export PANEL2_FIFO="/tmp/panel-fifo2"
-export PANEL_HEIGHT=20
+# export PANEL_HEIGHT=14
 # export BSPWM_TREE=/tmp/bspwm.tree
 # export BSPWM_HISTORY=/tmp/bspwm.history
 # export BSPWM_STACK=/tmp/bspwm.stack
-
 
 # }}}
 #==============================
@@ -87,6 +92,7 @@ export PANEL_HEIGHT=20
 #==============================
 # add ~/bin to $path for any scripts
 export PATH=$PATH:~/bin
+export Path=$PATH:~/.local/bin
 # export PATH=$PATH:~/bin/artget.py
 export PATH=$PATH:~/bin/mpv
 export PATH=$PATH:~/.config/bspwm/panel
@@ -150,12 +156,15 @@ setopt cdablevarS
 
 # no_clobber; no_case_glob; numeric_glob_sort; no_flow_control; ignore_eof; rc_expand_param
 
-#================General===================
-#tab autocomplete.. shows available commands, contents of directory, etc. tab again then can scroll through
-# 10 second wait if you do something that will delete everything; then will prompt
+#===============
+# General {{{
+#===============
+# 10 second wait then prompt if use rm with *
 setopt RM_STAR_WAIT
+# prompt if removing more than 3 files
+alias rm='rm -I'
 
-#allow comments 
+#allow comments with #
 setopt interactive_comments
 
 #no beeps
@@ -243,7 +252,7 @@ HISTSIZE=100000
 SAVEHIST=100000
 HISTFILE=~/.zsh_history
 
-# remove command line from history list when first character on the line is a space
+# remove command from history list when first character on the line is a space
 setopt hist_ignore_space
 
 # Remove extra blanks from each command line being added to history
@@ -276,12 +285,14 @@ setopt share_history
 
 # }}}
 # }}}
+#===============
+#}}}
 #==============================
 # Bindings ( _Vim Stuff )# {{{
 #==============================
 . ~/.navigation.zsh
 # enable vi mode on commmand line; no visual
-# http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Standard-Widgets
+# http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html
 # link viins to main.. no option to link vicmd to main?
 bindkey -v
 
@@ -333,7 +344,7 @@ bindkey -M vicmd "J" vi-forward-blank-word-end
 # control backspace
 bindkey -M viins "¸" backward-kill-word
 # http://zshwiki.org./home/zle/bindkeys#why_isn_t_control-r_working_anymore
-bindkey -M vicmd 't?' history-incremental-search-backward
+bindkey -M vicmd 't?' history-incremental-pattern-search-backward
 
 # Clipboard# {{{
 # http://unix.stackexchange.com/questions/25765/pasting-from-clipboard-to-vi-enabled-zsh-or-bash-shell
@@ -404,6 +415,8 @@ bindkey -a v enter-copy-mode
 
 # 'leader' bindings
 bindkey -a -r t
+# run man page of current command on cli and keep there when exit manpage
+bindkey -a tm run-help
 # for re-entering ranger # {{{
 enter-ranger() { xdotool key control+d }
 zle -N enter-ranger
@@ -465,7 +478,7 @@ fs() {
   tmux switch-client -t "$session"
 }
 zle -N fs
-bindkey sS fs
+bindkey -a sS fs
 # }}}
  
 # tmux experimentation {{{
@@ -641,14 +654,20 @@ bindkey -a ss s-s
 #==============================
 # benefit over alias is will show up as new name and fact that can use in aliases and functions
 # will autocomplete from any directory
-Desk=~/Desktop
 books=~/ag-sys/Large/Library/Books
+alias books="nocorrect books"
 
 #}}}
 #==============================
 # _Aliases {{{
 #==============================
-alias tvim="vim -c 'color badwolf|hi Normal ctermfg=252 ctermbg=none'"
+. ~/.zsh/.privatezshrc
+
+function alias_value() {
+	alias "$1" | sed "s/^$1='\(.*\)'$/\1/"
+	# test $(alias "$1")
+}
+alias showa="alias_value"
 #===============
 # Startup and Shutdown# {{{
 #===============
@@ -669,8 +688,8 @@ alias poweroff='sudo systemctl poweroff'
 #===============
 # Symlink All Dotfiles With Stow# {{{
 #===============
-alias deploy='cd ~/dotfiles ; stow -vt ~/ common terminal private vim remap music aesthetics mail news browsing'
-alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim remap music aesthetics mail news browsing'
+alias deploy='cd ~/dotfiles ; stow -vt ~/ common terminal private vim remap media music aesthetics mail_and_cal news browsing scripts startup games'
+alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim remap media music aesthetics mail_and_cal news browsing scripts startup games'
 # }}}
 #===============
 # Git Aliases# {{{
@@ -690,7 +709,7 @@ alias -g gcam='git commit -am'
 
 # push to github (or whatever else)
 # git remote add origin (link)
-alias togh='git push -u origin master'
+alias gpom='git push origin master'
 alias gd='git diff'
 alias gds='git diff --staged'
 function ga {
@@ -726,6 +745,9 @@ alias rldless='lesskey ~/.lesskey'
 
 # xscreensaver after changing xresources
 alias rldxscreen='xrdb -merge ~/.Xresources ; killall xscreensaver ; xscreensaver -no-splash &'
+
+# recreate grub config file; after editing /etc/default/grub
+alias -g regrub="grub-mkconfig -o /boot/grub/grub.cfg"
 
 #update font caches
 alias rldfonts='fc-cache -vf'
@@ -772,6 +794,14 @@ rldemptyb() {
 alias _='sudo'
 alias please='sudo'
 alias fucking='sudo'
+# last
+function l() {
+	$(fc -ln -1)
+}
+# b is for bang!
+function b() {
+	sudo $(fc -ln -1)
+}
 
 # change hostname
 alias -g chhost='hostnamectl set-hostname'
@@ -782,11 +812,6 @@ alias -g pk='pkill'
 # vim as password manager
 alias vpass="mountacct ; vim -u ~/.encrypted_vimrc -x ~/blemish/accts.vault"
 
-# create file then open with vim
-tv() {
-	touch $1
-	vim $1
-}
 # for opening in already open gvim session
 # alias -g gvir="gvim --remote"
 gvir() {
@@ -823,8 +848,9 @@ alias history='fc -l 1'
 alias checkclass='xprop | grep WM_CLASS'
 
 # Package Management {{{
-alias pacss="pacman -Ss"
-alias -g pacs='pacman -S'
+alias pkgfile='nocorrect pkgfile'
+alias pacss="nocorrect pacman -Ss"
+alias -g pacs='nocorrect sudo pacman -S'
 alias pacq='pacman -Q'
 alias pacqm="pacman -Qm"
 alias -g pacupd='pacman -Syu'
@@ -832,6 +858,11 @@ alias -g pacr="pacman -Rns"
 alias -g pacrefls='pacman -Syy'
 
 alias yass='yaourt -Ss'
+
+yap() {
+	yaourt -Ss $1 | vimpager
+}
+
 alias yas='yaourt -S'
 alias yapd='yaourt -Syu --aur'
 alias yaqm='yaourt -Qm'
@@ -839,6 +870,15 @@ alias yaqm='yaourt -Qm'
 alias aur='sudo aura -A'
 alias aurs='sudo aura -As'
 #}}}
+
+# wifi
+alias wifi='sudo wifi-menu'
+alias nts='sudo netctl switch-to'
+alias unnet='sudo netctl stop-all'
+# using ifplugd so shouldn't have to use this
+alias coneth='sudo netctl switch-to ethernet-dhcp'
+alias stopnetctl='sudo systemctl stop netctl.service'
+alias startnetctl='sudo systemctl start netctl.service'
 
 # Tmux {{{
 # new session without nesting; type name afterwards
@@ -851,7 +891,7 @@ alias tl='tmux list-sessions'
 # }}}
 
 # Other Program Aliases
-alias -g wifi='wifi-menu'
+alias tvim="vim -c 'color badwolf|hi Normal ctermfg=252 ctermbg=none'"
 alias brolink="node ~/.vim/bundle/browserlink.vim/brolink/brolink.js"
 alias sfh='screenfetch'
 alias wee='weechat'
@@ -964,12 +1004,13 @@ alias cpwd="pwd | tr -d '\n' | xclip -selection clipboard"
 alias mdp='mkdir -p'
 
 # ls stuff {{{
-alias l='ls -a'
-alias lsa='ls -lah'
-alias ll='ls -l'
+alias l='ls -alh'
+alias lsa='ls -a'
+alias lsl='ls -lh'
 # keep sl for steam locomotive choochoo (sl-patched)
 # http://jeff.robbins.ws/reference/my-zshrc-file
-alias lsd='ls -d'
+alias lsd='ls -d *'
+alias lsf='ls -f'
 alias lr='ls -tRFh'   #sorted by date,recursive,show type,human readable
 alias lst='ls -ltFh'   #long list,sorted by date,show type,human readable
 # no group names
@@ -992,10 +1033,13 @@ alias dh='dirs -v'
 
 # ### not needed due to ZSH autocd opt
 # alias ..='cd ..'
-# alias cd..='cd ..'
-alias cd...='cd ../..'
-alias cd....='cd ../../..'
-alias cd.....='cd ../../../..'
+# alias ...='cd ../..'
+# alias ....='cd ../../..'
+alias .4='cd ../../../..'
+alias .5='cd ../../../../..'
+alias .6='cd ../../../../../..'
+alias .7='cd ../../../../../../..'
+alias .8='cd ../../../../../../../..'
 
 alias -- -='cd -'
 alias 1='cd -'
@@ -1018,25 +1062,63 @@ alias po='popd'
 alias fspace='df -h'
 # finding largest dirs:
 # directories sorted by size
-alias dus='du -sckx * | sort -nr'
+# alias dus='du -sckx * | sort -nr'
 # colored disk usage; colour intelligently; sort; human readable sizes
 alias diskspace='cdu -isdh'
 alias dis='diskspace'
 # there's also ncdu.. but it doesn't support key rebinding I believe, so fuck it
+# dfc is also nice for whole filesystem
 # number of files (not directories)
 alias filecount='find . -type f | wc -l'
 #}}}
+# searching# {{{
+# use silver (or plat) searcher for contents
+alias ags="ag -S"
+
+rs(){
+	find . -name "*$1*"
+}
+alias rf="rs"
+
+alias rsl="find . -name"
+
+# https://github.com/gotbletu/shownotes/blob/master/mlocate_vdiscover_vim_locate.txt
+vloc() {
+	# demo video: http://www.youtube.com/watch?v=X0KPl5O006M
+	# escape spaces, pipe and parentheses
+	keyword=$(echo "$@" | sed -e 's/ /.*/g' -e 's:|:\\|:g' -e 's:(:\\(:g' -e 's:):\\):g')
+	locate -ir "$keyword" | vim -c 'nnoremap q :q<cr>' -R -
+}
+loc() {
+	# demo video: http://www.youtube.com/watch?v=X0KPl5O006M
+	# escape spaces, pipe and parentheses
+	keyword=$(echo "$@" | sed -e 's/ /.*/g' -e 's:|:\\|:g' -e 's:(:\\(:g' -e 's:):\\):g')
+	locate -ir "$keyword"
+}
+# }}}
 
 #}}}
 #===============
 # Ranger # {{{
 #===============
-# alias rn='ranger'
+function ranger-cd {
+# https://github.com/hut/ranger/blob/master/doc/examples/bash_automatic_cd.sh
+# change the directory to the last visited one after ranger quits.
+# "-" to return to the original directory.
+tempfile='/tmp/chosendir'
+/usr/bin/ranger --choosedir="$tempfile" "${@:-$(pwd)}"
+test -f "$tempfile" &&
+if [ "$(cat -- "$tempfile")" != "$(echo -n `pwd`)" ]; then
+cd -- "$(cat "$tempfile")"
+fi
+rm -f -- "$tempfile"
+}
+
 rn() {
- case $1 in     
-  dwn) ranger ~/Move ;;
-  vim) ranger ~/.vim ;;
-  *)   ranger ;;
+ case $1 in
+  dwn) ranger-cd ~/Move ;;
+  vim) ranger-cd ~/.vim ;;
+  *)   ranger-cd ;;
  esac
 }
 
@@ -1099,60 +1181,73 @@ alias hdmiadd='xrandr --output HDMI1 --auto --right-of LVDS1 && bspc monitor HDM
 #===============
 # alias xbox='sudo xboxdrv --silent --detach-kernel-driver'
 # alias controller='xbox'
+# experimenting:
+# sudo xboxdrv --deadzone 4000 --dpad-as-button --trigger-as-button --ui-axismap "x2=REL_X:10,y2=REL_Y:10,x1=KEY_A:KEY_D,y1=KEY_W:KEY_S" --ui-buttonmap "tl=KEY_LEFTSHIFT,tr=KEY_LEFTCTRL" --ui-buttonmap "a=KEY_SPACE,b=KEY_C,x=KEY_1,y=KEY_R" --ui-buttonmap "lb=KEY_Q,rb=KEY_E" --ui-buttonmap "lt=BTN_LEFT,rt=BTN_RIGHT" --ui-buttonmap "dl=KEY_4,dr=KEY_B,du=BTN_MIDDLE,dd=KEY_TAB" --ui-buttonmap "back=KEY_ESC,start=KEY_ENTER"
 #}}}
 #===============
 # Android Music Syncing # {{{
 #===============
 # alias -g mountand='jmtpfs -o allow_other ~/samsung'
-alias mountand='jmtpfs ~/samsung'
-alias -g umountand='fusermount -u ~/samsung'
-
 # restart adb
 alias adbrestart='adb kill-server ; adb start-server'
-# reload udev rules: (sudo)
-alias -g andudevreload='udevadm control --reload-rules'
+# manually reload udev rules: (sudo)
+alias -g rldudev='udevadm control --reload-rules'
 
-alias -g snandmus='andmusconfig1'
-alias -g andmusconfig1='sync30sec && syncimogen && syncadtr && syncbaao && syncblonde && syncbrandnew && syncbmth && syncchevelle && synccoldplay && syncdgd && syncdeadmau5 && syncdeftones && syncfob && syncffaf && syncgreenday && syncimogen && synckeane && synclydia && syncmuse && syncmcr && syncofmm && syncparamore && syncptv && syncradiohead && syncrage && syncra && syncsenses && syncskrillex && syncsmashingpumpkins && syncsoad && synckillers && syncrja && syncsleeping && synctssf && syncstrokes && syncthrice && syncuverworld'
+alias mountand="jmtpfs ~/mtp"
+alias umountand="fusermount -u ~/mtp"
+
+# http://www.arachnoid.com/android/SSHelper/index.html
+# with ssh: I tried but it was much slower :( even with fast internets
+# (sshdroid, sshelper, zshaolin, etc.)
+#  rsync -azvr --no-perms --no-times --size-only --progress --delete --rsh="ssh -p 2222" /path root@hostip:/path
+
+# MTP is an abomination
+# still get io errors and have to unmount and remount
+function andrsync(){
+	# no perms, times, and size only seems to have fixed some problems was previously having
+	rsync -azvr --no-perms --no-times --size-only --progress --delete $1 ~/mtp/Card/Music
+}
 
 # by bands:# {{{
-alias -g sync30sec='rsync -vr --delete ~/Music/30\ Seconds\ to\ Mars ~/and/Card/Music'
-alias -g syncadtr='rsync -vr --delete ~/Music/A\ Day\ To\ Remember ~/and/Card/Music'
-alias -g syncalexd='rsync -vr --delete ~/Music/Asking\ Alexandria ~/and/Card/Music'
-alias -g syncbaao='rsync -vr --delete ~/Music/Being\ As\ An\ Ocean ~/and/Card/Music'
-alias -g syncblonde='rsync -vr --delete ~/Music/Blonde\ Redhead ~/and/Card/Music'
-alias -g syncbrandnew='rsync -vr --delete ~/Music/Brand\ New ~/and/Card/Music'
-alias -g syncbmth='rsync -vr --delete ~/Music/Bring\ Me\ the\ Horizon ~/and/Card/Music'
-alias -g syncchevelle='rsync -vr --delete ~/Music/Chevelle ~/and/Card/Music'
-alias -g synccoldplay='rsync -vr --delete ~/Music/Coldplay ~/and/Card/Music'
-alias -g syncdgd='rsync -vr --delete ~/Music/Dance\ Gavin\ Dance ~/and/Card/Music'
-alias -g syncdeadmau5='rsync -vr --delete ~/Music/Deadmau5 ~/and/Card/Music'
-alias -g syncdeftones='rsync -vr --delete ~/Music/Deftones ~/and/Card/Music'
-alias -g syncfob='rsync -vr --delete ~/Music/Fall\ Out\ Boy ~/and/Card/Music'
-alias -g syncffaf='rsync -vr --delete ~/Music/Funeral\ For\ A\ Friend ~/and/Card/Music'
-alias -g syncgreenday='rsync -vr --delete ~/Music/Green\ Day ~/and/Card/Music'
-alias -g syncimogen='rsync -vr --delete ~/Music/Imogen\ Heap ~/and/Card/Music'
-alias -g synckeane='rsync -vr --delete ~/Music/Keane ~/and/Card/Music'
-alias -g synclydia='rsync -vr --delete ~/Music/Lydia ~/and/Card/Music'
-alias -g syncmuse='rsync -vr --delete ~/Music/Muse ~/and/Card/Music'
-alias -g syncmcr='rsync -vr --delete ~/Music/My\ Chemical\ Romance ~/and/Card/Music'
-alias -g syncofmm='rsync -vr --delete ~/Music/Of\ Mice\ \&\ Men ~/and/Card/Music'
-alias -g syncparamore='rsync -vr --delete ~/Music/Paramore ~/and/Card/Music'
-alias -g syncptv='rsync -vr --delete ~/Music/Pierce\ The\ Veil ~/and/Card/Music'
-alias -g syncradiohead='rsync -vr --delete ~/Music/Radiohead ~/and/Card/Music'
-alias -g syncrage='rsync -vr --delete ~/Music/Rage\ Against\ The\ Machine ~/and/Card/Music'
-alias -g syncra='rsync -vr --delete ~/Music/Rise\ Against ~/and/Card/Music'
-alias -g syncsenses='rsync -vr --delete ~/Music/Senses\ Fail ~/and/Card/Music'
-alias -g syncskrillex='rsync -vr --delete ~/Music/Skrillex ~/and/Card/Music'
-alias -g syncsmashpumpkins='rsync -vr --delete ~/Music/Smashing\ Pumkins ~/and/Card/Music'
-alias -g syncsoad='rsync -vr --delete ~/Music/System\ Of\ A\ Down ~/and/Card/Music'
-alias -g synckillers='rsync -vr --delete ~/Music/The\ Killers ~/and/Card/Music'
-alias -g syncrja='rsync -vr --delete ~/Music/The\ Red\ Jumpsuit\ Apparatus ~/and/Card/Music'
-alias -g syncsleeping='rsync -vr --delete ~/Music/The\ Sleeping ~/and/Card/Music'
-alias -g synctssf='rsync -vr --delete ~/Music/The\ Story\ So\ Far ~/and/Card/Music'
-alias -g syncstrokes='rsync -vr --delete ~/Music/The\ Strokes ~/and/Card/Music'
-alias -g syncthrice='rsync -vr --delete ~/Music/Thrice ~/and/Card/Music'
-alias -g syncuverworld='rsync -vr --delete ~/Music/UVERworld ~/and/Card/Music'
+function syncandmus() {
+	# andrsync ~/Music/30\ Seconds\ to\ Mars
+	# andrsync ~/Music/A\ Day\ To\ Remember
+	# andrsync ~/Music/Asking\ Alexandria
+	# andrsync ~/Music/Being\ As\ An\ Ocean
+	# andrsync ~/Music/Blonde\ Redhead
+	# andrsync ~/Music/Brand\ New
+	andrsync ~/Music/Bring\ Me\ the\ Horizon
+	andrsync ~/Music/Chevelle
+	# andrsync ~/Music/Coldplay
+	andrsync ~/Music/Dance\ Gavin\ Dance
+	andrsync ~/Music/Deadmau5
+	andrsync ~/Music/Deftones
+	andrsync ~/Music/Fall\ Out\ Boy
+	andrsync ~/Music/Funeral\ For\ A\ Friend
+	andrsync ~/Music/Green\ Day
+	# andrsync ~/Music/Imogen\ Heap
+	andrsync ~/Music/Keane
+	andrsync ~/Music/Lydia
+	andrsync ~/Music/Muse
+	andrsync ~/Music/My\ Chemical\ Romance
+	andrsync ~/Music/Of\ Mice\ \&\ Men
+	andrsync ~/Music/Paramore
+	andrsync ~/Music/Pierce\ The\ Veil
+	andrsync ~/Music/Radiohead
+	andrsync ~/Music/Rage\ Against\ The\ Machine
+	andrsync ~/Music/Rise\ Against
+	andrsync ~/Music/Senses\ Fail
+	andrsync ~/Music/Skrillex
+	andrsync ~/Music/Smashing\ Pumkins
+	andrsync ~/Music/System\ Of\ A\ Down
+	andrsync ~/Music/The\ Killers
+	andrsync ~/Music/The\ Red\ Jumpsuit\ Apparatus
+	andrsync ~/Music/The\ Sleeping
+	andrsync ~/Music/The\ Story\ So\ Far
+	andrsync ~/Music/The\ Strokes
+	andrsync ~/Music/Thrice
+	andrsync ~/Music/UVERworld
+}
 # }}}
 # }}}
 #===============
@@ -1242,15 +1337,14 @@ function bahamut() {
 	then
 		kill -INT $$
 	fi
-	mountsoma && sndot
 	if [ "$1" == "online" ];then
-		mountbkonlsoma && \
+		mountsoma && sndot ; mountbkonlsoma && \
 		rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk-onl
 		umountbkonlsoma
 		sngdrive
 	else
 		# to usb
-		mountbkdrivesoma && \
+		mountsoma && sndot ; mountbkdrivesoma && \
 		rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk
 		umountbkdrivesoma
 	fi
@@ -1375,6 +1469,26 @@ snpspdata() {
 # Other Functions# {{{
 #===============
 
+# from omz I think
+function zsh_stats() {
+	fc -l 1 | awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n20
+}
+
+function take() {
+	mkdir -p $1
+	cd $1
+}
+
+# pipe into head; optionally specify line number
+function he() {
+	# http://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash/806923#806923
+	if [[ "$1" =~ ^[0-9]+$ ]] ; then
+		"${@:2}" | head -n $1
+	else
+		"$@" | head -n 15
+	fi
+}
+alias he="nocorrect he"
 # from: https://github.com/z1lt0id/awesome/blob/master/.bashrc 
 # sanitize - set file/directory owner and permissions to normal values (644/755)
 # Usage: sanitize <file>
@@ -1458,6 +1572,7 @@ function nicemount() { (echo "DEVICE PATH TYPE FLAGS" && mount | awk '$2="";1') 
 # }}}
 
 # }}}
+#===============
 # }}}
 #==============================
 
@@ -1522,3 +1637,6 @@ export PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D"
 # }}}
 
 # }}}
+
+
+# zprof
