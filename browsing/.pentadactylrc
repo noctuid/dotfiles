@@ -181,7 +181,7 @@ bmark('Quickly Get to Subreddit', 'http://www.reddit.com/r/%s/', 'r')
 bmark('Rotten Tomatoes Search', 'http://www.rottentomatoes.com/search/?search=%s', 'rt')
 bmark('Search Albums', 'http://www.allmusic.com/search/all/%s', 'mus')
 bmark('Search Anime4fun', 'http://www.anime4fun.com/search?keyword=%s', 'aff')
-bmark('Search Azlyrics', 'http://search.azlyrics.com/cgi-bin/azseek.cgi?q=%s', 'az')
+bmark('Search Azlyrics', 'http://search.azlyrics.com/search.php?q=%s', 'az')
 bmark('Search Deviantart', 'http://www.deviantart.com/?q=%s', 'dv')
 // bmark('Search Fakku', 'http://www.fakku.net/search/%s', 'fk')
 //search tags
