@@ -7,3 +7,10 @@ sanitize() {
     sudo chmod -R u=rwX,go=rX "$@"
     sudo chown -R ${USER}.users "$@"
 }
+
+# extract archive then delete it
+exd() {
+	atool -x $1 && rm $1
+}
+
+# vim: ft=sh:

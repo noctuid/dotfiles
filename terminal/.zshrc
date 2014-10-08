@@ -1139,19 +1139,9 @@ rn() {
  esac
 }
 
-# Image Rotation (imagemagick)
-imrotate() {
-	mogrify -rotate 90 $1
-}
-
-# extract archive then delete it
-exd() {
-	atool -x $1 && rm $1
-}
-
 # }}}
 #===============
-# _Music, Video, & Sound {{{
+# _Music, Video/Images, & Sound {{{
 #===============
 # https://bbs.archlinux.org/viewtopic.php?id=128276
 # usage:
@@ -1188,6 +1178,8 @@ alias musimp='cd ~/Move ; beet import .'
 
 # beet mpdstats; not working
 
+# image rotation
+alias imrotate="mogrify -rotate 90 $1"
 # connecting to tv
 alias hdmiin='xrandr --output HDMI1 --auto && ponymix set-profile output:hdmi-stereo'
 alias hdmiout='xrandr --output HDMI1 --off && bspc monitor -r X && ponymix set-profile output:analog-stereo'
