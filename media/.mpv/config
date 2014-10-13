@@ -1,7 +1,5 @@
 # default configuration that applies to every file
 [default]
-
-# My Changes {{{
 # screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%f_-_%tH:%tM:%tS
 # F title with removed extension
 # screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
@@ -11,7 +9,11 @@ screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS
 screenshot-format=png
 screenshot-png-compression=5
 sub-scale=1
- }}}
+
+# do I understand this option? not really; but 5.1 plays through speakers instead of hdmi connection (alsa related?)
+audio-channels=empty
+
+framedrop=decoder
 
 # try to use high quality opengl output, with standard opengl, classic xv, and wayland as fallbacks
 # note: opengl has numerous quality/performance trade-off options.
@@ -21,22 +23,11 @@ vo=opengl-hq,opengl,xv,wayland
 # use alsa for audio output, choose pulse, or oss4 as fallback
 ao=alsa,pulse,oss
 
-# prefer using 5.1 channels audio (defaults to 2 - see mpv --channels=help) 
-# mixing is handled by libavcodec unless using "--af-add=pan" (see below)
-channels=5.1
-
 # scale the subtitles to the 3% of the screen size
 # sub-scale=3
 
 # set the window title using the media filename (see Property Expansion section of mpv(1))
 title="mpv - ${filename}"
-
-# add black borders so the movies have the same aspect ratio of the monitor
-# for wide screen monitors
-vf=expand=::::1:16/9:16
-
-# for non wide screen traditional monitors, alternative to the above item
-#vf=expand=::::1:4/3:16
 
 # disable screensaver
 stop-screensaver="yes"
@@ -59,23 +50,8 @@ af=scaletempo
 # allow to increase the maximal volume to 600%
 #softvol-max=600
 
-# skip displaying some frames to maintain A/V sync on slow systems
-framedrop=yes
-# more intense frame dropping (breaks decoding)
-#framedrop=hard
-
 # gapless audio play
 gapless-audio
 
 # custom terminal seek bar
 term-osd-bar-chars = "──╼ ·"
-
-# profile for up-mixing two channels audio to six channels
-# use --profile 2chto6ch to activate
-[2chto6ch]
-af-add=pan=6:1:0:.4:0:.6:2:0:1:0:.4:.6:2
-
-# profile to down-mixing six channels audio to two channels
-# use --profile 6chto2ch to activate
-[6chto2ch]
-af-add=pan=2:0.7:0:0:0.7:0.5:0:0:0.5:0.6:0.6:0:0
