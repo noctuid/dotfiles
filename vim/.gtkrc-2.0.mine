@@ -1,0 +1,6 @@
+# http://stackoverflow.com/questions/9265984/strange-gvim-inner-borders
+# make extra space less noticeable (not white anymore)
+style "vimfix" {
+  bg[NORMAL] = "#282828" # this matches my gvim theme 'Normal' bg color.
+}
+widget "vim-main-window.*GtkForm" style "vimfix"
