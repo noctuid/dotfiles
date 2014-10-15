@@ -34,8 +34,8 @@ cursor_blink = system
 # "block", "underline" or "ibeam"
 cursor_shape = block
 
-# $BROWSER is used by default
-# browser = /usr/bin/firefox
+# now not working without this line (exporting $BROWSER isn't enough?)
+browser = /usr/bin/firefox
 
 # word characters used for word selection
 # (default if unset: all graphic non-punctuation/space characters)
