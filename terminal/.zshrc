@@ -1269,8 +1269,12 @@ function bkhelp() {
 	bahamut (online) - backup soma to usb (or ~/grive and sync to google drive)
 	sin              - small/quick online encrypted backup
 	singluttony      - larger minimal online backup
-	snhometoexternal - sync ~/ to external hard drive
-	syncdatab        - sync Datab to external hard drive
+	snhometoexternal - sync ~/ to external hard drive \$1
+	 - bknsea         - sync ~/ to seagate
+	 - bkhbuffalo     - sync ~/ to buffalo
+	syncdatab        - sync datab to external hard drive \$1
+	 - bkdsea         - sync ~/datab to seagate
+	 - bkdbuffalo     - sync ~/datab to buffalo
 	snpspbk          - backup psp memcard to database
 	snpspdata        - backup psp savedata to database
 	"
@@ -1317,8 +1321,8 @@ alias umountacct="truecrypt -t -d ~/ag-sys/Else/ACCTS"
 # }}}
 
 # Shared# {{{
-alias mountsoma="mount_tc $HOME/soma_ $HOME/ag-sys/"
-alias umountsoma="truecrypt -t -d ~/soma_"
+alias mountsoma="mount_tc $HOME/soma $HOME/ag-sys/"
+alias umountsoma="truecrypt -t -d ~/soma"
 # sync ~/grive to google drive
 alias sngdrive="cd ~/grive/ ; grive -V"
 
@@ -1370,7 +1374,7 @@ alias umountsmallestbktc="truecrypt -t -d ~/grive/smallest_soma_bk"
 
 function sin() {
 	mountsoma && sndot ; mountsmallestbktc && \
-	rsync -avrh --exclude={".Trash/*",".git/*","Portable/*","Gaming/*","Large/*",".themes/*","tmux-powerline/*","bundle/*",".weechat/*","undo/*","Customization/win/*","chats/*"} --include={"*/","*.txt","*.rb","*.py","*.pl","*.hs","*.lua","*.el","*.cpp","*.js","*.penta","*.vim","*.ini","*.xml","*.conf","*.json","*.ytcs","*.tex","*.md","*.mkd","*.mkdn","*config*","*.zsh_history","*.yaml","*.Xmodmap*","*.Xdefaults",".Xresources",".emacs",".gitconfig",".lesskey","xboxdrv",".gtkrc-2.0","*xscreensaver*","*tmuxline*","*keymap*","*navigation*","dotfiles/**rc",".unite/*","TO\ Backup/*","bin/**sh","termite/*","ncmpcpp/*","herbstluftwm/*","ranger/*","surfraw/*",".abook/*","root/*","sxiv/**","panel/**"} --exclude='*' --prune-empty-dirs ~/ag-sys/ ~/smallest_bk
+	rsync -avrh --progress --exclude={".Trash/*",".git/*","Portable/*","Gaming/*","Large/*",".themes/*","tmux-powerline/*","bundle/*",".weechat/*","undo/*","Customization/win/*","chats/*"} --include={"*/","*.txt","*.rb","*.py","*.pl","*.hs","*.lua","*.el","*.cpp","*.js","*.penta","*.vim","*.ini","*.xml","*.conf","*.json","*.ytcs","*.tex","*.md","*.mkd","*.mkdn","*config*","*.zsh_history","*.yaml","*.Xmodmap*","*.Xdefaults",".Xresources",".emacs",".gitconfig",".lesskey","xboxdrv",".gtkrc-2.0","*xscreensaver*","*tmuxline*","*keymap*","*navigation*","dotfiles/**rc",".unite/*","TO\ Backup/*","bin/**sh","termite/*","ncmpcpp/*","herbstluftwm/*","ranger/*","surfraw/*",".abook/*","root/*","sxiv/**","panel/**"} --exclude='*' --prune-empty-dirs ~/ag-sys/ ~/smallest_bk
 	umountsmallestbktc && SpiderOak --batchmode --backup='~/grive/smallest_soma_bk'
 }
 # }}}
@@ -1383,7 +1387,7 @@ alias umountsmallbktc="truecrypt -d ~/grive/small_soma_bk"
 
 function singluttony() {
 	mountsoma && sndot ; mountsmallbktc && \
-	rsync -avrh --exclude={".Trash/*","School/older/*","immunization/*","Library/*","Dictionary/*","*other/**.pdf","Gaming/**.pdf","Programming/**.pdf","Languages/*","\#\#*/**.pdf"} --include={"*/","*.txt","*.odt",".weechat/**","forums/**","*.rtf","*.doc","*.docx","*.pdf","*.html","_used_pics/*"} --exclude='*' --prune-empty-dirs ~/ag-sys/ ~/small_bk
+	rsync -avrh --progress --exclude={".Trash/*","School/older/*","immunization/*","Library/*","Dictionary/*","*other/**.pdf","Gaming/**.pdf","Programming/**.pdf","Languages/*","\#\#*/**.pdf"} --include={"*/","*.txt","*.odt",".weechat/**","forums/**","*.rtf","*.doc","*.docx","*.pdf","*.html","_used_pics/*"} --exclude='*' --prune-empty-dirs ~/ag-sys/ ~/small_bk
 	umountsmallbktc && SpiderOak --batchmode --backup='~/grive/small_soma_bk'
 }
 
@@ -1400,21 +1404,37 @@ function snhometoexternal() {
 	then
 		echo
 	else
-		if [ -d /media/HD-CEU2\ Backup/home_folder ];then
-			rsync -avrh --progress --delete --exclude={".cache/*","grive/*","Dropbox/*","Datab","soma*","Steam/*",".mail/*",".wine/*",".wine_64/*","Music/*","VirtualBox\ VMs/*","ag-sys/*","database/*","blemish/*","private/*","*bk/*","Games/*",".local/share/*"} --prune-empty-dirs ~/ /media/HD-CEU2\ Backup/home_folder
+		if [ "$#" -ne 1 ];then
+			echo "Wrong number of arguments. The function takes one argument for the target sync path."
 		else
-			echo "Error. External hard drive is not mounted or directory is named differently."
+			if [ -d $1 ];then
+				mkdir -p $1/home_bk
+				rsync -avrh --progress --delete --include={"_repos/","_school/","anime/","dotfiles/",".mail/",".cards/",".gnupg/",".mozilla/","Move/","Music/","ps_vita/","wallpaper/","vimwiki/","soma_"} --exclude="/*" --prune-empty-dirs ~/ $1/home_bk
+			else
+				echo "Error. External hard drive is not mounted or directory is named differently."
+			fi
 		fi
 	fi
 }
+
+function snhometoseagate() {
+	snhometoexternal /media/seagate
+}
+alias bkhsea="snhometoseagate"
+
+function snhometobuffalo() {
+	snhometoexternal /media/HD-CEU2\ Backup
+}
+alias bkhbuffalo="snhometobuffalo"
+
  # }}}
 
 # backup database to external harddrive# {{{
-alias mountdatab="mount_tc $HOME/Datab $HOME/database"
-alias umountdatab="truecrypt -d ~/Datab"
+alias mountdatab="mount_tc $HOME/datab $HOME/database"
+alias umountdatab="truecrypt -d ~/datab"
 
-alias mountbkdatab="mount_tc /media/HD-CEU2\ Backup/Datab $HOME/database-bk"
-alias umountbkdatab="truecrypt -d /media/HD-CEU2\ Backup/Datab"
+alias mountbkdatab="mount_tc $1/datab $HOME/database-bk"
+alias umountbkdatab="truecrypt -d $1/datab"
 
 function syncdatab() {
 	echo "Using --delete with rsync. Continue? (y/n)"
@@ -1424,11 +1444,23 @@ function syncdatab() {
 	then
 		echo
 	else
-		mountdatab && mountbkdatab && \
-		rsync -avrh --progress --delete ~/database/ ~/database-bk
-		umountbkdatab
+		if [ "$#" -ne 1 ];then
+		mountdatab && mountbkdatab $1 && \
+		rsync -avrhP --delete ~/database/ ~/database-bk
+		umountbkdatab $1
+		fi
 	fi
 }
+
+function bkdatabtoseagate() {
+	syncdatab /media/seagate
+}
+alias bkdsea="bkdatabtoseagate"
+
+function bkdatabtobuffalo() {
+	syncdatab /media/HD-CEU2\ Backup
+}
+alias bkdbuffalo="bkdatabtobuffalo"
 
 # }}}
 
