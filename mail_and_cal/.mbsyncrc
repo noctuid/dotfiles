@@ -6,7 +6,7 @@ IMAPAccount gmail
 Host imap.gmail.com
 User nocturnalartifice@gmail.com
 # To store the password in an encrypted file use PassCmd instead of Pass
-PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | grep nocturnal | awk '{print $2}'"
+PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | nawk '/nocturnal/ { print $2 }'"
 # Use SSL:
 UseIMAPS yes
 # The following line should work. If get certificate errors, uncomment the two following lines and read the "Troubleshooting" section.
