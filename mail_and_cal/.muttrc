@@ -114,15 +114,13 @@ source ~/.mutt/colors.muttrc
 # Sidebar Settings# {{{
 macro index tb "<enter-command>toggle sidebar_visible<enter><refresh>"
 macro pager tb "<enter-command>toggle sidebar_visible<enter><redraw-screen>"
-# set sidebar_format = 
-# only show last part of path
-set sidebar_shortpath = yes
 set sidebar_delim = ' │'
-# indent subfolders
-set sidebar_folderindent = no
 set sidebar_visible = yes
 set sidebar_width   = 34
 color sidebar_new color221 color233
+# color sidebar_flagged
+# if start using mutt without sidebar frequently, can move these settings to script to prevent startup errors
+source '~/bin/mutt/mutt_sidebar_version.sh|'
 # }}}
 # Status Bar# {{{
 set status_chars  = " *%A"
