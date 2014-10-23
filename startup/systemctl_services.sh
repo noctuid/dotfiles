@@ -1,8 +1,10 @@
 # services have enabled (I don't actually run this) with systemd
 
 # internet
-systemctl enable netctl-auto@wlp3s0.service
-systemctl enable netctl-ifplugd@enp2s0.service
+# systemctl enable netctl-auto@wlp3s0.service
+# systemctl enable netctl-ifplugd@enp2s0.service
+systemctl disable netctl.service
+systemctl enable connman.service
 
 # after properly configuring:
 systemctl enable ufw.service

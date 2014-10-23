@@ -888,14 +888,19 @@ alias aur='sudo aura -A'
 alias aurs='sudo aura -As'
 #}}}
 
-# wifi
+# netctl (if don't have connman installed)
 alias wifi='sudo wifi-menu'
 alias nts='sudo netctl switch-to'
 alias unnet='sudo netctl stop-all'
-# using ifplugd so shouldn't have to use this
-alias coneth='sudo netctl switch-to ethernet-dhcp'
 alias stopnetctl='sudo systemctl stop netctl.service'
 alias startnetctl='sudo systemctl start netctl.service'
+# connman
+alias stopcon="sudo systemctl stop connman.service"
+alias startcon="sudo systemctl start connman.service"
+alias rldcon="sudo systemctl restart connman.service"
+alias conenwifi="connmanctl enable wifi"
+alias conlist="connmanctl scan wifi && connmanctl services"
+alias -g con="connmanctl connect"
 
 # Tmux {{{
 # new session without nesting; type name afterwards
