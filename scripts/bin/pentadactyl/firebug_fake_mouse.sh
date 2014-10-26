@@ -7,7 +7,7 @@ xdotool key Escape && sleep 0.2
 # open menu and copy link
 xdotool mousemove 284 713 click 3
 sleep 0.5
-xdotool mousemove_relative -- 97 -262  click 1
+xdotool mousemove_relative -- 97 -240 click 1
 # stop video playing in broswser
 xdotool mousemove 519 326 click 1 && sleep 0.2
 xdotool key Escape

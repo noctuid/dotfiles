@@ -35,7 +35,7 @@ elif [ "$site" == "comic" ]; then
 	# use emenu to open dta
 	sleep 0.3
 	# highlight download dir for changing; then just hit enter
-	xdotool mousemove 274 530 && xdotool mousedown 1 && xdotool mousemove 551 530 && xdotool mouseup 1
+	xdotool mousemove 275 522 && xdotool mousedown 1 && xdotool mousemove 551 530 && xdotool mouseup 1
 else
 	bspc rule -a termite -o floating=true center=true
 	termite -e "/bin/zsh -c 'xdo resize -w +300 && xdo move -x -150 && xdo resize -h +200 && xdo move -y -100 && ranger'" &
