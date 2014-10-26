@@ -731,6 +731,9 @@ alias -g gr="git rm --cached"
 #===============
 # Reloading things {{{
 #===============
+# kill x
+alias killx='pkill panel ; pkill X'
+
 # zshrc
 alias rld='echo "The Matrix has been reloaded" && . ~/.zshrc'
 

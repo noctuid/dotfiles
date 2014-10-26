@@ -1,7 +1,6 @@
 name: dropdown
 root: ~/
- 
-pre: mpd ~/.mpd/mpd.conf && mpdscribble
+
 windows:
   - music:
     - vimus
