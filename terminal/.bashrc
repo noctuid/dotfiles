@@ -3,22 +3,8 @@
 #
 # still have bash as startup shell
 
-# export#{{{
-# export for bspwm reloading
-export BSPWM_TREE=/tmp/bspwm.tree
-export BSPWM_HISTORY=/tmp/bspwm.history
-export BSPWM_STACK=/tmp/bspwm.stack
-
-export PANEL_FIFO="/tmp/panel-fifo"
-export PANEL_HEIGHT=14
-export PANEL_FIFO=/tmp/panel-fifo
-export PANEL2_FIFO=/tmp/panel-fifo2
-export PATH=$PATH:~/.config/bspwm/panel
-export PATH=$PATH:~/bin
-
-export BROWSER="firefox"
-
-#}}}
+alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim'
+alias rld='echo "The Matrix has been reloaded" && . ~/.bashrc'
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
