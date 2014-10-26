@@ -10,10 +10,11 @@
 bspc config presel_border_color "#B0FFF2"
 bspc config focused_border_color "#d0d293"
 # bspc config focused_border_color "#87875F"
-bspc config normal_border_color "#000000"
+bspc config normal_border_color "#1d282c"
 bspc config active_border_color "#555753"
 bspc config urgent_border_color "#4e9a06"
 #}}}
+
 # settings#{{{
 bspc config split_ratio         0.60
 bspc config borderless_monocle  true
@@ -23,14 +24,14 @@ bspc focus_follows_pointer      true
 bspc config auto_cancel         true
 bspc config ignore_emwh_focus   true
 bspc config border_width        2
-bspc config window_gap          8
-# https://bbs.archlinux.org/viewtopic.php?id=149444&p=38
-bspc config normal_frame_opacity 0.0
+# bspc config window_gap        8
+bspc config window_gap          0
+
 bspc config remove_disabled_monitors true
 bspc config remove_unplugged_monitors true
 
-# padding for bar (export PANEL_HEIGHT instead)
-# bspc config bottom_padding 20 
+# When focusing a window, put the pointer at its center; interesting.. not sure if will be useful
+# bspc config pointer_follows_focus true
 #}}}
 
 # Destktops/ Workspaces
@@ -40,18 +41,23 @@ bspc config remove_unplugged_monitors true
 # bspc monitor DP-1 -d VIII IX X
 # You can use `xrandr -q` or `bspc query -M` to find the monitor names.
 #}}}
+
 bspc monitor LVDS1 -d I II III IV V VI VII VIII IX
-# for reloading bspwm without losing window structure
+# for reloading bspwm without losing windows/structure
 if [ -e "$BSPWM_TREE" ] ; then
+	pkill sxhkd
 	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
 	rm "$BSPWM_TREE" "$BSPWM_HISTORY" "$BSPWM_STACK"
+	sxhkd &
+else
+	# only do this after starting x/bspwm (not after reloading bspwm)
+	bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("gvim &")); }' &
+	bspc control --subscribe | awk -F ':' '$4 ~ /^[FO]/ { exit(system("firefox &")); }' &
+	bspc desktop -f ^2
 fi
 
-# Window rules:#{{{
+# 'hooks'{{{
 # open firefox when go to third desktop for first time (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
-# only problem is that if reload bspwm, these will open again; moving them elsewhere messes up things
-bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("gvim &")); }' &
-bspc control --subscribe | awk -F ':' '$4 ~ /^[FO]/ { exit(system("firefox &")); }' &
 # for all desktops, setup home row navigation bindings on empty desktops
 bspc control --subscribe | awk -F ':' '$2 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
 bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.empty_sxhkdrc &"); }' &
@@ -73,12 +79,19 @@ bspc control --subscribe | awk -F ':' '$8 ~ /^O/ { system("pkill sxhkd && sxhkd 
 bspc control --subscribe | awk -F ':' '$9 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
 bspc control --subscribe | awk -F ':' '$10 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
 
+# e.g. changing wallpaper on desktop switch
+# bspc control --subscribe | awk -F ':' '$6 ~ /^[FO]/ { system("imlibsetroot -s w -p c /path/to/wallpaper && pkill conky && conky &"); }' &
+#}}}
+
+# Window rules:#{{{
 # Can check class name of program with: xprop | grep WM_CLASS
 bspc rule -a guake floating=on
 # bspc rule -a Firefox follow=false
 bspc rule -a apvlv dekstop=^5
 bspc rule -a gimp desktop=^4 floating=off
+# worst program of all time
+bspc rule -a skype desktop=^9 follow=false
+# bspc rule -a urxvt border=off
 #}}}
+
 panel &
-# panel2 &
-bspc desktop -f ^2
