@@ -88,7 +88,7 @@ grave ; g
 	gvim
 
 super + u
-	urxvt
+	xterm
 # }}}
 
 # video click

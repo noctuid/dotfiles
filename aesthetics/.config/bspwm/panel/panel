@@ -44,6 +44,8 @@ other='#FF7A52D1'
 lighter_orange='#FFF2AB4E'
 #}}}
 
+# sutils
+# https://github.com/baskerville/sutils
 panel_clock()
 {
         echo  "⭧" $(clock -f '%a %d %I: %M%P')

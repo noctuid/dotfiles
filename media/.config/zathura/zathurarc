@@ -72,6 +72,7 @@ map [normal] tr feedkeys ":open ~/school/LCRCalicoV2.pdf"<Tab><Return>
 # map <cr> to "<Return>
 # wm experementation#{{{
 unmap r
+unmap R
 unmap s
 # #r# is redraw#{{{
 # worskpace/Destkop switch#{{{

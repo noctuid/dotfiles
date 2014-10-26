@@ -15,6 +15,15 @@ space
 
 Return
 	synapse
+	
+super + u
+	urxvt
+
+u
+	urxvt -e "/bin/zsh"
+
+l
+	bspc desktop -f last
 
 # dmenu stuff
 
