@@ -15,16 +15,7 @@ import:
     timid: no
     log: ~/.config/beets/beetslog.txt
 
-# mpd stats tracks statistics: 
-# install python2-pip then sudo pip2 install python-mpd
-# mpdupdate: auto update mpd index when change beets library
-# add genre based on last.fm
-# for lastgenre, pip2 install pylast
-
-# chroma to actually tag based on audio
-# fromfilename to consider name in tagging
-
-plugins: mpdstats fetchart lyrics lastgenre mpdupdate chroma fromfilename discogs
+plugins: mpdupdate fetchart lyrics lastgenre chroma fromfilename discogs
 
 # for use by mpdstats and mpdupdate
 mpd:
@@ -32,24 +23,18 @@ mpd:
     port: 6600
 
 lastgenre:
-    fallback: ''
-    source: artist
+    source: track
     count: 4
 
+# will first check for images in folder importing
 fetchart:
-    auto: no
+    auto: yes
 
 lyrics:
     auto: no
 
-# needed if mpd library in different location
-# mpdstats:
-#    music_directory:
-
 match:
     strong_rec_thresh: 0.04
-
-art_filename: $album_cover
 
 threaded: yes
 color: yes
@@ -64,5 +49,5 @@ paths:
     default: $albumartist/$album%aunique{}/$track $title
     singleton: Non-Album/$artist/$title
     comp: Compilations/$album%aunique{}/$track $title
-        
+
 # vim:set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
