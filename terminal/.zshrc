@@ -882,19 +882,6 @@ alias aur='sudo aura -A'
 alias aurs='sudo aura -As'
 #}}}
 
-# netctl (if don't have connman installed)
-alias wifi='sudo wifi-menu'
-alias nts='sudo netctl switch-to'
-alias unnet='sudo netctl stop-all'
-alias stopnetctl='sudo systemctl stop netctl.service'
-alias startnetctl='sudo systemctl start netctl.service'
-# connman
-alias stopcon="sudo systemctl stop connman.service"
-alias startcon="sudo systemctl start connman.service"
-alias rldcon="sudo systemctl restart connman.service"
-alias conenwifi="connmanctl enable wifi"
-alias conlist="connmanctl scan wifi && connmanctl services"
-alias -g con="connmanctl connect"
 
 # Tmux {{{
 # new session without nesting; type name afterwards
@@ -1184,6 +1171,84 @@ alias hdmiin='xrandr --output HDMI1 --auto && ponymix set-profile output:hdmi-st
 alias hdmiout='xrandr --output HDMI1 --off && bspc monitor -r X && ponymix set-profile output:analog-stereo'
 alias hdmiadd='xrandr --output HDMI1 --auto --right-of LVDS1 && bspc monitor HDMI1 -a X && ponymix set-profile output:hdmi-stereo'
 #}}}
+#===============
+# Internet, VPN, Firewall, and Torrenting
+#===============
+# connecting/general# {{{
+# netctl (if no connman)
+alias wifi='sudo wifi-menu'
+alias nts='sudo netctl switch-to'
+alias stopnetctl='sudo systemctl stop netctl.service'
+alias startnetctl='sudo systemctl start netctl.service'
+# connman
+alias stopcon="sudo systemctl stop connman.service"
+alias startcon="sudo systemctl start connman.service"
+# sometimes necessary for reconnecting with spotty connection; doesn't always work
+# https://bbs.archlinux.org/viewtopic.php?id=188825
+alias rldcon="sudo systemctl stop connman.service && sleep 3 && sudo systemctl start connman.service"
+alias conenwifi="connmanctl enable wifi"
+alias conlist="connmanctl scan wifi && connmanctl services"
+alias -g con="connmanctl connect"
+
+# show active device
+function ipup() { ip link show up | awk -F ":" '/state UP/ {print $2}' }
+
+# identify active network connections; http://alias.sh/identify-and-search-active-network-connections
+alias spy='lsof -i -P +c 0 +M | grep -i "$1"'
+alias netlisteners='lsof -i -P | grep LISTEN'
+# }}}
+
+# vpn# {{{
+# https://github.com/pschmitt/pia-tools
+# show .ovpn files (available servers to use with vc())
+alias pial="ls /etc/openvpn/pia"
+# list vpn connections
+alias vl='systemctl list-units | grep pia@'
+# vpn connect; pia-tools will start transmission service
+# have added -d to pia-up and -a -c to pia-down (/etc/openvpn/pia/) to deny non-vpn traffic when starting the pia@<something> service and re-allow non-vpn traffic and stop the transmission service when stopping the pia service
+vc() { sudo systemctl stop transmission && sudo systemctl start pia@"$1" }
+alias vcs='vc Sweden'
+alias vcc='vc CA_Toronto'
+# stop any pia service
+alias stopv='sudo systemctl stop pia@\*'
+alias voff='stopv'
+alias piai="pia-tools -i"
+alias piac="pia-tools -c"
+# }}}
+
+# torrents# {{{
+alias starttr='sudo systemctl start transmission'
+alias stoptr='sudo systemctl start transmission'
+# https://github.com/gotbletu/shownotes/blob/master/transmission-cli.txt
+# manually add a torrent file or magnent link
+alias -g toa='transmission-remote -a'
+# remove torrent; leaves data alone; give id (e.g. 1) or "all"
+todd() { transmission-remote -t "$1" --remove }
+# remove done.. but without a bunch of greps
+alias tord="transmission-remote -l | awk '/100%.*Done/ {print $1}' | xargs -n 1 -I % transmission-remote -t % -r"
+# pause torrent
+topp() { transmission-remote -t "$1" --stop }
+# pause all
+alias stopto='transmission-remote -t all --stop'
+# unpause
+toup() { transmission-remote -t "$1" --start }
+
+# list
+alias tol='transmission-remote -l'
+# tell num of seeders; give a torrent file
+alias -g tons='transmission-show --scrape'
+alias tocs='tons'
+# continuously show speed; 
+toss() { while true;do clear; transmission-remote -t "$1" -i | grep Speed;sleep 1;done ;}
+
+# tsm-altspeedenable() { transmission-remote --alt-speed ;} # limit bandwidth
+# tsm-altspeeddisable() { transmission-remote --no-alt-speed ;} # dont limit bandwidth
+# }}}
+
+# ufw
+alias ufws='sudo ufw status'
+alias -g ufwd='sudo ufw delete'
+
 #===============
 # _Gaming {{{
 #===============
