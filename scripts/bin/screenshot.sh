@@ -1,9 +1,13 @@
 #!/bin/sh
-# to have window title in screenshot name
 
-# delete everything after a period; probably not necessary.. maybe truncate
-stripped_title=$(xtitle | sed 's/\..*$//')
+# get window title
+# remove punctuation (e.g.forward slashes) and replace whitespace with underscores
+title=$(xtitle | awk -F "-" '{ gsub(/[[:punct:]]/, "") gsub(/\s/, "_"); print $1}')
 
-# figure out how to keep $w and $h; won't work like normal
-scrot -q 75 ~/Move/Screenshots/"%m.%d.%y_%H:%M:%S_-_${w}x${h}_${stripped_title}.png"
-# scrot -q 75 ~/Move/Screenshots/"%m.%d.%y_%H:%M:%S_-_$wx$h_$(xtitle | sed 's/\..*$//').png"
+if [ "$1" == "select" ]; then
+	# if use -s won't be able to use $W and $H in name
+	eval `slop`
+	maim -g $G ~/Move/Screenshots/$(date +%m.%d.%y_%H:%M:%S)_-_"$title"_"$W"x"$H".png
+else
+	maim ~/Move/Screenshots/$(date +%m.%d.%y_%H:%M:%S)_-_"$title".png
+fi

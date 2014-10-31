@@ -66,15 +66,11 @@ alt + y
 # }}}
 
 # Screenshots# {{{
-# fullscreen screen shot; lowered quality
-# add xtitle to name
 Print
-	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
-	# needs fixing:
-	# sh ~/bin/screenshot.sh
+	~/bin/screenshot.sh
 
 alt + p
-	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
+	~/bin/screenshot.sh select
 
 # alt + g
 # 	ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -r 30 -s 1366x768 -i :0.0 -acodec pcm_s16le -vcodec libx264 -preset ultrafast -crf 0 -threads 0 output.mkv
