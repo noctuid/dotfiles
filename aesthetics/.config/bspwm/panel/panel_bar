@@ -33,21 +33,19 @@ lighter_c_4='#FF78B3CC'
 bspwm="%{B$COLOR_BACKGROUND}%{F$COLOR_EIGHT}%{F$COLOR_NINE} ⮗ bspwm%{F$COLOR_EIGHT}"
 
 while read -r line ; do
-	cpu_temp="%{F$lighter_green}$(acpi -t | awk '{print $4}')°C"
-	song=$(mpc current -f "%artist% - %title%")
-	# cut anything in parens from song title
-	songy=${song%(*}
-	song_final="%{F$lighter_green}⮕ $songy"
+	# cpu_temp="%{F$lighter_green}$(acpi -t | awk '{print $4}')°C"
 	case $line in
 		S*)
-			# clock output
+			# right side of bar (battery, clock, volume, date, mailcount, ram usage, connection)
 			sys_infos="%{F$C_7}${line#?}"
 			;;
+		M*)
+			# scrolling music
+			song="%{F$lighter_green}${line#?}"
+			;;
 		T*)
-			# xtitle output
-			title=$(echo "${line#?}" | cut -c 1-70)
-			title_final="%{F$lighter_c_4}⮠ ${title%-*} ♠"
-			# title="%{F$other}⮠ ${line#?} ♠"
+			# scrolling xtitle output
+			title="%{F$lighter_c_4}${line#?}"
 			;;
 		W*)
 			# bspwm internal state
@@ -92,5 +90,5 @@ while read -r line ; do
 			done
 			;;
 	esac
-	printf "%s\n" "%{l}$bspwm $wm_infos  $song_final %{c} $title_final %{r} $sys_infos"
+	printf "%s\n" "%{l}$bspwm $wm_infos $song %{c} $title %{r} $sys_infos"
 done
