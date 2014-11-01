@@ -1,14 +1,14 @@
-The panels are bar aint recursive (see `.config/bspwm/panel`). The current one is based on the default bspwm bar and esn89's bar. I am using [benghaem's scroller](https://github.com/benghaem/dotfiles/tree/master/bin/panel) for scrolling. The top panel from the old screenshot is `not_in_use/panel2`.
+The panels are bar aint recursive (see `.config/bspwm/panel`). The current one is based on the default bspwm bar and [esn89's bar](https://github.com/esn89/dotfiles). I am using [benghaem's scroller](https://github.com/benghaem/dotfiles/tree/master/bin/panel) for scrolling. The top panel from the old screenshot is `not_in_use/panel2`.
 
-The conky theme is charley166's lsd theme (I've modified it to create a black version as well).
+The conky theme is [charley166's lsd theme](http://charley166.deviantart.com/art/LSD-conky-config-v2-0-392188352) (I've modified it to create a black version as well).
 
 Fonts used are Inconsolata (and maybe -g or -dz; I don't remember) for the terminal, and uushi and stlarch for the panels.
 
-I'm using imlibsetroot to set the background (it has a lot of scaling options). I stopped using feh because it can only set pictures and will set the background _over_ backgrounds set by other programs like hsetroot and xsetroot instead of replacing them.
+I'm using `imlibsetroot` to set the background (it has a lot of scaling options). I stopped using feh because it can only set pictures and will set the background _over_ backgrounds set by other programs like `hsetroot` and `xsetroot` instead of replacing them.
 
 My term colors can be found in my termite config.
 
-See `slimlock/customs` for my slimlock theme (I'm just using slimlock; no display manager).
+See `slimlock/customs` for my `slimlock` theme (I'm just using slimlock; no display manager).
 
 I've added scrolling sections to my bar (for the `xtitle` output and for song info, which will now show a pause character if paused) as well as a signal strength indicator (which is only present if there is a wireless connection). I've also started truncating the brightness indicator to a single character except right after it is changed  (an empty circle if at lowest, a full circle if at max, or circle with dot inside otheriwse). I've fixed the audio indicators for whether headphones are plugged in or not and now have the audio section truncate if the volume is muted. Here's a gif:
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/aesthetics/bar.gif "Scrolling BAR")
