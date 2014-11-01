@@ -1,0 +1,208 @@
+# TODO:
+# .better logs
+# .test this (this is untested)
+# .eat newline v. url plugins?
+# .hooks
+
+# thanks to #weechat for always being helpful
+# decided to copy in a bunch of lines of sets instead of messing with actual weechat config files
+# now I have comments and only things I want to change from default
+
+# http://benoliver999.com/2014/02/18/weechatconf.html
+# https://github.com/angelic-sedition/weechat-vimode
+
+# Install scripts# {{{
+# message notifications with libnotify
+/script install lnotify.py
+# execute shell commands from weechat; not necessary anymore, have exec with weechat by default
+# /script install shell.py
+/script install colorize_nicks.py
+# quick buffer jumping (haven't really used); buffer list
+/script install go.py buffers.pl
+# buffer_autoclose.py
+# }}}
+
+# Aliases# {{{
+# add smart filter for specific channel; won't show join/parts for inactive people
+/alias sfilter filter add irc_smart_$server_$channel irc.$server.$channel irc_smart_filter *
+/alias rmsfilter filter del irc_smart_$server_$channel
+
+/alias c connect
+/alias j join
+
+# can make aliases for bindng to multiple commands (using vimode.py)
+/alias spa /buffer 1;/input delete_line
+/alias spr /buffer 2;/input delete_line
+/alias sps /buffer 3;/input delete_line
+/alias spt /buffer 4;/input delete_line
+/alias spd /buffer 5;/input delete_line
+/alias sph /buffer 6;/input delete_line
+/alias spn /buffer 7;/input delete_line
+/alias spe /buffer 8;/input delete_line
+/alias spi /buffer 9;/input delete_line
+/alias spo /buffer 10;/input delete_line
+# }}}
+
+# With WeeChat ≥ 0.3.6, you can enable option "eat_newline_glitch", so that new line char is not added at the end of each line displayed (it will not break URL selection):
+# /set weechat.look.eat_newline_glitch on
+# Important
+# This option may cause display bugs. If you experience such problem, you must turn off this option.
+
+# server options# {{{
+# default nick on all severs
+/set irc.server_default.nicks angelic_sedition
+
+# set up secure password storage (not stored in config file; encrypted in sec.conf)
+# weechat master passphrase
+# /secure passphrase <pass>
+# then can add passwords
+# /secure set freenode <pass>
+# /secure set bitlbee <pass>
+
+# add servers# {{{
+# certfp with rizon (no sasl); don't need to identify with this
+# http://wiki.rizon.net/index.php?title=CertFP#WeeChat
+# ssl
+/server del rizon
+/server add rizon irc.rizon.net/6697
+/set irc.server.rizon.ssl on
+/set irc.server.rizon.ssl_cert "%h/ssl/Rizon.pem"
+/set irc.server.rizon.ssl_dhkey_size 2048
+# weechat will refuse to connect if ssl_verify is on
+# untrusted certificate issuer or something
+/set irc.server.rizon.ssl_verify off
+
+# automatically connect to bitlbe
+/server add &bitlbee localhost -autoconnect
+# not done yet
+/set irc.server.&bitlbee.password "${sec.data.bitlbee}"
+
+# freenode is added by default; choose ssl
+/set irc.server.freenode.addresses "chat.freenode.net/7000"
+# http://weechat.org/files/doc/devel/weechat_quickstart.en.html
+# Freenode does not support the default dhkey size of 2048, so it has to be set to 1024.
+/set irc.server.freenode.ssl on
+/set irc.server.freenode.sasl_password "${sec.data.freenode}"
+/set irc.server.freenode.ssl_dhkey_size 1024
+# }}}
+
+# auto connects/joins
+/set irc.server.freenode.autoconnect on
+# /set irc.server.freenode.autojoin "#weechat,#reddit-anime,#bash,#vim,#haskell,#vimus,#bspwm,#archlinux,#ranger"
+
+/set irc.server.rizon.autoconnect on
+/set irc.server.rizon.autojoin "#/g/technology"
+# #nyaatorrents
+# }}}
+
+# "Insert" mode bindings
+/set weechat.look.key_bind_safe off
+/key bind ¸ /input delete_previous_word
+
+# don't show weechat, freenode, other servers, etc.
+/set buffers.look.hide_merged_buffers server
+
+# don't show time to the left of messages
+/set weechat.look.buffer_time_format ""
+
+# http://www.weechat.org/files/doc/devel/weechat_user.en.html#trigger_data_signal
+# triggers# {{{
+# /trigger monitor @hook_name
+# https://github.com/weechat/weechat/wiki/Triggers
+# default examples # {{{
+# display urls in green
+/trigger addreplace url_color modifier weechat_print "${tg_notify}" "==\S+://\S+==${color:green}$0${color:reset}=="
+
+# notify when people join
+# Execute a command when "FlashCode" joins Channel #weechat on freenode:
+# /trigger add jnotify signal *,irc_in_join "${server}.${channel}.${nick} =~ freenode.#weechat.FlashCode" "" "/shell beep -f 400"
+# 
+
+# Modify messages starting with '>' to display green text:
+/trigger addreplace greentext modifier weechat_print "${tg_notify} && ${tg_message_nocolor} =~ ^>" "/(.*)/${tg_prefix}\t${color:green}${tg_message}"
+
+# }}}
+
+# remove nicklist when tmux split/terminal window is small
+# number (100) is length in characters
+/trigger add resize_small signal signal_sigwinch "${info:term_width} < 100" "" "/bar hide nicklist"
+/trigger add resize_big signal signal_sigwinch "${info:term_width} >= 100" "" "/bar show nicklist"
+
+# channel specific settings# {{{
+# I couldn't get focus to trigger ever (testing with /trigger monitor @focus after setting up a no condition trigger for focus "chat"; maybe it works with /cursor? i'm not sure), so I'm doing this
+# I've added /input delete_line to all my bindings that change buffers (you can use ; to chain commands in aliases), so that I can hook a command run in the new buffer (the buffer change will give the old buffer information)
+# now can grab the current buffer information and check if it is a certain channel or whatever
+
+# example usage:
+# don't want to waste space with the time on really active channels; would rather only show for private messages and channels where a lot of time goes without talking
+/trigger addreplace timeshow command_run "/input delete_line" "${buffer} == irc.freenode.#weechat && ${buffer} == irc.freenode.#vimus" "" "/set weechat.look.buffer_time_format '%H:%M'"
+
+# /trigger addreplace timehide command_run "/input delete_line" "${buffer} != irc.freenode.#weechat && ${buffer} == irc.freenode.#vimus" "" "/set weechat.look.buffer_time_format ''"
+
+# }}}
+# }}}
+
+# filters# {{{
+# joins and parts don't count as channel activity
+# http://weechat.org/files/doc/weechat_faq.en.html
+/set weechat.look.buffer_notify_default message
+/set irc.look.smart_filter on
+# filter joins/parts on #weechat
+/filter add irc_smart_weechat irc.freenode.#weechat irc_smart_filter *
+# /filter add irc_smart_weechats irc.freenode.#weechat* irc_smart_filter *
+
+# to do globally
+# /filter add joinquit * irc_join,irc_part,irc_quit *
+
+# You can hide only join or part/quit with following options:
+# /set irc.look.smart_filter_join on
+# /set irc.look.smart_filter_quit on
+# You can setup delay (in minutes):
+# /set irc.look.smart_filter_delay 5
+
+# more filter examples# {{{
+#  only show activity on this channel if someone says your name (big channels)
+#  /set weechat.notify.irc.freenode.#go-nuts highlight
+
+#  weechat     |   use IRC smart filter on all buffers:
+#  weechat     |     /filter add irc_smart * irc_smart_filter *
+#  weechat     |   use IRC smart filter on all buffers except those with "#weechat" in name:
+#  weechat     |     /filter add irc_smart *,!*#weechat* irc_smart_filter *
+#  weechat     |   filter all IRC join/part/quit messages:
+#  weechat     |     /filter add joinquit * irc_join,irc_part,irc_quit *
+#  weechat     |   filter nicks displayed when joining channels or with /names:
+#  weechat     |     /filter add nicks * irc_366 *
+#  weechat     |   filter nick "toto" on IRC channel #weechat:
+#  weechat     |     /filter add toto irc.freenode.#weechat nick_toto *
+#  weechat     |   filter IRC join/action messages from nick "toto":
+#  weechat     |     /filter add toto * nick_toto+irc_join,nick_toto+irc_action *
+#  weechat     |   filter lines containing "weechat sucks" on IRC channel #weechat:
+#    /filter add sucks irc.freenode.#weechat * weechat sucks
+ # }}}
+ 
+# }}}
+
+# appearance# {{{
+# buffers.pl; put at top
+/bar set buffers position top
+/set buffers.color.current_fg *white
+/set buffers.color.current_bg green
+
+# bars# {{{
+/bar del status
+/bar del mystatus
+# removed +[buffer_count]
+/bar add mystatus root bottom 1 0 [mode_indicator],[buffer_plugin],buffer_number+:+buffer_name+(buffer_modes)+{buffer_nicklist_count}+buffer_zoom+buffer_filter,[lag],[hotlist],completion,scroll,vi_buffer
+
+
+/bar del title
+# removed +(away) and input_prompt
+/bar del myinput
+/bar add myinput root bottom 1 0 [input_search],[input_paste],>>,input_text
+/bar set myinput color_bg black
+/bar set myinput color_fg green
+/bar del input
+
+# }}}
+
+# }}}
