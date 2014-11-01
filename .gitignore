@@ -18,12 +18,12 @@ __pycache__/
 **/ranger/bookmarks
 **/ranger/tagged
 **/ranger/history
-.mpd/
+.mpd/*
 !mpd.conf
 !playlists/
-.weechat/
+.weechat/*
 !.weechatrc
-.mutt/
+.mutt/*
 !mailcap
 .muttnoctrc
 .muttschoolrc
@@ -32,7 +32,7 @@ __pycache__/
 # other people's unmodified plugins/things
 *antigen/
 **./vim/bundle/
-common/.emacs.d/
+common/.emacs.d/*
 !navigation.el
 browsing/.pentadactyl/plugins
 .fonts
@@ -42,7 +42,7 @@ imgur/
 scripts/other/
 
 # ignore all colorschemes but mine
-aesthetics/.pentadactyl/colors/
+aesthetics/.pentadactyl/colors/*
 !colors/custom.penta
 **/.vim/colors/
 
