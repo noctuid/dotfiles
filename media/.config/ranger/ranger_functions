@@ -8,6 +8,18 @@ sanitize() {
     sudo chown -R ${USER}.users "$@"
 }
 
+setbg() {
+	if [ "$1" == "width" ]; then
+		imlibsetroot -s w -p c $2
+		echo -n 'imlibsetroot -s w -p c '$2'' | xsel -bi
+	else
+		imlibsetroot -s h -p c $2
+		echo -n 'imlibsetroot -s h -p c '$2'' | xsel -bi
+	fi
+	killall conky
+	conky -q &
+}
+
 # extract archive then delete it
 exd() {
 	atool -x $1 && rm $1

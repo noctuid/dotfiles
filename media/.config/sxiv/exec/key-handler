@@ -38,17 +38,20 @@ case "$1" in
 	bspc window -c ;;
 #}}}
 
-# set current image to background; width
+# set current image to background and echo to clipboard; restart conky
 "w")
-	imlibsetroot -s w -p c "$2" ;;
-# echo command to do so to clipboard
-"W")
-	echo -n 'imlibsetroot -s w -p c '$2'' | xsel -bi ;;
+	imlibsetroot -s w -p c "$2"
+	echo -n 'imlibsetroot -s w -p c '$2'' | xsel -bi
+	killall conky
+	conky &
+	;;
 # set current image to background; height
 "b")
-	imlibsetroot -s h -p c "$2" ;;
-"B")
-	echo -n 'imlibsetroot -s h -p c '$2'' | xsel -bi ;;
+	imlibsetroot -s h -p c "$2"
+	echo -n 'imlibsetroot -s h -p c '$2'' | xsel -bi
+	killall conky
+	conky &
+	;;
 
 # put current image in trash
 "D")
