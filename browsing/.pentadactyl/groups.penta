@@ -21,7 +21,9 @@ group image -description "Image viewing mappings" -locations .*\.jpg,.*\.jpeg,.*
 nmap -group image -builtin n <down>
 nmap -group image -builtin e <up>
 nmap -group image -builtin i ZI
-nmap -group image -builtin k ZO
+nmap -group image -builtin y ZI
+" if need to copy
+nmap -group image -builtin c y
 nmap -group image -builtin w <right>
 nmap -group image -builtin b <left>
 "}}}
@@ -157,7 +159,7 @@ silent nmap -group chan -ex gy open http://www.4chan.org/y
 
 " Manga and Doujinshi{{{
 " passkeys (for webcomic reader) https://github.com/ameboide/webcomic_reader
-group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/(read)\#.*,pururin.com/view/.*,e-hentai.org/s/.*,bato\.to/read/.*
+group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/(read)\#.*,pururin.com/view/.*,e-hentai.org/s/.*,exhentai.org/s/.*,bato\.to/read/.*
 
 " only pass keys on actual image pages"{{{
 " prev image
