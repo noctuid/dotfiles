@@ -101,7 +101,7 @@ alignment tr
 gap_x 40
 gap_y 50
 minimum_size 265 412
-default_bar_size 308
+default_bar_size 30 8
 draw_shades no
 # change to black
 default_color 000000
