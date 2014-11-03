@@ -9,6 +9,9 @@ export PATH=$PATH:~/.config/bspwm/panel
 # scripts
 export PATH=$PATH:~/bin
 
+# only load ~/.config/ranger/rc.conf
+export RANGER_LOAD_DEFAULT_RC=FALSE
+
 # start mpd, mpdscribble, and devmon (if not already running)
 # https://wiki.archlinux.org/index.php/Music_Player_Daemon#Autostart_on_tty_login
 [ ! -s ~/.mpd/pid ] && mpd

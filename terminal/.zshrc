@@ -77,6 +77,8 @@ export EDITOR=vim
 export PAGER=vimpager
 
 export BROWSER=firefox
+# only load ~/.config/ranger/rc.conf
+export RANGER_LOAD_DEFAULT_RC=FALSE
 
 # }}}
 #==============================
@@ -829,8 +831,10 @@ gvir() {
 	gvim --remote $1
 }
 
-# set wallpaper
-alias bgset='imlibsetroot -s w -p c'
+# set wallpaper (see ranger_functions)
+alias setbgw='setbg width'
+alias setbgh='setbg height'
+
 
 # switch conky theme
 function conkylight() {
@@ -1575,15 +1579,11 @@ snpspdata() {
 #===============
 # Other Functions# {{{
 #===============
+. ~/.config/ranger/ranger_functions
 
 # from omz I think
 function zsh_stats() {
 	fc -l 1 | awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n20
-}
-
-function take() {
-	mkdir -p $1
-	cd $1
 }
 
 # pipe into head; optionally specify line number
@@ -1596,13 +1596,6 @@ function he() {
 	fi
 }
 alias he="nocorrect he"
-# from: https://github.com/z1lt0id/awesome/blob/master/.bashrc 
-# sanitize - set file/directory owner and permissions to normal values (644/755)
-# Usage: sanitize <file>
-sanitize() {
-    sudo chmod -R u=rwX,go=rX "$@"
-    sudo chown -R ${USER}.users "$@"
-}
 
 # Random# {{{
 # --------------------------------------------------------------

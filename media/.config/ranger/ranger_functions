@@ -3,6 +3,10 @@ function m() {
 	# cd $1 # I wish
 }
 
+# from: https://github.com/z1lt0id/awesome/blob/master/.bashrc 
+# sanitize - set file/directory owner and permissions to normal values (644/755)
+# recursive
+# Usage: sanitize <file>
 sanitize() {
     sudo chmod -R u=rwX,go=rX "$@"
     sudo chown -R ${USER}.users "$@"
@@ -18,6 +22,44 @@ setbg() {
 	fi
 	killall conky
 	conky -q &
+}
+
+make_thumbnail() {
+	# http://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash
+	filename=$1
+	extension="${filename##*.}"
+	filename_stripped="${filename%.*}"
+	convert "$filename" -resize 100x100 "$filename_stripped"_resized."$extension"
+}
+
+imp() {
+	# using imgur-cli (imgur-cli-svn in the aur)
+	anon=false
+	# upload with title and caption and copy original url to clipboard
+	# not really sure what the point of name is in addition to title
+	title="random"
+	# description
+	caption="none"
+	# name=$title
+	# file should be the last argument
+	filename=${!#}
+	while getopts t:c:a opt
+	do
+		case $opt in
+		t) title=$optarg;;
+		c) caption=$optarg;;
+		# n) name=$optarg;;
+		a) anon=true;;
+		esac
+	done
+	if $anon; then
+		# send info to file (e.g. in case want delete url or imgur page as well)
+		imgur upload $filename > ${filename%.*}.txt
+		awk '/original/ {print $2}' ${filename%.*}.txt | xclip -selection clipboard
+	else
+		# using xclip; xsel doesn't work consistently for some reason
+		imgur --user=angelicsedition --ask-pass upload -t "$title" -c "$caption" "$filename" | awk '/original/ {print $2}' | xclip -selection clipboard
+	fi
 }
 
 # extract archive then delete it
