@@ -115,6 +115,9 @@ alt + Q
 super + r
 	guake -t
 
+alt + r
+	guake -t
+
 alt + s
 	~/bin/hide_show.sh termite
 
