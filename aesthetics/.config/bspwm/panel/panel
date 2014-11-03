@@ -97,8 +97,8 @@ last_title_display="none"
 # based off:
 # https://github.com/benghaem/dotfiles/blob/master/bin/panel/panel
 fixedTitle() {
-	# remove " - " and display first 50 chars
-	title_display=$(echo "$title_display" | rev | cut -c 4- | rev | cut -c 1-70)
+	# remove " - " and display first 80 chars
+	title_display=$(echo "$title_display" | rev | cut -c 4- | rev | cut -c 1-80)
 	if [ "$title_display" == "" ]; then
 		echo "T| empty |" > "$PANEL_FIFO"
 	else
@@ -115,8 +115,8 @@ titleScroll(){
 			kill $PIDX
 			PIDX="none"
 		fi
-		if [ ${#title_display} -gt 60 ]; then
-			$HOME/.config/bspwm/panel/scroller "$title_display" "60" "T| " "" > "$PANEL_FIFO" &
+		if [ ${#title_display} -gt 80 ]; then
+			$HOME/.config/bspwm/panel/scroller "$title_display" "80" "T| " "" > "$PANEL_FIFO" &
 			PIDX=$!
 		else
 			fixedTitle
@@ -171,8 +171,10 @@ panel_brightness() {
 
 if [ "$brightnessLevel" == "$lastBrightness" ]; then
 	brightnessCount=$(cat brightness_count.txt)
-	((brightnessCount++))
-	echo $brightnessCount > brightness_count.txt
+	if [ $brightnessCount -lt 5 ]; then
+		((brightnessCount++))
+		echo $brightnessCount > brightness_count.txt
+	fi
 	justChanged=false
 else
 	justChanged=true
@@ -325,7 +327,7 @@ panel_volume() {
 # https://github.com/baskerville/sutils
 # https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
 panel_clock() {
-	echo  "⭧" $(clock -f '%a %I: %M%P')
+	echo  "⭧" $(clock -f '%a %d %I: %M%P')
 }
 
 mail_count() {
