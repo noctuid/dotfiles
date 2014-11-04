@@ -1,0 +1,18 @@
+{
+    "auto_date_change": true,
+    "auto_status_change": true,
+    "auto_status_change_if_scored": true,
+    "autoretrieve": "days",
+    "autoretrieve_days": 3,
+    "autosend": "hours",
+    "autosend_at_exit": true,
+    "autosend_hours": 5,
+    "autosend_size": 5,
+    "debug_disable_lock": true,
+    "player": "mpv",
+    "searchdir": "/home/angelic_sedition/anime",
+    "tracker_enabled": true,
+    "tracker_interval": 60,
+    "tracker_process": "mplayer|mplayer2|mpv",
+    "tracker_update_wait": 5
+}
