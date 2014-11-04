@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2009-2013  Roman Zimbelmann <hut@lavabit.com>
+# Copyright (C) 2009-2013  Roman Zimbelmann <hut@lepus.uberspace.de>
 # This configuration file is licensed under the same terms as ranger.
 # ===================================================================
 # This file contains ranger's commands.
@@ -42,9 +42,9 @@
 #      the user pressed 6X, self.quantifier will be 6.
 # self.arg(n): The n-th argument, or an empty string if it doesn't exist.
 # self.rest(n): The n-th argument plus everything that followed.  For example,
-#      If the command was "search foo bar a b c", rest(2) will be "bar a b c"
-# self.start(n): The n-th argument and anything before it.  For example,
-#      If the command was "search foo bar a b c", rest(2) will be "bar a b c"
+#      if the command was "search foo bar a b c", rest(2) will be "bar a b c"
+# self.start(n): Anything before the n-th argument.  For example, if the
+#      command was "search foo bar a b c", start(2) will be "search foo"
 #
 # ===================================================================
 # And this is a little reference for common ranger functions and objects:
@@ -77,55 +77,6 @@
 # ===================================================================
 
 from ranger.api.commands import *
-
-
-# Custom/ Addede
-# empty trash
-class empty(Command):
-    """:empty
-
-    Empties the trash directory ~/.Trash
-    """
-
-    def execute(self):
-        self.fm.run("rm -rf /home/myname/.Trash/{*,.[^.]*}")
-
-# extract with atool
-import os
-from ranger.core.loader import CommandLoader
-
-class extracthere(Command):
-    def execute(self):
-        """ Extract copied files to current directory """
-        copied_files = tuple(self.fm.env.copy)
-
-        if not copied_files:
-            return
-
-        def refresh(_):
-            cwd = self.fm.env.get_directory(original_path)
-            cwd.load_content()
-
-        one_file = copied_files[0]
-        cwd = self.fm.env.cwd
-        original_path = cwd.path
-        au_flags = ['-X', cwd.path]
-        au_flags += self.line.split()[1:]
-        au_flags += ['-e']
-
-        self.fm.env.copy.clear()
-        self.fm.env.cut = False
-        if len(copied_files) == 1:
-            descr = "extracting: " + os.path.basename(one_file.path)
-        else:
-            descr = "extracting files from: " + os.path.basename(one_file.dirname)
-        obj = CommandLoader(args=['aunpack'] + au_flags \
-                + [f.path for f in copied_files], descr=descr)
-
-        obj.signal_bind('after', refresh)
-        self.fm.loader.add(obj)
-
-# Default
 
 class alias(Command):
     """:alias <newcommand> <oldcommand>
@@ -203,7 +154,8 @@ class cd(Command):
             pass
         else:
             dirnames.sort()
-            dirnames = bookmarks + dirnames
+            if self.fm.settings.cd_bookmarks:
+                dirnames = bookmarks + dirnames
 
             # no results, return None
             if len(dirnames) == 0:
@@ -243,7 +195,7 @@ class shell(Command):
         if command:
             if '%' in command:
                 command = self.fm.substitute_macros(command, escape=True)
-            self.fm.execute_command("bash -c 'source ~/.config/ranger/ranger_functions;" + command + "'", flags=flags)
+            self.fm.execute_command('bash -c "source ~/.config/ranger/ranger_functions;' + command + '"', flags=flags)
             # self.fm.execute_command(command, flags=flags)
 
     def tab(self):
@@ -733,6 +685,18 @@ class rename(Command):
     def tab(self):
         return self._tab_directory_content()
 
+class renameConsole(Command):
+    """:renameConsole
+
+    Creates an open_console for the rename command, automatically placing the cursor before the file extension.
+    """
+
+    def execute(self):
+        if "." in self.fm.thisfile.basename:
+            offset = 6 + len(self.fm.thisfile.basename) - self.fm.thisfile.basename[::-1].index('.')
+            self.fm.open_console('rename ' + self.fm.thisfile.basename, position=offset)
+        else:
+            self.fm.open_console('rename ' + self.fm.thisfile.basename)
 
 class chmod(Command):
     """:chmod <octal number>
@@ -971,6 +935,9 @@ class map_(Command):
     resolve_macros = False
 
     def execute(self):
+        if not self.arg(1) or not self.arg(2):
+            return self.fm.notify("Not enough arguments", bad=True)
+
         self.fm.ui.keymaps.bind(self.context, self.arg(1), self.rest(2))
 
 
@@ -1081,7 +1048,10 @@ class scout(Command):
 
         if self.KEEP_OPEN in flags and thisdir != self.fm.thisdir:
             # reopen the console:
-            self.fm.open_console(self.line[0:-len(pattern)])
+            if not pattern:
+                self.fm.open_console(self.line)
+            else:
+                self.fm.open_console(self.line[0:-len(pattern)])
 
         if thisdir != self.fm.thisdir and pattern != "..":
             self.fm.block_input(0.5)
@@ -1244,7 +1214,7 @@ class diff(Command):
     """
     :diff
 
-    Displays a diff of selected files against last last commited version
+    Displays a diff of selected files against the last committed version
     """
     def execute(self):
         from ranger.ext.vcs import VcsError
@@ -1291,3 +1261,23 @@ class log(Command):
 
         pager = os.environ.get('PAGER', ranger.DEFAULT_PAGER)
         self.fm.run([pager, tmp.name])
+
+class flat(Command):
+    """
+    :flat <level>
+
+    Flattens the directory view up to level specified.
+        -1 fully flattened
+        0  remove flattened view
+    """
+
+    def execute(self):
+        try:
+            level = self.rest(1)
+            level = int(level)
+        except ValueError:
+            self.fm.notify("Need an integer number (-1, 0, 1, ...)", bad=True)
+            return
+        self.fm.thisdir.unload()
+        self.fm.thisdir.flat = level
+        self.fm.thisdir.load_content()
