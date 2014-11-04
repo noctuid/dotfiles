@@ -1,0 +1,93 @@
+#!/bin/bash
+# http://www.reddit.com/r/reactiongifs/comments/x55z9/after_i_learned_how_to_make_large_well_compressed/
+# http://superuser.com/questions/556029/how-do-i-convert-a-video-to-gif-using-ffmpeg-with-reasonable-quality
+# TODO:
+# .add start, stop time (make gif/frames for section of video)
+
+function print_help() {
+echo "
+Creates a gif and/or frames from it a video file (last argument).
+-w <width>     specify a width for the final gif (default: 600)
+-f <fps>       specify an fps for the final gif (default: 10)
+-o <filename>  specify an output name (default: output.gif)
+-O <opt level> level/whether to optimize with gifsicle (1-3, default: none/false)
+-c             just create frames from video (default: false)
+               options can be used with: -w, -f
+-u             use existing frames in frames folder and don't create frames (default false)
+               options can be used with: -z, -f, -o, -O
+               Only one or none of the above two should be set.
+               Note: The fps option should be the same value when creating the frames and when making a gif from existing frames or the fps will not be what is specified.
+-h             print help and exit
+
+"
+
+if [ "$1" == "illegal_opt" ]; then
+	exit 1
+else
+	exit 0
+fi
+}
+
+create_frames() {
+	# remove previously created frames
+	rm frames/*
+	# make new frames
+	ffmpeg -i "$full_path" -vf scale=$width:-1 -r $fps frames/ffout%03d.png
+}
+
+make_gif() {
+	convert -fuzz $fuzz_percent% -delay 1/$fps -loop 0 frames/*.png -layers OptimizePlus -layers OptimizeTransparency "$output_name"
+	if $optimize; then
+		gifsicle -O$optimization_level --colors 256 "$output_name" > "${output_name%.*}"_gifsicled.gif
+	fi
+
+}
+
+# default values
+width=600
+fps=10
+fuzz_percent=1.6
+optimize=false
+output_name=output.gif
+create_frames_only=false
+use_existing_frames=false
+
+while getopts w:f:z:O:o:cuh opt
+do
+	case $opt in
+	w) width=$optarg;;
+	f) fps=$optarg;;
+	z) fuzz_percent=$optarg;;
+	O) optimize=true
+	   optimization_level=$optarg;;
+	o) output_name="$optarg";;
+	c) create_frames_only=true;;
+	u) use_existing_frames=true;;
+	h) print_help;;
+	*) print_help illegal_opt;;
+    esac
+done
+
+if ! $use_existing_frames; then
+	# last arg should be the filename, unless using existing frames
+	file=${!#}
+	full_path=$(readlink -f "$file")
+fi
+mkdir -p ~/Move/gif/frames
+cd ~/Move/gif
+
+if $create_frames_only && $use_existing_frames; then
+	echo "create_frames_only and use_existing_frames are not meant to both be used."
+	sleep 1
+	print_help illegal_opt
+elif $create_frames_only; then
+	create_frames
+elif $use_existing_frames; then
+	make_gif
+else
+	create_frames
+	make_gif
+fi
+
+# ffmpeg -i <file> -vf scale=1366:-1 -r 10 frames/ffout%03d.png
+# convert -fuzz 1.6% -delay 1/10 -loop 0 frames/*.png -layers OptimizePlus -layers OptimizeTransparency output.gif
