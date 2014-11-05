@@ -1124,11 +1124,16 @@ rm -f -- "$tempfile"
 }
 
 rn() {
- case $1 in
-  dwn) ranger-cd ~/Move ;;
-  vim) ranger-cd ~/.vim ;;
-  *)   ranger-cd ;;
- esac
+	if [ ! -z "$RANGER_LEVEL" ]; then
+		# https://wiki.archlinux.org/index.php/Ranger
+		# if a ranger session exists, restore it
+		exit
+	fi
+	case $1 in
+		dwn) ranger-cd ~/Move ;;
+		vim) ranger-cd ~/.vim ;;
+		*)   ranger-cd ;;
+	esac
 }
 
 # }}}
