@@ -16,7 +16,7 @@ systemctl enable bitlbee
 systemctl enable slimlock.service
 
 # for printing
-systemctl enable cups.service
+systemctl enable org.cups.cupsd.service
 
 # preloading for commonly used appliations
 systemctl enable preload.service
