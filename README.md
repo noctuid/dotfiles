@@ -83,7 +83,7 @@ The downside of this is that the shell command is much slower if you have a lot 
 [source](https://bbs.archlinux.org/viewtopic.php?id=93025&p=34)
 In `commands.py`, replace with the following under `class shell(Command):`
 
-	self.fm.execute_command("zsh -c 'source /path/to/file;" + command + "'", flags=flags)
+	self.fm.execute_command('bash -c "source /path/to/file;' + command + '"', flags=flags)
 
 # More Interesting Parts of My Workflow:
 ## Create a Modal Interface For Programs That Don't Support Rebinding
