@@ -1369,15 +1369,15 @@ alias umountalltc="truecrypt -t -d"
 function mount_tc() {
 	tc_volume=$1
 	mount_point=$2
-	if [ "$(truecrypt -t -l | grep $tc_volume)" != "" ];then
+	if [ "$(truecrypt -t -l | grep $tc_volume)" != "" ]; then
 		echo "Already mounted."
 	else
-		if [ ! -f $tc_volume ];then
+		if [ ! -f $tc_volume ]; then
 			echo "Error. The specified path ($tc_volume) for the tc volume does not exist."
-			kill -INT $$
-		elif [ "$(ls -A $mount_point)" ];then
+			return 1
+		elif [ "$(ls -A $mount_point)" ]; then
 			echo "Error. Files exist in ($mount_point). Move/delete them."
-			kill -INT $$
+			return 1
 		else
 			mkdir -p $mount_point
 			truecrypt -t $tc_volume $mount_point
@@ -1421,20 +1421,20 @@ function bahamut() {
 	# read is different for zsh
 	read -q REPLY
 	echo
-	if [[ ! $REPLY =~ ^[Yy]$ ]]
-	then
-		kill -INT $$
-	fi
-	if [ "$1" == "online" ];then
-		mountsoma && sndot ; mountbkonlsoma && \
-		rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk-onl
-		umountbkonlsoma
-		sngdrive
+	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+		return 1
 	else
-		# to usb
-		mountsoma && sndot ; mountbkdrivesoma && \
-		rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk
-		umountbkdrivesoma
+		if [ "$1" == "online" ]; then
+			mountsoma && sndot ; mountbkonlsoma && \
+			rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk-onl
+			umountbkonlsoma
+			sngdrive
+		else
+			# to usb
+			mountsoma && sndot ; mountbkdrivesoma && \
+			rsync -avrh --progress --delete ~/ag-sys/ ~/ag-sys-bk
+			umountbkdrivesoma
+		fi
 	fi
 }
 
@@ -1477,7 +1477,7 @@ function snhometoexternal() {
 	echo
 	if [[ ! $REPLY =~ ^[Yy]$ ]]
 	then
-		echo
+		return 1
 	else
 		if [ "$#" -ne 1 ];then
 			echo "Wrong number of arguments. The function takes one argument for the target sync path."
@@ -1517,7 +1517,7 @@ function syncdatab() {
 	echo
 	if [[ ! $REPLY =~ ^[Yy]$ ]]
 	then
-		echo
+		return 1
 	else
 		if [ "$#" -ne 1 ];then
 		mountdatab && mountbkdatab $1 && \
@@ -1550,7 +1550,7 @@ snpspbk() {
 	echo
 	if [[ ! $REPLY =~ ^[Yy]$ ]]
 	then
-		echo
+		return 1
 	else
 		if [ -d /media/MS0/ ];then
 			mountdatab && \
@@ -1568,7 +1568,7 @@ snpspdata() {
 	echo
 	if [[ ! $REPLY =~ ^[Yy]$ ]]
 	then
-		echo
+		return 1
 	else
 		if [ -d /media/MS0/ ];then
 			mountdatab && \
