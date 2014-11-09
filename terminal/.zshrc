@@ -686,8 +686,9 @@ function xless() {
 }
 
 reboot() {
-	truecrypt -d ~/ag-sys/Else/ACCTS ; truecrypt -d ; devmon --unmount-all --no-gui
-	sudo systemctl reboot
+	pkill mpd
+	truecrypt -t -d ~/ag-sys/Else/ACCTS
+	truecrypt -t -d && devmon --unmount-all --no-gui && sudo systemctl reboot
 }
 
 alias poweroff='sudo systemctl poweroff'
