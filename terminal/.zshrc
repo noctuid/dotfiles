@@ -1379,7 +1379,7 @@ function mount_tc() {
 			return 1
 		else
 			mkdir -p $mount_point
-			truecrypt -t $tc_volume $mount_point
+			truecrypt -t --protect-hidden=no --keyfiles= $tc_volume $mount_point
 		fi
 	fi
 }
