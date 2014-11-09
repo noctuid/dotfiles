@@ -844,8 +844,7 @@ function conkylight() {
 	rm ~/dotfiles/aesthetics/.conkyrc
 	cp -r ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/white/.conky ~/dotfiles/aesthetics
 	cp ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/white/.conkyrc ~/dotfiles/aesthetics
-	restow
-	conky &
+	conky > /dev/null 2>&1 &
 }
 function conkydark() {
 	pkill conky
@@ -853,8 +852,7 @@ function conkydark() {
 	rm ~/dotfiles/aesthetics/.conkyrc
 	cp -r ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/black/.conky ~/dotfiles/aesthetics
 	cp ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/black/.conkyrc ~/dotfiles/aesthetics
-	restow
-	conky &
+	conky > /dev/null 2>&1 &
 }
 
 # Show history
