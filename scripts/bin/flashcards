@@ -45,8 +45,7 @@ for line in "${review_lines[@]}";do
 	fi
 	# read -p "Quit? [q]"-n 1 -r
 	read -n 1 -r
-	if [[ $REPLY =~ ^[Qq]$ ]]
-	then
+	if [[ $REPLY =~ ^[Qq]$ ]]; then
 		exit 0
 	fi
 done
@@ -55,12 +54,12 @@ done
 while getopts d:s:nehr opt
 do
 	case $opt in
-	d) card_dir=$optarg;;
+	d) card_dir=$OPTARG;;
 	n) create_set=yes
 	   review_set=no;;
 	e) edit_set=yes
 	   review_set=no;;
-	s) side=$optarg;;
+	s) side=$OPTARG;;
 	r) side=right;;
 	h) print_help;;
 	*) print_help illegal_opt;;
