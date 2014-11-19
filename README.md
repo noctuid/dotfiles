@@ -201,9 +201,26 @@ I initially thought this would be impossible to replicate in the terminal but sp
 See the README in the remap folder for more info.
 
 ## Make Gifs in MPV
-I thought it would be efficient to set up bindings within mpv to create gifs. I previously made a basic script to convert an existing video to a gif in mpv by having a binding to mark the start time and a binding to mark the end time. It's probably best to use the original video file for creating frames, but I've found it much easier (and really without any downside in terms of quality) to just record the active window (usually mpv in fullscren) using ffmpeg and convert that video into a gif instead using ffmpeg and imagemagick's (or graphicsmagick's) convert. This is nice because it works for anything in mpv, even if you're streaming it (e.g. youtube videos). With bindings set up outside of mpv using a hotkey program (e.g. sxhkd), it can be used for any window (e.g. a fullscreen web player) to make a gif not of indecent size with a lack of much hassle.
+I thought it would be efficient to set up bindings within mpv to create gifs. Now that mpv has an a-b loop (issue #1241), I've gone back to using a script (`ffcut`) that first cuts part of a video out and then optionally makes a gif from that part. I have three keys set up in mpv for this: two to adjust the start and end positions and one to execute the script. To deal with videos being streamed, I've added a `-d` flag that will download the video using aria2 before cutting out a section (this assumes mpv has been passed the direct link of the video; see "Stream Any Video in MPV" above). Note that a-b looping still works when streaming, so while it will take longer to create the cut video, it won't take more key presses (the time points can be marked prior to the download). When downloading the video is a hassle, one can always use a start and stop hotkey (for example, bound with sxhkd or in mpv) to screen record what's playing in mpv instead.
 
-See `bin/mpv/`
+The `makegif` script is just a wrapper for ffmpeg, imagemagick, and optionally gifsicle that takes a video, makes frames from it, and then creates an optimized 600 width 10 fps gif. It has much improved. For example, if the output gif is not satisfactory, one can simply use the frames already created and try different options:
+```bash
+makegif <path/to/video>
+# notice that there are some extra frames at the end; go into ~/Move/gif/frames and delete a few at the end
+makegif -u
+# use max optimization with gifsicle and increase fuzz percent
+makegif -u -O 3 -z 1.8
+# changing fps or width values requires remaking the frames (unless you want something sped up/slowed down):
+makegif -w 800 -O 3 -f 15 -o mygiff.gif <path/to/video>
+```
+
+An example gif with default settings (made within mpv):
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/example.gif "Tigre-sama Catches an Arrow")
+
+See 
+`scripts/bin/mpv/`
+`media/.mpv/input.conf`
+
 
 # Credit
 If I've taken anything from anyone else's config file, I've almost always put the url in the relevant config file.

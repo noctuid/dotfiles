@@ -2,15 +2,16 @@
 # http://www.reddit.com/r/reactiongifs/comments/x55z9/after_i_learned_how_to_make_large_well_compressed/
 # http://superuser.com/questions/556029/how-do-i-convert-a-video-to-gif-using-ffmpeg-with-reasonable-quality
 # TODO:
-# .add start, stop time (make gif/frames for section of video)
+# .copy /frames for later if isn't empty and -u isn't used
 
 function print_help() {
-echo "
-Creates a gif and/or frames from it a video file (last argument).
+	echo "
+Creates a gif and/or frames from a video file (last argument) or existing frames (-u).
 -w <width>     specify a width for the final gif (default: 600)
 -f <fps>       specify an fps for the final gif (default: 10)
 -o <filename>  specify an output name (default: output.gif)
 -O <opt level> level/whether to optimize with gifsicle (1-3, default: none/false)
+-z <percent>   choose fuzz percent for convert (default: 1.6)
 -c             just create frames from video (default: false)
                options can be used with: -w, -f
 -u             use existing frames in frames folder and don't create frames (default false)
@@ -21,11 +22,11 @@ Creates a gif and/or frames from it a video file (last argument).
 
 "
 
-if [ "$1" == "illegal_opt" ]; then
-	exit 1
-else
-	exit 0
-fi
+	if [ "$1" == "illegal_opt" ]; then
+		exit 1
+	else
+		exit 0
+	fi
 }
 
 create_frames() {
@@ -52,15 +53,15 @@ output_name=output.gif
 create_frames_only=false
 use_existing_frames=false
 
-while getopts w:f:z:O:o:cuh opt
+while getopts :w:f:z:O:o:cuh opt
 do
 	case $opt in
-	w) width=$optarg;;
-	f) fps=$optarg;;
-	z) fuzz_percent=$optarg;;
+	w) width=$OPTARG;;
+	f) fps=$OPTARG;;
+	z) fuzz_percent=$OPTARG;;
 	O) optimize=true
-	   optimization_level=$optarg;;
-	o) output_name="$optarg";;
+	   optimization_level=$OPTARG;;
+	o) output_name="$OPTARG";;
 	c) create_frames_only=true;;
 	u) use_existing_frames=true;;
 	h) print_help;;
