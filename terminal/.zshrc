@@ -1601,6 +1601,16 @@ function he() {
 }
 alias he="nocorrect he"
 
+# send all output to /dev/null, including error output
+function qt() {
+	$1 > /dev/null 2>&1 &
+}
+
+# save errors
+function qte() {
+	$1 2> "${1}_error.log" &
+}
+
 # Random# {{{
 # --------------------------------------------------------------
 # Find files and exec commands at them.
