@@ -126,16 +126,8 @@ titleScroll(){
 }
 
 # add ram percent
-memused() {
-	free | awk '/buffers\/cache/ {print $3}'
-}
-
-memtotal() {
-	free | awk '/Mem/ {print $2}'
-}
-
-mempercent() { 
-	echo "$(($(memused)*100/$(memtotal)))"
+mempercent() {
+	free | awk '/Mem/ {printf("%d", $3/$2 * 100)}'
 }
 
 # https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
