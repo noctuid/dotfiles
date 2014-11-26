@@ -20,8 +20,8 @@
 group image -description "Image viewing mappings" -locations .*\.jpg,.*\.jpeg,.*\.png,.*\.gif
 nmap -group image -builtin n <down>
 nmap -group image -builtin e <up>
-nmap -group image -builtin i ZI
-nmap -group image -builtin y ZI
+nmap -group image -builtin k ZI
+nmap -group image -builtin u ZO
 " if need to copy
 nmap -group image -builtin c y
 nmap -group image -builtin w <right>
@@ -183,9 +183,9 @@ silent nmap -group comic . <pass>
 " boomark 
 silent nmap -group comic a <pass>
 
-" zoom in and out; don't really need yank or text search since just pictures
+" zoom in and out; don't need text search on a picture; can use U if really need undo
 silent nmap -group comic k ZI
-silent nmap -group comic y ZO
+silent nmap -group comic u ZO
 "}}}
 
 " Downloads with webcomic reader (using dta; works with any site supported by the userscript)
@@ -206,7 +206,6 @@ group gel -description "jelly" -locations gelbooru.com
 silent nmap -group gel -ex <leader>f execute 'silent !~/bin/pentadactyl/dlf.sh gel "' + buffer.URL + '" &'
 
 "}}}…
-
 
 " Not using:
 " Graveyard"{{{
