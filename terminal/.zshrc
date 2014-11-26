@@ -1603,12 +1603,26 @@ alias he="nocorrect he"
 
 # send all output to /dev/null, including error output
 function qt() {
-	$1 > /dev/null 2>&1 &
+	$@ > /dev/null 2>&1 &
 }
 
 # save errors
 function qte() {
-	$1 2> "${1}_error.log" &
+	$@ 2> "${1}_error.log" &
+}
+
+# temporary 
+# doesn't work with linux-ck kernel or powerdown was problem
+function rldscrib() {
+	sudo rfkill unblock $(rfkill list | awk -F ":" '/hci0/ {print $1}')
+	sudo hciconfig hci0 up
+	sudo rfcomm release all
+	sudo rfcomm bind 0 00:1E:19:01:0B:A8
+}
+
+# kill all same processes; from alias.sh
+kl () {
+  sudo kill -9 `ps -ef | grep $1 | grep -v grep | awk '{print $2}'`; 
 }
 
 # Random# {{{
