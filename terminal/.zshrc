@@ -82,34 +82,6 @@ export RANGER_LOAD_DEFAULT_RC=FALSE
 
 # }}}
 #==============================
-# Path {{{
-#==============================
-# from https://github.com/windelicato/dotfiles/blob/master/.zshrc
-pathdirs=(
-	# for personal scripts
-	~/bin
-	~/.local/bin
-	~/bin/mpv
-	~/.config/bspwm/panel
-	# for vimus
-	~/.cabal/bin
-	# for adb
-	/opt/android-sdk
-)
-
-for dir in $pathdirs; do
-    if [ -d $dir ]; then
-        path+=$dir
-    fi
-done
-
-# for rbenv
-eval "$(rbenv init -)"
-# gem
-export PATH=$PATH:~/.gem/ruby/2.1.0/bin
-
-# }}}
-#==============================
 # Appearance {{{
 #==============================
 # Color Manpages
