@@ -6,6 +6,8 @@ export BSPWM_STACK=/tmp/bspwm.stack
 export PANEL_HEIGHT=14
 export PANEL_FIFO=/tmp/panel-fifo
 
+export BROWSER=firefox
+
 # only load ~/.config/ranger/rc.conf
 export RANGER_LOAD_DEFAULT_RC=FALSE
 

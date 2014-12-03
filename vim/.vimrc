@@ -1055,6 +1055,8 @@ autocmd FileType mkd call s:mkd_mappings()
 function! s:mkd_mappings()
 " share leader m with table mode
 nnoremap <leader>mt :Toc<cr>
+" preview
+nnoremap <leader>mp :call LivedownPreview()<CR>
 " experimenting with this; normally just use zn ze but don't really like the way it folds it
 nmap <leader>mn <Plug>(Markdown_MoveToNextHeader)<leader>;silent! call repeat#set("\<Plug>Markdown_MoveToNextHeader", v:count)<cr>
 nmap <leader>me <Plug>(Markdown_MoveToPreviousHeader);silent! call repeat#set("\<Plug>Markdown_MoveToPreviousHeader", v:count)<cr>
@@ -1534,6 +1536,9 @@ NeoBundle 'MattesGroeger/vim-bookmarks'
 NeoBundle 'plasticboy/vim-markdown'
 " folding in markdown files (like better than above but stopped working)
 " NeoBundle 'nelstrom/vim-markdown-folding'
+" markdown preview
+NeoBundle 'shime/vim-livedown'
+"
 " haskell
 " NeoBundle 'kana/vim-filetype-haskell'
 " NeoBundle 'ag/vim2hs'
