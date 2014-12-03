@@ -768,6 +768,10 @@ nnoremap g. :so %<cr>
 "'x-ray' view; cuc and cul
 nnoremap <leader>x :set cursorcolumn!<cr>:set cursorline!<cr>
 "}}}
+"
+" Shell Specific
+command! ViewTxtPdf :!prose2pdf -v % &<cr>
+" mapping for in navigation.vim
 
 " _Spell correct"{{{
 nnoremap <leader>z 1z=

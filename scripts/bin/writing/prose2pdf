@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+
+import os
+from subprocess import call
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("inputfile", help="specify the name of the text file to convert to pdf")
+parser.add_argument("-o","--outputname", help="specify the name of the output pdf (default: output)")
+parser.add_argument("-t","--template", help="specify a different <template>.tex file (default: ~/bin/writing/template.tex)")
+# nargs = 0
+parser.add_argument("-e","--example", action="store_true", help="add example lorem ipsum text")
+parser.add_argument("-v","--view", action="store_true", help="open pdf after generated with rifle")
+args = parser.parse_args()
+
+import re
+# raw string literal or will get unmatching parens error
+noEscHsh = re.compile(r"(?<!\\)#")
+noEscUsc = re.compile(r"(?<!\\)_")
+noEscAst = re.compile(r"(?<!\\)\*")
+# don't match single quotes preceded letter (e.g. won't match Jack's inflamed sense of rejection)
+# don't match for chapter or section (section{say{...}} doesn't work)
+Dqt = re.compile(r"(?<!^[\^\+])\"")
+Sqt = re.compile(r"(?<!^[\^\+])(?<![A-z])\'")
+
+def removeComment(line):
+    line = line.lstrip()
+    if line.startswith("#"):
+        return "\n"
+    pos = re.search(noEscHsh, line)
+    if pos is None:
+        # no comment; no need to modify
+        pass
+    else:
+        line = line[:pos.start()] + "\n"
+    return line
+
+def escapeForLatex(line):
+    line = line.replace("&", "\\&")
+    line = line.replace("%", "\\%")
+    line = line.replace("{", "\\{")
+    line = line.replace("}", "\\}")
+    # only create {}s after escaping originals
+    line = line.replace("~", "\\textasciitilde{}")
+    # replace \\ initially (so no possibility for something like \\#)
+    line = line.replace("\\\\", "\\textbackslash{}")
+    # caret or plus only need to be escaped in text file if at beginning of line for literal char
+    line = line.replace("\\^", r"\\textasciicircum{}")
+    line = line.replace("\\+", r"\\textasciicircum{}")
+    # only escape if not beginning of line
+    line = re.sub(r'(?<!^)\^', r"\\textasciicircum{}", line)
+    return line
+
+def formatSingles(line):
+    line = line.replace("...", "…")
+    line = line.replace("..", "\\_\\_\\_\\_\\_\\_")
+    return line
+
+def formatPairs(line):
+    # count number of non-escaped symbols
+    underscoreNum  = len(tuple(re.finditer(noEscUsc, line)))
+    asteriskNum    = len(tuple(re.finditer(noEscAst, line)))
+    doubleQuoteNum = len(tuple(re.finditer(Dqt, line)))
+    singleQuoteNum = len(tuple(re.finditer(Sqt, line)))
+
+    # ensure even (if matching character left off, formatting extends to end)
+    if underscoreNum % 2 != 0:
+        line = line.rstrip("\n") + "_\n"
+        underscoreNum += 1
+    if asteriskNum % 2 != 0:
+        line = line.rstrip("\n") + "*\n"
+        asteriskNum += 1
+
+    # alternate replace with opening and closing
+    for i in range(underscoreNum//2):
+        line = re.sub(noEscUsc, r"\\textit{", line, count=1)
+        line = re.sub(noEscUsc, "}", line, count=1)
+    for i in range(asteriskNum//2):
+        line = re.sub(noEscAst, r"\\textbf{", line, count=1)
+        line = re.sub(noEscAst, "}", line, count=1)
+    for i in range(doubleQuoteNum//2):
+        line = re.sub(Dqt, r"\\say{", line, count=1)
+        line = re.sub(Dqt, "}", line, count=1)
+    for i in range(singleQuoteNum//2):
+        line = re.sub(Sqt, r"\\say{", line, count=1)
+        line = re.sub(Sqt, "}", line, count=1)
+
+    # unescape ecaped asterisks (undescores need to be escaped for LaTeX though)
+    line = line.replace("\\*", "*")
+
+    return line
+
+def formatChapters(line):
+    if line.startswith("^"):
+        line = "\\chapter{" + line.rstrip("\n").lstrip("^") + "}\n"
+    elif line.startswith("+"):
+        line = "\\section{" + line.rstrip("\n").lstrip("+") + "}\n"
+    return line
+
+
+def main():
+    inFile = args.inputfile
+    if args.outputname:
+        outFile = args.output + ".tex"
+        outPdf  = args.output + ".pdf"
+    else:
+        outFile = "output.tex"
+        outPdf  = "output.pdf"
+    if args.template:
+        template = args.template
+    else:
+        home = os.path.expanduser("~")
+        template = home + "/bin/writing/template.tex"
+
+    f = open(inFile, "r")
+    lines = f.readlines()
+    newText = ""
+    for line in lines:
+        line = removeComment(line)
+        # don't continue processing if entire line was comment
+        if line == "\n":
+            newText += line + "\n"
+            continue
+        # escape first ( or {}s created for formatting will be escaped)
+        line = escapeForLatex(line)
+        line = formatSingles(line)
+        line = formatPairs(line)
+        line = formatChapters(line)
+        newText += line + "\n"
+
+    if args.example:
+        newText += "\n\\lipsum\\lipsum\n"
+
+    # create a .tex file
+    if not os.path.isdir("output"):
+        os.mkdir("output")
+    os.chdir("output")
+    fTemp = open(template, "r")
+    templateText = fTemp.read()
+    newText = templateText + "\\begin{document}\n" + newText + "\\end{document}"
+    fOut = open(outFile, "w")
+    fOut.write(newText)
+    f.close()
+    fTemp.close()
+    fOut.close()
+
+    call(["xelatex", outFile])
+
+    if args.view:
+        call(["rifle", outPdf])
+
+
+if __name__ == "__main__":
+    main()

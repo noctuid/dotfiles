@@ -24,6 +24,8 @@ pathdirs="
 ~/.cabal/bin
 # for adb
 /opt/android-sdk
+# for prose2pdf script
+~/bin/writing
 "
 
 while read -r dir; do
