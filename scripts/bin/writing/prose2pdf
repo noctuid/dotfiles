@@ -21,7 +21,7 @@ noEscAst = re.compile(r"(?<!\\)\*")
 # don't match single quotes preceded letter (e.g. won't match Jack's inflamed sense of rejection)
 # don't match for chapter or section (section{say{...}} doesn't work)
 Dqt = re.compile(r"(?<!^[\^\+])\"")
-Sqt = re.compile(r"(?<!^[\^\+])(?<![A-z])\'")
+Sqt = re.compile(r"(?<!^[\^\+])(?<![A-Za-z_])\'")
 
 def removeComment(line):
     line = line.lstrip()
@@ -71,6 +71,7 @@ def formatPairs(line):
         line = line.rstrip("\n") + "*\n"
         asteriskNum += 1
 
+    print(singleQuoteNum)
     # alternate replace with opening and closing
     for i in range(underscoreNum//2):
         line = re.sub(noEscUsc, r"\\textit{", line, count=1)
