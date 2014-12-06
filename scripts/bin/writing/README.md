@@ -33,6 +33,6 @@ See `output.pdf`
 #### Notes
 Every line that isn't a chapter title or subtext is a paragraph. Leading whitespace and newlines don't matter. 
 
-Quotations should be surrounded by either " or ' unless in section/chapter headings (left quote is ` and right quote is ' then). Dirtytalk is used to format the quotations properly. One level of nested quotes is supported. The number of quotes must match, and single quotes preceded by a letter (e.g. Jack's inflamed sense of rejection) are ignorned.
+Quotations should be surrounded by either " or ' unless in section/chapter headings (left quote is ` and right quote is ' then). Dirtytalk is used to format the quotations properly (to curly quotes). One level of nested quotes is supported. The number of quotes must match, and single quotes preceded by a letter (e.g. Jack's inflamed sense of rejection) are ignorned. [vim-textobj-quote](https://github.com/reedes/vim-textobj-quote) may also be worth looking at
 
 Only hashes, backslashes, underscores, asterisks, and ^ or + at the start of the line need to be escaped to be specified as the literal characters. Other characters should not be escaped.
