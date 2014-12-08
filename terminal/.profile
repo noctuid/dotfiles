@@ -49,3 +49,8 @@ if ! pgrep devmon; then
 	# auto mount usbs and such
 	devmon &
 fi
+
+# startx on login if tty1
+if [ $(tty) = "/dev/tty1" ]; then
+    startx
+fi
