@@ -13,15 +13,11 @@ sanitize() {
 }
 
 setbg() {
-	if [ "$1" == "width" ]; then
-		imlibsetroot -s w -p c $2
-		echo -n 'imlibsetroot -s w -p c '$2'' | xsel -bi
-	else
-		imlibsetroot -s h -p c $2
-		echo -n 'imlibsetroot -s h -p c '$2'' | xsel -bi
-	fi
+	# set image to background (fit to width or height to fit the screen)
+	setroot -z "$1"
+	echo -n "setroot -z '$1'" | xsel -bi
 	killall conky
-	conky -q &
+	conky -q > /dev/null 2>&1 &
 }
 
 make_thumbnail() {

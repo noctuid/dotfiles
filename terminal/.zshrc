@@ -804,11 +804,6 @@ gvir() {
 	gvim --remote $1
 }
 
-# set wallpaper (see ranger_functions)
-alias setbgw='setbg width'
-alias setbgh='setbg height'
-
-
 # switch conky theme
 function conkylight() {
 	pkill conky

@@ -38,19 +38,12 @@ case "$1" in
 	bspc window -c ;;
 #}}}
 
-# set current image to background and echo to clipboard; restart conky
-"w")
-	imlibsetroot -s w -p c "$2"
-	echo -n 'imlibsetroot -s w -p c '$2'' | xsel -bi
-	killall conky
-	conky &
-	;;
-# set current image to background; height
+# set current image to background (fit to width or height to fit the screen)
 "b")
-	imlibsetroot -s h -p c "$2"
-	echo -n 'imlibsetroot -s h -p c '$2'' | xsel -bi
+	setroot -z "$2"
+	echo -n "setroot -z '$2'" | xsel -bi
 	killall conky
-	conky &
+	conky -q > /dev/null 2>&1 &
 	;;
 
 # put current image in trash

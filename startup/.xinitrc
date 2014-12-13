@@ -14,7 +14,7 @@ setxkbmap us -variant colemak
 xmodmap ~/.Xmodmap_wide
 xmodmap ~/.Xmodmap
 # set background image
-imlibsetroot -s h -p c /home/angelic_sedition/wallpaper/anime/1398022103628.jpg
+setroot -z /home/angelic_sedition/wallpaper/_games/disgaea/287-disgaea-wallpaper-1680x1050-customity.jpg
 
 # font stuff
 xset +fp /usr/share/fonts/local
