@@ -52,5 +52,9 @@ fi
 
 # startx on login if tty1
 if [ $(tty) = "/dev/tty1" ]; then
-    startx
+	startx
+else
+	# change caps from backspace to escape
+	loadkeys ~/.vt_caps_esc
+	zsh
 fi
