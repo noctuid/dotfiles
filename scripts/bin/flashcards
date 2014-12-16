@@ -2,30 +2,25 @@
 # todo:
 # record which need more reviewing
 
-card_dir=~/.cards
-card_set=general
-create_set=no
-edit_set=no
-review_set=yes
-# side to show first
-side=left
-
 function print_help() {
-echo "
+	echo "
 If no cardset is given, will list existing cardsets.
 -d dir  specify an alternate directory for cards
 -n      to create a set instead of reviewing an existing set
 -e      to edit a set instead of reviewing one
+-f      'find'; search cards for a term using ag
 -s side to pick side to show first
 -r      show right side first (default is left)
 -h      print help and exit
 
+-e will override -n. -f will override both -e and -n.
+
 "
-if [ "$1" == "illegal_opt" ]; then
-	exit 1
-else
-	exit 0
-fi
+	if [ "$1" == "illegal_opt" ]; then
+		exit 1
+	else
+		exit 0
+	fi
 }
 
 function review_card() {
@@ -51,14 +46,27 @@ for line in "${review_lines[@]}";do
 done
 }
 
-while getopts d:s:nehr opt
+card_dir=~/.cards
+card_set=general
+create_set=false
+edit_set=false
+review_set=true
+# side to show first
+side=left
+while getopts :d:s:f:nehr opt
 do
 	case $opt in
 	d) card_dir=$OPTARG;;
-	n) create_set=yes
-	   review_set=no;;
-	e) edit_set=yes
-	   review_set=no;;
+	n) create_set=true
+	   review_set=false;;
+	e) edit_set=true
+	   create_set=false
+	   review_set=false;;
+	f) search=true
+	   edit_set=false
+	   create_set=false
+	   review_set=false
+	   search_term=$OPTARG;;
 	s) side=$OPTARG;;
 	r) side=right;;
 	h) print_help;;
@@ -71,14 +79,17 @@ cd $card_dir
 if [ -n "$1" ]; then
 	# last arg
 	card_set="${@: -1}"
-	if [ "$create_set" == "yes" ];then
+	if $search; then
+		ag $search_term
+	fi
+	if $create_set;then
 		touch $card_set
 	fi
-	if [ "$edit_set" == "yes" ];then
+	if $edit_set;then
 		vim $card_set
 		exit 0
 	fi
-	if [ "$review_set" == "yes" ];then
+	if $review_set;then
 		review_card
 	fi
 else
