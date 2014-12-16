@@ -26,6 +26,8 @@ pathdirs="
 /opt/android-sdk
 # for prose2pdf script
 ~/bin/writing
+# for octopress/gems
+~/.gem/ruby/2.1.0/bin
 "
 
 while read -r dir; do
