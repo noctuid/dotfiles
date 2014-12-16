@@ -6,4 +6,4 @@ au LocationChange !twitter.com,* :set showtabline=always
 
 " get rid of need to add sourcing into bindings
 " test if this slows down
-au LocationChange * :source ~/.navigation.penta
+au LocationChange * :source ~/.pentadactyl/navigation.penta

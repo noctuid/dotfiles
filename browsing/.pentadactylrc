@@ -475,8 +475,8 @@ nmap -builtin O o
 nmap -builtin c O
 nmap -builtin C T
 
-" space for tab switching"{{{
-source ~/.navigation.penta
+" space for tab switching (sourced on LocationChange; see autocommands.penta)"{{{
+source ~/.pentadactyl/navigation.penta
 " "}}}
 
 " swap d/D; move left when closing tab (see below for D mapping)

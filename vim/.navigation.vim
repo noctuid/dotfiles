@@ -91,8 +91,8 @@ if exists("t:taboo_tab_name")
 		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/\#browse.txt<cr>
 		nnoremap <buffer> ,f :e ~/.pentadactylrc<cr>
 		nnoremap <buffer> ,s :e ~/.pentadactyl/groups.penta<cr>
-		nnoremap <buffer> ,t :e ~/.quickpenta<cr>
-		nnoremap <buffer> ,F :e ~/.pentadactyl/autocommands<cr>
+		nnoremap <buffer> ,t :e ~/.pentadactyl/navigation.penta<cr>
+		nnoremap <buffer> ,F :e ~/.pentadactyl/autocommands.penta<cr>
 		" readme; basic documentation
 		nnoremap <buffer> ,r :e ~/README.mkd<cr>
 
