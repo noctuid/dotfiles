@@ -693,6 +693,7 @@ alias -g gcam='git commit -am'
 # push to github (or whatever else)
 # git remote add origin (link)
 alias gpom='git push origin master'
+alias gpos="git push origin source"
 alias gd='git diff'
 alias gds='git diff --staged'
 function ga {
@@ -1148,6 +1149,19 @@ alias hdmiin='xrandr --output HDMI1 --auto && ponymix set-profile output:hdmi-st
 alias hdmiout='xrandr --output HDMI1 --off && bspc monitor -r X && ponymix set-profile output:analog-stereo'
 alias hdmiadd='xrandr --output HDMI1 --auto --right-of LVDS1 && bspc monitor HDMI1 -a X && ponymix set-profile output:hdmi-stereo'
 #}}}
+#===============
+# Octopress Blog {{{
+#===============
+# work without publishing:
+alias genbl="cd $BLOG && bundle exec rake generate"
+alias prevbl="cd $BLOG && bundle exec rake preview"
+# update site on github pages
+alias pushblog="cd $BLOG && bundle exec rake gen_deploy"
+# update at posts and push to source
+alias pushposts="cd $BLOG/source/_posts && git add . && gpos"
+alias newbpost="cd $BLOG && bundle exec rake new_post\['$1'\]"
+
+# }}}
 #===============
 # Internet, VPN, Firewall, and Torrenting
 #===============
