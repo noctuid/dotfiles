@@ -1,0 +1,142 @@
+#!/bin/bash
+# https://bbs.archlinux.org/viewtopic.php?id=149444&p=54
+# http://angelic-sedition.github.io/blog/2014/07/19/make-any-terminal-emulator-a-quake-style-dropdown/
+# thanks to lharding for xtoolwait fork and ideas:
+# https://bbs.archlinux.org/viewtopic.php?pid=1484774#p1484774
+
+terminal=false
+use_pid=false
+use_wid=false
+window_info=$(xrandr | awk '/ connected/ {print $3}')
+width=$(echo "$window_info" | awk -F "x" '{print $1}')
+# for me, for some reason, full width is off screen (1366 wide but need to be 1362)
+((width = width - 4))
+# height=$(echo "$window_info" | awk -F "x|+" '{print $2}')
+height="45%"
+# x and y offset
+xoff=0
+yoff=15
+while getopts :h:w:x:y:tpi opt
+do
+	case $opt in
+	h) height=$OPTARG;;
+	w) width=$OPTARG;;
+	x) xoff=$OPTARG;;
+	y) yoff=$OPTARG;;
+	t) terminal=true;;
+	p) use_pid=true;;
+	i) use_wid=true
+	   use_pid=false;;
+    esac
+done
+
+generic_term_toggle() {
+	# will match any window by the classname
+	(xdotool search --onlyvisible --classname $1 windowactivate && xdo hide -n $1) ||\
+	(bspc rule -a $1 -o floating=on && xdotool search --classname $1 windowmap) ||\
+	(bspc rule -a $1 -o floating=on && $1 -e "/bin/bash -c 'sleep 0.01 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $2 || tmuxinator start $2 || tmux new-session -s $2'")
+}
+
+pid_term_toggle() {
+	# termite has two window ids (and maybe other terminals?) which is why piping to head
+	# this is the downside; won't work if want to use with programs where 1 pid has multiple windows and window want isn't the first given by xdotool; use wid_toggle instead
+	vwid=$(xdotool search --onlyvisible --pid $(cat /tmp/dropdowns_pid/$1) | head -n 1)
+	wid=$(xdotool search --pid $(cat /tmp/dropdowns_pid/$1) | head -n 1)
+	if [ "$wid" != "" ]; then
+		if [ "$vwid" != "" ]; then
+			xdo hide $wid
+		else
+			bspc rule -a $1 -o floating=on && xdotool windowmap $wid
+		fi
+	else
+		mkdir -p /tmp/dropdowns_pid
+		bspc rule -a $1 -o floating=on
+		$1 -e "/bin/bash -c 'sleep 0.01 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $2 || tmuxinator start $2 || tmux new-session -s $2'" &
+		echo "$!" > /tmp/dropdowns_pid/$1
+	fi
+}
+
+wid_term_toggle() {
+	# used xdo id to get wid and xwininfo to check if mapped
+	wid=$(cat /tmp/dropdowns_wid/$1 | head -n 1)
+	mkdir -p /tmp/dropdowns_wid
+	exists=true
+	visibility=$(xwininfo -id $wid | awk '/Map State/ {print $3}')
+	if [ "$wid" == "" ] || [ "$visibility" == "" ]; then
+		exists=false
+	fi
+	if $exists && [ "$visibility" != "IsUnviewable" ]; then
+		if [ "$visibility" == "IsUnMapped" ]; then
+			bspc rule -a $1 -o floating=on && xdotool windowmap $wid
+		else
+			xdo hide $wid
+		fi
+	else
+		mkdir -p /tmp/dropdowns_wid
+		bspc rule -a $1 -o floating=on
+		$1 -e "/bin/bash -c 'sleep 0.01 && xdo id > /tmp/dropdowns_wid/$1 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $2 || tmuxinator start $2 || tmux new-session -s $2'" &
+	fi
+}
+
+program=${!#}
+if [ -n "$1" ]; then
+	if [ "$program" == "termite" ]; then
+		wid_term_toggle termite dropdown
+	elif [ "$program" == "xterm" ]; then
+		wid_term_toggle xterm xterm
+	elif [ "$program" == "Terminology" ]; then
+		# window class is main for some bizzare reason
+		# inconsolata font; no visual bell; 256 colors
+		# extra_term_args="terminoloy -s=v -f=Inconsolata/12 -G=false -2"
+		wid_term_toggle terminology pretty
+	elif [ "$program" == "urxvt" ]; then
+		# doing something different for urxvt (not floating); open on first desktop and switch to, then switch back to last window
+		class_name=$(xprop -id $(xprop -root _NET_ACTIVE_WINDOW | awk '{print $5}') WM_CLASS | awk '{ gsub(/"/, ""); print $4}')
+		if [ "$class_name" == "URxvt" ]; then
+			bspc window -f last
+		else
+			xdotool search --classname urxvt windowactivate || (bspc desktop -f ^1 && urxvt &)
+		fi
+	elif [ "$program" == "toggle_hide" ]; then
+		no_hide=$(cat /tmp/hidden_terminal/no_hide 2> /dev/null)
+		if [ "$no_hide" == "" ]; then
+			echo "why"
+			mkdir -p /tmp/hidden_terminal
+			echo "true" > /tmp/hidden_terminal/no_hide
+		else
+			> /tmp/hidden_terminal/no_hide
+		fi
+	elif [ "$program" == "check_hide" ]; then
+		# this is for hiding a terminal when opening something from ranger
+		no_hide=$(cat /tmp/hidden_terminal/no_hide 2> /dev/null)
+		if [ "$no_hide" == "" ]; then
+			wid=$(xdo id)
+			class_name=$(xprop -id $(xprop -root _NET_ACTIVE_WINDOW | awk '{print $5}') WM_CLASS | awk '{ gsub(/"/, ""); print $4}')
+			mkdir -p /tmp/hidden_terminal
+			echo $wid > /tmp/hidden_terminal/wid
+			echo $class_name > /tmp/hidden_terminal/class
+			xdotool windowunmap $wid
+		fi
+	elif [ "$program" == "check_show" ]; then
+		no_hide=$(cat /tmp/hidden_terminal/no_hide 2> /dev/null)
+		if [ "$no_hide" == "" ]; then
+			wid=$(cat /tmp/hidden_terminal/wid)
+			class=$(cat /tmp/hidden_terminal/class)
+			bspc rule -a $class -o floating=on
+			xdotool windowmap $wid
+		fi
+	elif $terminal; then
+		if $use_pid; then
+			pid_term_toggle $program $program
+		elif $use_wid; then
+			wid_term_toggle $program $program
+		else
+			generic_term_toggle $program $program
+		fi
+	else
+		# I may make a generic wid_toggle at some point that isn't meant for calling terms with -e, but I have no use for it corrently
+		xdotool search --onlyvisible --classname $1 windowunmap || xdotool search --classname $1 windowmap || exec $1 &
+	fi
+else
+	echo "Error: no argument supplied. Aborting."
+fi

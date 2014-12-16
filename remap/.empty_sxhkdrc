@@ -42,14 +42,20 @@ semicolon ; {g,v}
 super + r
 	guake -t
 
+alt + r
+	guake -t
+
 alt + s
-	~/bin/hide_show.sh termite
+	hide_show -y 14 termite
 
 alt + t
-	~/bin/hide_show.sh termite
+	hide_show urxvt
+
+super + s
+	hide_show -y  14 xterm
 
 F1
-	~/bin/hide_show.sh Terminology
+	hide_show -y 14 Terminology
 
 # not in use
 F10
