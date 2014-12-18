@@ -1,5 +1,6 @@
 # TODO:
 # add real delete
+# fix message parsing regex
 # Sources:
 # * http://stevelosh.com/blog/2012/10/the-homely-mutt/#mutt
 # https://wiki.archlinux.org/index.php/mutt
@@ -114,14 +115,6 @@ folder-hook "~/.mail/school" 'source ~/.muttschoolrc'
 # Appearance {{{
 source ~/.mutt/colors.muttrc
 # Sidebar Settings# {{{
-macro index tb "<enter-command>toggle sidebar_visible<enter><refresh>"
-macro pager tb "<enter-command>toggle sidebar_visible<enter><redraw-screen>"
-set sidebar_delim = ' │'
-set sidebar_visible = yes
-set sidebar_width   = 34
-color sidebar_new color221 color233
-# color sidebar_flagged
-# if start using mutt without sidebar frequently, can move these settings to script to prevent startup errors
 source '~/bin/mutt/mutt_sidebar_version.sh|'
 # }}}
 # Status Bar# {{{
