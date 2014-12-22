@@ -328,9 +328,13 @@ bindkey -M vicmd 't?' history-incremental-pattern-search-backward
 # Clipboard# {{{
 # http://unix.stackexchange.com/questions/25765/pasting-from-clipboard-to-vi-enabled-zsh-or-bash-shell
 # paste from the system clipboard with p
-vi-append-x-selection () { RBUFFER=$(xsel -ob </dev/null)$RBUFFER; }
+vi-append-x-selection() { RBUFFER=$(xsel -ob </dev/null)$RBUFFER; }
 zle -N vi-append-x-selection
 bindkey -M vicmd p vi-append-x-selection
+# ecaped paste
+escape-paste-clipboard() { RBUFFER=$(printf '%q' "$(xsel -ob </dev/null)")$RBUFFER; }
+zle -N escape-paste-clipboard
+bindkey -M vicmd P escape-paste-clipboard
 
 # change yank to yank to clipboard.# {{{
 # http://zshwiki.org/home/zle/vi-mode
