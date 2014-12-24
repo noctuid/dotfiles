@@ -23,35 +23,18 @@
 #}}}
 
 #==============================
-# Antigen (Plugins) {{{
+# Antigen-hs (Plugins) {{{
 #==============================
 # takes care of installation and sourcing
-# installed from aur
-source /usr/share/zsh/scripts/antigen/antigen.zsh
+# see ~/.zsh/MyAntigen.hs for bundles
+source ~/.zsh/antigen-hs/init.zsh
+# theme
+source ~/.zsh/themes/fox-mod.zsh-theme
 
-# using for theme and completion
-antigen bundle robbyrussell/oh-my-zsh lib/
-
-# Bundles from the default repo (robbyrussell's oh-my-zsh).
-# antigen bundle command-not-found
-
-# Syntax highlighting bundle.
-antigen bundle zsh-users/zsh-syntax-highlighting
-
-# extra completions (e.g. ag and cabal)
-antigen bundle zsh-users/zsh-completions src/
-#
-# up and down will go through history based on what you have typed
-antigen bundle zsh-users/zsh-history-substring-search
-
-# text objects for normal mode (eh mostly useful for cc.. maybe gU; too much of a pain)
-# antigen bundle hchbaw/opp.zsh
-
-# Load the theme (frome omz/themes folder)
-antigen theme fox-mod
-
-# Tell antigen that you're done.
-antigen apply
+alias ahsc='antigen-hs-compile'
+alias antigen-hs-update='cd ~/.zsh/antigen-hs && git pull origin master'
+alias uahs='antigen-hs-update'
+alias ahsu='antigen-hs-update'
 
 # #}}}
 #==============================
@@ -60,6 +43,7 @@ antigen apply
 # http://askql.wordpress.com/2011/01/11/zsh-writing-own-completion/
 # add custom completion scripts
 fpath=(~/.zsh/completion $fpath)
+fpath=(~/.zsh/completion/zsh-completions/src $fpath)
 
 # compsys initialization
 autoload -U compinit
