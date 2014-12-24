@@ -156,6 +156,10 @@ if exists("t:taboo_tab_name")
 		cd ~/ag-sys/Else/everything/\#another/\#prose/pp
 		nnoremap <buffer> ,, :e
 		nnoremap <buffer> ,r :e ~/ag-sys/Else/everything/\#another/\#prose/pp/random.txt<cr>
+	elseif t:taboo_tab_name == "wr"
+		" writing related scripts
+		nnoremap <buffer> ,v :ViewTxtPdf<cr>
+		nnoremap <buffer> ,z :Clam ~/bin/writing/writing_stats -c %<cr>:resize 3<cr>
 
 	endif
 " else

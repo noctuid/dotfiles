@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("inputfile", help="specify the name of the text file to show word usage statistics for")
+parser.add_argument("-w", "--wordlist", help="specify a file containing words to be checked for and counted; all other words will be ignored")
+parser.add_argument("-i", "--ignorelist", help="specify a file containing words to be ignored on separate lines; some words are ignored by default, setting as 'dummy' will ignore no words")
+parser.add_argument("-I", "--onlyignorelist", help="specify a file containing words to be ignored and do not also ignore words in the commonWordList")
+parser.add_argument("-n", "--amount", help="print the first <number> words", type=int)
+parser.add_argument("-r", "--reverse", action="store_true", help="print least common words first")
+
+parser.add_argument("-c", "--count", action="store_true", help="count words, sentences, and paragraphs; overrides default action of showing most frequently used words")
+parser.add_argument("-o", "--onlychapter", help="specify a single chapter for count", type=int)
+parser.add_argument("-f", "--fromchapter", help="specify optional chapter to start from for count", type=int)
+parser.add_argument("-t", "--tochapter", help="specify optional chapter to end with for count (not including)", type=int)
+parser.add_argument("-C", "--fullcount", action="store_true", help="prints count for every chapter in formatted table; overrides default action of showing most frequently used words")
+args = parser.parse_args()
+
+
+import re
+# non escaped hash
+noEscHsh = re.compile(r"(?<!\\)#")
+# quote that isn't apostrophe
+singleQuote = re.compile(r"(?<!^[\^\+])(?<![A-Za-z_])[\'’]")
+# curly quotes
+curlyQuotes = re.compile("[“”‘]")
+# other punctuation and symbols (e.g. formatting characters like _)
+punctOrSymbol = re.compile(r"[!\.…\?,:\-\(\)\_\*\+\^&\\#%{}~`]")
+# match decimal in number, .., and ...
+notPeriod = re.compile("(\d*\.\d+|\.\.\.|\.\.)")
+
+
+def removeComment(line):
+    line = line.lstrip()
+    if line.startswith("#"):
+        return "\n"
+    pos = re.search(noEscHsh, line)
+    if pos is None:
+        # no comment; no need to modify
+        pass
+    else:
+        line = line[:pos.start()] + "\n"
+    return line
+
+
+def cleanWord(word):
+    # lowercase and remove punctuation/symbols and formatting
+    word = word.lower()
+    word = word.replace("\"", "")
+    word = re.sub(singleQuote, "", word)
+    # only apostrophes left, get rid of curly ones so don't need a duplicated word list
+    word = re.sub("’", "'", word)
+    word = re.sub(curlyQuotes, "", word)
+    word = re.sub(punctOrSymbol, "", word)
+    return word
+
+def createWordDict(chapters, start=0, end=None):
+    wordDict = {}
+
+    for chapter in chapters[start:end]:
+        lines = chapter.split('\n')
+        for line in lines:
+            line = removeComment(line)
+            words = line.split()
+            newWords = [cleanWord(word) for word in words]
+            if args.wordlist:
+                f = open(args.wordlist)
+                keepWordList = f.read().split("\n")
+            for word in newWords:
+                if args.wordlist:
+                    if word not in keepWordList:
+                        continue
+                if word not in wordDict:
+                    wordDict[word] = 1
+                else:
+                    wordDict[word] += 1
+
+    wordDict.pop('', None)
+    return wordDict
+
+def removeCommon(wordDict):
+    if args.ignorelist == "dummy":
+        return wordDict
+
+    if not args.onlyignorelist:
+        commonWordList = ['the', 'to', 'of', 'a', 'an', 'and', 'then', 'but', 'or', 'for', 'nor', 'yet', 'in', 'at', 'if', 'on', 'what', 'what\'s', 'how', 'this', 'that', 'that\'s', 'there', 'there\'s', 'with', 'as', 'for', 'am', 'is', 'isn\'t', 'are', 'aren\'t', 'was', 'wasn\'t', 'were', 'weren\'t', 'be', 'been', 'would', 'wouldn\'t', 'could', 'couldn\'t', 'can', 'can\'t', 'cannot', 'will', 'won\'t', 'did', 'didn\'t', 'do', 'does', 'doesn\'t', 'don\'t', 'not', 'no', 'it', 'it\'s', 'thing', 'things', 'you', 'your', 'you\'re', 'you\'ve', 'yourself', 'yours', 'you\'ll', 'me', 'myself', 'i', 'i\'d', 'mine', 'my', 'i\'m', 'i\'ve', 'i\'ll', 'she', 'her', 'hers', 'herself', 'she\'d', 'she\'ll', 'she\'s', 'he', 'him', 'himself', 'his', 'he\'d', 'he\'ll', 'he\'s', 'we', 'we\'re', 'we\'ll', 'us', 'our', 'ours', 'they', 'their', 'they\'re', 'theirs', 'them', 'has', 'had', 'have', 'said']
+        for word in commonWordList:
+            wordDict.pop(word, None)
+
+    if args.ignorelist:
+        f = open(args.ignorelist)
+    elif args.onlyignorelist:
+        f = open(args.onlyignorelist)
+    if args.ignorelist or args.onlyignorelist:
+        ignoreWordList = f.read().split("\n")
+        for word in ignoreWordList:
+            wordDict.pop(word, None)
+
+    return wordDict
+
+def sortWords(wordDict, N=0):
+    i = 1
+    if args.reverse:
+        for word in sorted(wordDict, key=wordDict.get):
+            print(word + ":" + str(wordDict[word]))
+            if i == N:
+                break
+            i +=1
+    else:
+        for word in sorted(wordDict, key=wordDict.get, reverse=True):
+            print(word + ":" + str(wordDict[word]))
+            if i == N:
+                break
+            i +=1
+
+
+def countWords(chapters, start=0, end=None):
+    wordCount = 0
+    for chapter in chapters[start:end]:
+        lines = chapter.split('\n')
+        for line in lines:
+            line = removeComment(line)
+            wordList = line.split()
+            wordCount += len(wordList)
+    return wordCount
+
+def countSentences(chapters, start=0, end=None):
+    # a mostly accurate sentence count that takes abbreviations and decimals into account
+    # won't be accurate when abbreviations come at the end of sentences
+    # also doesn't consider real ellipsis characters or sentences ending with ...
+    sentenceNumber = 0
+
+    # abbrebations used by https://github.com/reedes/vim-textobj-sentence
+    abbrRegexList= [
+    '[ABCDIMPSUabcdegimpsv]', \
+    'l[ab]', '[eRr]d', 'Ph', '[Ccp]l', '[Lli]n', '[cn]o', \
+    '[Oe]p', '[DJMSh]r', '[MVv]s', '[CFMPScfpw]t', \
+    'alt', '[Ee]tc', 'div', 'es[pt]', '[Ll]td', 'min', \
+    '[MD]rs', '[Aa]pt', '[Aa]ve?', '[Ss]tr?', \
+    '[Aa]ssn', '[Bb]lvd', '[Dd]ept', 'incl', 'Inst', 'Prof', 'Univ', \
+    ]
+    notSentence = "^(.*\s)?("
+    for item in abbrRegexList:
+        notSentence = notSentence + item + "|"
+    notSentence = notSentence.rstrip('|')
+    notSentence += ")$"
+    notSentence = re.compile(notSentence)
+
+    for chapter in chapters[start:end]:
+        lines = chapter.split('\n')
+        for line in lines:
+            line = removeComment(line)
+            # remove decimal numbers, elipsis (three periods), and two period place holders
+            line = re.sub(notPeriod, "", line)
+            maybeSentences = line.strip('\n').split('.')
+            for mSentence in maybeSentences:
+                if mSentence != '' and not notSentence.match(mSentence):
+                    sentenceNumber += 1
+    return sentenceNumber
+
+def countParagraphs(chapters, start=0, end=None):
+    # with the formatting I use, a line corresponds to a paragraph
+    paragraphCount = 0
+    for chapter in chapters[start:end]:
+        lines = chapter.split('\n')
+        for line in lines:
+            line = removeComment(line)
+            if line != "" and line != "\n":
+                paragraphCount += 1
+    return paragraphCount
+
+
+def main():
+    inFile = args.inputfile
+    f = open(inFile)
+    if args.count or args.fullcount:
+        chapters = re.split("\n\^.*\n", "\n" + f.read())
+        # get rid of '' (if two chapter headings after each other or first line in file is chapter heading)
+        chapters = [ chapter for chapter in chapters if chapter != ""]
+
+        if args.fullcount:
+            print("| Chapter	| Words 	| Sentences	| Paragraphs	|")
+            print("| ------------- | ------------- | ------------- | ------------- |")
+            for i in range(len(chapters)):
+                wordCount      = countWords(chapters, i, i+1)
+                sentenceCount  = countSentences(chapters, i, i+1)
+                paragraphCount = countParagraphs(chapters, i, i+1)
+                print("|	{}	|	{}	|	{}	|	{}	|".format(i+1, wordCount, sentenceCount, paragraphCount))
+
+            print("| Total:	|	{}	|	{}	|	{}	|".format(countWords(chapters), countSentences(chapters), countParagraphs(chapters)))
+
+        if args.count:
+            if args.fromchapter:
+                start = args.fromchapter - 1
+            else:
+                start = 0
+            if args.tochapter and not args.tochapter > len(chapters)+1:
+                end = args.tochapter - 1
+            else:
+                end = len(chapters)
+            if args.onlychapter:
+                end = args.onlychapter
+                start = end - 1
+
+            wordCount      = countWords(chapters, start, end)
+            sentenceCount  = countSentences(chapters, start, end)
+            paragraphCount = countParagraphs(chapters, start, end)
+            if args.onlychapter:
+                print("Chapter {}-\nWords: {}, Sentences: {}, Paragraphs: {}".format(args.onlychapter, wordCount, sentenceCount, paragraphCount))
+            elif not args.fromchapter and not args.tochapter:
+                chapterCount = len(chapters)
+                print("Words: {}, Sentences: {}, Paragraphs: {}, Chapters".format(wordCount, sentenceCount, paragraphCount, chapterCount))
+
+            else:
+                print("Chapters {} to {}-\nWords: {}, Sentences: {}, Paragraphs: {}".format(start+1, end+1, wordCount, sentenceCount, paragraphCount))
+
+        f.close()
+
+    else:
+        # keep names of chapters for word usage analysis
+        chapters = re.split("\n\^", "\n" + f.read())
+        chapters = [ chapter for chapter in chapters if chapter != ""]
+
+        if args.fromchapter:
+            start = args.fromchapter - 1
+        else:
+            start = 0
+        if args.tochapter and not args.tochapter > len(chapters)+1:
+            end = args.tochapter - 1
+        else:
+            end = len(chapters)
+        if args.onlychapter:
+            end = args.onlychapter
+            start = end - 1
+
+        wordDict = createWordDict(chapters, start, end)
+        wordDict = removeCommon(wordDict)
+        if args.amount:
+            sortWords(wordDict, args.amount)
+        else:
+            sortWords(wordDict)
+
+
+if __name__ == "__main__":
+    main()

@@ -10,6 +10,18 @@
 | ..        | placeholder; replaced with underscores            |
 | ...       | ellipsis; replaced with actual ellipsis character |
 
+## Word Usage Analysis and Word/Sentence/Paragraph Counting
+The `writing_stats` script will print the number of times words appear in a file ordered by frequency. It optionally accepts a list of words to ignore or a list of words to only check for. It also allows specifying a chapter range to limit the check to. This could be used, for example, to check that unusual words aren't used too often, especially in close proximity.
+
+The script can also instead print information about the number of words, sentences, paragraphs, and chapters. A chapter range is also allowed with this --count flag/option. It can also output a valid markdown table giving information for each chapter. Example:
+
+![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/scripts/bin/writing/writing_stats_table.png "table output")
+
+| Chapter	| Words 	| Sentences	| Paragraphs	|
+| ------------- | ------------- | ------------- | ------------- |
+|	1	|	54	|	8	|	3	|
+|	2	|	37	|	3	|	3	|
+| Total:	|	91	|	11	|	6	|
 
 ## Viewing in vim
 Comments, italics, and emboldened text are visible with vim syntax.
