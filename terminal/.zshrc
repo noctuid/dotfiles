@@ -30,6 +30,11 @@
 source ~/.zsh/antigen-hs/init.zsh
 # theme
 source ~/.zsh/themes/fox-mod.zsh-theme
+# zbell
+# https://gist.github.com/jpouellet/5278239
+# also see https://gist.github.com/oknowton/8346801
+zbell_ignore=(less vimpager vim rn ranger)
+source ~/.zsh/zbell.sh
 
 alias ahsc='antigen-hs-compile'
 alias antigen-hs-update='cd ~/.zsh/antigen-hs && git pull origin master'
