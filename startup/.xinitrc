@@ -54,6 +54,11 @@ scim -d
 
 # redshift; better options at this point than xflux
 redshift -c ~/.config/redshift.conf &
+
+# notifications on mpd song changes
+# https://github.com/vehk/mpdnotify works well with mpdcron also
+mpd-notification -m ~/Music &
+
 # backup hotkey program
 xchainkeys &
 sxhkd &
