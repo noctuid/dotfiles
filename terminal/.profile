@@ -1,3 +1,5 @@
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # export for bspwm reloading
 export BSPWM_TREE=/tmp/bspwm.tree
 export BSPWM_HISTORY=/tmp/bspwm.history
