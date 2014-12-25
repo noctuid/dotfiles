@@ -3,7 +3,3 @@ au DownloadPost * :silent !~/bin/ranger/ranger_browser_fm.sh "<file>"
 " don't show tabline on twitter
 au LocationChange twitter.com :set showtabline=never
 au LocationChange !twitter.com,* :set showtabline=always
-
-" get rid of need to add sourcing into bindings
-" test if this slows down
-au LocationChange * :source ~/.pentadactyl/navigation.penta

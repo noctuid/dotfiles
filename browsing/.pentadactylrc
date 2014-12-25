@@ -397,10 +397,10 @@ nmap -builtin vg :tgroup-get<space>
 nmap -builtin vs :tgroup-switch<space>
 nmap -builtin <space><space> :tgroup-switch<space>
 " specific tab group switching
-nmap -builtin vv :tgroup-switch main<cr>
-nmap -builtin va :tgroup-switch animu_y_mango<cr>
-nmap -builtin vp :tgroup-switch prog<cr>
-nmap -builtin vw :tgroup-switch school<cr>
+nmap -builtin vv :tgroup-switch main<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
+nmap -builtin va :tgroup-switch animu_y_mango<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
+nmap -builtin vp :tgroup-switch prog<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
+nmap -builtin vw :tgroup-switch school<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
 " rename group
 nmap -builtin vr :tgroup-title<space>
 nmap -builtin vd :tgroup-delete<space>
@@ -475,9 +475,6 @@ nmap -builtin O o
 nmap -builtin c O
 nmap -builtin C T
 
-" space for tab switching (sourced on LocationChange; see autocommands.penta)"{{{
-source ~/.pentadactyl/navigation.penta
-" "}}}
 
 " swap d/D; move left when closing tab (see below for D mapping)
 nmap -builtin d D
@@ -532,7 +529,60 @@ nmap -builtin Zz zz
 " nmap -builtin V ZO
 
 " }}}
- 
+
+" Tab Navigation With Space "{{{
+" formerly was sourcing a script to remap every key on location change
+" this is more concise and prevents possible slowdown
+command! -nargs=1 relative-move <<EOF
+if tabs.getTab().dactylOrdinal < "11"
+	if <args> == "0"
+		normal 10gt
+	else
+		normal <args>gt
+elseif tabs.getTab().dactylOrdinal < "21"
+	normal 1<args>gt
+elseif tabs.getTab().dactylOrdinal < "31"
+	normal 2<args>gt
+elseif tabs.getTab().dactylOrdinal < "41"
+	normal 3<args>gt
+elseif tabs.getTab().dactylOrdinal < "51"
+	normal 4<args>gt
+elseif tabs.getTab().dactylOrdinal < "61"
+	normal 5<args>gt
+elseif tabs.getTab().dactylOrdinal < "71"
+	normal 6<args>gt
+elseif tabs.getTab().dactylOrdinal < "81"
+	normal 7<args>gt
+elseif tabs.getTab().dactylOrdinal < "91"
+	normal 8<args>gt
+elseif tabs.getTab().dactylOrdinal < "101"
+	normal 9<args>gt
+elseif tabs.getTab().dactylOrdinal < "111"
+	if <args> == "0"
+		normal 110gt
+	else
+		normal 10<args>gt
+endif
+EOF
+
+nmap <space> <nop>
+nmap -builtin <space>q 1gt
+nmap -builtin <space>w 11gt
+nmap -builtin <space>f 21gt
+nmap -builtin <space>p 31gt
+nmap -builtin <space>g 41gt
+nmap -ex <space>a relative-move 1
+nmap -ex <space>r relative-move 2
+nmap -ex <space>s relative-move 3
+nmap -ex <space>t relative-move 4
+nmap -ex <space>d relative-move 5
+nmap -ex <space>h relative-move 6
+nmap -ex <space>n relative-move 7
+nmap -ex <space>e relative-move 8
+nmap -ex <space>i relative-move 9
+nmap -ex <space>o relative-move 0
+"}}}
+
 " Custom web bindings"{{{
 au Enter * source ~/.pentadactyl/groups.penta
 " delete all groups (turn on/off site specific mappings)
