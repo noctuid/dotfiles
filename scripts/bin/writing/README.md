@@ -11,7 +11,7 @@
 | ...       | ellipsis; replaced with actual ellipsis character |
 
 ## Word Usage Analysis and Word/Sentence/Paragraph Counting
-The `writing_stats` script will print the number of times words appear in a file ordered by frequency. It optionally accepts a list of words to ignore or a list of words to only check for. It also allows specifying a chapter range to limit the check to. This could be used, for example, to check that unusual words aren't used too often, especially in close proximity.
+The `writing_stats` script will print the number of times words appear in a file ordered by frequency. It optionally accepts a list of words to ignore or a list of words to only check for. It also allows specifying a chapter range to limit the check to. This could be used, for example, to check that unusual words aren't used too often, especially in close proximity. However, something like [wordlint](https://github.com/gbgar/Wordlint) might better serve this purpose.
 
 The script can also instead print information about the number of words, sentences, paragraphs, and chapters. A chapter range is also allowed with this --count flag/option. It can also output a valid markdown table giving information for each chapter. Example:
 
