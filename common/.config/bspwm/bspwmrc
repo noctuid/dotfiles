@@ -51,7 +51,8 @@ if [ -e "$BSPWM_TREE" ] ; then
 	sxhkd &
 else
 	# only do this after starting x/bspwm (not after reloading bspwm)
-	bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("gvim &")); }' &
+	# bspc control --subscribe | awk -F ':' '$3 ~ /^[FO]/ { exit(system("gvim &")); }' &
+	gvim &
 	bspc control --subscribe | awk -F ':' '$4 ~ /^[FO]/ { exit(system("firefox &")); }' &
 	bspc desktop -f ^2
 fi
