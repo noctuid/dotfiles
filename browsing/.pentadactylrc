@@ -535,33 +535,35 @@ nmap -builtin Zz zz
 " this is more concise and prevents possible slowdown
 command! -nargs=1 relative-move <<EOF
 if tabs.getTab().dactylOrdinal < "11"
-	if <args> == "0"
+	if <args> == 0
 		normal 10gt
 	else
 		normal <args>gt
-elseif tabs.getTab().dactylOrdinal < "21"
+	endif
+elseif tabs.getTab().dactylOrdinal > "10" && tabs.getTab().dactylOrdinal < "21"
 	normal 1<args>gt
-elseif tabs.getTab().dactylOrdinal < "31"
+elseif tabs.getTab().dactylOrdinal > "20" && tabs.getTab().dactylOrdinal < "31"
 	normal 2<args>gt
-elseif tabs.getTab().dactylOrdinal < "41"
+elseif tabs.getTab().dactylOrdinal > "30" && tabs.getTab().dactylOrdinal < "41"
 	normal 3<args>gt
-elseif tabs.getTab().dactylOrdinal < "51"
+elseif tabs.getTab().dactylOrdinal > "40" && tabs.getTab().dactylOrdinal < "51"
 	normal 4<args>gt
-elseif tabs.getTab().dactylOrdinal < "61"
+elseif tabs.getTab().dactylOrdinal > "50" && tabs.getTab().dactylOrdinal < "61"
 	normal 5<args>gt
-elseif tabs.getTab().dactylOrdinal < "71"
+elseif tabs.getTab().dactylOrdinal > "60" && tabs.getTab().dactylOrdinal < "71"
 	normal 6<args>gt
-elseif tabs.getTab().dactylOrdinal < "81"
+elseif tabs.getTab().dactylOrdinal > "70" && tabs.getTab().dactylOrdinal < "81"
 	normal 7<args>gt
-elseif tabs.getTab().dactylOrdinal < "91"
+elseif tabs.getTab().dactylOrdinal > "80" && tabs.getTab().dactylOrdinal < "91"
 	normal 8<args>gt
-elseif tabs.getTab().dactylOrdinal < "101"
+elseif tabs.getTab().dactylOrdinal > "90" && tabs.getTab().dactylOrdinal < "101"
 	normal 9<args>gt
-elseif tabs.getTab().dactylOrdinal < "111"
-	if <args> == "0"
+elseif tabs.getTab().dactylOrdinal > "100" && tabs.getTab().dactylOrdinal < "111"
+	if <args> == 0
 		normal 110gt
 	else
 		normal 10<args>gt
+	endif
 endif
 EOF
 
