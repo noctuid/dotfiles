@@ -140,7 +140,7 @@ function bahamut() {
 					mountsoma && \
 					mount_tc $usb_location/soma $HOME/ag-sys-bk && \
 					sndot && \
-					rsync -avrhP --delete $HOME/ag-sys/ $HOME/ag-sys-bk) && \
+					rsync -avrhP --delete $HOME/ag-sys/ $HOME/ag-sys-bk && \
 					echo "Backup of soma to $usb_location completed succesfully." || \
 					echo "bahamut failed."
 					truecrypt -t -d $usb_location/soma
