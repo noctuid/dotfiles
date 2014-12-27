@@ -1,0 +1,27 @@
+#
+# /etc/fstab: static file system information
+#
+# <file system>	<dir>	<type>	<options>	<dump>	<pass>
+# if 1 for dump, dump utility (whatever that is) will make a backup
+# pass used by fsck to decide what to check; 0 is no, 1 highest priority then 2
+
+# https://wiki.archlinux.org/index.php/Fstab#atime_options
+# atime updates atime of files with each read (useful for servers, not desktops really)
+# with noatime, no writes with read (can cause problem with old mail notifiers, e.g. mutt without maildir format)
+# relatime only updates atime with modification (default)
+
+# discard for TRIM with ssd
+# don't remount root; https://wiki.archlinux.org/index.php/Improve_boot_performance#Filesystem_mounts
+# LABEL=root_ssd / ext4 defaults,noatime,discard 0 1
+
+LABEL=boot_ssd /boot ext4 defaults,noatime,discard 0 2
+
+LABEL=mozilla_ssd /home/angelic_sedition/.mozilla ext4 defaults,noatime,discard 0 2
+
+LABEL=var_hdd /var ext4 defaults,noatime 0 2
+
+LABEL=home_hdd /home ext4 defaults,relatime 0 2
+
+LABEL=swap_hdd none swap defaults 0 0
+
+tmpfs /tmp tmpfs nodev,nosuid,size=2G 0 0

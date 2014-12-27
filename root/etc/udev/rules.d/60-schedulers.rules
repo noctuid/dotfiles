@@ -1,0 +1,3 @@
+# https://wiki.archlinux.org/index.php/Solid_State_Drives#I.2FO_Scheduler
+# set deadline scheduler for non-rotating disks
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="deadline"
