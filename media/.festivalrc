@@ -1,0 +1,5 @@
+;; for use with PulseAudio
+;; https://wiki.archlinux.org/index.php/Festival#Usage_with_a_Sound_Server
+(Parameter.set 'Audio_Required_Format 'aiff)
+(Parameter.set 'Audio_Method 'Audio_Command)
+(Parameter.set 'Audio_Command "paplay $FILE --client-name=Festival --stream-name=Speech")
