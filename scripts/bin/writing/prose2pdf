@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# TODO:
+# optionally add index
+# chapter range
 
 import os
 from subprocess import call
@@ -71,7 +74,6 @@ def formatPairs(line):
         line = line.rstrip("\n") + "*\n"
         asteriskNum += 1
 
-    print(singleQuoteNum)
     # alternate replace with opening and closing
     for i in range(underscoreNum//2):
         line = re.sub(noEscUsc, r"\\textit{", line, count=1)
@@ -117,6 +119,10 @@ def main():
     lines = f.readlines()
     newText = ""
     for line in lines:
+        # erease newText contents before a '###'
+        if line.startswith("###"):
+            newText = ""
+            continue
         line = removeComment(line)
         # don't continue processing if entire line was comment
         if line == "\n":

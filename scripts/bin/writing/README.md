@@ -3,6 +3,7 @@
 | Symbols   |                                                   |
 | --------- | ------------------------------------------------- |
 | \#        | comment character                                 |
+| \#\#\#    | comment character for all preceding text          |
 | \_text\_  | italics                                           |
 | \*text\*  | bold                                              |
 | ^text     | chapter title                                     |

@@ -20,7 +20,7 @@ import re
 # non escaped hash
 noEscHsh = re.compile(r"(?<!\\)#")
 # quote that isn't apostrophe
-singleQuote = re.compile(r"(?<!^[\^\+])(?<![A-Za-z_])[\'’]")
+singleQuote = re.compile(r"(?<![A-Za-z_])[\'’]")
 # curly quotes
 curlyQuotes = re.compile("[“”‘]")
 # other punctuation and symbols (e.g. formatting characters like _)
@@ -173,9 +173,12 @@ def main():
     inFile = args.inputfile
     f = open(inFile)
     if args.count or args.fullcount:
-        chapters = re.split("\n\^.*\n", "\n" + f.read())
+        text = f.read()
+        # remove everything before ###
+        chapter_text = re.split("\n###.*\n", "\n" + text)[-1]
+        chapters = re.split("\n\^.*\n", "\n" + chapter_text)
         # get rid of '' (if two chapter headings after each other or first line in file is chapter heading)
-        chapters = [ chapter for chapter in chapters if chapter != ""]
+        chapters = [ chapter for chapter in chapters if chapter != "" ]
 
         if args.fullcount:
             print("| Chapter	| Words 	| Sentences	| Paragraphs	|")
