@@ -9,6 +9,7 @@ export PANEL_HEIGHT=14
 export PANEL_FIFO=/tmp/panel-fifo
 
 export BROWSER=firefox
+export PACMAN=powerpill
 
 # only load ~/.config/ranger/rc.conf
 export RANGER_LOAD_DEFAULT_RC=FALSE
@@ -19,15 +20,14 @@ pathdirs="
 ~/bin
 ~/.local/bin
 ~/bin/mpv
-~/.config/bspwm/panel
-# for scut
 ~/bin/not_mine
+# for writing related script
+~/bin/writing
+~/.config/bspwm/panel
 # for vimus
 ~/.cabal/bin
 # for adb
 /opt/android-sdk
-# for prose2pdf script
-~/bin/writing
 # for octopress/gems
 ~/.gem/ruby/2.1.0/bin
 "
