@@ -2,6 +2,9 @@
 
 ! make key pad - caps if ever need
 keycode 82 = Caps_Lock 
+! unused middle key (from wide md) as enter
+keycode 57 = Return
+keycode 43 = Return
 
 ! caps as mode_switch
 keycode 66 = Mode_switch
@@ -32,7 +35,7 @@ keysym h = h H Left Left
 keysym n = n N Down 4 4 dollar
 keysym e = e E Up Up 5 5 percent 
 keysym i = i I Right 6 6 asciicircum
-keysym o = o O Prior 
+keysym o = o O Prior
 
 keysym k = k K Next A k k
 keysym m = m M NoSymbol NoSymbol 7
@@ -42,22 +45,4 @@ keysym slash = slash question backslash
 
 keycode 65 = space space Return 
 keycode 35 = braceleft braceright
-! }}}
- 
-! Keypad remaps! {{{
-! insert on keypad is f5
-keycode 90 = F5 
-! change 5 on keypad to up
-keycode 84 = Up
-! make kp down down
-keycode 88 = Down
-! 7/ kp home to -
-keycode 79 = minus
-! 8/ kp_up to +
-keycode 80 = plus
-! change pgup on keypad to control
-keycode 81 = Meta_R
-add control = Meta_R
-! kp / is numlock.. why? I don't know
-keycode 106 = Num_Lock
 ! }}}
