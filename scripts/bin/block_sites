@@ -1,0 +1,38 @@
+#!/bin/bash
+
+if [[ $EUID -ne 0 ]]; then
+  echo "Must run as root."
+  exit 1
+fi
+
+block_sites="www.reddit.com wololo.net www.last.fm bbs.archlinux.org www.tumblr.com twitter.com www.youtube.com"
+
+unblock_sites() {
+	echo "unblocking sites"
+	mv /etc/hosts.bak /etc/hosts
+}
+
+block_sites() {
+	if [[ ! -f /etc/hosts.bak ]]; then
+		cp /etc/hosts /etc/hosts.bak || (echo "Error backing up /etc/hosts. Exiting." ; exit 1)
+	fi
+	for site in $block_sites; do
+		echo "blocking $site"
+		echo "0.0.0.0 $site" >> /etc/hosts
+	done
+}
+
+if [[ -n $1 ]]; then
+	if [[ $1 == block ]]; then
+		block_sites
+	elif [[ $1 == unblock ]]; then
+		unblock_sites
+	fi
+else
+	if [[ -f /etc/hosts.bak ]]; then
+		unblock_sites
+	else
+		block_sites
+	fi
+fi
+

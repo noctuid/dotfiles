@@ -1161,6 +1161,9 @@ alias newbpost="cd $BLOG && bundle exec rake new_post\['$1'\]"
 #===============
 # Internet, VPN, Firewall, and Torrenting
 #===============
+# block unproductive sites
+alias focus="sudo block_sites block"
+
 # connecting/general# {{{
 # netctl (if no connman)
 alias wifi='sudo wifi-menu'
