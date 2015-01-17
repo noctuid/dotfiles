@@ -1,13 +1,12 @@
 " todo : 
 " fucking bookmark folders
 " get caret hints working; better caret mode 
-" set shell = zsh
+" prevent v from being overriden in caret (with v mappings)
 " grabbing feed with pageinfo
 " tabdo and url saving.. give save/Delete binding a count
-" a tabgroup where most urls are blacklisted?
 " fix tabgroupie...
 
-" downloads here (doesn't work in private mode for some reason)
+" downloads here (doesn't work in private mode for some reason; won't store a cwd?)
 silent cd ~/Move
 
 " some sources: {{{
@@ -104,7 +103,6 @@ nmap -ex spd silent !bspc desktop -c
 "}}}
 "}}}
 
-nmap -ex <leader>a silent !bspc window -f left && xsendkey p && bspc window -f last
 "}}}
 " #==============================
 " # Actual Firefox Settings (about:config)"{{{
@@ -121,6 +119,14 @@ set! extensions.dta.closedta=true
 
 " more undos
 set! browser.sessionstore.max_tabs_undo=100
+
+" to force install pentadactyl
+" set! extensions.checkCompatibility.nightly=false
+
+" https://github.com/Earnestly/dotfiles/blob/master/.config/pentadactyl/pentadactylrc
+" Require websites preform safe ssl negotiation
+" set! security.ssl.require_safe_negotiation=true
+" set! security.ssl.treat_unsafe_negotiation_as_broken=true
 
 "}}}
 " #==============================
@@ -241,8 +247,9 @@ command bml-tumblr-share -descripiton "Share Current Page to Tumblr" open javasc
 " thanks to mdegat01; I remember when lifehacker used to be interesting
 " http://jsfiddle.net/mdegat01/WSLak/
 " http://lifehacker.com/5973225/four-more-custom-searches-you-should-enable-in-your-browser-right-now
-command! customsearch -description "more custom search options" -nargs=1 open javascript:var url='<args>';if(!String.prototype.trim){String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,'')}}(function(u,m,h,n){var WC={'e':m[1]||n,'h':h||n,'q':(m[1]||h)?(h+' '+m[1]).trim():n,'d':window.location.hostname,'u':window.location.href,'t':document.title,'l':n};var w='[';for(var key in WC){if(WC.hasOwnProperty(key)){w+=key}}w+=']';var re=new RegExp('%((?:\\('+w+'(?:\\|\\|'+w+')+\\))|'+w+')','g');var sU=function(p){if(p){WC.l=p.coords.latitude+'%20'+p.coords.longitude}u=u.replace(re,function(match,p1,off,str){return encodeURIComponent((eval(p1.replace(new RegExp(w,'g'),'WC.$&'))||''))});switch((m[2]||'c').toLowerCase()){case'w':window.open(u,'Omnibar Window','toolbar=0,status=0,resizable=1,width=1100,height=762');break;case't':window.open(u,'_blank');break;default:window.location.href=u;break}};var lTest=/%(?:\([^)]*)?\bl\b/.test(u);if(navigator.geolocation&&lTest){navigator.geolocation.getCurrentPosition(sU)}else{if(lTest){alert('Geolocation%20is%20not%20supported%20by%20this%20browser.')}sU()}})(url,(/^(.*?)([wtc])?$/i.exec('%s')),((window.getSelection?window.getSelection():(document.getSelection?document.getSelection():(document.selection?document.selection.createRange().text:document.selection)))));
+command! customsearch -description "more custom search options" -nargs=1 tabopen javascript:var url='<args>';if(!String.prototype.trim){String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g,'')}}(function(u,m,h,n){var WC={'e':m[1]||n,'h':h||n,'q':(m[1]||h)?(h+' '+m[1]).trim():n,'d':window.location.hostname,'u':window.location.href,'t':document.title,'l':n};var w='[';for(var key in WC){if(WC.hasOwnProperty(key)){w+=key}}w+=']';var re=new RegExp('%((?:\\('+w+'(?:\\|\\|'+w+')+\\))|'+w+')','g');var sU=function(p){if(p){WC.l=p.coords.latitude+'%20'+p.coords.longitude}u=u.replace(re,function(match,p1,off,str){return encodeURIComponent((eval(p1.replace(new RegExp(w,'g'),'WC.$&'))||''))});switch((m[2]||'c').toLowerCase()){case'w':window.open(u,'Omnibar Window','toolbar=0,status=0,resizable=1,width=1100,height=762');break;case't':window.open(u,'_blank');break;default:window.location.href=u;break}};var lTest=/%(?:\([^)]*)?\bl\b/.test(u);if(navigator.geolocation&&lTest){navigator.geolocation.getCurrentPosition(sU)}else{if(lTest){alert('Geolocation%20is%20not%20supported%20by%20this%20browser.')}sU()}})(url,(/^(.*?)([wtc])?$/i.exec('%s')),((window.getSelection?window.getSelection():(document.getSelection?document.getSelection():(document.selection?document.selection.createRange().text:document.selection)))));
 
+" %u for current url
 command viewgcache,vgc -description "view google cache of page" customsearch http://www.google.com/search?q=cache:%u
 
 command getdirections,gdr -description "get directions from current location with google maps" customsearch http://www.google.com/maps?saddr=%l&daddr=%q
@@ -264,8 +271,9 @@ set newtab=all
 " if there is a popup to be opened (not blocked), open in new tab
 set popups=tab
 " don't open external at end (this with tab-options plugin)
+" silent loadplugins '\.(js|penta)$'
+" set loadplugins
 au Enter * set tabopen=link:right,orphan:right,external:right
-" 
 
 set hintkeys=rstneiowfpluy
 
@@ -370,8 +378,8 @@ vmap -builtin n <Down>
 vmap -builtin e <Up>
 
 " tab switching
-nmap -builtin N gT
 nmap -builtin E gt
+nmap -builtin N gT
 
 " tab moving
 nmap -ex <leader>e tabm +1
@@ -400,7 +408,7 @@ nmap -builtin <space><space> :tgroup-switch<space>
 nmap -builtin vv :tgroup-switch main<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
 nmap -builtin va :tgroup-switch animu_y_mango<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
 nmap -builtin vp :tgroup-switch prog<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
-nmap -builtin vw :tgroup-switch school<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
+nmap -builtin vw :tgroup-switch write<cr>:source ~/.pentadactyl/tabgroup_specific.penta<cr>
 " rename group
 nmap -builtin vr :tgroup-title<space>
 nmap -builtin vd :tgroup-delete<space>
@@ -616,23 +624,31 @@ nmap -ex gs pageinfo
 nmap -ex gf viewsource
 "}}}
 
-" Leader mappings
-map -builtin <leader>t gH
-" image hinting
-map -builtin <leader>i ;I
-map -builtin <leader>I ;i
-
 " Other
 " turn off highlight search
 nmap -builtin <esc> <esc>:noh<cr>
 
 " Leader Bindings {{{
+map -builtin <leader>t gH
+
+" image hinting; will only open in background if only one image found :(.. if have to hint, doesn't work
+map -ex <leader>i background feedkeys! ;I
+map -builtin <leader>I ;i
+
 " toggle pterosaur
 nmap -ex <leader>v set fullvim!
-" reload
+
+" reload config
 nmap -ex <leader>. source ~/.pentadactylrc
 
 nmap -ex <leader>p private winopen
+
+" autofill using pass and https://github.com/jvenant/passff
+" nmap -builtin <leader>a
+
+" https://github.com/covin/pentadactylrc/blob/master/pentadactylrc
+" hide tabline
+map -ex <leader>b set showtabline!=always,never
 
 " stream all videos in _mpv {{{
 " For Youtube, Dailymotion, etc.:
@@ -643,8 +659,11 @@ nmap -ex <leader>p private winopen
 " https://github.com/mpv-player/mpv/issues/481
 
 " simple youtube playing:
-" mpv already plays highest quality by default; I use a userscript to prevent autoplay
-nmap -ex <leader>y execute "silent !mpv " + buffer.URL + " &"
+" autocmd PageLoad youtube.com/watch* silent !mpv <url> &
+" --fs for fullscreen; --ytdl no longer explicitly needed
+" using youtube center to prevent autoplay
+" also see https://github.com/Earnestly/dotfiles/blob/master/.config/pentadactyl/plugins/launchv.js
+nmap -ex <leader>y execute "silent !mpv '" + buffer.URL + "' &"
 
 " download instead
 nmap -ex <leader>Y execute "silent !youtube-dl --restrict-filenames -o '~/Move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s' " + buffer.URL + " &"
@@ -700,10 +719,6 @@ nmap -builtin <leader>w :w ~/database/move/<tab><cr>d
 nmap -builtin <leader>s ;s
 
 "}}}
-
-" https://github.com/covin/pentadactylrc/blob/master/pentadactylrc
-" hide tabline
-map -ex <leader>b set showtabline!=always,never
 
 " }}}
 " }}}
