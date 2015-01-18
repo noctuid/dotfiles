@@ -1,73 +1,67 @@
-" Todo:"{{{
-" fix smartinput rules
-" add unconditional paste?
-" fix airline in term
-" set up yanking properly in unite
-" arpeggio
-"}}}
-" An important note:
-" since nnoremap doesn't work when binding to <Plug> mappings, there is often <leader>; instead of :
+" Todo:
+" don't count capitilization errors as spelling errors?
+" character-wise v line-wise visual
+" tab through menu with neocomplete and automatically expand snippets?
+" integrate taboo with airline's tabline
+" visual repeat setup
+" following symlinks better
+" get rid of calendar
+" after taboo command, source nav.vim
+
+" Wishes:
+" listchars working with linebreak
+" W13 fix
+" async linter update; async git singify update
+" better shell for repls
+" realtime visualization of block editing
+" tab left patch
+
+" Notes:
+" see https://gist.github.com/romainl/9ecd7b09a693816997ba
+" to check what is setting certain mappings and settings-
+" :verbose map
+" :verbose set
+" Insert prefixes: . and , (as usually followed by a space; can cause problems)
+
+" having a ~/.vimrc turns off compatable; :h 'cp'
+
+" todo , deadline, done, clocking in
+" emacs org mode with tables for budget
+
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
-set runtimepath+=~/.vim/colors
-" turns off vi compatibility mode for full vim functionality; set first
-set nocompatible
 
-"" Don't save backups of *.gpg files"{{{
-set backupskip+=*.gpg
+" #==============================
+" # Experimental {{{
+" #==============================
+" Arpeggio {{{
+" otherwise vim complains
+autocmd VimEnter * call s:arpeggio_maps()
 
-augroup encrypted
-  au!
-  " Disable swap files, and set binary file format before reading the file
-  " To avoid that parts of the file is saved to .viminfo when yanking or
-  " deleting, empty the 'viminfo' option.
-  autocmd BufReadPre,FileReadPre *.gpg
-    \ setlocal noswapfile noundofile noshelltemp history=0 viminfo= bin
-  " Decrypt the contents after reading the file, reset binary file format
-  " and run any BufReadPost autocmds matching the file name without the .gpg
-  " extension
-  autocmd BufReadPost,FileReadPost *.gpg
-    \ execute "'[,']!gpg --decrypt --default-recipient-self" |
-    \ setlocal nobin |
-    \ execute "doautocmd BufReadPost " . expand("%:r")
-  " Set binary file format and encrypt the contents before writing the file
-  autocmd BufWritePre,FileWritePre *.gpg
-    \ setlocal bin |
-    \ '[,']!gpg --encrypt --default-recipient-self
-  " After writing the file, do an :undo to revert the encryption in the
-  " buffer, and reset binary file format
-  autocmd BufWritePost,FileWritePost *.gpg
-    \ silent u |
-    \ setlocal nobin
-augroup END
+function! s:arpeggio_maps()
+	Arpeggio inoremap st <c-w>
+	Arpeggio inoremap ie <end>
+	Arpeggio inoremap ne <esc>
+	Arpeggio inoremap se <cr>
 
-"}}}
+	" Arpeggio inoremap ra <c-o>:silent !bspc desktop -f ^1<cr>
+	" Arpeggio inoremap rr <c-o>:silent !bspc desktop -f ^2<cr>
+	" Arpeggio inoremap rs <c-o>:silent !bspc desktop -f ^3<cr>
+	" Arpeggio inoremap rt <c-o>:silent !bspc desktop -f ^4<cr>
+	" Arpeggio inoremap rd <c-o>:silent !bspc desktop -f ^5<cr>
+	" Arpeggio inoremap rh <c-o>:silent !bspc desktop -f ^6<cr>
+	" Arpeggio inoremap rn <c-o>:silent !bspc desktop -f ^7<cr>
+	" Arpeggio inoremap re <c-o>:silent !bspc desktop -f ^8<cr>
+	" Arpeggio inoremap ri <c-o>:silent !bspc desktop -f ^9<cr>
 
-" vim as password manager"{{{
-" using truecrypt container with blowfish encrypted text file... makes sense? probably not
-" use the vpass alias with .encrypted_vimrc not this (no loading of plugins); I guess this is useful if accidentally open the buffer
+	" Arpeggio inoremap wf <c-r>+
+endfunction
 
-" no backup or writebackup for vault files
-set backupskip+=*.vault
+let g:arpeggio_timeoutlen=11
 
-augroup vaultencrypted
-  au!
-  " Disable swap files, saving to disk of undo history, writing to disk of commands
-  " To avoid that parts of the file is saved to .viminfo when yanking or deleting, empty the 'viminfo' option.
-    " \ setlocal noswapfile noundofile noshelltemp history=0 viminfo=
-  autocmd BufReadPre,FileReadPre,BufEnter *.vault
-    \ setlocal noswapfile cm=blowfish noundofile noshelltemp viminfo= 
-augroup END
+" }}}
 
-autocmd BufEnter *.vault nmap <buffer> yy yi{
-
-"}}}
-
-" Experimental"{{{
-" for pterosaur; was this fixed?
-inoremap qq <esc>
-
-" retrain to stop using caps layer in vim
+" Nop Arrow Keys {{{
 nnoremap <up> <nop>
 nnoremap <left> <nop>
 " nnoremap <right> <nop>
@@ -76,19 +70,25 @@ nnoremap <End> <nop>
 nnoremap <Home> <nop>
 inoremap <up> <nop>
 inoremap <left> <nop>
-inoremap <right> <nop>
+" inoremap <right> <nop>
 inoremap <down> <nop>
 inoremap <End> <nop>
 inoremap <Home> <nop>
+" better text file long line nav (use with lazy redraw); up and down between wraps
+" inoremap <Down> <C-o>gj
+" inoremap <Up> <C-o>gk
+
+" }}}
 
 nmap s <nop>
 nmap r <nop>
+nnoremap sr r
 if has("gui_running")
-" wm experementation"{{{
-" nnoremap <silent> <leader>a :silent !bspc window -f left && xsendkey p && bspc window -f last<cr>
+" WM Experimentation {{{
+nnoremap <silent> <space><space> :silent !bspc window -f left && xsendkey p && bspc window -f last<cr>
 
-" "r" is redraw"{{{
-" worskpace/Destkop switch"{{{
+" "r" is Redraw {{{
+" worskpace/Destkop switch {{{
 nnoremap <silent> ra :silent !bspc desktop -f ^1<cr>
 nnoremap <silent> rr :silent !bspc desktop -f ^2<cr>
 nnoremap <silent> rs :silent !bspc desktop -f ^3<cr>
@@ -99,8 +99,8 @@ nnoremap <silent> rn :silent !bspc desktop -f ^7<cr>
 nnoremap <silent> re :silent !bspc desktop -f ^8<cr>
 nnoremap <silent> ri :silent !bspc desktop -f ^9<cr>
 nnoremap <silent> ro :silent !bspc desktop -f ^10<cr>
-"}}}
-" move to destkop"{{{
+" }}}
+" move to destkop {{{
 nnoremap <silent> Ra :silent !bspc window -d ^1<cr>
 nnoremap <silent> Rr :silent !bspc window -d ^2<cr>
 nnoremap <silent> Rs :silent !bspc window -d ^3<cr>
@@ -111,9 +111,9 @@ nnoremap <silent> Rn :silent !bspc window -d ^7<cr>
 nnoremap <silent> Re :silent !bspc window -d ^8<cr>
 nnoremap <silent> Ri :silent !bspc window -d ^9<cr>
 nnoremap <silent> Ro :silent !bspc window -d ^10<cr>
-"}}}
+" }}}
 
-" moving windows within desktop"{{{
+" moving windows within desktop {{{
 " move to biggest
 nnoremap <silent> rcm :silent !bspc window -s biggest<cr>
 " directions
@@ -124,22 +124,22 @@ nnoremap <silent> rci :silent !bspc window -s right<cr>
 " circulate
 nnoremap <silent> r. :silent !bspc desktop -C forward<cr>
 nnoremap <silent> r, :silent !bspc desktop -C backward<cr>
-"}}}
+" }}}
 
-"resize"{{{
+"resize {{{
 nnoremap <silent> rmh :silent !~/bin/resize.sh left<cr>
 nnoremap <silent> rmn :silent !~/bin/resize.sh down<cr>
 nnoremap <silent> rme :silent !~/bin/resize.sh up<cr>
 nnoremap <silent> rmi :silent !~/bin/resize.sh right<cr>
-"}}}
+" }}}
 " open urxvt
 nnoremap <silent> ru :silent !urxvt &<cr>
 
 " close window
 nnoremap <silent> rx :silent !bspc window -c<cr>
-"}}}
+" }}}
 
-" s becomes select/Show/settings"{{{
+" s becomes select/Show/settings {{{
 "select
 nnoremap <silent> sh :silent !bspc window -f left<cr>
 nnoremap <silent> sn :silent !bspc window -f down<cr>
@@ -148,7 +148,7 @@ nnoremap <silent> si :silent !bspc window -f right<cr>
 nnoremap <silent> sl :silent !bspc window -f last<cr>
 
 " monocle toggle
-nnoremap <silent> st :silent !bspc desktop -l next<cr>
+nnoremap <silent> st :silent! !bspc desktop -l next<cr>
 nnoremap <silent> ss :silent !bspc window -t sticky<cr>
 nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
 
@@ -156,21 +156,21 @@ nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
 nnoremap <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
 nnoremap <silent> sU :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
 
-" preselect"{{{
+" preselect {{{
 nnoremap <silent> sph :silent !bspc window -p left<cr>
 nnoremap <silent> spn :silent !bspc window -p down<cr>
 nnoremap <silent> spe :silent !bspc window -p up<cr>
 nnoremap <silent> spi :silent !bspc window -p right<cr>
 nnoremap <silent> spx :silent !bspc window -p cancel<cr>
 nnoremap <silent> spd :silent !bspc desktop -c<cr>
-"}}}
-"}}}
+" }}}
+" }}}
 
-"}}}
+" }}}
 else
-" tmux experimentation"{{{
-" "r" is redraw"{{{
-" window switching"{{{
+" Tmux Experimentation {{{
+" "r" is Redraw {{{
+" window switching {{{
 nnoremap <silent> ra :silent !tmux select-window -t 1<cr>:redraw!<cr>
 nnoremap <silent> rr :silent !tmux select-window -t 2<cr>:redraw!<cr>
 nnoremap <silent> rs :silent !tmux select-window -t 3<cr>:redraw!<cr>
@@ -181,13 +181,13 @@ nnoremap <silent> rn :silent !tmux select-window -t 7<cr>:redraw!<cr>
 nnoremap <silent> re :silent !tmux select-window -t 8<cr>:redraw!<cr>
 nnoremap <silent> ri :silent !tmux select-window -t 9<cr>:redraw!<cr>
 nnoremap <silent> ro :silent !tmux select-window -t 10<cr>:redraw!<cr>
-"}}}
-" resize panes"{{{
+" }}}
+" resize panes {{{
 nnoremap <silent> rmh :silent !tmux resize-pane -L 10<cr>
 nnoremap <silent> rmn :silent !tmux resize-pane -D 10<cr>
 nnoremap <silent> rme :silent !tmux resize-pane -U 10<cr>
 nnoremap <silent> rmi :silent !tmux resize-pane -R 10<cr>
-"}}}
+" }}}
 " circulate
 " previous
 nnoremap <silent> r, :silent !tmux swap-pane -U<cr>
@@ -209,10 +209,10 @@ nnoremap <silent> r- :silent !tmux split-window<cr>:redraw!<cr>
 
 " break pane
 nnoremap <silent> r! :silent !tmux break-pane<cr>
-"}}}
+" }}}
 
-" "s" is select"{{{
-" panes"{{{
+" "s" is select {{{
+" panes {{{
 " directions
 nnoremap <silent> sh :silent !tmux select-pane -L<cr>:redraw!<cr>
 nnoremap <silent> sn :silent !tmux select-pane -D<cr>:redraw!<cr>
@@ -231,54 +231,32 @@ nnoremap <silent> st :silent !tmux resize-pane -Z<cr>
 nnoremap <silent> sm :silent !bspc desktop -l monocle && bspc window -t floating<cr>
 nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
 
-"}}}
+" }}}
 
 " select session
 nnoremap <silent> ss :silent !tmux choose-client<cr>
-"}}}
-"}}}
+" }}}
+" }}}
 endif
 
-"}}}
-
-" plugin unmaps"{{{
-" table mode
-autocmd VimEnter * silent! nunmap <leader>tt
-" replace camelcase's ib map
-autocmd VimEnter * omap ib <Plug>(textobj-anyblock-i)|xmap ib <Plug>(textobj-anyblock-i)
-"}}}
+" }}}
 " #==============================
-" # General {{{
+" # General/ Vim Settings {{{
 " #==============================
-" General General "{{{
-" error bells are off by default
-
-" filetype based indentation..
-filetype plugin indent on
-
-"relative numbers except current line (rnu); using numbers vim plugin as well
-set number relativenumber
-
-" set titlestring based on file
-set title
-" default; show mode, highlight matching brackets, and show keys in bottom right
-set showcmd showmode showmatch
-
-set foldmethod=marker
-set foldcolumn=1
-" open folds on jumping to marks
-set foldopen+=mark
-
-" set diffopt=filler,vertical,noicase,noiwhite,context:3
-
-set modeline
-
-" enable utf8
+" General General  {{{
+" utf8; http://rbtnn.hateblo.jp/entry/2014/12/28/010913
 set encoding=utf8
+scriptencoding utf-8
 set termencoding=utf-8
 
-" automatically use indentation from previous line
-set autoindent
+" 2000 lines of command line history.
+set history=2000
+
+" keep buffer contents in memory (e.g. undo history doesn't go away if change buffers and not saving undo history to disk)
+set hidden
+
+" no rodent
+set mouse=c
 
 " automatically cd to dir current file is in
 set autochdir
@@ -289,89 +267,63 @@ set nogdefault
 " can select past eol in visual block if one line is longer
 set virtualedit=block
 
-" Keep 2000 lines of command line history.
-set history=2000
+" default for vim; read "vim: settings:" in files
+set modeline
 
-" keeps buffer contents in memory (undo history doesn't go away if change buffers and not saving undo history)
-set hidden
+" allow backspacing over autoindent, linebreaks, and start of insert (2)
+set backspace=indent,eol,start
 
-" http://vim.wikia.com/wiki/Word_wrap_without_line_breaks
-" wrap lines visually when reach the edge
-set wrap
+" default; when do things like gg, will move cursor to sol
+set startofline
 
-" disable automatic insertion of newline characters
-set textwidth=0
-set wrapmargin=0
+" turn off timeout; default is 1000
+" fix airline mode changes without screwing up remaps of default letter keys (without this, using escape to exit insert mode won't change airline to display normal mode immediately in the terminal)
+" ttimeout only applies to keycodes (so changes to default vim keys that can't be unmapped won't be a problem, e.g. using r in multikey/prefix bindings)
+set notimeout ttimeout ttimeoutlen=10
 
-" display tabs and certain whitespace
-set list
-" listchars ;show tabs; show at end of line; ☬⚛⚜⚡☥☣
-set listchars=tab:\!\ ,nbsp:☣,eol:¬,extends:❯,precedes:❮
-set showbreak=↪\ 
-" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-141
-" show trailing whitespace
-augroup trailing
-    au!
-    au InsertEnter * :set listchars-=trail:⌴
-    au InsertLeave * :set listchars+=trail:⌴
-augroup END
+" generally use marker folds
+set foldmethod=marker
+set foldcolumn=2
+" open folds when jumping to marks
+set foldopen+=mark
 
-" text formatting; get rid of tc; no autowrap of comments or based on textwidth
-" l- don't break lines in insert mode
+set splitright nosplitbelow
+
+" Text Formatting {{{
+" default; disable automatic insertion of newline characters
+set textwidth=0 wrapmargin=0
+
+" :h fo-table
+" get rid of tc; no auto hardwrap (insert newline) of comments or text based on textwidth
+" having textwidth set overrides having tc in formatoptions
+" a - automatic formatting of paragraphs (e.g. if <esc> at eol with trailing whitespace, will join the lines)
 " j- remove comment char when joining lines
-" set formatoptions-=tc
+" l- don't break lines in insert mode
 " r - insert comment after enter while in insert
-" leaving off o which adds comment char on o
-set formatoptions=rwlj
+" q - allow formatting of comments with gq
+" w - trailing whitespace indicates a paragraph continues on the next line 
+" o - adds comment char on o when line (above) is commented
+set formatoptions=ljrq
 
 " don't add two spaces when joining a line that ends with.,?, or !
 set nojoinspaces
 
-" allow backspacing over autoindent, linebreaks, and start of insert
-set bs=2
+" }}}
 
-" won't redraw while executing macros, registers, and commands that have not been typed (not default)
-" for example, stops flickering when have up and down mapped to c-o gk and gj in insert
-set lazyredraw
+" return to/restore last edit position when opening files
+" http://vim.wikia.com/wiki/Restore_cursor_to_file_position_in_previous_editing_session
+augroup resCur
+	au!
+	au BufReadPost * call setpos(".", getpos("'\""))|normal! zv
+augroup END
 
-" (when do things like gg, will move cursor to sol)
-set startofline
+" }}}
 
-" at least 5 lines show below and above cursor
-set scrolloff=5
-
-" turn off timeout; default is 1000
-set notimeout
-" fix airline mode changes without screwing up remaps of default letter keys (without this, using escape to exit insert mode won't change airline to display normal mode immediately)
-" ttimeout only applies to keycodes (so changes to default vim keys (e.g. using r in multikey bindings) that can't be unmapped won't be a problem)
-set ttimeout
-set ttimeoutlen=10
-
-" return to last edit position when opening files
-autocmd BufReadPost *
-            \ if line("'\"") > 0 && line("'\"") <= line("$") |
-            \ exe "normal! g`\"" |
-            \ endif
-
-" http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
-" vp doesn't replace paste buffer
-function! RestoreRegister()
-  let @" = s:restore_reg
-  return ''
-endfunction
-function! s:Repl()
-  let s:restore_reg = @"
-  return "p@=RestoreRegister()\<cr>"
-endfunction
-vmap <silent> <expr> p <sid>Repl()
-
-"}}}
-
-" Session, saving, swap, backup settings"{{{
-" to prevent annoyance for now:
-set noswapfile
-" save swap files here; // to avoid collisions (files with same name will be named based on path)
+" Backup, Swap, Undo Settings {{{
+" // to avoid collisions (files with same name will be named based on path)
 " set directory=~/.vim/swap//
+" swapfiles are annoying
+set noswapfile
 
 " persistent undo history (even if close buffer)
 " Save undo's after file closes
@@ -379,65 +331,62 @@ set undofile
 " where to save undo histories
 set undodir=~/.vim/undo//
 " How many undos
-set undolevels=3000
+set undolevels=2000
 " save whole buffer for undo on reload if number of lines is smaller than
-set undoreload=10000
+set undoreload=10001
 
 " backup before overwriting file and keep backup file
 set writebackup backup
 " backup dir does not have // :(
 set backupdir=~/.vim/tmp
-set bkc=auto
-set backupskip+=*EDITMSG
+set backupcopy=auto
+" my important text files are under git; not worried about losing old versions
+set backupskip+=*EDITMSG,*.txt
 
-" http://vim.wikia.com/wiki/Keep_incremental_backups_of_edited_files
-fun! NewInitBex()
-  let &bex = '-' . strftime("(%m_%d)-{%H_%M}~")
-endfun
-augroup KeepSomeBackups
+augroup keepSomeBackups
 	au!
-" changes backup extension before writing file so old backup isn't deleted if has been a minute
+	" changes backup extension before writing file so old backup isn't deleted if has been a minute
 	au BufWritePre * call NewInitBex()
-	" delete files older than a day
+	" delete files older than two days
 	" http://askubuntu.com/questions/413529/delete-files-older-than-one-year-on-linux
-	au BufWritePost * silent !find ~/.vim/tmp* -mtime +1 -delete &
+	" if put .vim/tmp/*, wouldn't match dot files
+	au BufWritePost * silent !find ~/.vim/tmp* -mtime +2 -delete &
 augroup END
 
+" http://vim.wikia.com/wiki/Keep_incremental_backups_of_edited_files
+function! NewInitBex()
+	let &bex = '-' . strftime("(%m_%d)-{%H_%M}~")
+endfunction
+
 " https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-207
-" Make those folders automatically if they don't already exist.
+" make folders automatically if they don't already exist
 if !isdirectory(expand(&undodir))
-    call mkdir(expand(&undodir), "p")
+	call mkdir(expand(&undodir), "p")
 endif
 if !isdirectory(expand(&backupdir))
-    call mkdir(expand(&backupdir), "p")
+	call mkdir(expand(&backupdir), "p")
 endif
 " if !isdirectory(expand(&directory))
 "     call mkdir(expand(&directory), "p")
 " endif
 
-" auto save current buffer on focus lost if buffer changed (error if unnamed.. don't use untitled buffers)
-au FocusLost * update
-" all changed buffers and don't complain; locks up vim.. slow as fuck
-" au FocusLost * :silent !wall
+" }}}
 
-" autowriteall; save buffer if changed when use various commands (switching buffers, quit, exit, etc.)
-set awa
+" Writing/Saving Settings {{{
+" save buffer if changed when using various commands (switching buffers, quit, exit, etc.)
+set autowriteall
 " don't autoreload a file when changed outside of vim; prompt
 set noautoread
 
-"}}}
-
-" Sourcing vimrc"{{{
-" from vim wiki
-augroup AutoReloadVimRC
-  au!
-  " automatically reload vimrc when it's saved
-  au BufWritePost ~/dotfiles/vim/.vimrc so ~/.vimrc
+" auto save all changed buffers
+augroup autoSave
+	au!
+	au InsertLeave,FocusLost,BufEnter * silent! wa
 augroup END
 
-"}}}
+" }}}
 
-" Command mode"{{{
+" Command Mode {{{
 " when tab completing from command line will show
 set wildmenu
 " https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-153
@@ -446,149 +395,251 @@ set wildignore+=*.aux,*.out,*.toc                " LaTeX intermediate files
 set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg   " binary images
 set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest " compiled object files
 set wildignore+=*.spl                            " compiled spelling word lists
-set wildignore+=*.sw?                            " Vim swap files
-set wildignore+=*.DS_Store                       " OSX bullshit
 set wildignore+=*.pyc                            " Python byte code
-
-" changes tab behaviour in command line (i.e. list makes every possible choice popup:)
+" changes tab behaviour in command line (i.e. list makes every possible choice popup)
 set wildmode:full
-"}}}
 
-" Searching"{{{
+" }}}
+
+" Searching {{{
+" highlight search time
 set hlsearch
-
 " fine I'll incsearch
 set incsearch
 " go back to beginning of buffer once reach end
 set wrapscan
-
 " when searching lower case, will match any case
-set ignorecase
 " won't ignore case if search with upper case
-set smartcase
-"}}}
+set ignorecase smartcase
 
-" Spacing/Indentation Stuff "{{{
-" super tab for conversion
-" Only hard tab for indent:
-set noexpandtab "default; don't convert to spaces
-set shiftwidth=4
-set tabstop=4
-set softtabstop=0
-" I like tabs
-set smarttab
+" }}}
 
-" smart tabs plugin; use tabs only for indent; spaces for allignment
-" will insert spaces when use tab not at beginning of line
-
-"}}}
-
-"}}}
-" #==============================
-" # Specific Filetype Settings {{{
-" #==============================
-" can also add file specific settings to ~/.vim/after/ftplugin; html.vim or python.vim for example; use setlocal instead
-" http://stackoverflow.com/questions/1889602/multiple-vim-configurations
-
-" Text file settings"{{{
-
-" comment my textfiles with octothorpe
-call tcomment#DefineType('text', '# %s' )
-
-augroup text_autocommands
+" Auto-Sourcing .vimrc {{{
+" from vim wiki
+augroup autoReloadVimRC
 	au!
-	" remove listchars from txt files in favour of better wrapping (not cutting off halfway in between a word) for long lines
-	autocmd BufEnter *.txt setlocal nolist
-	autocmd BufEnter *.txt setlocal lbr
-	" set showbreak=···\ " Line break indicator.
-
-	" comment graying in text files
-	autocmd BufEnter *.txt highlight text guifg=gray
-	autocmd BufEnter *.txt match text /#.*/
-
-	" fix zf (folding now uses right comment char)
-	autocmd BufEnter *.txt setlocal commentstring=#\ %s
-
-	" Enable spell check for text files
-	autocmd BufNewFile,BufRead *.txt setlocal spell spelllang=en
+	" automatically reload vimrc when it's saved
+	au BufWritePost ~/dotfiles/vim/.vimrc so ~/.vimrc
 augroup END
 
-"}}}
+" }}}
 
-" Tex file settings"{{{
-autocmd BufEnter *.tex setlocal nolist
-autocmd BufEnter *.tex setlocal lbr
-autocmd BufEnter *.tex setlocal textwidth=0
+" }}}
+" #==============================
+" # Specific Filetype/Indentation Settings {{{
+" #==============================
+" Indentation
+" will use settings in path_to_vim_install/indent/<filetype>.vim
+" don't set smartindent or cindent with; can set autoindent though
+filetype plugin indent on
+" use previous line's indentation with <cr>, o, O
+set autoindent
 
-"}}}
+" Notes {{{
+" :retab for conversion from tabs to spaces; :retab! for spaces to tabs
+" see help and http://vim.wikia.com/wiki/Indenting_source_code
+" expandtab   - replace tab with spaces (noexpandtab is default)
+" tabstop     - how many columns a tab counts for visually
+" softtabstop - how many columns vim uses when you hit Tab in insert mode (default: 0/off); if not set, the tabstop value is used
+" shiftwidth  - how many columns text is indented with <<, >>, and == and with automatic indentation
+" smarttab    -use shiftwidth instead of softtabtop forwhen determining what to do with <tab> and <bs> at the start of line and insert; it repurposes softtabstop (or tabstop, if softtabstop is 0) to be used for determining number of spaces to insert/delete elsewhere (not at sol)
+" also, setting softtabstop to negative values with smarttab seems to mess up the behaviour instead of using the shiftwidth value; none of this is confusing
+" http://tedlogan.com/techblog3.html
+" "If softtabstop is less than tabstop and expandtab is not set, vim will use a combination of tabs and spaces to make up the desired spacing. If softtabstop equals tabstop and expandtab is not set, vim will always use tabs. When expandtab is set, vim will always use the appropriate number of spaces."
+" Example: if tabstop is 8, softtabstop is 4 and noexpandtab and nosmarttab are set,
+" the first tab will insert 4 spaces, second will make a tab that is visually 8 columns
+" if shiftwidth is also 4, >> from start of line will first create 4 spaces then a tab of visual length 8
+" now, if smarttab is set, shiftwidth will be used for <tab> and <bs> at the start of the line, and softtabstop will be used elsewhere
 
-" markdown
-autocmd FileType mkd setlocal spell spelllang=en
+" }}}
+set shiftwidth=4 tabstop=4 softtabstop=4
+set noexpandtab
+set smarttab
 
-" python
-autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=80 smarttab expandtab
-" indent folding for python
-"au BufEnter *.py set foldmethod=indent
+" Filetype Specific
+" default commentstring (will be used by tcomment)
+set commentstring=#\ %s
 
 " pentadactyl
-call tcomment#DefineType('pentadactyl', '" %s' )
-autocmd BufNewFile,BufRead *.pentadactylrc,*penta set filetype=pentadactyl
+augroup pentadactyl
+	au!
+	au BufNewFile,BufRead *.pentadactylrc,*penta set filetype=pentadactyl
+augroup END
 
-" comment char for .conf files
-let g:commentChar = {
-\ 'conf': '#'
-\}
-"}}}
-" #==============================
-" # Appearance"{{{
-" #==============================
-" syntax highlighting works when put at end but not here..
-" syntax on
+" See:
+" ./.vim/after/ftplugin
+" ./.vim/after/syntax
 
-colorscheme seoul256
-set t_Co=256
+" }}}
+" #==============================
+" # Encryption Related {{{
+" #==============================
+" Edit gpg Files {{{
+" http://vim.wikia.com/wiki/Edit_gpg_encrypted_files
+set backupskip+=*.gpg
+augroup gpg_encrypted
+	au!
+	" Disable swap files, and set binary file format before reading the file
+	" To avoid that parts of the file is saved to .viminfo when yanking or
+	" deleting, empty the 'viminfo' option.
+	au BufReadPre,FileReadPre *.gpg
+		\ setlocal noswapfile noundofile noshelltemp history=0 viminfo= bin
+	" Decrypt the contents after reading the file, reset binary file format
+	" and run any BufReadPost autocmds matching the file name without the .gpg
+	" extension
+	au BufReadPost,FileReadPost *.gpg
+		\ execute "'[,']!gpg --decrypt --default-recipient-self" |
+		\ setlocal nobin |
+		\ execute "doautocmd BufReadPost " . expand("%:r")
+	" Set binary file format and encrypt the contents before writing the file
+	au BufWritePre,FileWritePre *.gpg
+		\ setlocal bin |
+		\ '[,']!gpg --encrypt --default-recipient-self
+	" After writing the file, do an :undo to revert the encryption in the
+	" buffer, and reset binary file format
+	au BufWritePost,FileWritePost *.gpg
+		\ silent u |
+		\ setlocal nobin
+augroup END
+
+" }}}
+
+" Vault Files (password storage) {{{
+" have switched primarily to using pass (http://www.passwordstore.org/)
+" see vpass alias in ~/.zshrc; using .encrypted_vimrc, not this (no loading of plugins); I guess this is useful if I somehow accidentally open a file in another vim session
+
+" no backup or writebackup for vault files
+set backupskip+=*.vault
+
+augroup vaultEncrypted
+	au!
+	" disable swap files, saving to disk of undo history, writing to disk of commands, and saving thigns to .viminfo
+	au BufReadPre,FileReadPre,BufEnter *.vault
+		\ setlocal noswapfile cm=blowfish noundofile noshelltemp viminfo= history=0
+	" yanking pass
+	au BufEnter *.vault nnoremap <buffer> yy yiB
+augroup END
+
+" }}}
+" }}}
+" #==============================
+" # Appearance {{{
+" #==============================
+syntax on
+
+augroup rainbowParens
+	au!
+	au FileType c,cpp call rainbow#load()
+augroup END
+
+" Gvim v. Vim Settings
 if has("gui_running")
-	set guicursor=a:blinkon900-blinkoff600 " Slow down cursor blinking speed
-	" colorscheme molokai
+	" Slow down cursor blinking speed
+	set guicursor=a:blinkon1200-blinkoff800
+	" ultra anxiety...
+	" set guicursor=a:blinkon100-blinkoff50
 	colorscheme gruvbox
-	set background=dark
+	" colorscheme molokai
+	" colorscheme badwolf
 	set guifont=Inconsolata\ 11
+	" remove menubar (m), toolbar (t), gui tabs (e), and scrollbars
+	" c use console dialogues instead of popups for simple choices
+	" a automatically puts visually selected text to primary (*)
+	set guioptions=ca
+	" kind of fixes white bar appearing at bottom; seems to work.. a bit
+	" also see ./.gtkrc-2.0.mine
+	set guiheadroom=0
+else
+	colorscheme seoul256
 endif
 
-" Airline theme "{{{
-" airline always present
+" (G)vim Settings {{{
+" default; no screen flashes/beeps
+set noerrorbells
+
+"relative numbers except current line (rnu); using numbers vim plugin as well
+set number relativenumber
+
+" set titlestring based on file
+set title
+
+" default; show mode; show keys in bottom right
+set showcmd showmode
+
+" highlight matching brackets, parens, etc.
+set showmatch
+
+" won't redraw while executing macros, registers, and commands that have not been typed (not default)
+" for example, stops flickering when have up and down mapped to c-o gk and gj in insert
+set lazyredraw
+
+" don't highlight past certain length; slows down vim on long lines
+set synmaxcol=750
+
+" at least 5 lines shown below and above cursor
+set scrolloff=5
+
+" filler lines to keep text position; start diff with vertical splits; don't ignore changes in case and whitespace
+set diffopt=filler,vertical,icase,iwhite
+
+" http://vim.wikia.com/wiki/Word_wrap_without_line_breaks
+" softwrap lines visually when reach the edge
+set wrap
+
+" display tabs and certain whitespace
+set list
+" ☬⚛⚜⚡☥☣
+set listchars=tab:\!\ ,nbsp:☣,eol:¬,extends:❯,precedes:❮
+
+" don't indent wrapped lines
+set nobreakindent
+" set showbreak=↪\  
+
+" show trailing whitespace in normal mode
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-141
+augroup trailing
+	au!
+	" listchars doesn't work with linebreak (which fucking sucks)
+	" http://stackoverflow.com/questions/6496778/vim-run-autocmd-on-all-filetypes-except
+	let blacklist = ['text', 'tex']
+	au InsertEnter * if index(blacklist, &ft) < 0 | set listchars-=trail:⌴
+	au InsertLeave * if index(blacklist, &ft) < 0 | set listchars+=trail:⌴
+augroup END
+
+" }}}
+
+" Airline theme  {{{
+" statusline always present
 set laststatus=2
 
 " http://stackoverflow.com/questions/114431/fast-word-count-function-in-vim
 " also see http://naperwrimo.org/wiki/index.php?title=Vim_for_Writers
 function! WordCount()
-  let s:old_status = v:statusmsg
-  let position = getpos(".")
-  exe ":silent normal g\<c-g>"
-  let stat = v:statusmsg
-  let s:word_count = 0
-  if stat != '--No lines in buffer--'
-    let s:word_count = str2nr(split(v:statusmsg)[11])
-    let v:statusmsg = s:old_status
-  end
-  call setpos('.', position)
-  return s:word_count 
+	let s:old_status = v:statusmsg
+	let position = getpos(".")
+	exe ":silent normal g\<c-g>"
+	let stat = v:statusmsg
+	let s:word_count = 0
+	if stat != '--No lines in buffer--'
+		let s:word_count = str2nr(split(v:statusmsg)[11])
+		let v:statusmsg = s:old_status
+	end
+	call setpos('.', position)
+	return s:word_count 
 endfunction
 
 autocmd VimEnter * call s:airline_sections_custom()
+
 function! s:airline_sections_custom()
 	" add current session name to statusline
 	"http://stackoverflow.com/questions/11374047/adding-the-current-session-filename-in-the-statusline add current session name to statusline
 	let g:airline_section_x = airline#section#create(['filetype', ' %{fnamemodify(v:this_session, ":t")}'])
+	" let g:airline_section_z = airline#section#create(["%{noscrollbar#statusline(20,' ','▓',['▐'],['▌'])}", '%02p%% : %l: %c', ' %{WordCount()}w'])
 	let g:airline_section_z = airline#section#create(['%02p%% : %l: %c', ' %{WordCount()}w'])
 endfunction
 
 " my custom combination theme:
 let g:airline_theme='darkfox'
-" tabline won't work with taboo
-" let g:airline#extensions#tabline#enabled = 1
-" let g:airline#extensions#tabline#left_sep = ' '
-" let g:airline#extensions#tabline#left_alt_sep = '|'
 
 " powerline symbols
 let g:airline_left_sep = ''
@@ -597,112 +648,147 @@ let g:airline_right_sep = ''
 " let g:airline_right_alt_sep = ''
 
 if !exists('g:airline_symbols')
-let g:airline_symbols = {}
+	let g:airline_symbols = {}
 endif
+
 let g:airline_powerline_fonts = 1
 let g:airline_symbols.branch = ''
 let g:airline_symbols.readonly = ''
-" 
+
 " turn off mixed indent, trailing space
 let g:airline_section_warning = ''
 
-" integrate with nrrwrgn
+" nrrwrgn integration
 let g:airline#extensions#nrrwrgn#enabled = 1
-
 " vcs integration
 let g:airline#extensions#branch#enabled = 1
 " show summary of changed hunks (gitgutter and vim-signify)
 let g:airline#extensions#hunks#enabled = 1
-" syntastic
+" syntastic integration
 let g:airline#extensions#syntastic#enabled = 1
 
-"}}}
+" }}}
 
-" terminal like tabs (maybe not as ugly: use -=e):
-" A autoyank contents of visual mode to + register
-" c use console dialogues instead of popups for simple choices
-" also remove menu bar (m), T (toolbar)
-if has("gui_running")
-	set guioptions=P,c,e
-" set guioptions-=m,T,e
-" kind of fixes white bar appearing at bottom; seems to work
-	set guiheadroom=40
-endif
-
-" Tab stuff
-" limit amount of tabs for vim:
-" set tabpagemax=15
-
-"}}}
+" }}}
 " #==============================
-" # General Mappings/ Bindings and Settings "{{{
+" # General Mappings/ Bindings {{{
 " #==============================
+" _Colemak/Navigation Mappings/Improvements {{{
 " make colemak t more useful
-let mapleader = "t"
+let g:mapleader = "t"
 
-" Colemak/Navigation Mappings"{{{
 " modified from here:
 " https://github.com/bunnyfly/dotfiles/blob/master/vimrc
 " http://forum.colemak.com/viewtopic.php?id=1808
-" My change: keep i and don't have a dedicated right
-" l for 'last' instead of line
+" My changes:
+" .keep i and don't have a dedicated right
+" .l for 'last' instead of line
 
+" up/down, including softwraps
 noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
+" keep in visual
+xnoremap n j|xnoremap e k
 
-" don't just place in the middle; open folds recursively 
-nmap k <Plug>(Oblique-n)zvzz
-nmap K <Plug>(Oblique-N)zvzz
+" High/Low/Mid.
+" I never use gm or select mode; would rather have go to middle of window not line
+noremap gh H|noremap gm M|noremap gl L
+
+" l for last
+nnoremap l <c-o>zvzz
+nnoremap L <c-i>zvzz
+
+" Keep the cursor in place while joining lines
+nnoremap j mzJ`z
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-398
+" Split line (sister to [J]oin lines); normal use of S is covered by cc
+nnoremap S i<cr><esc>^mwgk:silent! s/\v +$//<cr>:noh<cr>`w
+nmap <cr> S
+
+" quickfix nav
+augroup quickfix
+	au!
+	au FileType qf call s:qf_settings()
+augroup END
+
+function! s:qf_settings()
+	nnoremap <buffer> n j
+	nnoremap <buffer> e k
+endfunction
+
+" Fold Navigation/Creation {{{
+" put comment char at sol (before text) with zf and add space between comment char and marker
+" needs work..
+xnoremap zf zf$3hr<space>:TComment<cr>zo]za<space><esc>[zzc
+
+" swapping folds with tommcdo's exchange and kana's fold text object
+nmap zE vazXzkvazX
+nmap zN vazXzjvazX
+
+" jump
+nnoremap ze zk:silent! call repeat#set("zk", v:count)<cr>
+nnoremap zn zj:silent! call repeat#set("zj", v:count)<cr>
+nnoremap <leader>fe zk:silent! call repeat#set("zk", v:count)<cr>
+nnoremap <leader>fn zj:silent! call repeat#set("zj", v:count)<cr>
+nnoremap <leader>fu ]z:silent! call repeat#set("]z", v:count)<cr>
+nnoremap <leader>fd [z:silent! call repeat#set("[z", v:count)<cr>
+
+" open/close
+nnoremap <tab> za
+nnoremap <leader>fh zmzz:silent! call repeat#set("zmzz", v:count)<cr>
+nnoremap <leader>fi zrzz:silent! call repeat#set("zrzz", v:count)<cr>
+nnoremap <leader>fo zRzz:silent! call repeat#set("zRzz", v:count)<cr>
+nnoremap <leader>fk zMzz:silent! call repeat#set("ZMzz", v:count)<cr>
+
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-651
+" put current line at center and close surrounding folds
+nnoremap zl mzzMzvzz`z
+" }}}
+
+" Search {{{
+" noremap k nzozz|noremap K Nzozz
+nmap k <Plug>(Oblique-n)
+nmap K <Plug>(Oblique-N)
 " get rid of visual mode mappings for n
 xmap Qq <Plug>(Oblique-n)
 xmap QQ <Plug>(Oblique-N)
-" center and open enough folds after search
-autocmd User Oblique normal! zvzz
+" map k to do visual star instead
+xmap k <Plug>(Oblique-*)
+xmap K <Plug>(Oblique-#)
+augroup oblique
+	au!
+	" center and open enough folds after search, star, and repeat
+	au User Oblique       normal! zvzz
+	au User ObliqueStar   normal! zvzz
+	au User ObliqueRepeat normal! zvzz
+augroup END
 
-" nnoremap L $|nnoremap <C-l> J
-nnoremap L <c-i>
-" l for last
-nnoremap l <c-o>
-" h for beginning of line
-" nnoremap h 0
+" }}}
 
-" High/Low/Mid.
-" never use gm or select mode; would rather have go to middle of buffer not line
-noremap gh H|noremap gm M|noremap gl L
+" }}}
 
-nnoremap j e|noremap J E
+" Modified Defaults {{{
+" commandline
+nnoremap ; :
+xnoremap ; :
+nnoremap <leader>; q:i
+xnoremap <leader>; q:i
+augroup cmdwin
+	au!
+	" use escape in "normal" to exit cmdwin:
+	au CmdwinEnter * nnoremap <buffer> <esc> <c-w>c
+	" enter in "normal" to execute command under cursor and re-enter q:
+	au CmdwinEnter * nnoremap <buffer> <cr> <cr>q:
+augroup END
 
-" keep in visual
-vnoremap n j
-vnoremap e k
+" using sneak, so unecessary
+" this, uncommented, is also annoying with nmaps/plugs (e.g. can't nmap <somekey> <Plug>(something):somecommand<cr>)
+" nnoremap : ;
 
-" fold navigation for colemak
-nnoremap ze zk
-nnoremap zn zj
-""}}}
-
-" Other General Mappings"{{{
-" change defaults"{{{
-nnoremap ; q:i
-nnoremap : ;
-nnoremap <leader>; :
-" use escape in "normal" to exit:
-autocmd CmdwinEnter * nnoremap <buffer> <esc> <c-w>c
-" enter in "normal" to execute command under cursor and re-enter q:
-autocmd CmdwinEnter * nnoremap <buffer> <cr> <cr>q:
-
-vnoremap ; q:i
-vnoremap t; :
-vnoremap : ;
 " Y like D
 nnoremap Y y$
-" yank paragraph
 " http://hashrocket.com/blog/posts/8-great-vim-mappings
+" yank paragraph
 nnoremap yp yap<S-}>p
-
-" because I hate Q; apply macro
-nnoremap Q @q
-vnoremap Q :norm @q<cr>
-" ma=ip`a
 
 " Sane redo.
 noremap U <C-r>
@@ -711,16 +797,229 @@ noremap U <C-r>
 nnoremap a A
 nnoremap A a
 
-" I use V more than v.. going to try this; can also double tap v now for visual
-nnoremap v V|nnoremap V v|nnoremap <leader>v <c-v>
+" visual block
+nnoremap <leader>v <c-v>
+xnoremap v V
 
-" I don't ever use ga; map to go to end of line (works with wrapping)
-" nnoremap ga g$
-" swap
-nnoremap g0 g^
-nnoremap g^ g0
+" because I hate Q; apply macro
+nnoremap Q @q
+xnoremap Q :norm @q<cr>
 
-" camelcase motion as default
+" centering an opening folds
+nnoremap G Gzvzz
+
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-579
+" move to last change (gi moves to last insert point)
+nnoremap gI `.a
+
+" go to file with optional line number, open folds, and center
+nnoremap gf gFzvzz
+
+" }}}
+
+" Other General Mappings {{{
+" jump up and down
+nnoremap <leader>k <c-d>zz:silent! call repeat#set("<c-d>zz", v:count)<cr>
+nnoremap <leader>o <c-u>zz:silent! call repeat#set("<c-u>zz", v:count)<cr>
+xnoremap <leader>k <c-d>zz
+xnoremap <leader>o <c-u>zz
+
+" control backspace behaviour
+inoremap ¸ <c-w>
+cnoremap ¸ <c-w>
+nnoremap ¸ daw
+inoremap .uu <c-u>
+
+" paste in insert and command mode
+inoremap .yp <c-r>+
+cnoremap .yp <c-r>+
+
+" source vimrc
+nnoremap <leader>. :so ~/.vimrc<cr>
+" source current buffer
+nnoremap g. :so %<cr>
+" source line or selection; https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-405
+nnoremap <leader>S ^vg_y:execute @@<cr>:echo 'Sourced line.'<cr>
+xnoremap <leader>S y:execute @@<cr>:echo 'Sourced selection.'<cr>
+
+"'x-ray' view; cuc and cul
+nnoremap <leader>x :set cursorcolumn!\|set cursorline!<cr>
+
+" open with rifle
+function! OpenCurrentLine()
+	" https://github.com/gotbletu/shownotes/blob/master/mlocate_vdiscover_vim_locate.txt
+	" grab current line
+	let line = getline (".")
+	" remove leading whitespace
+	let line = substitute(line, '^\s', '', "g")
+	" add qoutes around the current line to avoid spaces/symbols issues
+	let line = substitute(line, '^\(.*\)$', '"\1"', "g")
+	" changed to open with rifle (don't use with dirs/text files; use gf that)
+	exec "!rifle" line '>&/dev/null &'
+endfunction
+" bind function to a hotkey
+nnoremap <leader>go :call OpenCurrentLine()<CR><CR>
+
+" }}}
+
+" _Clipboard/Yank/Paste Related {{{
+" use +/clipboard as default register
+set clipboard=unnamedplus
+
+" http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
+" move to end after yank or paste; similar to gp but won't go to next line
+xnoremap <silent> y y`]
+xnoremap <silent> p p`]
+nnoremap <silent> p p`]
+" since have above, change gp to paste on new line
+nnoremap gp :pu<cr>
+nnoremap gy V`]
+
+" https://github.com/Shougo/unite.vim/issues/415
+let g:unite_source_history_yank_enable = 1
+" saves things in clipboard register even if not yanked in vim
+let g:unite_source_history_yank_save_clipboard = 1
+" don't save yanks to disk
+let g:unite_source_history_yank_file=""
+" let g:unite_source_history_yank_limit = 300
+
+nnoremap <space>y :Unite history/yank<cr>
+" }}}
+
+" }}}
+" #==============================
+" # Commands/ Shell {{{
+" #==============================
+" get rid of trailing whitespace; don't remember where got this from
+command! Tr normal! mz:%s/\s\+$//<cr>:let @/=''<cr>`z
+
+" copy current file path to clipboard
+command! Yp let @+=expand("%:p")
+
+" Shell Specific
+nnoremap <a-1> :let @+=expand("%:p")<cr>:!xterm -e "<c-r>+" &<cr>
+
+" mappings for in navigation.vim
+command! ViewTxtPdf :!prose2pdf -v % &<cr>
+" command! CurrentChapterStats :!
+
+" " }}}
+" #==============================
+" # Plugin Unmaps {{{
+" #==============================
+autocmd VimEnter * silent! nunmap <leader>tt
+" replace camelcase's ib map
+autocmd VimEnter * omap ib <Plug>(textobj-anyblock-i)|xmap ib <Plug>(textobj-anyblock-i)
+
+" }}}
+" #==============================
+" # Buffer, Window, and Tab Management Mappings and Settings {{{
+" #==============================
+nnoremap <space>q 1gt
+nnoremap <space>w 11gt
+nnoremap <space>f 12gt
+
+source ~/.navigation.vim
+augroup navigationSourcing
+	au!
+	au TabEnter * so ~/.navigation.vim
+augroup END
+
+" General Quickmarks {{{
+nnoremap ,a :e ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>
+nnoremap ,b :e ~/ag-sys/Else/everything/\#browse.txt<cr>
+nnoremap ,B :e ~/.config/bspwm/bspwmrc<cr>
+nnoremap ,c :e ~/.config/ranger/rc.conf<cr>
+nnoremap ,d :e ~/ag-sys/Else/everything/another/ideas.txt<cr>
+nnoremap ,e :e ~/ag-sys/Else/everything/everything_index.txt<cr>
+nnoremap ,E :e ~/.emacs<cr>
+nnoremap ,g :e ~/.pentadactyl/groups.penta<cr>
+nnoremap ,i :e ~/ag-sys/Else/everything/interaction.txt<cr>
+nnoremap ,I :e ~/dotfiles/post_install/post_install.txt<cr>
+nnoremap ,j :e ~/ag-sys/Else/everything/journal.txt<cr>
+nnoremap ,l :e ~/ag-sys/Else/everything/log.txt<cr>
+nnoremap ,m :e ~/.muttrc<cr>
+nnoremap ,M :e ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>
+nnoremap ,n :e ~/.navigation.vim<cr>
+nnoremap ,p :e ~/.pentadactylrc<cr>
+nnoremap ,P :e ~/ag-sys/Else/everything/policy.txt<cr>
+nnoremap ,r :e ~/ag-sys/Else/everything/\#remapping.txt<cr>
+nnoremap ,R :e ~/.README.md<cr>
+nnoremap ,t :e ~/.tmux.conf<cr>
+nnoremap ,v :e ~/.vimrc<cr>
+nnoremap ,x :e ~/.xinitrc<cr>
+nnoremap ,y :Unite -start-insert buffer file_mru<cr>.yml<esc>
+nnoremap ,z :e ~/.zshrc<cr>
+nnoremap ,2 :e ~/ag-sys/Else/everything/\#20xx.txt<cr>
+
+" }}}
+
+" Tabs {{{
+nnoremap <leader>t :tabnew<cr>
+" go to last tab
+nnoremap <space>l :TWcmd tcm p<cr>
+" move tabs
+nnoremap <leader>N :tabm -1<cr>
+nnoremap <leader>E :tabm +1<cr>
+
+" Taboo {{{
+" default tab naming behaviour
+let g:taboo_modified_tab_flag='+'
+let g:taboo_tab_format=' %N %m%f '
+let g:taboo_renamed_tab_format=' %N [%l]%m '
+" don't manage the tabline
+" let g:taboo_tabline = 0
+
+" save taboo names in session
+set sessionoptions+=tabpages,globals
+
+nnoremap <leader>r q:TabooRename<space>
+
+" }}}
+" }}}
+
+" Windows/Splits {{{
+nnoremap <leader>q :q<cr>
+nnoremap <space>x <c-w>c
+nnoremap <leader>' :vsplit<cr>
+nnoremap <leader>- :split<cr>
+nnoremap <leader>h <c-w><left>
+nnoremap <leader>i <c-w><right>
+nnoremap N <c-w><down>
+nnoremap E <c-w><up>
+" vim window maximize (using instead of ZoomWin); still accessible (see border)
+nnoremap sm :TWcmd wcm m<cr>
+
+" Wipeout (close buffers not open in windows)
+nnoremap <leader>W :Wipeout<cr>
+
+" Moving windows around. (if ever needed)
+nnoremap <C-w>N <C-w>J|nnoremap <C-w>E <C-w>K|nnoremap <C-w>I <C-w>L
+
+" vim-eighties
+let g:eighties_enabled = 1
+let g:eighties_minimum_width = 110
+let g:eighties_extra_width = 0 " Increase this if you want some extra room
+let g:eighties_compute = 1 " Disable this if you just want the minimum + extra
+
+" https://github.com/talek/obvious-resize
+
+" }}}
+
+" Bufkill {{{
+" move forward and back in buffer history (for window)
+nnoremap <leader>l :BB<cr>
+nnoremap <leader>L :BF<cr>
+" delete buffer and leave window open and switch to last used buffer (bufkill)
+nnoremap <leader>d :BD<Return>
+
+" }}}
+
+" }}}
+" #==============================
+" # Operators, Motions, etc. {{{
+" #==============================
+" camelcase motion as default {{{
 map <silent> w <Plug>CamelCaseMotion_w
 map <silent> b <Plug>CamelCaseMotion_b
 map <silent> j <Plug>CamelCaseMotion_e
@@ -728,347 +1027,524 @@ sunmap w
 sunmap b
 sunmap j
 
-" default iw (camelcase's iw deletes spaces like aw and newline chars)
+" default iw (camelcase's iw deletes spaces like aw and newline chars; ie is closer to default iw)
 omap <silent> iw <Plug>CamelCaseMotion_ie
 xmap <silent> iw <Plug>CamelCaseMotion_ie
 
-"}}}
-" better text file long line nav (use with lazy redraw); up and down between wraps
-inoremap <Down> <C-o>gj
-inoremap <Up> <C-o>gk
+" }}}
 
-" jump up and down
-nnoremap <Plug>MuchUp <c-u>
-nnoremap <Plug>MuchDown <c-d>
-nmap <leader>k <Plug>MuchDown<leader>;silent! call repeat#set("\<Plug>MuchDown", v:count)<cr>
-nmap <leader>o <Plug>MuchUp<leader>;silent! call repeat#set("\<Plug>MuchUp", v:count)<cr>
-vnoremap <leader>k <c-d>|vnoremap <leader>o <c-u>
+" vcs hunks {{{
+omap ih <plug>(signify-motion-inner-pending)
+xmap ih <plug>(signify-motion-inner-visual)
+omap ah <plug>(signify-motion-outer-pending)
+xmap ah <plug>(signify-motion-outer-visual)
 
-" save; save on insert leaver?
-nnoremap <leader>s :w<cr>
-nnoremap <leader>q :q<cr>
+" }}}
 
-" control backspace behaviour
-inoremap ¸ <c-w>
-cnoremap ¸ <c-w>
-nnoremap ¸ daw
-inoremap .¸ <c-u>
+" operator-surround {{{
+" using this, not tpope's surround
+map <silent>sa <Plug>(operator-surround-append)
+map <silent>sd <Plug>(operator-surround-delete)
+map <silent>sc <Plug>(operator-surround-replace)
 
-" paste in insert
-inoremap .yp <c-r>+
+" delete or replace most inner surround
+nmap <silent> sdd <Plug>(operator-surround-delete)<Plug>(textobj-anyblock-a)
+nmap <silent> scc <Plug>(operator-surround-replace)<Plug>(textobj-anyblock-a)
 
-" keep cursor at beginning of line after hitting enter; fix
-inoremap <return> <return><home>
+nmap saw saiW'
+nmap sal sail"
 
-" source vimrc
-nnoremap <leader>. :so ~/.vimrc<cr>
-" source current buffer
-nnoremap g. :so %<cr>
+" }}}
 
-"'x-ray' view; cuc and cul
-nnoremap <leader>x :set cursorcolumn!<cr>:set cursorline!<cr>
-"}}}
+" sentence text object {{{
+let g:textobj#sentence#abbreviations = [
+	\ '[ABCDIMPSUabcdegimpsv]',
+	\ 'l[ab]', '[eRr]d', 'Ph', '[Ccp]l', '[Lli]n', '[cn]o',
+	\ '[Oe]p', '[DJMSh]r', '[MVv]s', '[CFMPScfpw]t',
+	\ 'alt', '[Ee]tc', 'div', 'es[pt]', '[Ll]td', 'min',
+	\ '[MD]rs', '[Aa]pt', '[Aa]ve?', '[Ss]tr?',
+	\ '[Aa]ssn', '[Bb]lvd', '[Dd]ept', 'incl', 'Inst', 'Prof', 'Univ',
+	\ ]
+
+let g:textobj#sentence#select = 's'
+let g:textobj#sentence#move_p = '('
+let g:textobj#sentence#move_n = ')'
 "
-" Shell Specific
-command! ViewTxtPdf :!prose2pdf -v % &<cr>
-" mapping for in navigation.vim
+augroup textobjSentence
+	au!
+	au FileType markdown,mkd call textobj#sentence#init()
+	au FileType rst call textobj#sentence#init()
+	au FileType text call textobj#sentence#init()
+augroup END
 
-" _Spell correct"{{{
-nnoremap <leader>z 1z=
-" repeatable correct last or next mispelled word
-nnoremap <Plug>CorrectNextMispell ]s1z=
-nnoremap <Plug>CorrectPreviousMispell [s1z=
-" add word to spellfile
-nnoremap <Plug>AddNextMispell ]szg
-nnoremap <Plug>AddPreviousMispell [szg
-" goto sleep is useless
-" goto next mispelled word and correct with first option
-nmap gsc <Plug>CorrectNextMispell<leader>;silent! call repeat#set("\<Plug>CorrectNextMispell", v:count)<cr>
-nmap gSc <Plug>CorrectPreviousMispell<leader>;silent! call repeat#set("\<Plug>CorrectPreviousMispell", v:count)<cr>
-" go to the next mispelled word and add to spellfile
-nmap gsa <Plug>AddNextMispell<leader>;silent! call repeat#set("\<Plug>AddNextMispell", v:count)<cr>
-nmap gSa <Plug>AddPreviousMispell<leader>;silent! call repeat#set("\<Plug>AddPreviousMispell", v:count)<cr>
-" mark word a wrong
-" nnoremap gsm zw
-"}}}
+" }}}
 
-" Plugin Specific"{{{
-" NeoBundle stuff"{{{
-nnoremap <leader>bi :Unite neobundle/install<cr>
-nnoremap <leader>bc :NeoBundleClean<cr>
-" neobundle update
-nnoremap <leader>bu :Unite neobundle/update<cr>
-nnoremap <leader>bs :Unite neobundle/search<cr>
-nnoremap <leader>bl :NeoBundleList<cr>
-"}}}
+" narrow region {{{
+" thanks to ddungtang for pointing me to this plugin:
+" http://www.reddit.com/r/vim/comments/298049/question_on_repetitively_making_changes_to_the/
+" just to get rid of normal mode mapping the plugin makes by default
+nmap <Leader>ZXY <Plug>NrrwrgnDo
+" for changing the same areas across multiple lines
+" open selected text, delete all of it, map escape to save changes and close win
+xmap S <Plug>NrrwrgnDodG;inoremap <buffer> <lt>esc> <lt>esc>:wq<lt>cr><cr>
 
-" Git Related"{{{
-" Follow symlinks when opening a file"{{{
+" }}}
+
+" letters instead of symbols {{{
+" paRens
+omap ir i(
+omap ar a(
+xmap ir i(
+xmap ar a(
+
+" angle brackets (not noremap because text objectify)
+omap ia i<
+omap aa a<
+xmap ia i<
+xmap aa a<
+
+" sqUare
+omap iu i[
+omap au a[
+xmap iu i[
+xmap au a[
+
+" kurly
+omap ik i{
+omap ak a{
+xmap ik i{
+xmap ak a{
+
+" shorten when possible (e.g. not for word) for i or a
+" https://github.com/beloglazov/vim-textobj-quotes
+" ',", and `
+omap q iq
+xmap q iq
+omap r i(
+xmap r i(
+omap u i[
+xmap u i[
+omap k i{
+" k for viual star
+
+" also have anyblock
+
+" }}}
+
+" }}}
+" #==============================
+" # Plugin Bindings and Settings {{{
+" #==============================
+" Snippets and Completion {{{ 
+" UltiSnips {{{
+let g:UltiSnipsExpandTrigger       = ",e"
+let g:UltiSnipsJumpForwardTrigger  = ",f"
+let g:UltiSnipsJumpBackwardTrigger = ",b"
+" let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
+
+" }}}
+
+" NeoComplete {{{
+let g:neocomplete#enable_at_startup = 0
+" borrow from bundle bindings for now...
+nnoremap <leader>bt :NeoCompleteToggle<cr>
+"toggle neocomplete in insert (i.e. for file name completion)
+inoremap ,nt <c-o>:NeoCompleteToggle<cr>
+
+" scroll through menu
+" inoremap <expr><down> pumvisible() ? "\<C-n>" : "\<down>"
+" inoremap <expr><up> pumvisible() ? "\<C-p>" : "\<up>"
+
+augroup tabWithNeocomplete
+	" prevent tab binding from being overriden with autocmd
+	au!
+	" https://github.com/Shougo/neocomplete.vim/issues/32
+	au Bufenter * inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
+		\ <SID>check_back_space() ? "\<TAB>" :
+		\ neocomplete#start_manual_complete()
+	function! s:check_back_space()
+	let col = col('.') - 1
+	return !col || getline('.')[col - 1]  =~ '\s'
+	endfunction
+augroup END
+" for backwards in completion menus
+inoremap <s-Tab> <c-p>
+
+" Use smartcase.
+let g:neocomplete#enable_smart_case = 1
+" Set minimum syntax keyword length.
+let g:neocomplete#sources#syntax#min_keyword_length = 4
+let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+" Define dictionary.
+let g:neocomplete#sources#dictionary#dictionaries = {
+    \ 'default' : '',
+    \ 'vimshell' : $HOME.'/.vimshell_hist',
+    \ }
+
+augroup neoCompleteSettings
+	au!
+	au FileType * NeoCompleteLock
+	au FileType java NeoCompleteEnable
+	" Enable omni completion.
+	au FileType css setlocal omnifunc=csscomplete#CompleteCSS
+	au FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+	au FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+	au FileType python setlocal omnifunc=pythoncomplete#Complete
+	au FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+augroup END
+
+" }}}
+
+" }}}
+
+" _Unite Related {{{
+" http://www.codeography.com/2013/06/17/replacing-all-the-things-with-unite-vim.html
+" http://eblundell.com/thoughts/2013/08/15/Vim-CtrlP-behaviour-with-Unite.html
+let g:unite_split_rule = "topleft"
+" tmi
+let g:unite_source_buffer_time_format     = ''
+let g:unite_source_buffer_filename_format = ''
+" more mru
+let g:unite_source_file_mru_long_limit      = 3000
+let g:unite_source_file_rec_max_cache_files = 5000
+
+" fuzzy matching; sorting
+" call unite#filters#matcher_default#use(['matcher_fuzzy'])
+" call unite#filters#sorter_default#use(['sorter_rank'])
+
+" colemak
+let g:unite_quick_match_table = {
+	\ 'a' : 0, 'r' : 1, 's' : 2, 't' : 3, 'd' : 4, 'h' : 5, 'n' : 6, 'e' : 7, 'i' : 8, 'o' : 9,
+	\ 'w' : 10, 'f' : 11, 'p' : 12, 'l' : 13, 'u' : 14, 'y' : 15, 'x' : 16, 'c' : 17, 'v' : 18, 'k' : 19,
+	\ '1' : 20, '2' : 21, '3' : 22, '4' : 23, '5' : 24, '6' : 25, '7' : 26, '8' : 27, '9' : 28, '0' : 29,
+	\ }
+
+" Search open buffers and most recently used
+" only reason for p is because used to use control-p
+nnoremap <leader>p :Unite -start-insert buffer file_mru<cr>
+" Search files; this is overriden for certain tabs in ~/.navigation.vim
+nnoremap <leader>P :cd ~/dotfiles\|Unite -start-insert file_rec/async<cr>
+" search with mlocate (indexed so much faster); overriden for certain tabs in ~/.navigation.vim
+nnoremap <space>p :Unite -start-insert locate<cr>
+" source for outline of file (e.g. function jumping)
+nnoremap <space>u :Unite outline<cr>
+
+" searching; silver searcher {{{
+" http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
+let g:unite_source_grep_command = "ag"
+" ag is recursive; does not need -r
+let g:unite_source_grep_recursive_opt = ""
+let g:unite_source_grep_default_opts =
+	\ '--smart-case --line-numbers --nocolor --nogroup --hidden --ignore ' .
+	\  '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
+
+" search current buffer wth ag and display results in unite window
+" nnoremap <leader>/ :Unite grep:%<cr>
+" interactive search (instead of typing search term before; real time results)
+nnoremap <leader>/ :Unite line -start-insert<cr>
+" use last search
+nnoremap <leader>? :Unite grep:%<cr><c-r>/<cr>
+" search recursively
+nnoremap <space>/ :Unite grep:.<cr>
+nnoremap <space>? :Unite grep:.<cr><c-r>/<cr>
+
+" ag motion with kana's operator user
+map ga <Plug>(operator-ag)
+map gA <Plug>(operator-ag-recursive)
+
+autocmd VimEnter * call operator#user#define('ag', 'Ag_motion')
+autocmd VimEnter * call operator#user#define('ag-recursive', 'Ag_motion_recursive')
+
+function! Ag_motion(motion_wise)
+	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
+	execute 'normal!' '`[' . v . '`]y' 
+	execute "Unite grep:%::" . fnameescape(getreg('+'))
+endfunction
+
+function! Ag_motion_recursive(motion_wise)
+	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
+	execute 'normal!' '`[' . v . '`]y' 
+	execute "Unite grep:.::" . fnameescape(getreg('+'))
+endfunction
+
+" }}}
+
+augroup unite
+	au!
+	au FileType unite call s:unite_settings()
+augroup END
+
+function! s:unite_settings()
+	" let me exit with escape and move with colemak bindings
+	nmap <buffer> <ESC> <Plug>(unite_exit)
+	nmap <buffer> n j
+	" nmap <buffer> n <Plug>(unite_skip_cursor_down)
+	nmap <buffer> e k
+	" nmap <buffer> e <Plug>(unite_skip_cursor_up)
+	" opening with rifle action
+	let rifleAction = { 'is_selectable' : 1 }
+	function! rifleAction.func(items)
+		for item in a:items
+			execute '!rifle ' . item.word
+		endfor
+	endfunction
+	call unite#custom#action('file,cdable', 'rifle', rifleAction)
+endfunction
+
+" }}}
+
+" _Git Related {{{
+" https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-233
+" Highlight VCS conflict markers
+match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$'
+
+" Follow Symlinks When Opening a File {{{
 " Sources:
 "  - https://github.com/tpope/vim-fugitive/issues/147#issuecomment-7572351
 "  - http://www.reddit.com/r/vim/comments/yhsn6/is_it_possible_to_work_around_the_symlink_bug/c5w91qw
-" Echoing a warning does not appear to work:
-"   echohl WarningMsg | echo "Resolving symlink." | echohl None |
+" this isn't as good as emacs' (setq vc-follow-symlinks "t") because have to use :w! to save after...
+
 function! MyFollowSymlink(...)
-  let fname = a:0 ? a:1 : expand('%')
-  if getftype(fname) != 'link'
-    return
-  endif
-  let resolvedfile = fnameescape(resolve(fname))
-  exec 'file ' . resolvedfile
+	let fname = a:0 ? a:1 : expand('%')
+		if getftype(fname) != 'link'
+			return
+		endif
+	let resolvedfile = fnameescape(resolve(fname))
+	exec 'file ' . resolvedfile
 endfunction
 command! FollowSymlink call MyFollowSymlink()
 
-autocmd BufReadPost * call MyFollowSymlink(expand('<afile>'))
-"}}}
+augroup followSym
+	au!
+	au BufReadPost * call MyFollowSymlink(expand('<afile>'))
+augroup END
 
-" Fugitive"{{{
+" }}}
+
+" Fugitive {{{
 nnoremap <leader>ga :Gwrite<cr>
 nnoremap <leader>gs :Gstatus<cr>
 nnoremap <leader>gc :Gcommit<cr>
-nnoremap <leader>gd :Gdiff<cr>
-" get previous commit
-" nnoremap <leader>gr :Gread<cr>
+nnoremap <leader>gd :Gvdiff<cr>
+" get previous commit version of buffer (can just undo)
+nnoremap <leader>gr :Gread<cr>
 nnoremap <leader>gm :Gmove<space>
+" this will delete on disk
 " nnoremap <leader>gR :Gremove<cr>
 " git rm --cached
 
 " https://github.com/PonderingGrower/dotfiles/blob/master/.vimrc
-augroup fugitive_settings
-    autocmd!
+augroup fugitiveSettings
+	au!
 	" same bindings for merging diffs as in normal mode
-    autocmd BufRead fugitive://* xnoremap <buffer> dp :diffput<cr>
-    autocmd BufRead fugitive://* xnoremap <buffer> do :diffget<cr>
-	" easy diff update
-    autocmd BufRead fugitive://* xnoremap <buffer> du :diffupdate<cr>
+	au BufRead fugitive://* call s:diff_bindings()
 	" bindings for git status window
-	autocmd FileType gitcommit nmap <buffer> n <c-n>|nmap <buffer> e <c-p>
+	au FileType gitcommit nmap <buffer> n <c-n>|nmap <buffer> e <c-p>
 augroup END
-"}}}
 
-" gitgutter"{{{
-" don't set up default mappings
-let g:gitgutter_map_keys = 0
-nnoremap <leader>gg :GitGutterToggle<cr>
-nnoremap <leader>gG :GitGutterLineHighlightsToggle<cr>
-" hunks don't work well for me; use :Gdiff instead
-" nmap <Leader>gh <Plug>GitGutterStageHunk
-" nmap <Leader>gH <Plug>GitGutterRevertHunk
-" repeatable hunk navigation
-nmap <leader>gn <Plug>GitGutterNextHunkzO<leader>;silent! call repeat#set("\<Plug>GitGutterNextHunkzO", v:count)<cr>
-nmap <leader>ge <Plug>GitGutterPrevHunkzO<leader>;silent! call repeat#set("\<Plug>GitGutterPrevHunkzO", v:count)<cr>
-"}}}
+function! s:diff_bindings()
+	xnoremap <buffer> dp :diffput<cr>
+	xnoremap <buffer> do :diffget<cr>
+	xnoremap <buffer> du :diffupdate<cr>
+endfunction
 
-" vim-signify settings "{{{
-" " which vcs and order
-" let g:signify_vcs_list = [ 'git' ]
-" let g:signify_disable_by_default = 0
-" "
-" nmap <leader>gn <plug>(signify-next-hunk)
-" nmap <leader>ge <plug>(signify-prev-hunk)
-" let g:signify_mapping_toggle_highlight = '<leader>gh'
-"}}}
-"}}}
+" }}}
 
-" Goyo & Limelight"{{{
+" vim-signify settings  {{{
+" which vcs and order
+let g:signify_vcs_list              = [ 'git', 'hg' ]
+let g:signify_disable_by_default    = 0
+let g:signify_update_on_focusgained = 1
+let g:signify_sign_change           = '~'
+
+nmap <leader>gn <plug>(signify-next-hunk):silent! call repeat#set("\<Plug>(signify-next-hunk)", v:count)<cr>
+nmap <leader>ge <plug>(signify-prev-hunk):silent! call repeat#set("\<Plug>(signify-prev-hunk)", v:count)<cr>
+let g:signify_mapping_toggle_highlight = '<leader>gh'
+
+" }}}
+
+" }}}
+
+" Visual {{{
+" vim-signature and vim-bookmarks {{{
+" marks are letters, markers are 0-9 (which correspond to shifted symbols)
+" not using g:SignatureMap for mn and me, because want repeatable
+" ugly, but works
+nmap me `[:silent! call repeat#set("`[", v:count)<cr>
+nmap mn `]:silent! call repeat#set("`]", v:count)<cr>
+
+" not tied to a letter; probably won't use anotations often or ever
+" mm to toggle mark; mi to add anotation; overriding mn
+let g:bookmark_sign = '♥'
+" center when jumping to a bookmark
+let g:bookmark_center = 1
+nnoremap m/ :Unite mark vim_bookmarks<cr>
+
+" }}}
+
+" Goyo & Limelight {{{
 " toggle goyo
 nnoremap <leader>gy :Goyo<cr>
 " settings
-let g:goyo_width = 100
+let g:goyo_width = 120
 " limelight
 function! GoyoBefore()
-  Limelight
+	Limelight
 endfunction
 
 function! GoyoAfter()
-  Limelight!
+	Limelight!
 endfunction
 
 let g:goyo_callbacks = [function('GoyoBefore'), function('GoyoAfter')]
-"}}}
 
-" Gundo
-nnoremap <leader>u :GundoToggle<CR>
-let g:gundo_map_move_older="n"
-let g:gundo_map_move_newer="e"
+" }}}
 
-" tcomment
-map <leader>c <C-_><C-_>
-
-" Tabular
-" vnoremap <leader>a :Tabularize<space>
-" :Tabularize /=
-" :Tabularize /=\zs
-
-" Easy Allign
-" Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
-vmap <leader>a <Plug>(EasyAlign)
-" Start interactive EasyAlign for a motion/text object (e.g. <Leader>aip)
-nmap <Leader>a <Plug>(EasyAlign)
-
-" table mode
-let g:table_mode_map_prefix = '<leader>m'
-let g:table_mode_toggle_map = 'm'
-
-" Emmet vim
-map <leader>y <C-y>,
-" just for html and css
-let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
-
-" auto-pairs
-" use closing bracket to jump outside even if not next char
-let g:AutoPairsFlyMode = 1
-let g:AutoPairsShortcutBackInsert = '<M-b>'
-
+" Syntastic {{{
 " from bling/dotvim
-" syntastic "{{{
 let g:syntastic_error_symbol = '✗'
 let g:syntastic_style_error_symbol = '✠'
 let g:syntastic_warning_symbol = '∆'
 let g:syntastic_style_warning_symbol = '≈'
-"}}}
 
-" vim-session:"{{{
-" quickly open session
-" nnoremap <leader>ss :OpenSession
-let g:session_autosave_periodic='yes'
-let g:session_autosave='yes'
-" automatically load  ~/.vim/sessions/default.vim
-let g:session_autoload='yes'
-"}}}
-" sessions"{{{
-" function! s:session_load_lock()
-" 	if filereadable(expand("~/.vim/sessions/main.vim.lock"))
-" 		echo "main.vim is locked"
-" 	else
-" 		silent! source ~/.vim/sessions/main.vim
-" 		!touch ~/.vim/sessions/main.vim.lock
-" 		au VimLeavePre * !rm ~/.vim/sessions/main.vim.lock
-" 	endif
-" endfunction
-"}}}
+" }}}
 
-" Sneak settings"{{{
-" 1 means use ignorecase or smartcase if set (have smartcase set)
-let g:sneak#use_ic_scs = 1
-" use streak mode (easy motion highlighting) when > 1 match on screen
-let g:sneak#streak = 1
-" s to go to next S for previous
-let g:sneak#s_next = 1
-let g:sneak#textobject_z = 0
+" }}}
 
-" hi link SneakPluginTarget ErrorMsg
-hi link SneakStreakTarget ErrorMsg
-" hi link SneakStreakMask Comment
-" nmap f <Plug>Sneak_s
-" visual mode
-xmap f <Plug>Sneak_s
-xmap F <Plug>Sneak_S
-" operator-pending-mode
-omap f <Plug>Sneak_s
-omap F <Plug>Sneak_S
-" nice since have "l" mapped to <c-o>
+" For Specific FileTypes {{{
+" Slimv {{{
+" probably going to use emacs instead all the time for lisp and remove this
+" ,d for def; ,b for buffer; ,cd for compile defun; ,cl compile and load file; ,cf compile file; ,cr (compile region)
+" = to reindent selection
+" indents properly; paredit and electric return
+" automatically loaded on lisp files by default
+let g:slimv_leader = ','
+let g:slimv_keybindings=1
 
-" colemak chars for sneak mode; take out i for insert; d out to delete
-let g:sneak#target_labels = "arsthneowfpluy/ARSTDHNEIOFPLUY"
+let g:lisp_rainbow=1
+" default
+let g:paredit_mode=1
+let g:paredit_electric_return=1
+" vertical right split for repl
+let g:slimv_repl_split=4
 
-nmap f <Plug>SneakForward
-nmap F <Plug>SneakBackward
-"}}}
+" }}}
 
-" VimWiki (using like TabsOutliner with pentadactyl)"{{{
+" Emmet-vim {{{
+imap ,he <Plug>(emmet-expand-abbr)
+" just for html and css
+let g:user_emmet_install_global = 0
+
+augroup emmet
+	au!
+	au FileType html,css EmmetInstall
+augroup END
+
+" }}}
+
+" Vim Markdown {{{
+let g:markdown_fold_style = 'stacked'
+" let g:vim_markdown_no_default_key_mappings=1
+" let g:vim_markdown_folding_disabled=0
+
+augroup mkdown
+	au!
+	au FileType mkd call s:mkd_mappings()
+augroup END
+
+function! s:mkd_mappings()
+	" share leader m with table mode
+	nnoremap <leader>mt :Toc<cr>
+	" preview
+	nnoremap <leader>mp :call LivedownPreview()<CR>
+	" experimenting with this; normally just use zn ze but don't really like the way it folds it
+	nmap <leader>mn <Plug>(Markdown_MoveToNextHeader):silent! call repeat#set("\<Plug>Markdown_MoveToNextHeader", v:count)<cr>
+	nmap <leader>me <Plug>(Markdown_MoveToPreviousHeader):silent! call repeat#set("\<Plug>Markdown_MoveToPreviousHeader", v:count)<cr>
+	nmap <leader>mc <Plug>(Markdown_MoveToCurHeader):silent! call repeat#set("\<Plug>Markdown_MoveToCurHeader", v:count)<cr>
+	nmap <leader>mu <Plug>(Markdown_MoveToParentHeader):silent! call repeat#set("\<Plug>Markdown_MoveToParentHeader", v:count)<cr>
+endfunction
+
+" }}}
+
+" }}}
+
+" 'New' FileTypes (wiki, calendar) {{{
+" VimWiki (using like TabsOutliner with pentadactyl) {{{
 " tww to go to index
 " tws select from multiple wikis
-autocmd FileType vimwiki call s:vimwiki_keys()
+
+let g:vimwiki_list = [{
+	\    'path':                       '~/vimwiki/',
+	\    'path_html':                  '~/vimwikihtml/',
+	\    'maxhi':                      1,
+	\    'css_name':                   'style.css',
+	\    'auto_export':                0,
+	\    'nested_syntaxes':            {},
+	\    'html_header':                '',
+	\    'html_footer':                '',
+	\    'syntax':                     'default',
+	\    'index':                      'index',
+	\    'ext':                        '.wiki',
+	\    'temp':                       0
+	\    }]
+
+" Don't automatically make CamelCase words links.
+let g:vimwiki_camel_case = 0
+
+augroup vimwiki
+	au!
+	au FileType vimwiki call s:vimwiki_keys()
+augroup END
+
 function! s:vimwiki_keys()
 	nmap <buffer> i <Plug>VimwikiFollowLink
 	nmap <buffer> h <Plug>VimwikiGoBackLink
 endfunction
 
-let g:vimwiki_list = [{
-    \    'path':                       '~/vimwiki/',
-    \    'path_html':                  '~/vimwikihtml/',
-    \    'maxhi':                      1,
-    \    'css_name':                   'style.css',
-    \    'auto_export':                0,
-    \    'nested_syntaxes':            {},
-    \    'html_header':                '',
-    \    'html_footer':                '',
-    \    'syntax':                     'default',
-    \    'index':                      'index',
-    \    'ext':                        '.wiki',
-    \    'temp':                       0
-    \    }]
-let g:vimwiki_camel_case = 0                   " Don't automatically make CamelCase words links.
-"}}}
+" }}}
 
-" Calendar Settings
+" Calendar Settings {{{
 let g:calendar_google_calendar = 1
-let g:calendar_google_task = 1
+let g:calendar_google_task     = 1
 " nnoremap <cr>c :Calendar -position=tab<cr>
 
-autocmd FileType calendar call s:calendar_settings()
+augroup calendar
+	au!
+	au FileType calendar call s:calendar_settings()
+augroup END
+
 function! s:calendar_settings()
-" colemak nav
-nmap <buffer> h <Plug>(calendar_left)
-nmap <buffer> n <Plug>(calendar_down)
-nmap <buffer> e <Plug>(calendar_up)
-" nmap <buffer> i <Plug>(calendar_right)
+	" colemak nav
+	nmap <buffer> h <Plug>(calendar_left)
+	nmap <buffer> n <Plug>(calendar_down)
+	nmap <buffer> e <Plug>(calendar_up)
+	" nmap <buffer> i <Plug>(calendar_right)
 endfunction
 
-" insertlessly (get rid of ?)
-" don't fuck with whitespace
-let g:insertlessly_cleanup_trailing_ws = 0
-let g:insertlessly_cleanup_all_ws = 0
-" don't interfere with space bindings
-let g:insertlessly_insert_spaces = 0
+" }}}
 
-" Vertigo
-" colemak
-let g:Vertigo_homerow = 'arstdhneio'
+" }}}
 
-nnoremap <silent> <leader>n :<C-U>VertigoDown n<CR>
-vnoremap <silent> <leader>n :<C-U>VertigoDown v<CR>
-onoremap <silent> <leader>n :<C-U>VertigoDown o<CR>
+" Allignment {{{
+" Easy Allign {{{
+" Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
+xmap <leader>a <Plug>(EasyAlign)
+" Start interactive EasyAlign for a motion/text object (e.g. <Leader>aip)
+nmap <Leader>a <Plug>(EasyAlign)
 
-nnoremap <silent> <leader>e :<C-U>VertigoUp n<CR>
-vnoremap <silent> <leader>e :<C-U>VertigoUp v<CR>
-onoremap <silent> <leader>e :<C-U>VertigoUp o<CR>
+" }}}
 
-let g:Vertigo_onedigit_method = 'smart3'
-" let g:Vertigo_homerow_onedigit = 'ARSTDHNEIO'
-"}}}
+" Table Mode {{{
+let g:table_mode_map_prefix = '<leader>m'
+let g:table_mode_toggle_map = 'm'
 
-" vim bookmarks"{{{
-" center when jumping to bookmark
-let g:bookmark_center = 1
-" let g:bookmark_auto_save_file = '~/.vim/.vim-bookmarks'
-let g:bookmark_save_per_working_dir = 1
-let g:bookmark_auto_save = 1
-nmap mn <plug>BookmarkNext<leader>;silent! call repeat#set("\<Plug>BookmarkNext", v:count)<cr>
-nmap me <plug>BookmarkPrev<leader>;silent! call repeat#set("\<Plug>BookmarkPrev", v:count)<cr>
-"}}}
+" }}}
 
-" Vim Markdown"{{{
-let g:markdown_fold_style = 'stacked'
+" }}}
 
-" let g:vim_markdown_no_default_key_mappings=1
-" let g:vim_markdown_folding_disabled=1
-autocmd FileType mkd call s:mkd_mappings()
-function! s:mkd_mappings()
-" share leader m with table mode
-nnoremap <leader>mt :Toc<cr>
-" preview
-nnoremap <leader>mp :call LivedownPreview()<CR>
-" experimenting with this; normally just use zn ze but don't really like the way it folds it
-nmap <leader>mn <Plug>(Markdown_MoveToNextHeader)<leader>;silent! call repeat#set("\<Plug>Markdown_MoveToNextHeader", v:count)<cr>
-nmap <leader>me <Plug>(Markdown_MoveToPreviousHeader);silent! call repeat#set("\<Plug>Markdown_MoveToPreviousHeader", v:count)<cr>
-nmap <leader>mc <Plug>(Markdown_MoveToCurHeader);silent! call repeat#set("\<Plug>Markdown_MoveToCurHeader", v:count)<cr>
-nmap <leader>mu <Plug>(Markdown_MoveToParentHeader);silent! call repeat#set("\<Plug>Markdown_MoveToParentHeader", v:count)<cr>
-endfunction
-
-" vimshell"{{{
+" Shell Related {{{
+" Vimshell {{{
 " Use current directory as vimshell prompt.
 let g:vimshell_prompt_expr =
 \ 'escape(fnamemodify(getcwd(), ":~").">", "\\[]()?! ")." "'
@@ -1076,7 +1552,12 @@ let g:vimshell_prompt_pattern = '^\%(\f\|\\.\)\+> '
 
 " use instead of netrw (e.g. with gf or if use vim to open a dir)
 let g:vimfiler_as_default_explorer = 1
-autocmd FileType vimfiler call s:vimfiler_mappings()
+
+augroup vimfiler
+	au!
+	au FileType vimfiler call s:vimfiler_mappings()
+augroup END
+
 function! s:vimfiler_mappings()
 	" colemak
 	map <buffer> n <Plug>(vimfiler_loop_cursor_down)
@@ -1089,9 +1570,15 @@ function! s:vimfiler_mappings()
 endfunction
 
 " let g:vimshell_no_default_keymappings=0
-autocmd FileType vimshell call s:vimshell_mappings()
+
+augroup vimshell
+	au!
+	au FileType vimshell call s:vimshell_mappings()
+augroup END
+
+
 function! s:vimshell_mappings()
-	" Normal mode key-mappings."{{{
+	" Normal mode key-mappings. {{{
 	" Execute command.
 	nmap <buffer> <CR> <Plug>(vimshell_enter)
 	" Hide vimshell.
@@ -1127,14 +1614,14 @@ function! s:vimshell_mappings()
 
 	" History completion.
 	nmap <buffer> <space><space> <Plug>(vimshell_history_unite)
-	"}}}
-	" Visual mode key-mappings."{{{
+	" }}}
+	" Visual mode key-mappings. {{{
 	" Move to previous prompt.
-	vmap <buffer> <leader>e <Plug>(vimshell_select_previous_prompt)
+	xmap <buffer> <leader>e <Plug>(vimshell_select_previous_prompt)
 	" Move to next prompt.
-	vmap <buffer> <leader>n <Plug>(vimshell_select_next_prompt)
-	"}}}
-	" Insert mode key-mappings."{{{
+	xmap <buffer> <leader>n <Plug>(vimshell_select_next_prompt)
+	" }}}
+	" Insert mode key-mappings. {{{
 	" Execute command.
 	inoremap <expr> <SID>(bs-ctrl-])
 		\ getline('.')[col('.') - 2] ==# "\<C-]>" ? "\<BS>" : ''
@@ -1168,268 +1655,158 @@ function! s:vimshell_mappings()
 	imap <buffer> <C-c> <Plug>(vimshell_interrupt)
 	" Delete char.
 	imap <buffer> <BS> <Plug>(vimshell_delete_backward_char)
-	"}}}
+	" }}}
 endfunction
-"}}}
-"}}}
+" }}}
 
-" _Clipboard Related"{{{
-" use + as default register.. no more different pasting.. still have yank history with unite
-set clipboard=unnamedplus
-
-" http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
-" move to end after yank or paste; similar to gp but won't go to next line
-vnoremap <silent> y y`]
-vnoremap <silent> p p`]
-nnoremap <silent> p p`]
-" since have above, change gp to paste on new line
-nnoremap gp :pu<cr>
-
-" thanks to shougo for such a versatile and useful plugin; https://github.com/Shougo/unite.vim/issues/415
-" vim is my clipboard manager
-let g:unite_source_history_yank_enable = 1
-" saves things in clipboard register even if not yanked in vim 
-let g:unite_source_history_yank_save_clipboard = 1
-" don't save yanks to disk
-let g:unite_source_history_yank_file=""
-" let g:unite_source_history_yank_file=$HOME.'/.unite/history_yank'
-" let g:unite_source_history_yank_limit = 300
-nnoremap <space>y :Unite history/yank<cr>
-"}}}
+" Clam {{{
+let g:clam_winpos = 'topleft'
 
 " }}}
-" ==============================
-" Buffer, Window, and Tab Management Mappings and Settings"{{{
-" ==============================
-source ~/.navigation.vim
-" source so that <space>u will work
-nnoremap <leader>t :tabnew<cr>
-nnoremap <space>x <c-w>c
 
-" Taboo"{{{
-" default tab naming behaviour
-let g:taboo_modified_tab_flag='+'
-let g:taboo_tab_format=' %N %m%f '
-let g:taboo_renamed_tab_format=' %N [%f]%m '
+" }}}
 
-" save taboo names in session
-set sessionoptions+=tabpages,globals
+" Other {{{
+" NeoBundle {{{
+nnoremap <leader>bi :Unite neobundle/install<cr>
+nnoremap <leader>bu :NeoBundleUpdate!<cr>
+nnoremap <leader>bs :Unite neobundle/search<cr>
+nnoremap <leader>bl :NeoBundleList<cr>
 
-nnoremap <leader>r :TabooRename<space>
+" broswerlink maps <leader>bc ...
+augroup ovewriteBLMap
+	au!
+	au VimEnter * nnoremap <leader>bc :NeoBundleClean<cr>
+	au BufWritePost ~/dotfiles/vim/.vimrc nnoremap <leader>bc :NeoBundleClean<cr>
+augroup END
 
-"}}}
+" }}}
 
-"bufkill stuff"{{{
-" move forward and back in buffer history (for window)
-nnoremap <leader>l :BB<cr>
-nnoremap <leader>L :BF<cr>
-" delete buffer and leave window open and switch to last used buffer (bufkill)
-nnoremap <leader>d :BD<Return>
-" delete buffer and close window
-" nnoremap <leader>D :BD<cr><c-w>c
-" close buffer without closing window
-" http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
-" cabbr bc BClose
-" create a new buffer in current window use :enew new window/buffer without split
-"}}}
+" Gundo {{{
+nnoremap <leader>u :GundoToggle<CR>
+let g:gundo_map_move_older = "n"
+let g:gundo_map_move_newer = "e"
 
-" Wipeout (close buffers not open in windows/tabs)
-nnoremap <leader>W :Wipeout<cr>
+" }}}
 
-" _Unite Related"{{{
-" http://www.codeography.com/2013/06/17/replacing-all-the-things-with-unite-vim.html
-" http://eblundell.com/thoughts/2013/08/15/Vim-CtrlP-behaviour-with-Unite.html
-let g:unite_split_rule = "topleft"
-" tmi
-let g:unite_source_buffer_time_format=''
-let g:unite_source_buffer_filename_format=''
-" more mru
-let g:unite_source_file_mru_long_limit = 3000
-" let g:unite_winheight = 10
-" call unite#filters#matcher_default#use(['matcher_fuzzy'])
-" can use with tabs :Unite tab and windows
-" let g:unite_enable_use_short_source_names=1
-" let g:unite_source_file_rec_max_cache_files = 5000
+" tcomment {{{
+nnoremap <leader>c :TComment<cr>
+xnoremap <leader>c :TComment<cr>
+nnoremap <leader>C :TCommentBlock<cr>
+xnoremap <leader>C :TCommentBlock<cr>
 
+call tcomment#DefineType('text', '# %s' )
+call tcomment#DefineType('lisp', ';; %s' )
+call tcomment#DefineType('pentadactyl', '" %s' )
+" don't use block comments for single lines by default
+call tcomment#DefineType('java', '// %s' )
+call tcomment#DefineType('c', '// %s' )
+
+" }}}
+
+" vim-session: {{{
+" quickly open session
+nnoremap <leader>ss :OpenSession
+let g:session_autosave_periodic='yes'
+let g:session_autosave='yes'
+" automatically load  ~/.vim/sessions/default.vim
+let g:session_autoload='yes'
+" let g:session_persist_globals = ['&sessionoptions']
+" call add(g:session_persist_globals, 'g:Taboo_tabs')
+
+" }}}
+
+" Sneak Settings {{{
+" 1 means use ignorecase or smartcase if set (have smartcase set)
+let g:sneak#use_ic_scs    = 1
+" use streak mode (easy motion highlighting) when > 1 match on screen
+let g:sneak#streak        = 1
+" use sneak key to go to next (and back) (f and F for me)
+let g:sneak#s_next        = 1
+let g:sneak#textobject_z  = 0
+" colemak chars for sneak mode; take out i for insert; d out to delete; take out f for go to next
+let g:sneak#target_labels = "arsthneowpluy/ARSTDHNEIOFPLUY"
+
+" mappings
+nmap f <Plug>SneakForward
+nmap F <Plug>SneakBackward
+xmap f <Plug>Sneak_s
+xmap F <Plug>Sneak_S
+omap f <Plug>Sneak_s
+omap F <Plug>Sneak_S
+
+hi link SneakStreakTarget ErrorMsg
+
+" }}}
+
+" Vertigo {{{
 " colemak
-let g:unite_quick_match_table = {
-  \ 'a' : 0, 'r' : 1, 's' : 2, 't' : 3, 'd' : 4, 'h' : 5, 'n' : 6, 'e' : 7, 'i' : 8, 'o' : 9,
-  \ 'w' : 10, 'f' : 11, 'p' : 12, 'l' : 13, 'u' : 14, 'y' : 15, 'x' : 16, 'c' : 17, 'v' : 18, 'k' : 19,
-  \ '1' : 20, '2' : 21, '3' : 22, '4' : 23, '5' : 24, '6' : 25, '7' : 26, '8' : 27, '9' : 28, '0' : 29,
-  \ }
+let g:Vertigo_homerow          = 'arstdhneio'
+let g:Vertigo_onedigit_method  = 'smart3'
 
-" silver searcher {{{
-" http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
-let g:unite_source_grep_command = "ag"
-" ag is recursive; does not need -r
-let g:unite_source_grep_recursive_opt = ""
-let g:unite_source_grep_default_opts =
-	  \ '--smart-case --line-numbers --nocolor --nogroup --hidden --ignore ' .
-	  \  '''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
+nnoremap <silent> <leader>n :<C-U>VertigoDown n<CR>
+xnoremap <silent> <leader>n :<C-U>VertigoDown v<CR>
+onoremap <silent> <leader>n :<C-U>VertigoDown o<CR>
 
-" search current buffer wth ag and display results in unite window
-nnoremap <leader>/ :Unite grep:%<cr>
-" use last search
-nnoremap <leader>? :Unite grep:%<cr><c-r>/<cr>
-" search recursively
-nnoremap <space>/ :Unite grep:.<cr>
-nnoremap <space>? :Unite grep:.<cr><c-r>/<cr>
-
-" ag motion with kana's operator user
-map ga <Plug>(operator-ag)
-map gA <Plug>(operator-ag-recursive)
-
-autocmd VimEnter * call operator#user#define('ag', 'Ag_motion')
-autocmd VimEnter * call operator#user#define('ag-recursive', 'Ag_motion_recursive')
-function! Ag_motion(motion_wise)
-	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
-	execute 'normal!' '`[' . v . '`]y' 
-	execute "Unite grep:%::" . fnameescape(getreg('+'))
-endfunction
-
-function! Ag_motion_recursive(motion_wise)
-	let v = operator#user#visual_command_from_wise_name(a:motion_wise)
-	execute 'normal!' '`[' . v . '`]y' 
-	execute "Unite grep:.::" . fnameescape(getreg('+'))
-endfunction
-" }}}
-
-" Open bookmark file for most frequently used files
-" nnoremap <space><space> :Unite -quick-match bookmark<cr>
-
-" Search open buffers and most recently used
-nnoremap <leader>p :Unite -start-insert buffer file_mru<cr>
-" Search files (cd first); file_rec/async
-nnoremap <leader>P :Unite -start-insert file<cr>
-
-autocmd FileType unite call s:unite_settings()
-function! s:unite_settings()
-	" let me exit with escape and move with colemak bindings
-	nmap <buffer> <ESC> <Plug>(unite_exit)
-	nmap <buffer> n j
-	" nmap <buffer> n <Plug>(unite_skip_cursor_down)
-	nmap <buffer> e k
-	" nmap <buffer> e <Plug>(unite_skip_cursor_up)
-endfunction
-
-"}}}
-
-" Splits"{{{
-nnoremap <leader>w <c-w>
-" r after above to swap
-nnoremap <leader>' :vsplit<cr>
-nnoremap <leader>- :split<cr>
-nnoremap <leader>h <c-w><left>
-nnoremap <leader>i <c-w><right>
-
-" split navigation (backup)
-noremap H <C-w>h|noremap N <C-w>j|noremap E <C-w>k
-" Moving windows around. (if ever needed)
-noremap <C-w>N <C-w>J|noremap <C-w>E <C-w>K|noremap <C-w>I <C-w>L
-
-" 'monocle'
-nnoremap <silent> <leader>f :ZoomWin<cr>
-
-let g:eighties_enabled = 1
-let g:eighties_minimum_width = 100
-let g:eighties_extra_width = 0 " Increase this if you want some extra room
-let g:eighties_compute = 1 " Disable this if you just want the minimum + extra
-
-"}}}
-" move tabs
-nnoremap <leader>N :tabm -1<cr>
-nnoremap <leader>E :tabm +1<cr>
-
-"}}}
-" #==============================
-" # Operators, Text Objects, etc."{{{
-" #==============================
-" Narrow Region"{{{
-" thanks to ddungtang for pointing me to this plugin:
-" http://www.reddit.com/r/vim/comments/298049/question_on_repetitively_making_changes_to_the/
-" just to get rid of normal mode mapping the plugin makes by default
-nmap <Leader>ZXY <Plug>NrrwrgnDo
-" for changing the same areas across multiple lines
-" open selected text, delete all of it, map escape to save changes and close win
-xmap S <Plug>NrrwrgnDodG;inoremap <buffer> <lt>esc> <lt>esc>:wq<lt>cr><cr>
-"}}}
-
-" letters instead of symbols {{{
-
-" paRens
-omap ir i(
-omap ar a(
-vmap ir i(
-vmap ar a(
-
-" angle brackets (not noremap because text objectify)
-omap ia i<
-omap aa a<
-vmap ia i<
-vmap aa a<
-
-" sqUare
-omap iu i[
-omap au a[
-vmap iu i[
-vmap au a[
-
-" kurly
-omap ik i{
-omap ak a{
-vmap ik i{
-vmap ak a{
-
-" shorten when possible (e.g. not for word) for i or a
-" https://github.com/beloglazov/vim-textobj-quotes
-" ',", and `
-omap q iq
-xmap q iq
-omap r i(
-xmap r i(
-omap u i[
-xmap u i[
-omap k i{
-" k for viual star
-
-" also have anyblock
+nnoremap <silent> <leader>e :<C-U>VertigoUp n<CR>
+xnoremap <silent> <leader>e :<C-U>VertigoUp v<CR>
+onoremap <silent> <leader>e :<C-U>VertigoUp o<CR>
 
 " }}}
 
-" using this, not tpope's surround
-map <silent>sa <Plug>(operator-surround-append)
-map <silent>sd <Plug>(operator-surround-delete)
-map <silent>sc <Plug>(operator-surround-replace)
+" _Spell correct <leader>s mappings {{{
+" correct current word with first suggestion
+nnoremap <leader>z 1z=:silent! call repeat#set(":spellr<cr>", v:count)<cr>
 
-nmap saw saiW'
-nmap sal sail"
+" goto sleep is useless; go to next mispelled
+nnoremap gs ]s:silent! call repeat#set("]s", v:count)<cr>
+nnoremap ]s ]s:silent! call repeat#set("]s", v:count)<cr>
+nnoremap [s [s:silent! call repeat#set("[s", v:count)<cr>
 
-" delete or replace most inner surround
-" if you use vim-textobj-anyblock
-nmap <silent> sdd <Plug>(operator-surround-delete)<Plug>(textobj-anyblock-a)
-nmap <silent> scc <Plug>(operator-surround-replace)<Plug>(textobj-anyblock-a)
+" repeatable correct next or current (if is current word under cursor is mispelled) mispelled word
+nnoremap <Plug>CorrectNextMispell T<space>b]s1z=
+nnoremap <leader>sc T<space>b]s1z=:silent! call repeat#set("\<Plug>CorrectNextMispell", v:count)<cr>
 
-" remote; unecessary because of TextObjectify
-" http://learnvimscriptthehardway.stevelosh.com/chapters/15.html
-" inside next, last paren
-" onoremap in( :<c-u>normal! f(vi(<cr>
-" onoremap il( :<c-u>normal! F)vi(<cr>
+" add word to spellfile (having a count will add to next spellfile e.g. 2zg)
+nnoremap <leader>sa ]szg:silent! call repeat#set("]szg", v:count)<cr>
 
-"}}}
-" #==============================
-" # Abbreviations"{{{
-" #==============================
-" python
-" command! Calico !bspc window --presel right && ~/_school/Calico/StartCalico &
-nnoremap <a-l> :let @+=expand("%:p")<cr>:!~/bin/calico.sh exec_graphics &<cr>
-nnoremap <a-L> :let @+=expand("%:p")<cr>:!~/bin/calico.sh exec &<cr>
-" nnoremap <a-w> :let @+="~/empty.py"<cr>:!~/bin/calico.sh start &<cr>
-autocmd FileType python call s:python_abbreviations()
-function! s:python_abbreviations()
-	inoreabbr <buffer> shb #!/usr/bin/env python3
-endfunction
-" 
-" "}}}
+" mark word a wrong; zw; zuw; not sure if <leader>sm or zw is preferable
+nnoremap <leader>sm zw
+
+" lexical
+let g:lexical#spelllang = ['en_us','en_ca',]
+let g:lexical#thesaurus = ['~/.vim/thesaurus/mthesaur.txt',]
+let g:lexical#dictionary = ['/usr/share/dict/words',]
+
+augroup lexical
+	au!
+	au FileType markdown,mkd call lexical#init()
+	au FileType text call lexical#init()
+	au FileType rst call lexical#init()
+augroup END
+
+" correct with popup (except doesn't suck like z=)
+let g:lexical#spell_key = '<leader>ss'
+let g:lexical#dictionary_key = '<leader>sk'
+inoremap ,sk <c-x><c-k>
+let g:lexical#thesaurus_key = '<leader>st'
+
+" vim-online-thesaurus
+let g:online_thesaurus_map_keys = 0
+nnoremap <leader>sw :OnlineThesaurusCurrentWord<CR>
+
+" }}}
+
+" auto-pairs {{{
+" use closing bracket to jump outside even if not next char
+let g:AutoPairsFlyMode = 0
+let g:AutoPairsShortcutBackInsert = '<M-b>'
+
+" }}}
+
+" }}}
+
+" }}}
 " #==============================
 " # NeoBundle {{{
 " #==============================
@@ -1443,316 +1820,305 @@ call neobundle#rc(expand('~/.vim/bundle/'))
 " Required:
 NeoBundleFetch 'Shougo/neobundle.vim'
 
-" Plugins"{{{
-" Constantly Active/ Visual"{{{
-" show actual line numbers in insert
+" Plugins {{{
+" Constantly Active/ Visual {{{
+" show non-relative line numbers in insert
 NeoBundle 'myusuf3/numbers.vim'
-" better marks; show and symbols (markers) in gutter
+
+" mark navigation; show marks/markers in gutter
 NeoBundle 'kshenoy/vim-signature'
-" git info
-NeoBundle 'airblade/vim-gitgutter'
-" NeoBundle 'mhinz/vim-signify'
+" bookmarks
+NeoBundle 'MattesGroeger/vim-bookmarks'
+
+" vcs info
+ NeoBundle 'mhinz/vim-signify'
+
 " tab renaming
 NeoBundle 'gcmt/taboo.vim'
+
+" automatic split resizing
+NeoBundle 'justincampbell/vim-eighties'
+
 " statusline
 NeoBundle 'bling/vim-airline'
+
 " linter
 NeoBundle 'scrooloose/syntastic'
-" rainbow parens
-" will use same colors again across multiple indented lines (find something that doesnt?)
+
+" substitute preview (half of emacs functionality)
+NeoBundle "osyo-manga/vim-over"
+
+" rainbow parens (also see slimv)
 NeoBundle 'oblitum/rainbow'
 " NeoBundle 'amdt/vim-niji'
+
+" distraction free writing
+NeoBundle 'junegunn/goyo.vim'
+NeoBundle 'junegunn/limelight.vim'
+
 " colorschemes
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'sjl/badwolf'
 NeoBundle 'junegunn/seoul256.vim'
 NeoBundle 'morhetz/gruvbox'
+NeoBundle 'nice/sweater'
+NeoBundle 'whatyouhide/vim-gotham'
 
-"}}}
+" }}}
 
-" Most Used"{{{
-" unite related"{{{
+" Unite Related {{{
+" https://github.com/Shougo/unite.vim/wiki/unite-plugins
 NeoBundle 'Shougo/unite.vim'
+
 " for async file search
-" NeoBundle 'Shougo/vimproc.vim'
-let vimproc_updcmd = has('win64') ?
-      \ 'tools\\update-dll-mingw 64' : 'tools\\update-dll-mingw 32'
-execute "NeoBundle 'Shougo/vimproc.vim'," . string({
-      \ 'build' : {
-      \     'windows' : vimproc_updcmd,
-      \     'cygwin' : 'make -f make_cygwin.mak',
-      \     'mac' : 'make -f make_mac.mak',
-      \     'unix' : 'make -f make_unix.mak',
-      \    },
-      \ })
+NeoBundle 'Shougo/vimproc.vim', {
+\ 'build' : {
+\     'windows' : 'tools\\update-dll-mingw',
+\     'cygwin' : 'make -f make_cygwin.mak',
+\     'mac' : 'make -f make_mac.mak',
+\     'linux' : 'make',
+\     'unix' : 'gmake',
+\    },
+\ }
+
+" extra sources:
 " mru
 NeoBundle 'Shougo/neomru.vim'
-"}}}
-" easymotion pretty much does everything now; but for simplicity:
-" sneak a 2 letter multiline find
-NeoBundle 'justinmk/vim-sneak'
-" like other plugins.. but X char find (basically like a search)
-" NeoBundle 't9md/vim-smalls'
-" fugitive 
-NeoBundle 'tomtom/tcomment_vim'
+" ahead of https://github.com/h1mesuke/unite-outline
+" opens unite with functions as lines
+NeoBundle 'Shougo/unite-outline'
+" unite source for marks (also see vim-bookmarks which gives vim_bookmarks)
+NeoBundle 'tacroe/unite-mark'
+" (m)locate
+NeoBundle 'ujihisa/unite-locate'
 
-" NeoBundle 'tpope/vim-obsession'
-" NeoBundle 'manuel-colmenero/vim-simple-session'
+" }}}
 
-NeoBundle 'xolox/vim-session'
-NeoBundle 'xolox/vim-misc'
-
-
+" Case/Filetype Specific {{{
+" git
 NeoBundle 'tpope/vim-fugitive'
-" for buffer history and killing buffers without changing window layout or closing
-NeoBundle 'bufkill.vim'
-" alternatively: https://github.com/Soares/butane.vim
-"}}}
 
-" Case Specific/ Occasional"{{{
-" for move and sudowrite
-NeoBundle 'tpope/vim-eunuch'
-" file linking and formatting/highlighting
-NeoBundle 'vimwiki/vimwiki'
-" view undo tree
-NeoBundle 'sjl/gundo.vim'
 " html generation
 NeoBundle 'mattn/emmet-vim'
-
 " reload html page displayed in browser when changes
 NeoBundle 'jaxbot/browserlink.vim'
-" alt:
-" guard and guard-livereload
-" live reload browser plugin and NeoBundle 'flomotlik/vim-livereload'
-" vimfox
+
+" markdown folding, syntax highlighting, and navigation
+NeoBundle 'plasticboy/vim-markdown'
+" NeoBundle 'nelstrom/vim-markdown-folding'
+" markdown preview
+NeoBundle 'shime/vim-livedown'
+
+" haskell
+NeoBundle 'kana/vim-filetype-haskell'
+" NeoBundle 'ag/vim2hs'
+NeoBundle "Twinside/vim-hoogle"
+
+" for lisp
+NeoBundle 'kovisoft/slimv'
+
+" rust highlighting and indentation
+NeoBundle 'wting/rust.vim'
+
+" repl interaction with tmux
+NeoBundle 'benmills/vimux'
+
+" for move and sudowrite commands
+NeoBundle 'tpope/vim-eunuch'
+
+" view undo tree
+NeoBundle 'sjl/gundo.vim'
 
 " password syntax highlighting/hiding stuff
 NeoBundle 'aaronbieber/vim-vault'
 
-"}}}
+" wikis
+NeoBundle 'vimwiki/vimwiki'
 
-" Writing"{{{
-NeoBundle 'MattesGroeger/vim-bookmarks'
-"}}}
+" openscad syntax highlighting
+NeoBundle 'torrancew/vim-openscad'
 
-" Other"{{{
-" markdown folding, syntax highlighting, and navigation
-NeoBundle 'plasticboy/vim-markdown'
-" folding in markdown files (like better than above but stopped working)
-" NeoBundle 'nelstrom/vim-markdown-folding'
-" markdown preview
-NeoBundle 'shime/vim-livedown'
-"
-" haskell
-" NeoBundle 'kana/vim-filetype-haskell'
-" NeoBundle 'ag/vim2hs'
-" add newlines with enter; backspace in normal
-NeoBundle 'dahu/Insertlessly'
-NeoBundle 'vim-scripts/Smart-Tabs'
-" camelcase motion
-NeoBundle 'bkad/CamelCaseMotion' 
-" 'monocle' view for splits
-NeoBundle 'regedarek/ZoomWin'
+" }}}
+
+" Writing {{{
+" smarter sentence text object (kana's text object user is a dependency)
+NeoBundle 'reedes/vim-textobj-sentence'
+NeoBundle 'reedes/vim-lexical'
+NeoBundle 'beloglazov/vim-online-thesaurus'
+" NeoBundle 'reedes/vim-textobj-quote'
+
+" Rst
+NeoBundle 'Rykka/riv.vim'
+NeoBundle 'Rykka/InstantRst'
+
+" }}}
+
+" Other {{{
+" compiling/ running code
+NeoBundle 'tpope/vim-dispatch'
+NeoBundle 'JarrodCTaylor/vim-shell-executor'
+
+" shell
+NeoBundle 'Shougo/vimshell.vim'
+NeoBundle 'sjl/clam.vim'
+
+" easymotion pretty much does everything now, but for simplicity using seak
+" sneak: a 2 letter multiline find
+NeoBundle 'justinmk/vim-sneak'
+
+" like better than other commenters by far
+NeoBundle 'tomtom/tcomment_vim'
+" NeoBundle 'tpope/vim-commentary'
+" NeoBundle 'scrooloose/nerdcommenter'
+
+" session management
+NeoBundle 'xolox/vim-session'
+NeoBundle 'xolox/vim-misc'
+" NeoBundle 'tpope/vim-obsession'
+" NeoBundle 'manuel-colmenero/vim-simple-session'
+
+" for buffer history and killing buffers without changing window layout or closing
+NeoBundle 'bufkill.vim'
+" alternatively: https://github.com/Soares/butane.vim
+" close all buffers not open in windows 
+NeoBundle 'wipeout'
+
+" using for tab movement history
+NeoBundle 'yssl/twcmd.vim'
+
+" allignment
+NeoBundle 'junegunn/vim-easy-align'
+" NeoBundle 'godlygeek/tabular'
+NeoBundle 'dhruvasagar/vim-table-mode'
+
+" home row line jumping
+NeoBundle 'prendradjaja/vim-vertigo'
+
+" completion and snippets
 NeoBundle 'Shougo/neocomplete.vim'
-" NeoBundle 'Shougo/neosnippet.vim'
 NeoBundle 'SirVer/ultisnips'
 " Optional
 NeoBundle "honza/vim-snippets"
 
-" smart auto closing
+" smart auto closing parens, quotes, etc.
 NeoBundle 'jiangmiao/auto-pairs'
+" NeoBundle 'kana/vim-smartinput'
 
-"}}}
+" automatic ending in vimscript (endfunction), bash, etc.
+NeoBundle 'tpope/vim-endwise'
 
-" Misc"{{{
-" allows repeat (.) with plugins like sneak, surround, vim-abolish, etc.
+" allows repeat (.) with plugin mappings
 NeoBundle 'tpope/vim-repeat'
-"}}}
+NeoBundle 'vim-scripts/visualrepeat'
 
-" Experimenting"{{{
-" hybrid chording
+" }}}
+
+" Experimenting {{{
+" chording
 NeoBundle 'kana/vim-arpeggio'
-NeoBundle 'Shougo/vimshell.vim'
+
+" file manager
 NeoBundle "Shougo/vimfiler.vim"
+
 " all text boxes vim
 NeoBundle 'ardagnir/vimbed'
-" NeoBundle 'ardagnir/eventloop.vim'
+
 "  calendar
 NeoBundle 'itchyny/calendar.vim'
 
-NeoBundle 'dhruvasagar/vim-table-mode'
-NeoBundle 'prendradjaja/vim-vertigo'
-
-NeoBundle 'chrisbra/NrrwRgn'
-" close all buffer not open in windows 
-NeoBundle 'wipeout'
-
-" NeoBundle 'godlygeek/tabular'
-NeoBundle 'junegunn/vim-easy-align'
-
-" automatic split resizing
-NeoBundle 'justincampbell/vim-eighties'
-
-NeoBundle 'junegunn/fzf'
-
-" distraction free writing
-NeoBundle 'junegunn/goyo.vim'
-NeoBundle 'junegunn/limelight.vim'
-" improved / search
+" improved "/" search
 NeoBundle 'junegunn/vim-oblique'
 " required for above
 NeoBundle 'junegunn/vim-pseudocl'
 
-" NeoBundle 'szw/vim-ctrlspace'
+" latex
+" NeoBundle "https://github.com/vim-scripts/TeX-9"
+"
+" japanese input; mapping something up in search...
+" NeoBundle "https://github.com/tyru/eskk.vim"
 
-"}}}
+NeoBundle 'jceb/vim-orgmode'
 
-" Text Object and Operator Stuff"{{{
-" cx(text objext) then cx(text object) to exchange (or . to repeat)
+" }}}
+
+" Operators and Text Objects {{{
+" required for other stuff
+NeoBundle 'kana/vim-textobj-user'
+NeoBundle 'kana/vim-operator-user'
+
+" camelcase motion
+NeoBundle 'bkad/CamelCaseMotion' 
+
+" cx operator to exchange; X for visual
 NeoBundle 'tommcdo/vim-exchange'
+
+" edit selected region in separate window
+NeoBundle 'chrisbra/NrrwRgn'
 
 " if do something like i{ seek for {} if outside of like vim already does with i'
 " make i' work for multiple lines like i{ would
 NeoBundle 'paradigm/TextObjectify'
+
 " adds ic, iC, ac, aC text objects; great for quickly working with columns/visual blocks
 NeoBundle 'coderifous/textobj-word-column.vim'
+
 " adds text object io and ao for indentation whitespace
 NeoBundle 'glts/vim-textobj-indblock'
+
 " iq and aq for ', ", and `
 " NeoBundle 'beloglazov/vim-textobj-quotes'
+
 " punctuation text objects (also gives iq and aq);i.e. gives %; i<space> will work for any
 NeoBundle 'kurkale6ka/vim-pairs'
-" required for other stuff
-NeoBundle 'kana/vim-textobj-user'
-NeoBundle 'kana/vim-operator-user'
-" NeoBundle 'tpope/vim-surround'
+
 " using this instead because works well with text objects (i.e. ic) and makes more sense than doing something like ysiW:
 " gives sa{any text object} (surround append), sd, and sc
+" see http://www.reddit.com/r/vim/comments/2qozgi/vimoperatorsurround_operator_to_surround_a_text/cn8xcbf
 NeoBundle 'rhysd/vim-operator-surround'
+" better for html tag features:
+" NeoBundle 'tpope/vim-surround'
+
 " match closest '', "", (), {}, [] or <> with ib and ab
 NeoBundle 'rhysd/vim-textobj-anyblock'
+
 " gives il and al for lines
 NeoBundle 'kana/vim-textobj-line'
+
 " gives ae and ie for entire buffer
 NeoBundle 'kana/vim-textobj-entire'
-"}}}
 
-"if ever need more than <c-w>r
-"https://github.com/wesQ3/vim-windowswap
-"}}}
- " Required:
- filetype plugin indent on
+" give az and iz for folds
+NeoBundle 'kana/vim-textobj-fold'
+
+" gives things like a= for after equal sign
+NeoBundle 'junegunn/vim-after-object'
+
+" }}}
+
+" future..? {{{
+" https://github.com/AndrewRadev/splitjoin.vim
+" https://noahfrederick.com/log/vim-and-progressive-enhancement/
+" nnoremap <silent> J :<C-u>call <SID>try('SplitjoinJoin',  'J')<CR>
+" nnoremap <silent> S :<C-u>call <SID>try('SplitjoinSplit', "r\015")<CR>
+" function! s:try(cmd, default)
+"   if exists(':' . a:cmd) && !v:count
+"     let tick = b:changedtick
+"     execute a:cmd
+"     if tick == b:changedtick
+"       execute join(['normal!', a:default])
+"     endif
+"   else
+"     execute join(['normal! ', v:count, a:default], '')
+"   endif
+" endfunction
+
+" }}}
+
+" }}}
 
 " If there are uninstalled bundles found on startup,
 " this will conveniently prompt you to install them.
 NeoBundleCheck
 
-"}}}
-
-" Dissolve {{{
-" map ;s set invspell spelllang=en<cr
-" map ;ss :set spell spelllang=anonomize<cr>
-" mkspell ~/dotfiles/common/.vim/spell
-" 
-" Snippets and Completion"{{{ 
-" UltiSnips"{{{
-" let g:UltiSnipsExpandTrigger="<c-Tab>"
-" let g:UltiSnipsJumpForwardTrigger="<cr>"
-" let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-let g:UltiSnipsSnippetsDir="~/.vim/UltiSnips"
-" If you want :UltiSnipsEdit to split your window.
-let g:UltiSnipsEditSplit="vertical"
-"}}}
-
-" Use neocomplete."{{{
-" let g:neocomplete#enable_at_startup = 1
-" Use smartcase.
-let g:neocomplete#enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 4
-let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
-
-" Define dictionary.
-let g:neocomplete#sources#dictionary#dictionaries = {
-    \ 'default' : '',
-    \ 'vimshell' : $HOME.'/.vimshell_hist',
-    \ }
-
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  return neocomplete#close_popup() . "\<CR>"
-  " For no inserting <CR> key.
-  " return pumvisible() ? neocomplete#close_popup() : "\<CR>"
-endfunction
-
-" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" <TAB>: completion
-augroup TabWithNeocomplete
-" something in vimrc messes this up.. so doing this
-	au!
-	" https://github.com/Shougo/neocomplete.vim/issues/32
-	au Bufenter * inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
-		\ <SID>check_back_space() ? "\<TAB>" :
-		\ neocomplete#start_manual_complete()
-	function! s:check_back_space()
-	let col = col('.') - 1
-	return !col || getline('.')[col - 1]  =~ '\s'
-	endfunction
-augroup END
-" imap `     <Plug>(neosnippet_expand_or_jump)
-" smap `     <Plug>(neosnippet_expand_or_jump)
-" xmap `     <Plug>(neosnippet_expand_target)
-" " Enable snipMate compatibility feature.
-" let g:neosnippet#enable_snipmate_compatibility = 1
-" " Tell Neosnippet about the other snippets
-" let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
-
-"}}}
-"}}}
-" 
-" Control space stuff"{{{
-" let g:ctrlspace_use_tabline=1
-" let g:ctrlspace_set_default_mapping=0
-" g:ctrlspace_default_mapping_key = "<space><space>"
-" g:ctrlspace_use_mouse_and_arrows = 0
-" g:ctrlspace_project_root_markers
-" g:ctrlspace_unicode_font 
-" g:ctrlspace_search_resonators
-
-" Allows you to set characters which will be used to increase search accurancy. If such resonator is found next to the searched sequence, it increases the search score. For example, consider following files: zzzabczzz.txt, zzzzzzabc.txt, and zzzzz.abc.txt. If you search for abc with default resonators, you will get the last file as the top relevant item, because there are two resonators (dots) next to the searched sequence. Next you would get the middle one (one dot around abc), and then the first one (no resonators at all). You can disable this behavior completely by providing an empty array. Default value: ['.', '/', '\', '_', '-']
-
-" if g:ctrlspace_unicode_font
-"   let g:ctrlspace_symbols = {
-"         \ "cs"      : "⌗",
-"         \ "tab"     : "⊙",
-"         \ "all"     : "∷",
-"         \ "open"    : "◎",
-"         \ "tabs"    : "○",
-"         \ "c_tab"   : "●",
-"         \ "load"    : "⋮ → ∙",
-"         \ "save"    : "∙ → ⋮",
-"         \ "prv"     : "⌕",
-"         \ "s_left"  : "›",
-"         \ "s_right" : "‹"
-"         \ }
-" else
-"   let g:ctrlspace_symbols = {
-"         \ "cs"      : "#",
-"         \ "tab"     : "TAB",
-"         \ "all"     : "ALL",
-"         \ "open"    : "OPEN",
-"         \ "tabs"    : "-",
-"         \ "c_tab"   : "+",
-"         \ "load"    : "LOAD",
-"         \ "save"    : "SAVE",
-"         \ "prv"     : "*",
-"         \ "s_left"  : "[",
-"         \ "s_right" : "]"
-"         \ }
-" endif
-"}}}
-
-"}}}
-syntax on
-au FileType c,cpp,lisp call rainbow#load()
+" }}}
+" #==============================

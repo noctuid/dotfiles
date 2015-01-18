@@ -1,0 +1,3 @@
+setlocal nolist
+setlocal linebreak
+

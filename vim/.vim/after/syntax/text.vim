@@ -1,3 +1,7 @@
+" gray comments
+syn match commentedText /#.*/
+hi commentedText guifg=gray
+
 " https://github.com/tpope/vim-markdown
 " Copyright © Tim Pope. Distributed under the same terms as Vim itself. See :help license.
 " I've just taken the highlighting for bold and italics and added \n as an end
@@ -14,3 +18,4 @@ hi def link markdownItalic                htmlItalic
 hi def link markdownBold                  htmlBold
 hi def link markdownBoldItalic            htmlBoldItalic
 hi def link markdownCodeDelimiter         Delimiter
+
