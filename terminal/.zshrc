@@ -454,6 +454,12 @@ fs() {
 }
 zle -N fs
 bindkey -a sS fs
+
+# as suggested gotbletu
+fzf-locate() {
+	 rifle "$(locate "*" | fzf -e)"
+}
+
 # }}}
  
 # tmux experimentation {{{
@@ -1054,19 +1060,6 @@ alias rf="rs"
 
 alias rsl="find . -name"
 
-# https://github.com/gotbletu/shownotes/blob/master/mlocate_vdiscover_vim_locate.txt
-vloc() {
-	# demo video: http://www.youtube.com/watch?v=X0KPl5O006M
-	# escape spaces, pipe and parentheses
-	keyword=$(echo "$@" | sed -e 's/ /.*/g' -e 's:|:\\|:g' -e 's:(:\\(:g' -e 's:):\\):g')
-	locate -ir "$keyword" | vim -c 'nnoremap q :q<cr>' -R -
-}
-loc() {
-	# demo video: http://www.youtube.com/watch?v=X0KPl5O006M
-	# escape spaces, pipe and parentheses
-	keyword=$(echo "$@" | sed -e 's/ /.*/g' -e 's:|:\\|:g' -e 's:(:\\(:g' -e 's:):\\):g')
-	locate -ir "$keyword"
-}
 # }}}
 
 #}}}
