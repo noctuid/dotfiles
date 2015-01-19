@@ -15,6 +15,7 @@
 " better shell for repls
 " realtime visualization of block editing
 " tab left patch
+" uppercase all words but to, the, etc.?
 
 " Notes:
 " see https://gist.github.com/romainl/9ecd7b09a693816997ba
@@ -754,6 +755,7 @@ xmap QQ <Plug>(Oblique-N)
 " map k to do visual star instead
 xmap k <Plug>(Oblique-*)
 xmap K <Plug>(Oblique-#)
+
 augroup oblique
 	au!
 	" center and open enough folds after search, star, and repeat
@@ -1383,6 +1385,7 @@ nmap mn `]:silent! call repeat#set("`]", v:count)<cr>
 let g:bookmark_sign = '♥'
 " center when jumping to a bookmark
 let g:bookmark_center = 1
+let g:bookmark_no_default_key_mappings = 1
 nnoremap m/ :Unite mark vim_bookmarks<cr>
 
 " }}}
@@ -1417,24 +1420,6 @@ let g:syntastic_style_warning_symbol = '≈'
 " }}}
 
 " For Specific FileTypes {{{
-" Slimv {{{
-" probably going to use emacs instead all the time for lisp and remove this
-" ,d for def; ,b for buffer; ,cd for compile defun; ,cl compile and load file; ,cf compile file; ,cr (compile region)
-" = to reindent selection
-" indents properly; paredit and electric return
-" automatically loaded on lisp files by default
-let g:slimv_leader = ','
-let g:slimv_keybindings=1
-
-let g:lisp_rainbow=1
-" default
-let g:paredit_mode=1
-let g:paredit_electric_return=1
-" vertical right split for repl
-let g:slimv_repl_split=4
-
-" }}}
-
 " Emmet-vim {{{
 imap ,he <Plug>(emmet-expand-abbr)
 " just for html and css
@@ -1661,6 +1646,7 @@ function! s:vimshell_mappings()
 	imap <buffer> <BS> <Plug>(vimshell_delete_backward_char)
 	" }}}
 endfunction
+
 " }}}
 
 " Clam {{{
@@ -1870,7 +1856,7 @@ endif
 " substitute preview (half of emacs functionality)
 NeoBundle "osyo-manga/vim-over"
 
-" rainbow parens (also see slimv)
+" rainbow parens
 NeoBundle 'oblitum/rainbow'
 " NeoBundle 'amdt/vim-niji'
 
@@ -1935,9 +1921,6 @@ NeoBundle 'shime/vim-livedown'
 NeoBundle 'kana/vim-filetype-haskell'
 " NeoBundle 'ag/vim2hs'
 NeoBundle "Twinside/vim-hoogle"
-
-" for lisp
-NeoBundle 'kovisoft/slimv'
 
 " rust highlighting and indentation
 NeoBundle 'wting/rust.vim'
