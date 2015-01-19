@@ -1144,6 +1144,8 @@ let g:UltiSnipsJumpBackwardTrigger = ",b"
 
 " }}}
 
+" requires if_lua
+if !has('nvim')
 " NeoComplete {{{
 let g:neocomplete#enable_at_startup = 0
 " borrow from bundle bindings for now...
@@ -1167,6 +1169,7 @@ augroup tabWithNeocomplete
 	return !col || getline('.')[col - 1]  =~ '\s'
 	endfunction
 augroup END
+
 " for backwards in completion menus
 inoremap <s-Tab> <c-p>
 
@@ -1195,6 +1198,7 @@ augroup neoCompleteSettings
 augroup END
 
 " }}}
+endif
 
 " }}}
 
@@ -1808,6 +1812,19 @@ let g:AutoPairsShortcutBackInsert = '<M-b>'
 
 " }}}
 " #==============================
+" # Neovim Specific {{{
+" #==============================
+if has('nvim')
+" neomake
+augroup neomake
+	au!
+	au BufWritePost,CursorHold *.py,*.sh,*.c Neomake
+augroup END
+
+endif
+
+" }}}
+" #==============================
 " # NeoBundle {{{
 " #==============================
 " Required:
@@ -1842,8 +1859,13 @@ NeoBundle 'justincampbell/vim-eighties'
 " statusline
 NeoBundle 'bling/vim-airline'
 
-" linter
-NeoBundle 'scrooloose/syntastic'
+if has('nvim')
+	" async for neovim
+	NeoBundle 'benekastah/neomake'
+else
+	" linter
+	NeoBundle 'scrooloose/syntastic'
+endif
 
 " substitute preview (half of emacs functionality)
 NeoBundle "osyo-manga/vim-over"
@@ -1995,7 +2017,9 @@ NeoBundle 'dhruvasagar/vim-table-mode'
 NeoBundle 'prendradjaja/vim-vertigo'
 
 " completion and snippets
+if !has('nvim')
 NeoBundle 'Shougo/neocomplete.vim'
+endif
 NeoBundle 'SirVer/ultisnips'
 " Optional
 NeoBundle "honza/vim-snippets"
