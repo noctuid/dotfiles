@@ -1249,7 +1249,7 @@ alias adbrestart='adb kill-server ; adb start-server'
 # manually reload udev rules: (sudo)
 alias -g rldudev='udevadm control --reload-rules'
 
-alias mountand="jmtpfs ~/mtp"
+alias mountand="mkdir -p ~/mtp && jmtpfs ~/mtp"
 alias umountand="fusermount -u ~/mtp"
 
 # http://www.arachnoid.com/android/SSHelper/index.html
@@ -1259,52 +1259,15 @@ alias umountand="fusermount -u ~/mtp"
 
 # MTP is an abomination
 # still get io errors and have to unmount and remount
-function andrsync(){
-	# no perms, times, and size only seems to have fixed some problems was previously having
-	rsync -azvr --no-perms --no-times --size-only --progress --delete $1 ~/mtp/Card/Music
+
+# by bands:
+# see $HOME/.zsh/rsync_bandlist.txt
+function syncandmus() {
+	# add auto-mounting and checking
+	rsync -azv --no-perms --no-times --size-only --progress --delete --include-from="$HOME/.zsh/rsync_bandlist.txt" "$HOME/Music/" "$HOME/mtp/Card/Music"
+
 }
 
-# by bands:# {{{
-function syncandmus() {
-	# andrsync ~/Music/30\ Seconds\ to\ Mars
-	# andrsync ~/Music/A\ Day\ To\ Remember
-	# andrsync ~/Music/Asking\ Alexandria
-	# andrsync ~/Music/Being\ As\ An\ Ocean
-	# andrsync ~/Music/Blonde\ Redhead
-	# andrsync ~/Music/Brand\ New
-	andrsync ~/Music/Bring\ Me\ the\ Horizon
-	andrsync ~/Music/Chevelle
-	# andrsync ~/Music/Coldplay
-	andrsync ~/Music/Dance\ Gavin\ Dance
-	andrsync ~/Music/Deadmau5
-	andrsync ~/Music/Deftones
-	andrsync ~/Music/Fall\ Out\ Boy
-	andrsync ~/Music/Funeral\ For\ A\ Friend
-	andrsync ~/Music/Green\ Day
-	# andrsync ~/Music/Imogen\ Heap
-	andrsync ~/Music/Keane
-	andrsync ~/Music/Lydia
-	andrsync ~/Music/Muse
-	andrsync ~/Music/My\ Chemical\ Romance
-	andrsync ~/Music/Of\ Mice\ \&\ Men
-	andrsync ~/Music/Paramore
-	andrsync ~/Music/Pierce\ The\ Veil
-	andrsync ~/Music/Radiohead
-	andrsync ~/Music/Rage\ Against\ The\ Machine
-	andrsync ~/Music/Rise\ Against
-	andrsync ~/Music/Senses\ Fail
-	andrsync ~/Music/Skrillex
-	andrsync ~/Music/Smashing\ Pumkins
-	andrsync ~/Music/System\ Of\ A\ Down
-	andrsync ~/Music/The\ Killers
-	andrsync ~/Music/The\ Red\ Jumpsuit\ Apparatus
-	andrsync ~/Music/The\ Sleeping
-	andrsync ~/Music/The\ Story\ So\ Far
-	andrsync ~/Music/The\ Strokes
-	andrsync ~/Music/Thrice
-	andrsync ~/Music/UVERworld
-}
-# }}}
 # }}}
 #===============
 # _Backup & Mounting # {{{
