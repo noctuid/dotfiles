@@ -541,7 +541,7 @@ nmap -builtin Zz zz
 " Tab Navigation With Space "{{{
 " formerly was sourcing a script to remap every key on location change
 " this is more concise and prevents possible slowdown
-command! -nargs=1 relative-move <<EOF
+command! -nargs=1 relative-tab-move <<EOF
 if tabs.getTab().dactylOrdinal < "11"
 	if <args> == 0
 		normal 10gt
@@ -581,16 +581,16 @@ nmap -builtin <space>w 11gt
 nmap -builtin <space>f 21gt
 nmap -builtin <space>p 31gt
 nmap -builtin <space>g 41gt
-nmap -ex <space>a relative-move 1
-nmap -ex <space>r relative-move 2
-nmap -ex <space>s relative-move 3
-nmap -ex <space>t relative-move 4
-nmap -ex <space>d relative-move 5
-nmap -ex <space>h relative-move 6
-nmap -ex <space>n relative-move 7
-nmap -ex <space>e relative-move 8
-nmap -ex <space>i relative-move 9
-nmap -ex <space>o relative-move 0
+nmap -ex <space>a relative-tab-move 1
+nmap -ex <space>r relative-tab-move 2
+nmap -ex <space>s relative-tab-move 3
+nmap -ex <space>t relative-tab-move 4
+nmap -ex <space>d relative-tab-move 5
+nmap -ex <space>h relative-tab-move 6
+nmap -ex <space>n relative-tab-move 7
+nmap -ex <space>e relative-tab-move 8
+nmap -ex <space>i relative-tab-move 9
+nmap -ex <space>o relative-tab-move 0
 "}}}
 
 " Custom web bindings"{{{
