@@ -1848,9 +1848,12 @@ NeoBundle 'bling/vim-airline'
 if has('nvim')
 	" async for neovim
 	NeoBundle 'benekastah/neomake'
+	NeoBundleLazy 'scrooloose/syntastic'
 else
 	" linter
 	NeoBundle 'scrooloose/syntastic'
+	" can't use async so no reason to be able to source
+	NeoBundleFetch 'benekastah/neomake'
 endif
 
 " substitute preview (half of emacs functionality)
@@ -2000,8 +2003,11 @@ NeoBundle 'dhruvasagar/vim-table-mode'
 NeoBundle 'prendradjaja/vim-vertigo'
 
 " completion and snippets
-if !has('nvim')
-NeoBundle 'Shougo/neocomplete.vim'
+if has('nvim')
+	" no lua support currently
+	NeoBundleFetch 'Shougo/neocomplete.vim'
+else
+	NeoBundle 'Shougo/neocomplete.vim'
 endif
 NeoBundle 'SirVer/ultisnips'
 " Optional
