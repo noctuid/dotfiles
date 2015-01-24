@@ -1,19 +1,7 @@
 " Navigation (tab, buffer, file)
 
-augroup BufferBindings
-  au!
-  au BufEnter * so ~/.navigation.vim
-augroup END
-
-nnoremap <leader>f :Unite --start-insert file<cr>
-
-" quicker tab navigation"{{{
-" nnoremap N gT
-" nnoremap E gt
-nnoremap <space>w 1gt
-nnoremap <space>f 11gt
-nnoremap <space>p 12gt
-if tabpagenr() < 11
+" Quicker Tab Navigation"{{{
+if tabpagenr() <= 10
 	nnoremap <space>a 1gt
 	nnoremap <space>r 2gt
 	nnoremap <space>s 3gt
@@ -24,7 +12,7 @@ if tabpagenr() < 11
 	nnoremap <space>e 8gt
 	nnoremap <space>i 9gt
 	nnoremap <space>o 10gt
-elseif tabpagenr() >= 10
+elseif tabpagenr() > 10
 	nnoremap <space>a 11gt
 	nnoremap <space>r 12gt
 	nnoremap <space>s 13gt
@@ -39,52 +27,33 @@ endif
 
 "}}}
 
-" 'session' setup (shorten)
-nnoremap ,ks 1gt:e ~/.vimrc<cr>2gt:e ~/ag-sys/Else/everything/@log.txt<cr>3gt:TabooRename main<cr>:e ~/ag-sys/Else/everything/everything_index.txt<cr>4gt:TabooRename browse<cr>:e ~/ag-sys/Else/everything/\#browse.txt<cr>5gt:TabooRename config<cr>:e ~/dotfiles/README.md<cr>6gt:TabooRename bin<cr>7gt:TabooRename remap<cr>:e ~/ag-sys/Else/everything/\#remapping.txt<cr>2gt
+" re-setup session/tabs and close other buffers
+nnoremap ,ks 1gt:tabonly<cr>:only<cr>:e ~/.vimrc<cr>:vsplit ~/.zshrc<cr>:tabe ~/ag-sys/Else/everything/log.txt<cr>:tabe ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>:vsplit ~/ag-sys/Else/everything/everything_index.txt<cr>:TabooRename main<cr>:tabe ~/ag-sys/Else/everything/\#browse.txt<cr>:TabooRename browse<cr>:tabe ~/.navigation.vim<cr>:TabooRename config<cr>:tabe ~/dotfiles/post_install/post_install.sh<cr>:TabooRename bin<cr>:tabe ~/ag-sys/Else/everything/\#remapping.txt<cr>:TabooRename remap<cr>:tabe ~/ag-sys/Else/everything/another/consume/book_notes.txt<cr>:vsplit ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>:TabooRename cons<cr>:tabe ~/ag-sys/Else/everything/another/_prose/pots/draft_a.txt<cr>:vsplit ~/ag-sys/Else/everything/another/_prose/pots/plot.txt<cr>:TabooRename wr<cr>:tabnew<cr>:TabooRename wr<cr>:tabnew<cr>:Wipeout<cr>2gt
 
-" faster tab name setup
-nnoremap ,kb :TabooRename browse<cr>:e ~/ag-sys/Else/everything/\#browse.txt<cr>
-nnoremap ,km :TabooRename main<cr>:e ~/ag-sys/Else/everything/@log.txt<cr>
-
-" general quickmarks
-nnoremap <buffer> ,a :e ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>
-nnoremap <buffer> ,b :e ~/ag-sys/Else/everything/\#browse.txt<cr>
-nnoremap <buffer> ,B :e ~/.config/bspwm/bspwmrc<cr>
-nnoremap <buffer> ,c :e ~/.config/ranger/rc.conf<cr>
-nnoremap <buffer> ,d :e ~/ag-sys/Else/everything/\#another/\#idea.txt<cr>
-nnoremap <buffer> ,e :e ~/ag-sys/Else/everything/everything_index.txt<cr>
-nnoremap <buffer> ,g :e ~/.pentadactyl/groups.penta<cr>
-nnoremap <buffer> ,i :e ~/ag-sys/Else/everything/\#interaction.txt<cr>
-nnoremap <buffer> ,I :e ~/post_install.txt<cr>
-nnoremap <buffer> ,j :e ~/ag-sys/Else/everything/journal.txt<cr>
-nnoremap <buffer> ,l :e ~/ag-sys/Else/everything/@log.txt<cr>
-nnoremap <buffer> ,m :e ~/.muttrc<cr>
-nnoremap <buffer> ,M :e ~/ag-sys/Else/everything/music/\#music.txt<cr>
-nnoremap <buffer> ,n :e ~/.navigation.vim<cr>
-nnoremap <buffer> ,p :e ~/.pentadactylrc<cr>
-nnoremap <buffer> ,r :e ~/ag-sys/Else/everything/\#remapping.txt<cr>
-nnoremap <buffer> ,R :e ~/.README.md<cr>
-nnoremap <buffer> ,t :e ~/.tmux.conf<cr>
-nnoremap <buffer> ,v :e ~/.vimrc<cr>
-nnoremap <buffer> ,x :e ~/.xinitrc<cr>
-nnoremap <buffer> ,y :Unite -start-insert buffer file_mru<cr>.yml<esc>
-nnoremap <buffer> ,Y :e ~/ag-sys/Else/everything/lpol.txt<cr>
-nnoremap <buffer> ,z :e ~/.zshrc<cr>
+" some issues running repls in vimshell...
+" nmap ,kp <leader>;TabooRename prog<cr><Plug>(vimshell_split_create)python<Plug>(vimshell_enter)<esc><c-w>r
+" nmap ,kh <leader>;TabooRename prog<cr><Plug>(vimshell_split_create)ghci<Plug>(vimshell_enter)<esc><c-w>r
 
 " Thanks to Ingo Karkat for answering my question: http://stackoverflow.com/questions/21125170/grabbing-the-current-tab-name
 cnoreabbr <expr> tabname t:taboo_tab_name
 cnoreabbr <expr> buffername expand('%:t')
-" stop complaining if not named
+
 if exists("t:taboo_tab_name")
-	nnoremap <buffer> <space>u :Unite -quick-match bookmark:tabname<C-]><cr>
-	nnoremap <buffer> <space>U :UniteBookmarkAdd<cr>tabname<c-]><cr>buffername<c-]>
+	" too much manual work without being able to easily edit in one place;
+	" using ,<letter> mappings below for quickmarks now exclusively instead of unite bookmarking files for specific tab names
+	" nnoremap <buffer> <space>u :Unite -quick-match bookmark:tabname<C-]><cr>
+	" nnoremap <buffer> <space>U :UniteBookmarkAdd<cr>tabname<c-]><cr>buffername<c-]>
 
 	if t:taboo_tab_name == "main"
 		cd ~/ag-sys/Else/everything
-		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/@log.txt<cr>
+		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/log.txt<cr>
+		" first second third most used
 		nnoremap <buffer> ,f :e ~/ag-sys/Else/everything/everything_index.txt<cr>
 		nnoremap <buffer> ,s :e ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>
-		nnoremap <buffer> ,t :e ~/ag-sys/Else/everything/\#interaction.txt<cr>
+		nnoremap <buffer> ,t :e ~/ag-sys/Else/everything/interaction.txt<cr>
+		nnoremap <buffer> ,F :e ~/ag-sys/Else/everything/\#20xx.txt<cr>
+		nnoremap <buffer> ,p :e ~/ag-sys/Else/everything/policy.txt<cr>
+		nnoremap <buffer> ,i :e ~/ag-sys/Else/everything/other/computer/linux/arch/install.txt<cr>
 
 	elseif t:taboo_tab_name == 'browse'
 		cd ~/dotfiles/browsing
@@ -98,21 +67,27 @@ if exists("t:taboo_tab_name")
 
 	elseif t:taboo_tab_name == 'prog'
 		cd ~/ag-sys/prog
-		nnoremap <buffer> ,f ~/ag-sys/prog/python/\#info.txt
-		nnoremap <buffer> ,s ~/ag-sys/prog/haskell/\#info.txt
-		nnoremap <buffer> ,t ~/ag-sys/prog/cpp/\#info.txt
+		nnoremap <buffer> ,f ~/ag-sys/prog/common_lisp/cl_notes.txt
+		nnoremap <buffer> ,s ~/ag-sys/prog/rust/rust_notes.txt
+		nnoremap <buffer> ,t ~/ag-sys/prog/haskell/\#info.txt
+		nnoremap <buffer> ,c ~/ag-sys/prog/c/info.txt
+		nnoremap <buffer> ,p ~/ag-sys/prog/python/\#info.txt
 
 	elseif t:taboo_tab_name == "config"
 		cd ~/dotfiles
+		setlocal noautochdir
+		nnoremap <buffer> ,, :e ~/dotfiles/README.md<cr>
 		nnoremap <buffer> ,f :e ~/.navigation.vim<cr>
 		nnoremap <buffer> ,r :e ~/dotfiles/README.md<cr>
-		nnoremap <buffer> <space>u :Unite -start-insert file<cr>
+		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
 
 		nnoremap <Plug>CycleToMail :TabooRename conf-mail<cr>:so ~/.navigation.vim<cr>
 		nmap <buffer> <space>c <Plug>CycleToMail
 		silent! call repeat#set("\<Plug>CycleToMail", v:count)
-	elseif t:taboo_tab_name == "conf-mail"
-		cd ~/dotfiles/mail
+	" don't really use; remove? {{{
+	elseif t:taboo_tab_name == "mail"
+		cd ~/dotfiles/mail_and_cal
+		setlocal noautochdir
 		nnoremap <buffer> ,f :e ~/.muttrc<cr>
 		nnoremap <buffer> ,s :e ~/.mbsyncrc<cr>
 		nnoremap <buffer> ,t :e ~/.msmtprc<cr>
@@ -120,8 +95,10 @@ if exists("t:taboo_tab_name")
 		nnoremap <Plug>CycleToMedia :TabooRename conf-media<cr>:so ~/.navigation.vim<cr>
 		nmap <buffer> <space>c <Plug>CycleToMedia
 		silent! call repeat#set("\<Plug>CycleToMedia", v:count)
-	elseif t:taboo_tab_name == "conf-media"
+	elseif t:taboo_tab_name == "music"
 		cd ~/dotfiles/music
+		setlocal noautochdir
+		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>
 		nnoremap <buffer> ,f :e ~/.mpv/input.conf<cr>
 		nnoremap <buffer> ,s :e ~/.vimusrc<cr>
 		nnoremap <buffer> ,t :e ~/.mpd/mpd.conf<cr>
@@ -130,37 +107,72 @@ if exists("t:taboo_tab_name")
 		nnoremap <Plug>CycleToRan :TabooRename conf-ranger<cr>:so ~/.navigation.vim<cr>
 		nmap <buffer> <space>c <Plug>CycleToRan
 		silent! call repeat#set("\<Plug>CycleToRan", v:count)
-	elseif t:taboo_tab_name == "conf-ranger"
+	elseif t:taboo_tab_name == "ranger"
 		cd ~/.config/ranger
+		setlocal noautochdir
 		nnoremap <buffer> ,f :e ~/.config/ranger/rc.conf<cr>
 		nnoremap <buffer> ,s :e ~/.config/ranger/rifle.conf<cr>
 		nnoremap <buffer> ,t :e ~/.config/ranger/commands.py<cr>
-		nnoremap <buffer> <space>u :Unite -quick-match file<cr>
+		nnoremap <buffer> <space>p :Unite -quick-match file<cr>
 
 		nnoremap <Plug>CycleToConf :TabooRename config<cr>:so ~/.navigation.vim<cr>
 		nmap <buffer> <space>c <Plug>CycleToConf
 		silent! call repeat#set("\<Plug>CycleToConf", v:count)
-
-	elseif t:taboo_tab_name == 'bin'
+	" }}}
+	elseif t:taboo_tab_name == "bin"
 		cd ~/bin
-		nnoremap <buffer> <space>u :Unite -start-insert file<cr>
+		setlocal noautochdir
+		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
 
 	elseif t:taboo_tab_name == "remap"
 		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/\#remapping.txt<cr>
-		nnoremap <buffer> ,f ~/.config/sxhkd/sxhkdrc
-		nnoremap <buffer> ,s ~/.Xmodmap
-		nnoremap <buffer> ,t ~/.config/xchainkeys/xchainkeys.conf
-		nnoremap <buffer> ,r :e ~/README.md
+		nnoremap <buffer> ,f :e ~/.config/sxhkd/sxhkdrc<cr>
+		nnoremap <buffer> ,s :e ~/.Xmodmap<cr>
+		nnoremap <buffer> ,t :e ~/.config/xchainkeys/xchainkeys.conf<cr>
+		nnoremap <buffer> ,r :e ~/README.md<cr>
 
-	elseif t:taboo_tab_name == "pp"
-		cd ~/ag-sys/Else/everything/\#another/\#prose/pp
-		nnoremap <buffer> ,, :e
-		nnoremap <buffer> ,r :e ~/ag-sys/Else/everything/\#another/\#prose/pp/random.txt<cr>
+	elseif t:taboo_tab_name == "blag"
+		cd ~/_repos/blog/angelic-sedition.github.io/source/_posts
+		setlocal noautochdir
+		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/another/blag/octopress/octopress_blogging.txt<cr>
+		nnoremap <buffer> ,f :e ~/ag-sys/Else/everything/another/blag/octopress/octopress_setup.txt<cr>
+		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
+
 	elseif t:taboo_tab_name == "wr"
-		" writing related scripts
+		cd ~/ag-sys/Else/everything/another/_prose/pots
+
+		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/another/_prose/structure_standards.txt<cr>
+		nnoremap <buffer> ,f :e draft_a.txt<cr>
+		nnoremap <buffer> ,s :e plot.txt<cr>
+		nnoremap <buffer> ,t :e ~/ag-sys/Else/everything/another/_prose/pots/misc.txt<cr>
+		nnoremap <buffer> ,w :e world.txt<cr>
+		nnoremap <buffer> ,m :e misc.txt<cr>
+		nnoremap <buffer> ,b :e bio.txt<cr>
+
+		nnoremap <buffer> ,l :e ~/ag-sys/Else/everything/another/_prose/lts/misc.txt<cr>
+		nnoremap <buffer> ,p :e ~/ag-sys/Else/everything/another/_prose/pp/todo.txt<cr>
+		nnoremap <buffer> ,i :e ~/ag-sys/Else/everything/another/ideas.txt<cr>
+		nnoremap <buffer> ,c :e ~/ag-sys/Else/everything/another/_prose/lndn/landon.txt<cr>
+		nnoremap <buffer> ,g :e ~/ag-sys/Else/everything/another/_prose/gen_misc.txt<cr>
+		
+		" related scripts
 		nnoremap <buffer> ,v :ViewTxtPdf<cr>
 		nnoremap <buffer> ,z :Clam ~/bin/writing/writing_stats -c %<cr>:resize 3<cr>
+		nnoremap <buffer> ,Z :Clam ~/bin/writing/word_use_stats -r %<cr>
+
+	elseif t:taboo_tab_name == "cons"
+		nnoremap <buffer> ,f :e ~/ag-sys/Else/everything/another/consume/book_notes.txt<cr>
+		nnoremap <buffer> ,s :e ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>
+
+	elseif t:taboo_tab_name == "cube"
+		setlocal noautochdir
+		cd ~/ag-sys/Else/everything/other/skill_toys/cubes/
+		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
+
+	elseif t:taboo_tab_name == "game"
+		setlocal noautochdir
+		cd ~/ag-sys/Else/everything/other/Gaming
+		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
 
 	endif
-" else
 endif
