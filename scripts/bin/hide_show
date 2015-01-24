@@ -3,140 +3,184 @@
 # http://angelic-sedition.github.io/blog/2014/07/19/make-any-terminal-emulator-a-quake-style-dropdown/
 # thanks to lharding for xtoolwait fork and ideas:
 # https://bbs.archlinux.org/viewtopic.php?pid=1484774#p1484774
+# This is not a generic script
 
-terminal=false
+print_help() {
+	echo "
+	Used for hiding/unhiding terminal emulators (could be adapted for a program in general) to acheive quake dropdown functionality. Supports ability to auto-hide and auto-show. For example, this can be used to automatically hide a term when opening something (e.g. image viewer, video viewer, etc.) and then re-open it whenever the open program is closed.
+	Takes a terminal as an argument or one of auto_show, auto_hide, or toggle_auto_hide. 'toggle_auto_hide' toggles whether calling 'auto_hide' or 'auto_show' will have any effect.
+
+usage: hide_show [options] <terminal or auto_show/auto_hide/toggle_auto_hide>
+options:
+	-h height  specify a height for a newly created term
+	-w width   specify a width for a newly created term
+	-x pos     specify x offset for a newly created term
+	-y pos     specify y offset for a newly created term
+	-s name    name for tmux session (defaults to name of term)
+	-p         use process id to identify term (class name is used by default)
+	-d         use window id to identify term (best when a pid has multiple wids)
+	-c         don't cancel an auto-show; only applicable with -d
+	           (default is to prevent this when manually toggling a term after it is auto-hidden)
+	--help     print help
+"
+	if [ "$1" == "illegal_opt" ]; then
+		exit 1
+	else
+		exit 0
+	fi
+}
+
 use_pid=false
 use_wid=false
+cancel_auto_show=true
 window_info=$(xrandr | awk '/ connected/ {print $3}')
 width=$(echo "$window_info" | awk -F "x" '{print $1}')
 # for me, for some reason, full width is off screen (1366 wide but need to be 1362)
 ((width = width - 4))
 # height=$(echo "$window_info" | awk -F "x|+" '{print $2}')
+# xdotool can take percentages; cannot take decimal percentages though which is why not doing for width
 height="45%"
 # x and y offset
 xoff=0
 yoff=15
-while getopts :h:w:x:y:tpi opt
+term=${*:0-1}
+session_name=$term
+while getopts :h:w:x:y:s:-:pdc opt
 do
 	case $opt in
 	h) height=$OPTARG;;
 	w) width=$OPTARG;;
 	x) xoff=$OPTARG;;
 	y) yoff=$OPTARG;;
-	t) terminal=true;;
+	s) session_name=$OPTARG;;
 	p) use_pid=true;;
-	i) use_wid=true
-	   use_pid=false;;
+	d) use_wid=true;;
+	c) cancel_auto_show=false;;
+	-)
+		case $OPTARG in
+		help) print_help;;
+		esac;;
+	*) print_help illegal_opt;;
     esac
 done
 
 generic_term_toggle() {
 	# will match any window by the classname
-	(xdotool search --onlyvisible --classname $1 windowactivate && xdo hide -n $1) ||\
-	(bspc rule -a $1 -o floating=on && xdotool search --classname $1 windowmap) ||\
-	(bspc rule -a $1 -o floating=on && $1 -e "/bin/bash -c 'sleep 0.01 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $2 || tmuxinator start $2 || tmux new-session -s $2'")
+	(xdotool search --onlyvisible --classname "$1" windowactivate && xdo hide -n "$1") ||\
+	(bspc rule -a "$1" -o floating=on && xdotool search --classname "$1" windowmap) ||\
+	(bspc rule -a "$1" -o floating=on && "$1" -e "/bin/bash -c 'sleep 0.01 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $session_name || tmuxinator start $session_name || tmux new-session -s $session_name'")
 }
 
 pid_term_toggle() {
 	# termite has two window ids (and maybe other terminals?) which is why piping to head
-	# this is the downside; won't work if want to use with programs where 1 pid has multiple windows and window want isn't the first given by xdotool; use wid_toggle instead
-	vwid=$(xdotool search --onlyvisible --pid $(cat /tmp/dropdowns_pid/$1) | head -n 1)
-	wid=$(xdotool search --pid $(cat /tmp/dropdowns_pid/$1) | head -n 1)
-	if [ "$wid" != "" ]; then
-		if [ "$vwid" != "" ]; then
-			xdo hide $wid
+	# this is the downside; won't work if want to use with programs where 1 pid has multiple windows and window want to hide/show isn't the first given by xdotool; use wid_toggle instead
+	vwid=$(xdotool search --onlyvisible --pid "$(< /tmp/dropdowns_pid/"$1")" | head -n 1)
+	wid=$(xdotool search --pid "$(< /tmp/dropdowns_pid/"$1")" | head -n 1)
+	if [[ -n $wid ]]; then
+		if [[ -n $vwid ]]; then
+			xdo hide "$wid"
 		else
-			bspc rule -a $1 -o floating=on && xdotool windowmap $wid
+			bspc rule -a "$1" -o floating=on && xdotool windowmap "$wid"
 		fi
 	else
 		mkdir -p /tmp/dropdowns_pid
-		bspc rule -a $1 -o floating=on
-		$1 -e "/bin/bash -c 'sleep 0.01 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $2 || tmuxinator start $2 || tmux new-session -s $2'" &
-		echo "$!" > /tmp/dropdowns_pid/$1
+		bspc rule -a "$1" -o floating=on
+		$1 -e "/bin/bash -c 'sleep 0.01 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $session_name || tmuxinator start $session_name || tmux new-session -s $session_name'" &
+		echo "$!" > /tmp/dropdowns_pid/"$1"
 	fi
 }
 
 wid_term_toggle() {
 	# used xdo id to get wid and xwininfo to check if mapped
-	wid=$(cat /tmp/dropdowns_wid/$1 | head -n 1)
+	wid=$(< /tmp/dropdowns_wid/"$1")
 	mkdir -p /tmp/dropdowns_wid
 	exists=true
-	visibility=$(xwininfo -id $wid | awk '/Map State/ {print $3}')
-	if [ "$wid" == "" ] || [ "$visibility" == "" ]; then
+	visibility=$(xwininfo -id "$wid" | awk '/Map State/ {print $3}')
+	if [[ -z $wid ]] || [[ -z $visibility ]]; then
 		exists=false
 	fi
-	if $exists && [ "$visibility" != "IsUnviewable" ]; then
-		if [ "$visibility" == "IsUnMapped" ]; then
-			bspc rule -a $1 -o floating=on && xdotool windowmap $wid
+	if $exists && [[ "$visibility" != "IsUnviewable" ]]; then
+		if [[ "$visibility" == "IsUnMapped" ]]; then
+			bspc rule -a "$1" -o floating=on && xdotool windowmap "$wid"
 		else
-			xdo hide $wid
+			xdo hide "$wid"
 		fi
 	else
 		mkdir -p /tmp/dropdowns_wid
-		bspc rule -a $1 -o floating=on
-		$1 -e "/bin/bash -c 'sleep 0.01 && xdo id > /tmp/dropdowns_wid/$1 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $2 || tmuxinator start $2 || tmux new-session -s $2'" &
+		bspc rule -a "$1" -o floating=on
+		$1 -e "/bin/bash -c 'sleep 0.01 && xdo id > /tmp/dropdowns_wid/$1 && xdotool getactivewindow windowmove $xoff $yoff windowsize $width $height && tmux attach-session -dt $session_name || tmuxinator start $session_name || tmux new-session -s $session_name'" &
+	fi
+
+	auto_hidden_wid=$(< /tmp/auto_hidden_terminal/wid)
+	if $cancel_auto_show && [[ $wid == "$auto_hidden_wid" ]]; then
+		> /tmp/auto_hidden_terminal/wid
 	fi
 }
 
-program=${!#}
-if [ -n "$1" ]; then
-	if [ "$program" == "termite" ]; then
-		wid_term_toggle termite dropdown
-	elif [ "$program" == "xterm" ]; then
-		wid_term_toggle xterm xterm
-	elif [ "$program" == "Terminology" ]; then
-		# window class is main for some bizzare reason
-		# inconsolata font; no visual bell; 256 colors
-		# extra_term_args="terminoloy -s=v -f=Inconsolata/12 -G=false -2"
-		wid_term_toggle terminology pretty
-	elif [ "$program" == "urxvt" ]; then
-		# doing something different for urxvt (not floating); open on first desktop and switch to, then switch back to last window
-		class_name=$(xprop -id $(xprop -root _NET_ACTIVE_WINDOW | awk '{print $5}') WM_CLASS | awk '{ gsub(/"/, ""); print $4}')
-		if [ "$class_name" == "URxvt" ]; then
-			bspc window -f last
-		else
-			xdotool search --classname urxvt windowactivate || (bspc desktop -f ^1 && urxvt &)
-		fi
-	elif [ "$program" == "toggle_hide" ]; then
-		no_hide=$(cat /tmp/hidden_terminal/no_hide 2> /dev/null)
-		if [ "$no_hide" == "" ]; then
-			echo "why"
-			mkdir -p /tmp/hidden_terminal
-			echo "true" > /tmp/hidden_terminal/no_hide
-		else
-			> /tmp/hidden_terminal/no_hide
-		fi
-	elif [ "$program" == "check_hide" ]; then
-		# this is for hiding a terminal when opening something from ranger
-		no_hide=$(cat /tmp/hidden_terminal/no_hide 2> /dev/null)
-		if [ "$no_hide" == "" ]; then
-			wid=$(xdo id)
-			class_name=$(xprop -id $(xprop -root _NET_ACTIVE_WINDOW | awk '{print $5}') WM_CLASS | awk '{ gsub(/"/, ""); print $4}')
-			mkdir -p /tmp/hidden_terminal
-			echo $wid > /tmp/hidden_terminal/wid
-			echo $class_name > /tmp/hidden_terminal/class
-			xdotool windowunmap $wid
-		fi
-	elif [ "$program" == "check_show" ]; then
-		no_hide=$(cat /tmp/hidden_terminal/no_hide 2> /dev/null)
-		if [ "$no_hide" == "" ]; then
-			wid=$(cat /tmp/hidden_terminal/wid)
-			class=$(cat /tmp/hidden_terminal/class)
-			bspc rule -a $class -o floating=on
-			xdotool windowmap $wid
-		fi
-	elif $terminal; then
-		if $use_pid; then
-			pid_term_toggle $program $program
-		elif $use_wid; then
-			wid_term_toggle $program $program
-		else
-			generic_term_toggle $program $program
-		fi
+auto_hide() {
+	# this is for hiding a terminal when opening something from ranger
+	no_hide=$(< /tmp/auto_hidden_terminal/no_hide)
+	if [[ -z $no_hide ]]; then
+		wid=$(xdo id)
+		class_name=$(xprop -id "$(xprop -root _NET_ACTIVE_WINDOW | awk '{print $5}')" WM_CLASS | awk '{ gsub(/"/, ""); print $4}')
+		mkdir -p /tmp/auto_hidden_terminal
+		echo "$wid" > /tmp/auto_hidden_terminal/wid
+		echo "$class_name" > /tmp/auto_hidden_terminal/class
+		xdotool windowunmap "$wid"
+	fi
+}
+
+auto_show() {
+	no_hide=$(< /tmp/auto_hidden_terminal/no_hide)
+	if [[ -z $no_hide ]]; then
+		wid=$(cat /tmp/auto_hidden_terminal/wid)
+		class=$(cat /tmp/auto_hidden_terminal/class)
+		bspc rule -a "$class" -o floating=on
+		xdotool windowmap "$wid"
+	fi
+}
+
+toggle_auto_hide() {
+	no_hide=$(< /tmp/hidden_terminal/no_hide)
+	if [[ -z $no_hide ]]; then
+		mkdir -p /tmp/auto_hidden_terminal
+		echo "true" > /tmp/auto_hidden_terminal/no_hide
 	else
-		# I may make a generic wid_toggle at some point that isn't meant for calling terms with -e, but I have no use for it corrently
-		xdotool search --onlyvisible --classname $1 windowunmap || xdotool search --classname $1 windowmap || exec $1 &
+		mkdir -p /tmp/auto_hidden_terminal
+		> /tmp/auto_hidden_terminal/no_hide
+	fi
+}
+
+urxvt_toggle() {
+	# doing something different for urxvt (not floating); open on first desktop and switch to, then switch back to last window
+	class_name=$(xprop -id "$(xprop -root _NET_ACTIVE_WINDOW | awk '{print $5}')" WM_CLASS | awk '{ gsub(/"/, ""); print $4}')
+	if [[ $class_name == "URxvt" ]]; then
+		bspc window -f last
+	else
+		xdotool search --classname urxvt windowactivate || (bspc desktop -f ^1 && urxvt &)
+	fi
+}
+
+if [[ -n "$1" ]]; then
+	if [[ $term == "urxvt" ]]; then
+		urxvt_toggle
+	elif [[ $term == "toggle_auto_hide" ]]; then
+		toggle_auto_hide
+	elif [[ $term == "auto_hide" ]]; then
+		auto_hide
+	elif [[ "$term" == "auto_show" ]]; then
+		auto_show
+	else
+		if $use_pid; then
+			pid_term_toggle "$term"
+		elif $use_wid; then
+			wid_term_toggle "$term"
+		else
+			generic_term_toggle "$term"
+		fi
 	fi
 else
 	echo "Error: no argument supplied. Aborting."
 fi
+# vim is dumb
+# vim: set ft=sh:

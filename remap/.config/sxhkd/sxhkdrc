@@ -111,16 +111,16 @@ alt + r
 	guake -t
 
 alt + s
-	hide_show -y 14 termite
+	hide_show -d -y 14 -s dropdown termite
 
 alt + t
 	hide_show urxvt
 
 super + s
-	hide_show -y 14 xterm
+	hide_show -d -y 14 xterm
 
 F1
-	hide_show -y 14 Terminology
+	hide_show -d -y 14 Terminology
 
 # }}}
 

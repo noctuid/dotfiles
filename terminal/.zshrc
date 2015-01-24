@@ -680,14 +680,14 @@ alias gin='git init'
 alias -g gcl='git clone'
 alias -g g='git'
 alias gaa='git add -A'
-alias gc='git commit'
+alias gc='hide_on_open git commit'
 alias gcm='git commit -m'
+alias gcam='hide_on_open git commit --amend'
 alias gl='git clone'
 alias gp='git push'
 # alias gh='git checkout'
 alias -g gc='git commit'
 alias -g gcm='git commit -m'
-alias -g gcam='git commit -am'
 
 # push to github (or whatever else)
 # git remote add origin (link)
@@ -1090,6 +1090,11 @@ rn() {
 		vim) ranger-cd ~/.vim ;;
 		*)   ranger-cd ;;
 	esac
+}
+
+# for use when opening programs from a terminal and want them hidden the activated again after the open program closes
+hide_on_open() {
+	hide_show auto_hide; "$@" && hide_show auto_show
 }
 
 # }}}
