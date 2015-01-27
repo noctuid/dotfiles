@@ -9,6 +9,18 @@ if [ "$1" == "exec" ]; then
 elif [ "$1" == "exec_graphics" ]; then
 	# going to be creating a window whose size can be specified; float it
 	bspc rule -a Calico -o floating=on && ~/_school/Calico/StartCalico --graphics --exec "$file_name"
+
+elif [ "$1" == "mirror_line" ]; then
+	# because initializing rfcomm0 every time want to run a script is slow; FUCK you calico
+	# position of shell
+	xdotool mousemove 140 128 click 1
+	# 133 108
+	bspc window -f left && xsendkey Control+v && xdotool key Return && bspc window -f right && xdotool key Escape
+
+elif [ "$1" == "run_focus_shell" ]; then
+	bspc window -r 0.2
+	bspc window --presel left && ~/_school/Calico/StartCalico
+	sleep 7 && xdotool mousemove 133 108 click 1 && bspc window -f right
 	
 # hopefully will never have to use these:
 
