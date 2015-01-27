@@ -868,9 +868,6 @@ alias tl='tmux list-sessions'
 
 # Other Program Aliases
 alias tvim="vim -c 'color badwolf|hi Normal ctermfg=252 ctermbg=none'"
-alias calico="cd ~/_school/Calico && ./StartCalico"
-alias bscan="hcitool scan"
-alias brscan="sudo hciconfig hci0 up ; hcitool scan"
 alias brolink="node ~/.vim/bundle/browserlink.vim/brolink/brolink.js"
 alias sfh='screenfetch'
 alias wee='weechat'
