@@ -2,15 +2,18 @@
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("inputfile", help="specify the name of the text file to show word usage statistics for")
+# word usage statistics
 parser.add_argument("-w", "--wordlist", help="specify a file containing words to be checked for and counted; all other words will be ignored")
 parser.add_argument("-i", "--ignorelist", help="specify a file containing words to be ignored on separate lines; some words are ignored by default, setting as 'dummy' will ignore no words")
 parser.add_argument("-I", "--onlyignorelist", help="specify a file containing words to be ignored and do not also ignore words in the commonWordList")
 parser.add_argument("-n", "--amount", help="print the first <number> words", type=int)
 parser.add_argument("-r", "--reverse", action="store_true", help="print least common words first")
 
+# word, sentence, etc. number statistics
 parser.add_argument("-c", "--count", action="store_true", help="count words, sentences, and paragraphs; overrides default action of showing most frequently used words")
+parser.add_argument("-l", "--chapterlevel", help="specify the number of asterisks for a chapter heading (default: 3)", type=int)
 parser.add_argument("-o", "--onlychapter", help="specify a single chapter for count", type=int)
-parser.add_argument("-f", "--fromchapter", help="specify optional chapter to start from for count", type=int)
+parser.add_argument("-f", "--fromchapter", help="specify optional chapter to start from (default: 1)", type=int)
 parser.add_argument("-t", "--tochapter", help="specify optional chapter to end with for count (not including)", type=int)
 parser.add_argument("-C", "--fullcount", action="store_true", help="prints count for every chapter in formatted table; overrides default action of showing most frequently used words")
 args = parser.parse_args()
@@ -41,6 +44,19 @@ def removeComment(line):
         line = line[:pos.start()] + "\n"
     return line
 
+# ignore outline headings that don't correspond to chapter title or subheading
+def removeHeading(line):
+    if args.chapterlevel:
+        ignoreLevel = args.chapterlevel
+    else:
+        ignoreLevel = 3
+    # will ignore any heading except chapter level heading and following level up to 30; kind of overkill...
+    for i in range(29):
+        headingLevel = i + 1
+        if headingLevel != ignoreLevel and headingLevel != ignoreLevel + 1:
+            if line.startswith("*" * headingLevel + " "):
+                return "\n"
+    return line
 
 def cleanWord(word):
     # lowercase and remove punctuation/symbols and formatting
@@ -59,7 +75,7 @@ def createWordDict(chapters, start=0, end=None):
     for chapter in chapters[start:end]:
         lines = chapter.split('\n')
         for line in lines:
-            line = removeComment(line)
+            line = removeHeading(removeComment(line))
             words = line.split()
             newWords = [cleanWord(word) for word in words]
             if args.wordlist:
@@ -118,7 +134,7 @@ def countWords(chapters, start=0, end=None):
     for chapter in chapters[start:end]:
         lines = chapter.split('\n')
         for line in lines:
-            line = removeComment(line)
+            line = removeHeading(removeComment(line))
             wordList = line.split()
             wordCount += len(wordList)
     return wordCount
@@ -126,8 +142,10 @@ def countWords(chapters, start=0, end=None):
 def countSentences(chapters, start=0, end=None):
     # a mostly accurate sentence count that takes abbreviations and decimals into account
     # won't be accurate when abbreviations come at the end of sentences
-    # also doesn't consider real ellipsis characters or sentences ending with ...
+    # only considers .?! as sentence ending characters
     sentenceNumber = 0
+    # subtract chapter headings at end
+    headingNumber = 0
 
     # abbrebations used by https://github.com/reedes/vim-textobj-sentence
     abbrRegexList= [
@@ -146,39 +164,50 @@ def countSentences(chapters, start=0, end=None):
     notSentence = re.compile(notSentence)
 
     for chapter in chapters[start:end]:
+        headingNumber += 1
         lines = chapter.split('\n')
         for line in lines:
-            line = removeComment(line)
+            line = removeHeading(removeComment(line))
             # remove decimal numbers, elipsis (three periods), and two period place holders
             line = re.sub(notPeriod, "", line)
-            maybeSentences = line.strip('\n').split('.')
-            for mSentence in maybeSentences:
-                if mSentence != '' and not notSentence.match(mSentence):
+            maybeSentences = re.split("[\.\?\!]", line.strip("\n"))
+            for i in maybeSentences:
+                if i != '' and not notSentence.match(i):
                     sentenceNumber += 1
-    return sentenceNumber
+    return sentenceNumber - headingNumber
 
 def countParagraphs(chapters, start=0, end=None):
     # with the formatting I use, a line corresponds to a paragraph
     paragraphCount = 0
+    # subtract chapter headings at end
+    headingNumber = 0
     for chapter in chapters[start:end]:
+        headingNumber += 1
         lines = chapter.split('\n')
         for line in lines:
-            line = removeComment(line)
+            line = removeHeading(removeComment(line))
             if line != "" and line != "\n":
                 paragraphCount += 1
-    return paragraphCount
+    return paragraphCount - headingNumber
 
 
 def main():
     inFile = args.inputfile
     f = open(inFile)
+
+    # determine heading level for chapter splitting
+    if args.chapterlevel:
+        chapterChar = "\*" * args.chapterlevel + "\ +"
+    else:
+        chapterChar = "\*\*\*\ +"
+
     if args.count or args.fullcount:
         text = f.read()
         # remove everything before ###
-        chapter_text = re.split("\n###.*\n", "\n" + text)[-1]
-        chapters = re.split("\n\^.*\n", "\n" + chapter_text)
+        chapterText = re.split("\n###.*\n", "\n" + text)[-1]
+        chapters = re.split("\n" + chapterChar, "\n" + chapterText)
         # get rid of '' (if two chapter headings after each other or first line in file is chapter heading)
-        chapters = [ chapter for chapter in chapters if chapter != "" ]
+        chapters = [ chapter for chapter in chapters if chapter != "" and chapter != "\n" ]
 
         if args.fullcount:
             print("| Chapter	| Words 	| Sentences	| Paragraphs	|")

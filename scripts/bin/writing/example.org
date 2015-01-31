@@ -1,0 +1,30 @@
+* Example Chapter Name
+** `A witty quote.' - Person
+*** This heading should be ignored (any but chapter heading/subheading are structural for folding and ignored).
+
+# This is a comment
+	"As you can see, quotes will be converted to their correctly angled counterparts. Also, Jack told me the following when questioned about his drug habit: 'One level of nesting is supported.' How wonderful," said I.
+	Each line corresponds to a paragraph (the start of an indented line). No hard wrapping is used.
+	_This is underlined text_.
+	/This is italic text/. # This is also comment
+	\# This is not a comment.
+	A literal backslash must be escaped: \\
+	Symbols that need to be escaped for LaTeX will be automatically: & % {} ~ ^
+	Literal underscores, asterisks, and forward slashes must be escaped manually: \_ \* \/
+Indentation at the beginning of the line doesn't matter. Empty lines don't matter either:
+
+
+
+
+	This paragraph is an example of using a placeholder for Dr. ..'s name...
+	This script /can also deal with unmatched symbols. This line will just be italicized and emboldened *here to the end.
+	This line remains untouched.
+
+* Another Chapter!
+
+	Let's test the word, sentence, paragraph, and chapter count.
+	Mr. is an abbreviation and doesn't count as a sentence.
+	This file has two chapters.
+	Numbers count as words. Chapter headings are ignored in the sentence, and paragraph counts but not word counts.
+	Does a question mark end a sentence? Yes it does!
+	This chapter has 6 paragraphs, 8 sentences, and 67 words (excluding lorem ipsum).
