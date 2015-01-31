@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # TODO:
 # make less ugly
-# optionally add index
 # chapter range
 
 import os
@@ -16,6 +15,7 @@ parser.add_argument("-l", "--chapterlevel", help="specify the number of asterisk
 # nargs = 0
 parser.add_argument("-e", "--example", action="store_true", help="add example lorem ipsum text")
 parser.add_argument("-v", "--view", action="store_true", help="open pdf after generated with rifle")
+parser.add_argument("-i", "--index", action="store_true", help="add a table of contents")
 args = parser.parse_args()
 
 import re
@@ -177,7 +177,11 @@ def main():
     os.chdir("output")
     fTemp = open(template, "r")
     templateText = fTemp.read()
-    newText = templateText + "\\begin{document}\n" + newText + "\\end{document}"
+    if args.index:
+        templateText += "\\begin{document}\n\\tableofcontents\n"
+    else:
+        templateText += "\\begin{document}\n"
+    newText = templateText + newText + "\\end{document}"
     fOut = open(outFile, "w")
     fOut.write(newText)
     f.close()
