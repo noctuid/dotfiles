@@ -433,7 +433,256 @@
 (define-key evil-normal-state-map "l" 'evil-jump-backward)
 (define-key evil-normal-state-map "L" 'evil-jump-forward)
 
-
-
 (define-key evil-normal-state-map "U" 'undo-tree-redo)
 ;; look into these packages: fasd, bitlebee, weechat, launch, magit, muttrc mode, org
+
+
+
+;; _org mode {{{
+;; general settings {{{
+;; make headings levels same size and smaller
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-level-1 ((t (:inherit outline-1 :height 1.0))))
+ '(org-level-2 ((t (:inherit outline-2 :height 1.0))))
+ '(org-level-3 ((t (:inherit outline-3 :height 1.0))))
+ '(org-level-4 ((t (:inherit outline-4 :height 1.0))))
+ '(org-level-5 ((t (:inherit outline-5 :height 1.0)))))
+
+;; don't indent headings or text below them
+(setq org-adapt-indentation nil)
+;; add time when closing a todo
+(setq org-log-done 'time)
+;; tabs have width 4
+(add-hook 'org-mode-hook (lambda () (setq tab-width 4)))
+
+; }}}
+
+;; clocking {{{
+;; can only have one clock running (which makes sense..); if start clock in another file, current will be stopped automatically
+;; remember clock if exit emacs
+(setq org-clock-persist 'history)
+(org-clock-persistence-insinuate)
+;; will become dangling clock if exit emacs (to automatically resume: (setq org-clock-persist t))
+;; if inactive in emacs for x minutes, prompt to resolve idle time
+(setq org-clock-idle-time 15)
+
+;; http://orgmode.org/manual/Resolving-idle-time.html#Resolving-idle-time
+;; shift something always leaves you clocked out
+;; k to re-clock in and keep some (or all if hit RET) of the minutes
+;; K like above but clock out
+;; i or q will ignore question and start new clock (if restarting emacs... maybe will keep all idle time if idle time prompt appears)
+;; g- got back x minutes ago (clocks you out at beginning of idle period then back in x minutes ago)
+;; C to cancel clock
+;; s to clock out at beginning of idle (subtracting all minutes) and clock back in now
+;; S clocks out at beginning of idle
+
+; }}}
+
+;; speed commands {{{
+(setq org-use-speed-commands t)
+
+;; http://ergoemacs.org/emacs/elisp_insert-date-time.html
+;; because org-time-stamp-inactive requires hitting enter to get default (2 universal prefixes will do automatically but contains time which don't want) and can't figure out how to auto insert today
+(defun insert-date (&optional addTimeStamp-p)
+  "Insert current date and or time.
+
+• In this format yyyy-mm-dd weekday.
+• When called with `universal-argument', insert date and time, e.g. 2012-05-28T07:06:23-07:00
+• Replaces text selection.
+
+See also `current-date-time-string'."
+  (interactive "P")
+  (when (use-region-p) (delete-region (region-beginning) (region-end) ) )
+  (cond
+   ((equal addTimeStamp-p nil ) (insert (format-time-string "[%Y-%m-%d %a]")))
+   (t (insert (current-date-time-string))) ) )
+
+;; ? to show
+;; t  to cycle todo (will stop a clock)
+;; tab or c to toggle
+;; I and O to clock in and out
+;; a archive subtree with confirmation (moves to archive file; will ask for confirmation)
+;; e to set effort
+;; W to add a warning in x minutes
+;; v to open agenda
+   ;; L for timeline for current buffer
+   ;; a to see agenda for day/Week (deadlines) (can mark as done here)
+;; w to refile (move current subtree to under another heading)
+;; 0-3 priority
+;; (org-speed-move-safe (quote org-forward-heading-same-level))
+(setq org-speed-commands-user
+        '(("e" . (org-speed-move-safe 'outline-previous-visible-heading))
+          ("n" . (org-speed-move-safe 'outline-next-visible-heading))
+          ;; swapping down and up
+          ("E" . (org-shiftmetaup))
+          ("N" . (org-shiftmetadown))
+          ;; add tags
+          (";" . (org-set-tags-command))
+          ("h" . (org-metaleft))
+          ("i" . (org-metaright))
+          ;; will shift entire subtree
+          ("<" . (org-shiftmetaleft))
+          (">" . (org-shiftmetaright))
+          ;; these two won't work
+          ;; ("s" . (org-schedule))
+          ;; ("d" . (org-deadline))
+          ;; d to add today's date as an inactive timestamp
+          ("d" . (progn (evil-next-line) (insert-date) (org-return) (org-return) (evil-previous-line)))
+          ;; clock in under section where last clocked in then out
+          ("l" . (org-clock-in-last))
+          ("q" . (org-clock-cancel))
+          ;; this is default i; default o is open link
+          ("o" . (progn (forward-char 1) (call-interactively (quote org-insert-heading-respect-content))))))
+
+; }}}
+
+;; is there actually any reason to make a new minor mode instead of just using
+;; evil-define-key and org-mode-map?
+;; evil-org-mode {{{
+;; create evil org minor mode and functions {{{
+;; https://github.com/edwtjo/evil-org-mode
+(define-minor-mode evil-org-mode
+  "Buffer local minor mode for evil-org"
+  :init-value nil
+  :lighter " EvilOrg"
+  :keymap (make-sparse-keymap) ; defines evil-org-mode-map
+  :group 'evil-org)
+
+;; made smarter (added check if on heading)
+(defun clever-insert-item ()
+  "Clever insertion of org item or heading."
+  (if (org-on-heading-p)
+    ;; is this any different than after-current?
+    (org-insert-heading-respect-content)
+    (if (org-in-item-p)
+      (org-insert-item)
+      (insert "\n"))))
+
+(defun evil-org-eol-call (fun)
+  "Go to end of line and call provided function.
+  FUN function callback"
+  (end-of-line)
+  (funcall fun)
+  (evil-append nil))
+
+; }}}
+
+;; capture {{{
+;; http://orgmode.org/manual/Capture-templates.html#Capture-templates
+;; http://orgmode.org/manual/Template-elements.html#Template-elements
+(setq org-default-notes-file "~/org/notes.org")
+;; universal prefix to visit template; twice to go to last stored capture item in its buffer
+;; for log day (adding things to log without going there)
+(define-key evil-normal-state-map (kbd "SPC c") 'org-capture)
+;; go to heading clocked into
+(define-key evil-normal-state-map (kbd "SPC C") 'org-clock-goto)
+
+;; define this after evil-org-mode and takes precedence it seems
+(define-minor-mode evil-capture-mode
+  "Buffer local minor mode for evil-capture"
+  :init-value nil
+  :lighter " EvilCapture"
+  :keymap (make-sparse-keymap) ; defines evil-capture-mode-map
+  :group 'evil-capture)
+
+(add-hook 'org-capture-mode-hook 'evil-capture-mode) ;; only load with org-mode
+(evil-define-key 'normal evil-capture-mode-map
+  (kbd "RET") 'org-capture-finalize
+  ;; abort
+  "q" 'org-capture-kill)
+
+;; (org-capture-refile)
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/ag-sys/Else/everything/log.org" "General Tasks/ Maybe Refile")
+             "* TODO %?\n  %i\n  %a")
+        ("c" "Currently Clocked in" entry (clock)
+             "* .%? (Entered on %U)")))
+
+;; %a will be expanded to link from whence called capture; see http://orgmode.org/manual/Template-expansion.html#Template-expansion
+;; %U for inactive date, meaning will not show up in agenda
+;; use certain template without interactive selection
+;;  (define-key global-map "\C-cx"
+;;     (lambda () (interactive) (org-capture nil "x")))
+; }}}
+
+;; can dot repeat with
+;;  mappings {{{
+
+;; 2 way instead of 3 way cycle; also works WITHIN heading, keeping position!! fuck org-cycle!!
+;; sadly drawers will always be open when using though
+;; http://emacs.stackexchange.com/questions/3998/how-to-remap-control-up-in-org-mode
+(defun org-take-back-tab-bindings ()
+  (define-key org-mode-map [remap outline-toggle-children] nil))
+(eval-after-load "org" #'(org-take-back-tab-bindings))
+
+(add-hook 'org-mode-hook 'evil-org-mode) ;; only load with org-mode
+;; insert tab character
+(evil-define-key 'insert evil-org-mode-map
+  ;; (kbd "RET") 'clever-insert-item
+  ;; (kbd "<tab>") (insert "<tab>"))
+  (kbd "<tab>") (kbd "C-q <tab>"))
+
+;; same bindings for the most part as speed commands; not using a state because don't usually want to do more than one command at a time; if do, can use speed commands
+(evil-define-key 'normal evil-org-mode-map
+  (kbd "<tab>")  'outline-toggle-children
+  ;; navigate up and down between visible headings
+  (kbd "m e") 'outline-previous-visible-heading
+  (kbd "m n") 'outline-next-visible-heading
+  (kbd "m w") 'org-forward-sentence
+  (kbd "m E") 'org-shiftmetaup
+  (kbd "m N") 'org-shiftmetadown
+  (kbd "m h") 'org-metaleft
+  (kbd "m i") 'org-metaright
+  "<"         'org-shiftmetaleft
+  ">"         'org-shiftmetaright
+  ;; when adding a deadline can type +1 to add a day; day of week (tues); day of month (20)
+  (kbd "m d") 'org-deadline
+  (kbd "m s") 'org-schedule
+  (kbd "m l") 'org-clock-in-last
+  (kbd "m q") 'org-clock-cancel
+  ;; follow links
+  (kbd "RET") 'org-open-at-point
+  (kbd "m T") 'org-insert-todo-heading-respect-content
+  ;; toggle todo
+  (kbd "m t") 'org-todo
+  (kbd "m c") 'org-toggle-checkbox
+  ;; archive
+  (kbd "m a") 'org-archive-subtree-default-with-confirmation
+  ;; open agenda
+  (kbd "m v") 'org-agenda
+  ;; add current file to agenda files (so todos and deadlines will be listed in agenda view; can also add directories)
+  (kbd "m A") 'org-agenda-file-to-front
+  ;; go to next agenda file
+  (kbd "m C") 'org-cycle-agenda-files
+  ;; clock in and out under current heading; 3 universal prefixes to start from last clock out time of session; 2 for clock-in-last
+  ;; 1 universal prefix to select task from recent
+  (kbd "m I") 'org-clock-in
+  (kbd "m O") 'org-clock-out
+  ;; show outline view
+  ;; (kbd "SPC u") 'org-toc-show
+  (kbd "SPC u") 'helm-org-in-buffer-headings
+  "ge"          'outline-up-heading
+  "gn"          'outline-forward-same-level
+  "zR"          'show-all
+  "zZ"          'hide-other
+  (kbd "m /")   'org-sparse-tree
+  ;; not the same
+  "zM"          'hide-body
+  "T" '(lambda () (interactive) (evil-org-eol-call (lambda() (org-insert-todo-heading nil))))
+  ;; will act like o or insert -, etc.
+  "o" '(lambda () (interactive) (evil-org-eol-call 'clever-insert-item))
+  "O" 'org-insert-heading
+  "$" 'org-end-of-line
+  "^" 'org-beginning-of-line
+  "-" 'org-cycle-list-bullet)
+  ;; org-insert-drawer
+
+; }}}
+
+; }}}
+
+; }}}
