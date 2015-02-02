@@ -467,6 +467,12 @@ augroup pentadactyl
 	au BufNewFile,BufRead *.pentadactylrc,*penta set filetype=pentadactyl
 augroup END
 
+" for vim-dotoo
+augroup orgdotoo
+	au!
+	au BufEnter,BufNewFile,BufRead *.org setlocal filetype=dotoo
+augroup END
+
 " See:
 " ./.vim/after/ftplugin
 " ./.vim/after/syntax
@@ -1235,6 +1241,8 @@ nnoremap <leader>P :cd ~/dotfiles\|Unite -start-insert file_rec/async<cr>
 nnoremap <space>p :Unite -start-insert locate<cr>
 " source for outline of file (e.g. function jumping)
 nnoremap <space>u :Unite outline<cr>
+" for folds in file (e.g. dotoo/org headings)
+nnoremap <space>u :Unite fold<cr>
 
 " searching; silver searcher {{{
 " http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
@@ -1458,7 +1466,7 @@ endfunction
 
 " }}}
 
-" 'New' FileTypes (wiki, calendar) {{{
+" 'New' FileTypes (wiki, calendar, org) {{{
 " VimWiki (using like TabsOutliner with pentadactyl) {{{
 " tww to go to index
 " tws select from multiple wikis
@@ -1513,6 +1521,51 @@ endfunction
 
 " }}}
 
+" dotoo {{{
+" maybe use with below for quick keys like behaviour
+" https://github.com/kana/vim-submode
+let g:dotoo#agenda#files = ['~/ag-sys/Else/everything/log.org']
+
+" default
+let g:dotoo#parser#todo_keywords = [
+	\ 'TODO',
+	\ 'NEXT',
+	\ 'WAITING',
+	\ 'HOLD',
+	\ 'PHONE',
+	\ 'MEETING',
+	\ 'CANCELLED',
+	\ 'DONE']
+
+" default
+let g:dotoo#capture#templates = [
+	\ ['t', 'Todo', ['* TODO %?',
+	\                'DEADLINE: [%(strftime(g:dotoo#time#datetime_format))]']],
+	\ ['n', 'Note', '* %? :NOTE:'],
+	\ ['m', 'Meeting', '* MEETING with %? :MEETING:'],
+	\ ['p', 'Phone call', '* PHONE %? :PHONE:'],
+	\ ['h', 'Habit', ['* NEXT %?',
+	\                'SCHEDULED: [%(strftime(g:dotoo#time#date_day_format)) +1m]',
+	\                ':PROPERTIES:',
+	\                ':STYLE: habit',
+	\                ':REPEAT_TO_STATE: NEXT',
+	\                ':END:']]
+	\ ]
+
+" https://github.com/dhruvasagar/vim-dotoo/issues/6
+" fix color alloc errors
+let g:dotoo_todo_keyword_faces = [
+	\ ['TODO', [':foreground #d46a6a', ':weight bold']],
+	\ ['NEXT', [':foreground #d49a6a', ':weight bold']],
+	\ ['DONE', [':foreground #0d4d4d', ':weight bold']],
+	\ ['WAITING', [':foreground #55aa55', ':weight bold']],
+	\ ['HOLD', [':foreground #669999', ':weight bold']],
+	\ ['CANCELLED', [':foreground #552700', ':weight bold']],
+	\ ['MEETING', [':foreground #ffaaaa', ':weight bold']],
+	\ ['PHONE', [':foreground #aa6c39', ':weight bold']]
+	\ ]
+
+" }}}
 " }}}
 
 " Allignment {{{
@@ -2050,7 +2103,8 @@ NeoBundle 'junegunn/vim-pseudocl'
 " japanese input; mapping something up in search...
 " NeoBundle "https://github.com/tyru/eskk.vim"
 
-NeoBundle 'jceb/vim-orgmode'
+" org mode
+NeoBundle 'dhruvasagar/vim-dotoo'
 
 " }}}
 
