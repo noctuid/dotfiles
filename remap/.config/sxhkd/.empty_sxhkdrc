@@ -38,7 +38,7 @@ semicolon ; {g,v}
 	{gvim,gvim}
 
 # keep bindings# {{{
-# Dropdown Terms# {{{
+## Dropdown Terms# {{{
 super + r
 	guake -t
 
@@ -46,24 +46,17 @@ alt + r
 	guake -t
 
 alt + s
-	hide_show -y 14 termite
+	hide_show -d -y 14 -s dropdown termite
 
 alt + t
 	hide_show urxvt
 
 super + s
-	hide_show -y  14 xterm
+	hide_show -d -y 14 xterm
 
 F1
-	hide_show -y 14 Terminology
+	hide_show -d -y 14 Terminology
 
-# not in use
-F10
-	bspc desktop -l monocle && bspc window -t floating
-F11
-	bspc window -t fullscreen
-
-# terminology -f=Inconsolata/12 -G=false -2
 # }}}
 
 # brightness# {{{

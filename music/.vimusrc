@@ -58,12 +58,12 @@ map r. :!~/bin/tmux/vimus_tmux.sh r.<CR>
 # new session
 map r_ :!~/bin/tmux/vimus_tmux.sh r_<CR>
 
-# new window 
+# new window
 map rc :!~/bin/tmux/vimus_tmux.sh rc<CR>
 # kill pane
 map rx :!tmux kill-pane<CR>
-# last window 
-map rl :!~/bin/tmux/vimus_tmux.sh<CR>
+# last window
+map rl :!~/bin/tmux/vimus_tmux.sh rl<CR>
 # split windows
 map r/ :!~/bin/tmux/vimus_tmux.sh r/<CR>
 map r- :!~/bin/tmux/vimus_tmux.sh r-<CR>
