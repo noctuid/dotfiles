@@ -37,8 +37,9 @@ semicolon ; a
 semicolon ; {g,v}
 	{gvim,gvim}
 
+#
 # keep bindings# {{{
-## Dropdown Terms# {{{
+# Dropdown Terms# {{{
 super + r
 	guake -t
 
