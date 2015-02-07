@@ -1866,11 +1866,18 @@ endif
 " #==============================
 " # NeoBundle {{{
 " #==============================
+" NeoBundle Automatic Installation {{{
+if !isdirectory(expand("$HOME/.vim/bundle/neobundle.vim"))
+	!curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh > install.sh && echo "run the install.sh script to install neobundle"
+endif
+
+" }}}
+
 " Required:
 set runtimepath+=~/.vim/bundle/neobundle.vim/
 
 " Required:
-call neobundle#rc(expand('~/.vim/bundle/'))
+call neobundle#begin(expand('~/.vim/bundle/'))
 
 " Let NeoBundle manage NeoBundle
 " Required:
@@ -2183,6 +2190,7 @@ NeoBundle 'junegunn/vim-after-object'
 
 " }}}
 
+call neobundle#end()
 " If there are uninstalled bundles found on startup,
 " this will conveniently prompt you to install them.
 NeoBundleCheck
