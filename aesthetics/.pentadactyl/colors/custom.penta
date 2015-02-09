@@ -19,7 +19,11 @@ hi FontFixed -a font-size:12px !important; font-family:"Inconsolata" !important;
 " Reset the styles {{{1
 " ----------------------------------------------------------------------
 " This ensures they don't bleed over from other themes
-hi clear
+" I don't switch between color schemes, so commenting
+" causes 10+ second freezes (sometimes infinite) when opening new windows
+" http://pentadactyl.narkive.com/ufMJGU4f/to-open-a-new-window-takes-too-long
+" https://code.google.com/p/dactyl/issues/detail?id=1150
+" hi clear
 
 " Solarized color mappings {{{1
 " ----------------------------------------------------------------------
