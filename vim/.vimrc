@@ -85,7 +85,7 @@ inoremap <Home> <nop>
 " don't use x, y, z, i, or j
 inoreabbr e =
 inoreabbr pe +=
-inoreabbr a &
+inoreabbr r &
 inoreabbr c :
 inoreabbr q ?
 " plus, time*, modulo
