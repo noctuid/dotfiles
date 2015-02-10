@@ -81,6 +81,35 @@ inoremap <Home> <nop>
 
 " }}}
 
+" letter symbols; short letter abbrevs {{{
+" don't use x, y, z, i, or j
+inoreabbr e =
+inoreabbr pe +=
+inoreabbr a &
+inoreabbr c :
+inoreabbr q ?
+" plus, time*, modulo
+inoreabbr p +
+inoreabbr t *
+inoreabbr m %
+" e.g. dollar operator
+inoreabbr d $
+" e.g.type t/ to get ~/
+inoreabbr t ~
+" comparison
+inoreabbr ee ==
+inoreabbr g >
+inoreabbr ge >=
+inoreabbr l <
+inoreabbr le <=
+
+" problems so far:
+" if backspace and then type one of these sequences will expand; may be better to use only in program files and not in config files either (because of mappings)
+" e.g.
+inoreabbr eg e.g.
+
+" }}}
+
 nmap s <nop>
 nmap r <nop>
 nnoremap sr r
