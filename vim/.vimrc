@@ -1366,10 +1366,21 @@ augroup END
 " }}}
 
 " Fugitive {{{
+" git add
 nnoremap <leader>ga :Gwrite<cr>
+" interactive status
+" cc to commit; ca to ammend
 nnoremap <leader>gs :Gstatus<cr>
 nnoremap <leader>gc :Gcommit<cr>
+nnoremap <leader>gp :Git push<cr>
+" for staging parts
 nnoremap <leader>gd :Gvdiff<cr>
+" nnoremap <leader>gb :Git branch<Space>
+nnoremap <leader>go :Git checkout<Space>
+nnoremap <leader>gl :Clam git log<cr>gg
+" http://mislav.uniqpath.com/2014/02/hidden-documentation/
+nnoremap <leader>gB :Gblame<cr>
+nnoremap <leader>gb :Gbrowse<cr>
 " get previous commit version of buffer (can just undo)
 nnoremap <leader>gr :Gread<cr>
 nnoremap <leader>gm :Gmove<space>
@@ -1382,9 +1393,15 @@ augroup fugitiveSettings
 	au!
 	" same bindings for merging diffs as in normal mode
 	au BufRead fugitive://* call s:diff_bindings()
+	au FileType fugitiveblame call s:blame_bindings()
 	" bindings for git status window
 	au FileType gitcommit nmap <buffer> n <c-n>|nmap <buffer> e <c-p>
 augroup END
+
+function! s:blame_bindings()
+	nnoremap <buffer> <cr> :Gbrowse<cr>
+	nmap p P
+endfunction
 
 function! s:diff_bindings()
 	xnoremap <buffer> dp :diffput<cr>
