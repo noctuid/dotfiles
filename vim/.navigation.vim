@@ -27,16 +27,9 @@ endif
 
 "}}}
 
-" re-setup session/tabs and close other buffers
-nnoremap ,ks 1gt:tabonly<cr>:only<cr>:e ~/.vimrc<cr>:vsplit ~/.zshrc<cr>:tabe ~/ag-sys/Else/everything/log.txt<cr>:tabe ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>:vsplit ~/ag-sys/Else/everything/everything_index.txt<cr>:TabooRename main<cr>:tabe ~/ag-sys/Else/everything/\#browse.txt<cr>:TabooRename browse<cr>:tabe ~/.navigation.vim<cr>:TabooRename config<cr>:tabe ~/dotfiles/post_install/post_install.sh<cr>:TabooRename bin<cr>:tabe ~/ag-sys/Else/everything/\#remapping.txt<cr>:TabooRename remap<cr>:tabe ~/ag-sys/Else/everything/another/consume/book_notes.txt<cr>:vsplit ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>:TabooRename cons<cr>:tabe ~/ag-sys/Else/everything/another/_prose/pots/draft_a.txt<cr>:vsplit ~/ag-sys/Else/everything/another/_prose/pots/plot.txt<cr>:TabooRename wr<cr>:tabnew<cr>:TabooRename wr<cr>:tabnew<cr>:Wipeout<cr>2gt
-
-" some issues running repls in vimshell...
-" nmap ,kp <leader>;TabooRename prog<cr><Plug>(vimshell_split_create)python<Plug>(vimshell_enter)<esc><c-w>r
-" nmap ,kh <leader>;TabooRename prog<cr><Plug>(vimshell_split_create)ghci<Plug>(vimshell_enter)<esc><c-w>r
-
 " Thanks to Ingo Karkat for answering my question: http://stackoverflow.com/questions/21125170/grabbing-the-current-tab-name
 cnoreabbr <expr> tabname t:taboo_tab_name
-cnoreabbr <expr> buffername expand('%:t')
+" cnoreabbr <expr> buffername expand('%:t')
 
 if exists("t:taboo_tab_name")
 	" too much manual work without being able to easily edit in one place;
@@ -55,7 +48,7 @@ if exists("t:taboo_tab_name")
 		nnoremap <buffer> ,p :e ~/ag-sys/Else/everything/policy.txt<cr>
 		nnoremap <buffer> ,i :e ~/ag-sys/Else/everything/other/computer/linux/arch/install.txt<cr>
 
-	elseif t:taboo_tab_name == 'browse'
+	elseif t:taboo_tab_name == "browse"
 		cd ~/dotfiles/browsing
 		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/\#browse.txt<cr>
 		nnoremap <buffer> ,f :e ~/.pentadactylrc<cr>
@@ -65,7 +58,7 @@ if exists("t:taboo_tab_name")
 		" readme; basic documentation
 		nnoremap <buffer> ,r :e ~/README.mkd<cr>
 
-	elseif t:taboo_tab_name == 'prog'
+	elseif t:taboo_tab_name == "prog"
 		cd ~/ag-sys/prog
 		nnoremap <buffer> ,f ~/ag-sys/prog/common_lisp/cl_notes.txt
 		nnoremap <buffer> ,s ~/ag-sys/prog/rust/rust_notes.txt
@@ -75,7 +68,6 @@ if exists("t:taboo_tab_name")
 
 	elseif t:taboo_tab_name == "config"
 		cd ~/dotfiles
-		setlocal noautochdir
 		nnoremap <buffer> ,, :e ~/dotfiles/README.md<cr>
 		nnoremap <buffer> ,f :e ~/.navigation.vim<cr>
 		nnoremap <buffer> ,r :e ~/dotfiles/README.md<cr>
@@ -87,7 +79,6 @@ if exists("t:taboo_tab_name")
 	" don't really use; remove? {{{
 	elseif t:taboo_tab_name == "mail"
 		cd ~/dotfiles/mail_and_cal
-		setlocal noautochdir
 		nnoremap <buffer> ,f :e ~/.muttrc<cr>
 		nnoremap <buffer> ,s :e ~/.mbsyncrc<cr>
 		nnoremap <buffer> ,t :e ~/.msmtprc<cr>
@@ -97,7 +88,6 @@ if exists("t:taboo_tab_name")
 		silent! call repeat#set("\<Plug>CycleToMedia", v:count)
 	elseif t:taboo_tab_name == "music"
 		cd ~/dotfiles/music
-		setlocal noautochdir
 		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>
 		nnoremap <buffer> ,f :e ~/.mpv/input.conf<cr>
 		nnoremap <buffer> ,s :e ~/.vimusrc<cr>
@@ -109,7 +99,6 @@ if exists("t:taboo_tab_name")
 		silent! call repeat#set("\<Plug>CycleToRan", v:count)
 	elseif t:taboo_tab_name == "ranger"
 		cd ~/.config/ranger
-		setlocal noautochdir
 		nnoremap <buffer> ,f :e ~/.config/ranger/rc.conf<cr>
 		nnoremap <buffer> ,s :e ~/.config/ranger/rifle.conf<cr>
 		nnoremap <buffer> ,t :e ~/.config/ranger/commands.py<cr>
@@ -121,7 +110,6 @@ if exists("t:taboo_tab_name")
 	" }}}
 	elseif t:taboo_tab_name == "bin"
 		cd ~/bin
-		setlocal noautochdir
 		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
 
 	elseif t:taboo_tab_name == "remap"
@@ -133,7 +121,6 @@ if exists("t:taboo_tab_name")
 
 	elseif t:taboo_tab_name == "blag"
 		cd ~/_repos/blog/angelic-sedition.github.io/source/_posts
-		setlocal noautochdir
 		nnoremap <buffer> ,, :e ~/ag-sys/Else/everything/another/blag/octopress/octopress_blogging.txt<cr>
 		nnoremap <buffer> ,f :e ~/ag-sys/Else/everything/another/blag/octopress/octopress_setup.txt<cr>
 		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
@@ -165,12 +152,10 @@ if exists("t:taboo_tab_name")
 		nnoremap <buffer> ,s :e ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>
 
 	elseif t:taboo_tab_name == "cube"
-		setlocal noautochdir
 		cd ~/ag-sys/Else/everything/other/skill_toys/cubes/
 		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
 
 	elseif t:taboo_tab_name == "game"
-		setlocal noautochdir
 		cd ~/ag-sys/Else/everything/other/Gaming
 		nnoremap <buffer> <space>p :Unite -start-insert file<cr>
 

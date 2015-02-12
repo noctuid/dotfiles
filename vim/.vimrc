@@ -954,12 +954,20 @@ autocmd VimEnter * omap ib <Plug>(textobj-anyblock-i)|xmap ib <Plug>(textobj-any
 " #==============================
 nnoremap <space>q 1gt
 nnoremap <space>w 11gt
-nnoremap <space>f 12gt
+
+" re-setup session/tabs and close other buffers
+nnoremap ,ks 1gt:tabonly<cr>:only<cr>:e ~/.vimrc<cr>:vsplit ~/.zshrc<cr>:tabe ~/ag-sys/Else/everything/log.txt<cr>:tabe ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>:vsplit ~/ag-sys/Else/everything/everything_index.txt<cr>:TabooRename main<cr>:tabe ~/ag-sys/Else/everything/\#browse.txt<cr>:TabooRename browse<cr>:tabe ~/.navigation.vim<cr>:TabooRename config<cr>:tabe ~/dotfiles/post_install/post_install.sh<cr>:TabooRename bin<cr>:tabe ~/ag-sys/Else/everything/\#remapping.txt<cr>:TabooRename remap<cr>:tabe ~/ag-sys/Else/everything/another/consume/book_notes.txt<cr>:vsplit ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>:TabooRename cons<cr>:tabe ~/ag-sys/Else/everything/another/_prose/pots/draft_a.txt<cr>:vsplit ~/ag-sys/Else/everything/another/_prose/pots/plot.txt<cr>:TabooRename wr<cr>:tabnew<cr>:TabooRename wr<cr>:tabnew<cr>:Wipeout<cr>2gt
+
+" repls; vimshell has some annoyances though (lack of visual updating when window not active, weird cursor blinking, errors, etc.)
+nnoremap ,kl :TabooRename prog<cr>:VimShellInteractive --split='vsplit' sbcl<cr>
+nnoremap ,kp :TabooRename prog<cr>:VimShellInteractive --split='vsplit' python<cr>
+nnoremap ,kh :TabooRename prog<cr>:VimShellInteractive --split='vsplit' ghci<cr>
 
 source ~/.navigation.vim
+
 augroup navigationSourcing
 	au!
-	au TabEnter * so ~/.navigation.vim
+	au BufEnter * so ~/.navigation.vim
 augroup END
 
 " General Quickmarks {{{
@@ -969,7 +977,7 @@ nnoremap ,B :e ~/.config/bspwm/bspwmrc<cr>
 nnoremap ,c :e ~/.config/ranger/rc.conf<cr>
 nnoremap ,d :e ~/ag-sys/Else/everything/another/ideas.txt<cr>
 nnoremap ,e :e ~/ag-sys/Else/everything/everything_index.txt<cr>
-nnoremap ,E :e ~/.emacs<cr>
+nnoremap ,E :e ~/.emacs.d/awaken.org<cr>
 nnoremap ,g :e ~/.pentadactyl/groups.penta<cr>
 nnoremap ,i :e ~/ag-sys/Else/everything/interaction.txt<cr>
 nnoremap ,I :e ~/dotfiles/post_install/post_install.txt<cr>
