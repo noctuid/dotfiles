@@ -47,16 +47,16 @@ alt + r
 	guake -t
 
 alt + s
-	hide_show -d -y 14 -s dropdown termite
+	tdrop -p bspwm -w 1362 -y 14 -s dropdown termite
 
 alt + t
-	hide_show urxvt
+	tdrop -p bspwm -w 1362 -h 750 -y 14 urxvt
 
 super + s
-	hide_show -d -y 14 xterm
+	tdrop -p bspwm -w 1362 -y 14 xterm
 
 F1
-	hide_show -d -y 14 Terminology
+	tdrop -p bspwm -w 1362 -y 14 terminology
 
 # }}}
 

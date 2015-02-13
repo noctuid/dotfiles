@@ -1094,7 +1094,7 @@ rn() {
 
 # for use when opening programs from a terminal and want them hidden the activated again after the open program closes
 hide_on_open() {
-	hide_show auto_hide; "$@" && hide_show auto_show
+	tdrop auto_hide; "$@" && tdrop -p bspwm auto_show
 }
 
 # }}}
