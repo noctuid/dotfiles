@@ -5,7 +5,7 @@
 # screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
 
 # for long filenames with characters that give "error writing screenshot":
-screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS
+screenshot-template=~/Move/Screenshots/%ty.%tm.%td_%tH:%tM:%tS
 screenshot-format=png
 screenshot-png-compression=5
 sub-scale=1
