@@ -616,7 +616,7 @@ set synmaxcol=750
 set scrolloff=5
 
 " filler lines to keep text position; start diff with vertical splits; don't ignore changes in case and whitespace
-set diffopt=filler,vertical,icase,iwhite
+set diffopt=filler,vertical
 
 " http://vim.wikia.com/wiki/Word_wrap_without_line_breaks
 " softwrap lines visually when reach the edge
