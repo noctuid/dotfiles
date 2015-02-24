@@ -62,15 +62,15 @@ fi
 # 'hooks'{{{
 # open firefox when go to third desktop for first time (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
 # for all desktops, setup home row navigation bindings on empty desktops
-bspc control --subscribe | awk -F ':' '$2 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$4 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$5 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$6 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$7 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$8 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$9 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
-bspc control --subscribe | awk -F ':' '$10 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/.empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$2 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$3 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$4 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$5 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$6 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$7 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$8 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$9 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+bspc control --subscribe | awk -F ':' '$10 ~ /^F/ { system("pkill sxhkd && sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
 # revert as soon as desktop is occupied
 bspc control --subscribe | awk -F ':' '$2 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
 bspc control --subscribe | awk -F ':' '$3 ~ /^O/ { system("pkill sxhkd && sxhkd &"); }' &
