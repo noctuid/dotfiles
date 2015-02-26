@@ -9,14 +9,10 @@
 # .chaining isn't perfect (use xchainkeys instead)
 # .can only use level 1 (unshifted) key for prefix (can use keys in layer with modifier though) 
 
-# Reloading# {{{
-# Reload bspwm
-# super alt esc to reload; add shift to just quit
+# Reloading {{{
+# reload wm config or quit
 super + alt + {_,shift + }Escape
-	{bspc query -T > "$BSPWM_TREE"; \
-		bspc query -H > "$BSPWM_HISTORY"; \
-			bspc quit && pkill panel,\
-	 bspc quit 1}
+	wm_action {reload,quit}
 
 # reload keyboad layout (if screw it up and can't type)
 F11
@@ -125,138 +121,129 @@ F1
 # }}}
 
 # Window Management {{{
-# General# {{{
+# General {{{
 # close
 super + w
-	bspc window -c
+	wm_action w_close
 
 # kill
 super + W
-	bspc window -k
+	wm_action w_kill
 
 # cycle layout (monocle=kind of like fullscreen, but within normal area)
 super + t
-	bspc desktop -l next
+	wm_action lsel next
 # toggle fullscreen
 super + T
-	bspc window -t fullscreen
+	wm_action w_toggle fullscreen
 
 # }}}
-# Selection# {{{
+# Selection {{{
 
 # window cycing
 # super + {n,e}
-# 	bspc window -f {next,prev}
+# 	wm_action wsel {next,prev}
 
 # selection by direction
 super + {h,n,e,i}
-	bspc window -f {left,down,up,right}
+	wm_action wsel {left,down,up,right}
 
 # switch last window or desktop
 super + {grave,Tab}
-	bspc {window,desktop} -f last
+	wm_action {wsel,dsel} last
 
 # }}}
-# Window Movement# {{{
+# Window Movement {{{
 # move selected window to biggest space
 super + m
-	bspc window -s biggest
+	wm_action wmove biggest
 
 # move window in direction
 super + {H,N,E,I}
-	bspc window -s {left,down,up,right}
+	wm_action wmove {left,down,up,right}
 
 # switch to last window
 super + l
-	bspc window -f last
+	wm_action wmsel last
 
 # switch with last window (works across desktops)
 super + apostrophe
-	bspc window -s last
+	wm_action wmove last
 
 # toggle floating
 super + f
-	bspc window -t floating
+	wm_action w_toggle floating
 
 # navigate to biggest floating window
 super + F
-	bspc window -f biggest.floating
+	wm_action wsel biggest.floating
 
 # cycle windows forward and backward
 super + {comma,period}
-	bspc desktop -C {backward,forward}
-
-# Circulate leaves of tree ; basically flip windows
-alt + {comma,period}
-	bspc desktop -F {horizontal,vertical}
+	wm_action dcycle {backward,forward}
 
 # basically rotate windows, but keep relative size
-alt + shift + {comma,period}
-	bspc desktop -R {90,270}
+alt + {comma,forward}
+	wm_action drotate {backward,forward}
 
 # balance
 super + b
-	bspc desktop -B
+	wm_action dbalance
 
 # }}}
-# Desktop Movement# {{{
+# Desktop Movement {{{
 # move between desktops ([])
 # super + bracket{left,right}
-# 	bspc desktop -f {prev,next}
+# 	wm_action dsel {prev,next}
 
-# # Select previous / next desktop
+# # Select previous / next occupied desktop
 # alt + {p,n}
-# 	bspc desktop -f {prev.occupied,next.occupied} 
+# 	wm_action dsel {prev.occupied,next.occupied} 
 
 # change to desktop or move selected to desktop with shift
 super + {_,shift + }{1-9,0}
-	bspc {desktop -f,window -d} ^{1-9,10}
+	wm_action {dsel,wmove_tod} {1-9,10}
 
 # }}}
-# Resizing# {{{
+# Resizing {{{
 # using caps layer hnei
-super + Left
-	bspc window --edge right -20 || bspc window --edge left -30
-super + Right
-	bspc window --edge right +20 || bspc window --edge left +30
-super + Down
-	bspc window --edge up +20 || bspc window --edge down +30
-super + Up
-	bspc window --edge up -20 || bspc window --edge down -30
+super + {Left,Down,Up,Right}
+	wm_action wresize {left,down,up,right}
 
 # }}}
-# Preselection# {{{
-# direction to split 
+# Preselection {{{
+# direction to split
 super + p ; {h,n,e,i}
-	bspc window -p {left,down,up,right}
+	wm_action psel {left,down,up,right}
 
 # cancel.. current; all
 super + p ; {_,shift + }space
-	bspc {window -p cancel,desktop -c}
+	wm_action psel {cancel,canceld}
+
+# set presl splitting ratio of current window
+super + ctrl + {1-9}
+	wm_action splitr 0.{1-9}
 
 # }}}
-# Adjustment# {{{
+# Adjustment {{{
 super + minus
-	bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))
+	wm_action gapc +4
 
 super + equal
-	bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))
-
-# set splitting ratio of current window
-super + ctrl + {1-9}
-	bspc window -r 0.{1-9}
+	wm_action gapc -4
 
 # }}}
-# Misc# {{{
+# Misc {{{
 # lock
 super + L
 	slimlock
 
 # hide all windows
 KP_Add
-	bspc control --toggle-visibility
+	wm_action hide_all
+
 super + k
-	bspc control --toggle-visibility
+	wm_action hide_all
 
 # }}}
 # Mouse shit# {{{

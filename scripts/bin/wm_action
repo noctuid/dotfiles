@@ -1,0 +1,112 @@
+#!/bin/bash
+# for bspwm and maybe eventually herbstluftwm, i3, etc.
+# so can setup bindings in one place for different programs and WMs
+
+wm=$(< /tmp/window_manager)
+if [[ -z $wm ]]; then
+	wm=$(xprop -notype -id "$(xprop -root -notype | awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
+	echo "$wm" > /tmp/window_manager
+fi
+
+bspc_action() {
+case $1 in
+	dsel)
+		if [[ $2 =~ ^[0-9]$ ]]; then
+			bspc desktop -f ^"$2"
+		else
+			bspc desktop -f "$2"
+		fi
+		;;
+	dcycle)
+		bspc desktop -C "$2"
+		;;
+	drotate)
+		if [[ $2 == backward ]]; then
+			bspc desktop -R 270
+		elif [[ $2 == forward ]]; then
+			bspc desktop -R 90
+		fi
+		;;
+	dbalance)
+		bspc desktop -B
+		;;
+	wsel)
+		# so can change windows w/ same keys even in monocle (e.g. like a tabbed layout)
+		if [[ $2 ==  left ]] || [[ $2 == down ]]; then
+			if bspc control --get-status | grep -q "LT"; then
+				bspc window -f "$2"
+			else
+				bspc window -f prev
+			fi
+		elif [[ $2 == up ]] || [[ $2 == right ]]; then
+			if bspc control --get-status | grep -q "LT"; then
+				bspc window -f "$2"
+			else
+				bspc window -f next
+			fi
+		else
+			bspc window -f "$2"
+		fi
+		;;
+	wmove)
+		bspc window -s "$2"
+		;;
+	wmove_tod)
+		bspc window -d ^"$2"
+		;;
+	wresize)
+		if [[ $2 == left ]]; then
+			bspc window --edge right -40 || bspc window --edge left -40
+		elif  [[ $2 == down ]]; then
+			bspc window --edge up +30 || bspc window --edge down +30
+		elif  [[ $2 == up ]]; then
+			bspc window --edge up -30 || bspc window --edge down -30
+		elif  [[ $2 == right ]]; then
+			bspc window --edge right +40 || bspc window --edge left +40
+		fi
+		;;
+	w_toggle)
+		bspc window -t "$2"
+		;;
+	w_close)
+		bspc window -c
+		;;
+	w_kill)
+		bspc window -k
+		;;
+	lsel)
+		bspc desktop -l "$2"
+		;;
+	psel)
+		if [[ $2 == canceld ]]; then
+			bspc desktop -c
+		else
+			bspc window -p "$2"
+		fi
+		;;
+	gapc)
+		bspc config -d focused window_gap $(($(bspc config -d focused window_gap) + $2 ))
+		;;
+	splitr)
+		bspc window -r "$2"
+		;;
+	hide_all)
+		bspc control --toggle-visibility
+		;;
+	reload)
+		bspc query -T > "$BSPWM_TREE"; bspc query -H > "$BSPWM_HISTORY"; bspc quit && pkill panel
+		;;
+	quit)
+		 bspc quit 1
+		 ;;
+	*)
+		echo "not a valid action"
+		exit 1
+esac
+}
+
+if [[ $wm == bspwm ]]; then
+	bspc_action "$@"
+fi
+
+# vim: set ft=sh:
