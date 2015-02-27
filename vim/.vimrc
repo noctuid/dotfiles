@@ -722,6 +722,9 @@ let g:mapleader = "t"
 
 " up/down, including softwraps
 noremap n gj|noremap e gk|nnoremap gn j|nnoremap ge k
+" get back default gn
+nnoremap gk gn
+xnoremap gk gn
 " keep in visual
 xnoremap n j|xnoremap e k
 
