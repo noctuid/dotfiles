@@ -105,8 +105,79 @@ case $1 in
 esac
 }
 
-if [[ $wm == bspwm ]]; then
-	bspc_action "$@"
+tmux_action() {
+case $1 in
+	# wm desktop is equivalent to tmux window
+	dsel)
+		if [[ $2 == last ]]; then
+			tmux select-window -l
+		else
+			tmux select-window -t "$2"
+		fi
+		;;
+	dbalance)
+		tmux select-layout even-vertical
+		;;
+	# pane selection
+	wsel)
+		if [[ $2 == left ]]; then
+			tmux select-pane -L
+		elif [[ $2 == down ]]; then
+			tmux select-pane -D
+		elif [[ $2 == up ]]; then
+			tmux select-pane -U
+		elif [[ $2 == right ]]; then
+			tmux select-pane -R
+		elif [[ $2 == last ]]; then
+			tmux select-pane -l
+		fi
+		;;
+	wmove)
+		if [[ $2 == prev ]]; then
+			tmux swap-pane -U
+		elif [[ $2 == next ]]; then
+			tmux swap-pane -D
+		fi
+		;;
+	wresize)
+		if [[ $2 == left ]]; then
+			tmux resize-pane -L 5
+		elif  [[ $2 == down ]]; then
+			tmux resize-pane -D 3
+		elif  [[ $2 == up ]]; then
+			tmux resize-pane -U 3
+		elif  [[ $2 == right ]]; then
+			tmux resize-pane -R 5
+		fi
+		;;
+	wcreate)
+		tmux new-window
+		;;
+	split_top)
+		tmux split-window -h
+		;;
+	split_left)
+		tmux split-window
+		;;
+	p_close)
+		tmux kill-pane
+		;;
+	break)
+		tmux break-pane
+		;;
+	lsel)
+		# 'monocle'
+		if [[ $2 == next ]]; then
+			tmux resize-pane -Z
+		else
+			tmux select-layout "$2"
+		fi
+		;;
+	*)
+		echo "not a valid action"
+		exit 1
+esac
+}
 fi
 
 # vim: set ft=sh:
