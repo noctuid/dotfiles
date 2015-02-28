@@ -313,6 +313,8 @@ if [[ $1 == mpv ]]; then
 	else
 		prefix_in_program_maps tmux_action "${@:2}"
 	fi
+elif [[ $1 == tmux ]]; then
+	tmux_action "${@:2}"
 else
 	win_action "$@"
 fi
