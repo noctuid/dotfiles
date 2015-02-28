@@ -2,7 +2,6 @@
 " don't count capitilization errors as spelling errors?
 " character-wise v line-wise visual
 " tab through menu with neocomplete and automatically expand snippets?
-" integrate taboo with airline's tabline
 " visual repeat setup
 " following symlinks better
 " get rid of calendar
@@ -713,6 +712,11 @@ let g:airline#extensions#branch#enabled = 1
 let g:airline#extensions#hunks#enabled = 1
 " syntastic integration
 let g:airline#extensions#syntastic#enabled = 1
+" tabline w/ taboo integration
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#taboo#enabled = 1
+" show tab number instead of number of splits
+let g:airline#extensions#tabline#tab_nr_type = 1
 
 " }}}
 
@@ -1024,10 +1028,8 @@ nnoremap <leader>E :tabm +1<cr>
 " Taboo {{{
 " default tab naming behaviour
 let g:taboo_modified_tab_flag='+'
-let g:taboo_tab_format=' %N %m%f '
-let g:taboo_renamed_tab_format=' %N [%l]%m '
-" don't manage the tabline
-" let g:taboo_tabline = 0
+let g:taboo_tab_format='%m%f'
+let g:taboo_renamed_tab_format='[%l]%m'
 
 " save taboo names in session
 set sessionoptions+=tabpages,globals
