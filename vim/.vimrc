@@ -445,11 +445,22 @@ set ignorecase smartcase
 " }}}
 
 " Auto-Sourcing .vimrc {{{
+" https://github.com/bling/vim-airline/issues/539
+function! RefreshUI()
+  if exists(':AirlineRefresh')
+    AirlineRefresh
+  else
+    " Clear & redraw the screen, then redraw all statuslines.
+    redraw!
+    redrawstatus!
+  endif
+endfunction
+
 " from vim wiki
 augroup autoReloadVimRC
 	au!
 	" automatically reload vimrc when it's saved
-	au BufWritePost ~/dotfiles/vim/.vimrc so ~/.vimrc
+	au BufWritePost ~/dotfiles/vim/.vimrc so ~/.vimrc | call RefreshUI()
 augroup END
 
 " }}}
