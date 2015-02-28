@@ -124,18 +124,18 @@ F1
 # General {{{
 # close
 super + w
-	wm_action w_close
+	wm_action wclose
 
 # kill
 super + W
-	wm_action w_kill
+	wm_action wkill
 
 # cycle layout (monocle=kind of like fullscreen, but within normal area)
 super + t
 	wm_action lsel next
 # toggle fullscreen
 super + T
-	wm_action w_toggle fullscreen
+	wm_action wtoggle fullscreen
 
 # }}}
 # Selection {{{
@@ -172,7 +172,7 @@ super + apostrophe
 
 # toggle floating
 super + f
-	wm_action w_toggle floating
+	wm_action wtoggle floating
 
 # navigate to biggest floating window
 super + F

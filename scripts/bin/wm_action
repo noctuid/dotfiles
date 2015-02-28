@@ -65,13 +65,13 @@ case $1 in
 			bspc window --edge right +40 || bspc window --edge left +40
 		fi
 		;;
-	w_toggle)
+	wtoggle)
 		bspc window -t "$2"
 		;;
-	w_close)
+	wclose)
 		bspc window -c
 		;;
-	w_kill)
+	wkill)
 		bspc window -k
 		;;
 	lsel)
@@ -159,10 +159,10 @@ case $1 in
 	split_left)
 		tmux split-window
 		;;
-	p_close)
+	wclose)
 		tmux kill-pane
 		;;
-	break)
+	pbreak)
 		tmux break-pane
 		;;
 	lsel)
