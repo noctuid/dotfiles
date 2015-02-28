@@ -8,6 +8,12 @@ if [[ -z $wm ]]; then
 	echo "$wm" > /tmp/window_manager
 fi
 
+win_action() {
+	if [[ $wm == bspwm ]]; then
+		bspc_action "$@"
+	fi
+}
+
 bspc_action() {
 case $1 in
 	dsel)
@@ -207,6 +213,96 @@ case $1 in
 		exit 1
 esac
 }
+
+prefix_in_program_maps() {
+case $2 in
+	# 'r' is prefix key
+	# desktop/tmux win switching
+	a) $1 dsel 1;;
+	r) $1 dsel 2;;
+	s) $1 dsel 3;;
+	t) $1 dsel 4;;
+	d) $1 dsel 5;;
+	h) $1 dsel 6;;
+	# down or left
+	n) $1 wsel down;;
+	# up or right
+	e) $1 wsel up;;
+	# more desktop/tmux win switching
+	i) $1 dsel 9;;
+	o) $1 dsel 10;;
+	b) $1 dbalance;;
+	# last desktop/tmux win
+	l) $1 dsel last;;
+	# last win/tmux pane
+	u) $1 wsel last;;
+	# move to desktop
+	A) $1 wmove_tod 1;;
+	R) $1 wmove_tod 2;;
+	S) $1 wmove_tod 3;;
+	T) $1 wmove_tod 4;;
+	D) $1 wmove_tod 5;;
+	H) $1 wmove_tod 6;;
+	N) $1 wmove_tod 7;;
+	E) $1 wmove_tod 8;;
+	I) $1 wmove_tod 9;;
+	O) $1 wmove_tod 10;;
+	# window movement
+	ch) $1 wmove left;;
+	cn) $1 wmove down;;
+	ce) $1 wmove up;;
+	ci) $1 wmove right;;
+	cm) $1 wmove biggest;;
+	# cycle move windows
+	comma) $1 wmove prev;;
+	period) $1 wmove next;;
+	# window/tmux pane resizing
+	mh) $1 wresize left;;
+	mn) $1 wresize down;;
+	me) $1 wresize up;;
+	mi) $1 wresize right;;
+	# win/tmux pane close
+	x) $1 wclose;;
+	# monocle toggle
+	k) $1 lsel next;;
+	# for wm even if tmux
+	y) win_action wtoggle sticky;;
+	f) win_action wtoggle fullscreen;;
+	# presel/tmux spltting
+	slash|apos)
+		if [[ $1 == win_action ]]; then
+			 win_action psel right
+		elif [[ $1 == tmux_action ]]; then
+			tmux split-window -h
+		fi
+		;;
+	hyphen)
+		if [[ $1 == win_action ]]; then
+			 win_action psel up
+		elif [[ $1 == tmux_action ]]; then
+			tmux split-window
+		fi
+		;;
+	# (tmux only)
+	w) $1 wcreate;;
+	bang) $1 pbreak;;
+	*)
+		echo "not a valid action"
+		exit 1
+esac
+}
+
+if [[ $1 == mpv ]]; then
+	# different bindings depending on whether mpv is running in terminal (audio)
+	# i set title for gui mpv to 'mpv - ${filename}' in .mpv/config
+	title=$(xtitle | awk '{ print $1 }')
+	if [[ $title == mpv ]]; then
+		prefix_in_program_maps win_action "${@:2}"
+	else
+		prefix_in_program_maps tmux_action "${@:2}"
+	fi
+else
+	win_action "$@"
 fi
 
 # vim: set ft=sh:
