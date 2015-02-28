@@ -2,6 +2,10 @@
 # for bspwm and maybe eventually herbstluftwm, i3, etc.
 # so can setup bindings in one place for different programs and WMs
 
+#
+# Wm Detection
+#
+
 wm=$(< /tmp/window_manager)
 if [[ -z $wm ]]; then
 	wm=$(xprop -notype -id "$(xprop -root -notype | awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
@@ -13,6 +17,10 @@ win_action() {
 		bspc_action "$@"
 	fi
 }
+
+#
+# Different Wm/Environment Functions
+#
 
 bspc_action() {
 case $1 in
@@ -291,6 +299,10 @@ case $2 in
 		exit 1
 esac
 }
+
+#
+# Main
+#
 
 if [[ $1 == mpv ]]; then
 	# different bindings depending on whether mpv is running in terminal (audio)
