@@ -126,7 +126,7 @@ case $1 in
 		fi
 		;;
 	dbalance)
-		tmux select-layout even-vertical
+		tmux select-layout even-horizontal
 		;;
 	# pane selection
 	wsel)
