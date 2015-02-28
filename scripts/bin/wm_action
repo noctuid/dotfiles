@@ -31,16 +31,26 @@ case $1 in
 		bspc desktop -B
 		;;
 	wsel)
-		# so can change windows w/ same keys even in monocle (e.g. like a tabbed layout)
 		if [[ $2 ==  left ]] || [[ $2 == down ]]; then
 			if bspc control --get-status | grep -q "LT"; then
-				bspc window -f "$2"
+				# if not monocle, down will go down or left if no windows below
+				if [[ $2 == down ]]; then
+					bspc window -f down || bspc window -f left # || bspc desktop -f prev
+				# if not monocle, down will go left or to previous desktop if no windows left
+				else
+					bspc window -f left || bspc desktop -f prev
+				fi
+			# so can change windows w/ same keys even in monocle (e.g. like a tabbed layout)
 			else
 				bspc window -f prev
 			fi
 		elif [[ $2 == up ]] || [[ $2 == right ]]; then
 			if bspc control --get-status | grep -q "LT"; then
-				bspc window -f "$2"
+				if [[ $2 == up ]]; then
+					bspc window -f up || bspc window -f right # || bspc desktop -f next
+				else
+					bspc window -f right || bspc desktop -f next
+				fi
 			else
 				bspc window -f next
 			fi
@@ -120,14 +130,33 @@ case $1 in
 		;;
 	# pane selection
 	wsel)
+		pane_id1=$(tmux display-message -p '#D')
+		# if no pane left, go to previous window
 		if [[ $2 == left ]]; then
 			tmux select-pane -L
+			pane_id2=$(tmux display-message -p '#D')
+			if [[ $pane_id1 == "$pane_id2" ]]; then
+				tmux select-window -p
+			fi
+		# if no pane below, go left
 		elif [[ $2 == down ]]; then
 			tmux select-pane -D
+			pane_id2=$(tmux display-message -p '#D')
+			if [[ $pane_id1 == "$pane_id2" ]]; then
+				tmux select-pane -L
+			fi
 		elif [[ $2 == up ]]; then
-			tmux select-pane -U
+			tmux select-pane -U && \
+			pane_id2=$(tmux display-message -p '#D')
+			if [[ $pane_id1 == "$pane_id2" ]]; then
+				tmux select-pane -R
+			fi
 		elif [[ $2 == right ]]; then
 			tmux select-pane -R
+			pane_id2=$(tmux display-message -p '#D')
+			if [[ $pane_id1 == "$pane_id2" ]]; then
+				tmux select-window -n
+			fi
 		elif [[ $2 == last ]]; then
 			tmux select-pane -l
 		fi
