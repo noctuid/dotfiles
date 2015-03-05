@@ -1,0 +1,52 @@
+* Elfeed
+** feeds and settings
+#+begin_src emacs-lisp
+(setq elfeed-feeds
+      '(("http://nullprogram.com/feed/" emacs)
+        ("http://oremacs.com/atom.xml" emacs)
+        ("http://feeds.feedburner.com/usevim" vim)
+        ("http://blog.binchen.org/rss.xml" emacs)
+        ("http://wololo.net/feed/" psp/vita)))
+
+(setq-default elfeed-search-filter "@3-weeks-ago +unread ")
+#+end_src
+** mappings
+Because it's just a buffer, I get some vim bindings for free (e.g. gg and G) and keep my evil remaps (e.g. for helm-swoop).
+#+begin_src emacs-lisp
+;; mappings for entry list
+(evil-define-key 'normal elfeed-search-mode-map
+  ;; fetch feed updates; default: G
+  "o" 'elfeed-update
+  ;; refreash view of feed listing; default: g
+  "O" 'elfeed-search-update--force
+  ;; filter
+  "f" 'elfeed-search-live-filter
+  ;; reset to default filter
+  "F" '(lambda () (interactive) (elfeed-search-set-filter "@3-weeks-ago +unread "))
+  ;; open url in specified browser
+  "b" 'elfeed-search-browse-url
+  ;; read current entry or selected (remove unread tag)
+  "h" 'elfeed-search-untag-all-unread
+  ;; enter show mode on entry
+  "i" 'elfeed-search-show-entry
+  ;; mark current entry or selected unread
+  "u" 'elfeed-search-tag-all-unread
+  ;; add a tag to current entry or selected
+  "a" 'elfeed-search-tag-all
+  ;; star entries to come back later to and do something about
+  "s" '(lambda () (interactive) (elfeed-search-toggle-all '*))
+  ;; remove a tag from current entry or selected
+  "d" 'elfeed-search-untag-all)
+
+;; mappings for when reading a post
+(evil-define-key 'normal elfeed-show-mode-map
+  (kbd "RET") 'elfeed-search-browse-url
+  "h" 'elfeed-kill-buffer
+  ;; next post
+  "i" 'elfeed-show-next
+  ;; add a tag to current entry
+  "a" 'elfeed-show-tag
+  "s" '(lambda () (interactive) (elfeed-search-toggle-all '*))
+  ;; remove a tag from current entry
+  "d" 'elfeed-show-untag)
+#+end_src
