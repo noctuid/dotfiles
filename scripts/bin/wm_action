@@ -226,65 +226,65 @@ prefix_in_program_maps() {
 case $2 in
 	# 'r' is prefix key
 	# desktop/tmux win switching
-	a) $1 dsel 1;;
-	r) $1 dsel 2;;
-	s) $1 dsel 3;;
-	t) $1 dsel 4;;
-	d) $1 dsel 5;;
-	h) $1 dsel 6;;
+	ra) $1 dsel 1;;
+	rr) $1 dsel 2;;
+	rs) $1 dsel 3;;
+	rt) $1 dsel 4;;
+	rd) $1 dsel 5;;
+	rh) $1 dsel 6;;
 	# down or left
-	n) $1 wsel down;;
+	rn) $1 wsel down;;
 	# up or right
-	e) $1 wsel up;;
+	re) $1 wsel up;;
 	# more desktop/tmux win switching
-	i) $1 dsel 9;;
-	o) $1 dsel 10;;
-	b) $1 dbalance;;
+	ri) $1 dsel 9;;
+	ro) $1 dsel 10;;
+	rb) $1 dbalance;;
 	# last desktop/tmux win
-	l) $1 dsel last;;
+	rl) $1 dsel last;;
 	# last win/tmux pane
-	u) $1 wsel last;;
+	ru) $1 wsel last;;
 	# move to desktop
-	A) $1 wmove_tod 1;;
-	R) $1 wmove_tod 2;;
-	S) $1 wmove_tod 3;;
-	T) $1 wmove_tod 4;;
-	D) $1 wmove_tod 5;;
-	H) $1 wmove_tod 6;;
-	N) $1 wmove_tod 7;;
-	E) $1 wmove_tod 8;;
-	I) $1 wmove_tod 9;;
-	O) $1 wmove_tod 10;;
+	Ra) $1 wmove_tod 1;;
+	Rr) $1 wmove_tod 2;;
+	Rs) $1 wmove_tod 3;;
+	Rt) $1 wmove_tod 4;;
+	Rd) $1 wmove_tod 5;;
+	Rh) $1 wmove_tod 6;;
+	Rn) $1 wmove_tod 7;;
+	Re) $1 wmove_tod 8;;
+	Ri) $1 wmove_tod 9;;
+	Ro) $1 wmove_tod 10;;
 	# window movement
-	ch) $1 wmove left;;
-	cn) $1 wmove down;;
-	ce) $1 wmove up;;
-	ci) $1 wmove right;;
-	cm) $1 wmove biggest;;
+	rch) $1 wmove left;;
+	rcn) $1 wmove down;;
+	rce) $1 wmove up;;
+	rci) $1 wmove right;;
+	rcm) $1 wmove biggest;;
 	# cycle move windows
-	comma) $1 wmove prev;;
-	period) $1 wmove next;;
+	r,) $1 wmove prev;;
+	r.) $1 wmove next;;
 	# window/tmux pane resizing
-	mh) $1 wresize left;;
-	mn) $1 wresize down;;
-	me) $1 wresize up;;
-	mi) $1 wresize right;;
+	rmh) $1 wresize left;;
+	rmn) $1 wresize down;;
+	rme) $1 wresize up;;
+	rmi) $1 wresize right;;
 	# win/tmux pane close
-	x) $1 wclose;;
+	rx) $1 wclose;;
 	# monocle toggle
-	k) $1 lsel next;;
+	rk) $1 lsel next;;
 	# for wm even if tmux
-	y) win_action wtoggle sticky;;
-	f) win_action wtoggle fullscreen;;
+	ry) win_action wtoggle sticky;;
+	rf) win_action wtoggle fullscreen;;
 	# presel/tmux spltting
-	slash|apos)
+	r/|r\')
 		if [[ $1 == win_action ]]; then
 			 win_action psel right
 		elif [[ $1 == tmux_action ]]; then
 			tmux split-window -h
 		fi
 		;;
-	hyphen)
+	r-)
 		if [[ $1 == win_action ]]; then
 			 win_action psel up
 		elif [[ $1 == tmux_action ]]; then
@@ -292,8 +292,8 @@ case $2 in
 		fi
 		;;
 	# (tmux only)
-	w) $1 wcreate;;
-	bang) $1 pbreak;;
+	rw) $1 wcreate;;
+	r!) $1 pbreak;;
 	*)
 		echo "not a valid action"
 		exit 1
