@@ -150,61 +150,63 @@ panel_battery() {
 
 }
 
-# modified from: https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/
-# this is a really convoluted way of truncating the brightness if it hasn't just been changed
-# since echoed > into $PANEL_FIFO, can't use variables for storing last brightness state; would have to split system info (since brightness in middle.. or move it) and echo into PANEL_FIFO from within panel_brightness
-echo "none" > ~/.config/bspwm/panel/brightness.txt
-echo "0" > ~/.config/bspwm/panel/brightness_count.txt
-panel_brightness() {
-	cd ~/.config/bspwm/panel
-	brightnessLevel=$(cat /sys/class/backlight/acpi_video0/actual_brightness)
-	# maxBrightness=$(cat /sys/class/backlight/acpi_video0/max_brightness)
-	lastBrightness=$(cat brightness.txt)
+# modified from:
+# https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/brightnessScript
+# truncate brightness unless just changed
+mkdir -p /tmp/brightness
+echo "none" > /tmp/brightness/level
+echo "0" > /tmp/brightness/counter
+panelBrightness() {
+	currentBLevel=$(< /sys/class/backlight/acpi_video0/actual_brightness)
+	# 15 seems to be the normal max?
+	# maxBLevel=$(< /sys/class/backlight/acpi_video0/max_brightness)
+	lastBLevel=$(< /tmp/brightness/level)
 
-if [ "$brightnessLevel" == "$lastBrightness" ]; then
-	brightnessCount=$(cat brightness_count.txt)
-	if [ $brightnessCount -lt 5 ]; then
-		((brightnessCount++))
-		echo $brightnessCount > brightness_count.txt
-	fi
-	justChanged=false
-else
-	justChanged=true
-	echo "0" > brightness_count.txt
-fi
-
-if [ "$brightnessCount" == "" ]; then
-	brightnessCount=0
-fi
-if [ $brightnessCount -gt 4 ]; then
-	if [ "$brightnessLevel" == 15 ]; then
-		echo "•"
-	elif [ "$brightnessLevel" == 0 ]; then
-		echo "○"
+	# reset or possibly update counter
+	# how many updates before full brightness meter is no longer displayed after a brightness change
+	maxCount=8
+	if [[ $currentBLevel -eq $lastBLevel ]]; then
+		brightnessCounter=$(< /tmp/brightness/counter)
+		if [[ $brightnessCounter -lt $maxCount ]]; then
+			((brightnessCounter++))
+			echo $brightnessCounter > /tmp/brightness/counter
+		fi
 	else
-		echo "◉"
+		echo 0 > /tmp/brightness/counter
 	fi
-else
-	case $brightnessLevel in
-		0)  echo "•○○○○○○○○○○○○○○○";;
-		1)  echo "••○○○○○○○○○○○○○○";;
-		2)  echo "•••○○○○○○○○○○○○○";;
-		3)  echo "••••○○○○○○○○○○○○";;
-		4)  echo "•••••○○○○○○○○○○○";;
-		5)  echo "••••••○○○○○○○○○○";;
-		6)  echo "•••••••○○○○○○○○○";;
-		7)  echo "••••••••○○○○○○○○";;
-		8)  echo "•••••••••○○○○○○○";;
-		9)  echo "••••••••••○○○○○○";;
-		10) echo "•••••••••••○○○○○";;
-		11) echo "••••••••••••○○○○";;
-		12) echo "•••••••••••••○○○";;
-		13) echo "••••••••••••••○○";;
-		14) echo "•••••••••••••••○";;
-		15) echo "••••••••••••••••";;
-	esac
-fi
-	echo $brightnessLevel > brightness.txt
+
+	# echo based on current brightness level and panel updates since last brightness change
+	if [[ $brightnessCounter -ge $maxCount ]]; then
+		if [[ $currentBLevel -eq 15 ]]; then
+			echo "•"
+		elif [[ $currentBLevel -eq 0 ]]; then
+			echo "○"
+		else
+			echo "◉"
+		fi
+	else
+		case $currentBLevel in
+			0)  echo "•○○○○○○○○○○○○○○○";;
+			1)  echo "••○○○○○○○○○○○○○○";;
+			2)  echo "•••○○○○○○○○○○○○○";;
+			3)  echo "••••○○○○○○○○○○○○";;
+			4)  echo "•••••○○○○○○○○○○○";;
+			5)  echo "••••••○○○○○○○○○○";;
+			6)  echo "•••••••○○○○○○○○○";;
+			7)  echo "••••••••○○○○○○○○";;
+			8)  echo "•••••••••○○○○○○○";;
+			9)  echo "••••••••••○○○○○○";;
+			10) echo "•••••••••••○○○○○";;
+			11) echo "••••••••••••○○○○";;
+			12) echo "•••••••••••••○○○";;
+			13) echo "••••••••••••••○○";;
+			14) echo "•••••••••••••••○";;
+			15) echo "••••••••••••••••";;
+		esac
+	fi
+
+	# save current brightness level
+	echo "$currentBLevel" > /tmp/brightness/level
 }
 
 # https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
@@ -362,7 +364,7 @@ panel_sigStrength() {
 while true; do
 	songScroll
 	titleScroll
-	echo "S" ""$other⮃ ¤ $(mempercent)%% $(panel_battery)  %{F$C_3}⮃ $(panel_brightness) %{F$C_Z}⮃ $(panel_volume) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$LIGHTBLUE$(panel_essid) > "$PANEL_FIFO"
+	echo "S" ""$other⮃ ¤ $(mempercent)%% $(panel_battery)  %{F$C_3}⮃ $(panelBrightness) %{F$C_Z}⮃ $(panel_volume) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$LIGHTBLUE$(panel_essid) > "$PANEL_FIFO"
 	sleep 0.1s
 
 done &
