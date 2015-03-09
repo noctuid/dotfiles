@@ -330,41 +330,45 @@ mail_count() {
 	echo "$(find ~/.mail/nocturnalartifice/Inbox/new -type f | wc -l)/$(find ~/.mail/nocturnalartifice/Inbox/cur -type f | wc -l)"
 }
 
-# https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
-# changed so will detect name of wireless device
-panel_essid() {
-	wlan_device=$(ifconfig | awk -F ":" '/^wl/ {print $1}')
-	echo $(panel_sigStrength) $(essid -w $wlan_device)
-}
+# https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L188
+# modified to work with more than just connman (for detecting if wred connection)
+# modified to detect name of interface
+panelNetConnection() {
+	color1=$1
+	color2=$2
+	color3=$3
+	signalStrength=$(awk 'NR==3 {gsub(/\./, ""); print $3}' /proc/net/wireless)
 
-# https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
-# works with connman
-panel_sigStrength() {
-	# use just awk, no sed
-	signalStrength=$(cat /proc/net/wireless | awk 'NR==3 { gsub(/\./, ""); print $3}')
-	isEthernet=$(connmanctl technologies | awk '/Connected/ { print $NF }')
-	final=$(echo $isEthernet | awk '{print $1}')
+	# get interface name; could check if starts with 'e', but don't really need to since signalStrength will be empty if ethernet connection
+	interface=$(ip route get 8.8.8.8 | awk '{print $5;exit}')
+	# wlan_device=$(ifconfig | awk -F ":" '/^wl/ {print $1}')
 
-	if [ "$final" == "True" ]; then
-		echo $LIGHTBLUE "⮃ W"
-	# if no connection, prevent annoying errors
-	elif [ "$signalStrength" == "" ]; then
-		echo $LIGHTBLUE ""
-	elif [ "$signalStrength" -gt 64 ]; then
-		echo $LIGHTBLUE "⮃ ‗▬▪▮"
-	elif [ "$signalStrength" -lt 65 ] && [ "$signalStrength" -gt 39 ]; then
-		echo $LIGHTBLUE "⮃ ‗▬▪"$DARKGREY"▮"$BLUE
-	elif [ "$signalStrength" -lt 40 ]; then
-		echo $LIGHTBLUE "⮃ ‗▬"$DARKGREY"▪▮"$BLUE
+	# wired connection
+	if [[ -n $interface ]] && [[ -z $signalStrength ]]; then
+		echo "$color1" " ⮃ W"
+	# if no connection, print nothing
+	elif [[ -z $signalStrength ]]; then
+		echo ""
+	# wireless connection
 	else
-		echo $DARKGREY "⮃ ‗▬▪▮ Connecting..."
+		echo " "
+		if [[ $signalStrength -gt 64 ]]; then
+			echo "$color1""⮃ ‗▬▪▮"
+		elif [[ $signalStrength -lt 65 ]] && [[ $signalStrength -gt 39 ]]; then
+			echo "$color1""⮃ ‗▬▪""$color2""▮""$color3"
+		elif [[ "$signalStrength" -lt 40 ]]; then
+			echo "$color1""⮃ ‗▬""$color2""▪▮""$color3"
+		else
+			echo "$color2""⮃ ‗▬▪▮ Connecting..."
+		fi
+		echo " $(essid -w "$interface")"
 	fi
 }
 
 while true; do
 	songScroll
 	titleScroll
-	echo "S" ""$other⮃ ¤ $(mempercent)%% $(panel_battery)  %{F$C_3}⮃ $(panelBrightness) %{F$C_Z}⮃ $(panel_volume) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$LIGHTBLUE$(panel_essid) > "$PANEL_FIFO"
+	echo "S" ""$other⮃ ¤ $(mempercent)%% $(panel_battery)  %{F$C_3}⮃ $(panelBrightness) %{F$C_Z}⮃ $(panel_volume) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$(panelNetConnection "$LIGHTBLUE" "$DARKGRAY" "$BLUE") > "$PANEL_FIFO"
 	sleep 0.1s
 
 done &
