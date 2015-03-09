@@ -28,8 +28,8 @@ DARKGREY="%{F#FF707880}"
 COLOR_FOREGROUND='#FF34322E'
 COLOR_BACKGROUND='#FF232C31'
 # old default colours
-C_0='#FF2D3C46'
-C_1='#FFAC4142'
+gray_blue='%{F#FF2D3C46}'
+dark_red='%{F#FFAC4142}'
 C_2='#FF90A959'
 C_3='#FFDE935F'
 C_4='#FF6A9FB5'
@@ -37,7 +37,7 @@ C_5='#FFAA759F'
 C_7='#FF6C7A80'
 C_9='#FFCC6666'
 
-C_Z='#FF2A7A9C'
+dark_blue='%{F#FF2A7A9C}'
 # bright_pink='#FFFF78FF'
 bright_pink='#FFE300E3'
 better_purple='#FFA84D95'
@@ -209,112 +209,58 @@ panelBrightness() {
 	echo "$currentBLevel" > /tmp/brightness/level
 }
 
-# https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
-# added check for outputting audio to hdmi
-panel_volume() {
-	# changed to use awk instead of tail, cut, and sed
+# originally from:
+# https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L89
+# modified to prefer single awk over cut/grep/tail/sed
+# added check for audio output to hdmi
+# added truncation when muted or full volume
+panelVolume() {
+	color1=$1
+	color2=$2
+	color3=$3
+
 	volStatus=$(amixer get Master | awk 'END { gsub(/[\[\]]/, ""); print $6 }')
 	volLevel=$(amixer get Master | awk 'END { gsub(/[%\[\]]/, ""); print $5 }')
-	# got rid of extra cut; grep for headphone jack, not a number
 	headphone=$(amixer -c 0 contents | grep "Headphone Jack'" -A 2 | awk -F "=" 'NR==3 { print $2 }')
 	isHDMI=$(ponymix list --output | grep HDMI)
 
-	if [ "$volStatus" == "on" ] && [ "$headphone" == "off" ]; then
-		icon="%{F$C_Z}⮞"
-	elif [ "$volStatus" == "on" ] && [ "$headphone" == "on" ];then
-		icon="%{F$C_Z}⮜"
-	elif [ "$volStatus" == "off" ] && [ "$headphone" == "on" ]; then
-		icon="%{F$C_1}⮜"
-	elif [ "$volStatus" == "off" ] && [ "$headphone" == "off" ]; then
-		icon="%{F$C_1}⮝"
+	if [[ $volStatus == on ]] && [[ $headphone == off ]]; then
+		icon="$color1⮞"
+	elif [[ $volStatus == on ]] && [[ $headphone == on ]];then
+		icon="$color1⮜"
+	elif [[ $volStatus == off ]] && [[ $headphone == on ]]; then
+		icon="$color2⮜"
+	elif [[ $volStatus == off ]] && [[ $headphone == off ]]; then
+		icon="$color2⮝"
 	else
-		icon="%{F$C_1} "
+		# I don't think this ever happens
+		icon="$color2?"
 	fi
 
-	if [ "$isHDMI" ];then
+	# designate if using hdmi connection
+	if [[ -n $isHDMI ]];then
 		icon="$icon H"
 	fi
 
-	case $volLevel in
-		100) if [ "$volStatus" == "on" ]; then 
-				# echo "$icon" "%{F$C_Z}——————————"
-				echo "$icon"
-			else
-				# echo "$icon" "%{F$C_5}——————————"
-				echo "$icon"
-			fi
-			;;
-		[0-9]) if [ "$volStatus" == "on" ]; then 
-				echo "$icon" "%{F$C_Z}—%{F$C_0}—————————"
-			else
-				# echo "$icon" "%{F$C_5}—%{F$C_0}—————————"
-				echo "$icon"
-			fi
-			;;
-		1*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}——%{F$C_0}————————"
-			else
-				# echo "$icon" "%{F$C_5}——%{F$C_0}————————"
-				echo "$icon"
-			fi
-			;;
-		2*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}———%{F$C_0}———————"
-			else
-				# echo "$icon" "%{F$C_5}———%{F$C_0}———————"
-				echo "$icon"
-			fi
-			;;
-		3*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}————%{F$C_0}——————"
-			else
-				# echo "$icon" "%{F$C_5}————%{F$C_0}——————"
-				echo "$icon"
-			fi
-			;;
-		4*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}—————%{F$C_0}—————"
-			else
-				# echo "$icon" "%{F$C_5}—————%{F$C_0}—————"
-				echo "$icon"
-			fi
-			;;
-		5*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}——————%{F$C_0}————"
-			else
-				# echo "$icon" "%{F$C_5}——————%{F$C_0}————"
-				echo "$icon"
-			fi
-			;;
-		6*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}———————%{F$C_0}———"
-			else
-				# echo "$icon" "%{F$C_5}———————%{F$C_0}———"
-				echo "$icon"
-			fi
-			;;
-		7*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}————————%{F$C_0}——"
-			else
-				# echo "$icon" "%{F$C_5}————————%{F$C_0}——"
-				echo "$icon"
-			fi
-			;;
-		8*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}——————————%{F$C_0}—"
-			else
-				# echo "$icon" "%{F$C_5}——————————%{F$C_0}—"
-				echo "$icon"
-			fi
-			;;
-		9*) if [ "$volStatus" == "on" ]; then
-				echo "$icon" "%{F$C_Z}——————————"
-			else
-				# echo "$icon" "%{F$C_5}——————————"
-				echo "$icon"
-			fi
-			;;
-	esac
+	# if muted, truncate
+	if [[ $volStatus != on ]]; then
+		echo "$icon"
+	else
+		case $volLevel in
+			# if full volume truncate
+			100) echo "$icon" ;;
+			[0-9]) echo "$icon" "$color1—$color3—————————" ;;
+			1*) echo "$icon" "$color1——$color3————————" ;;
+			2*) echo "$icon" "$color1———$color3———————" ;;
+			3*) echo "$icon" "$color1————$color3——————" ;;
+			4*) echo "$icon" "$color1—————$color3—————" ;;
+			5*) echo "$icon" "$color1——————$color3————" ;;
+			6*) echo "$icon" "$color1———————$color3———" ;;
+			7*) echo "$icon" "$color1————————$color3——" ;;
+			8*) echo "$icon" "$color1——————————$color3—" ;;
+			9*) echo "$icon" "$color1——————————" ;;
+		esac
+	fi
 }
 
 # needs sutils
@@ -368,7 +314,7 @@ panelNetConnection() {
 while true; do
 	songScroll
 	titleScroll
-	echo "S" ""$other⮃ ¤ $(mempercent)%% $(panel_battery)  %{F$C_3}⮃ $(panelBrightness) %{F$C_Z}⮃ $(panel_volume) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$(panelNetConnection "$LIGHTBLUE" "$DARKGRAY" "$BLUE") > "$PANEL_FIFO"
+	echo "S" ""$other⮃ ¤ $(mempercent)%% $(panel_battery)  %{F$C_3}⮃ $(panelBrightness) $dark_blue⮃ $(panelVolume $dark_blue $dark_red $gray_blue) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$(panelNetConnection "$LIGHTBLUE" "$DARKGRAY" "$BLUE") > "$PANEL_FIFO"
 	sleep 0.1s
 
 done &
