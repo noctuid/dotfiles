@@ -287,31 +287,34 @@ panelNetConnection() {
 	color1=$1
 	color2=$2
 	color3=$3
-	signalStrength=$(awk 'NR==3 {gsub(/\./, ""); print $3}' /proc/net/wireless)
 
-	# get interface name; could check if starts with 'e', but don't really need to since signalStrength will be empty if ethernet connection
+	# get active interface name
 	interface=$(ip route get 8.8.8.8 | awk '{print $5;exit}')
+	# can parse ifconfig or ip link if need every interface name
 	# wlan_device=$(ifconfig | awk -F ":" '/^wl/ {print $1}')
 
 	# wired connection
-	if [[ -n $interface ]] && [[ -z $signalStrength ]]; then
+	if [[ $interface =~ ^e ]]; then
 		echo "$color1" " ⮃ W"
-	# if no connection, print nothing
-	elif [[ -z $signalStrength ]]; then
-		echo ""
-	# wireless connection
 	else
-		echo " "
-		if [[ $signalStrength -gt 64 ]]; then
-			echo "$color1""⮃ ‗▬▪▮"
-		elif [[ $signalStrength -lt 65 ]] && [[ $signalStrength -gt 39 ]]; then
-			echo "$color1""⮃ ‗▬▪""$color2""▮""$color3"
-		elif [[ "$signalStrength" -lt 40 ]]; then
-			echo "$color1""⮃ ‗▬""$color2""▪▮""$color3"
+		# shows up with wired connection for some connection managers it seems (e.g. networkmanager)
+		signalStrength=$(awk 'NR==3 {gsub(/\./, ""); print $3}' /proc/net/wireless)
+		# if no connection, print nothing
+		if [[ -z $signalStrength ]]; then
+			echo ""
 		else
-			echo "$color2""⮃ ‗▬▪▮ Connecting..."
+			# wireless connection
+			if [[ $signalStrength -gt 64 ]]; then
+				echo "$color1"" ⮃ ‗▬▪▮"
+			elif [[ $signalStrength -lt 65 ]] && [[ $signalStrength -gt 39 ]]; then
+				echo "$color1"" ⮃ ‗▬▪""$color2""▮""$color3"
+			elif [[ "$signalStrength" -lt 40 ]]; then
+				echo "$color1"" ⮃ ‗▬""$color2""▪▮""$color3"
+			else
+				echo "$color2"" ⮃ ‗▬▪▮ Connecting..."
+			fi
+			echo " $(essid -w "$interface")"
 		fi
-		echo " $(essid -w "$interface")"
 	fi
 }
 
