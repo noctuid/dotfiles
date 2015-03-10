@@ -24,18 +24,19 @@ bspc control --subscribe > "$PANEL_FIFO" &
 # colors from esn's panel
 LIGHTBLUE="%{F#FF81A2BE}"
 DARKGREY="%{F#FF707880}"
+green="%{F#FF8C9440}"
 # add alpha channel; no opacity
 COLOR_FOREGROUND='#FF34322E'
 COLOR_BACKGROUND='#FF232C31'
 # old default colours
 gray_blue='%{F#FF2D3C46}'
 dark_red='%{F#FFAC4142}'
-C_2='#FF90A959'
+light_green='%{F#FF90A959}'
 C_3='#FFDE935F'
 C_4='#FF6A9FB5'
 C_5='#FFAA759F'
-C_7='#FF6C7A80'
-C_9='#FFCC6666'
+gray='%{F#FF6C7A80}'
+light_red='%{F#FFCC6666}'
 
 dark_blue='%{F#FF2A7A9C}'
 # bright_pink='#FFFF78FF'
@@ -130,24 +131,29 @@ mempercent() {
 	free | awk '/Mem/ {printf("%d", $3/$2 * 100)}'
 }
 
-# https://github.com/esn89/dotfiles/blob/master/bspwm/.barScripts/panel
-panel_battery() {
-	# replaced cut and sed with only awk
-	batStats=$(acpi --battery | awk '{ gsub(/,/, ""); print $3 }')
-	batLevel=$(acpi --battery | awk '{ gsub(/[,%]/, ""); print $4 }')
-	if [ "$batStats" == "" ]; then
-		echo "%{F$C_7}⮃ ⮎ AC"
-	elif [ "$batStats" == "Charging" ]; then
-		echo "%{F$C_9}⮃ ⮒" $batLevel"+"
-	elif [ "$batStats" == "Discharging" ]; then
-		echo "%{F$C_1}⮃ ⮑" $batLevel"-"
-	elif [ "$batStats" == "Unknown" ]; then
-		# echo $GREEN"⮃ ⮒ Fully Charged"
-		echo ""
-	else
-		echo "%{F$C_2}⮃ Refreshing..."
-	fi
+# modified from:
+# https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L217
+panelBattery() {
+	color_ac=$1
+	color_charge=$2
+	color_dcharge=$3
+	color_fcharge=$4
+	color_refresh=$5
 
+	batStatus=$(acpi --battery | awk '{gsub(/,/, ""); print $3}')
+	batLevel=$(acpi --battery | awk '{gsub(/[,%]/, ""); print $4}')
+
+	if [[ -z $batStatus ]]; then
+		echo "${color_ac}⮃ ⮎ AC"
+	elif [[ $batStatus == Charging ]]; then
+		echo "${color_charge}⮃ ⮒ $batLevel+"
+	elif [[ $batStatus == Discharging ]]; then
+		echo "${color_dcharge}⮃ ⮑ $batLevel-"
+	elif [[ $batStatus == Unknown ]]; then
+		echo "${color_fcharge}⮃ ⮒ Fully Charged"
+	else
+		echo "${color_refresh}⮃ Refreshing..."
+	fi
 }
 
 # modified from:
@@ -314,7 +320,7 @@ panelNetConnection() {
 while true; do
 	songScroll
 	titleScroll
-	echo "S" ""$other⮃ ¤ $(mempercent)%% $(panel_battery)  %{F$C_3}⮃ $(panelBrightness) $dark_blue⮃ $(panelVolume $dark_blue $dark_red $gray_blue) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$(panelNetConnection "$LIGHTBLUE" "$DARKGRAY" "$BLUE") > "$PANEL_FIFO"
+	echo "S" ""$other⮃ ¤ $(mempercent)%% $dark_red $(panelBattery $gray $light_red $dark_red $green $light_green)  %{F$C_3}⮃ $(panelBrightness) $dark_blue⮃ $(panelVolume $dark_blue $dark_red $gray_blue) "%{F$better_purple}⮃ "$(panel_clock) %{F$C_7}⮃  $(mail_count)$(panelNetConnection "$LIGHTBLUE" "$DARKGRAY" "$BLUE") > "$PANEL_FIFO"
 	sleep 0.1s
 
 done &
