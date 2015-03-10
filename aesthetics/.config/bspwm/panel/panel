@@ -11,8 +11,6 @@ fi
 
 trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
-flavor=${1:-bar}
-
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
 
@@ -325,18 +323,6 @@ while true; do
 
 done &
 
-case "$flavor" in
-	bar)
-		# change to bar-aint-recursive since using git version
-		# -b to put at bottom
-		# use o
 		cat "$PANEL_FIFO" | panel_bar | bar-aint-recursive -f "*-stlarch-medium-r-*-*-10-*-*-*-*-*-*-*,-benis-uushi-medium-r-normal--11-90-75-75-p-58-iso10646-1" x$PANEL_HEIGHT -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" &
-		;;
-	dzen2)
-		FONT_FAMILY='DejaVu Sans'
-		FONT_SIZE=11
-		cat "$PANEL_FIFO" | panel_dzen2 -f "$FONT_FAMILY" -s "$FONT_SIZE" | dzen2 -h $PANEL_HEIGHT -dock -ta l -title-name panel -fn "${FONT_FAMILY}:pixelsize=${FONT_SIZE}" -fg "$COLOR_FOREGROUND" -bg "$COLOR_BACKGROUND" &
-		;;
-esac
 
 wait
