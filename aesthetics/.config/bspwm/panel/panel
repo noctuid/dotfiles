@@ -44,83 +44,74 @@ better_purple='#FFA84D95'
 other='%{F#FF7549D6}'
 lighter_orange='#FFF2AB4E'
 
-PID="first"
-last_mpc_display="none"
+MUSIC_SCROLLER=""
+LAST_MPC_DISPLAY=""
+LAST_MPC_STATE=""
 # based off:
-# https://github.com/benghaem/dotfiles/blob/master/bin/panel/panel
-fixedSong() {
-	# remove last 3 characters (the " - "), then make sure not longer than 40
-	mpc_display=$(echo "$mpc_display" | rev | cut -c 4- | rev | cut -c 1-40)
-	PID="none"
-	last_mpc_display=$mpc_display
-	if [ "$1" == "paused" ]; then
-		echo "M ⮔" $mpc_display > "$PANEL_FIFO"
-	else
-		echo "M" $mpc_display > "$PANEL_FIFO"
-	fi
-}
+# https://github.com/benghaem/dotfiles/blob/1dcbee5ed235a8e319dcc4255df10f0a6b23b6fe/bin/panel/panel#L80
+# unlike the other functions, this actually sends stuff to the fifo on its own
+# see "M*" section in panel_bar
+songScroll() {
+	mpc_state=$(mpc status | awk 'NR==2 {print $1}')
+	mpc_song=$(mpc current)
 
-songScroll(){
-	mpc_info=$(mpc -f '%artist% - %title% - ')
-	mpc_display=$(echo "$mpc_info" | head -n 1)
-	is_paused=$(echo $mpc_info | grep paused)
-	if [ "$(mpc current)" == "" ]; then
-		mpc_display=""	
-	fi
-	if [ "$is_paused" != "" ]; then
-		if ([[ $PID != "first" ]] && [[ $PID != "none" ]]); then
-			kill $PID
-			PID="none"
+	# kill old zscroll so not scrolling over new text
+	if [[ $mpc_song != "$LAST_MPC_SONG" ]] || [[ $mpc_state != "$LAST_MPC_STATE" ]]; then
+		if [[ -n $MUSIC_SCROLLER ]]; then
+			kill $MUSIC_SCROLLER
+			MUSIC_SCROLLER=""
 		fi
-		fixedSong paused
 	fi
-	if [ "$mpc_display" != "$last_mpc_display" ]; then
-		if [ "$PID" != "first" ] && [ "$PID" != "none" ]; then
-			kill $PID
-			PID="none"
-		fi
-		if [ ${#mpc_display} -gt 40 ]; then
-			# echo $mpc_display
-			$HOME/.config/bspwm/panel/scroller "$mpc_display" "40" "M ⮕ " "" > "$PANEL_FIFO" &
-			PID=$!
+
+	if [[ -n $mpc_song ]]; then
+		# if going to be scrolled, add " - " separator
+		if [[ ${#mpc_song} -gt 40 ]]; then
+			mpc_display="$mpc_song - "
 		else
-			fixedSong
+			mpc_display=$mpc_song
 		fi
-		last_mpc_display=$mpc_display
-		#echo $PID
-	fi
-}
 
-PIDX="first"
-last_title_display="none"
-# based off:
-# https://github.com/benghaem/dotfiles/blob/master/bin/panel/panel
-fixedTitle() {
-	# remove " - " and display first 80 chars
-	title_display=$(echo "$title_display" | rev | cut -c 4- | rev | cut -c 1-80)
-	if [ "$title_display" == "" ]; then
-		echo "T| empty |" > "$PANEL_FIFO"
+		if [[ $mpc_state == "[paused]" ]]; then
+			# don't scroll if paused
+			echo "M⮔" "${mpc_song:0:40}" > "$PANEL_FIFO"
+		else
+			# update scroller on song change or state change (e.g. paused to unpaused)
+			if [[ $mpc_song != "$LAST_MPC_SONG" ]] || [[ $mpc_state != "$LAST_MPC_STATE" ]]; then
+				# will only scroll if greater than 40, otherwise will just print in place
+				zscroll -n -b "M⮕ " "$mpc_display" > "$PANEL_FIFO" &
+				MUSIC_SCROLLER=$!
+			fi
+		fi
 	else
-		echo "T|" $title_display "|" > "$PANEL_FIFO"
+		# nothing playing/paused
+		echo "M⮕ x" > "$PANEL_FIFO"
 	fi
-	PIDX="none"
-	last_title_display=$title_display
+	# save
+	LAST_MPC_SONG=$mpc_song
+	LAST_MPC_STATE=$mpc_state
 }
 
+TITLE_SCROLLER=""
+LAST_TITLE_DISPLAY=""
+# different from above: not using zscroll for fixed text:
+# window title changes a lot; seems a bit excessive to a start/kill a zscroll process each time
 titleScroll(){
-	title_display=$(xtitle -f '%s - ')
-	if [ "$title_display" != "$last_title_display" ]; then
-		if [ "$PIDX" != "first" ] && [ "$PIDX" != "none" ]; then
-			kill $PIDX
-			PIDX="none"
+	title_display=$(xtitle)
+	if [[ $title_display != "$LAST_TITLE_DISPLAY" ]]; then
+		# prevent old scroller from messing with new text
+		if [[ -n $TITLE_SCROLLER ]]; then
+			kill $TITLE_SCROLLER
+			TITLE_SCROLLER=""
 		fi
-		if [ ${#title_display} -gt 80 ]; then
-			$HOME/.config/bspwm/panel/scroller "$title_display" "80" "T| " "" > "$PANEL_FIFO" &
-			PIDX=$!
+
+		if [[ ${#title_display} -gt 80 ]]; then
+			zscroll -n -l 80 -b "T| " -a " |" "$title_display - " > "$PANEL_FIFO" &
+			TITLE_SCROLLER=$!
 		else
-			fixedTitle
+			echo "T| $title_display |" > "$PANEL_FIFO"
 		fi
-		last_title_display=$title_display
+
+		LAST_TITLE_DISPLAY=$title_display
 	fi
 }
 
