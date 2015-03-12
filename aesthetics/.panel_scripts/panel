@@ -286,13 +286,13 @@ netConnection() {
 		else
 			# wireless connection
 			if [[ $signalStrength -gt 64 ]]; then
-				echo "${colour1}⮃ ‗▬▪▮"
+				echo -n "${colour1}⮃ ‗▬▪▮"
 			elif [[ $signalStrength -lt 65 ]] && [[ $signalStrength -gt 39 ]]; then
-				echo "${colour1}⮃ ‗▬▪""$colour2""▮""$colour3"
+				echo -n "${colour1}⮃ ‗▬▪""$colour2""▮""$colour3"
 			elif [[ "$signalStrength" -lt 40 ]]; then
-				echo "${colour21}⮃ ‗▬""$colour2""▪▮""$colour3"
+				echo -n "${colour1}⮃ ‗▬""$colour2""▪▮""$colour3"
 			else
-				echo "$colour2"" ⮃ ‗▬▪▮ Connecting..."
+				echo -n "$colour2"" ⮃ ‗▬▪▮ Connecting..."
 			fi
 			echo " $(essid -w "$interface")"
 		fi
