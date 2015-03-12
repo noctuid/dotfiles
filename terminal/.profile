@@ -23,7 +23,7 @@ pathdirs="
 ~/bin/not_mine
 # for writing related script
 ~/bin/writing
-~/.config/bspwm/panel
+~/.panel_scripts
 # for vimus
 ~/.cabal/bin
 # for adb
