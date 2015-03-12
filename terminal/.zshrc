@@ -812,18 +812,20 @@ function conkylight() {
 	pkill conky
 	rm -r ~/dotfiles/aesthetics/.conky
 	rm ~/dotfiles/aesthetics/.conkyrc
-	cp -r ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/white/.conky ~/dotfiles/aesthetics
-	cp ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/white/.conkyrc ~/dotfiles/aesthetics
+	cp -r ~/dotfiles/aesthetics/.for_switching_out_conky_themes/lsd/white/.conky ~/dotfiles/aesthetics
+	cp ~/dotfiles/aesthetics/.for_switching_out_conky_themes/lsd/white/.conkyrc ~/dotfiles/aesthetics
 	conky > /dev/null 2>&1 &
 }
+alias conkywhite="conkylight"
 function conkydark() {
 	pkill conky
 	rm -r ~/dotfiles/aesthetics/.conky
 	rm ~/dotfiles/aesthetics/.conkyrc
-	cp -r ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/black/.conky ~/dotfiles/aesthetics
-	cp ~/dotfiles/aesthetics/for_switching_out_conky_themes/lsd/black/.conkyrc ~/dotfiles/aesthetics
+	cp -r ~/dotfiles/aesthetics/.for_switching_out_conky_themes/lsd/black/.conky ~/dotfiles/aesthetics
+	cp ~/dotfiles/aesthetics/.for_switching_out_conky_themes/lsd/black/.conkyrc ~/dotfiles/aesthetics
 	conky > /dev/null 2>&1 &
 }
+alias conkyblack="conkydark"
 
 # Show history
 alias history='fc -l 1'
