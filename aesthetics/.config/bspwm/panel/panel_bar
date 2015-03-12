@@ -1,94 +1,87 @@
-#! /bin/sh
+#!/bin/bash
+
 #
-# Example panel for LemonBoy's bar
-# updated for syntax change with my modifications
-# https://github.com/baskerville/bspwm/blob/master/examples/panel/panel_bar
+# Colours
+#
 
-# Colours#{{{
-COLOR_STATUS_FG='#FF6C7A80'
-# stop transparency (FF alpha channel)
-COLOR_FOREGROUND='#FF34322E'
-COLOR_BACKGROUND='#FF232C31'
+# some old default colours (https://github.com/LemonBoy/bar/blob/3f4ed1600ad1f1bc3a1e838f3c0282ff9b4b1966/config.def.h)
+# foreground
+LIGHT_GREEN='%{F#FF90A959}'
+LIGHTER_GREEN='%{F#FFA9D152}'
+GRAY='%{F#FF6C7A80}'
+BRIGHT_RED='%{F#FFFF6666}'
+LIGHT_PINK='%{F#FFFFD6FC}'
+GRAY_PINK='%{F#FFD9CAD7}'
+BRIGHT_PINK='%{F#FFFF78FF}'
+LIGHT_BLUE='%{F#FF78B3CC}'
+# background
+DARK_RED_B='%{B#FFAC4142}'
+# underline
+BLUE_U='%{U#FF6A9FB5}'
+YELLOW_U='%{U#FFDE935F}'
+LIGHT_RED_U='%{U#FFCC6666}'
 
-# old default colours (https://github.com/LemonBoy/bar/blob/3f4ed1600ad1f1bc3a1e838f3c0282ff9b4b1966/config.def.h)
-C_0='#FF2D3C46'
-C_1='#FFAC4142'
-C_2='#FF90A959'
-lighter_green='#FFA9D152'
-C_3='#FFDE935F'
-C_4='#FF6A9FB5'
-C_5='#FFAA759F'
-C_7='#FF6C7A80'
-C_9='#FFCC6666'
-COLOR_EIGHT='#FF425059'
-COLOR_NINE='#FFFF6666'
-light_pink='#FFFFD6FC'
-gray_pink='#FFD9CAD7'
-bright_pink='#FFFF78FF'
-other='#FF7A52D1'
-lighter_c_4='#FF78B3CC'
-#}}}
+#
+# Positioning
+#
 
-# bspwm and arch symbol from uushi
-bspwm="%{B$COLOR_BACKGROUND}%{F$COLOR_EIGHT}%{F$COLOR_NINE} ⮗ bspwm%{F$COLOR_EIGHT}"
-
-while read -r line ; do
-	# cpu_temp="%{F$lighter_green}$(acpi -t | awk '{print $4}')°C"
+while read -r line; do
 	case $line in
 		S*)
 			# right side of bar (battery, clock, volume, date, mailcount, ram usage, connection)
-			sys_infos="%{F$C_7}${line#?}"
+			sys_infos="$GRAY${line#?}"
 			;;
 		M*)
 			# scrolling music
-			song="%{F$lighter_green}${line#?}"
+			song="$LIGHTER_GREEN${line#?}"
 			;;
 		T*)
 			# scrolling xtitle output
-			title="%{F$lighter_c_4}${line#?}"
+			title="$LIGHT_BLUE${line#?}"
 			;;
 		W*)
 			# bspwm internal state
 			wm_infos=""
 			IFS=':'
+			# this shouldn't be double quoted
 			set -- ${line#?}
-			while [ $# -gt 0 ] ; do
+			while [[ $# -gt 0 ]] ; do
 				item=$1
 				name=${item#?}
 				case $item in
 					O*)
 						# focused occupied desktop
-						wm_infos="$wm_infos %{U$C_3}%{F$bright_pink}%{+u}${name}%{-u}"
+						wm_infos="$wm_infos $YELLOW_U$BRIGHT_PINK%{+u}${name}%{-u}"
 						;;
 					F*)
 						# focused free desktop
-						wm_infos="$wm_infos %{U$C_4}%{F$gray_pink}%{+u}${name}%{-u}"
+						wm_infos="$wm_infos $BLUE_U$GRAY_PINK%{+u}${name}%{-u}"
 						;;
 					U*)
 						# focused urgent desktop
-						wm_infos="$wm_infos %{U$C_9}%{+u}${name}%{-u}"
+						wm_infos="$wm_infos $LIGHT_RED_U%{+u}${name}%{-u}"
 						;;
 					o*)
 						# occupied desktop
-						wm_infos="$wm_infos %{F$light_pink}${name}"
+						wm_infos="$wm_infos $LIGHT_PINK$name"
 						;;
 					f*)
 						# free desktop
-						wm_infos="$wm_infos %{F$C_7}${name}"
+						wm_infos="$wm_infos $GRAY$name"
 						;;
 					u*)
 						# urgent desktop
-						wm_infos="$wm_infos %{B$C_1}${name}"
+						wm_infos="$wm_infos $DARK_RED_B$name"
 						;;
 					L*)
 						# layout
 						layout=$(printf "%s" "${name}" | sed 's/\(.\).*/\U\1/')
-						wm_infos="$wm_infos  %{F$C_2}$layout"
+						wm_infos="$wm_infos  $LIGHT_GREEN$layout"
 						;;
 				esac
 				shift
 			done
 			;;
 	esac
-	printf "%s\n" "%{l}$bspwm $wm_infos $song %{c} $title %{r} $sys_infos"
+	printf "%s\n" "%{l}$BRIGHT_RED ⮗ bspwm $wm_infos $song %{c} $title %{r} $sys_infos"
 done
