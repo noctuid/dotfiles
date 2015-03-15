@@ -1,4 +1,5 @@
 **Dotfiles**
+
 These are my dotfiles. Some are pretty heavily commented. If you have interest in keyboard ergonomics and remapping or Colemak, they may be of some use. This repo is pretty incomplete at the moment. The documentation is mainly to allow me to keep track of things, so it may be somewhat incomprehensible if you are not well versed in the ways of the Himalayan sand frog. Be wary of my scripts. I'm getting better at bash, but a lot of them are still poorly written.
 
 See `aesthetics/` for pretty pictures.
@@ -12,61 +13,10 @@ See `aesthetics/` for more info on theming, panels, etc.
 Visualizations in ncmpcpp and album art of current song in ranger (outdated) both opened from vimus (`scripts/bin/music`, outdated)
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/dirty.png "SCREENSHOT")
 
-# Goals for Configuration & Workflow:
-- Increase efficiency and speed; cut wasted time and movement
-- Reduce/eliminate hand, pinky, and wrist pain
-
-## Achieving This (General)
-- One time configuration
-  - Software should be configured in human editable plain text files stored in a central location; this prevents the need for slow gui menu interaction or problems finding and backing up one's configuration
-  - More complicated/customizable software should be configured in an actual programming language (e.g. elisp)
-- Arch Linux is the choice of distro
-  - AUR: I use a lot of packages not in the official repos or often want the latest git version of something; this means less time spent dealing with program installation and helps tremendously with scripting the post-install setup
-  - No default GUI programs or WM/DE that I would uninstall
-  - Text based installation (easily scriptable)
-  - Also looking into NixOS for its nice central, declarative config file and for a more easily reproducible setup with less manual interaction
-- 99% mouse-free setup; 1% is activity specific, such as for gaming or when feeling lazy
-  - Use of keyboard friendly programs
-    - Text editor: vim or emacs/evil
-    - Browser: firefox w/ pentadactyl/vimperator or something like qutebrowser
-    - File manager: ranger or dired
-    - Tiling WM: bspwm, i3, herbstluftwm, stumpwm, etc. (note that all these can be interacted with via shell commands)
-  - When there is not an existing keyboard friendly solution, hack one together with macros or faking cursor movement and clicks (or actually write software.. eventually)
-- Navigation should be seemless, out of the way, and fast
-  - Text: vim motions; imenu and unite/helm sources such as unite's line, fold, and outline or helm swoop and occur or swiper; plugins like sneak, easymotion, etc.; case specific plugins like lispy and functions like worf-goto or helm-org-in-buffer-headings; buffer local marks
-  - Files: ag or pt; again, helm or unite (or fzf) with mru, current project, open buffers, and locate sources; 'quickmarks' for most used files in a workgroup and quickmarks for most used directories in the file manager; use of tools like fasd and blscd on the command line (or if using ansi-term or eshell, syncing the cwd)
-  - Tabs, workspaces, windows: context bindings (see below)
-- Automation
-  - Text manipulation: text objects; [smart-parens](https://github.com/Fuco1/smartparens); use of tools such as snippets and abbreviations; use of other auto-generation plugins such as [emmet-vim](https://github.com/mattn/emmet-vim), [tiny](https://github.com/abo-abo/tiny), and [vim-transform](https://github.com/t9md/vim-transform); keyboard macros, iedit, multiple cursors, etc.
-  - Startup: window manager, programs, tmux sessions, previous vim/emacs session, previous browsing session, etc.
-  - Semi-automatic backups: text files locally with text editor (and git); to external harddrives; offsite with cron (manual authentication)
-- Use the fewest number of comfortable keystrokes to perform all actions
-  - Use modes and letter bindings in all situations where multiple consecutive actions are frequent (e.g. browsing)
-  - Use prefix keys, simple letter chords (e.g. vim-arpeggio and emacs key-chord), or well placed thumb modifiers where usually only one or two actions take place as at a time (e.g. window management)
-  - Frequently used programs should be opened automatically (e.g. on a specific desktop/workspace) and bound to a key, not opened with a launcher
-  - Better text input; write language/sentences using chording (steno); a long term goal
-  - Most comfortable keys to reach should be personalized for most frequently used actions
-- Eliminate usage of hard to reach pinky modifiers and straighten wrists
-  - With modal interfaces, control and many modifier bindings are mostly obsoleted; they can still be remapped and used for other purposes; note that I don't have some irrational hate for control as an arbitrary modifier; I hate its position on the standard keyboard; it can, of course, be remapped, but then again, I find most of the default functionality of control to be useless
-  - With home thumb-key modifiers and maybe home-row modifiers (with smartly implemented dual-role keys) or letter chording, pinky modifiers are obsoleted entirely
-  - Use a wide layout mod to keep wrists straighter and allow for more easy access to ralt/altgr or whatever thumb keys exist on standard (shitty) keyboards
-  - Dual-role keys when possible; use caps as modifier if needed (preferable in comparison to other pinky modifiers but still undesirable)
-  - Use better hardware if possible: thumb cluster or split up spacebar (Japanese keyboards) and split keyboard (preferably vertically staggered, mechanical, tented, etc.); support for tmk firmware
-    - This allows for remapping all modifiers to the thumb as well along with other frequently used keys (backspace, enter, shift, and alt/win (misc or wm modifiers))
-    - Even if not split, the ISO layout allows for a wider wide mod
-- Eliminate motion away from the home row (particularly horizontal movement that requires hand repositioning)
-  - Again, don't waste time switching to and using the general inferiority that is the rodent
-  - Remap symbols, backspace, enter, tab, etc. based on frequency of use
-  - Rely on layer locks (both temporary and automatically escaped (basically a prefix key; think sticky keys and dead keys)) and macros (one key executes multiple keypresses) when beneficial (see [tmk firmware](https://github.com/tmk/tmk_keyboard) for hardware solution)
-    - e.g. you type in multiple languages; lock an unmodified layer for another language instead of using modifiers for special characters (this again with the modal spirit in mind); set up a key to change software keyboard layouts instead if hardware remapping is not available/viable
-    - e.g. you don't use qwerty and a game doesn't allow for remapping; lock layer/switch to "mode" for wasd/esdf and such; basically I mean an alternate layout with key bindings to revert it
-  - Use of arrow keys, home, end, pageup, etc. is obsoleted by modality (or letter chording) in many cases; otherwise remap navigation keys to home row with caps or thumbkey
-- Use emacs for as much as possible: the more I use emacs, the more convinced I'm it provides a an unmatched interface for a lot of software (you get vim text selection/motions with evil, helm-occur, multi-key and key-chord bindings, a consitent way of doing settings and keybindings, scriptability with elisp, etc.); with evil, many programs are far more "vimmy" than vim inspired standalone programs
-
 # For More Information:
 I'll add documentation of the specifics once I've cleaned things up.
 
-See [my blog](http://angelic-sedition.github.io/).
+See the [goals](https://github.com/angelic-sedition/dotfiles#goals-for-configuration--workflow) section and [my blog](http://angelic-sedition.github.io/).
 
 # Working On
 ## Right Now
@@ -111,7 +61,7 @@ See [this post](http://angelic-sedition.github.io/blog/2014/04/30/using-ranger-f
 I've found that pentadactyl's "upload file: " that appears when you hint an upload link to be nice but not a universal solution (if there is no such link to hint). Right now, I do image uploads and mail attachment from the commandline/ranger (see `media/.config/ranger/ranger_functions`). When I have to use the upload gui I often paste in file locations after copying them in ranger.
 
 ## Block Layout in Vim and Example of Context Bindings
-Using tabs is only useless if you're trying to use one buffer per tab (in an editor that supports buffers/a bufferline). I use tabs (or workgroups in emacs) as workspaces. I setup them up with names so I can see which number tab corresponds to what subject and can easily jump to them with <space><home row>. In vim, I use a script that also sets up custom key bindings for different tab names. For example, I use `,` as a prefix key to jump to specific files depending on tab name. I have a general set of these "quickmarks" and specific ones that either correspond to files by frequency of use (,f ,s ,t for first second third) or by name. This allows for key re-use. <space>p will do different things with Unite depending on the tab name/context. For example, in my "bin" tab, it will open the file unite source in ~/bin. I also have different bindings to execute certain shell commands depending on the tab.
+Using tabs is only useless if you're trying to use one buffer per tab (in an editor that supports buffers/a bufferline). I use tabs (or workgroups in emacs) as workspaces. I setup them up with names so I can see which number tab corresponds to what subject and can easily jump to them with `<space><home row>`. In vim, I use a script that also sets up custom key bindings for different tab names. For example, I use `,` as a prefix key to jump to specific files depending on tab name. I have a general set of these "quickmarks" and specific ones that either correspond to files by frequency of use (,f ,s ,t for first second third) or by name. This allows for key re-use. `<space>p` will do different things with Unite depending on the tab name/context. For example, in my "bin" tab, it will open the file unite source in ~/bin. I also have different bindings to execute certain shell commands depending on the tab.
 
 This drastically reduces the time it takes to get to a specific file as well as the complexity of key bindings to execute certain actions. This is the order of preference for me when it comes to navigation of files:
 
@@ -120,22 +70,22 @@ This drastically reduces the time it takes to get to a specific file as well as 
 3. locate or find search (or maybe ag if searching for by contents) (unite, helm)
 4. file manager w/ quickmarked dirs as last resort (ranger if in terminal vim; otherwise dired or vimfiler)
 
-While I find things like fasd and vimfiler to be cool, I never really find myself using them because they actually end up being slower. On the commandline, fasd is probably the best option for non-quickmarked dirs that aren't close. I've kind of made it a bad habit to use ranger or blscd with quickmarks and f<chars> for directory navigation when fasd would be better. However, for opening files and the other actions it has, something interactive like fzf or ranger is a much better idea in my opinion. Using a fasd command in ranger, I think ranger might always be preferable to the commandline for navigation because you still have access to shell commands and get folder visualization as a bonus. Still, I don't deal with a huge number of folder, and manually added quickmarks/bookmarks for directories take care of most of my problems. Slow speed when loading certain folders in ranger may be an issue though (my only annoyance with it).
+While I find things like fasd and vimfiler to be cool, I never really find myself using them because they actually end up being slower. On the commandline, fasd is probably the best option for non-quickmarked dirs that aren't close. I've kind of made it a bad habit to use ranger or blscd with quickmarks and `f<chars>` for directory navigation when fasd would be better. However, for opening files and the other actions it has, something interactive like fzf or ranger is a much better idea in my opinion. Using a fasd command in ranger, I think ranger might always be preferable to the commandline for navigation because you still have access to shell commands and get folder visualization as a bonus. Still, I don't deal with a huge number of folder, and manually added quickmarks/bookmarks for directories take care of most of my problems. Slow speed when loading certain folders in ranger may be an issue though (my only annoyance with it).
 
 I don't currently have directory specific quickmarks for zsh, though I may add them in the future (if I've not mostly switched to emacs/(w)dired). Memorization is the trade-off though, and the less you use a quickmark mapping, the more forgettable it is. That's also why I find open buffers/tab layouts (saved in a vim/emacs session or setup automatically) and f s t key bindings for most frequently used files to be a nice way to not have to memorize things while keeping keystrokes to a minimum.
 
-In vim/emacs, I am using 'm' as a prefix key for whatever major mode/filetype I'm currently in. In org mode, m<keys> performs org mode navigation, clocking, todo, etc. actions. In code files, I use m<keys> to compile and run the current file in the shell split on the right (vimshell or eshell) as well as for repl interaction, error navigation, etc. I plan on using m<home row> to switch between channel buffers if I ever start using erc or circe.
+In vim/emacs, I am using 'm' as a prefix key for whatever major mode/filetype I'm currently in. In org mode, `m<keys>` performs org mode navigation, clocking, todo, etc. actions. In code files, I use `m<keys>` to compile and run the current file in the shell split on the right (vimshell or eshell) as well as for repl interaction, error navigation, etc. I plan on using `m<home row>` to switch between channel buffers if I ever start using erc or circe.
 
 As for other, non-vim/emacs examples, I have context bindings for empty vs. non-empty workspaces/desktops. On empty desktops, I have sxhkd automatically restarted with a custom config for single key mappings for opening programs and switching desktops. Why use more keys than necessary? The transition time to get used to the difference was insignificant, so I don't think consistency is of any benefit here.
 
-In firefox, I also use the space bar as a prefix key for tab navigation. I bind <space><home row> to a command that will go to tab 1-10 in the curent tab range (e.g. <space>a on tab 24 will go to tab 21). I also have key bindings to switch to specific tab groups and setup a few custom key bindings depending on tab group. I haven't done much with this though since TabGroupie works very inconsistently. Pentadactyl's groups (not related to tab groups) are probably the best example for taking advantage of different contexts. I use them to set up site-specific key bindings. For example, on reddit, I pass through keys for use with RES and also add custom goto bindings with the prefix g for going to specific subreddits. I use this to setup more convenient zoom bindings on image urls. This also allows setting up custom key bindings for sites that have non-configurable key bindings.
+In firefox, I also use the space bar as a prefix key for tab navigation. I bind `<space><home row>` to a command that will go to tab 1-10 in the curent tab range (e.g. `<space>a` on tab 24 will go to tab 21). I also have key bindings to switch to specific tab groups and setup a few custom key bindings depending on tab group. I haven't done much with this though since TabGroupie works very inconsistently. Pentadactyl's groups (not related to tab groups) are probably the best example for taking advantage of different contexts. I use them to set up site-specific key bindings. For example, on reddit, I pass through keys for use with RES and also add custom goto bindings with the prefix g for going to specific subreddits. I use this to setup more convenient zoom bindings on image urls. This also allows setting up custom key bindings for sites that have non-configurable key bindings.
 
 The best example I've seen of key re-use lately is [lispy](https://github.com/abo-abo/lispy). Org speed keys and [worf](https://github.com/abo-abo/worf) are also good examples.
 
-See 
-`vim/.navigation.vim` and `emacs/.emacs.d/navigation.el` 
-`common/.config/bspwm/bspwmrc` and `remap/.config/sxhkd/empty_sxhkdrc` 
-`browsing/.pentadactylrc` (search `relative-move`) 
+See  
+`vim/.navigation.vim` and `emacs/.emacs.d/navigation.el`  
+`common/.config/bspwm/bspwmrc` and `remap/.config/sxhkd/empty_sxhkdrc`  
+`browsing/.pentadactylrc` (search `relative-move`)  
 `browsing/.pentadactyl/groups.penta`
 
 ## Stream Any Video in MPV
@@ -150,8 +100,8 @@ Some problems: Very rarely the video will quit in the middle or the buffering wi
 
 The firebug plugin for pentadactyl will not be able to open firebug if it has not been opened yet in the firefox window. I originally got around this by faking the key combo to open the console with xdotool, but realized that pentadactyl's emenu can be used instead. This fixes the problem where the binding had to be used twice to open the firebug console and get it to the right tab. This also makes it easier to setup autocommands to open firebug for specific sites. Another nice thing about firebug is that once you've opened it for a site in a window, it will open whenever you navigate to that site in that firefox window. However, I think this is a really ugly, hacky way of doing it, and hope to fix this in the future to somehow query firebug or something else instead for the direct link.
 
-See 
-`scripts/bin/firebug_fake_mouse.sh` 
+See  
+`scripts/bin/firebug_fake_mouse.sh`  
 the corresponding section in my `.pentadactylrc` (search undescore MPV)
 
 ## Make Gifs in MPV
@@ -173,8 +123,8 @@ I still need to alter it to make it easier to deal with. I couldn't find a good 
 An example gif with default settings (made within mpv):
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/example.gif "Tigre-sama Catches an Arrow")
 
-See 
-`scripts/bin/mpv/` 
+See  
+`scripts/bin/mpv/`  
 `media/.mpv/input.conf`
 
 ## Tabs Outliner Replacement
@@ -182,14 +132,14 @@ One reason I stuck with Chromium for so long is because of this extension. I use
 
 Like TO, when the window is closed (with a custom D binding), the link will be deleted from any of the .wiki files it is in.
 
-See 
-`scripts/bin/pentadactyl/to.sh` 
+See  
+`scripts/bin/pentadactyl/to.sh`  
 `browsing/.pentadactylrc`
 
 ## Vim/Emacs and the Clipboard
 I've tried quite a few clipboard managers without liking any of them. What I really wanted was one with vim bindings, so I ended up deciding just to use vim with Unite's history/yank source. This doesn't actually work if vim doesn't become focused before changing the clipboard contents. I don't usually need more than this, but I guess you could use something like CaptureClipboard in it's own vim instance if needed. There's also [clipmon](https://github.com/bburns/clipmon) for emacs which I'll probably start using instead. There's also easyclip, which I find nicer than yank stack or yank ring even though I don't use it.
 
-'y' and 'p' are my "universal" copy paste bindings. I don't use <c-v> or  <c-c>, and I have everything go to the system clipboard (+ register). I have these bindings set up for pentadactyl, zsh, weechat, vim, tmux, etc. I have also set up bindings for pasting into command mode and insert mode in pentadactyl and vim ('.yp' expands to clipboard contents) and am messing with letter chording.
+'y' and 'p' are my "universal" copy paste bindings. I don't use `<c-v>` or  `<c-c>`, and I have everything go to the system clipboard (+ register). I have these bindings set up for pentadactyl, zsh, weechat, vim, tmux, etc. I have also set up bindings for pasting into command mode and insert mode in pentadactyl and vim ('.yp' expands to clipboard contents) and am messing with letter chording.
 
 Search underscore clipboard in my `.vimrc`.
 
@@ -218,8 +168,8 @@ See the README in the remap folder for more info.
 ## Flashcard Script
 I've made a simple cli flashcard script with zsh completion. I'm probably going to trash this in favour with something like org-drill or something else like anki.
 
-See 
-`scripts/bin/flashcards` 
+See  
+`scripts/bin/flashcards`  
 `terminal/.zsh/completion/_flashcards`
 
 ## Create a Modal Interface For Programs That Don't Support Rebinding
@@ -228,6 +178,7 @@ I've pretty much abandoned software that doesn't support modality and prefix bin
 There are many programs that have extensive keyboard shortcuts that could potentially be useful if their default bindings weren't oriented towards masochists. For some programs, the few available shortcuts can still be massively useful when implemented in vim-like modes (e.g. Libre Office).
 
 Solution: Rebind keys to fake the existing keyboard shortcuts
+
 [Video Demonstration With Libre Writer](http://youtu.be/iB1fCASlpY8)
 
 [Explanation](http://forum.colemak.com/viewtopic.php?id=1817)
@@ -236,10 +187,61 @@ This solution is restricted to X currently (though something similar could proba
 
 See `remap/xchainkeys.examplevimlayer.conf` for an example configuration for Libre Writer. Since I've started using LaTeX instead for the most part, I haven't done anything else with this, but I think that it would be more desirable to have the modal interface automatically started (setting up and deconstructing bindings on window change) for the program it is being used for (using bspc --subscribe and awk to run a bash script on window change that checks if the current window is, for example, Libre Office).
 
+# Goals for Configuration & Workflow:
+- Increase efficiency and speed; cut wasted time and movement
+- Reduce/eliminate hand, pinky, and wrist pain
+
+## Achieving This (General)
+- One time configuration
+  - Software should be configured in human editable plain text files stored in a central location; this prevents the need for slow gui menu interaction or problems finding and backing up one's configuration
+  - More complicated/customizable software should be configured in an actual programming language (e.g. elisp)
+- Arch Linux is the choice of distro
+  - AUR: I use a lot of packages not in the official repos or often want the latest git version of something; this means less time spent dealing with program installation and helps tremendously with scripting the post-install setup
+  - No default GUI programs or WM/DE that I would uninstall
+  - Text based installation (easily scriptable)
+  - Also looking into NixOS for its nice central, declarative config file and for a more easily reproducible setup with less manual interaction
+- 99% mouse-free setup; 1% is activity specific, such as for gaming or when feeling lazy
+  - Use of keyboard friendly programs
+    - Text editor: vim or emacs/evil
+    - Browser: firefox w/ pentadactyl/vimperator or something like qutebrowser
+    - File manager: ranger or dired
+    - Tiling WM: bspwm, i3, herbstluftwm, stumpwm, etc. (note that all these can be interacted with via shell commands)
+  - When there is not an existing keyboard friendly solution, hack one together with macros or faking cursor movement and clicks (or actually write software.. eventually)
+- Navigation should be seemless, out of the way, and fast
+  - Text: vim motions; imenu and unite/helm sources such as unite's line, fold, and outline or helm swoop and occur or swiper; plugins like sneak, easymotion, etc.; case specific plugins like lispy and functions like worf-goto or helm-org-in-buffer-headings; buffer local marks
+  - Files: ag or pt; again, helm or unite (or fzf) with mru, current project, open buffers, and locate sources; 'quickmarks' for most used files in a workgroup and quickmarks for most used directories in the file manager; use of tools like fasd and blscd on the command line (or if using ansi-term or eshell, syncing the cwd)
+  - Tabs, workspaces, windows: context bindings (see below)
+- Automation
+  - Text manipulation: text objects; [smart-parens](https://github.com/Fuco1/smartparens); use of tools such as snippets and abbreviations; use of other auto-generation plugins such as [emmet-vim](https://github.com/mattn/emmet-vim), [tiny](https://github.com/abo-abo/tiny), and [vim-transform](https://github.com/t9md/vim-transform); keyboard macros, iedit, multiple cursors, etc.
+  - Startup: window manager, programs, tmux sessions, previous vim/emacs session, previous browsing session, etc.
+  - Semi-automatic backups: text files locally with text editor (and git); to external harddrives; offsite with cron (manual authentication)
+- Use the fewest number of comfortable keystrokes to perform all actions
+  - Use modes and letter bindings in all situations where multiple consecutive actions are frequent (e.g. browsing)
+  - Use prefix keys, simple letter chords (e.g. vim-arpeggio and emacs key-chord), or well placed thumb modifiers where usually only one or two actions take place at a time (e.g. window management)
+  - Frequently used programs should be opened automatically (e.g. on a specific desktop/workspace) and bound to a key, not opened with a launcher
+  - Better text input; write language/sentences using chording (steno); a long term goal
+  - Most comfortable keys to reach should be personalized for most frequently used actions
+- Eliminate usage of hard to reach pinky modifiers and straighten wrists
+  - With modal interfaces, control and many modifier bindings are mostly obsoleted; they can still be remapped and used for other purposes; note that I don't have some irrational hate for control as an arbitrary modifier; I hate its position on the standard keyboard; it can, of course, be remapped, but then again, I find most of the default functionality of control to be useless
+  - With thumb-key modifiers and maybe home-row modifiers (with smartly implemented dual-role keys) or letter chording, pinky modifiers are obsoleted entirely
+  - Use a wide layout mod to keep wrists straighter and allow for more easy access to ralt/altgr or whatever thumb keys exist on standard (shitty) keyboards
+  - Dual-role keys when possible; use caps as a modifier if needed (preferable in comparison to other pinky modifiers but still undesirable)
+  - Use better hardware if possible: thumb cluster or split up spacebar (Japanese keyboards) and split keyboard (preferably vertically staggered, mechanical, tented, etc.); support for tmk firmware
+    - This allows for remapping all modifiers to the thumb along with other frequently used keys (backspace, enter, shift, and alt/win (misc or wm modifiers))
+    - Even if not split, the ISO layout allows for a wider wide mod
+- Eliminate motion away from the home row (particularly horizontal movement that requires hand repositioning)
+  - Again, don't waste time switching to and using the general inferiority that is the rodent
+  - Remap symbols, backspace, enter, tab, etc. based on frequency of use
+  - Rely on layer locks (both temporary and automatically escaped (basically a prefix key; think sticky keys and dead keys)) and macros (one key executes multiple keypresses) when beneficial (see [tmk firmware](https://github.com/tmk/tmk_keyboard) for a hardware solution)
+    - e.g. you type in multiple languages; lock a layer for another language instead of using modifiers for special characters (this again with the modal spirit in mind); set up a key to change software keyboard layouts instead if hardware remapping is not available/viable
+    - e.g. you don't use qwerty and a game doesn't allow for remapping; switch to an alternate layout with the letter keys re-arranged
+  - Use of arrow keys, home, end, pageup, etc. is obsoleted by modality (or letter chording) in many cases; otherwise remap navigation keys to home row with caps or thumbkey
+- Use emacs for as much as possible: the more I use emacs, the more convinced I am that it provides an unmatched interface for a lot of software (you get vim text selection/motions with evil, helm-occur, multi-key and key-chord bindings, a consitent way of doing settings and keybindings, scriptability with elisp, etc.); with evil, many programs are far more "vimmy" than vim inspired standalone programs
+
 # Credit
 Anything I've swiped for my config files has a url.
 
-Some general stuff: 
+Some general stuff:  
 Credit to vaskozl for [his thread](http://forum.colemak.com/viewtopic.php?id=1731&p=1) on not using the mouse, which is one of the main reasons I ever took interest in any of this. Credit to DreymaR and lalop for inspiration on layout stuff after I switched to Colemak and to bunnfly for the colemak vim config (all from the Colemak forum).
 
 Thanks to baskerville/bloom for bspwm and sxhkd. Thanks to kana, Shougo, tpope, junegunn, etc. for all their awesome vim plugins. Thanks to abo-abo for his awesome emacs packages like lispy and hydra. Thanks to tuhdo for his great guide on helm. Thanks to codestation for qcma. Thanks to sol, haasn, etc. for vimus. Thanks to ttzhou for setroot.
