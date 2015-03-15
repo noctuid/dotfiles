@@ -1,210 +1,164 @@
 **Dotfiles**
+These are my dotfiles. Some are pretty heavily commented. If you have interest in keyboard ergonomics and remapping or Colemak, they may be of some use. This repo is pretty incomplete at the moment. The documentation is mainly to allow me to keep track of things, so it may be somewhat incomprehensible if you are not well versed in the ways of the Himalayan sand frog. Be wary of my scripts. I'm getting better at bash, but a lot of them are still poorly written.
 
-These are my dotfiles. Some are pretty heavily commented. If you have interest in keyboard ergonomics and remapping, they may be of some use. This repo is pretty incomplete at the moment. The documentation is mainly to allow me to keep track of things, so it may be somewhat incomprehensible if you are not well versed in the ways of the himalayan sand frog. Also note that I am not a programmer and some of my scripts are probably done or written badly.
-
-See `aesthetics/` for pretty pictures. Everything else is boring and tailored for my bizarre workflow.
+See `aesthetics/` for pretty pictures.
 
 ## Pictures:
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/keyboard_ftw.gif "Words of wisdom from Tatsuya")
 
-See aesthetics for more info on theming, panels, etc.
+See `aesthetics/` for more info on theming, panels, etc.
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/clean.png "SCREENSHOT")
 
-Visualizations in ncmpcpp and album art of current song in ranger (outdated **see aesthetics/ for pretty things!**) both opened from vimus (see below and `bin/music`)
+Visualizations in ncmpcpp and album art of current song in ranger (outdated) both opened from vimus (`scripts/bin/music`, outdated)
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/dirty.png "SCREENSHOT")
 
 # Goals for Configuration & Workflow:
-- Increase efficiency and speed; cut wasted time and movement; get the computer to work with instead of against
+- Increase efficiency and speed; cut wasted time and movement
 - Reduce/eliminate hand, pinky, and wrist pain
 
-## Acheiving This (General Principles)
+## Achieving This (General)
+- One time configuration
+  - Software should be configured in human editable plain text files stored in a central location; this prevents the need for slow gui menu interaction or problems finding and backing up one's configuration
+  - More complicated/customizable software should be configured in an actual programming language (e.g. elisp)
 - Arch Linux is the choice of distro
-  - AUR (I use a lot of packages not in the official repos; bleeding edge); less time spent dealing with program installation; helps with scripting post-install setup
-  - No default gui programs or WM/DE (don't have to remove DE, since I don't use one)
-  - etc.
-- 99% mouseless setup (1% is activity specific (gaming, photo editing) or when feeling lazy)
-  - Use of keyboard friendly programs (vim (or emacs/evil), pentadactyl, ranger, decent wm, and terminal programs)
+  - AUR: I use a lot of packages not in the official repos or often want the latest git version of something; this means less time spent dealing with program installation and helps tremendously with scripting the post-install setup
+  - No default GUI programs or WM/DE that I would uninstall
+  - Text based installation (easily scriptable)
+  - Also looking into NixOS for its nice central, declarative config file and for a more easily reproducible setup with less manual interaction
+- 99% mouse-free setup; 1% is activity specific, such as for gaming or when feeling lazy
+  - Use of keyboard friendly programs
+    - Text editor: vim or emacs/evil
+    - Browser: firefox w/ pentadactyl/vimperator or something like qutebrowser
+    - File manager: ranger or dired
+    - Tiling WM: bspwm, i3, herbstluftwm, stumpwm, etc. (note that all these can be interacted with via shell commands)
   - When there is not an existing keyboard friendly solution, hack one together with macros or faking cursor movement and clicks (or actually write software.. eventually)
-- Navigation should be seemless, out of the way, and essentially instantaneous
-  - No extra time should be spent getting to the text you want to edit (vim and plugins like sneak, seek, easymotion, or ace jump, etc.)
-  - No extra time should be spent getting to the the tabs, workspace, window, etc you want to (proper bindings for window manager, tmux, ranger, vim, firefox, etc.)
-  - Use of context based mappings; no extra keys should be used; since navigation is a common action it should require only the home row in most circumstances
+- Navigation should be seemless, out of the way, and fast
+  - Text: vim motions; imenu and unite/helm sources such as unite's line, fold, and outline or helm swoop and occur or swiper; plugins like sneak, easymotion, etc.; case specific plugins like lispy and functions like worf-goto or helm-org-in-buffer-headings; buffer local marks
+  - Files: ag or pt; again, helm or unite (or fzf) with mru, current project, open buffers, and locate sources; 'quickmarks' for most used files in a workgroup and quickmarks for most used directories in the file manager; use of tools like fasd and blscd on the command line (or if using ansi-term or eshell, syncing the cwd)
+  - Tabs, workspaces, windows: context bindings (see below)
+- Automation
+  - Text manipulation: text objects; [smart-parens](https://github.com/Fuco1/smartparens); use of tools such as snippets and abbreviations; use of other auto-generation plugins such as [emmet-vim](https://github.com/mattn/emmet-vim), [tiny](https://github.com/abo-abo/tiny), and [vim-transform](https://github.com/t9md/vim-transform); keyboard macros, iedit, multiple cursors, etc.
+  - Startup: window manager, programs, tmux sessions, previous vim/emacs session, previous browsing session, etc.
+  - Semi-automatic backups: text files locally with text editor (and git); to external harddrives; offsite with cron (manual authentication)
 - Use the fewest number of comfortable keystrokes to perform all actions
-  - Use modes and letter bindings in all situations where multiple consequtive actions are frequent (e.g. browsing)
-  - Use prefix keys, simple chords (e.g. vim-arpeggio), or well placed thumb modifiers where usually only one or two actions take place as at a time (e.g. window management)
-  - Use two and three letter aliases for most programs (or have run automatically in proper context); balance between brevity and clarity/memorizability
-  - Better text input; write language/sentences in shorthand with text expansion (e.g. autokey or iabbr) or use steno/plover
-  - Most comfortable keys to reach should be personalized for most frequently used actions (e.g. \<leader\> should be space or a letter)
-  - Automate as much as possible; use smart completion and expansion as much as possible (snippets, autocompletion and autogeneration)
+  - Use modes and letter bindings in all situations where multiple consecutive actions are frequent (e.g. browsing)
+  - Use prefix keys, simple letter chords (e.g. vim-arpeggio and emacs key-chord), or well placed thumb modifiers where usually only one or two actions take place as at a time (e.g. window management)
+  - Frequently used programs should be opened automatically (e.g. on a specific desktop/workspace) and bound to a key, not opened with a launcher
+  - Better text input; write language/sentences using chording (steno); a long term goal
+  - Most comfortable keys to reach should be personalized for most frequently used actions
 - Eliminate usage of hard to reach pinky modifiers and straighten wrists
-  - With modal interfaces, control and many modifier bindings are obsoleted; they can still be remapped and used for other purposes
-  - Wide mod to keep wrists straighter and more easy access to ralt/altgr or whatever thumb keys exist
-  - Dual role keys when possible; use caps as modifier if needed
-  - Better Hardware: thumb cluster or split up spacebar (japanese keyboards) and split keyboard (preferably vertically staggered and mechanical)
-    - This allows for remapping all modifiers to thumb as well as other keys (backspace, enter, shift, and better alt location (misc modifier) in addition to a backup wm key)
+  - With modal interfaces, control and many modifier bindings are mostly obsoleted; they can still be remapped and used for other purposes; note that I don't have some irrational hate for control as an arbitrary modifier; I hate its position on the standard keyboard; it can, of course, be remapped, but then again, I find most of the default functionality of control to be useless
+  - With home thumb-key modifiers and maybe home-row modifiers (with smartly implemented dual-role keys) or letter chording, pinky modifiers are obsoleted entirely
+  - Use a wide layout mod to keep wrists straighter and allow for more easy access to ralt/altgr or whatever thumb keys exist on standard (shitty) keyboards
+  - Dual-role keys when possible; use caps as modifier if needed (preferable in comparison to other pinky modifiers but still undesirable)
+  - Use better hardware if possible: thumb cluster or split up spacebar (Japanese keyboards) and split keyboard (preferably vertically staggered, mechanical, tented, etc.); support for tmk firmware
+    - This allows for remapping all modifiers to the thumb as well along with other frequently used keys (backspace, enter, shift, and alt/win (misc or wm modifiers))
     - Even if not split, the ISO layout allows for a wider wide mod
 - Eliminate motion away from the home row (particularly horizontal movement that requires hand repositioning)
-  - The more frequent the action, the better position it should have; Window management and tab/split/file navigation can be done with no modifiers and using mostly just the home row
   - Again, don't waste time switching to and using the general inferiority that is the rodent
-  - Remap symbols, backspace, enter, tab, etc. based on frequency of use (for symbols, can, for example, use letter chords or 1+ letters with iabbr if thumb keys not available for symbol layer)
-  - Rely on layer locks (both temporary and automatically escaped (types of prefixes)) and macros when beneficial (see tmk firmware for hardware solution)
-    - e.g. you type in multiple languages; lock an unmodified layer for another language instead of using modifiers for special characters (this again with the modal spirit); set up a key to change software keyboard layouts instead if hardware remapping is not available/viable
-    - e.g. you don't use qwerty and games don't allow for remapping; lock layer/switch to "mode" for wasd/esdf and such
-  - Use of arrow keys, home, end, pageup, etc. is obsoleted by modality (or letter chording) in many cases; otherwise remap navigation keys to home row with caps or thumbkey (less desirable)
+  - Remap symbols, backspace, enter, tab, etc. based on frequency of use
+  - Rely on layer locks (both temporary and automatically escaped (basically a prefix key; think sticky keys and dead keys)) and macros (one key executes multiple keypresses) when beneficial (see [tmk firmware](https://github.com/tmk/tmk_keyboard) for hardware solution)
+    - e.g. you type in multiple languages; lock an unmodified layer for another language instead of using modifiers for special characters (this again with the modal spirit in mind); set up a key to change software keyboard layouts instead if hardware remapping is not available/viable
+    - e.g. you don't use qwerty and a game doesn't allow for remapping; lock layer/switch to "mode" for wasd/esdf and such; basically I mean an alternate layout with key bindings to revert it
+  - Use of arrow keys, home, end, pageup, etc. is obsoleted by modality (or letter chording) in many cases; otherwise remap navigation keys to home row with caps or thumbkey
+- Use emacs for as much as possible: the more I use emacs, the more convinced I'm it provides a an unmatched interface for a lot of software (you get vim text selection/motions with evil, helm-occur, multi-key and key-chord bindings, a consitent way of doing settings and keybindings, scriptability with elisp, etc.); with evil, many programs are far more "vimmy" than vim inspired standalone programs
 
 # For More Information:
-- Will add documentation of the specifics once this has been cleaned up
+I'll add documentation of the specifics once I've cleaned things up.
 
 See [my blog](http://angelic-sedition.github.io/).
 
 # Working On
 ## Right Now
-- Cleaning up all my config files and adding them here (specifically mutt and many related config files)
-- Making long xkb configs..
-- Perfect post-install script (ideally, installing os, setting up configuration, folder structure, programs installed, etc. to 99% similarity of past install should take under 30 minutes of the user's direct attention)
-- messing around with a reversed (front is back) keycool 84 for thumbkeys; testing viability
-- Lose virginity to a half foreign mixed race walrus of high status and social respectability
-- Messing around with insert mode commands and chording (vim-arpeggio); still considering the potential viability of plover
+- Cleaning up all config files and adding them here
+- Cleaning emacs init file and using emacs for other things (e.g. file management and mail) when it makes sense
+- Making my bash scripts suck less
+- Testing post-install scripts; ideally, installing the OS, setting up configuration, folder structure, programs installed, etc. to 99% similarity of past install should take under 30 minutes of the user's direct attention if not even less
 
-Now completed:
-- Script to display album art in terminal split (see below and `bin/albumart_display.sh`)
-- Got Pterosaur working
+## Hopefully
+- Buy one of the many new ergo keyboards with a thumbcluster (e.g. keyboardio) and set up tmk
+- Nix configs
+- Make or get someone else to make a hotkey program that supports letter chords and/or smartly implements letter keys as modifiers
+  - Hoping a good chording or dual-role implementation can be beneficial, even with good hardware
+  - Especially with the standard keyboard, this is important for eliminating pinky modifiers (shift hurts my pinky; I often have to use other fingers to press it when typing for extended periods of time, and my hand still ends up hurting)
 
-## Of Less Importance
-- Design a better compact keyboard (see [will add]; 60% (no numpad and such); cherry brown switches (quiet; nkro for plover); non-horizontally-staggered?; possibly split or with irregular shape (vertical stagger); thumb keys; rows not tilted upwards (flat); tmk firmware compatable; etc.)
-- Mess around more with Emacs (meh)
-- Make or coerce someone into making an actually decent dual role program/script for GNU/Linux
+# Cool Thing I Stole
+## Use Shell Functions in Ranger
+I use this mainly for things like image rotation, image uploading, git (not so much), and file extraction; ranger serves as a nice interface in many cases. I've only found this to work for functions and not aliases.
 
-# Cool Things I've Stolen
-## Use Functions in Ranger
-I use this mainly for things like image rotation, git (not so much), and file extraction; ranger serves as a nice interface in many cases. I've only found this to work for functions and not aliases.
-The downside of this is that the shell command is much slower if you have a lot of functions. Because of this, I have switched to sourcing a separate file instead of my whole fucking `~/.zshrc`. You can of course, make bindings to specific 'shell something somethings' instead.
+The downside of this is that the shell command is much slower if you have a lot of functions. Because of this, I have switched to sourcing a separate file instead of my whole `~/.zshrc`. You can of course, make bindings to specific 'shell something somethings' instead, but this is nice for more complex functions that don't quite warrant their own script.
 
-[source](https://bbs.archlinux.org/viewtopic.php?id=93025&p=34)
+[source](https://bbs.archlinux.org/viewtopic.php?pid=895749#p895749)
+
 In `commands.py`, replace with the following under `class shell(Command):`
 
 	self.fm.execute_command('bash -c "source /path/to/file;' + command + '"', flags=flags)
 
+Note that you shouldn't use the line in the thread because the quoting order will kill ranger's handling of escaping.
+See `media/.config/ranger/ranger_functions`.
+
 # More Interesting Parts of My Workflow:
-## Create a Modal Interface For Programs That Don't Support Rebinding
-There already exist programs that are modal by default or only need one set of letter bindings (tui programs such as ncmpcpp, vim, evil for emacs (and other less impressive things like vintageous for ST), pentadactyl for firefox, scripts for irssi and weechat, bash readline and zsh vi mode, tmux, and window management with sxhkd or xchainkeys for bindings (though seperately modal bindings aren't as important or even really desirable in the last two cases)).
-
-However, there are many examples of programs that do have extensive keyboard shortcuts that could potentially be useful if their default bindings weren't oriented towards masochists (e.g. photoshop). For some programs, the few available shortcuts can still be massively useful when implemented in vim-like modes (e.g. Libre Office).
-
-Solution: Rebind keys to fake the existing keyboard shortcuts
-[Video Demonstration With Libre Writer](http://youtu.be/iB1fCASlpY8)
-
-[Explanation](http://forum.colemak.com/viewtopic.php?id=1817)
-
-This solution is restricted to X currently (though something similar could probably done with AHK). It makes use of xchainkeys for the modal bindings and xdotool and xsendkey to fake the necessary keyboard input. A potentially "software independent" solution would be to use tmk firmware to make layers with macros and keys for "mode" (layer) switching. I have not been able to test this.
-
-See `remap/.xchainkeys` for an example configuration for Libre Writer. Since I've started using LaTeX instead for the most part, I haven't done anything else with this, but I think that it would be more desirable to have the modal interface automatically started (setting up and deconstructing bindings on window change) for the program it is being used for (using bspc --subscribe and awk to run a bash script on window change that checks if the current window is, for example, Libre Office).
-
 ## Make Any Terminal Emulator Dropdown Regardless of Window Manager
-Sure there's guake, tilde, xfce4-term, yakuake, finalterm (*throws up*) and solutions for urxvt (-pe quake), xterm (yeahconsole), and specific window managers (using wmctrl, scratchpad solutions, etc.). The benefit of this is that the idea can be adapted to different window managers and terminal emulators.
+I've tried to create a much more generalized version of my dropdown script that works well with more window managers and has extra functionality that other dropdowns don't have.
 
-When I switched from primarily guake to termite, I wanted to find a way to use termite as a dropdown term. Originally, I decided to use tmux sesison and just close the window or open a new one and reattach.
-
-[Video Demonstration](http://youtu.be/3yhX_y1VdWE)
-
-See `not_in_use/my_dropdown.sh` for the script.
-
-I recently came across a simpler, faster solution that uses xdotool's windowunmap. Anyone interested in adapting the script will still have to deal with resizing/window placement, but it eliminates the need to actually kill the terminal and reattach with tmux (which can get slower with high RAM usage). It's also a true toggle unlike the previous script which requires an extra hotkey press to close in the case that it loses focus without special focus rules in place or some other workaround. It also fixes the problem from the previous script where ranger would crash upon closing the terminal with image preview enabled.
-
-See `bin/hide_show.sh` for my modified version of [quiv's mapunmap script](https://bbs.archlinux.org/viewtopic.php?pid=1436909#p1436909) and [this blog post](http://angelic-sedition.github.io/blog/2014/07/19/make-any-terminal-emulator-a-quake-style-dropdown/) where go into more detail.
-
-## Stream Any Video in MPV
-Existing solutions for playing videos in the player of your choice (e.g. mplayer or vlc) are limited in what they work with. There are quite a few programs that allow this for a few sites such as youtube and daily motion (consider as youtube-viewer and using quvi), but I'd rather use mpv with all its features (keybindings for screenshots, seeking, etc.) than send just fake clicks to pause and play videos where things like [noflash](http://www-users.cs.umn.edu/~oztekin/software/noflash/) don't work.
-
-This is a relatively simple thing to do in actuality. The reason existing solutions are site specific is because they operate based on the site link. Mpv will have no problem playing pretty much any video if you pass it the direct link, so all you have to do is set up a script to get that link.
-
-There's almost certainly a much better way to do this, but I only know how to get this link manually: you open up firebug (or control+shift+j in chrome) and go to the net/media tab. When you play the video, the direct link will show up. What I've done is scripted the opening of the firebug window, the clicking on the video to start it, the clicking on the firebug window to copy that link, and then the opening of the link in mpv. This is mouse location dependent; the areas that need to be clicked will depend on screen size, window size, and firebug window size (all of these are constant for me but may be a problem if you use a floating wm; then again, if you're using a floating wm, you might not care about having to manually copy the link in the first place). I use this extensively, and it works quickly and consistently for me for almost every site/video player I've tried. A nice thing about firebug is that there is a wide range where you can click beside and below the media popup where it will allow you to copy the link.
-
-Requirements: Pentadactyl with firebug plugin, MPV, and Firefox
-Some problems: Occasionally the video will quit in the middle or the buffering will be slow (it's the site's fault). For some sites, the played video won't be detected (I've only encountered this on two websites out of the 25+ I've tried).
-
-The firebug plugin for pentadactyl will not be able to open firebug if it has not been opened yet in the firefox window. I originally got around this by faking the key combo to open the console with xdotool, but realized that pentadactyl's emenu can be used instead. This fixes the problem where the binding had to be used twice to open the firebug console and get it to the right tab. This also makes it easier to setup autocommands to open firebug for specific sites. Another nice thing about firebug is that once you've opened it for a site in a window, it will open whenever you navigate to that site in that firefox window.
-
-See 
-`bin/firebug_fake_mouse.sh`
-the corresponding section in my `.pentadactylrc` (search undescore MPV)
+See [tdrop](https://github.com/angelic-sedition/tdrop) and make an issue if there isn't already floating support for your wm.
 
 ## Use Ranger Instead of Default GUI Popup for File Saving
-Pentadactyl already has :w and ;s which allow for typing out file path with tab completion. This is cumbersome especially if you have as large a folder structure as I do. I used to just use an alias to open ranger in my downloads folder and save there automatically. I find even then I don't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open ranger floating and pass the file location to ranger's --selectfile and cut it (see `common/bin/ranger/ranger_browser_fm.sh`).
+Pentadactyl already has :w and ;s which allow for typing out file paths with tab completion. This is cumbersome especially if you have as large a folder structure as I do. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating term with ranger running and pass the file location to ranger's --selectfile and cut it (see `scripts/bin/ranger/ranger_browser_fm.sh`).
 
 See [this post](http://angelic-sedition.github.io/blog/2014/04/30/using-ranger-for-downloads/) for more detailed information and other possibilities.
 
-I've found that pentadactyl's "upload file: " when you hint an upload link only works in many cases. Right now, I do image uploads from the commandline and paste in the file location (after yanking it in ranger) to the upload gui when I have to use it (see the above blog post for more information).
-
-## Tabs Outliner Replacement
-One reason I stuck with Chromium for so long is because of this extension. I used to use things like pocket, evernote webclipper, other read later extensions, and even bookmarks for anything I wanted to look at later. I found it better to just save links in an organized structure with TO (if I didn't plan on looking at them for a while) and save anything I wanted to keep as html and incorporate it into my folder structure. I thought of several possibilities for replacing this functionality with pentadactyl (tab groups and session saving; stuff with bookmarks) and decided to use vimwiki as in interface for saved links. Basically, I created a script that saves the current link to a .wiki file by the title of the argument you give it. Saving all tabs can be done with pentadactyl's :tabdo command. Another binding opens an instance of vim for the index.wiki file. Enter opens links. I still need to add automatic addition of new .wiki files to the index.wiki file. I may work on automatic naming based on tab groups similar to what I do with unite sometime in the future. I may add a more "tree style" like structure in the future.
-
-Like TO, when the window is closed (with a special d binding), the link will be deleted from any of the .wiki files it is in.
-
-See `bin/to.sh` and `bin/to_win.sh` as well as `browsing/.pentadactylrc.`
+I've found that pentadactyl's "upload file: " that appears when you hint an upload link to be nice but not a universal solution (if there is no such link to hint). Right now, I do image uploads and mail attachment from the commandline/ranger (see `media/.config/ranger/ranger_functions`). When I have to use the upload gui I often paste in file locations after copying them in ranger.
 
 ## Block Layout in Vim and Example of Context Bindings
-Will add more explanation.. see `navigation.vim`, `navigation.penta`, `groups.penta` (site specific bindings), etc.
+Using tabs is only useless if you're trying to use one buffer per tab (in an editor that supports buffers/a bufferline). I use tabs (or workgroups in emacs) as workspaces. I setup them up with names so I can see which number tab corresponds to what subject and can easily jump to them with <space><home row>. In vim, I use a script that also sets up custom key bindings for different tab names. For example, I use `,` as a prefix key to jump to specific files depending on tab name. I have a general set of these "quickmarks" and specific ones that either correspond to files by frequency of use (,f ,s ,t for first second third) or by name. This allows for key re-use. <space>p will do different things with Unite depending on the tab name/context. For example, in my "bin" tab, it will open the file unite source in ~/bin. I also have different bindings to execute certain shell commands depending on the tab.
 
-## Vim as a Clipboard Manager
-I've tried quite a few clipboard managers without liking any of them. What I really wanted was one with vim bindings, so I ended up deciding just to use vim. This doesn't actually work if vim doesn't become focused before changing the clipboard contents (which is what I want, I generally don't see the purpose of a clipboard manager).
+This drastically reduces the time it takes to get to a specific file as well as the complexity of key bindings to execute certain actions. This is the order of preference for me when it comes to navigation of files:
 
-Also, y and p are my universal copy paste bindings. I don't use c-v and c-c, and I have everything go to the system clipboard (+ register). I have these bindings set up for pentadactyl, zsh, weechat, vim, tmux, etc. I have also set up bindings for pasting into command mode and insert mode in pentadactyl and vim (.yp expands) and am messing with letter chording. Unite can essentially act as a clipboard manager while simultaneously replacing yank stack/ yank ring. I don't really need the complex functionality given by either; I just want a list I can scroll through and copy/paste from with vim bindings, and Unite does this well.
+1. navigate to open buffer or quickmarks (2-4 keys; 2 for right tab/workgroup, maybe 2 for getting correct pane or using a quickmark)
+2. interactive search of open buffers and mru files and current dir (unite, helm)
+3. locate or find search (or maybe ag if searching for by contents) (unite, helm)
+4. file manager w/ quickmarked dirs as last resort (ranger if in terminal vim; otherwise dired or vimfiler)
 
-There's also easyclip, which I find nicer than yank stack or yank ring even though I don't use it
+While I find things like fasd and vimfiler to be cool, I never really find myself using them because they actually end up being slower. On the commandline, fasd is probably the best option for non-quickmarked dirs that aren't close. I've kind of made it a bad habit to use ranger or blscd with quickmarks and f<chars> for directory navigation when fasd would be better. However, for opening files and the other actions it has, something interactive like fzf or ranger is a much better idea in my opinion. Using a fasd command in ranger, I think ranger might always be preferable to the commandline for navigation because you still have access to shell commands and get folder visualization as a bonus. Still, I don't deal with a huge number of folder, and manually added quickmarks/bookmarks for directories take care of most of my problems. Slow speed when loading certain folders in ranger may be an issue though (my only annoyance with it).
 
-Search underscore clipboard in my `.vimrc`.
+I don't currently have directory specific quickmarks for zsh, though I may add them in the future (if I've not mostly switched to emacs/(w)dired). Memorization is the trade-off though, and the less you use a quickmark mapping, the more forgettable it is. That's also why I find open buffers/tab layouts (saved in a vim/emacs session or setup automatically) and f s t key bindings for most frequently used files to be a nice way to not have to memorize things while keeping keystrokes to a minimum.
 
-## Termite Link Hinting and Remapping:
-Currently, termite does not support rebindings from the config file. I use colemak and prefer tmux copy mode, so this isn't that much of a problem for me. However, I really prefer termite's link hinting to things like urlview and urlscan. I usually only use link hinting in weechat, so I've bound f in normal mode (see my vimode.py fork) to `bin/link_hint.sh` to fake the key combo necessary to open the url hint window. I have a zsh binding, and for everything else I've bound it to tmux prefix-f (which I'll probably never use).
+In vim/emacs, I am using 'm' as a prefix key for whatever major mode/filetype I'm currently in. In org mode, m<keys> performs org mode navigation, clocking, todo, etc. actions. In code files, I use m<keys> to compile and run the current file in the shell split on the right (vimshell or eshell) as well as for repl interaction, error navigation, etc. I plan on using m<home row> to switch between channel buffers if I ever start using erc or circe.
 
-## Display Lyrics and Album Art With MPD (glitchy)
-Before I used ncmpcpp, I used cmus. I like the idea of having vi-like key bindings to begin with, but I could never get scrobbling working and like mpd a lot. However, to be frank, ncmpcpp has the worst binding capabilities of any tui program I use extensively (it's really pitiful), so I've recently switched to [vimus](https://github.com/vimus/vimus). I had some trouble installing it at first, and though it may not have as complex a ui as ncmpcpp, it has all the functionality I need as well as some interesting default bindings (like visual yanking and pasting of songs and appending/insertion of songs to the playlist) and support for multikey bindings.
+As for other, non-vim/emacs examples, I have context bindings for empty vs. non-empty workspaces/desktops. On empty desktops, I have sxhkd automatically restarted with a custom config for single key mappings for opening programs and switching desktops. Why use more keys than necessary? The transition time to get used to the difference was insignificant, so I don't think consistency is of any benefit here.
 
-Vimus also supports bindings to shell commands (it doesn't have things like a tag editor, so you can set up bindings to use external programs). I've set up a binding to open a tmux split and download the album art for the currently playing song if it doesn't exist using [artget](https://github.com/berkoz/artget) and then display it in a tmux split using w3m. This will work in terminal that support w3m's image display (xterm, urxvt, termite, terminology, gnome-terminal, etc.). To use this with a mpd client other than vimus that does not support bindings to shell commands, a tmux binding will be necessary, or the script will have to be run manually in window 1 split 1 (/path/to/script run_script_in_split).
-I now have it working so that it will update the album art without manually hitting a keybinding again. The displaying of the image may be more glitchy depending on the terminal emulator. Some glitches with tmux when viewing images include the image being displayed in other splits if left displayed when changing (goes away when you press a key) and the image not being fully visible (a black bar).
+In firefox, I also use the space bar as a prefix key for tab navigation. I bind <space><home row> to a command that will go to tab 1-10 in the curent tab range (e.g. <space>a on tab 24 will go to tab 21). I also have key bindings to switch to specific tab groups and setup a few custom key bindings depending on tab group. I haven't done much with this though since TabGroupie works very inconsistently. Pentadactyl's groups (not related to tab groups) are probably the best example for taking advantage of different contexts. I use them to set up site-specific key bindings. For example, on reddit, I pass through keys for use with RES and also add custom goto bindings with the prefix g for going to specific subreddits. I use this to setup more convenient zoom bindings on image urls. This also allows setting up custom key bindings for sites that have non-configurable key bindings.
 
-I've also bound a key to display the lyrics of the currently playing song in ncmpcpp in a tmux split.
+The best example I've seen of key re-use lately is [lispy](https://github.com/abo-abo/lispy). Org speed keys and [worf](https://github.com/abo-abo/worf) are also good examples.
 
-See `bin/music`
+See 
+`vim/.navigation.vim` and `emacs/.emacs.d/navigation.el` 
+`common/.config/bspwm/bspwmrc` and `remap/.config/sxhkd/empty_sxhkdrc` 
+`browsing/.pentadactylrc` (search `relative-move`) 
+`browsing/.pentadactyl/groups.penta`
 
-## Home Row Window Mangement (Eliminate the Window Management Binding Layer)
-See `.vimrc` and `.lesskey` for examples.
+## Stream Any Video in MPV
+Existing solutions for playing videos in the player of your choice (e.g. mplayer or vlc) are limited in what they work with. There are quite a few programs that allow this for a few sites such as youtube and daily motion (consider youtube-viewer and using quvi), but I'd rather use mpv with all its features (keybindings for screenshots, seeking, etc.) than send fake clicks to pause and play videos where things like [noflash](http://www-users.cs.umn.edu/~oztekin/software/noflash/) don't work. I'm not particularly fond of the mozplugger/viewtube approach either where your player is basically embedded in the browser instead of the default flash player (even if this worked with all sites.)
 
-For me, window management is pretty much split between tmux and bspwm. Bspwm takes care of all my gui windows (and occasionally a terminal window), and tmux takes care of all my terminal sessions, windows, splits, etc.
+This is a relatively simple thing to do in actuality. The reason existing solutions are site specific is because they operate based on the site link. Mpv will already play youtube videos from the url (and those on other sites supported by youtube-dl). It will have no problem playing pretty much any video if you pass it the direct link, so all you have to do is set up a script to get that link.
 
-The idea of modal window management has interested me, but modal window management isn't really efficient when most of the time you only execute one wm command (it just requires an extra key for escaping as opposed to using a prefix key). It introduces other problems as well. Escape can't be used to enter this "window management mode" (with sxhkd this would make escape lose functionality everywhere else). Unlike in vim, "normal mode" would be infrequently entered and immediately exited. Although I am a fan of modality, I do not think having modes within modes does anything other than overcomplicate things.
+There's certainly a much better way to do this, but I only know how to get this link manually: you open up firebug (or control+shift+j in chrome) and go to the net/media tab. When you play the video, the direct link will show up. What I've done is scripted the opening of the firebug window, the clicking on the video to start it, the clicking on the firebug window to copy that link, and then the opening of the link in mpv. This is mouse location dependent; the areas that need to be clicked will depend on screen size, window size, and firebug window size (all of these are constant for me but may be a problem if you use a floating wm; then again, if you're using a floating wm, you might not care about having to manually copy the link in the first place). I use this extensively, and it works quickly and consistently for me for almost every site/video player I've tried. A nice thing about firebug is that there is a wide range where you can click beside and below the media popup where it will allow you to copy the link.
 
-Instead of trying to mirror this functionality, I've found it most efficient to eliminate window management as a separate entity and build it in to all my programs just as I would set up the same (or similar) bindings for split navigation for different programs.
+Requirements: Pentadactyl with firebug plugin, MPV, and Firefox
+Some problems: Very rarely the video will quit in the middle or the buffering will be slow (it's the site's fault). For some sites, the played video won't be detected (I've only encountered this on two websites out of the 25+ I've tried).
 
-For optimally comfortable and distinct window management bindings, I would need 3-4 dedicated thumb keys (2 for bspc; 2 for tmux; in each case 1 where selection is two home row key presses and another where desktop/window(tmux) navigation and movement is 2 home row key presses). I don't have that many to spare and would rather use letter bindings.
+The firebug plugin for pentadactyl will not be able to open firebug if it has not been opened yet in the firefox window. I originally got around this by faking the key combo to open the console with xdotool, but realized that pentadactyl's emenu can be used instead. This fixes the problem where the binding had to be used twice to open the firebug console and get it to the right tab. This also makes it easier to setup autocommands to open firebug for specific sites. Another nice thing about firebug is that once you've opened it for a site in a window, it will open whenever you navigate to that site in that firefox window. However, I think this is a really ugly, hacky way of doing it, and hope to fix this in the future to somehow query firebug or something else instead for the direct link.
 
-I decided to test out setting up letter bindings for fun, but because it actually works fairly well, I've been using this regularly lately.. it makes room for other important keys instead of having as many specifically for window management, though I have not gotten rid of my wm key (super).
-
-Building bindings into every program instead of using sxhkd and a regular tmux prefix key has the following advantages:
-- The keys used can be on the home row (better position; 90% navigation is now home row)
-- The same physical keys can be used in each context (reducing the total number of needed keys) whereas if super is being used for bspc with a hotkey program, it cannot also be used for tmux
-Disadvantages:
-- Initial setup time (temporary)
-- You lose two keys for program specific bindings (not a big problem for me)
-- Not as viable if programs that don't allow this sort of rebinding are being used (I'm not using any)
-- Possible slowdown (maybe if you have hundreds of buffers and tabs in gvim)
-
-My four most used gui programs (gvim, firefox, mpv, and apvlv) all allow for bindings to terminal commands as well as multikey bindings (thanks to wm4 for recently implementing this in mpv!). I decided to try to eliminate the "wm layer" and build parallel wm bindings into the normal mode of each program. Colemak "r" becomes "redraw," "resize," etc. and colemak "s" becomes select (two keys I don't use much anyway and can easily get a lot more out of with a prefix key for window management than a single operation key). This means window management is now "builtin" to each program with the illusion of universality. If this doesn't make sense, basically instead of having to use a harder to reach prefix or modifier key for window management like super, alt, grave, etc. a letter can be used instead.
-
-This probably won't be as useful for anyone who uses a lot of gui programs (unless you are making extensive use of hooks to setup and get rid of modal hotkeys on window switching). For me, window management is something that should be out of the way and take essentially no time, and this worked a lot better than I thought it would (it replaces 95% use of a dedicated wm key for me). The difference between pressing "super+5" and rd (qwerty "sg") may not seem to be a big deal, but it's been quite noticeable to me. As for delay, I've only experienced slight lag when gvim was being slow. It should be noted that "-ex" and not "-builtin" should be used for pentadactyl bindings (builtin interpretting as keys is much slower and will cause a noticeable delay).
-
-I'd also like to try this with chording at some point (pressing qwerty s + {h,j,k,l} simultaneously will do window switching). However, very few programs support this kind of thing (vim and emacs). This gets pretty messy without a universal way of doing things, and it may just be better/cleaner to do window management with thumbkeys
-
-I initially thought this would be impossible to replicate in the terminal but spent a day testing it, and I have now built tmux bindings into all of tui my programs (vim, zsh, less, weechat, ranger, emacs, mutt, tig (which used to have just gotten multikey bindings), w3m, and vimus). The only downside of this is that zsh bindings obviously won't work if you have something running. On the other hand, this isn't that big of a deal because tmux allows use of a prefix key on a layer (e.g. mine is grave, which is mode_switch f for me). For things like interactive python and ghci, I sometimes like to run them in VimShell, so I can still use modal keybindings. Eshell how I envy you.
-
-See the README in the remap folder for more info.
+See 
+`scripts/bin/firebug_fake_mouse.sh` 
+the corresponding section in my `.pentadactylrc` (search undescore MPV)
 
 ## Make Gifs in MPV
-I thought it would be efficient to set up bindings within mpv to create gifs. Now that mpv has an a-b loop (issue #1241), I've gone back to using a script (`ffcut`) that first cuts part of a video out and then optionally makes a gif from that part. I have three keys set up in mpv for this: two to adjust the start and end positions and one to execute the script. To deal with videos being streamed, I've added a `-d` flag that will download the video using aria2 before cutting out a section (this assumes mpv has been passed the direct link of the video; see "Stream Any Video in MPV" above). Note that a-b looping still works when streaming, so while it will take longer to create the cut video, it won't take more key presses (the time points can be marked prior to the download). When downloading the video is a hassle, one can always use a start and stop hotkey (for example, bound with sxhkd or in mpv) to screen record what's playing in mpv instead.
+I thought it would be efficient to set up bindings within mpv to create gifs. Now that mpv has an a-b loop (issue #1241), I've gone back to using a script (`ffcut`) that first cuts part of a video out and then optionally makes a gif from that part. I have three keys set up in mpv for this: two to adjust the start and end positions and one to execute the script. To deal with videos being streamed, I've added a `-d` flag that will download the video using aria2 before cutting out a section (this assumes mpv has been passed the direct link of the video; see above). Note that a-b looping still works when streaming, so while it will take longer to create the cut video, it won't take more key presses (the time points can be marked prior to the download). When downloading the video is a hassle, one can always use a start and stop hotkey (for example, bound with sxhkd or in mpv) to screen record what's playing in mpv instead.
 
 The `makegif` script is just a wrapper for ffmpeg, imagemagick, and optionally gifsicle that takes a video, makes frames from it, and then creates an optimized 600 width 10 fps gif. It has much improved. For example, if the output gif is not satisfactory, one can simply use the frames already created and try different options:
-```bash
+```
 makegif <path/to/video>
 # notice that there are some extra frames at the end; go into ~/Move/gif/frames and delete a few at the end
 makegif -u
@@ -214,29 +168,78 @@ makegif -u -O 3 -z 1.8
 makegif -w 800 -O 3 -f 15 -o mygiff.gif <path/to/video>
 ```
 
+I still need to alter it to make it easier to deal with. I couldn't find a good way to be able to seek/use the exact time instead of from a key frame, so often one has to mark a larger section then delete the pictures at the beginning and end in the output directory (which is stupidly hardcoded currently). It works though. I'm thinking GNEVE may be an alternate way to do this better.
+
 An example gif with default settings (made within mpv):
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/example.gif "Tigre-sama Catches an Arrow")
 
 See 
-`scripts/bin/mpv/`
+`scripts/bin/mpv/` 
 `media/.mpv/input.conf`
 
+## Tabs Outliner Replacement
+One reason I stuck with Chromium for so long is because of this extension. I used to use things like pocket, evernote webclipper, other read later extensions, and even bookmarks for anything I wanted to look at later. I found it better to just save links in an organized structure with TO (if I didn't plan on looking at them for a while) and save anything I wanted to keep as html and incorporate it into my folder structure. I thought of several possibilities for replacing this functionality with pentadactyl (tab groups and session saving; stuff with bookmarks) and decided to use vimwiki as in interface for saved links. Basically, I created a script that saves the current link to a .wiki file by the title of the argument you give it. Saving all tabs can be done with pentadactyl's :tabdo command. Another binding opens an instance of vim for the index.wiki file which I automatically populate with the created wikis. Enter opens links. I may add a more "tree style" like structure in the future or do something with org mode instead.
+
+Like TO, when the window is closed (with a custom D binding), the link will be deleted from any of the .wiki files it is in.
+
+See 
+`scripts/bin/pentadactyl/to.sh` 
+`browsing/.pentadactylrc`
+
+## Vim/Emacs and the Clipboard
+I've tried quite a few clipboard managers without liking any of them. What I really wanted was one with vim bindings, so I ended up deciding just to use vim with Unite's history/yank source. This doesn't actually work if vim doesn't become focused before changing the clipboard contents. I don't usually need more than this, but I guess you could use something like CaptureClipboard in it's own vim instance if needed. There's also [clipmon](https://github.com/bburns/clipmon) for emacs which I'll probably start using instead. There's also easyclip, which I find nicer than yank stack or yank ring even though I don't use it.
+
+'y' and 'p' are my "universal" copy paste bindings. I don't use <c-v> or  <c-c>, and I have everything go to the system clipboard (+ register). I have these bindings set up for pentadactyl, zsh, weechat, vim, tmux, etc. I have also set up bindings for pasting into command mode and insert mode in pentadactyl and vim ('.yp' expands to clipboard contents) and am messing with letter chording.
+
+Search underscore clipboard in my `.vimrc`.
+
+## Termite Link Hinting and Remapping:
+Currently, termite does not support rebindings from the config file. I use colemak and prefer tmux copy mode, so this isn't that much of a problem for me. However, I really prefer termite's link hinting to things like urlview and urlscan. I usually only use link hinting in weechat, so I've bound f in normal mode (see my vimode.py fork) to `scripts/bin/link_hint.sh` to fake the key combo necessary to open the url hint window. I have a zsh binding, and for everything else I've bound it to tmux prefix-f (which I'll probably never use).
+
+This still isn't really optimal. Having to use numbers to select urls is annoying, and having to deal with multi-line urls in mutt and weechat is even more of a pain. By comparison, text selection and url opening is far better in a mail or irc client for emacs.
+
+## Home Row Window Mangement (Eliminate the Window Management Binding Layer)
+This started as something I did for fun, but I've actually found it pretty useful. See `.vimrc` and `.lesskey` for examples. I might abandon this in favour of thumbkey modifiers if I get a better keyboard.
+
+For me, window management is pretty much split between tmux and bspwm. Bspwm takes care of all my gui windows (and occasionally a terminal window), and tmux takes care of all my terminal sessions, windows, splits, etc.
+
+The idea of modal window management has interested me, but modal window management isn't really efficient when most of the time you only execute one wm command (it just requires an extra key for escaping as opposed to using a prefix key). It introduces other problems as well. Escape can't be used to enter this "window management mode" (with sxhkd this would make escape lose functionality everywhere else). Unlike in vim, "normal mode" would be infrequently entered and immediately exited. Although I am a fan of modality, I do not think having modes within modes does anything other than overcomplicate things. Instead of trying to mirror this functionality, I've found it most efficient to eliminate window management as a separate entity and build it in to all my programs just as I would set up the same (or similar) bindings for split navigation for different programs.
+
+My most used gui programs (gvim, firefox, mpv, apvlv/zathura, and sxiv) all allow for bindings to terminal commands as well as multikey bindings (thanks to wm4 for implementing this in mpv!). This probably won't be as useful for anyone who uses a lot of gui programs, without doing something particularly convulted like using sxhkd as a wrapper for modal keybindings (see below). The difference between pressing "super+5" and rd (qwerty "sg") may not seem to be a big deal, but it's been quite noticeable to me. As for delay, I've only experienced slight lag when gvim was being slow. It should be noted that "-ex" and not "-builtin" should be used for pentadactyl bindings (builtin interpretting as keys is much slower and will cause a noticeable delay).
+
+I've also built tmux bindings into all of tui my programs (vim, zsh, less, weechat, ranger, emacs, mutt, tig, w3m, and vimus). The only downside of this is that zsh bindings obviously won't work if you have something running (not a problem if you're running zsh in emacs though!). On the other hand, this isn't that big of a deal because tmux allows use of a prefix key on a layer (e.g. mine is grave, which is mode_switch f for me). For things like interactive python and ghci, I like to run them in vimshell or eshell, so I can still use modal keybindings (and things like slime). At some point in the distant future I may stop using terminals/tui software much at all in favour of emacs.
+
+Previously I was repurposing 'r' and 's' as these prefix keys. I've for the most part switched to just using r. I've started using the `wm_action` script as a wrapper for my window management keybindings. This is kind of ugly, but it has already allowed me to get rid of some old scripts I was using. For example, I've set it up to determine whether mpv is being run in a terminal or not so that bspc or tmux key bindings are used accordingly. I've started binding keys in sxhkd to it instead of directly to bspc (e.g. to wm_action wmsel left or something) with the intent of using this to use the same sxhkd config when experimenting with other window managers. I'm also using it in the programs I am remapping 'r' for so that I can change the actions for certain keys in one place instead of 10 and have them work in whatever wm I'm working with.
+
+I'd also like to try window management with chording or dual-roled keys at some point (pressing qwerty s + {h,j,k,l} simultaneously will do window switching). This gets pretty messy without a universal way of doing chording, and it may just be better/cleaner to do window management with thumbkeys instead.
+
+See the README in the remap folder for more info.
+
+## Flashcard Script
+I've made a simple cli flashcard script with zsh completion. I'm probably going to trash this in favour with something like org-drill or something else like anki.
+
+See 
+`scripts/bin/flashcards` 
+`terminal/.zsh/completion/_flashcards`
+
+## Create a Modal Interface For Programs That Don't Support Rebinding
+I've pretty much abandoned software that doesn't support modality and prefix bindings, but this may be useful for users of such software.
+
+There are many programs that have extensive keyboard shortcuts that could potentially be useful if their default bindings weren't oriented towards masochists. For some programs, the few available shortcuts can still be massively useful when implemented in vim-like modes (e.g. Libre Office).
+
+Solution: Rebind keys to fake the existing keyboard shortcuts
+[Video Demonstration With Libre Writer](http://youtu.be/iB1fCASlpY8)
+
+[Explanation](http://forum.colemak.com/viewtopic.php?id=1817)
+
+This solution is restricted to X currently (though something similar could probably done with AHK). It makes use of xchainkeys for the modal bindings and xdotool and xsendkey to fake the necessary keyboard input. A potentially "software independent" solution would be to use tmk firmware to make layers with macros and keys for "mode" (layer) switching. I have not been able to test this.
+
+See `remap/xchainkeys.examplevimlayer.conf` for an example configuration for Libre Writer. Since I've started using LaTeX instead for the most part, I haven't done anything else with this, but I think that it would be more desirable to have the modal interface automatically started (setting up and deconstructing bindings on window change) for the program it is being used for (using bspc --subscribe and awk to run a bash script on window change that checks if the current window is, for example, Libre Office).
 
 # Credit
-If I've taken anything from anyone else's config file, I've almost always put the url in the relevant config file.
+Anything I've swiped for my config files has a url.
 
-Some general stuff:
-Credit to vaskozl for his thread on not using the mouse, which is one of the main reasons I ever took interest in any of this shit.
-Credit to DreymaR and lalop for inspiration on layout stuff after I switched to Colemak and to bunnfly for colemak vim config (all from Colemak forum).
-Credit to [this site](https://osrc.dfm.io/angelic-sedition/) for making me feel amazing about myself, even though the statistics are misleading as hell.
+Some general stuff: 
+Credit to vaskozl for [his thread](http://forum.colemak.com/viewtopic.php?id=1731&p=1) on not using the mouse, which is one of the main reasons I ever took interest in any of this. Credit to DreymaR and lalop for inspiration on layout stuff after I switched to Colemak and to bunnfly for the colemak vim config (all from the Colemak forum).
 
-For now I'll just list a few devs whose work I admire:
-- baskerville/bloom
-- Shougo
-- tpope
-- kana
-- junegunn
-- codestation
-- Coldbird (from wololo)
-- hasu (on geekhack) for tmk
-- sol and haasn
+Thanks to baskerville/bloom for bspwm and sxhkd. Thanks to kana, Shougo, tpope, junegunn, etc. for all their awesome vim plugins. Thanks to abo-abo for his awesome emacs packages like lispy and hydra. Thanks to tuhdo for his great guide on helm. Thanks to codestation for qcma. Thanks to sol, haasn, etc. for vimus. Thanks to ttzhou for setroot.
