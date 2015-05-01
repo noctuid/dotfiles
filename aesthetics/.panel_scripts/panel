@@ -270,10 +270,7 @@ netConnection() {
 	colour3=$3
 
 	# get active interface name
-	interface=$(ip route get 8.8.8.8 | awk '{print $5;exit}')
-	# can parse ifconfig or ip link if need every interface name
-	# wlan_device=$(ifconfig | awk -F ":" '/^wl/ {print $1}')
-
+	interface=$(ip link show up | awk -F ": " '/state UP/ {print $2}')
 	# wired connection
 	if [[ $interface =~ ^e ]]; then
 		echo "${colour1}⮃ W"
