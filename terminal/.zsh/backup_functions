@@ -1,6 +1,10 @@
-# vim: ft=sh
-# maybe switch to rdiff-backup
-# maybe combine sndatab and bahamut
+#!/bin/bash
+# TODO:
+# Maybe switch to tcplay at some point
+# Combine common past of bahamut and sndatab
+
+RUN_BY_CRON="${RUN_BY_CRON:-false}"
+# Help {{{
 function bkhelp() {
 	echo "
 sndot            - sync dotfiles & vimwiki to ag-sys (soma tc volume)
@@ -26,45 +30,63 @@ snpspbk          - backup psp memcard to database
 snpspdata        - backup psp savedata to database
 "
 }
+# }}}
 
-# Mounting# {{{
+# Mounting {{{
 # unmount most recent external drive
 alias uned="devmon -c"
 # unmount all external
 alias uneda="devmon -u"
 # eject disk
 alias ej="sudo eject /dev/sr0"
+function maybe_eject() {
+	echo "Eject last mounted drive? (y/n)"
+	# read is different for zsh
+	read -q REPLY
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+		return 1
+	else
+		devmon -c
+	fi
+}
 # }}}
 
-# TC mounting and unmounting# {{{
+# TC mounting and unmounting {{{
 function mount_tc() {
 	tc_volume=$1
 	mount_point=$2
 	# don't print errors
-	if [ "$(truecrypt -t -l 2> /dev/null | grep $tc_volume)" != "" ]; then
+	if [[ "$(truecrypt -t -l 2> /dev/null | grep "$tc_volume")" != "" ]]; then
 		echo "Already mounted."
 	else
-		if [ ! -f $tc_volume ]; then
+		if [[ ! -f "$tc_volume" ]]; then
 			echo "Error. The specified path ($tc_volume) for the tc volume does not exist."
 			return 1
-		elif [ "$(ls -A $mount_point)" ]; then
+		elif [[ "$(ls -A "$mount_point")" ]]; then
 			echo "Error. Files exist in ($mount_point). Move/delete them."
 			return 1
 		else
-			mkdir -p $mount_point
-			truecrypt -t --protect-hidden=no --keyfiles= $tc_volume $mount_point
+			mkdir -p "$mount_point"
+			if $RUN_BY_CRON; then
+				# use gui popup
+				truecrypt "$tc_volume" "$mount_point"
+			else
+				truecrypt -t --protect-hidden=no --keyfiles= "$tc_volume" "$mount_point"
+			fi
 		fi
 	fi
 }
 
 # prevent errors when a volume already is unmounted
 function umount_tc() {
-	if [ -n "$1" ]; then
+	if [[ -n "$1" ]]; then
 		tc_volume=$1
 
 		# only try to unmount if mounted
-		if [ "$(truecrypt -t -l 2> /dev/null | grep $tc_volume)" != "" ]; then
-			truecrypt -t -d $tc_volume
+		if [[ "$(truecrypt -t -l 2> /dev/null | grep "$tc_volume")" != "" ]]; then
+			truecrypt -t -d "$tc_volume" && \
+			echo "Umounted $tc_volume successfully."
 		fi
 	else
 		# umount all
@@ -80,13 +102,18 @@ mountacct() {
 	truecrypt ~/ag-sys/Else/ACCTS ~/blemish
 }
 
-alias umountacct="truecrypt -t -d ~/ag-sys/Else/ACCTS"
+alias umountacct="umount_tc ~/ag-sys/Else/ACCTS"
 
 # }}}
 
-# Shared# {{{
-alias mountsoma="mount_tc $HOME/soma $HOME/ag-sys/"
-alias umountsoma="umount_tc $HOME/soma"
+# Shared {{{
+function mountsoma() {
+	mount_tc "$HOME"/soma "$HOME"/ag-sys/
+}
+function umountsoma() {
+	umount_tc "$HOME"/ag-sys/Else/ACCTS
+	umount_tc "$HOME"/soma
+}
 # sync ~/grive to google drive
 alias sngdrive="cd ~/grive/ ; grive -V"
 alias spideroak="SpiderOak"
@@ -98,15 +125,17 @@ function sndot() {
 }
 # }}}
 
-# soma backup# {{{
+# soma backup {{{
 function bahamut() {
 	online=false
 	mountdir=/media
+	no_eject=false
 	while getopts :m:ho opt
 	do
 		case $opt in
 		m) mountdir=$OPTARG;;
 		o) online=true;;
+		n) no_eject=true;;
 		h) bkhelp && return 1;;
 		*) echo "invalid option" && return 1;;
 		esac
@@ -121,32 +150,35 @@ function bahamut() {
 	else
 		if $online; then
 			mountsoma && \
-			mount_tc $HOME/grive/soma_bk $HOME/ag-sys-bk-onl && \
+			mount_tc "$HOME"/grive/soma_bk "$HOME"/ag-sys-bk-onl && \
 			sndot && \
-			rsync -avrhP --delete $HOME/ag-sys/ $HOME/ag-sys-bk-onl && \
-			truecrypt -t -d ~/grive/soma_bk && \
+			rsync -avrhP --delete "$HOME"/ag-sys/ "$HOME"/ag-sys-bk-onl && \
+			umount_tc ~/grive/soma_bk && \
 			sngdrive && \
 			echo "Backup of soma to gdrive completed succesfully."
 		else
-			usb_location="$mountdir/${@: -1}"
-			if [ -d "$usb_location" ]; then
+			usb_location=$mountdir/${*:0-1}
+			if [[ -d "$usb_location" ]]; then
 				# if soma volume doesn't already exist, copy it over
-				if [ ! -f $usb_location/soma ]; then
+				if [[ ! -f "$usb_location/soma" ]]; then
 					umountsoma && \
-					rsync -avhP $HOME/soma $usb_location && \
+					rsync -avhP "$HOME"/soma "$usb_location" && \
 					echo "Backup of soma to $usb_location completed succesfully." || \
 					echo "bahamut failed."
 				else
 					mountsoma && \
-					mount_tc $usb_location/soma $HOME/ag-sys-bk && \
+					mount_tc "$usb_location"/soma "$HOME"/ag-sys-bk && \
 					sndot && \
-					rsync -avrhP --delete $HOME/ag-sys/ $HOME/ag-sys-bk && \
+					rsync -avrhP --delete "$HOME"/ag-sys/ "$HOME"/ag-sys-bk && \
 					echo "Backup of soma to $usb_location completed succesfully." || \
 					echo "bahamut failed."
-					truecrypt -t -d $usb_location/soma
+					umount_tc "$usb_location"/soma && \
+					if ! $no_eject; then
+						maybe_eject
+					fi
 				fi
 			else
-				echo "Error. USB drive ${@: -1} is not mounted at $mountdir."
+				echo "Error. USB drive ${*:0-1} is not mounted at $mountdir."
 				return 1
 			fi
 		fi
@@ -155,17 +187,15 @@ function bahamut() {
 
 # }}}
 
-# quick net backup# {{{
+# quick net backup {{{
 # add grive option
 # ~8mb volume
 
-alias umountsmallestbktc="truecrypt -t -d ~/grive/smallest_soma_bk"
-
 function sin() {
 	mountsoma && \
-	mount_tc $HOME/grive/smallest_soma_bk $HOME/smallest_bk && \
+	mount_tc "$HOME"/grive/smallest_soma_bk "$HOME"/smallest_bk && \
 	sndot && \
-	rsync -avrh --progress --delete --prune-empty-dirs --exclude={".Trash/*",".git/*","Portable/*","Gaming/*","Large/*","Customization/win/*","chats/*","dotfiles/*"} --include={"*/","*.txt","*.tex","*.md","*.mkd","*.mkdn",} --exclude='*' ~/ag-sys/ ~/smallest_bk && \
+	rsync -avrh --progress --delete --prune-empty-dirs --exclude={".Trash/*",".git/*","Portable/*","Gaming/*","Large/*","Customization/win/*","chats/*","dotfiles/*"} --include={"*/","*.txt","*.tex","*.md","*.mkd","*.mkdn"} --exclude='*' ~/ag-sys/ ~/smallest_bk && \
 	umount_tc ~/grive/smallest_soma_bk && \
 	SpiderOak --batchmode --backup='~/grive/smallest_soma_bk' && \
 	echo "Minimal backup to Spider Oak completed." || \
@@ -173,7 +203,7 @@ function sin() {
 }
 # }}}
 
-# home backup# {{{
+# home backup {{{
 # add music back; smarter soma sync; add important from mail, wine, etc.
 # add more useless dirs to exclude
 function snhometoexternal() {
@@ -192,15 +222,16 @@ function snhometoexternal() {
 	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 		return 1
 	else
-		exthd_loc="$mountdir/${@: -1}"
-		if [ -d "$exthd_loc" ]; then
-			mkdir -p "$exthd_loc/home_bk"
-			rsync -avrhP --delete --include={".cabal/",".cards/",".gnupg/",".mail/",".mozilla/","_repos/","_school/","anime/","dotfiles/",".gem/","Move/","Music/","ps_vita/","vimwiki/","wallpaper/"} --exclude="/*" --prune-empty-dirs ~/ "$exthd_loc/home_bk" || echo "snhometoexternal failed."
+		exthd_loc=$mountdir/${*:0-1}
+		if [[ -d "$exthd_loc" ]]; then
+			mkdir -p "$exthd_loc"/home_bk
+			# if exclude *, won't transfer dir contents, by specifying /* (/ refering to the top of the from dir), the contents of the included folders will be transferred (because of -r)
+			rsync -avrhP --delete --include={".cabal/",".cards/",".gnupg/",".mail/",".mozilla/","_repos/","_school/","_/projects","anime/","dotfiles/",".gem/","Move/","Music/","ps_vita/","vimwiki/","wallpaper/","quicklisp/",".cargo/",".password-store "} --exclude="/*" --prune-empty-dirs ~/ "$exthd_loc/home_bk" || echo "snhometoexternal failed."
 			# sync truecrypt volumes as well as well
-			bahamut -m $exthd_loc home_bk
-			syncdatab -m $exthd_loc home_bk
+			bahamut -m "$exthd_loc" -n home_bk
+			sndatab -m "$exthd_loc" home_bk
 		else
-			echo "Error. External drive ${@: -1} is not mounted at $mountdir."
+			echo "Error. External drive ${*:0-1} is not mounted at $mountdir."
 			return 1
 		fi
 	fi
@@ -218,9 +249,13 @@ alias bkhbuffalo="snhometobuffalo"
 
 # }}}
 
-# backup database to external harddrive# {{{
-alias mountdatab="mount_tc $HOME/datab $HOME/database"
-alias umountdatab="umount_tc ~/datab"
+# backup database to external harddrive {{{
+function mountdatab() {
+	mount_tc "$HOME"/datab "$HOME"/database
+}
+function umountdatab() {
+	umount_tc ~/datab
+}
 
 function sndatab() {
 	mountdir=/media
@@ -239,37 +274,37 @@ function sndatab() {
 	then
 		return 1
 	else
-		exthd_loc="$mountdir/${@: -1}"
-		if [ -d "$exthd_loc" ]; then
+		exthd_loc=$mountdir/${*:0-1}
+		if [[ -d "$exthd_loc" ]]; then
 			# if soma volume doesn't already exist, copy it over
-			if [ ! -f "$exthd_loc/datab" ]; then
+			if [[ ! -f "$exthd_loc/datab" ]]; then
 				umountdatab && \
-				rsync -avhP $HOME/datab "$exthd_loc" && \
+				rsync -avhP "$HOME"/datab "$exthd_loc" && \
 				echo "Backup of datab to $exthd_loc completed succesfully." || \
 				echo "sndatab failed."
 			else
 				mountdatab && \
- 				mount_tc "$exthd_loc/datab" $HOME/database-bk && \
+ 				mount_tc "$exthd_loc/datab" "$HOME"/database-bk && \
 				sndot && \
-				rsync -avrhP --delete $HOME/database/ $HOME/database-bk && \
+				rsync -avrhP --delete "$HOME"/database/ "$HOME"/database-bk && \
 				echo "Backup of datab to $exthd_loc completed succesfully." || \
 				echo "sndatab failed."
-				truecrypt -t -d "$exthd_loc/datab"
+				umount_tc "$exthd_loc/datab"
 			fi
 		else
-			echo "Error. External drive ${@: -1} is not mounted at $mountdir."
+			echo "Error. External drive ${*:0-1} is not mounted at $mountdir."
 			return 1
 		fi
 	fi
 }
 
 function bkdatabtoseagate() {
-	syncdatab /media/seagate
+	sndatab /media/seagate
 }
 alias bkdsea="bkdatabtoseagate"
 
 function bkdatabtobuffalo() {
-	syncdatab /media/HD-CEU2\ Backup
+	sndatab /media/HD-CEU2\ Backup
 }
 alias bkdbuffalo="bkdatabtobuffalo"
 
@@ -289,7 +324,7 @@ snpspbk() {
 	then
 		return 1
 	else
-		if [ -d /media/MS0/ ];then
+		if [[ -d /media/MS0/ ]];then
 			mountdatab && \
 			rsync -avrh --progress --delete /media/MS0/ ~/database/database/Gaming/handheld/PSP/PSP\ Backup/
 		else
@@ -308,7 +343,7 @@ snpspdata() {
 	then
 		return 1
 	else
-		if [ -d /media/MS0/ ];then
+		if [[ -d /media/MS0/ ]];then
 			mountdatab && \
 			rsync -avrh --progress --delete /media/MS0/SAVEDATA ~/database/database/Gaming/handheld/PSP/savedata/
 		else
@@ -318,3 +353,5 @@ snpspdata() {
 	fi
 }
 # }}}
+# vim is dumb
+# vim: ft=sh
