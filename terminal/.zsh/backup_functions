@@ -197,6 +197,8 @@ function sin() {
 	sndot && \
 	rsync -avrh --progress --delete --prune-empty-dirs --exclude={".Trash/*",".git/*","Portable/*","Gaming/*","Large/*","Customization/win/*","chats/*","dotfiles/*"} --include={"*/","*.txt","*.tex","*.md","*.mkd","*.mkdn"} --exclude='*' ~/ag-sys/ ~/smallest_bk && \
 	umount_tc ~/grive/smallest_soma_bk && \
+	# update modification time so will be accuate on places backed up to
+	touch ~/grive/smallest_soma_bk && \
 	SpiderOak --batchmode --backup='~/grive/smallest_soma_bk' && \
 	echo "Minimal backup to Spider Oak completed." || \
 	echo "Minimal backup to Spider Oak failed."
