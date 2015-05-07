@@ -1,5 +1,5 @@
 ### Info
-The panels are bar aint recursive (see `.config/bspwm/panel`). The current one is based on the default bspwm bar and [esn89's bar](https://github.com/esn89/dotfiles). I am using [benghaem's scroller](https://github.com/benghaem/dotfiles/tree/master/bin/panel) for scrolling. The top panel from the old screenshot is `not_in_use/panel2`.
+The panels are bar aint recursive (see `.config/bspwm/panel`). The current one is based on the default bspwm bar with some heavily modified functions from [esn89's bar](https://github.com/esn89/dotfiles). I am using [zscroll](https://github.com/angelic-sedition/zscroll) for scrolling. The top panel from the old screenshot is `not_in_use/panel2`.
 
 The conky theme is [charley166's lsd theme](http://charley166.deviantart.com/art/LSD-conky-config-v2-0-392188352) (I've modified it to create a black version as well).
 
