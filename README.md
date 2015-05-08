@@ -54,7 +54,7 @@ I've tried to create a much more generalized version of my dropdown script that 
 See [tdrop](https://github.com/angelic-sedition/tdrop) and make an issue if there isn't already floating support for your wm.
 
 ## Use Ranger Instead of Default GUI Popup for File Saving
-Pentadactyl already has :w and ;s which allow for typing out file paths with tab completion. This is cumbersome especially if you have as large a folder structure as I do. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating term with ranger running and pass the file location to ranger's --selectfile and cut it (see `scripts/bin/ranger/ranger_browser_fm.sh`).
+Pentadactyl already has :w and ;s which allow for typing out file paths with tab completion. This is cumbersome especially if you have as large a folder structure as I do. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating term with ranger running and pass the file location to ranger's --selectfile and cut it (see `scripts/bin/ranger/ranger_browser_fm.sh`). I also have a dired section which, when used with emacsclient, can start a lot faster than ranger.
 
 See [this post](http://angelic-sedition.github.io/blog/2014/04/30/using-ranger-for-downloads/) for more detailed information and other possibilities.
 
@@ -93,21 +93,19 @@ Existing solutions for playing videos in the player of your choice (e.g. mplayer
 
 This is a relatively simple thing to do in actuality. The reason existing solutions are site specific is because they operate based on the site link. Mpv will already play youtube videos from the url (and those on other sites supported by youtube-dl). It will have no problem playing pretty much any video if you pass it the direct link, so all you have to do is set up a script to get that link.
 
-There's certainly a much better way to do this, but I only know how to get this link manually: you open up firebug (or control+shift+j in chrome) and go to the net/media tab. When you play the video, the direct link will show up. What I've done is scripted the opening of the firebug window, the clicking on the video to start it, the clicking on the firebug window to copy that link, and then the opening of the link in mpv. This is mouse location dependent; the areas that need to be clicked will depend on screen size, window size, and firebug window size (all of these are constant for me but may be a problem if you use a floating wm; then again, if you're using a floating wm, you might not care about having to manually copy the link in the first place). I use this extensively, and it works quickly and consistently for me for almost every site/video player I've tried. A nice thing about firebug is that there is a wide range where you can click beside and below the media popup where it will allow you to copy the link.
+There's certainly a much better way to do this, but I only know how to get this link manually: you open up firebug (or control+shift+j in chrome) and go to the net/media tab. When you play the video, the direct link will show up. You can also use the media sniffer firefox plugin (which is short and could probably easily be turned into a pentdactyl plugin). What I've done is scripted the clicks. This is mouse location dependent; the areas that need to be clicked will depend on menu size (which depends on the gtk theme or window size if firebug or something similar is being used). I use this extensively, and it works quickly and consistently for me for almost every site/video player I've tried.
 
-Requirements: Pentadactyl with firebug plugin, MPV, and Firefox
+Requirements: Pentadactyl with firebug or media sniffer plugin, MPV, and Firefox
 Some problems: Very rarely the video will quit in the middle or the buffering will be slow (it's the site's fault). For some sites, the played video won't be detected (I've only encountered this on two websites out of the 25+ I've tried).
 
-The firebug plugin for pentadactyl will not be able to open firebug if it has not been opened yet in the firefox window. I originally got around this by faking the key combo to open the console with xdotool, but realized that pentadactyl's emenu can be used instead. This fixes the problem where the binding had to be used twice to open the firebug console and get it to the right tab. This also makes it easier to setup autocommands to open firebug for specific sites. Another nice thing about firebug is that once you've opened it for a site in a window, it will open whenever you navigate to that site in that firefox window. However, I think this is a really ugly, hacky way of doing it, and hope to fix this in the future to somehow query firebug or something else instead for the direct link.
-
 See  
-`scripts/bin/firebug_fake_mouse.sh`  
+`scripts/bin/pentadactyl`  
 the corresponding section in my `.pentadactylrc` (search undescore MPV)
 
 ## Make Gifs in MPV
-I thought it would be efficient to set up bindings within mpv to create gifs. Now that mpv has an a-b loop (issue #1241), I've gone back to using a script (`ffcut`) that first cuts part of a video out and then optionally makes a gif from that part. I have three keys set up in mpv for this: two to adjust the start and end positions and one to execute the script. To deal with videos being streamed, I've added a `-d` flag that will download the video using aria2 before cutting out a section (this assumes mpv has been passed the direct link of the video; see above). Note that a-b looping still works when streaming, so while it will take longer to create the cut video, it won't take more key presses (the time points can be marked prior to the download). When downloading the video is a hassle, one can always use a start and stop hotkey (for example, bound with sxhkd or in mpv) to screen record what's playing in mpv instead.
+I thought it would be efficient to set up bindings within mpv to create gifs. Now that mpv has an a-b loop (issue #1241), I've gone back to using a script (`ffcut`) that first cuts part of a video out and then optionally makes a gif from that part. To deal with videos being streamed, I've added a `-d` flag that will download the video using aria2 before cutting out a section (this assumes mpv has been passed the direct link of the video; see above). When downloading the video is a hassle, one can always use a start and stop hotkey (for example, bound with sxhkd or in mpv) to screen record what's playing in mpv instead.
 
-The `makegif` script is just a wrapper for ffmpeg, imagemagick, and optionally gifsicle that takes a video, makes frames from it, and then creates an optimized 600 width 10 fps gif. It has much improved. For example, if the output gif is not satisfactory, one can simply use the frames already created and try different options:
+The `makegif` script is just a wrapper for ffmpeg, imagemagick, and optionally gifsicle that takes a video, makes frames from it, and then creates an optimized 600 width 10 fps gif. It has much improved (but still sucks and needs to be updated). For example, if the output gif is not satisfactory, one can simply use the frames already created and try different options:
 ```
 makegif <path/to/video>
 # notice that there are some extra frames at the end; go into ~/Move/gif/frames and delete a few at the end
@@ -118,7 +116,7 @@ makegif -u -O 3 -z 1.8
 makegif -w 800 -O 3 -f 15 -o mygiff.gif <path/to/video>
 ```
 
-I still need to alter it to make it easier to deal with. I couldn't find a good way to be able to seek/use the exact time instead of from a key frame, so often one has to mark a larger section then delete the pictures at the beginning and end in the output directory (which is stupidly hardcoded currently). It works though. I'm thinking GNEVE may be an alternate way to do this better.
+I still need to alter it to make it easier to deal with. I couldn't find a good way to be able to seek/use the exact time instead of from a key frame, so often one has to mark a larger section then delete the pictures at the beginning and end in the output directory (which is stupidly hardcoded currently). [These](https://github.com/lvml/mpv-plugin-excerpt) [two](https://gist.github.com/Zehkul/25ea7ae77b30af959be0) mpv plugins would be a better way to cut or crop the video first.
 
 An example gif with default settings (made within mpv):
 ![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/example.gif "Tigre-sama Catches an Arrow")
@@ -126,27 +124,6 @@ An example gif with default settings (made within mpv):
 See  
 `scripts/bin/mpv/`  
 `media/.mpv/input.conf`
-
-## Tabs Outliner Replacement
-One reason I stuck with Chromium for so long is because of this extension. I used to use things like pocket, evernote webclipper, other read later extensions, and even bookmarks for anything I wanted to look at later. I found it better to just save links in an organized structure with TO (if I didn't plan on looking at them for a while) and save anything I wanted to keep as html and incorporate it into my folder structure. I thought of several possibilities for replacing this functionality with pentadactyl (tab groups and session saving; stuff with bookmarks) and decided to use vimwiki as in interface for saved links. Basically, I created a script that saves the current link to a .wiki file by the title of the argument you give it. Saving all tabs can be done with pentadactyl's :tabdo command. Another binding opens an instance of vim for the index.wiki file which I automatically populate with the created wikis. Enter opens links. I may add a more "tree style" like structure in the future or do something with org mode instead.
-
-Like TO, when the window is closed (with a custom D binding), the link will be deleted from any of the .wiki files it is in.
-
-See  
-`scripts/bin/pentadactyl/to.sh`  
-`browsing/.pentadactylrc`
-
-## Vim/Emacs and the Clipboard
-I've tried quite a few clipboard managers without liking any of them. What I really wanted was one with vim bindings, so I ended up deciding just to use vim with Unite's history/yank source. This doesn't actually work if vim doesn't become focused before changing the clipboard contents. I don't usually need more than this, but I guess you could use something like CaptureClipboard in it's own vim instance if needed. There's also [clipmon](https://github.com/bburns/clipmon) for emacs which I'll probably start using instead. There's also easyclip, which I find nicer than yank stack or yank ring even though I don't use it.
-
-'y' and 'p' are my "universal" copy paste bindings. I don't use `<c-v>` or  `<c-c>`, and I have everything go to the system clipboard (+ register). I have these bindings set up for pentadactyl, zsh, weechat, vim, tmux, etc. I have also set up bindings for pasting into command mode and insert mode in pentadactyl and vim ('.yp' expands to clipboard contents) and am messing with letter chording.
-
-Search underscore clipboard in my `.vimrc`.
-
-## Termite Link Hinting and Remapping:
-Currently, termite does not support rebindings from the config file. I use colemak and prefer tmux copy mode, so this isn't that much of a problem for me. However, I really prefer termite's link hinting to things like urlview and urlscan. I usually only use link hinting in weechat, so I've bound f in normal mode (see my vimode.py fork) to `scripts/bin/link_hint.sh` to fake the key combo necessary to open the url hint window. I have a zsh binding, and for everything else I've bound it to tmux prefix-f (which I'll probably never use).
-
-This still isn't really optimal. Having to use numbers to select urls is annoying, and having to deal with multi-line urls in mutt and weechat is even more of a pain. By comparison, text selection and url opening is far better in a mail or irc client for emacs.
 
 ## Home Row Window Mangement (Eliminate the Window Management Binding Layer)
 This started as something I did for fun, but I've actually found it pretty useful. See `.vimrc` and `.lesskey` for examples. I might abandon this in favour of thumbkey modifiers if I get a better keyboard.
@@ -165,17 +142,10 @@ I'd also like to try window management with chording or dual-roled keys at some 
 
 See the README in the remap folder for more info.
 
-## Flashcard Script
-I've made a simple cli flashcard script with zsh completion. I'm probably going to trash this in favour with something like org-drill or something else like anki.
-
-See  
-`scripts/bin/flashcards`  
-`terminal/.zsh/completion/_flashcards`
-
 ## Create a Modal Interface For Programs That Don't Support Rebinding
 I've pretty much abandoned software that doesn't support modality and prefix bindings, but this may be useful for users of such software.
 
-There are many programs that have extensive keyboard shortcuts that could potentially be useful if their default bindings weren't oriented towards masochists. For some programs, the few available shortcuts can still be massively useful when implemented in vim-like modes (e.g. Libre Office).
+There are many programs that have extensive keyboard shortcuts that could potentially be useful if their default bindings weren't oriented towards masochists. For some programs, the few available shortcuts can still be massively useful when implemented in vim-like modes (e.g. Libre Office). It is worth noting that this isn't that great of an approach. For example, a better solution exists at least for Libre Office (see [vibreoffice](https://github.com/seanyeh/vibreoffice)). Hopefully embedded vim/neovim will replace vim emulation for text editing though.
 
 Solution: Rebind keys to fake the existing keyboard shortcuts
 
@@ -185,7 +155,7 @@ Solution: Rebind keys to fake the existing keyboard shortcuts
 
 This solution is restricted to X currently (though something similar could probably done with AHK). It makes use of xchainkeys for the modal bindings and xdotool and xsendkey to fake the necessary keyboard input. A potentially "software independent" solution would be to use tmk firmware to make layers with macros and keys for "mode" (layer) switching. I have not been able to test this.
 
-See `remap/xchainkeys.examplevimlayer.conf` for an example configuration for Libre Writer. Since I've started using LaTeX instead for the most part, I haven't done anything else with this, but I think that it would be more desirable to have the modal interface automatically started (setting up and deconstructing bindings on window change) for the program it is being used for (using bspc --subscribe and awk to run a bash script on window change that checks if the current window is, for example, Libre Office).
+See `remap/xchainkeys.examplevimlayer.conf` for an example configuration for Libre Writer. Since I've started using LaTeX or simple markup instead for the most part, I haven't done anything else with this, but I think that it would be more desirable to have the modal interface automatically started (setting up and deconstructing bindings on window change) for the program it is being used for (using bspc --subscribe and awk to run a bash script on window change that checks if the current window is, for example, Libre Office).
 
 # Goals for Configuration & Workflow:
 - Increase efficiency and speed; cut wasted time and movement
