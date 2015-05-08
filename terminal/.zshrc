@@ -670,8 +670,10 @@ alias poweroff='sudo systemctl poweroff'
 #===============
 # Symlink All Dotfiles With Stow# {{{
 #===============
-alias deploy='cd ~/dotfiles ; stow -vt ~/ common terminal private vim remap media music aesthetics mail_and_cal news browsing scripts startup games'
-alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim remap media music aesthetics mail_and_cal news browsing scripts startup games'
+alias deploy='cd ~/dotfiles ; stow -vt ~/ common terminal private vim remap media music aesthetics mail news browsing scripts startup games
+emacs'
+alias restow='cd ~/dotfiles ; stow -Rvt ~/ common terminal private vim remap media music aesthetics mail news browsing scripts startup games emacs'
+
 # }}}
 #===============
 # Git Aliases# {{{
