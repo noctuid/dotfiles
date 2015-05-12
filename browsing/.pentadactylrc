@@ -167,57 +167,42 @@ silent qmark y http://youtube.com/
 
 "}}}
 " #==============================
-" # BMarks {{{
+" # Bookmark Searches {{{
 " #==============================
-" https://github.com/mashiro/dot-files/blob/master/.vimperatorrc
-" this is specifically for custom search bookmarks and such; edited because bookmarks.isBookmarked is deprecated apparently
-
-javascript <<EOM
-function bmark(title, url, keyword) {
-	if (!bookmarkcache.isBookmarked(url)) {
-		bookmarks.add(false, title, url, keyword, ['keyword'], false);
-	}
-}
-
-bmark('Amazon', 'http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s','am')
-bmark('Arch Wiki', 'http://wiki.archlinux.org/index.php?search=%s', 'aw')
-bmark('Duck Duck Go', 'http://duckduckgo.com/?q=%s', 'd')
-bmark('Post to Twitter', 'http://twitter.com/home?status=%s', 'tweet')
-bmark('Quickly Get to Subreddit', 'http://www.reddit.com/r/%s/', 'r')
-bmark('Rotten Tomatoes Search', 'http://www.rottentomatoes.com/search/?search=%s', 'rt')
-bmark('Search Albums', 'http://www.allmusic.com/search/all/%s', 'mus')
-bmark('Search Anime4fun', 'http://www.anime4fun.com/search?keyword=%s', 'aff')
-bmark('Search Azlyrics', 'http://search.azlyrics.com/search.php?q=%s', 'az')
-bmark('Search Deviantart', 'http://www.deviantart.com/?q=%s', 'dv')
-// bmark('Search Fakku', 'http://www.fakku.net/search/%s', 'fk')
-//search tags
-bmark('Search Batoto', 'http://bato.to/search?name_cond=c&name=%s', 'bt')
-bmark('Search Baka Renders', 'http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND', 'bkr')
-bmark('Search Fluffy.is', 'http://fluffy.is/search.php?folders=&name=%s', 'fl')
-bmark('Search Full Fights', 'http://anime.fullfights.org/?s=%s', 'fu')
-bmark('Search Gelbooru', 'http://gelbooru.com/index.php?page=post&s=list&tags=%s', 'gel');
-bmark('Search Github', 'http://github.com/search?q=%s', 'gh')
-bmark('Search GoGo', 'http://www.gogoanime.com/?s=%s', 'gg')
-bmark('Search with Hoogle', 'http://www.haskell.org/hoogle/?hoogle=%s', 'hg')
-bmark('Search MAL', 'http://myanimelist.net/anime.php?q=%s', 'mal')
-bmark('Search MAL for manga', 'http://myanimelist.net/manga.php?q=%s', 'mmal')
-bmark('Search Tumblr', 'http://www.tumblr.com/search/%s', 't')
-bmark('Search Youtube', 'http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search', 'y')
-bmark('Search ZeroChan', 'http://www.zerochan.net/%s', 'zch');
-bmark('Startpage', 'https://startpage.com/do/metasearch.pl?q=%s', 's')
-bmark('YubNub', 'http://yubnub.org/parser/parse?command=%s', 'yubnub');
-
-/*
-" alternative syntax:
-" silent bma -tags searchengine -title 'Arch Wiki' http://wiki.archlinux.org/index.php?search=%s -k aw
-
-alt to gim
-http://www.googleimageripper.com/#!/?search=true&key=puppies&page_start=1&safemode=on&tbs=any&silu=yes&autoremove_not_found=yes
-*/
-EOM
+bmark -keyword aff -title 'Search Anime4fun' http://www.anime4fun.com/search?keyword=%s
+bmark -keyword am -title 'Amazon' http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s
+bmark -keyword aw -title 'Arch Wiki' http://wiki.archlinux.org/index.php?search=%s
+bmark -keyword az -title 'Search Azlyrics' http://search.azlyrics.com/search.php?q=%s
+bmark -keyword bt -title 'Search Batoto' http://bato.to/search?name_cond=c&name=%s
+bmark -keyword bkr -title 'Search Baka Renders' http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND
+bmark -keyword d -title 'Duck Duck Go' http://duckduckgo.com/?q=%s
+bmark -keyword dv -title 'Search Deviantart' http://www.deviantart.com/?q=%s
+bmark -keyword exh -title 'Search Exhentai' http://exhentai.org/?f_doujinshi=1&f_manga=1&fsearch=%s+language%3Aenglish&f_apply=Apply+Filter
+bmark -keyword fk -title 'Search Fakku' http://www.fakku.net/search/%s
+bmark -keyword fl -title 'Search Fluffy.is' http://fluffy.is/search.php?folders=&name=%s
+bmark -keyword full -title 'Search Full Fights' http://anime.fullfights.org/?s=%s
+bmark -keyword gel -title 'Search Gelbooru' http://gelbooru.com/index.php?page=post&s=list&tags=%s
+bmark -keyword gh -title 'Search Github' http://github.com/search?q=%s
+bmark -keyword hg -title 'Search with Hoogle' http://www.haskell.org/hoogle/?hoogle=%s
+bmark -keyword mal -title 'Search MAL' http://myanimelist.net/anime.php?q=%s
+bmark -keyword mmal -title 'Search MAL for manga' http://myanimelist.net/manga.php?q=%s
+bmark -keyword mus -title 'Search Albums' http://www.allmusic.com/search/all/%s
+bmark -keyword r -title 'Quickly Get to Subreddit' http://www.reddit.com/r/%s/
+bmark -keyword rt -title 'Rotten Tomatoes Search' http://www.rottentomatoes.com/search/?search=%s
+bmark -keyword s -title 'Searx' https://searx.me/?q=%s
+" bmark -keyword s -title 'Startpage' https://startpage.com/do/metasearch.pl?q=%s
+bmark -keyword t -title 'Search Tumblr' http://www.tumblr.com/search/%s
 " other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
 " useful mostly for stuff that combines things like mash, split, weird piping stuff, etc.
-" }}} 
+bmark -keyword yub -title 'YubNub' http://yubnub.org/parser/parse?command=%s
+bmark -keyword y -title 'Search Youtube' http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search
+bmark -keyword wayback -title 'Search Wayback Machine' http://web.archive.org/web/*/%s
+bmark -keyword zerochan -title 'Search ZeroChan' http://www.zerochan.net/%s
+
+" Set the default motor search (see bookmark)
+set defsearch=s
+
+" }}}
 " #==============================
 " # Addon Commands and Bookmarklets"{{{
 " #==============================
@@ -295,9 +280,6 @@ set history=3000
 
 " despotic.. in allowing focus change
 set strictfocus='chrome:*':laissez-faire,*:despotic
-
-" Set the default motor search (see bookmark)
-set defsearch=yubnub
 
 " }}}
 " #==============================
