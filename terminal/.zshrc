@@ -1146,6 +1146,11 @@ alias imrotate="mogrify -rotate 90 $1"
 alias hdmiin='xrandr --output HDMI1 --auto && ponymix set-profile output:hdmi-stereo'
 alias hdmiout='xrandr --output HDMI1 --off && bspc monitor -r X && ponymix set-profile output:analog-stereo'
 alias hdmiadd='xrandr --output HDMI1 --auto --right-of LVDS1 && bspc monitor HDMI1 -a X && ponymix set-profile output:hdmi-stereo'
+
+# play clipboard
+function mpgo() {
+	mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(xsel -b)"
+}
 #}}}
 #===============
 # Octopress Blog {{{
