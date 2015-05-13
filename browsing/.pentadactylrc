@@ -169,27 +169,27 @@ silent qmark y http://youtube.com/
 " #==============================
 " # Bookmark Searches {{{
 " #==============================
-bmark -keyword aff -title 'Search Anime4fun' http://www.anime4fun.com/search?keyword=%s
-bmark -keyword am -title 'Amazon' http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s
-bmark -keyword aw -title 'Arch Wiki' http://wiki.archlinux.org/index.php?search=%s
-bmark -keyword az -title 'Search Azlyrics' http://search.azlyrics.com/search.php?q=%s
-bmark -keyword bt -title 'Search Batoto' http://bato.to/search?name_cond=c&name=%s
-bmark -keyword bkr -title 'Search Baka Renders' http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND
-bmark -keyword d -title 'Duck Duck Go' http://duckduckgo.com/?q=%s
-bmark -keyword dv -title 'Search Deviantart' http://www.deviantart.com/?q=%s
-bmark -keyword exh -title 'Search Exhentai' http://exhentai.org/?f_doujinshi=1&f_manga=1&fsearch=%s+language%3Aenglish&f_apply=Apply+Filter
-bmark -keyword fk -title 'Search Fakku' http://www.fakku.net/search/%s
-bmark -keyword fl -title 'Search Fluffy.is' http://fluffy.is/search.php?folders=&name=%s
-bmark -keyword full -title 'Search Full Fights' http://anime.fullfights.org/?s=%s
-bmark -keyword gel -title 'Search Gelbooru' http://gelbooru.com/index.php?page=post&s=list&tags=%s
-bmark -keyword gh -title 'Search Github' http://github.com/search?q=%s
-bmark -keyword hg -title 'Search with Hoogle' http://www.haskell.org/hoogle/?hoogle=%s
-bmark -keyword mal -title 'Search MAL' http://myanimelist.net/anime.php?q=%s
-bmark -keyword mmal -title 'Search MAL for manga' http://myanimelist.net/manga.php?q=%s
-bmark -keyword mus -title 'Search Albums' http://www.allmusic.com/search/all/%s
-bmark -keyword r -title 'Quickly Get to Subreddit' http://www.reddit.com/r/%s/
-bmark -keyword rt -title 'Rotten Tomatoes Search' http://www.rottentomatoes.com/search/?search=%s
-bmark -keyword s -title 'Searx' https://searx.me/?q=%s
+silent bmark -keyword aff -title 'Search Anime4fun' http://www.anime4fun.com/search?keyword=%s
+silent bmark -keyword am -title 'Amazon' http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s
+silent bmark -keyword aw -title 'Arch Wiki' http://wiki.archlinux.org/index.php?search=%s
+silent bmark -keyword az -title 'Search Azlyrics' http://search.azlyrics.com/search.php?q=%s
+silent bmark -keyword bt -title 'Search Batoto' http://bato.to/search?name_cond=c&name=%s
+silent bmark -keyword bkr -title 'Search Baka Renders' http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND
+silent bmark -keyword d -title 'Duck Duck Go' http://duckduckgo.com/?q=%s
+silent bmark -keyword dv -title 'Search Deviantart' http://www.deviantart.com/?q=%s
+silent bmark -keyword exh -title 'Search Exhentai' http://exhentai.org/?f_doujinshi=1&f_manga=1&fsearch=%s+language%3Aenglish&f_apply=Apply+Filter
+silent bmark -keyword fk -title 'Search Fakku' http://www.fakku.net/search/%s
+silent bmark -keyword fl -title 'Search Fluffy.is' http://fluffy.is/search.php?folders=&name=%s
+silent bmark -keyword full -title 'Search Full Fights' http://anime.fullfights.org/?s=%s
+silent bmark -keyword gel -title 'Search Gelbooru' http://gelbooru.com/index.php?page=post&s=list&tags=%s
+silent bmark -keyword gh -title 'Search Github' http://github.com/search?q=%s
+silent bmark -keyword hg -title 'Search with Hoogle' http://www.haskell.org/hoogle/?hoogle=%s
+silent bmark -keyword mal -title 'Search MAL' http://myanimelist.net/anime.php?q=%s
+silent bmark -keyword mmal -title 'Search MAL for manga' http://myanimelist.net/manga.php?q=%s
+silent bmark -keyword mus -title 'Search Albums' http://www.allmusic.com/search/all/%s
+silent bmark -keyword r -title 'Quickly Get to Subreddit' http://www.reddit.com/r/%s/
+silent bmark -keyword rt -title 'Rotten Tomatoes Search' http://www.rottentomatoes.com/search/?search=%s
+silent bmark -keyword s -title 'Searx' https://searx.me/?q=%s
 " bmark -keyword s -title 'Startpage' https://startpage.com/do/metasearch.pl?q=%s
 bmark -keyword t -title 'Search Tumblr' http://www.tumblr.com/search/%s
 " other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
