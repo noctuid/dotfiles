@@ -14,7 +14,8 @@ LIGHT_PINK='%{F#FFFFD6FC}'
 GRAY_PINK='%{F#FFD9CAD7}'
 BRIGHT_PINK='%{F#FFFF78FF}'
 LIGHT_BLUE='%{F#FF78B3CC}'
-# background
+# normal background; same as COLOUR_BACKGROUND in panel
+NORMAL_B='%{B#FF232C31#}'
 DARK_RED_B='%{B#FFAC4142}'
 # underline
 BLUE_U='%{U#FF6A9FB5}'
@@ -71,7 +72,7 @@ while read -r line; do
 						;;
 					u*)
 						# urgent desktop
-						wm_infos="$wm_infos $DARK_RED_B$name"
+						wm_infos="$wm_infos $DARK_RED_B$name$NORMAL_B"
 						;;
 					L*)
 						# layout
