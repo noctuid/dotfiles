@@ -7,9 +7,10 @@
 #
 
 wm=$(< /tmp/window_manager)
-if [[ -z $wm ]]; then
+if [[ -z $wm ]] || [[ $(tty) != "$(< /tmp/last_tty)" ]]; then
 	wm=$(xprop -notype -id "$(xprop -root -notype | awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
 	echo "$wm" > /tmp/window_manager
+	echo "$tty" > /tmp/last_tty
 fi
 
 win_action() {
