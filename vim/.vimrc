@@ -1,20 +1,23 @@
 " Todo:
 " don't count capitilization errors as spelling errors?
-" character-wise v line-wise visual
-" tab through menu with neocomplete and automatically expand snippets?
+" tab for snippets and indentation and auto-completion?
 " visual repeat setup
-" following symlinks better
-" get rid of calendar
-" after taboo command, source nav.vim
+" octodown instead of livedown
+" http://smalltalk.gnu.org/blog/bonzinip/emacs-ifying-vims-autoindent
+" instead of autochdir?
+" autocmd BufReadPost * if &ft != 'help' | silent! cd %:p:h | endif
+" Plugins:
+" https://github.com/gelguy/Cmd2.vim
+" skybison and vim-swoop
+" https://github.com/mhinz/vim-startify
+" https://github.com/t9md/vim-transform
 
 " Wishes:
 " listchars working with linebreak
 " W13 fix
 " async linter update; async git singify update
-" better shell for repls
-" realtime visualization of block editing
-" tab left patch
-" uppercase all words but to, the, etc.?
+" decent repl integration with new terminal in neovim
+" real-time visualization of block editing (not that important)
 
 " Notes:
 " see https://gist.github.com/romainl/9ecd7b09a693816997ba
@@ -22,11 +25,8 @@
 " :verbose map
 " :verbose set
 " Insert prefixes: . and , (as usually followed by a space; can cause problems)
-
-" having a ~/.vimrc turns off compatable; :h 'cp'
-
-" todo , deadline, done, clocking in
-" emacs org mode with tables for budget
+" chord would be better..
+" having a ~/.vimrc turns off compatable; :h 'cp'; with -u can use -N
 
 " fixes complaining about undefined tcomment variable
 set runtimepath+=~/.vim/bundle/tcomment_vim
@@ -38,22 +38,12 @@ set runtimepath+=~/.vim/bundle/tcomment_vim
 " otherwise vim complains
 autocmd VimEnter * call s:arpeggio_maps()
 
+" works great with low timeout except during lag (due to neocomplete mostly)
 function! s:arpeggio_maps()
 	Arpeggio inoremap st <c-w>
 	Arpeggio inoremap ie <end>
 	Arpeggio inoremap ne <esc>
 	Arpeggio inoremap se <cr>
-
-	" Arpeggio inoremap ra <c-o>:silent !bspc desktop -f ^1<cr>
-	" Arpeggio inoremap rr <c-o>:silent !bspc desktop -f ^2<cr>
-	" Arpeggio inoremap rs <c-o>:silent !bspc desktop -f ^3<cr>
-	" Arpeggio inoremap rt <c-o>:silent !bspc desktop -f ^4<cr>
-	" Arpeggio inoremap rd <c-o>:silent !bspc desktop -f ^5<cr>
-	" Arpeggio inoremap rh <c-o>:silent !bspc desktop -f ^6<cr>
-	" Arpeggio inoremap rn <c-o>:silent !bspc desktop -f ^7<cr>
-	" Arpeggio inoremap re <c-o>:silent !bspc desktop -f ^8<cr>
-	" Arpeggio inoremap ri <c-o>:silent !bspc desktop -f ^9<cr>
-
 	" Arpeggio inoremap wf <c-r>+
 endfunction
 
@@ -61,55 +51,54 @@ let g:arpeggio_timeoutlen=11
 
 " }}}
 
-" Nop Arrow Keys {{{
-nnoremap <up> <nop>
-nnoremap <left> <nop>
-" nnoremap <right> <nop>
-nnoremap <down> <nop>
-nnoremap <End> <nop>
-nnoremap <Home> <nop>
-inoremap <up> <nop>
-inoremap <left> <nop>
-" inoremap <right> <nop>
-inoremap <down> <nop>
-inoremap <End> <nop>
-inoremap <Home> <nop>
 " better text file long line nav (use with lazy redraw); up and down between wraps
-" inoremap <Down> <C-o>gj
-" inoremap <Up> <C-o>gk
+inoremap <Down> <C-o>gj
+inoremap <Up> <C-o>gk
 
-" }}}
-
+" not viable due to vim abbrevs expanding even with letters before them
+" and sometimes even when have typed stuff before the abbrev
 " letter symbols; short letter abbrevs {{{
-" don't use x, y, z, i, or j
-inoreabbr e =
-inoreabbr pe +=
-inoreabbr r &
-inoreabbr c :
-inoreabbr q ?
-" plus, time*, modulo
-inoreabbr p +
-inoreabbr t *
-inoreabbr m %
-" e.g. dollar operator
-inoreabbr d $
-" e.g.type t/ to get ~/
-inoreabbr t ~
-" comparison
-inoreabbr ee ==
-inoreabbr g >
-inoreabbr ge >=
-inoreabbr l <
-inoreabbr le <=
+" " don't use a, x, y, z, i (for several reasons), or j
+" inoreabbr e =
+" inoreabbr pe +=
+" inoreabbr r &
+" inoreabbr rr &&
+" inoreabbr c :
+" inoreabbr q ?
+" " plus, time*, modulo
+" inoreabbr p +
+" inoreabbr t *
+" inoreabbr m %
+" " e.g. dollar operator
+" inoreabbr d $
+" " e.g.type t/ to get ~/
+" inoreabbr t ~
+" " comparison
+" inoreabbr ee ==
+" inoreabbr g >
+" inoreabbr ge >=
+" inoreabbr l <
+" inoreabbr le <=
 
 " problems so far:
 " if backspace and then type one of these sequences will expand; may be better to use only in program files and not in config files either (because of mappings)
 " e.g.
-inoreabbr eg e.g.
+" inoreabbr eg e.g.
 
 " }}}
 
-nmap s <nop>
+" make a submode for this...
+" nnoremap w zj
+" nnoremap b zk
+
+augroup sCustom
+	au!
+	" move by paragraph (empty line)
+	au FileType * nnoremap <buffer> s }|nnoremap <buffer> S {
+	" move by sentence
+	au FileType doto,text,mkd nmap <buffer> s <Plug>(textobj-sentence-move-n)|nmap <buffer> S <Plug>(texobj-sentence-move-p):call repeat#set("\<Plug>(textobj-sentence-move-p)", v:count)<cr>
+augroup END
+
 nmap r <nop>
 nnoremap cd r
 if has("gui_running")
@@ -249,10 +238,8 @@ endif
 " # General/ Vim Settings {{{
 " #==============================
 " General General  {{{
-" utf8; http://rbtnn.hateblo.jp/entry/2014/12/28/010913
+" utf8 as default encoding
 set encoding=utf8
-scriptencoding utf-8
-set termencoding=utf-8
 
 " 2000 lines of command line history.
 set history=2000
@@ -266,7 +253,7 @@ set mouse=c
 " automatically cd to dir current file is in
 set autochdir
 
-" default; :s/// replaces one; /g replace all; /gg replace one
+" default; :%s/// replaces one; /g replace all; /gg replace one
 set nogdefault
 
 " can select past eol in visual block if one line is longer
@@ -479,7 +466,7 @@ set commentstring=#\ %s
 " pentadactyl
 augroup pentadactyl
 	au!
-	au BufNewFile,BufRead *.pentadactylrc,*penta set filetype=pentadactyl
+	au BufNewFile,BufRead *.pentadactylrc,*penta setlocal filetype=pentadactyl
 augroup END
 
 " for vim-dotoo
@@ -590,6 +577,8 @@ set showcmd showmode
 
 " highlight matching brackets, parens, etc.
 set showmatch
+" Make < and > as well as match pairs. https://github.com/EHartC/dot-vimrc/blob/master/vim%20config/styling.vim
+set matchpairs+=<:>
 
 " won't redraw while executing macros, registers, and commands that have not been typed (not default)
 " for example, stops flickering when have up and down mapped to c-o gk and gj in insert
@@ -631,6 +620,7 @@ augroup END
 " }}}
 
 " Airline theme  {{{
+" https://github.com/bling/vim-airline/issues/539
 " statusline always present
 set laststatus=2
 
@@ -650,7 +640,7 @@ function! WordCount()
 	return s:word_count 
 endfunction
 
-autocmd VimEnter * call s:airline_sections_custom()
+au VimEnter * call s:airline_sections_custom()
 
 function! s:airline_sections_custom()
 	" add current session name to statusline
@@ -747,8 +737,8 @@ endfunction
 
 " Fold Navigation/Creation {{{
 " put comment char at sol (before text) with zf and add space between comment char and marker
-" needs work..
-xnoremap zf zf$3hr<space>:TComment<cr>zo]za<space><esc>[zzc
+" fix this
+" xnoremap zf zf$3hr<space>:TComment mode=K<cr>zo]za<space><esc>[zzc
 
 " swapping folds with tommcdo's exchange and kana's fold text object
 nmap zE vazXzkvazX
@@ -799,6 +789,7 @@ augroup END
 
 " Modified Defaults {{{
 " commandline
+" I never really need , and ;
 nnoremap ; :
 xnoremap ; :
 nnoremap <leader>; q:i
@@ -845,6 +836,9 @@ nnoremap gI `.a
 
 " go to file with optional line number, open folds, and center
 nnoremap gf gFzvzz
+
+" use m for "mode" or filetype specific bindings
+" nnoremap M m
 
 " }}}
 
@@ -1010,7 +1004,7 @@ let g:taboo_renamed_tab_format='[%l]%m'
 " save taboo names in session
 set sessionoptions+=tabpages,globals
 
-nnoremap <leader>r q:TabooRename<space>
+nnoremap <leader>r :TabooRename<space>
 
 " }}}
 " }}}
@@ -1056,6 +1050,11 @@ nnoremap <leader>d :BD<Return>
 " #==============================
 " # Operators, Motions, etc. {{{
 " #==============================
+" more convenient motions
+" going to a byte is useless to me
+nnoremap <silent> go }:silent! call repeat#set("}", v:count)<cr>
+nnoremap <silent> gO {:silent! call repeat#set("{", v:count)<cr>
+
 " camelcase motion as default {{{
 map <silent> w <Plug>CamelCaseMotion_w
 map <silent> b <Plug>CamelCaseMotion_b
@@ -1089,6 +1088,7 @@ nmap <silent> sdd <Plug>(operator-surround-delete)<Plug>(textobj-anyblock-a)
 nmap <silent> scc <Plug>(operator-surround-replace)<Plug>(textobj-anyblock-a)
 
 nmap saw saiW'
+nmap sae sa$"
 nmap sal sail"
 
 " }}}
@@ -1113,6 +1113,14 @@ augroup textobjSentence
 	au FileType rst call textobj#sentence#init()
 	au FileType text call textobj#sentence#init()
 augroup END
+
+" }}}
+
+" comment text object {{{
+" nice for moving and formatting comments (gqax)
+let g:textobj_comment_no_default_key_mappings = 1
+xmap ax <Plug>(textobj-comment-a)
+omap ax <Plug>(textobj-comment-a)
 
 " }}}
 
@@ -1225,7 +1233,7 @@ let g:neocomplete#sources#dictionary#dictionaries = {
 augroup neoCompleteSettings
 	au!
 	au FileType * NeoCompleteLock
-	au FileType java NeoCompleteEnable
+	" au FileType java NeoCompleteEnable
 	" Enable omni completion.
 	au FileType css setlocal omnifunc=csscomplete#CompleteCSS
 	au FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
@@ -1266,12 +1274,12 @@ let g:unite_quick_match_table = {
 nnoremap <leader>p :Unite -start-insert buffer file_mru<cr>
 " Search files; this is overriden for certain tabs in ~/.navigation.vim
 nnoremap <leader>P :cd ~/dotfiles\|Unite -start-insert file_rec/async<cr>
-" search with mlocate (indexed so much faster); overriden for certain tabs in ~/.navigation.vim
+" search with locate; overriden for certain tabs in ~/.navigation.vim
 nnoremap <space>p :Unite -start-insert locate<cr>
 " source for outline of file (e.g. function jumping)
-nnoremap <space>u :Unite outline<cr>
+nnoremap <space>U :Unite -start-insert outline<cr>
 " for folds in file (e.g. dotoo/org headings)
-nnoremap <space>u :Unite fold<cr>
+nnoremap <space>u :Unite -start-insert fold<cr>
 
 " searching; silver searcher {{{
 " http://bling.github.io/blog/2013/06/02/unite-dot-vim-the-plugin-you-didnt-know-you-need/
@@ -1333,6 +1341,32 @@ function! s:unite_settings()
 		endfor
 	endfunction
 	call unite#custom#action('file,cdable', 'rifle', rifleAction)
+endfunction
+
+" }}}
+
+" Vimfiler {{{
+" use instead of netrw (e.g. with gf or if use vim to open a dir)
+" use with vinegar
+let g:vimfiler_as_default_explorer = 1
+
+augroup vimfiler
+	au!
+	au FileType vimfiler call s:vimfiler_mappings()
+	au FileType vimfiler NeoCompleteDisable
+augroup END
+
+function! s:vimfiler_mappings()
+	" colemak
+	map <buffer> n <Plug>(vimfiler_loop_cursor_down)
+	map <buffer> e <Plug>(vimfiler_loop_cursor_up)
+	map <buffer> gn <Plug>(vimfiler_jump_last_child)
+	map <buffer> ge <Plug>(vimfiler_jump_first_child)
+	map <buffer> i <Plug>(vimfiler_smart_l)
+	map <buffer> o <Plug>(vimfiler_edit_file)
+	map <buffer> q <Plug>(vimfiler_exit)
+	map <buffer> <tab> <Plug>(vimfiler_expand_tree)
+	map <buffer> t <leader>
 endfunction
 
 " }}}
@@ -1415,7 +1449,8 @@ endfunction
 " which vcs and order
 let g:signify_vcs_list              = [ 'git', 'hg' ]
 let g:signify_disable_by_default    = 0
-let g:signify_update_on_focusgained = 1
+" eating clipboard again?
+" let g:signify_update_on_focusgained = 1
 let g:signify_sign_change           = '~'
 
 nmap <leader>gn <plug>(signify-next-hunk):silent! call repeat#set("\<Plug>(signify-next-hunk)", v:count)<cr>
@@ -1547,40 +1582,18 @@ endfunction
 
 " }}}
 
-" Calendar Settings {{{
-let g:calendar_google_calendar = 1
-let g:calendar_google_task     = 1
-" nnoremap <cr>c :Calendar -position=tab<cr>
-
-augroup calendar
-	au!
-	au FileType calendar call s:calendar_settings()
-augroup END
-
-function! s:calendar_settings()
-	" colemak nav
-	nmap <buffer> h <Plug>(calendar_left)
-	nmap <buffer> n <Plug>(calendar_down)
-	nmap <buffer> e <Plug>(calendar_up)
-	" nmap <buffer> i <Plug>(calendar_right)
-endfunction
-
-" }}}
-
 " dotoo {{{
 " maybe use with below for quick keys like behaviour
 " https://github.com/kana/vim-submode
 let g:dotoo#agenda#files = ['~/ag-sys/Else/everything/log.org']
+" don't clock captures
+let g:dotoo#capture#clock = 0
 
-" default
 let g:dotoo#parser#todo_keywords = [
 	\ 'TODO',
 	\ 'NEXT',
 	\ 'WAITING',
-	\ 'HOLD',
-	\ 'PHONE',
 	\ 'MEETING',
-	\ 'CANCELLED',
 	\ 'DONE']
 
 " default
@@ -1637,25 +1650,7 @@ let g:table_mode_toggle_map = 'm'
 let g:vimshell_prompt_expr =
 \ 'escape(fnamemodify(getcwd(), ":~").">", "\\[]()?! ")." "'
 let g:vimshell_prompt_pattern = '^\%(\f\|\\.\)\+> '
-
-" use instead of netrw (e.g. with gf or if use vim to open a dir)
-let g:vimfiler_as_default_explorer = 1
-
-augroup vimfiler
-	au!
-	au FileType vimfiler call s:vimfiler_mappings()
-augroup END
-
-function! s:vimfiler_mappings()
-	" colemak
-	map <buffer> n <Plug>(vimfiler_loop_cursor_down)
-	map <buffer> e <Plug>(vimfiler_loop_cursor_up)
-	map <buffer> gn <Plug>(vimfiler_jump_last_child)
-	map <buffer> ge <Plug>(vimfiler_jump_first_child)
-	map <buffer> i <Plug>(vimfiler_smart_l)
-	map <buffer> o <Plug>(vimfiler_edit_file)
-	map <buffer> q <Plug>(vimfiler_exit)
-endfunction
+let g:vimshell_popup_command = 'vsplit'
 
 " let g:vimshell_no_default_keymappings=0
 
@@ -1663,7 +1658,6 @@ augroup vimshell
 	au!
 	au FileType vimshell call s:vimshell_mappings()
 augroup END
-
 
 function! s:vimshell_mappings()
 	" Normal mode key-mappings. {{{
@@ -1720,11 +1714,11 @@ function! s:vimshell_mappings()
 	" 	\ <SID>start_history_complete()
 	" inoremap <buffer><expr> <C-n> pumvisible() ? "\<C-n>" :
 	" 	\ <SID>start_history_complete()
-	inoremap <buffer><expr> <Up> pumvisible() ? "\<C-p>" :
-		\ <SID>start_history_complete()
-	inoremap <buffer><expr> <Down> pumvisible() ? "\<C-n>" :
-		\ <SID>start_history_complete()
-
+	" inoremap <buffer><expr> <Up> pumvisible() ? "\<C-p>" :
+	" 	\ <SID>start_history_complete()
+	" inoremap <buffer><expr> <Down> pumvisible() ? "\<C-n>" :
+	" 	\ <SID>start_history_complete()
+	" imap <up> <Plug>(vimshell_history_neocomplete)
 	" Command completion.
 	imap <buffer> <TAB> <Plug>(vimshell_command_complete)
 	" Move to Beginning of command.
@@ -1906,6 +1900,18 @@ augroup neomake
 	au BufWritePost,CursorHold *.py,*.sh,*.c Neomake
 augroup END
 
+" https://github.com/neovim/neovim/issues/1172#issuecomment-74602464
+function! MoveToTabOnLeft()
+    let curtab = tabpagenr()
+    let tabonleft = curtab - 1
+    exe tabonleft."tabnext"
+endfunction
+
+augroup tabonleft
+    au!
+    au TabClosed * call MoveToTabOnLeft()
+augroup END
+
 endif
 
 " }}}
@@ -1971,15 +1977,20 @@ NeoBundle 'oblitum/rainbow'
 
 " distraction free writing
 NeoBundle 'junegunn/goyo.vim'
+" try distraction free https://github.com/DanielFGray/DistractionFree.vim
 NeoBundle 'junegunn/limelight.vim'
 
 " colorschemes
+NeoBundle 'morhetz/gruvbox'
+NeoBundle 'romainl/Apprentice'
+NeoBundle 'junegunn/seoul256.vim'
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'sjl/badwolf'
-NeoBundle 'junegunn/seoul256.vim'
-NeoBundle 'morhetz/gruvbox'
+
 NeoBundle 'nice/sweater'
 NeoBundle 'whatyouhide/vim-gotham'
+NeoBundle 'shawncplus/skittles_berry"'
+NeoBundle 'idbrii/vim-sandydune'
 
 " }}}
 
@@ -2006,8 +2017,10 @@ NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'Shougo/unite-outline'
 " unite source for marks (also see vim-bookmarks which gives vim_bookmarks)
 NeoBundle 'tacroe/unite-mark'
-" (m)locate
+" locate
 NeoBundle 'ujihisa/unite-locate'
+" for fold text/ navigation
+NeoBundle 'osyo-manga/unite-fold'
 
 " }}}
 
@@ -2059,7 +2072,7 @@ NeoBundle 'torrancew/vim-openscad'
 NeoBundle 'reedes/vim-textobj-sentence'
 NeoBundle 'reedes/vim-lexical'
 NeoBundle 'beloglazov/vim-online-thesaurus'
-" NeoBundle 'reedes/vim-textobj-quote'
+NeoBundle 'reedes/vim-textobj-quote'
 
 " Rst
 NeoBundle 'Rykka/riv.vim'
@@ -2130,9 +2143,15 @@ NeoBundle 'tpope/vim-endwise'
 NeoBundle 'tpope/vim-repeat'
 NeoBundle 'vim-scripts/visualrepeat'
 
+" neither of these are usable for me
+" NeoBundle 'terryma/vim-multiple-cursors'
+" NeoBundle 'paradigm/vim-multicursor"'
+
 " }}}
 
 " Experimenting {{{
+NeoBundle 'tpope/vim-vinegar'
+
 " chording
 NeoBundle 'kana/vim-arpeggio'
 
@@ -2142,8 +2161,6 @@ NeoBundle "Shougo/vimfiler.vim"
 " all text boxes vim
 NeoBundle 'ardagnir/vimbed'
 
-"  calendar
-NeoBundle 'itchyny/calendar.vim'
 
 " improved "/" search
 NeoBundle 'junegunn/vim-oblique'
@@ -2185,8 +2202,14 @@ NeoBundle 'coderifous/textobj-word-column.vim'
 " adds text object io and ao for indentation whitespace
 NeoBundle 'glts/vim-textobj-indblock'
 
+" text objects for comments
+NeoBundle 'glts/vim-textobj-comment'
+
 " iq and aq for ', ", and `
 " NeoBundle 'beloglazov/vim-textobj-quotes'
+
+" haven't found to work well
+"https://github.com/lucapette/vim-textobj-underscore
 
 " punctuation text objects (also gives iq and aq);i.e. gives %; i<space> will work for any
 NeoBundle 'kurkale6ka/vim-pairs'
