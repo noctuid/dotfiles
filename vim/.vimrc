@@ -111,160 +111,136 @@ inoreabbr eg e.g.
 
 nmap s <nop>
 nmap r <nop>
-nnoremap sr r
+nnoremap cd r
 if has("gui_running")
 " WM Experimentation {{{
 nnoremap <silent> <space><space> :silent !bspc window -f left && xsendkey p && bspc window -f last<cr>
-
 " "r" is Redraw {{{
 " worskpace/Destkop switch {{{
-nnoremap <silent> ra :silent !bspc desktop -f ^1<cr>
-nnoremap <silent> rr :silent !bspc desktop -f ^2<cr>
-nnoremap <silent> rs :silent !bspc desktop -f ^3<cr>
-nnoremap <silent> rt :silent !bspc desktop -f ^4<cr>
-nnoremap <silent> rd :silent !bspc desktop -f ^5<cr>
-nnoremap <silent> rh :silent !bspc desktop -f ^6<cr>
-nnoremap <silent> rn :silent !bspc desktop -f ^7<cr>
-nnoremap <silent> re :silent !bspc desktop -f ^8<cr>
-nnoremap <silent> ri :silent !bspc desktop -f ^9<cr>
-nnoremap <silent> ro :silent !bspc desktop -f ^10<cr>
+nnoremap <silent> ra :silent !wm_action inpw ra<cr>
+nnoremap <silent> rr :silent !wm_action inpw rr<cr>
+nnoremap <silent> rs :silent !wm_action inpw rs<cr>
+nnoremap <silent> rt :silent !wm_action inpw rt<cr>
+nnoremap <silent> rd :silent !wm_action inpw rd<cr>
+nnoremap <silent> rh :silent !wm_action inpw rh<cr>
+" nnoremap <silent> rn :silent !wm_action dsel 7<cr>
+" nnoremap <silent> re :silent !wm_action dsel 8<cr>
+nnoremap <silent> rn :silent !wm_action inpw rn<cr>
+nnoremap <silent> re :silent !wm_action inpw re<cr>
+nnoremap <silent> ri :silent !wm_action inpw ri<cr>
+nnoremap <silent> ro :silent !wm_action inpw ro<cr>
+
 " }}}
+
 " move to destkop {{{
-nnoremap <silent> Ra :silent !bspc window -d ^1<cr>
-nnoremap <silent> Rr :silent !bspc window -d ^2<cr>
-nnoremap <silent> Rs :silent !bspc window -d ^3<cr>
-nnoremap <silent> Rt :silent !bspc window -d ^4<cr>
-nnoremap <silent> Rd :silent !bspc window -d ^5<cr>
-nnoremap <silent> Rh :silent !bspc window -d ^6<cr>
-nnoremap <silent> Rn :silent !bspc window -d ^7<cr>
-nnoremap <silent> Re :silent !bspc window -d ^8<cr>
-nnoremap <silent> Ri :silent !bspc window -d ^9<cr>
-nnoremap <silent> Ro :silent !bspc window -d ^10<cr>
+nnoremap <silent> Ra :silent !wm_action inpw Ra<cr>
+nnoremap <silent> Rr :silent !wm_action inpw Rr<cr>
+nnoremap <silent> Rs :silent !wm_action inpw Rs<cr>
+nnoremap <silent> Rt :silent !wm_action inpw Rt<cr>
+nnoremap <silent> Rd :silent !wm_action inpw Rd<cr>
+nnoremap <silent> Rh :silent !wm_action inpw Rh<cr>
+nnoremap <silent> Rn :silent !wm_action inpw Rn<cr>
+nnoremap <silent> Re :silent !wm_action inpw Re<cr>
+nnoremap <silent> Ri :silent !wm_action inpw Ri<cr>
+nnoremap <silent> Ro :silent !wm_action inpw 0Ro<cr>
+
 " }}}
 
 " moving windows within desktop {{{
 " move to biggest
-nnoremap <silent> rcm :silent !bspc window -s biggest<cr>
+nnoremap <silent> rcm :silent !wm_action inpw rcm<cr>
 " directions
-nnoremap <silent> rch :silent !bspc window -s left<cr>
-nnoremap <silent> rcn :silent !bspc window -s down<cr>
-nnoremap <silent> rce :silent !bspc window -s up<cr>
-nnoremap <silent> rci :silent !bspc window -s right<cr>
+nnoremap <silent> rch :silent !wm_action inpw rch<cr>
+nnoremap <silent> rcn :silent !wm_action inpw rcn<cr>
+nnoremap <silent> rce :silent !wm_action inpw rce<cr>
+nnoremap <silent> rci :silent !wm_action inpw rci<cr>
 " circulate
-nnoremap <silent> r. :silent !bspc desktop -C forward<cr>
-nnoremap <silent> r, :silent !bspc desktop -C backward<cr>
+nnoremap <silent> r. :silent !wm_action inpw r.<cr>
+nnoremap <silent> r, :silent !wm_action inpw r,<cr>
+
 " }}}
 
-"resize {{{
-nnoremap <silent> rmh :silent !~/bin/resize.sh left<cr>
-nnoremap <silent> rmn :silent !~/bin/resize.sh down<cr>
-nnoremap <silent> rme :silent !~/bin/resize.sh up<cr>
-nnoremap <silent> rmi :silent !~/bin/resize.sh right<cr>
-" }}}
-" open urxvt
-nnoremap <silent> ru :silent !urxvt &<cr>
+" resize {{{
+nnoremap <silent> rmh :silent !wm_action inpw rmh<cr>
+nnoremap <silent> rmn :silent !wm_action inpw rmn<cr>
+nnoremap <silent> rme :silent !wm_action inpw rme<cr>
+nnoremap <silent> rmi :silent !wm_action inpw rmi<cr>
 
-" close window
-nnoremap <silent> rx :silent !bspc window -c<cr>
 " }}}
 
-" s becomes select/Show/settings {{{
-"select
-nnoremap <silent> sh :silent !bspc window -f left<cr>
-nnoremap <silent> sn :silent !bspc window -f down<cr>
-nnoremap <silent> se :silent !bspc window -f up<cr>
-nnoremap <silent> si :silent !bspc window -f right<cr>
-nnoremap <silent> sl :silent !bspc window -f last<cr>
-
+" take from old s<keys> bindings {{{
+" last window
+nnoremap <silent> ru :silent !wm_action inpw ru<cr>
 " monocle toggle
-nnoremap <silent> st :silent! !bspc desktop -l next<cr>
-nnoremap <silent> ss :silent !bspc window -t sticky<cr>
-nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
-
-" gap up and down
-nnoremap <silent> su :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` - 4 ))<cr>
-nnoremap <silent> sU :silent !bspc config -d focused window_gap $((`bspc config -d focused window_gap` + 4 ))<cr>
-
-" preselect {{{
-nnoremap <silent> sph :silent !bspc window -p left<cr>
-nnoremap <silent> spn :silent !bspc window -p down<cr>
-nnoremap <silent> spe :silent !bspc window -p up<cr>
-nnoremap <silent> spi :silent !bspc window -p right<cr>
-nnoremap <silent> spx :silent !bspc window -p cancel<cr>
-nnoremap <silent> spd :silent !bspc desktop -c<cr>
-" }}}
-" }}}
+nnoremap <silent> rk :silent !wm_action inpw rk<cr>
+nnoremap <silent> rf :silent !wm_action inpw rf<cr>
+nnoremap <silent> ry :silent !wm_action inpw ry<cr>
 
 " }}}
+
+" last destkop
+nnoremap <silent> rl :silent !wm_action inpw rl<cr>
+" close window
+nnoremap <silent> rx :silent !wm_action inpw rx<cr>
+
+" }}}
+"}}}
 else
 " Tmux Experimentation {{{
 " "r" is Redraw {{{
 " window switching {{{
-nnoremap <silent> ra :silent !tmux select-window -t 1<cr>:redraw!<cr>
-nnoremap <silent> rr :silent !tmux select-window -t 2<cr>:redraw!<cr>
-nnoremap <silent> rs :silent !tmux select-window -t 3<cr>:redraw!<cr>
-nnoremap <silent> rt :silent !tmux select-window -t 4<cr>:redraw!<cr>
-nnoremap <silent> rd :silent !tmux select-window -t 5<cr>:redraw!<cr>
-nnoremap <silent> rh :silent !tmux select-window -t 6<cr>:redraw!<cr>
-nnoremap <silent> rn :silent !tmux select-window -t 7<cr>:redraw!<cr>
-nnoremap <silent> re :silent !tmux select-window -t 8<cr>:redraw!<cr>
-nnoremap <silent> ri :silent !tmux select-window -t 9<cr>:redraw!<cr>
-nnoremap <silent> ro :silent !tmux select-window -t 10<cr>:redraw!<cr>
+nnoremap <silent> ra :silent !wm_action inpt ra<cr>:redraw!<cr>
+nnoremap <silent> rr :silent !wm_action inpt rr<cr>:redraw!<cr>
+nnoremap <silent> rs :silent !wm_action inpt rs<cr>:redraw!<cr>
+nnoremap <silent> rt :silent !wm_action inpt rt<cr>:redraw!<cr>
+nnoremap <silent> rd :silent !wm_action inpt rd<cr>:redraw!<cr>
+nnoremap <silent> rh :silent !wm_action inpt rh<cr>:redraw!<cr>
+nnoremap <silent> rn :silent !wm_action inpt rn<cr>:redraw!<cr>
+nnoremap <silent> re :silent !wm_action inpt re<cr>:redraw!<cr>
+nnoremap <silent> ri :silent !wm_action inpt ri<cr>:redraw!<cr>
+nnoremap <silent> ro :silent !wm_action inpt ro<cr>:redraw!<cr>
 " }}}
 " resize panes {{{
-nnoremap <silent> rmh :silent !tmux resize-pane -L 10<cr>
-nnoremap <silent> rmn :silent !tmux resize-pane -D 10<cr>
-nnoremap <silent> rme :silent !tmux resize-pane -U 10<cr>
-nnoremap <silent> rmi :silent !tmux resize-pane -R 10<cr>
+nnoremap <silent> rmh :silent !wm_action inpt rmh<cr>
+nnoremap <silent> rmn :silent !wm_action inpt rmn<cr>
+nnoremap <silent> rme :silent !wm_action inpt rme<cr>
+nnoremap <silent> rmi :silent !wm_action inpt rmi<cr>
 " }}}
 " circulate
 " previous
-nnoremap <silent> r, :silent !tmux swap-pane -U<cr>
+nnoremap <silent> r, :silent !wm_action inpt r,<cr>
 " next
-nnoremap <silent> r. :silent !tmux swap-pane -D<cr>
-
-" new session
-nnoremap <silent> r_ :silent !tmux new-session<cr>
+nnoremap <silent> r. :silent !wm_action inpt r.<cr>
 
 " new window
-nnoremap <silent> rc :silent !tmux new-window<cr>:redraw!<cr>
+nnoremap <silent> rc :silent !wm_action inpt rc<cr>:redraw!<cr>
 " kill pane
-nnoremap <silent> rx :silent !tmux kill-pane<cr>
+nnoremap <silent> rx :silent !wm_action inpt rx<cr>
 " last window
-nnoremap <silent> rl :silent !tmux last-window<cr>:redraw!<cr>
+nnoremap <silent> rl :silent !wm_action inpt rl<cr>:redraw!<cr>
 " split windows
-nnoremap <silent> r/ :silent !tmux split-window -h<cr>:redraw!<cr>
-nnoremap <silent> r- :silent !tmux split-window<cr>:redraw!<cr>
+nnoremap <silent> r/ :silent !wm_action inpt r/<cr>:redraw!<cr>
+nnoremap <silent> r- :silent !wm_action inpt r-<cr>:redraw!<cr>
 
 " break pane
-nnoremap <silent> r! :silent !tmux break-pane<cr>
-" }}}
+nnoremap <silent> r! :silent !wm_action inpt rbang<cr>
 
-" "s" is select {{{
-" panes {{{
-" directions
-nnoremap <silent> sh :silent !tmux select-pane -L<cr>:redraw!<cr>
-nnoremap <silent> sn :silent !tmux select-pane -D<cr>:redraw!<cr>
-nnoremap <silent> se :silent !tmux select-pane -U<cr>:redraw!<cr>
-nnoremap <silent> si :silent !tmux select-pane -R<cr>:redraw!<cr>
-" last
-nnoremap <silent> sl :silent !tmux select-pane -l<cr>:redraw!<cr>
-" select layout
-nnoremap <silent> sv :silent !tmux select-layout main-vertical<cr>:redraw!<cr>
-
-" toggle "monocle" (zoom)
-nnoremap <silent> st :silent !tmux resize-pane -Z<cr>
-
-" bspwm
-" bspwm monocle (for dropdown terms)
-nnoremap <silent> sm :silent !bspc desktop -l monocle && bspc window -t floating<cr>
-nnoremap <silent> sf :silent !bspc window -t fullscreen<cr>
+" take from old s<keys> bindings {{{
+" last pane
+nnoremap <silent> ru :silent !wm_action inpt ru<cr>:redraw!<cr>
+" zoomed pane toggle
+nnoremap <silent> rk :silent !wm_action inpt rk<cr>
+" fullscreen
+nnoremap <silent> rf :silent !wm_action inpt rf<cr>
+" sticky
+nnoremap <silent> ry :silent !wm_action inpt ry<cr>:redraw!<cr>
+" main-vertical layout
+nnoremap <silent> rv :silent !wm_action inpt rv<cr>:redraw!<cr>
 
 " }}}
 
-" select session
-nnoremap <silent> ss :silent !tmux choose-client<cr>
 " }}}
+
 " }}}
 endif
 

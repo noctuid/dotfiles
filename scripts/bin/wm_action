@@ -293,8 +293,9 @@ case $2 in
 		fi
 		;;
 	# (tmux only)
-	rw) $1 wcreate;;
-	r!) $1 pbreak;;
+	rc) $1 wcreate;;
+	rbang) $1 pbreak;;
+	rv) $1 lsel main-vertical;;
 	*)
 		echo "not a valid action"
 		exit 1
@@ -314,6 +315,10 @@ if [[ $1 == mpv ]]; then
 	else
 		prefix_in_program_maps tmux_action "${@:2}"
 	fi
+elif [[ $1 == inpt ]]; then
+	prefix_in_program_maps tmux_action "${@:2}"
+elif [[ $1 == inpw ]]; then
+	prefix_in_program_maps win_action "${@:2}"
 elif [[ $1 == tmux ]]; then
 	tmux_action "${@:2}"
 else
