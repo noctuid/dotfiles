@@ -1,8 +1,8 @@
 #!/bin/bash
 # http://www.reddit.com/r/reactiongifs/comments/x55z9/after_i_learned_how_to_make_large_well_compressed/
 # http://superuser.com/questions/556029/how-do-i-convert-a-video-to-gif-using-ffmpeg-with-reasonable-quality
-# TODO:
-# .copy /frames for later if isn't empty and -u isn't used
+
+# Simple wrapper for creating a gif from a video using ffmpeg, imagemagick, and optionally gifsicle
 
 function print_help() {
 	echo "
@@ -10,6 +10,7 @@ Creates a gif and/or frames from a video file (last argument) or existing frames
 -w <width>     specify a width for the final gif (default: 600)
 -f <fps>       specify an fps for the final gif (default: 10)
 -o <filename>  specify an output name (default: output.gif)
+-d <dir>       specify the dir to create the frames and output gif in (default: ~/Move/gif)
 -O <opt level> level/whether to optimize with gifsicle (1-3, default: none/false)
 -z <percent>   choose fuzz percent for convert (default: 1.6)
 -c             just create frames from video (default: false)
@@ -17,31 +18,18 @@ Creates a gif and/or frames from a video file (last argument) or existing frames
 -u             use existing frames in frames folder and don't create frames (default false)
                options can be used with: -z, -f, -o, -O
                Only one or none of the above two should be set.
-               Note: The fps option should be the same value when creating the frames and when making a gif from existing frames or the fps will not be what is specified.
+               Note: The fps option should be the same value when creating the frames and
+               when making a gif from existing frames or the speed will be off.
+-s             copy frames/ to frames_<date>/
 -h             print help and exit
 
 "
 
-	if [ "$1" == "illegal_opt" ]; then
+	if [[ $1 == illegal_opt ]]; then
 		exit 1
 	else
 		exit 0
 	fi
-}
-
-create_frames() {
-	# remove previously created frames
-	rm frames/*
-	# make new frames
-	ffmpeg -i "$full_path" -vf scale=$width:-1 -r $fps frames/ffout%03d.png
-}
-
-make_gif() {
-	convert -fuzz $fuzz_percent% -delay 1/$fps -loop 0 frames/*.png -layers OptimizePlus -layers OptimizeTransparency "$output_name"
-	if $optimize; then
-		gifsicle -O$optimization_level --colors 256 "$output_name" > "${output_name%.*}"_gifsicled.gif
-	fi
-
 }
 
 # default values
@@ -49,11 +37,13 @@ width=600
 fps=10
 fuzz_percent=1.6
 optimize=false
-output_name=output.gif
+cur_time=$(date +%Y.%m.%d_%H:%M:%S)
+output_name=${cur_time}_output.gif
+output_dir=$HOME/Move/gif
 create_frames_only=false
 use_existing_frames=false
-
-while getopts :w:f:z:O:o:cuh opt
+save_frames=false
+while getopts :w:f:z:O:o:d:cush opt
 do
 	case $opt in
 	w) width=$OPTARG;;
@@ -62,20 +52,38 @@ do
 	O) optimize=true
 	   optimization_level=$OPTARG;;
 	o) output_name="$OPTARG";;
+	d) output_dir="$OPTARG";;
 	c) create_frames_only=true;;
 	u) use_existing_frames=true;;
+	s) save_frames=true;;
 	h) print_help;;
 	*) print_help illegal_opt;;
     esac
 done
+
+create_frames() {
+	# remove previously created frames
+	rm frames/*
+	# make new frames
+	ffmpeg -i "$full_path" -vf scale="$width":-1 -r "$fps" frames/ffout%03d.png
+}
+
+make_gif() {
+	convert -fuzz "$fuzz_percent"% -delay 1/"$fps" -loop 0 frames/*.png -layers OptimizePlus -layers OptimizeTransparency "$output_name"
+	if $optimize; then
+		gifsicle -O"$optimization_level" --colors 256 "$output_name" > "${output_name%.*}"_gifsicled"$optimization_level".gif
+	fi
+
+}
 
 if ! $use_existing_frames; then
 	# last arg should be the filename, unless using existing frames
 	file=${!#}
 	full_path=$(readlink -f "$file")
 fi
-mkdir -p ~/Move/gif/frames
-cd ~/Move/gif
+
+mkdir -p "$output_dir"/frames
+cd "$output_dir"
 
 if $create_frames_only && $use_existing_frames; then
 	echo "create_frames_only and use_existing_frames are not meant to both be used."
@@ -90,5 +98,7 @@ else
 	make_gif
 fi
 
-# ffmpeg -i <file> -vf scale=1366:-1 -r 10 frames/ffout%03d.png
-# convert -fuzz 1.6% -delay 1/10 -loop 0 frames/*.png -layers OptimizePlus -layers OptimizeTransparency output.gif
+if $save_frames; then
+	mkdir frames_"${cur_time}"
+	cp frames/* frames_"${cur_time}"
+fi
