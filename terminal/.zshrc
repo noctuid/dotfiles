@@ -23,25 +23,48 @@
 #}}}
 
 #==============================
-# Antigen-hs (Plugins) {{{
+# Plugins {{{
 #==============================
-# takes care of installation and sourcing
-# see ~/.zsh/MyAntigen.hs for bundles
-source ~/.zsh/antigen-hs/init.zsh
-# theme
-source ~/.zsh/themes/fox-mod.zsh-theme
 # zbell
 # https://gist.github.com/jpouellet/5278239
 # also see https://gist.github.com/oknowton/8346801
 zbell_ignore=(less vimpager vim rn ranger)
 source ~/.zsh/zbell.sh
 
-alias ahsc='antigen-hs-compile'
-alias antigen-hs-update='cd ~/.zsh/antigen-hs && git pull origin master'
-alias uahs='antigen-hs-update'
-alias ahsu='antigen-hs-update'
+# https://github.com/tarjoilija/zgen
+source /usr/share/zsh/scripts/zgen/zgen.zsh
+# check if there's no init script
+if ! zgen saved; then
+	echo "Creating a zgen save"
 
-# #}}}
+	# for theme
+	zgen oh-my-zsh lib/theme-and-appearance.zsh
+	zgen oh-my-zsh lib/git.zsh
+
+	# plugins
+	zgen oh-my-zsh plugins/command-not-found
+	zgen load zsh-users/zsh-syntax-highlighting
+	zgen load zsh-users/zsh-history-substring-search
+	zgen load Tarrasch/zsh-bd
+	# zgen load hchbaw/opp.zsh
+	# zgen load Tarrasch/zsh-autoenv
+
+	# completion stuff
+	zgen oh-my-zsh lib/completion.zsh
+	zgen load zsh-users/zsh-completions src
+
+	# save all to init script
+	zgen save
+fi
+
+# update repos and remove init script
+alias zpupd="zgen update"
+# update zgen
+alias zupd="zgen selfupdate"
+
+# theme
+source ~/.zsh/themes/fox-mod.zsh-theme
+# }}}
 #==============================
 # Completion Settings# {{{
 #==============================
