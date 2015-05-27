@@ -1,44 +1,46 @@
-# Configuration for nocturnal artifice
+# configuration for an account (see folder hooks in .muttrc)
 # name to use when sending messages; compose view
-set realname = "Lit Wakefield"
+set realname = "My Name"
 # default from header
 set from = "myemailaddress@email.com"
+# to use 'gmail.com' instead of hostname in Message-Id header
+set hostname = "gmail.com"
 
-# inbox
-set spoolfile = "+nocturnalartifice/Inbox"
+# inbox (specify a subdir of what you have $folder set to (e.g. ~/Mail))
+set spoolfile = "+account/Inbox"
 # prevent duplicates
 unset record #= "+account/Sent\ Items"
-set postponed = "+nocturnalartifice/[Gmail]/.Drafts"
+set postponed = "+account/[Gmail]/.Drafts"
 # needs trash patch
-# set trash = "+nocturnalartifice/[Gmail]/.Trash"
+# set trash = "+account/[Gmail]/.Trash"
 # archive
-set mbox = "nocturnalartifice/[Gmail]/.All Mail"
+set mbox = "account/[Gmail]/.All Mail"
 
-# Alternate email addresses.
+# alternate email addresses
 # tells mutt what messages are from you and addressed to youth
-alternates myalternate email addresses
+alternates alt1@something.com alt2@something.com
 
 # for showing in sidebar
 # specifies folders that can recieve mail and will be checked for new messages
 unmailboxes *
-mailboxes "+nocturnalartifice/Inbox" "+nocturnalartifice/[Gmail]/.Starred" "+nocturnalartifice/[Gmail]/.Sent Mail" "+nocturnalartifice/[Gmail]/.All Mail" "+nocturnalartifice/[Gmail]/.Trash"
+mailboxes "+account/Inbox" "+account/[Gmail]/.Starred" "+account/[Gmail]/.Sent Mail" "+account/[Gmail]/.All Mail" "+account/[Gmail]/.Trash"
 
 # actually move to trash
-macro index,pager td "<save-message>=nocturnalartifice/[Gmail]/.Trash<enter>" "Trash Message"
+macro index,pager td "<save-message>=account/[Gmail]/.Trash<enter>" "Trash Message"
 
 # Sync email # add reindex with notmuch
-macro index o "<shell-escape>mbsync -a nocturnal<enter>" "download mail"
-macro index O "<shell-escape>mbsync -c ~/.school_mbsyncrc -a school<enter>" "download mail"
+macro index o "<shell-escape>mbsync channel_specified_in_mbsyncrc<enter>" "download mail"
+macro index O "<shell-escape>mbsync -a<enter>" "download all mail"
 
-# Folder Navigation# {{{
-macro index gi "<change-folder>=nocturnalartifice/Inbox<enter>" "Go to inbox"
-macro index ga "<change-folder>=nocturnalartifice/[Gmail]/.All Mail<enter>" "Go to all mail"
-macro index gs "<change-folder>=nocturnalartifice/[Gmail]/.Sent Mail<enter>" "Go to sent Mail"
-macro index gm "<change-folder>=nocturnalartifice/[Gmail]/.Starred<enter>" "Go to starred Mail"
-macro index gt "<change-folder>=nocturnalartifice/[Gmail]/.Trash<enter>" "Go to trash"
-macro index gd "<change-folder>=nocturnalartifice/[Gmail]/.Drafts<enter>" "Go to drafts"
+# Folder Navigation {{{
+macro index gi "<change-folder>=account/Inbox<enter>" "Go to inbox"
+macro index ga "<change-folder>=account/[Gmail]/.All Mail<enter>" "Go to all mail"
+macro index gs "<change-folder>=account/[Gmail]/.Sent Mail<enter>" "Go to sent Mail"
+macro index gm "<change-folder>=account/[Gmail]/.Starred<enter>" "Go to starred Mail"
+macro index gt "<change-folder>=account/[Gmail]/.Trash<enter>" "Go to trash"
+macro index gd "<change-folder>=account/[Gmail]/.Drafts<enter>" "Go to drafts"
 # this will trigger hook and load other account's config
-macro index gn "<change-folder>=school/Inbox<enter>" "Go to other inbox"
+macro index gn "<change-folder>=another_account/Inbox<enter>" "Go to other inbox"
 # }}}
 
 # vim: set ft=muttrc:
