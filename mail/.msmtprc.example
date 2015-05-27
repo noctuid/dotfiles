@@ -1,32 +1,47 @@
 # https://wiki.archlinux.org/index.php/Msmtp
-# Accounts will inherit settings from this section
+# accounts will inherit settings from this section
 defaults
-auth             on
-tls              on
-tls_trust_file   /usr/share/ca-certificates/mozilla/Thawte_Premium_Server_CA.crt
-# logfile ~/.msmtp.los
+auth               on
+tls                on
+tls_certcheck      on
+tls_trust_file     /etc/ssl/certs/ca-certificates.crt
+# already default
+remove_bcc_headers on
+# must explicitly set envelope-from
+auto_from          off
 
-# A first gmail address
-account        school
-host           smtp.gmail.com
-port           587
-protocol       smtp
-from           someemail@gmail.com
-user           someemail@gmail.com
-passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | grep school | awk '{print $2}'"
-tls_trust_file /etc/ssl/certs/ca-certificates.crt
+# a first gmail address
+account      account1
+host         smtp.gmail.com
+port         587
+protocol     smtp
+from         name@gmail.com
+user         name@gmail.com
+passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/signifier/ {print $2}'"
 
-# an email setup sending for with gmail in accounts/import (e.g. .edu that forwards without dedicated mailbox)
+# an email setup sending for with gmail in accounts/import 
+# e.g. .edu that forwards without dedicated mailbox
 # may have to setup for tls/ port 587
-account anotheremail
-host smtp.gmail.com
-port 587
-protocol smtp
-from someaddress@somewhere.edu
-user sameemailasabove@gmail.com
-passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | grep school | awk '{print $2}'"
-tls_trust_file /etc/ssl/certs/ca-certificates.crt
+# test this again...
+account      anotheraccount
+host         smtp.gmail.com
+port         587
+protocol     smtp
+from         someaddress@somewhere.edu
+user         name@gmail.com
+passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/signifier/ {print $2}'"
 
-# Set a default account
+# openmailbox account
+account      openmailboxaccount
+host         smtp.openmailbox.org
+# ssl/tls port without starttls; 587 for starttls
+port         465
+tls_starttls off
+protocol     smtp
+from         name@openmailbox.org
+user         name@openmailbox.org
+passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/openmailbox-signifier/ {print $2}'"
+
+# set a default account
 # don't set; so won't accidentally send with wrong account; will fail
 # account default : none
