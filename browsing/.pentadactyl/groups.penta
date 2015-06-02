@@ -157,6 +157,12 @@ silent nmap -group chan -ex gy open http://www.4chan.org/y
 
 "}}}
 
+" 8chan {{{
+group fullchan -description "based hotwheels" -locations 8ch.net
+silent nmap -group fullchan -ex <leader>f execute "silent !~/bin/pentadactyl/dlf.sh 8chan " + buffer.URL + " &"
+
+" }}}
+
 " Manga and Doujinshi{{{
 " passkeys (for webcomic reader) https://github.com/ameboide/webcomic_reader
 group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/(read)\#.*,pururin.com/view/.*,e-hentai.org/s/.*,exhentai.org/s/.*,bato\.to/read/.*
