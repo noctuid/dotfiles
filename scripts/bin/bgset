@@ -1,0 +1,12 @@
+#!/bin/bash
+# This script serves as a wrapper for setroot. It will do the following:
+# 1. Set the wallpaper.
+# 2. Copy the command to clipboard.
+# 3. Restart conky.
+
+setroot "$@"
+
+echo -n "setroot $*" | xsel -bi
+
+killall conky
+conky -q &> /dev/null &
