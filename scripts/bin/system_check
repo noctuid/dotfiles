@@ -1,0 +1,34 @@
+#!/bin/bash
+# running this every 4 minutes with cron
+
+# battery check
+battery_level=$(acpi --battery | awk '{gsub(/[,%]/, ""); print $4}')
+if [[ $battery_level -le 10 ]]; then
+	notify-send "Battery low" "Battery level is $battery_level%!"
+elif [[ $battery_level -le 5 ]]; then
+	for _ in {1..3}; do
+		notify-send -u low "Battery low"
+	done
+	notify-send -u critical "Battery low: $battery_level%"
+fi
+
+# cpu temp check
+cpu_temp=$(acpi -t | awk '{printf "%d", $4}')
+if [[ $cpu_temp -ge 75 ]]; then
+	notify-send "CPU temperature is $cpu_temp°C"
+fi
+
+# high ram usage
+ram_percent=$(free | awk '/Mem/ {printf("%d", $3/$2 * 100)}')
+if [[ $ram_percent -ge 20 ]]; then
+	notify-send "The rams are getting high: $ram_percent%"
+fi
+
+# free space check
+while read -r line; do
+	percent_full=$(echo "$line" | awk '{gsub("%",""); print $5}')
+	if [[ $percent_full -ge 90 ]]; then
+		disk=$(echo "$line" | awk '{print $6}')
+		notify-send "$disk is $percent_full% full"
+	fi
+done <<< "$(df | tail -n +2)"
