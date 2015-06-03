@@ -1,10 +1,13 @@
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=10
-GRUB_DISTRIBUTOR="Arch"
+GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null`
 # boot parameters
 # don't know if I had acpi_osi= before, but can't change brightness without it now
-GRUB_CMDLINE_LINUX_DEFAULT="quiet rootflags=noatime,discard elevator=bfq pcie_aspm=force i915.i915_enable_rc6=1 acpi_osi="
+GRUB_CMDLINE_LINUX_DEFAULT="quiet rootflags=noatime,discard pcie_aspm=force i915.i915_enable_rc6=1 acpi_osi="
+# used for both normal and rescue boot items
 GRUB_CMDLINE_LINUX=""
+# background image
+GRUB_BACKGROUND="/boot/grub/grub-bakground.png"
 
 # Preload both GPT and MBR modules so that they are not missed
 GRUB_PRELOAD_MODULES="part_gpt part_msdos"
