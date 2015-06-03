@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # todo:
 # record which need more reviewing
 
@@ -25,7 +25,7 @@ If no cardset is given, will list existing cardsets.
 
 function review_card() {
 # order non-blank/non-"comment" lines randomly
-IFS=$'\n'; review_lines=($(grep -vw '^\s*$\|#' $card_set | shuf))
+IFS=$'\n'; review_lines=($(grep -vw '^\s*$\|#' "$card_set" | shuf))
 for line in "${review_lines[@]}";do
 	if [ "$side" == "left" ]; then
 		echo $line | awk -F ':' '{ print $1 }'
@@ -74,22 +74,22 @@ do
     esac
 done
 
-mkdir -p $card_dir
-cd $card_dir
+mkdir -p "$card_dir"
+cd "$card_dir"
 if [ -n "$1" ]; then
 	# last arg
-	card_set="${@: -1}"
+	card_set="${*:0-1}"
 	if $search; then
-		ag $search_term
+		ag "$search_term"
 	fi
-	if $create_set;then
-		touch $card_set
+	if $create_set; then
+		touch "$card_set"
 	fi
-	if $edit_set;then
-		vim $card_set
+	if $edit_set; then
+		vim "$card_set"
 		exit 0
 	fi
-	if $review_set;then
+	if $review_set; then
 		review_card
 	fi
 else
