@@ -20,7 +20,7 @@ fi
 
 # high ram usage
 ram_percent=$(free | awk '/Mem/ {printf("%d", $3/$2 * 100)}')
-if [[ $ram_percent -ge 20 ]]; then
+if [[ $ram_percent -ge 80 ]]; then
 	notify-send "The rams are getting high: $ram_percent%"
 fi
 
