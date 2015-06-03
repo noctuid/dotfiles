@@ -1,0 +1,11 @@
+#!/bin/bash
+# rld bspwm empty desktop bindings
+killall bspc
+killall panel
+panel &> /dev/null &
+
+# for all desktops, set up home row navigation bindings on empty desktops
+# matching roman numerals after because can get something like ':FDesktop...'
+bspc control --subscribe | awk '/:F(I|II|III|IV|V|VI|VII|VIII|IX|X):/ { system("killall sxhkd ; sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
+# revert as soon as a desktop is occupied
+bspc control --subscribe | awk '/:O(I|II|III|IV|V|VI|VII|VIII|IX|X):/ { system("killall sxhkd ; sxhkd &"); }' &
