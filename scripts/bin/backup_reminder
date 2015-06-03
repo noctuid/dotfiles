@@ -1,0 +1,25 @@
+#!/bin/zsh
+# run every two hours
+# last backup check; see ~/.zsh/backup_functions
+export HISTFILE=~/.zsh_history
+export HISTSIZE=100000
+fc -R
+last_backup() {
+	fc -lrn -t "%m%d" "$1" | tail -n 1 | awk '{print $1}'
+}
+today=$(date +%m%d)
+
+b_backup=$(last_backup bahamut)
+if [[ $((today-b_backup)) -gt 3 ]];then
+	notify-send "No soma backup in over 3 days"
+fi
+
+s_backup=$(last_backup sin)
+if [[ $((today-s_backup)) -gt 7 ]]; then
+	notify-send "No small backup in over a week"
+fi
+
+h_backup=$(last_backup bkhsea)
+if [[ $((today-h_backup)) -gt 14 ]];then
+	notify-send "No home backup in over two weeks"
+fi
