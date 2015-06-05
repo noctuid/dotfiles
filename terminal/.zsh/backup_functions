@@ -130,7 +130,7 @@ function bahamut() {
 	online=false
 	mountdir=/media
 	no_eject=false
-	while getopts :m:ho opt
+	while getopts :m:hon opt
 	do
 		case $opt in
 		m) mountdir=$OPTARG;;
