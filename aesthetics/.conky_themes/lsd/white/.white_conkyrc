@@ -1,0 +1,53 @@
+# NOTE: This is charley166's conky theme with only slight modifications
+# need conky-lua
+# http://charley166.deviantart.com/art/LSD-conky-config-v2-0-392188352
+
+update_interval 5
+total_run_times 0
+net_avg_samples 1
+cpu_avg_samples 1
+imlib_cache_size 0
+double_buffer yes
+no_buffers yes
+use_xft yes
+xftfont Zekton:size=9
+override_utf8_locale yes
+text_buffer_size 2048
+own_window_class Conky
+own_window yes
+own_window_type desktop
+own_window_transparent yes
+own_window_hints undecorated,sticky,skip_taskbar,skip_pager
+alignment tr
+gap_x 40
+gap_y 50
+minimum_size 265 412
+default_bar_size 30 8
+draw_shades no
+# change to black
+# default_color 000000
+# default_shade_color 000000
+# white
+default_color ffffff
+default_shade_color ffffff
+
+color0 00d9ff
+color1 ffffff
+color2 ffffff
+
+
+lua_load ~/.conky_themes/lsd/white/white_lsd_rings.lua
+lua_draw_hook_post main
+
+TEXT
+${goto 185}${voffset -8}${color0}${font Zekton:style=bold:size=12}angelic_sedition
+${goto 60}${voffset 20}${color}${font}Temperature: 
+${goto 10}${voffset 75}${font Zekton:style=bold:size=30}${time %H:%M}${font}
+${goto 166}${voffset -10}${font Zekton:style=Bold:size=9}Battery
+${alignc -23}${font Zekton:style=Bold:size=9}${battery_percent BAT1}%
+${goto 49}${voffset 45}CPU${voffset -5}${color}${goto 128}RAM
+${goto 130}${font Zekton:style=Bold:size=9}${memperc}%
+${goto 75}${voffset 25}${font Zekton:style=Bold:size=9}HDused
+${goto 80}${font Zekton:style=Bold:size=9}${fs_used /home}
+
+${image ~/.conky_themes/lsd/white/white_lsd.png -p 10,0 -s 255x412}
