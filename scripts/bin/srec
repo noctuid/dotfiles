@@ -1,0 +1,68 @@
+#!/bin/bash
+# credit to gotbletu for ffmpeg opts and to
+# http://wiki.oz9aec.net/index.php/High_quality_screen_capture_with_Ffmpeg
+
+print_help() {
+	echo "
+usage: srec [options]
+options:
+	-o <output name>   specify the name of the output file (default: output.mkv)
+	-a <card,device>   specify audio card to use
+	                   you can use 'arecord -l' to check what's available (default 0,0)
+	-f <fps>           choose frames per second (default: 30)
+	-s                 select an area with slop to record
+	-w                 specify a window to record
+	-h                 print help
+"
+	if [[ $1 == illegal_opt ]]; then
+		exit 1
+	else
+		exit 0
+	fi
+}
+
+geometry=$(xwininfo -root | awk '/geometry/ {gsub("\\+.*",""); print $2}')
+offset=
+output_name=output.mkv
+audio_card="0,0"
+fps=30
+slop=false
+choose_window=false
+while getopts :o:a:f:swh opt
+do
+	case $opt in
+	o) output_name=$OPTARG;;
+	a) audio_card=$OPTARG;;
+	f) fps=$OPTARG;;
+	s) slop=true;;
+	w) choose_window=true;;
+	h) print_help;;
+	*) print_help illegal_opt;
+	esac
+done
+
+if $slop; then
+	slop_info=$(slop -f "%wx%h+%x,%y")
+	geometry=$(echo "$slop_info" | awk -F "+" '{print $1}')
+	offset=$(echo "$slop_info" | awk -F "+" '{print "+"$2}')
+elif $choose_window; then
+	# some WMs will mess this up so won't be accurate (blackbox)
+	# also may need adjusting for window borders...
+	wininfo=$(xwininfo)
+	x=$(echo "$wininfo" | awk '/Absolute.*X/ {print $4}')
+	y=$(echo "$wininfo" | awk '/Absolute.*Y/ {print $4}')
+	rel_x=$(echo "$wininfo" | awk '/Relative.*X/ {print $4}')
+	rel_y=$(echo "$wininfo" | awk '/Relative.*Y/ {print $4}')
+	if [[ $x -ne $rel_x ]]; then
+		x=$((x-rel_x))
+	fi
+	if [[ $y -ne $rel_y ]]; then
+		y=$((y-rel_y))
+	fi
+	offset="+${x},$y"
+	w=$(echo "$wininfo" | awk '/Width/ {print $2}')
+	h=$(echo "$wininfo" | awk '/Height/ {print $2}')
+	geometry="${w}x$h"
+fi
+	
+ffmpeg -f alsa -ac 2 -i hw:"$audio_card" -f x11grab -r "$fps" -s "$geometry" -i :0.0"$offset" -acodec pcm_s16le -vcodec libx264 -preset ultrafast -crf 0 -threads 0 "$output_name"

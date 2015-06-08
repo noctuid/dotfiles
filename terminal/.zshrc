@@ -937,10 +937,8 @@ alias kthxbai='halt'
 # }}}
 #}}}
 #===============
-# Screen Shot/Record# {{{
+# Screen Shot {{{
 #===============
-# Screen Recording; automatically works with external mic; q to quit and save
-alias srec="ffmpeg -f alsa -ac 2 -i hw:0,0 -f x11grab -r 30 -s 1366x768 -i :0.0 -acodec pcm_s16le -vcodec libx264 -preset ultrafast -crf 0 -threads 0 output.mkv"
 
 # alias zshot="scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'"
 alias zshot="~/bin/screenshot.sh"
