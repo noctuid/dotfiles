@@ -16,6 +16,8 @@ fi
 win_action() {
 	if [[ $wm == bspwm ]]; then
 		bspc_action "$@"
+	elif [[ $wm == i3 ]]; then
+		i3_action "$@"
 	fi
 }
 
@@ -124,6 +126,86 @@ case $1 in
 	quit)
 		 bspc quit 1
 		 ;;
+	*)
+		echo "not a valid action"
+		exit 1
+esac
+}
+
+i3_action() {
+case $1 in
+	dsel)
+		if [[ $2 =~ ^[1-9]$ ]]; then
+			i3-msg "workspace $2"
+		fi
+		;;
+	wsel)
+		i3-msg "focus $2"
+		;;
+	wmove)
+		i3-msg "move $2"
+		;;
+	wmove_tod)
+		i3-msg "move container to workspace $2"
+		;;
+	wresize)
+		if [[ $2 == left ]]; then
+			result=$(i3-msg "resize grow left 10 px or 10 ppt" | \
+				awk -F ':' '/success/ {gsub("}]",""); print $2}')
+			if ! $result; then
+				i3-msg "resize shrink right 10 px or 10 ppt"
+			fi
+		elif [[ $2 == right ]]; then
+			result=$(i3-msg "resize grow right 10 px or 10 ppt" | \
+				awk -F ':' '/success/ {gsub("}]",""); print $2}')
+			if ! $result; then
+				i3-msg "resize shrink left 10 px or 10 ppt"
+			fi
+		elif [[ $2 == down ]]; then
+			result=$(i3-msg "resize grow down 10 px or 10 ppt" | \
+				awk -F ':' '/success/ {gsub("}]",""); print $2}')
+			if ! $result; then
+				i3-msg "resize shrink up 10 px or 10 ppt"
+			fi
+		elif [[ $2 = up ]]; then
+			result=$(i3-msg "resize grow up 10 px or 10 ppt" | \
+				awk -F ':' '/success/ {gsub("}]",""); print $2}')
+			if ! $result; then
+				i3-msg "resize shrink down 10 px or 10 ppt"
+			fi
+		fi
+		;;
+	wtoggle)
+		if [[ $2 == fullscreen ]]; then
+			i3-msg "fullscreen"
+		elif [[ $2 == floating ]]; then
+			i3-msg "floating toggle"
+		fi
+		;;
+	wclose)
+		i3-msg "kill"
+		;;
+	wkill)
+		i3-msg "kill"
+		;;
+	lsel)
+		if [[ $2 = next ]]; then
+			i3-msg "layout toggle"
+		fi
+		;;
+	psel)
+		if [[ $2 == right ]]; then
+			i3-msg "split h"
+		elif [[ $2 == down ]]; then
+			i3-msg "split v"
+		fi
+		;;
+	reload)
+		i3-msg "reload"
+		;;
+	quit)
+		i3-msg "exit"
+		;;
 	*)
 		echo "not a valid action"
 		exit 1
