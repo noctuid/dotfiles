@@ -1,4 +1,3 @@
-#
 # /etc/fstab: static file system information
 #
 # <file system>	<dir>	<type>	<options>	<dump>	<pass>
@@ -13,15 +12,15 @@
 # discard for TRIM with ssd
 # don't remount root; https://wiki.archlinux.org/index.php/Improve_boot_performance#Filesystem_mounts
 # LABEL=root_ssd / ext4 defaults,noatime,discard 0 1
+# see boot configuration for root mounting
 
-LABEL=boot_ssd /boot ext4 defaults,noatime,discard 0 2
+# https://wiki.archlinux.org/index.php/Security#Mount_options
 
-LABEL=mozilla_ssd /home/angelic_sedition/.mozilla ext4 defaults,noatime,discard 0 2
+LABEL=boot_ssd /boot ext4 defaults,noatime,discard,nodev,nosuid,noexec 0 2
+LABEL=mozilla_ssd /home/angelic_sedition/.mozilla ext4 defaults,noatime,discard,nosuid,nodev 0 2
 
-LABEL=var_hdd /var ext4 defaults,noatime 0 2
-
-LABEL=home_hdd /home ext4 defaults,relatime 0 2
-
+LABEL=var_hdd /var ext4 defaults,noatime,nodev,nosuid 0 2
+LABEL=home_hdd /home ext4 defaults,relatime,nodev,nosuid 0 2
 LABEL=swap_hdd none swap defaults 0 0
 
-tmpfs /tmp tmpfs nodev,nosuid,size=2G 0 0
+tmpfs /tmp tmpfs nodev,nosuid,size=3G 0 0
