@@ -105,30 +105,76 @@ nmap -ex spd silent !bspc desktop -c
 
 "}}}
 " #==============================
-" # Actual Firefox Settings (about:config)"{{{
+" # Actual Firefox Settings (about:config) {{{
 " #==============================
-set! browser.download.dir=/home/angelic_sedition/Move
-set! browser.newtab.url=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
-set! browser.startup.homepage=/home/angelic_sedition/dotfiles/aesthetics/homepage/home.html
-
+" general info:
+" http://kb.mozillazine.org/About:config_entries
+set! browser.download.dir=~/move
+" load previous session when starting firefox (default)
+set! browser.startup.page=3
+set! browser.newtab.url=~/dotfiles/aesthetics/homepage/home.html
+" ~ only expands with gH...
+set! browser.startup.homepage=~/dotfiles/aesthetics/homepage/home.html
 " a new setting to move cache to same location as profile for use with profile-sync-daemon
-set! browser.cache.disk.parent_directory=/home/angelic_sedition/.mozilla/firefox/v7w4b13j.normal/cache
-
-" close dta when downloads are complete
-set! extensions.dta.closedta=true
-
+" will need to change if change profile dir though...
+" maybe turn off cache altogether
+set! browser.cache.disk.parent_directory=~/.mozilla/firefox/v7w4b13j.normal/cache
 " more undos
 set! browser.sessionstore.max_tabs_undo=100
+" spell check even single line textboxes
+set! layout.spellcheckDefault=2
+" for more zoom on really large/long images
+set! zoom.maxPercent=500
+" https://wiki.archlinux.org/index.php/Firefox_tweaks
+" performance; enable pipelining for normal connections
+" http://www-archive.mozilla.org/projects/netlib/http/pipelining-faq.html
+set! network.http.pipelining=true
+" set! network.http.proxy.pipelining=true
+" save session every minute (default is 15 seconds)
+set! browser.sessionstore.interval=600000
+" do not want pocket
+set! browser.pocket.enabled=false
+" do not want hello (in user.js already)
+set! loop.enabled=false
+" close dta when downloads are complete
+set! extensions.dta.closedta=true
+" classic theme restorer looks like crap with pentadactyl (or at least my theme)
+" this gives okay straight tab seperators that look okay
+set! browser.devedition.theme.enabled=true
 
-" to force install pentadactyl
+" to force install pentadactyl if needed (set in user.js or directly in about:config)
 " set! extensions.checkCompatibility.nightly=false
 
+" security
+" also see ./user.js
 " https://github.com/Earnestly/dotfiles/blob/master/.config/pentadactyl/pentadactylrc
-" Require websites preform safe ssl negotiation
+" require websites to perform safe ssl negotiation; breaks some sites (goodreads)
 " set! security.ssl.require_safe_negotiation=true
 " set! security.ssl.treat_unsafe_negotiation_as_broken=true
+" https://wiki.manjaro.org/index.php?title=Firefox_about:config_edits
+" block domains and sites known to track; can also reduce load time of sites
+set! privacy.trackingprotection.enabled=true
+" disabling and will see if have problems...
+set! dom.storage.enabled=false
+" never send referring url when following a link; may cause problems for online banking sites and others
+set! network.http.sendRefererHeader=0
+" don't send referring url when navigating between https hosts
+set! network.http.sendSecureXSiteReferrer=false
+" don't download pages just because they are likely to be visited
+set! network.prefetch-next=false
 
-"}}}
+" full native html5 player
+" https://wiki.manjaro.org/index.php?title=Firefox_about:config_edits#Enable_full_native_HTML5_player
+set! media.mediasource.enabled=true
+set! media.mediasource.mp4.enabled=true
+set! media.mediasource.webm.enabled=true
+set! media.fragmented-mp4.enabled=true
+set! media.fragmented-mp4.exposed=true
+set! media.fragmented-mp4.ffmpeg.enabled=true
+set! media.fragmented-mp4.gmp.enabled=true
+set! media.fragmented-mp4.use-blank-decoder=false
+
+" }}}
 " #==============================
 " # QuickMarks {{{
 " #==============================
