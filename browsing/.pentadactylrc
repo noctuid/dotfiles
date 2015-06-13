@@ -126,9 +126,10 @@ set! layout.spellcheckDefault=2
 " for more zoom on really large/long images
 set! zoom.maxPercent=500
 " https://wiki.archlinux.org/index.php/Firefox_tweaks
-" performance; enable pipelining for normal connections
+" performance; enable pipelining
 " http://www-archive.mozilla.org/projects/netlib/http/pipelining-faq.html
 set! network.http.pipelining=true
+set! network.http.pipelining.ssl=true
 " set! network.http.proxy.pipelining=true
 " save session every minute (default is 15 seconds)
 set! browser.sessionstore.interval=600000
@@ -173,6 +174,16 @@ set! media.fragmented-mp4.exposed=true
 set! media.fragmented-mp4.ffmpeg.enabled=true
 set! media.fragmented-mp4.gmp.enabled=true
 set! media.fragmented-mp4.use-blank-decoder=false
+
+" fingerprint/uniqueness
+" https://superuser.com/questions/436598/how-to-hide-browser-plugin-details-in-firefox-for-more-privacy#436602
+" not flawless, but works with https://panopticlick.eff.org/
+set! plugins.enumerable_names=""
+" https://github.com/dillbyrne/random-agent-spoofer/releases
+set! extensions.agentSpoof.enabled=true
+set! extensions.agentSpoof.notify=false
+set! extensions.agentSpoof.timeInterval=randomTime
+set! extensions.agentSpoof.uaChosen=random_desktop
 
 " }}}
 " #==============================
