@@ -21,6 +21,13 @@ LABEL=mozilla_ssd /home/angelic_sedition/.mozilla ext4 defaults,noatime,discard,
 
 LABEL=var_hdd /var ext4 defaults,noatime,nodev,nosuid 0 2
 LABEL=home_hdd /home ext4 defaults,relatime,nodev,nosuid 0 2
-LABEL=swap_hdd none swap defaults 0 0
+
+# https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption
+# LABEL=swap_hdd none swap defaults 0 0
+/dev/mapper/swap none swap defaults 0 0
+# find id of swap partition: ls -l /dev/disk/by-id/* | grep sd<xX>
+# if two results can choose either one
+# in /etc/cryptab:
+# swap /dev/disk/by-id/... /dev/urandom swap,cipher=aes-cbc-essiv:sha256,size=256
 
 tmpfs /tmp tmpfs nodev,nosuid,size=3G 0 0
