@@ -81,7 +81,6 @@ if [ $(tty) = "/dev/tty1" ]; then
 
 	# start window manager
 	case $1 in
-		xless) termite --geometry=1366x768 --exec="zsh -c '. ~/.zshrc && xless'";;
 		hlwm) exec herbstluftwm --locked;;
 		bspwm) exec bspwm;;
 		# vb) VirtualBox -startvm "Windows 7" -fullscreen;;

@@ -1,0 +1,4 @@
+#compdef vc
+
+_arguments \
+":location:_path_files -W /etc/openvpn/pia -g '*.ovpn(:t:r)'"

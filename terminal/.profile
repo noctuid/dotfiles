@@ -8,11 +8,23 @@ export BSPWM_STACK=/tmp/bspwm.stack
 export PANEL_HEIGHT=14
 export PANEL_FIFO=/tmp/panel-fifo
 
+export EDITOR=vim
+export PAGER=vimpager
 export BROWSER=firefox
 export PACMAN=powerpill
+export SHELL=/bin/zsh
+
+# stderr in red
+# https://github.com/sickill/stderred
+if [ -f "/usr/lib/libstderred.so" ]; then
+	export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
+fi
 
 # only load ~/.config/ranger/rc.conf
 export RANGER_LOAD_DEFAULT_RC=FALSE
+
+# blog dir
+export BLOG=/home/angelic_sedition/dev/blog/angelic-sedition.github.io
 
 # add to PATH
 pathdirs="
@@ -28,8 +40,9 @@ pathdirs="
 ~/.cabal/bin
 # for adb
 /opt/android-sdk
-# for octopress/gems
+# for octopress and other gems (e.g. for tmuxinator)
 ~/.gem/ruby/2.1.0/bin
+~/.gem/ruby/2.2.0/bin
 "
 
 while read -r dir; do
@@ -37,7 +50,7 @@ while read -r dir; do
 	# posix check if starts with #
 	if [ "$dir" != "" ] && [ ! "${dir%${dir#?}}"x = '#x' ]; then
 		# eval so expands tilde
-		eval PATH=$PATH:$dir
+		eval PATH="$PATH":"$dir"
 	fi
 done <<< "$pathdirs"
 
@@ -55,7 +68,7 @@ if ! pgrep devmon; then
 fi
 
 # startx on login if tty1
-if [ $(tty) = "/dev/tty1" ]; then
+if [ "$(tty)" == "/dev/tty1" ]; then
 	startx
 else
 	# change caps from backspace to escape
