@@ -1,0 +1,97 @@
+# Sources:
+# https://wiki.archlinux.org/index.php/Isync
+
+# * A Gmail Account
+IMAPAccount gmail-1
+Host imap.gmail.com
+User account1@gmail.com
+# store the password in an encrypted file with PassCmd
+PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/account1/ { print $2 }'"
+# use ssl
+UseIMAPS yes
+# abort if tls/ssl connection cannot be established
+RequireSSL yes
+# The following line should work. If get certificate errors, uncomment the two following lines and read the "Troubleshooting" section.
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+# CertificateFile ~/.cert/imap.gmail.com.pem
+# CertificateFile ~/.cert/Equifax_Secure_CA.pem
+
+IMAPStore gmail-1-remote
+# imap account to use
+Account gmail-1
+
+MaildirStore gmail-1-local
+# the trailing "/" is important
+Path ~/.mail/account1/
+Inbox ~/.mail/account1/Inbox
+
+# to download: $ mbsync gmail-1
+Channel gmail-1
+Master :gmail-1-remote:
+Slave :gmail-1-local:
+# exclude everything under the internal [Gmail] folder, except the interesting folders
+# Patterns * ![Gmail]* "[Gmail]/Sent Mail" "[Gmail]/Starred" "[Gmail]/All Mail"
+# Patterns * ![Gmail]* "[Gmail]/Chats"
+# include everything
+Patterns * [Gmail]*
+# only create missing mailboxes locally
+Create Slave
+# don't delete
+Expunge None
+# sync changes both ways (read, archived, etc.)
+Sync All
+# Save the synchronization state files in the relevant directory
+SyncState *
+
+# * A Second Gmail
+IMAPAccount gmail-2
+Host imap.gmail.com
+User account2@gmail.com
+PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/account2/ { print $2 }'"
+UseIMAPS yes
+RequireSSL yes
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore gmail-2-remote
+Account gmail-2
+
+MaildirStore gmail-2-local
+Path ~/.mail/account2/
+Inbox ~/.mail/account2/Inbox
+
+Channel gmail-2
+Master :gmail-2-remote:
+Slave :gmail-2-local:
+Patterns * [Gmail]*
+Create Slave
+Expunge None
+Sync All
+SyncState *
+
+# * An Openmailbox Account
+IMAPAccount openmailbox
+Host imap.openmailbox.org
+User account@openmailbox.org
+PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/openmailbox/ { print $2 }'"
+UseIMAPS yes
+RequireSSL yes
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore openmailbox
+Account openmailbox
+
+MaildirStore openmailbox
+Path ~/.mail/openmailbox/
+Inbox ~/.mail/openmailbox/Inbox
+
+Channel openmailbox
+CopyArrivalDate yes
+Master :openmailbox:
+Slave :openmailbox:
+# openmailbox is simple by default with Drafts, Inbox, Sent, Spam, and Trash
+# I've added an "Archive" folder
+Patterns *
+Create Slave
+Expunge None
+Sync All
+SyncState *
