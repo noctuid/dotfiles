@@ -17,7 +17,7 @@ port         587
 protocol     smtp
 from         name@gmail.com
 user         name@gmail.com
-passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/signifier/ {print $2}'"
+passwordeval "gpg2 --quiet --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/signifier/ {print $2}'"
 
 # an email setup sending for with gmail in accounts/import 
 # e.g. .edu that forwards without dedicated mailbox
@@ -29,7 +29,7 @@ port         587
 protocol     smtp
 from         someaddress@somewhere.edu
 user         name@gmail.com
-passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/signifier/ {print $2}'"
+passwordeval "gpg2 --quiet --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/signifier/ {print $2}'"
 
 # openmailbox account
 account      openmailboxaccount
@@ -40,7 +40,7 @@ tls_starttls off
 protocol     smtp
 from         name@openmailbox.org
 user         name@openmailbox.org
-passwordeval "gpg2 --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/openmailbox-signifier/ {print $2}'"
+passwordeval "gpg2 --quiet --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/openmailbox-signifier/ {print $2}'"
 
 # set a default account
 # don't set; so won't accidentally send with wrong account; will fail
