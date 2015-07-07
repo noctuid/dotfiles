@@ -32,7 +32,9 @@ elif [[ $site == *chan ]]; then
 	else
 		title=$(echo "$thread" | grep -o '<title>[^<]*' | sed 's/^<title>//')
 		takedir 8chan/"${title//[\/ ]/_}"
-		echo "$thread" | grep -o '<a href="https://media.8ch.net/tech/src/[^"]*' | sed "s/<a href=\"//" | uniq > tmp_urls
+		# doesn't work on boards that don't have the media.8ch part
+		# haven't encountered any such boards that I would want to use
+		echo "$thread" | grep -oE '<a href="https://media.8ch.net/[[:lower:]]*/src/[^"]*' | sed "s/<a href=\"//" | uniq > tmp_urls
 	fi
 	aria2c -i tmp_urls
 	rm tmp_urls
