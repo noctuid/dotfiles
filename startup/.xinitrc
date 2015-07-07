@@ -9,9 +9,6 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
         unset f
 fi
 
-# TODO:
-# .start a window instead of wm maximized without using geometry
-# .slimlock for multiple xsessions? does that even make sense.. or maybe just disable tty switching?
 #==============================
 # General (for any X session) {{{
 #==============================
@@ -22,7 +19,11 @@ xmodmap ~/.Xmodmap
 xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
 
 # restore background image/settings
-setroot --restore
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/setroot/.setroot-restore" ]; then
+	setroot --restore
+else
+	setroot --bg-color "#00ff00"
+fi
 
 # font stuff
 xset +fp /usr/share/fonts/local
@@ -37,9 +38,15 @@ xset +dpms
 # standby suspend and off; no difference for lcds apparently; blank screen after 5 minutes of inactivity
 xset dpms 0 0 300
 
-# disable mouse when typing
-# i flag
-# will disable for one second after last keypress; k ignore modifier keys (i.e. control left click) ; t will only disable scrolling and clicking
+# disable system mouse acceleration
+xset mouse 0 0
+# not necesssary with xset I think:
+# xinput list | awk -F "id=" '/slave *pointer/ && !/XTEST pointer/ {gsub(" *\\[.*",""); system("xinput --set-prop " $2 " \"Device Accel Velocity Scaling\" 1.00")}'
+
+# disable mousepad when typing
+# i- disable for x second(s) after last keypress
+# k- ignore modifier keys (i.e. control left click)
+# t- only disable scrolling and clicking
 syndaemon -k -i 1 -d &
 
 # set cursor look
@@ -55,9 +62,9 @@ redshift -c ~/.config/redshift.conf &
 
 # }}}
 #==============================
-# TTY Specific# {{{
+# TTY Specific {{{
 #==============================
-if [ $(tty) = "/dev/tty1" ]; then
+if [ "$(tty)" = "/dev/tty1" ]; then
 	# japanese input
 	export XMODIFIERS=@im=SCIM
 	export GTK_IM_MODULE="scim"
@@ -67,7 +74,7 @@ if [ $(tty) = "/dev/tty1" ]; then
 	# another dropdown
 	guake &
 
-	# sleep after 20 minutes activity
+	# sleep after 20 minutes of inactivity
 	xautolock -time 20 -locker "pm-suspend" -detectsleep &
 
 	# notifications on mpd song changes
@@ -79,17 +86,18 @@ if [ $(tty) = "/dev/tty1" ]; then
 	# hotkeys
 	sxhkd &
 
+	emacs --daemon &
 	# start window manager
 	case $1 in
 		hlwm) exec herbstluftwm --locked;;
 		bspwm) exec bspwm;;
+		i3) exec i3;;
 		# vb) VirtualBox -startvm "Windows 7" -fullscreen;;
 		*) exec wm;;
 	esac
-else
-	# add battery info, etc. since no panel
-	# start emacs maximized
-	exec emacs -g 1366x768
+elif [ "$(tty)" = "/dev/tty2" ]; then
+	sxhkd &
+	exec i3
 fi
-#  }}}
+# }}}
 #==============================
