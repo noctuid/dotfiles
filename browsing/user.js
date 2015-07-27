@@ -5,9 +5,12 @@
 user_pref("clipboard.autocopy",                  true);
 // probably change once have more passwords setup with pass
 user_pref("privacy.clearOnShutdown.cookies",     false);
+// http://kb.mozillazine.org/Network.cookie.lifetimePolicy
+// 0- cookie's lifetime supplied by server
+// 3- to use network.cookie.lifetime.days
+user_pref("network.cookie.lifetimePolicy",       0);
 // I like the sessions/history (pentadactyl completion)
 user_pref("places.history.enabled",              true);
-user_pref("browser.sessionstore.enabled",        true);
 user_pref("browser.privatebrowsing.autostart",   false);
 user_pref("privacy.sanitize.sanitizeOnShutdown", false);
 user_pref("privacy.clearOnShutdown.history",     false);

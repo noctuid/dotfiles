@@ -112,6 +112,8 @@ nmap -ex spd silent !bspc desktop -c
 set! browser.download.dir=~/move
 " load previous session when starting firefox (default)
 set! browser.startup.page=3
+" pyllyukko/user.js sets to true; brings up page every time start firefox
+set! plugins.update.notifyUser=false
 set! browser.newtab.url=~/dotfiles/aesthetics/homepage/home.html
 " ~ only expands with gH...
 set! browser.startup.homepage=~/dotfiles/aesthetics/homepage/home.html
@@ -119,7 +121,7 @@ set! browser.startup.homepage=~/dotfiles/aesthetics/homepage/home.html
 " will need to change if change profile dir though...
 " maybe turn off cache altogether
 set! browser.cache.disk.parent_directory=~/.mozilla/firefox/v7w4b13j.normal/cache
-" more undos
+" more undos (supersedes browser.sessionstore.enabled)
 set! browser.sessionstore.max_tabs_undo=100
 " spell check even single line textboxes
 set! layout.spellcheckDefault=2
@@ -163,6 +165,10 @@ set! network.http.sendRefererHeader=0
 set! network.http.sendSecureXSiteReferrer=false
 " don't download pages just because they are likely to be visited
 set! network.prefetch-next=false
+" java plugin off
+set! plugin.state.java=0
+" ask to activate flash
+set! plugin.state.flash=1
 
 " full native html5 player
 " https://wiki.manjaro.org/index.php?title=Firefox_about:config_edits#Enable_full_native_HTML5_player
