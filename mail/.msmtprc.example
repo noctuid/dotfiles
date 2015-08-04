@@ -43,5 +43,6 @@ user         name@openmailbox.org
 passwordeval "gpg2 --quiet --for-your-eyes-only --no-tty -d $HOME/.pass.gpg | awk '/openmailbox-signifier/ {print $2}'"
 
 # set a default account
-# don't set; so won't accidentally send with wrong account; will fail
-# account default : none
+# msmtp will still fail if account/email isn't in config
+# just make sure mail client always specifies an account/email when replying
+account default : openmailboxaccount
