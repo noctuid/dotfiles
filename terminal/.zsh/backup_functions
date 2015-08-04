@@ -312,48 +312,34 @@ alias bkdbuffalo="bkdatabtobuffalo"
 
 # }}}
 
-# need to be updated
 # psp backup {{{
 # vita
 alias cm="qcma --verbose"
 
-# leave out psp isos?
-snpspbk() {
+snpsp() {
 	echo "Using --delete with rsync. Continue? (y/n)"
 	read -q REPLY
 	echo
-	if [[ ! $REPLY =~ ^[Yy]$ ]]
-	then
+	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 		return 1
 	else
-		if [[ -d /media/MS0/ ]];then
+		# trailing slash is needed
+		psp_dir=$(echo "$1" | sed -r "s;/?$;/;")
+		echo "$psp_dir"
+		if [[ -d $psp_dir ]];then
 			mountdatab && \
-			rsync -avrh --progress --delete /media/MS0/ ~/database/database/Gaming/handheld/PSP/PSP\ Backup/
+			# don't backup large games but do backup their names
+			tree "$psp_dir"/ISO > "$psp_dir"/isos.txt && \
+			ls "$psp_dir"/PSP/GAME/PSX > "$psp_dir"/psx.txt && \
+			rsync -avrh --progress --delete  --prune-empty-dirs \
+				--exclude={"ISO/*","PSX/*"} "$psp_dir" ~/database/gaming/handheld/psp/backup/
 		else
-			echo "Error. PSP is not mounted or directory is named differently."
+			echo "Error. Given directory does not exist."
 			return 1
 		fi
 	fi
 }
 
-# save databackup
-snpspdata() {
-	echo "Using --delete with rsync. Continue? (y/n)"
-	read -q REPLY
-	echo
-	if [[ ! $REPLY =~ ^[Yy]$ ]]
-	then
-		return 1
-	else
-		if [[ -d /media/MS0/ ]];then
-			mountdatab && \
-			rsync -avrh --progress --delete /media/MS0/SAVEDATA ~/database/database/Gaming/handheld/PSP/savedata/
-		else
-			echo "Error. PSP is not mounted or directory is named differently."
-			return 1
-		fi
-	fi
-}
 # }}}
 # vim is dumb
 # vim: ft=sh
