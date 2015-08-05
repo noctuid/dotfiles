@@ -188,21 +188,20 @@ function bahamut() {
 # }}}
 
 # quick net backup {{{
-# add grive option
 # ~8mb volume
 
 function sin() {
 	mountsoma && \
-	mount_tc "$HOME"/grive/smallest_soma_bk "$HOME"/smallest_bk && \
+	mount_tc "$HOME"/omb_owncloud/smallest_soma_bk "$HOME"/smallest_bk && \
 	sndot && \
-	rsync -avrh --progress --delete --prune-empty-dirs --exclude={".Trash/*",".git/*","Portable/*","Gaming/*","Large/*","Customization/win/*","chats/*","dotfiles/*"} --include={"*/","*.txt","*.tex","*.md","*.mkd","*.mkdn"} --exclude='*' ~/ag-sys/ ~/smallest_bk && \
-	umount_tc ~/grive/smallest_soma_bk && \
+	rsync -avrh --progress --delete --prune-empty-dirs --exclude={".Trash/*",".git/*","gaming/*","large/*","chats/*","dotfiles/*"} --include={"*/","*.txt","*.org","*.tex","*.md","*.mkd","*.mkdn"} --exclude='*' "$HOME"/ag-sys/ "$HOME"/smallest_bk && \
+	umount_tc "$HOME"/omb_owncloud/smallest_soma_bk && \
 	# update modification time so will be accuate on places backed up to
-	touch ~/grive/smallest_soma_bk && \
-	SpiderOak --batchmode --backup='~/grive/smallest_soma_bk' && \
-	echo "Minimal backup to Spider Oak completed." || \
-	echo "Minimal backup to Spider Oak failed."
+	touch "$HOME"/omb_owncloud/smallest_soma_bk && \
+	SpiderOak --batchmode --backup="$HOME/omb_owncloud/smallest_soma_bk" && \
+	owncloudcmd $HOME/omb_owncloud https://cloud.openmailbox.org/
 }
+
 # }}}
 
 # home backup {{{
