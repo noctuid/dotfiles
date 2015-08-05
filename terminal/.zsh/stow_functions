@@ -1,0 +1,15 @@
+#!/bin/sh
+restow() {
+	cd ~/dotfiles && \
+	# so can have readmes in each dir without conflict
+	stow --ignore="^README.*" -Rvt ~/ aesthetics browsing common emacs games mail \
+		media music remap scripts startup terminal vim .mail .aesthetics .browsing \
+		.common .emacs .games .media .music .terminal .vim
+}
+
+unstow() {
+	cd ~/dotfiles && \
+	stow -Dvt ~/ aesthetics browsing common emacs games mail \
+		media music remap scripts startup terminal vim .mail .aesthetics .browsing \
+		.common .emacs .games .media .music .terminal .vim
+}
