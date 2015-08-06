@@ -157,7 +157,7 @@ function bahamut() {
 			sngdrive && \
 			echo "Backup of soma to gdrive completed succesfully."
 		else
-			usb_location=$mountdir/${*:0-1}
+			usb_location=$mountdir/${*: -1}
 			if [[ -d "$usb_location" ]]; then
 				# if soma volume doesn't already exist, copy it over
 				if [[ ! -f "$usb_location/soma" ]]; then
@@ -178,7 +178,7 @@ function bahamut() {
 					fi
 				fi
 			else
-				echo "Error. USB drive ${*:0-1} is not mounted at $mountdir."
+				echo "Error. USB drive ${*: -1} is not mounted at $mountdir."
 				return 1
 			fi
 		fi
@@ -223,7 +223,7 @@ function snhometoexternal() {
 	if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 		return 1
 	else
-		exthd_loc=$mountdir/${*:0-1}
+		exthd_loc=$mountdir/${*: -1}
 		if [[ -d "$exthd_loc" ]]; then
 			mkdir -p "$exthd_loc"/home_bk
 			# if exclude *, won't transfer dir contents, by specifying /* (/ refering to the top of the from dir), the contents of the included folders will be transferred (because of -r)
@@ -232,7 +232,7 @@ function snhometoexternal() {
 			bahamut -m "$exthd_loc" -n home_bk
 			sndatab -m "$exthd_loc" home_bk
 		else
-			echo "Error. External drive ${*:0-1} is not mounted at $mountdir."
+			echo "Error. External drive ${*: -1} is not mounted at $mountdir."
 			return 1
 		fi
 	fi
@@ -275,7 +275,7 @@ function sndatab() {
 	then
 		return 1
 	else
-		exthd_loc=$mountdir/${*:0-1}
+		exthd_loc=$mountdir/${*: -1}
 		if [[ -d "$exthd_loc" ]]; then
 			# if soma volume doesn't already exist, copy it over
 			if [[ ! -f "$exthd_loc/datab" ]]; then
@@ -293,7 +293,7 @@ function sndatab() {
 				umount_tc "$exthd_loc/datab"
 			fi
 		else
-			echo "Error. External drive ${*:0-1} is not mounted at $mountdir."
+			echo "Error. External drive ${*: -1} is not mounted at $mountdir."
 			return 1
 		fi
 	fi
