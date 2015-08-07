@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+
+# Change DNS settings right away
+# http://dnsleak.com/
+pia-tools --pia-dns
+# Port forward request will fail if asked too early (according to pia-tools)
+sleep 5 && pia-tools --refresh --disallow
