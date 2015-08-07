@@ -59,7 +59,7 @@ function mount_tc() {
 	if [[ ! -f "$tc_volume" ]]; then
 		echo "Error. The specified path ($tc_volume) for the tc volume does not exist."
 		return 1
-	elif [[ -n "$(truecrypt -t -l 2> /dev/null | awk "\$2 ~ /${tc_volume//\//\\/}/")" ]]; then
+	elif truecrypt -t -l 2> /dev/null | grep -qE "^[0-9]: $tc_volume"; then
 		echo "$tc_volume is already mounted."
 		return 0
 	elif [[ -n "$(ls -A "$mount_point" 2> /dev/null)" ]]; then
