@@ -118,10 +118,13 @@ function umountsoma() {
 alias sngdrive="cd ~/grive/ ; grive -V"
 alias spideroak="SpiderOak"
 
+# shared rsync flags
+alias backup_rsync="rsync -avhmP --delete --ignore-errors"
+
 function sndot() {
 	# dotfiles backup
-	rsync -avrh --progress --delete --exclude={"bundle/*","elpa/*",".mpd/log",".mutt/cache/*","ppsspp/PSP/SAVEDATA/*",".vim/undo",".vim/thesaurus"} --prune-empty-dirs ~/dotfiles ~/ag-sys/Backup/
-	rsync -avrh --progress --delete ~/vimwiki ~/ag-sys/Backup/
+	backup_rsync --exclude={"bundle/*","elpa/*",".mpd/log",".mutt/cache/*","ppsspp/PSP/SAVEDATA/*",".vim/undo",".vim/thesaurus"} --prune-empty-dirs ~/dotfiles ~/ag-sys/Backup/
+	backup_rsync ~/vimwiki ~/ag-sys/Backup/
 }
 # }}}
 
@@ -152,7 +155,7 @@ function bahamut() {
 			mountsoma && \
 			mount_tc "$HOME"/grive/soma_bk "$HOME"/ag-sys-bk-onl && \
 			sndot && \
-			rsync -avrhP --delete "$HOME"/ag-sys/ "$HOME"/ag-sys-bk-onl && \
+			rsync_backup "$HOME"/ag-sys/ "$HOME"/ag-sys-bk-onl && \
 			umount_tc ~/grive/soma_bk && \
 			sngdrive && \
 			echo "Backup of soma to gdrive completed succesfully."
@@ -162,14 +165,14 @@ function bahamut() {
 				# if soma volume doesn't already exist, copy it over
 				if [[ ! -f "$usb_location/soma" ]]; then
 					umountsoma && \
-					rsync -avhP "$HOME"/soma "$usb_location" && \
+					backup_rsync "$HOME"/soma "$usb_location" && \
 					echo "Backup of soma to $usb_location completed succesfully." || \
 					echo "bahamut failed."
 				else
 					mountsoma && \
 					mount_tc "$usb_location"/soma "$HOME"/ag-sys-bk && \
 					sndot && \
-					rsync -avrhP --delete "$HOME"/ag-sys/ "$HOME"/ag-sys-bk && \
+					backup_rsync -avrhP --delete "$HOME"/ag-sys/ "$HOME"/ag-sys-bk && \
 					echo "Backup of soma to $usb_location completed succesfully." || \
 					echo "bahamut failed."
 					umount_tc "$usb_location"/soma && \
@@ -194,7 +197,7 @@ function sin() {
 	mountsoma && \
 	mount_tc "$HOME"/omb_owncloud/smallest_soma_bk "$HOME"/smallest_bk && \
 	sndot && \
-	rsync -avrh --progress --delete --prune-empty-dirs --exclude={".Trash/*",".git/*","gaming/*","large/*","chats/*","dotfiles/*"} --include={"*/","*.txt","*.org","*.tex","*.md","*.mkd","*.mkdn"} --exclude='*' "$HOME"/ag-sys/ "$HOME"/smallest_bk && \
+	backup_rsync --exclude={".Trash/*",".git/*","gaming/*","large/*","chats/*","dotfiles/*"} --include={"*/","*.txt","*.org","*.tex","*.md","*.mkd","*.mkdn"} --exclude='*' "$HOME"/ag-sys/ "$HOME"/smallest_bk && \
 	umount_tc "$HOME"/omb_owncloud/smallest_soma_bk && \
 	# update modification time so will be accuate on places backed up to
 	touch "$HOME"/omb_owncloud/smallest_soma_bk && \
@@ -227,7 +230,7 @@ function snhometoexternal() {
 		if [[ -d "$exthd_loc" ]]; then
 			mkdir -p "$exthd_loc"/home_bk
 			# if exclude *, won't transfer dir contents, by specifying /* (/ refering to the top of the from dir), the contents of the included folders will be transferred (because of -r)
-			rsync -avrhP --delete --include={".cabal/",".cards/",".gnupg/",".mail/",".mozilla/","_repos/","_school/","_/projects","anime/","dotfiles/",".gem/","Move/","Music/","ps_vita/","vimwiki/","wallpaper/","quicklisp/",".cargo/",".password-store "} --exclude="/*" --prune-empty-dirs ~/ "$exthd_loc/home_bk" || echo "snhometoexternal failed."
+			backup_rsync --include={".cabal/",".cards/",".gnupg/",".mail/",".mozilla/","_repos/","_school/","_/projects","anime/","dotfiles/",".gem/","Move/","Music/","ps_vita/","vimwiki/","wallpaper/","quicklisp/",".cargo/",".password-store "} --exclude="/*" --prune-empty-dirs ~/ "$exthd_loc/home_bk" || echo "snhometoexternal failed."
 			# sync truecrypt volumes as well as well
 			bahamut -m "$exthd_loc" -n home_bk
 			sndatab -m "$exthd_loc" home_bk
@@ -280,14 +283,14 @@ function sndatab() {
 			# if soma volume doesn't already exist, copy it over
 			if [[ ! -f "$exthd_loc/datab" ]]; then
 				umountdatab && \
-				rsync -avhP "$HOME"/datab "$exthd_loc" && \
+				backup_rsync "$HOME"/datab "$exthd_loc" && \
 				echo "Backup of datab to $exthd_loc completed succesfully." || \
 				echo "sndatab failed."
 			else
 				mountdatab && \
  				mount_tc "$exthd_loc/datab" "$HOME"/database-bk && \
 				sndot && \
-				rsync -avrhP --delete "$HOME"/database/ "$HOME"/database-bk && \
+				backup_rsync "$HOME"/database/ "$HOME"/database-bk && \
 				echo "Backup of datab to $exthd_loc completed succesfully." || \
 				echo "sndatab failed."
 				umount_tc "$exthd_loc/datab"
@@ -330,8 +333,8 @@ snpsp() {
 			# don't backup large games but do backup their names
 			tree "$psp_dir"/ISO > "$psp_dir"/isos.txt && \
 			ls "$psp_dir"/PSP/GAME/PSX > "$psp_dir"/psx.txt && \
-			rsync -avrh --progress --delete  --prune-empty-dirs \
-				--exclude={"ISO/*","PSX/*"} "$psp_dir" ~/database/gaming/handheld/psp/backup/
+			backup_rsync --exclude={"ISO/*","PSX/*"} "$psp_dir" \
+				~/database/gaming/handheld/psp/backup/
 		else
 			echo "Error. Given directory does not exist."
 			return 1
