@@ -56,37 +56,32 @@ function maybe_eject() {
 function mount_tc() {
 	tc_volume=$1
 	mount_point=$2
-	# don't print errors
-	if [[ "$(truecrypt -t -l 2> /dev/null | grep "$tc_volume")" != "" ]]; then
-		echo "Already mounted."
+	if [[ ! -f "$tc_volume" ]]; then
+		echo "Error. The specified path ($tc_volume) for the tc volume does not exist."
+		return 1
+	elif [[ -n "$(truecrypt -t -l 2> /dev/null | awk "\$2 ~ /${tc_volume//\//\\/}/")" ]]; then
+		echo "$tc_volume is already mounted."
+		return 0
+	elif [[ -n "$(ls -A "$mount_point" 2> /dev/null)" ]]; then
+		echo "Error. Files exist in $mount_point or it is not a directory."
+		return 1
 	else
-		if [[ ! -f "$tc_volume" ]]; then
-			echo "Error. The specified path ($tc_volume) for the tc volume does not exist."
-			return 1
-		elif [[ "$(ls -A "$mount_point")" ]]; then
-			echo "Error. Files exist in ($mount_point). Move/delete them."
-			return 1
-		else
-			mkdir -p "$mount_point"
-			if $RUN_BY_CRON; then
-				# use gui popup
-				truecrypt "$tc_volume" "$mount_point"
-			else
-				truecrypt -t --protect-hidden=no --keyfiles= "$tc_volume" "$mount_point"
-			fi
-		fi
+		mkdir -p "$mount_point"
+		truecrypt -t --protect-hidden=no --keyfiles= "$tc_volume" "$mount_point"
 	fi
 }
 
 # prevent errors when a volume already is unmounted
+# give full path of volume as arg
 function umount_tc() {
 	if [[ -n "$1" ]]; then
 		tc_volume=$1
-
 		# only try to unmount if mounted
 		if [[ "$(truecrypt -t -l 2> /dev/null | grep "$tc_volume")" != "" ]]; then
 			truecrypt -t -d "$tc_volume" && \
 			echo "Umounted $tc_volume successfully."
+		else
+			echo "$tc_volume is not mounted."
 		fi
 	else
 		# umount all
@@ -94,19 +89,80 @@ function umount_tc() {
 	fi
 }
 
-# alias -g mountacct='truecrypt ~/ag-sys/Else/ACCTS ~/blemish'
-mountacct() {
-	mkdir -p ~/blemish
-	# pasword will appear in process listing if done like this
-	# truecrypt -p "$(gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/accts/ {print $2}')" ~/ag-sys/Else/ACCTS ~/blemish
-	truecrypt ~/ag-sys/Else/ACCTS ~/blemish
+# }}}
+
+# zuluMount mounting and umounting {{{
+# holding off on for now... may just switch to veracrypt instead of tc-play
+
+# limitations:
+# - Can't choose full path (only directly under $HOME (or /run/media/private/$USER))
+mount_z() {
+	volume=$1
+	mount_point=$2
+	if [[ ! $mount_point =~ ^${HOME}.* ]]; then
+		# mount point must be under home
+		echo "Error. Mount point must be a full path directly under \$HOME."
+		return 1
+	elif [[ ! -f "$volume" ]]; then
+		echo "Error. The specified path ($volume) for the volume does not exist."
+		return 1
+	elif zuluMount-cli -l | grep -q "^$volume"; then
+		# if try to mount an already mounted volume with zuluMout will get error:
+		# "ERROR: Could not create mount point, invalid path or path already taken"
+		# this will give an accurate message
+		echo "$volume is already mounted."
+		return 0
+	fi
+
+	if [[ -d "$mount_point" ]]; then
+		# zuluMount must make the mount point
+		rmdir "$mount_point" 2> /dev/null || \
+			(echo "Error. Files exist in ($mount_point). Move/delete them." && return 1)
+	elif [[ -e "$mount_point" ]]; then
+		echo "Error. $mount_point exists and is not a directory."
+		return 1
+	fi
+
+	# make up to the last dir of the mount path
+	mkdir -p "${mount_point%/*}"
+	# must be a member of zulumount group for -e?
+	# not actually necessary to remove $HOME, since zuluCrypt will only take last dir in given path
+	zuluMount-cli -m -e mount-prefix=home -d "$volume" -z "${mount_point/$HOME\//}"
 }
 
-alias umountacct="umount_tc ~/ag-sys/Else/ACCTS"
+# give full path of volume as arg
+# problems:
+# get "ERROR: Close failed, volume is not open or was opened by a different user"
+# when the reason is actually that the volume is in use
+umount_z() {
+	if [[ -n "$1" ]]; then
+		volume=$1
+		if zuluMount-cli -l | grep -q "^$volume"; then
+			zuluMount-cli -u -d "$volume" && echo "Umounted $tc_volume successfully."
+		else
+			# prevent non-zero exit value if volume isn't mounted
+			echo "$volume is not mounted."
+		fi
+	else
+		non_system_volumes=$(zuluMount-cli -N)
+		while read -r volume; do
+			zuluMount-cli -u -d "$volume"
+		done <<< "$non_system_volumes"
+	fi
+}
 
 # }}}
 
 # Shared {{{
+mountacct() {
+	# pasword will appear in process listing if done like this
+	# truecrypt -p "$(gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/accts/ {print $2}')" ~/ag-sys/Else/ACCTS ~/blemish
+	mount_tc "$HOME"/ag-sys/else/ACCTS "$HOME"/blemish
+}
+umountacct() {
+	umount_tc "$HOME"/ag-sys/else/ACCTS
+}
+
 function mountsoma() {
 	mount_tc "$HOME"/soma "$HOME"/ag-sys/
 }
