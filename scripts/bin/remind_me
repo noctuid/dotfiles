@@ -4,22 +4,27 @@
 export HISTFILE=~/.zsh_history
 export HISTSIZE=100000
 fc -R
-last_backup() {
+last_run() {
 	fc -lrn -t "%m%d" "$1" | tail -n 1 | awk '{print $1}'
 }
 today=$(date +%m%d)
 
-b_backup=$(last_backup bahamut)
+b_backup=$(last_run bahamut)
 if [[ $((today-b_backup)) -gt 3 ]];then
 	notify-send "No soma backup in over 3 days"
 fi
 
-s_backup=$(last_backup sin)
+s_backup=$(last_run sin)
 if [[ $((today-s_backup)) -gt 7 ]]; then
-	notify-send "No small backup in over a week"
+	notify-send "No small net backup in over a week"
 fi
 
-h_backup=$(last_backup bkhsea)
-if [[ $((today-h_backup)) -gt 14 ]];then
+h_backup=$(last_run bkhsea)
+if [[ $((today-h_backup)) -gt 14 ]]; then
 	notify-send "No home backup in over two weeks"
+fi
+
+system_update=$(last_run pacupd)
+if [[ $((today-system_update)) -gt 14 ]]; then
+	notify-send "No system update in over two weeks"
 fi
