@@ -1,0 +1,8 @@
+# run every 3 minutes of uptime (fcron active time)
+@m(no) 3 env DISPLAY=:0 ~/bin/system_check
+# run every 2 hours of uptime
+@m(no) 2h env DISPLAY=:0 ~/bin/remind_me
+# empty trash every 2 weeks of uptime
+@m(no) 2w /usr/bin/trash-empty
+# run once a month as soon as computer is on between 8 and 12
+%monthly,erroronlymail,mailto(me) * 20-23 * ~/bin/net/ep_backup.sh
