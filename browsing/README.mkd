@@ -1,5 +1,5 @@
 # Pentadactyl Cool Things
-I'm using [this command](https://github.com/angelic-sedition/dotfiles/blob/3f722f0a087dccd752e1dd766c0027c8082e46be/browsing/.pentadactylrc#L544) for navigating tabs in the current 0-9 range with the space key.
+I'm using [this command](https://github.com/noctuid/dotfiles/blob/3f722f0a087dccd752e1dd766c0027c8082e46be/browsing/.pentadactylrc#L544) for navigating tabs in the current 0-9 range with the space key.
 
 Since you can create bookmarks in the config file, keyword searches are nicer to set up (e.g. being able to type `:open d <search terms>` to search something with duckduckgo). You can also use yubnub as the default search engine for a similar effect.
 

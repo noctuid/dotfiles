@@ -24,7 +24,7 @@ The `writing_stats` script will print the number of times words appear in a file
 
 The script can also instead print information about the number of words, sentences (taking into account abbreviations), paragraphs (lines), and chapters. A chapter range is also allowed. It can also output a valid markdown table giving information for each chapter (which will also be aligned in the terminal). Example:
 
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/scripts/bin/writing/writing_stats_table.png "table output")
+![Alt text](https://raw.github.com/noctuid/dotfiles/master/scripts/bin/writing/writing_stats_table.png "table output")
 
 | Chapter       | Words         | Sentences     | Paragraphs    |
 | ------------- | ------------- | ------------- | ------------- |

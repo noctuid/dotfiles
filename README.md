@@ -5,18 +5,18 @@ These are my dotfiles. Some are pretty heavily commented. If you have interest i
 See `aesthetics/` for pretty pictures.
 
 ## Pictures:
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/keyboard_ftw.gif "Words of wisdom from Tatsuya")
+![Alt text](https://raw.github.com/noctuid/dotfiles/master/keyboard_ftw.gif "Words of wisdom from Tatsuya")
 
 See `aesthetics/` for more info on theming, panels, etc.
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/clean.png "SCREENSHOT")
+![Alt text](https://raw.github.com/noctuid/dotfiles/master/clean.png "SCREENSHOT")
 
 Visualizations in ncmpcpp and album art of current song in ranger (outdated) both opened from vimus (`scripts/bin/music`, outdated)
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/dirty.png "SCREENSHOT")
+![Alt text](https://raw.github.com/noctuid/dotfiles/master/dirty.png "SCREENSHOT")
 
 # For More Information:
 I'll add documentation of the specifics once I've cleaned things up.
 
-See the [goals](https://github.com/angelic-sedition/dotfiles#goals-for-configuration--workflow) section and [my blog](http://angelic-sedition.github.io/).
+See the [goals](https://github.com/noctuid/dotfiles#goals-for-configuration--workflow) section and [my blog](http://noctuid.github.io/).
 
 # Working On
 ## Right Now
@@ -51,12 +51,12 @@ See `media/.config/ranger/ranger_functions`.
 ## Make Any Terminal Emulator Dropdown Regardless of Window Manager
 I've tried to create a much more generalized version of my dropdown script that works well with more window managers and has extra functionality that other dropdowns don't have.
 
-See [tdrop](https://github.com/angelic-sedition/tdrop) and make an issue if there isn't already floating support for your wm.
+See [tdrop](https://github.com/noctuid/tdrop) and make an issue if there isn't already floating support for your wm.
 
 ## Use Ranger Instead of Default GUI Popup for File Saving
 Pentadactyl already has :w and ;s which allow for typing out file paths with tab completion. This is cumbersome especially if you have as large a folder structure as I do. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating term with ranger running and pass the file location to ranger's --selectfile and cut it (see `scripts/bin/ranger/ranger_browser_fm.sh`). I also have a dired section which, when used with emacsclient, can start a lot faster than ranger.
 
-See [this post](http://angelic-sedition.github.io/blog/2014/04/30/using-ranger-for-downloads/) for more detailed information and other possibilities.
+See [this post](http://noctuid.github.io/blog/2014/04/30/using-ranger-for-downloads/) for more detailed information and other possibilities.
 
 I've found that pentadactyl's "upload file: " that appears when you hint an upload link to be nice but not a universal solution (if there is no such link to hint). Right now, I do image uploads and mail attachment from the commandline/ranger (see `media/.config/ranger/ranger_functions`). When I have to use the upload gui I often paste in file locations after copying them in ranger.
 
@@ -119,7 +119,7 @@ makegif -w 800 -O 3 -f 15 -o mygiff.gif <path/to/video>
 I still need to alter it to make it easier to deal with. I couldn't find a good way to be able to seek/use the exact time instead of from a key frame, so often one has to mark a larger section then delete the pictures at the beginning and end in the output directory (which is stupidly hardcoded currently). [These](https://github.com/lvml/mpv-plugin-excerpt) [two](https://gist.github.com/Zehkul/25ea7ae77b30af959be0) mpv plugins would be a better way to cut or crop the video first.
 
 An example gif with default settings (made within mpv):
-![Alt text](https://raw.github.com/angelic-sedition/dotfiles/master/example.gif "Tigre-sama Catches an Arrow")
+![Alt text](https://raw.github.com/noctuid/dotfiles/master/example.gif "Tigre-sama Catches an Arrow")
 
 See  
 `scripts/bin/mpv/`  
