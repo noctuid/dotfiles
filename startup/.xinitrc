@@ -52,8 +52,6 @@ syndaemon -k -i 1 -d &
 # set cursor look
 xsetroot -cursor_name left_ptr &
 
-# compositing.. transparency
-compton --config ~/.compton.conf -b &
 # conky with stats
 conky &
 
@@ -65,6 +63,10 @@ redshift -c ~/.config/redshift.conf &
 # TTY Specific {{{
 #==============================
 if [ "$(tty)" = "/dev/tty1" ]; then
+	# compositing.. transparency, fade-in, etc.
+	# will mess things up if run with a DE like gnome or cinnamon
+	compton --config ~/.compton.conf -b &
+
 	# japanese input
 	export XMODIFIERS=@im=SCIM
 	export GTK_IM_MODULE="scim"
