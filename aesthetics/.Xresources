@@ -29,6 +29,3 @@ xscreensaver.passwd.thermometer.background:  #525252
 xscreensaver.passwd.thermometer.width:       8
 !datestamp format--see the strftime(3) manual page for details
 xscreensaver.dateFormat:%A, %B %d
-
-! wallpaper directory
-xscreensaver.imageDirectory: /home/angelic_sedition/wallpaper/

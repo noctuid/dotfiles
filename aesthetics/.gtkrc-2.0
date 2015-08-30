@@ -1,7 +1,7 @@
 # DO NOT EDIT! This file will be overwritten by LXAppearance.
 # Any customization should be done in ~/.gtkrc-2.0.mine instead.
 
-include "/home/angelic_sedition/.gtkrc-2.0.mine"
+include "/home/noctuid/.gtkrc-2.0.mine"
 gtk-theme-name="Numix-ArchBlue"
 gtk-icon-theme-name="Numix"
 gtk-font-name="Cantarell 11"

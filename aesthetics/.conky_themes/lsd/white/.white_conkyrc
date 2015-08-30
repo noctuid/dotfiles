@@ -40,7 +40,7 @@ lua_load ~/.conky_themes/lsd/white/white_lsd_rings.lua
 lua_draw_hook_post main
 
 TEXT
-${goto 185}${voffset -8}${color0}${font Zekton:style=bold:size=12}angelic_sedition
+${goto 185}${voffset -8}${color0}${font Zekton:style=bold:size=12}noctuid
 ${goto 60}${voffset 20}${color}${font}Temperature: 
 ${goto 10}${voffset 75}${font Zekton:style=bold:size=30}${time %H:%M}${font}
 ${goto 166}${voffset -10}${font Zekton:style=Bold:size=9}Battery

@@ -26,10 +26,9 @@ map O o
 
 " quickmarks
 map " '
-map 'h :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/haskell/lyah.pdf<CR>
-map 'p :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/python/thinkpython_for_python_3.pdf<CR>
-map 'c :open /home/angelic_sedition/ag-sys/Large/Library/Books/programming/c/The.C.Programming.Language.2nd.Edition.pdf<CR>
-map 'r :open /home/angelic_sedition/school/LCRCalicoV2.pdf<CR>
+map 'h :open ~/ag-sys/large/library/programming/haskell/lyah.pdf<CR>
+map 'p :open ~/ag-sys/large/library/programming/python/thinkpython_for_python_3.pdf<CR>
+map 'c :open ~/ag-sys/large/library/programming/c/The.C.Programming.Language.2nd.Edition.pdf<CR>
 
 " space bindings
 " gt doesn't behave like vim; 3gt is gt 3 times not go to third tab

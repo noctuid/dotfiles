@@ -1,8 +1,11 @@
+# https://bbs.archlinux.org/viewtopic.php?pid=1429854#p1429854
+# e.g. run like:
+# $ sudo systemctl enable slimlock@$USER
 [Unit]
 Description=Lock X session using slimlock
 
 [Service]
-User=angelic_sedition
+User=%I
 Environment=Display=:0
 ExecStart=/usr/bin/slimlock
 

@@ -17,7 +17,7 @@
 # https://wiki.archlinux.org/index.php/Security#Mount_options
 
 LABEL=boot_ssd /boot ext4 defaults,noatime,discard,nodev,nosuid,noexec 0 2
-LABEL=mozilla_ssd /home/angelic_sedition/.mozilla ext4 defaults,noatime,discard,nosuid,nodev 0 2
+LABEL=mozilla_ssd /home/noctuid/.mozilla ext4 defaults,noatime,discard,nosuid,nodev 0 2
 
 LABEL=var_hdd /var ext4 defaults,noatime,nodev,nosuid 0 2
 LABEL=home_hdd /home ext4 defaults,relatime,nodev,nosuid 0 2

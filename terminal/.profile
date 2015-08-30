@@ -24,7 +24,8 @@ fi
 export RANGER_LOAD_DEFAULT_RC=FALSE
 
 # blog dir
-export BLOG=/home/angelic_sedition/dev/blog/angelic-sedition.github.io
+export BLOG=$HOME/dev/blog/noctuid.github.io
+
 
 # add to PATH
 pathdirs="
