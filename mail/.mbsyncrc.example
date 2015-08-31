@@ -7,10 +7,8 @@ Host imap.gmail.com
 User account1@gmail.com
 # store the password in an encrypted file with PassCmd
 PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/account1/ { print $2 }'"
-# use ssl
-UseIMAPS yes
-# abort if tls/ssl connection cannot be established
-RequireSSL yes
+# use ssl/tls; secure IMAP port 993
+SSLType IMAPS
 # The following line should work. If get certificate errors, uncomment the two following lines and read the "Troubleshooting" section.
 CertificateFile /etc/ssl/certs/ca-certificates.crt
 # CertificateFile ~/.cert/imap.gmail.com.pem
@@ -48,8 +46,7 @@ IMAPAccount gmail-2
 Host imap.gmail.com
 User account2@gmail.com
 PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/account2/ { print $2 }'"
-UseIMAPS yes
-RequireSSL yes
+SSLType IMAPS
 CertificateFile /etc/ssl/certs/ca-certificates.crt
 
 IMAPStore gmail-2-remote
@@ -73,8 +70,7 @@ IMAPAccount openmailbox
 Host imap.openmailbox.org
 User account@openmailbox.org
 PassCmd "gpg2 --for-your-eyes-only --no-tty -d ~/.pass.gpg | awk '/openmailbox/ { print $2 }'"
-UseIMAPS yes
-RequireSSL yes
+SSLType IMAPS
 CertificateFile /etc/ssl/certs/ca-certificates.crt
 
 IMAPStore openmailbox
