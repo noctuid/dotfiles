@@ -1,13 +1,27 @@
+# default menu item
 GRUB_DEFAULT=0
+# time before auto-starting
 GRUB_TIMEOUT=10
+# name of linux distribution
 GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null`
-# boot parameters
+# background image; may need to use $ convert <file> -colorspace rgb <out_name>
+GRUB_BACKGROUND="/boot/grub/background.png"
+# Boot Parameters
+# quiet disables most messages; can set loglevel to 0-7 (3 - errors)
+# always can check logs later with dmesg
+# rw and rootflags to prevent root remount (rw is grub default so don't need explicitly):
+# https://wiki.archlinux.org/index.php/Improve_boot_performance#Filesystem_mounts
+# if IO scheduler (elevator) doesn't exist, will just message that not found
+# aspm: https://wireless.wiki.kernel.org/en/users/documentation/aspm
+# intel specific stuff for battery saving (doesn't cause problems for me):
+# https://www.phoronix.com/scan.php?page=article&item=intel_i915_power&num=1
 # don't know if I had acpi_osi= before, but can't change brightness without it now
-GRUB_CMDLINE_LINUX_DEFAULT="quiet rootflags=noatime,discard pcie_aspm=force i915.i915_enable_rc6=1 acpi_osi="
+GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=3 nosplash rootflags=noatime,discard elevator=bfq pcie_aspm=force acpi915.i915_enable_rc6=1 i915.i915_enable_fbc=1 i915.lvds_downclock=1 acpi_osi="
+# https://www.kernel.org/doc/Documentation/kernel-parameters.txt
+
+# * Rest
 # used for both normal and rescue boot items
 GRUB_CMDLINE_LINUX=""
-# background image
-GRUB_BACKGROUND="/boot/grub/grub-bakground.png"
 
 # Preload both GPT and MBR modules so that they are not missed
 GRUB_PRELOAD_MODULES="part_gpt part_msdos"
