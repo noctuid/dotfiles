@@ -237,7 +237,7 @@ function bahamut() {
 					fi
 				fi
 			else
-				echo "Error. USB drive ${*: -1} is not mounted at $mountdir."
+				echo "Error. USB drive" ${*: -1} "is not mounted at $mountdir."
 				return 1
 			fi
 		fi
@@ -291,7 +291,7 @@ function snhometoexternal() {
 			bahamut -m "$exthd_loc" -n home_bk
 			sndatab -m "$exthd_loc" home_bk
 		else
-			echo "Error. External drive ${*: -1} is not mounted at $mountdir."
+			echo "Error. External drive" ${*: -1} "is not mounted at $mountdir."
 			return 1
 		fi
 	fi
@@ -352,7 +352,7 @@ function sndatab() {
 				umount_tc "$exthd_loc/datab"
 			fi
 		else
-			echo "Error. External drive ${*: -1} is not mounted at $mountdir."
+			echo "Error. External drive" ${*: -1} "is not mounted at $mountdir."
 			return 1
 		fi
 	fi
