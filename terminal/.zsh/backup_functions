@@ -177,10 +177,12 @@ alias spideroak="SpiderOak"
 # shared rsync flags
 alias backup_rsync="rsync -avhmP --delete --ignore-errors"
 
+# minimal dotfiles/dev/school backup; for files that change quickly
 function sndot() {
-	# dotfiles backup
-	backup_rsync --exclude={"bundle/*","elpa/*",".mpd/log",".mutt/cache/*","ppsspp/PSP/SAVEDATA/*",".vim/undo",".vim/thesaurus"} --prune-empty-dirs ~/dotfiles ~/ag-sys/Backup/
-	backup_rsync ~/vimwiki ~/ag-sys/Backup/
+	backup_rsync --exclude={"musiclibrary.blb","bundle/*","elpa/*",".git/*","homepage/*",".mpd/log","mpdscribble.log",".mu/*",".mutt/cache/*","ppsspp/*","spacemacs/*",".vim/undo",".vim/thesaurus",".weechat/logs/*","windows/*",".zgen/*","*.gif","*.png"} ~/dotfiles ~/ag-sys/backup/
+	backup_rsync ~/vimwiki ~/ag-sys/backup/
+	backup_rsync --exclude={"old/*",".git/*"} ~/dev/ ~/ag-sys/backup/dev
+	backup_rsync ~/school/ ~/ag-sys/current-school
 }
 # }}}
 
