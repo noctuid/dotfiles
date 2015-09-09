@@ -1,3 +1,60 @@
+* Pdf Tools
+#+begin_src emacs-lisp
+(use-package pdf-tools
+  :ensure t
+  ;; :mode ("\\.pdf$" . pdf-view-mode)
+  :init (pdf-tools-install))
+
+(defun lit/pdf-page-as-text ()
+  "Inserts current pdf page into a buffer for keyboard selection."
+  (interactive)
+  (pdf-view-mark-whole-page)
+  (pdf-view-kill-ring-save)
+  (switch-to-buffer (make-temp-name "temp"))
+  (yank))
+
+(evil-define-key 'normal pdf-view-mode-map
+  "h" 'backward-page
+  "n" '(lambda () (interactive) (pdf-view-next-line-or-next-page 5))
+  "e" '(lambda () (interactive) (pdf-view-previous-line-or-previous-page 5))
+  "i" 'forward-page
+  (kbd "RET") 'pdf-view-scroll-up-or-next-page
+  "m" 'pdf-view-position-to-register
+  "M" 'pdf-view-position-to-register
+  "'" 'pdf-view-jump-to-register
+  "=" 'pdf-view-scale-reset
+  "u" 'pdf-view-shrink
+  "y" 'pdf-view-enlarge
+  "w" 'pdf-view-fit-width-to-window
+  "W" 'pdf-view-fit-height-to-window
+  ;; open urls
+  "f" 'pdf-links-action-perform
+  "l" 'pdf-history-backward
+  "L" 'pdf-history-forward
+  "/" 'pdf-occur
+  "o" 'pdf-outline
+  ;; go to specific page number (can take number argument)
+  "j" 'pdf-view-goto-page
+  "b" 'pdf-view-midnight-minor-mode
+  [down-mouse-1] 'pdf-view-mouse-extend-region
+  "y" 'pdf-view-kill-ring-save
+  ;; for easier selection; just `kill-this-buffer' when done
+  "Y" 'lit/pdf-page-as-text)
+
+(add-to-list 'golden-ratio-exclude-modes 'pdf-outline-buffer-mode)
+(evil-define-key 'normal pdf-outline-buffer-mode-map
+  "q" 'pdf-outline-quit-and-kill
+  "i" 'pdf-outline-follow-link
+  "a" 'pdf-outline-follow-link-and-quit
+  ;; display link without leaving outline buffer
+  "I" 'pdf-outline-display-link
+  "o" 'pdf-outline-select-pdf-window
+  ;; in outline buffer move to page that is in view buffer
+  "p" 'pdf-outline-move-to-current-page
+  ;; like pdf-view-goto-page
+  "j" 'pdf-outline-move-to-page
+  (kbd "RET") 'pdf-outline-toggle-subtree)
+#+end_src
 * Elfeed
 ** feeds and settings
 #+begin_src emacs-lisp
