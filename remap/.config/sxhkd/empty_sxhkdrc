@@ -34,6 +34,14 @@ semicolon ; f
 semicolon ; a
 	apvlv
 
+# start a new graphical client; -a "" will create a new emacs daemon if one isn't running
+# -c will create a new frame
+semicolon ; e
+	emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
+
+semicolon ; E
+	emacsclient -c -a "" -e "(lit/o-session-setup)"
+
 semicolon ; {g,v}
 	{gvim,gvim}
 
