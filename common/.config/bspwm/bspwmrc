@@ -42,15 +42,11 @@ bspc config remove_unplugged_monitors true
 bspc monitor LVDS1 -d I II III IV V VI VII VIII IX
 # for reloading bspwm without losing windows/structure
 if [ -e "$BSPWM_TREE" ] ; then
-	pkill sxhkd
+	pkill -x sxhkd
 	bspc restore -T "$BSPWM_TREE" -H "$BSPWM_HISTORY" -S "$BSPWM_STACK"
 	rm "$BSPWM_TREE" "$BSPWM_HISTORY" "$BSPWM_STACK"
 	sxhkd &
 else
-	# only do this after starting x/bspwm (not after reloading bspwm)
-	gvim &
-	# open firefox when go to third desktop for first time (thanks to Stebalien; https://bbs.archlinux.org/viewtopic.php?pid=1398604#p1398604)
-	bspc control --subscribe | awk -F ':' '$4 ~ /^[FO]/ { exit(system("firefox &")); }' &
 	bspc desktop -f ^2
 fi
 
