@@ -256,9 +256,11 @@ currentTime() {
 }
 
 mailCount() {
-	# unread/just in inbox
-	# echo "$(find ~/.mail/school/Inbox/new -type f | wc -l)/$(find ~/.mail/school/Inbox/cur -type f | wc -l) |"
-	echo "$(find ~/.mail/nocturnalartifice/Inbox/new -type f | wc -l)/$(find ~/.mail/nocturnalartifice/Inbox/cur -type f | wc -l)"
+	# unread/total in inbox
+	newMessages=$(find ~/.mail/noct/Inbox/new -type f | wc -l)
+	curMessages=$(find ~/.mail/noct/Inbox/cur -type f | wc -l)
+	totalMessages=$((newMessages+curMessages))
+	echo "$newMessages/$totalMessages"
 }
 
 # https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L188
