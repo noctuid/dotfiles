@@ -203,7 +203,7 @@ mailCount() {
 }
 
 # https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L188
-# modified to work with more than just connman (for detecting if wred connection)
+# modified to work with more than just connman (for detecting if wired connection)
 # modified to detect name of interface
 netConnection() {
 	colour1=$1
@@ -261,9 +261,8 @@ songScroll
 titleScroll
 # system info section (right side)
 while true; do
-	info section (right side)
-	# no < for battery, volume, or connection sectiosn because the < changes color depending on state
-	echo "S""${DARK_PURPLE}⮃ ¤ $(memoryPercent)%% \
+	# no < for battery, volume, or connection sectiosn because the < changes colour depending on state
+	echo "S""${DARK_PURPLE}⮃ ¤ $(memoryPercent)% \
 $(batteryPercent $GRAY $LIGHT_RED $DARK_RED $GREEN $LIGHT_GREEN) \
 ${YELLOW}⮃ $(brightnessLevel) \
 $(panelVolume $DARK_BLUE $DARK_RED $GRAY_BLUE) \
@@ -272,6 +271,16 @@ ${GRAY}⮃  $(mailCount) \
 $(netConnection $LIGHT_BLUE $DARK_GRAY $BLUE)" > "$PANEL_FIFO"
 	sleep 0.1s
 done &
+
+# using lemonbar-xft-git
+# http://blog.gaijinpot.com/choosing-japanese-font/
+# https://wiki.archlinux.org/index.php/Fonts#Japanese
+# IPAGothic is more clear than IPAMincho in lemonbar
+panel_bar < "$PANEL_FIFO" | lemonbar \
+	-f "uushi:pixelsize=11" \
+	-f "Stlarch:pizelsize=10" \
+	-f "IPAGothic:pixelsize=11:weight=bold" \
+	x"$PANEL_HEIGHT" -F "$COLOUR_FOREGROUND" -B "$COLOUR_BACKGROUND" &
 
 wait
 # because vim is dumber than emacs:
