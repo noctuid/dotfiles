@@ -68,4 +68,6 @@ elif $choose_window; then
 	geometry="${w}x$h"
 fi
 	
-ffmpeg -f alsa -ac 2 -i hw:"$audio_card" -f x11grab -r "$fps" -s "$geometry" -i :0.0"$offset" -acodec pcm_s16le -vcodec libx264 -preset ultrafast -crf 0 -threads 0 "$output_name"
+ffmpeg -f alsa -ac 2 -i hw:"$audio_card" \
+	-f x11grab -framerate "$fps" -s "$geometry" -i :0.0"$offset" \
+	-acodec pcm_s16le -vcodec libx264 -preset ultrafast -crf 0 "$output_name"
