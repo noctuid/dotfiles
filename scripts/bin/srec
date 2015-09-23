@@ -60,8 +60,11 @@ elif $choose_window; then
 		y=$((y-rel_y))
 	fi
 	offset="+${x},$y"
+	border_width=$(echo "$wininfo" | awk '/Border width/ {print $3}')
 	w=$(echo "$wininfo" | awk '/Width/ {print $2}')
 	h=$(echo "$wininfo" | awk '/Height/ {print $2}')
+	w=$((w+border_width*2))
+	h=$((h+border_width*2))
 	geometry="${w}x$h"
 fi
 	
