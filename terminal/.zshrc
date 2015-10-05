@@ -1310,8 +1310,13 @@ toss() {
 # restart adb
 alias adbrestart='adb kill-server ; adb start-server'
 
-alias mountand='mkdir -p ~/mtp && jmtpfs ~/mtp'
-alias umountand='fusermount -u ~/mtp'
+export MTP_MOUNT_DIR="$HOME/mtp"
+mountand() {
+	mkdir -p "$MTP_MOUNT_DIR" && jmtpfs "$MTP_MOUNT_DIR"
+}
+umountand() {
+	fusermount -u "$MTP_MOUNT_DIR"
+}
 
 # http://www.arachnoid.com/android/SSHelper/index.html
 # with ssh: I tried but it was much slower :( even with fast internets
@@ -1325,7 +1330,7 @@ alias umountand='fusermount -u ~/mtp'
 # see ~/.zsh/rsync_bandlist.txt
 function syncandmus() {
 	# add auto-mounting and checking
-	rsync -azv --no-perms --no-times --size-only --progress --delete --include-from="$HOME/.zsh/rsync_bandlist.txt" "$HOME/Music/" "$1"
+	rsync -azv --no-perms --no-times --size-only --progress --delete --include-from="$HOME/.zsh/rsync_bandlist.txt" "$HOME/Music/" "$MTP_MOUNT_DIR/Card/Music"
 }
 
 # }}}
