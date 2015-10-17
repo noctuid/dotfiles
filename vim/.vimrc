@@ -173,7 +173,7 @@ nnoremap <silent> rl :silent !wm_action inpw rl<cr>
 nnoremap <silent> rx :silent !wm_action inpw rx<cr>
 
 " }}}
-"}}}
+" }}}
 else
 " Tmux Experimentation {{{
 " "r" is Redraw {{{
@@ -227,9 +227,7 @@ nnoremap <silent> ry :silent !wm_action inpt ry<cr>:redraw!<cr>
 nnoremap <silent> rv :silent !wm_action inpt rv<cr>:redraw!<cr>
 
 " }}}
-
 " }}}
-
 " }}}
 endif
 
@@ -550,7 +548,8 @@ if has("gui_running")
 	colorscheme gruvbox
 	" colorscheme molokai
 	" colorscheme badwolf
-	set guifont=Inconsolata\ 11
+	" set guifont=Inconsolata-dz\ for\ Powerline\ 11
+	set guifont=Fira\ Mono\ 9
 	" remove menubar (m), toolbar (t), gui tabs (e), and scrollbars
 	" c use console dialogues instead of popups for simple choices
 	" a automatically puts visually selected text to primary (*)
@@ -720,9 +719,8 @@ nnoremap L <c-i>zvzz
 " Keep the cursor in place while joining lines
 nnoremap j mzJ`z
 " https://bitbucket.org/sjl/dotfiles/src/tip/vim/vimrc#cl-398
-" Split line (sister to [J]oin lines); normal use of S is covered by cc
-nnoremap S i<cr><esc>^mwgk:silent! s/\v +$//<cr>:noh<cr>`w
-nmap <cr> S
+" Split line (sister to [J]oin lines)
+nnoremap <cr> i<cr><esc>^mwgk:silent! s/\v +$//<cr>:noh<cr>`w
 
 " quickfix nav
 augroup quickfix
@@ -944,7 +942,7 @@ nnoremap <space>q 1gt
 nnoremap <space>w 11gt
 
 " re-setup session/tabs and close other buffers
-nnoremap ,ks 1gt:tabonly<cr>:only<cr>:e ~/.vimrc<cr>:vsplit ~/.zshrc<cr>:tabe ~/ag-sys/Else/everything/log.txt<cr>:tabe ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>:vsplit ~/ag-sys/Else/everything/everything_index.txt<cr>:TabooRename main<cr>:tabe ~/ag-sys/Else/everything/\#browse.txt<cr>:TabooRename browse<cr>:tabe ~/.navigation.vim<cr>:TabooRename config<cr>:tabe ~/dotfiles/post_install/post_install.sh<cr>:TabooRename bin<cr>:tabe ~/ag-sys/Else/everything/\#remapping.txt<cr>:TabooRename remap<cr>:tabe ~/ag-sys/Else/everything/another/consume/book_notes.txt<cr>:vsplit ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>:TabooRename cons<cr>:tabe ~/ag-sys/Else/everything/another/_prose/pots/draft_a.txt<cr>:vsplit ~/ag-sys/Else/everything/another/_prose/pots/plot.txt<cr>:TabooRename wr<cr>:tabnew<cr>:TabooRename wr<cr>:tabnew<cr>:Wipeout<cr>2gt
+nnoremap ,ks 1gt:tabonly<cr>:only<cr>:e ~/.vimrc<cr>:vsplit ~/.zshrc<cr>:tabe ~/ag-sys/else/log.org<cr>:tabe ~/ag-sys/else/arch_and_program_info.org<cr>:vsplit ~/ag-sys/else/everything_index.org<cr>:TabooRename main<cr>:tabe ~/ag-sys/else/browse.org<cr>:TabooRename browse<cr>:tabe ~/.navigation.vim<cr>:TabooRename config<cr>:tabe ~/dotfiles/post_install/post_install.sh<cr>:TabooRename bin<cr>:tabe ~/ag-sys/else/remapping.org<cr>:TabooRename remap<cr>:tabe ~/ag-sys/else/consume/book_notes.org<cr>:vsplit ~/ag-sys/else/music/listen/music.org<cr>:TabooRename cons<cr>:tabe ~/ag-sys/else/scrawl/prose/pots/draft_a.org<cr>:vsplit ~/ag-sys/else/scrawl/prose/pots/plot.org<cr>:TabooRename wr<cr>:tabnew<cr>:TabooRename wr<cr>:tabnew<cr>:Wipeout<cr>2gt
 
 " repls; vimshell has some annoyances though (lack of visual updating when window not active, weird cursor blinking, errors, etc.)
 nnoremap ,kl :TabooRename prog<cr>:VimShellInteractive --split='vsplit' sbcl<cr>
@@ -959,31 +957,31 @@ augroup navigationSourcing
 augroup END
 
 " General Quickmarks {{{
-nnoremap ,a :e ~/ag-sys/Else/everything/arch_and_program_info.txt<cr>
-nnoremap ,b :e ~/ag-sys/Else/everything/\#browse.txt<cr>
+nnoremap ,a :e ~/ag-sys/else/arch_and_program_info.org<cr>
+nnoremap ,b :e ~/ag-sys/else/browse.org<cr>
 nnoremap ,B :e ~/.config/bspwm/bspwmrc<cr>
 nnoremap ,c :e ~/.config/ranger/rc.conf<cr>
-nnoremap ,d :e ~/ag-sys/Else/everything/another/ideas.txt<cr>
-nnoremap ,e :e ~/ag-sys/Else/everything/everything_index.txt<cr>
+nnoremap ,d :e ~/ag-sys/else/scrawl/ideas.org<cr>
 nnoremap ,E :e ~/.emacs.d/awaken.org<cr>
 nnoremap ,g :e ~/.pentadactyl/groups.penta<cr>
-nnoremap ,i :e ~/ag-sys/Else/everything/interaction.txt<cr>
+nnoremap ,i :e ~/ag-sys/else/interaction.org<cr>
 nnoremap ,I :e ~/dotfiles/post_install/post_install.txt<cr>
-nnoremap ,j :e ~/ag-sys/Else/everything/journal.txt<cr>
-nnoremap ,l :e ~/ag-sys/Else/everything/log.txt<cr>
+nnoremap ,j :e ~/ag-sys/else/journal.org<cr>
+nnoremap ,l :e ~/ag-sys/else/log.org<cr>
 nnoremap ,m :e ~/.muttrc<cr>
-nnoremap ,M :e ~/ag-sys/Else/everything/other/music/listen/music.txt<cr>
+nnoremap ,M :e ~/ag-sys/else/music/listen/music.org<cr>
 nnoremap ,n :e ~/.navigation.vim<cr>
 nnoremap ,p :e ~/.pentadactylrc<cr>
-nnoremap ,P :e ~/ag-sys/Else/everything/policy.txt<cr>
-nnoremap ,r :e ~/ag-sys/Else/everything/\#remapping.txt<cr>
+nnoremap ,P :e ~/ag-sys/else/policy.org<cr>
+nnoremap ,r :e ~/ag-sys/else/remapping.org<cr>
 nnoremap ,R :e ~/.README.md<cr>
 nnoremap ,t :e ~/.tmux.conf<cr>
 nnoremap ,v :e ~/.vimrc<cr>
+nnoremap ,w :e ~/ag-sys/else/workflow.org<cr>
 nnoremap ,x :e ~/.xinitrc<cr>
 nnoremap ,y :Unite -start-insert buffer file_mru<cr>.yml<esc>
 nnoremap ,z :e ~/.zshrc<cr>
-nnoremap ,2 :e ~/ag-sys/Else/everything/\#20xx.txt<cr>
+nnoremap ,2 :e ~/ag-sys/else/20xx.org<cr>
 
 " }}}
 
@@ -1585,7 +1583,7 @@ endfunction
 " dotoo {{{
 " maybe use with below for quick keys like behaviour
 " https://github.com/kana/vim-submode
-let g:dotoo#agenda#files = ['~/ag-sys/Else/everything/log.org']
+let g:dotoo#agenda#files = ['~/ag-sys/else/everything/log.org']
 " don't clock captures
 let g:dotoo#capture#clock = 0
 
@@ -2224,7 +2222,7 @@ NeoBundle 'rhysd/vim-operator-surround'
 " match closest '', "", (), {}, [] or <> with ib and ab
 NeoBundle 'rhysd/vim-textobj-anyblock'
 
-" gives il and al for lines
+" gives il for lines (like ^yg_)
 NeoBundle 'kana/vim-textobj-line'
 
 " gives ae and ie for entire buffer
