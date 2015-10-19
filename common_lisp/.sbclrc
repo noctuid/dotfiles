@@ -1,0 +1,11 @@
+;;; The following lines added by ql:add-to-init-file:
+;; #-quicklisp
+(let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp"
+                                       (user-homedir-pathname))))
+  (when (probe-file quicklisp-init)
+    (load quicklisp-init)))
+
+(defun lit/ql-update ()
+  "Get latest quicklisp libraries available and update client."
+  (ql:update-dist "quicklisp")
+  (ql:update-client))
