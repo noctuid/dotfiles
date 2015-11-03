@@ -66,6 +66,8 @@ if ! zgen saved; then
 	# completion stuff
 	zgen oh-my-zsh lib/completion.zsh
 	zgen load zsh-users/zsh-completions src
+	# provides ** tab completion for various commands:
+	zgen load junegunn/fzf shell/completion.zsh
 
 	# save all to init script
 	zgen save
@@ -579,20 +581,34 @@ bindkey -a rv r-v
 #==============================
 # FASD and FZF / Navigation {{{
 #==============================
-# mostly living inside file manager now 
-# (there is an fzf plugin for ranger; can use helm with dired)
-# 1. quickmark for dir if exists
-# 2. fuzzy search for recent/most visited/locate/find
-# 3. f<keys> auto-enter navigation in file manager (e.g. deer and blscd)
+# Programs like fasd and shell fuzzy finders like FZF and percol are awesome.
+# I don't end up using them much though since they aren't very useful
+# with a workflow based inside the editor (e.g. magit/fugitive over cli git,
+# helm/unite instead of fzf).
+# Note: there are fzf and fasd plugins for ranger; helm can be used with dired
+# order of preference:
+# 1. quickmark for dir/file if exists (fastest but requires memorization)
+# 2. (maybe fuzzy) search for recent/most visited/locate/find
+# manual navigation is hardly ever necessary-
+# 3. f<keys> auto-enter navigation in file manager (e.g. deer and blscd) or tab
+#    completion
 
-# have a (any), s (show), removed d (directory), z (cd), etc
+# have a (any), s (show), z (cd), etc.
 eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
-alias i='fasd_cd -d'
 
-# default from github page
-export FZF_DEFAULT_COMMAND='
-(git ls-tree -r --name-only HEAD ||
-find * -name ".*" -prune -o -type f -print -o -type l -print) 2> /dev/null'
+# use ag by default instead of find:
+export FZF_DEFAULT_COMMAND='ag -l -g ""'
+# using git ls-tree can be faster in large repos according to fzf README
+# only shows tracked files though
+# export FZF_DEFAULT_COMMAND='
+# (git ls-tree -r --name-only HEAD ||
+# ag -l -g "") 2> /dev/null'
+
+# using FZF completion script (see plugins section) for the following:
+# $ cd ** # dirs
+# $ kill -9 ** # processes
+# $ other_command ** # files
+# etc.
 
 fzf-fasd-dir() {
 	# otherwise will end up as a cdable var
@@ -603,52 +619,33 @@ fzf-fasd-dir() {
 zle -N fzf-fasd-dir
 bindkey -M viins "^[w" fzf-fasd-dir
 
-# I didn't write any of the functions below:
-
-# fe [FUZZY PATTERN] - Open the selected file with the default editor
-#   - Bypass fuzzy finder if there's only one match (--select-1)
-#   - Exit if there's no match (--exit-0)
-fe() {
-  local file
-  file=$(fzf --query="$1" --select-1 --exit-0)
-  [ -n "$file" ] && ${EDITOR:-vim} "$file"
+# possibility if zsh-history-substring-search doesn't cut it
+# https://github.com/junegunn/fzf/wiki/examples#command-history
+# fh - repeat history
+fh() {
+  eval $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
+}
+# fhe - repeat history edit
+fhe() {
+  print -z $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
 }
 
-# fd - cd to selected directory
-fd() {
-	local dir
-	dir=$(find ${1:-*} -path '*/\.*' -prune \
-		-o -type d -print 2> /dev/null | fzf +m) &&
-	cd "$dir"
-}
-
-# fda - including hidden directories
-fda() {
-	local dir
-	dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
-}
-zle -N fda
-bindkey -a td fd
-
-# fkill - kill process
-fkill() {
-	ps -ef | sed 1d | fzf -m | awk '{print $2}' | xargs kill -${1:-9}
-}
-zle -N fkill
-bindkey -a tk fkill
-
-# select session with FZF
-fs() {
-	local session
-	session=$(tmux list-sessions -F "#{session_name}" | \
-		fzf --query="$1" --select-1 --exit-0) &&
-	tmux switch-client -t "$session"
-}
-
-# as suggested gotbletu
+# idea suggested by gotbletu
 fzf-locate() {
-	 rifle "$(locate "${1:-*}" | fzf -e)"
+	local selected
+	selected=$(locate "${1:-*}" | fzf -e)
+	if [[ -d $selected ]]; then
+		cd "$selected"
+	else
+		rifle "$selected"
+	fi
 }
+fl() {
+	fzf-locate "$PWD"/*
+}
+
+# https://github.com/b4b4r07/enhancd
+# cd ..<TAB> could potentially be useful
 
 # }}}
 #==============================
