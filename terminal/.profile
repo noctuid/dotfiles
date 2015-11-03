@@ -8,7 +8,7 @@ export BSPWM_STACK=/tmp/bspwm.stack
 export PANEL_HEIGHT=14
 export PANEL_FIFO=/tmp/panel-fifo
 
-export EDITOR=vim
+export EDITOR="emacsclient -t"
 export PAGER=vimpager
 export BROWSER=firefox
 export PACMAN=powerpill
