@@ -195,40 +195,40 @@ set! extensions.agentSpoof.uaChosen=random_desktop
 " #==============================
 " # QuickMarks {{{
 " #==============================
+silent qmark 4 https://boards.4chan.org/g/
+silent qmark 8 https://8ch.net/tech/
 silent qmark a https://bbs.archlinux.org/
-silent qmark A http://www.anime4fun.com/
-silent qmark b http://bato.to/
+silent qmark A https://animeonlinetv.tv/
+silent qmark b https://bato.to/
 silent qmark B http://www.dustloop.com/forums/index.php?/forum/63-blazblue/
-silent qmark c http://forum.colemak.com/ 
-silent qmark e http://www.exitpath-levelmakers.forumotion.com/
-silent qmark E https://ep-sys.appspot.com/login.jsp
-silent qmark f http://www.4chan.org/
-silent qmark F http://www.fakku.net/
-silent qmark g http://www.geekhack.org/
-silent qmark G http://www.gelbooru.com
-silent qmark h https://www.github.com/
-silent qmark H http://news.ycombinator.com/news
-silent qmark i http://www.ign.com/games/vita?sortBy=score&sortOrder=desc
+silent qmark c http://forum.colemak.com/
+silent qmark e https://www.reddit.com/r/emacs/
+silent qmark g https://www.github.com/
+silent qmark G https://www.geekhack.org/
+silent qmark h https://news.ycombinator.com/news
+silent qmark H http://book.realworldhaskell.org/read/
+silent qmark i https://imgur.com/
+silent qmark I https://www.ign.com/games/vita?sortBy=score&sortOrder=desc
 silent qmark k http://kissanime.com/Search/Anime
-silent qmark l http://www.last.fm/
-silent qmark L http://www.lifehacker.com/
+silent qmark l https://lainchan.org/%CE%BB/index.html
+silent qmark L http://www.last.fm/
 silent qmark m http://myanimelist.net
-silent qmark n http://fuwanovel.org/
-silent qmark p http://pixiv.net/
-silent qmark P http://pururin.com/
-silent qmark M https://mail.google.com/mail/
-silent qmark q http://quora.com/
-silent qmark r http://reddit.com/
+silent qmark p http://planet.lisp.org/
+silent qmark P http://pixiv.net/
+silent qmark q https://quora.com/
+silent qmark r https://reddit.com/
 silent qmark R http://redditbooru.com/
-silent qmark s http://myanimelist.net/clubs.php?cid=27907 
-silent qmark S http://stumbleupon.com/
-silent qmark t http://www.tumblr.com/dashboard/
-silent qmark T http://twitter.com/home/
-silent qmark v http://www.reddit.com/r/vim/
+silent qmark s http://myanimelist.net/clubs.php?cid=27907
+silent qmark S http//stumbleupon.com/
+silent qmark t https://www.tumblr.com/dashboard/
+silent qmark T https://twitter.com/home/
+silent qmark v https://www.reddit.com/r/vim/
 silent qmark w http://www.wololo.net
-silent qmark y http://youtube.com/
+silent qmark x https://www.exitpath-levelmakers.forumotion.com/
+silent qmark X https://ep-sys.appspot.com/login.jsp
+silent qmark y https://youtube.com/
 
-"}}}
+" }}}
 " #==============================
 " # Bookmark Searches {{{
 " #==============================
@@ -240,11 +240,9 @@ silent bmark -keyword bt -title 'Search Batoto' http://bato.to/search?name_cond=
 silent bmark -keyword bkr -title 'Search Baka Renders' http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND
 silent bmark -keyword d -title 'Duck Duck Go' http://duckduckgo.com/?q=%s
 silent bmark -keyword dv -title 'Search Deviantart' http://www.deviantart.com/?q=%s
-silent bmark -keyword exh -title 'Search Exhentai' http://exhentai.org/?f_doujinshi=1&f_manga=1&fsearch=%s+language%3Aenglish&f_apply=Apply+Filter
-silent bmark -keyword fk -title 'Search Fakku' http://www.fakku.net/search/%s
 silent bmark -keyword fl -title 'Search Fluffy.is' http://fluffy.is/search.php?folders=&name=%s
 silent bmark -keyword full -title 'Search Full Fights' http://anime.fullfights.org/?s=%s
-silent bmark -keyword gel -title 'Search Gelbooru' http://gelbooru.com/index.php?page=post&s=list&tags=%s
+silent bmark -keyword g -title 'Google' https://www.google.com/search?q=%s&ie=utf-8&oe=utf-8
 silent bmark -keyword gh -title 'Search Github' http://github.com/search?q=%s
 silent bmark -keyword hg -title 'Search with Hoogle' http://www.haskell.org/hoogle/?hoogle=%s
 silent bmark -keyword mal -title 'Search MAL' http://myanimelist.net/anime.php?q=%s
@@ -253,21 +251,21 @@ silent bmark -keyword mus -title 'Search Albums' http://www.allmusic.com/search/
 silent bmark -keyword r -title 'Quickly Get to Subreddit' http://www.reddit.com/r/%s/
 silent bmark -keyword rt -title 'Rotten Tomatoes Search' http://www.rottentomatoes.com/search/?search=%s
 silent bmark -keyword s -title 'Searx' https://searx.me/?q=%s
-" bmark -keyword s -title 'Startpage' https://startpage.com/do/metasearch.pl?q=%s
-bmark -keyword t -title 'Search Tumblr' http://www.tumblr.com/search/%s
+silent bmark -keyword sp -title 'Startpage' https://startpage.com/do/metasearch.pl?q=%s
+silent bmark -keyword t -title 'Search Tumblr' http://www.tumblr.com/search/%s
 " other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
 " useful mostly for stuff that combines things like mash, split, weird piping stuff, etc.
-bmark -keyword yub -title 'YubNub' http://yubnub.org/parser/parse?command=%s
-bmark -keyword y -title 'Search Youtube' http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search
-bmark -keyword wayback -title 'Search Wayback Machine' http://web.archive.org/web/*/%s
-bmark -keyword zerochan -title 'Search ZeroChan' http://www.zerochan.net/%s
+silent bmark -keyword yub -title 'YubNub' http://yubnub.org/parser/parse?command=%s
+silent bmark -keyword y -title 'Search Youtube' http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search
+silent bmark -keyword wayback -title 'Search Wayback Machine' http://web.archive.org/web/*/%s
+silent bmark -keyword zerochan -title 'Search ZeroChan' http://www.zerochan.net/%s
 
 " Set the default motor search (see bookmark)
-set defsearch=s
+set defsearch=sp
 
 " }}}
 " #==============================
-" # Addon Commands and Bookmarklets"{{{
+" # Addon Commands and Bookmarklets {{{
 " #==============================
 command dta -description "open downthemall window" emenu Tools.DownThemAll! Tools.DownThemAll!...
 command disab -description "disable addblock edge for current page" emenu Tools.Adblock Edge.Disable on this page only
@@ -289,7 +287,7 @@ command bml-grid -description "Show Grid" open javascript:void(myDiv=document.cr
 command bml-reddit-submit-link -description "Submit Current Link to Reddit" open javascript:(function(){location.href='http://reddit.com/submit?url='+location.href+'&title='+encodeURIComponent(document.title)})();
 
 command bml-tumblr-share -descripiton "Share Current Page to Tumblr" open javascript:var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://www.tumblr.com/share',l=d.location,e=encodeURIComponent,p='?v=3&u='+e(l.href)%20+'&t='+e(d.title)%20+'&s='+e(s),u=f+p;try{if(!/^(.*.)?tumblr[^.]*$/.test(l.host))throw(0);tstbklt();}catch(z){a%20=function(){if(!w.open(u,'t','toolbar=0,resizable=0,status=1,width=450,height=430'))l.href=u;};if(/Firefox/.test(navigator.userAgent))setTimeout(a,0);else%20a();}void(0)
-"}}}
+" }}}
 
 " javascript custom searches
 " thanks to mdegat01; I remember when lifehacker used to be interesting
