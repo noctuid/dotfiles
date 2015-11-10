@@ -1,0 +1,6 @@
+#compdef sntcvol
+
+_arguments \
+'-h[help]' \
+':truecrypt volume:_files' \
+':backup directory:_path_files -/'

@@ -1,0 +1,21 @@
++ .cabal/***
++ .cargo/***
++ .gem/***
++ .ghc/***
++ .gnupg/***
++ .mozilla/***
++ .npm/***
++ .tmsu/***
++ anime/***
++ build/***
++ dev/***
++ dotfiles/***
++ move/***
++ Music/***
++ ps_vita/***
++ vboxshare/***
++ vimwiki/***
++ VirtualBox VMs/***
++ wallpaper/***
++ quicklisp/***
++ school/***

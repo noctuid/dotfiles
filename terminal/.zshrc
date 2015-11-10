@@ -1334,7 +1334,7 @@ function syncandmus() {
 #===============
 # Backup & Mounting {{{
 #===============
-source ~/.zsh/backup_functions
+source ~/.zsh/backup_functions.zsh
 
 # }}}
 #===============

@@ -1,7 +1,5 @@
-#compdef bahamut
+#compdef bahamut=sndb
 
 _arguments \
-'-o[online]' \
-'-m[usb mount point]' \
 '-h[help]' \
-':usb location:_path_files -W /media'
+':backup directory:_path_files -W /media'
