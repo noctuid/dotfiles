@@ -79,6 +79,8 @@ if [ "$(tty)" = "/dev/tty1" ]; then
 	# sleep after 20 minutes of inactivity
 	xautolock -time 20 -locker "pm-suspend" -detectsleep &
 
+	# notification daemon
+	dunst &
 	# notifications on mpd song changes
 	# https://github.com/vehk/mpdnotify works well with mpdcron also
 	mpd-notification -m ~/Music &
