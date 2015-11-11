@@ -1072,20 +1072,23 @@ alias rsl='find . -name'
 # Ranger {{{
 #===============
 function ranger-cd {
-	# https://github.com/hut/ranger/blob/master/doc/examples/bash_automatic_cd.sh
+	# from https://github.com/hut/ranger/blob/bdd6bf407ab22782f7ddb3a1dd24ffd9c3361a8d/examples/bash_automatic_cd.sh
+	# with minor modifications
 	# change the directory to the last visited one after ranger quits.
 	# "-" to return to the original directory.
-	tempfile='/tmp/chosendir'
-	/usr/bin/ranger --choosedir="$tempfile" "${@:-$(pwd)}"
-	test -f "$tempfile" &&
-	if [ "$(cat -- "$tempfile")" != "$(echo -n `pwd`)" ]; then
-		cd -- "$(cat "$tempfile")"
+	local tempfile
+	tempfile=/tmp/ranger/chosendir
+	mkdir -p /tmp/ranger
+	ranger --choosedir="$tempfile" "${@:-$(pwd)}"
+	if [[ -f $tempfile ]] && \
+		[[ $(< $tempfile) != $(pwd | tr -d '\n') ]]; then
+		cd "$(< $tempfile)"
 	fi
-	rm -f -- "$tempfile"
+	rm -f "$tempfile"
 }
 
 rn() {
-	if [ ! -z "$RANGER_LEVEL" ]; then
+	if [[ ! -z $RANGER_LEVEL ]]; then
 		# https://wiki.archlinux.org/index.php/Ranger
 		# if a ranger session exists, restore it
 		exit
