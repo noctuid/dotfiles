@@ -34,6 +34,7 @@ pathdirs="
 ~/.local/bin
 ~/bin/mpv
 ~/bin/not_mine
+~/bin/dunst
 # for writing related script
 ~/bin/writing
 ~/.panel_scripts
