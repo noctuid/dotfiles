@@ -16,51 +16,45 @@ export SHELL=/bin/zsh
 
 # stderr in red
 # https://github.com/sickill/stderred
-if [ -f "/usr/lib/libstderred.so" ]; then
+if [[ -f "/usr/lib/libstderred.so" ]]; then
 	export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 fi
 
 # only load ~/.config/ranger/rc.conf
 export RANGER_LOAD_DEFAULT_RC=FALSE
 
+export SOURCE=$HOME/src
 # blog dir
-export BLOG=$HOME/dev/blog/noctuid.github.io
+export BLOG=$SOURCE/noctuid.github.io
 
 
 # add to PATH
 pathdirs="
 # personal scripts
-~/bin
-~/.local/bin
-~/bin/mpv
-~/bin/not_mine
-~/bin/dunst
-# for writing related script
-~/bin/writing
-~/.panel_scripts
+$HOME/bin
+$HOME/bin/mpv
+$HOME/bin/not_mine
+$HOME/bin/dunst
+$HOME/.panel_scripts
 # for vimus
-~/.cabal/bin
+$HOME/.cabal/bin
 # for adb
 /opt/android-sdk
 # for octopress and other gems (e.g. for tmuxinator)
-~/.gem/ruby/2.1.0/bin
-~/.gem/ruby/2.2.0/bin
+$HOME/.gem/ruby/2.1.0/bin
+$HOME/.gem/ruby/2.2.0/bin
 "
 
 while read -r dir; do
-	# http://serverfault.com/a/252406
-	# posix check if starts with #
-	if [ "$dir" != "" ] && [ ! "${dir%${dir#?}}"x = '#x' ]; then
-		# eval so expands tilde
-		eval PATH="$PATH":"$dir"
+	if [[ -n $dir ]] && [[ ! ${dir:0:1} == '#' ]]; then
+		PATH="$PATH":"$dir"
 	fi
 done <<< "$pathdirs"
 
 # start mpd, mpdscribble, and devmon (if not already running)
 # https://wiki.archlinux.org/index.php/Music_Player_Daemon#Autostart_on_tty_login
-[ ! -s ~/.mpd/pid ] && mpd
-pidof mpdscribble >& /dev/null
-if [ $? -ne 0 ]; then
+[[ ! -s ~/.mpd/pid ]] && mpd
+if ! pidof mpdscribble; then
 	# scrobble to last.fm/libre.fm
 	mpdscribble &
 fi
@@ -76,7 +70,7 @@ if ! pidof devmon; then
 fi
 
 # startx on login if tty1
-if [ "$(tty)" == "/dev/tty1" ]; then
+if [[ "$(tty)" == "/dev/tty1" ]]; then
 	startx
 else
 	# change caps from backspace to escape
