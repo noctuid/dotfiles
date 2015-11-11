@@ -65,7 +65,13 @@ if [ $? -ne 0 ]; then
 fi
 if ! pidof devmon; then
 	# auto mount usbs and such
-	devmon &
+	# using variables to prevent long unbreakable lines and to re-use text
+	notify="notify-send --icon=media-removable"
+	summary="'Devmon Notification'"
+	# FIXME: %l and %d do not work on unmount with devmon version 1.1.8
+	devmon --no-gui \
+		--exec-on-drive "$notify $summary \"Volume %l has been mounted to %d.\"" \
+		--exec-on-unmount "$notify $summary \"Volume %l has been unmounted from %d.\"" &
 fi
 
 # startx on login if tty1
