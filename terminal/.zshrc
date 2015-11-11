@@ -112,6 +112,9 @@ export LESS_TERMCAP_us=$'\E[01;32m'             # begin underline
 
 # for tmux line vcs stats
 export PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D" | tr -d %) "$PWD")'
+# for if have entered shell from ranger
+# https://github.com/hut/ranger/blob/bdd6bf407ab22782f7ddb3a1dd24ffd9c3361a8d/examples/bash_subshell_notice.sh
+[[ -n $RANGER_LEVEL ]] && export PS1="$PS1"'%{$fg[red]%}ranger> '
 
 # }}}
 #==============================
