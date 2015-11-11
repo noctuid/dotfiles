@@ -73,7 +73,7 @@ alias uneda="devmon -unmount-all"
 alias ej="sudo eject /dev/sr0"
 function maybe_eject() {
 	echo "Unmount last mounted external drive? (y/n)"
-	confirm_do devmon --unmount-recent || return 0
+	confirm_do devmon --unmount-recent --no-gui || return 0
 }
 
 # }}}

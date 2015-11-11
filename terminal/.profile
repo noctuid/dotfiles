@@ -63,7 +63,7 @@ if [ $? -ne 0 ]; then
 	# scrobble to last.fm/libre.fm
 	mpdscribble &
 fi
-if ! pgrep devmon; then
+if ! pidof devmon; then
 	# auto mount usbs and such
 	devmon &
 fi
