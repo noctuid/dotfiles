@@ -870,6 +870,11 @@ grouplist() {
 #===============
 # General/Random {{{
 #===============
+# function so that will work even if EDITOR happens to be changed
+function ed() {
+	"$EDITOR" "$@"
+}
+
 take() {
 	mkdir -p "$1"
 	cd "$1"
