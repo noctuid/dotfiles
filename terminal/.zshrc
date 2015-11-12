@@ -339,11 +339,16 @@ bindkey -M vicmd 't?' history-incremental-pattern-search-backward
 # clipboard {{{
 # http://unix.stackexchange.com/questions/25765/pasting-from-clipboard-to-vi-enabled-zsh-or-bash-shell
 # paste from the system clipboard with p
-vi-append-x-selection() { RBUFFER=$(xsel -ob </dev/null)$RBUFFER; }
+function vi-append-x-selection() {
+	RBUFFER=$(xsel -ob </dev/null)$RBUFFER
+}
 zle -N vi-append-x-selection
 bindkey -M vicmd p vi-append-x-selection
+
 # ecaped paste
-escape-paste-clipboard() { RBUFFER=$(printf '%q' "$(xsel -ob </dev/null)")$RBUFFER; }
+function escape-paste-clipboard() {
+	RBUFFER=$(printf '%q' "$(xsel -ob </dev/null)")$RBUFFER
+}
 zle -N escape-paste-clipboard
 bindkey -M vicmd P escape-paste-clipboard
 
@@ -394,14 +399,14 @@ bindkey -M vicmd P escape-paste-clipboard
 
 # general additional bindings
 # for termite link mode from vi cmd mode..
-enter-url-hint() {
+function enter-url-hint() {
 	xdotool key --window Termite control+shift+x
 }
 zle -N enter-url-hint
 bindkey -a f enter-url-hint
 
 # for tmux copy mode
-enter-copy-mode() {
+function enter-copy-mode() {
 	tmux copy-mode
 }
 zle -N enter-copy-mode
@@ -414,7 +419,7 @@ bindkey -a -r t
 bindkey -a tm run-help
 
 # for re-entering ranger {{{
-enter-ranger() {
+function enter-ranger() {
 	xdotool key control+d
 }
 zle -N enter-ranger
@@ -425,8 +430,8 @@ bindkey -a tr enter-ranger
 # re-enter vim {{{
 # may never use..
 # http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
-fancy-ctrl-z () {
-	if [[ $#BUFFER -eq 0 ]]; then
+function fancy-ctrl-z () {
+	if [[ $#BUFFER == 0 ]]; then
 		fg
 		zle redisplay
 	else
@@ -452,62 +457,62 @@ bindkey -a -r s
 # need to check if some of symbol bindings working
 # "r" is redraw {{{
 # window switching {{{
-r-a() { wm_action inpt ra; }
+function r-a() { wm_action inpt ra; }
 zle -N r-a
 bindkey -a ra r-a 
 
-r-r() { wm_action inpt rr; }
+function r-r() { wm_action inpt rr; }
 zle -N r-r
 bindkey -a rr r-r
 
-r-s() { wm_action inpt rs; }
+function r-s() { wm_action inpt rs; }
 zle -N r-s
 bindkey -a rs r-s
 
-r-t() { wm_action inpt rt; }
+function r-t() { wm_action inpt rt; }
 zle -N r-t
 bindkey -a rt r-t
 
-r-d() { wm_action inpt rd; }
+function r-d() { wm_action inpt rd; }
 zle -N r-d
 bindkey -a rd r-d
 
-r-h() { wm_action inpt rh; }
+function r-h() { wm_action inpt rh; }
 zle -N r-h
 bindkey -a rh r-h
 
-r-n() { wm_action inpt rn; }
+function r-n() { wm_action inpt rn; }
 zle -N r-n
 bindkey -a rn r-n
 
-r-e() { wm_action inpt re; }
+function r-e() { wm_action inpt re; }
 zle -N r-e
 bindkey -a re r-e
 
-r-i() { wm_action inpt ri; }
+function r-i() { wm_action inpt ri; }
 zle -N r-i
 bindkey -a ri r-i
 
-r-o() { wm_action inpt ro; }
+function r-o() { wm_action inpt ro; }
 zle -N r-o
 bindkey -a ro r-o
 
 # }}}
 
 # resize panes {{{
-r-m-h() { wm_action inpt rmh; }
+function r-m-h() { wm_action inpt rmh; }
 zle -N r-m-h
 bindkey -a rmh r-m-h
 
-r-m-n() { wm_action inpt rmn; }
+function r-m-n() { wm_action inpt rmn; }
 zle -N r-m-n
 bindkey -a rmn r-m-n
 
-r-m-e() { wm_action inpt rme; }
+function r-m-e() { wm_action inpt rme; }
 zle -N r-m-e
 bindkey -a rme r-m-e
 
-r-m-i() { wm_action inpt rmi; }
+function r-m-i() { wm_action inpt rmi; }
 zle -N r-m-i
 bindkey -a rmi r-m-i
 
@@ -515,65 +520,69 @@ bindkey -a rmi r-m-i
 
 # circulate {{{
 # previous
-r-.() { wm_action inpt r.; }
+function r-.() { wm_action inpt r.; }
 zle -N r-.
 bindkey -a 'r.' r-.
 
 # next
-r-comma() { wm_action inpt r,; }
+function r-comma() { wm_action inpt r,; }
 zle -N r-comma
 bindkey -a 'r,' r-comma
 
 # }}}
 
 # new window
-r-c() { wm_action inpt rc; }
+function r-c() { wm_action inpt rc; }
 zle -N r-c
 bindkey -a rc r-c
 
 # kill pane
-r-x() { wm_action inpt rx; }
+function r-x() { wm_action inpt rx; }
 zle -N r-x
 bindkey -a rx r-x
 
 # last window 
-r-l() { wm_action inpt rl; }
+function r-l() { wm_action inpt rl; }
 zle -N r-l
 bindkey -a rl r-l
 
 # split windows
-r-slash() { wm_action inpt r/; }
+function r-slash() { wm_action inpt r/; }
 zle -N r-slash
 bindkey -a 'r/' r-slash
 
-r--() { wm_action inpt r-; }
+function r--() { wm_action inpt r-; }
 zle -N r--
 bindkey -a 'r-' r--
 
 # break pane
-r-bang() { wm_action inpt rbang; }
+function r-bang() { wm_action inpt rbang; }
 zle -N r-bang
 bindkey -a 'r!' r-bang
 
 # from old "s" {{{
 # last pane
-r-u() { wm_action inpt ru; }
+function r-u() { wm_action inpt ru; }
 zle -N r-u
 bindkey -a ru r-u
+
 # zoomed pane toggle
-r-k() { wm_action inpt rk; }
+function r-k() { wm_action inpt rk; }
 zle -N r-k
 bindkey -a rk r-k
+
 # fullscreen
-r-f() { wm_action inpt rf; }
+function r-f() { wm_action inpt rf; }
 zle -N r-f
 bindkey -a rf r-f
+
 # sticky
-r-y() { wm_action inpt ry; }
+function r-y() { wm_action inpt ry; }
 zle -N r-y
 bindkey -a ry r-y
+
 # main-vertical layout
-r-v() { wm_action inpt rv; }
+function r-v() { wm_action inpt rv; }
 zle -N r-v
 bindkey -a rv r-v
 
@@ -613,7 +622,7 @@ export FZF_DEFAULT_COMMAND='ag -l -g ""'
 # $ other_command ** # files
 # etc.
 
-fzf-fasd-dir() {
+function fzf-fasd-dir() {
 	# otherwise will end up as a cdable var
 	local dir
 	dir="$(fasd -ds | fzf --tac | awk '{print $2}')" && \
@@ -625,16 +634,18 @@ bindkey -M viins "^[w" fzf-fasd-dir
 # possibility if zsh-history-substring-search doesn't cut it
 # https://github.com/junegunn/fzf/wiki/examples#command-history
 # fh - repeat history
-fh() {
-  eval $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
+function fh() {
+	eval "$( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | \
+		sed 's/ *[0-9]* *//')"
 }
 # fhe - repeat history edit
-fhe() {
-  print -z $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
+function fhe() {
+	print -z "$( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | \
+		sed 's/ *[0-9]* *//')"
 }
 
 # idea suggested by gotbletu
-fzf-locate() {
+function fzf-locate() {
 	local selected
 	selected=$(locate "${1:-*}" | fzf -e)
 	if [[ -d $selected ]]; then
@@ -643,7 +654,8 @@ fzf-locate() {
 		rifle "$selected"
 	fi
 }
-fl() {
+
+function fl() {
 	fzf-locate "$PWD"/*
 }
 
@@ -665,16 +677,23 @@ alias books='nocorrect books'
 #==============================
 source ~/.zsh/.private_zshrc
 
-alias_value() {
+function alias_value() {
 	alias "$1" | sed "s/^$1='\(.*\)'$/\1/"
 }
 alias showa='alias_value'
 alias countalias='alias | wc -l'
+
+#===============
+# Backup & Mounting {{{
+#===============
+source ~/.zsh/backup_functions.zsh
+
+# }}}
 #===============
 # Startup and Shutdown {{{
 #===============
 # if ever start using another init: cat /proc/1/comm
-reboot() {
+function poweroff() {
 	pkill -x mpd
 	truecrypt -t -d ~/ag-sys/else/ACCTS
 	truecrypt -t -d && devmon --unmount-all --no-gui && sudo systemctl reboot
@@ -708,7 +727,7 @@ alias gconf='git config --list'
 alias gr='git rm --cached' # file
 # count commits; from alias.sh
 alias gcn='git rev-list --count HEAD'
-gsearch() {
+function gsearch() {
 	git log --grep="$1"
 }
 
@@ -741,7 +760,7 @@ alias gr='git remote rename' # oldname newname
 alias grs'git remote show' # remotename
 
 # branching
-current_branch() {
+function current_branch() {
 	git branch | awk '{print $2}'
 }
 alias gh='git checkout'
@@ -838,12 +857,12 @@ alias -g rldudev='udevadm control --reload-rules'
 # System Information {{{
 #===============
 alias sysinfo='sudo dmidecode | grep "System Information" -2'
-cpuinfo() {
+function cpuinfo() {
 	${PAGER:-less} /proc/cpuinfo
 }
 
 # check drive mount options
-mountopts() {
+function mountopts() {
 	grep -i "$1" /proc/mounts
 }
 # e.g.
@@ -851,7 +870,7 @@ mountopts() {
 # $ mountopts discard
 
 # http://catonmat.net/blog/another-ten-one-liners-from-commandlingfu-explained
-nicemount() {
+function nicemount() {
 	(echo "DEVICE PATH TYPE FLAGS" && mount | awk '$2="";1') | column -t
 }
 
@@ -860,12 +879,12 @@ nicemount() {
 # Group Stuff {{{
 #===============
 # add current user to group
-gadd() {
-	sudo gpasswd -a "$USER"
+function gadd() {
+	sudo gpasswd -a "$USER" "$1"
 }
 
-# list what groups user is
-grouplist() {
+# list what groups current user is in
+function grouplist() {
 	groups "$USER"
 }
 
@@ -878,7 +897,7 @@ function ed() {
 	"$EDITOR" "$@"
 }
 
-take() {
+function take() {
 	mkdir -p "$1"
 	cd "$1"
 }
@@ -888,7 +907,7 @@ function b() {
 	sudo "$(fc -ln -1)"
 }
 
-e(){
+function def(){
 	echo "$1" | festival --tts &
 	sdcv "$1"
 	sdcv "$1" | ${PAGER:-less}
@@ -899,13 +918,14 @@ function conkywhite() {
 	pkill -x conky
 	nohup conky -c ~/.conky_themes/lsd/white/.white_conkyrc &> /dev/null &
 }
+
 function conkyblack() {
 	pkill -x conky
 	nohup conky -c ~/.conky_themes/lsd/black/.black_conkyrc &> /dev/null &
 }
 
 # for opening in already open gvim session
-gvir() {
+function gvir() {
 	gvim --remote "$1"
 }
 
@@ -946,7 +966,7 @@ alias lstrash='trash-list'
 
 # http://alias.sh/strip-comments-and-blank-lines-file
 # strip comments and blanks lines from file
-confcat() {
+function confcat() {
 	sed -e 's/[#;].*//;/^\s*$/d' "$@"
 }
 # show lines that are not blank or commented out
@@ -1012,7 +1032,7 @@ alias cdot='cd ~/dotfiles'
 # view dir stack
 alias dv='dirs -v'
 # exit symlinks; http://alias.sh/exit-symlinks
-xs() {
+function xs() {
 	cd "$(pwd -P)"
 }
 
@@ -1061,7 +1081,7 @@ alias filecount='find . -type f | wc -l'
 # use silver (or plat) searcher for contents
 alias ags='ag -S'
 
-rs(){
+function rs(){
 	find . -name "*$1*"
 }
 alias -g rf='rs'
@@ -1090,7 +1110,7 @@ function ranger-cd {
 	rm -f "$tempfile"
 }
 
-rn() {
+function rn() {
 	if [[ ! -z $RANGER_LEVEL ]]; then
 		# https://wiki.archlinux.org/index.php/Ranger
 		# if a ranger session exists, restore it
@@ -1121,7 +1141,8 @@ alias dim='identify -format "%wx%h"'
 # image rotation
 alias imrotate='mogrify -rotate 90'
 # to create an image that will work as grub background
-grubify() {
+function grubify() {
+	local extension
 	extension=${1##*.}
 	convert "$1" -colorspace rgb "${1%.*}_rgb.$extension"
 }
@@ -1133,11 +1154,11 @@ alias hdmiout='xrandr --output HDMI1 --off && bspc monitor -r X && ponymix set-p
 alias hdmiadd='xrandr --output HDMI1 --auto --right-of LVDS1 && bspc monitor HDMI1 -a X && ponymix set-profile output:hdmi-stereo && setroot --restore'
 
 # vga
-vgain() {
+function vgain() {
 	geometry=$(xwininfo -root | awk '/geometry/ {gsub("\\+.*",""); print $2}')
 	xrandr --output VGA1 --auto --scale-from "$geometry"
 }
-vgaadd() {
+function vgaadd() {
 	geometry=$(xwininfo -root | awk '/geometry/ {gsub("\\+.*",""); print $2}')
 	xrandr --output VGA1 --auto --scale-from "$geometry" --right-of LVDS1 && \
 		bspc monitor VGA1 -a X && setroot --restore
@@ -1145,7 +1166,7 @@ vgaadd() {
 alias vgaout='xrandr --output VGA1 --off && bspc monitor -r X'
 
 # play clipboard (url)
-mpgo() {
+function mpgo() {
 	mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(xsel -b)"
 }
 
@@ -1158,21 +1179,25 @@ alias ytaudio='youtube-dl --restrict-filenames --extract-audio -o "~/move/%(titl
 # Octopress Blog {{{
 #===============
 # work without publishing:
-genbl() {
+function genbl() {
 	cd "$BLOG" && bundle exec rake generate
 }
-prevbl() {
+
+function prevbl() {
 	cd "$BLOG" && bundle exec rake preview
 }
+
 # update site on github pages
-pushblog() {
+function pushblog() {
 	cd "$BLOG" && bundle exec rake gen_deploy
 }
+
 # update at posts and push to source
-pushposts() {
+function pushposts() {
 	cd "$BLOG"/source/_posts && git add . && gpos
 }
-newbpost() {
+
+function newbpost() {
 	cd "$BLOG" && bundle exec rake new_post\["$1"\]
 }
 
@@ -1203,7 +1228,8 @@ alias ufwd='sudo ufw delete'
 # pastebin
 # https://unix.stackexchange.com/questions/108493/easy-way-to-paste-command-line-output-to-paste-bin-services
 # "You can send to an enhanced URL if you would like syntax highlighting for your code paste. For ix, you append either /ID/ to the URL (http://ix.io/ID/) for default syntax based on auto-detection, or /ID/<language>/ to explicitly set the language for pygments highlighting."
-ix() {
+function ix() {
+	local url
 	url=$(curl -F 'f:1=<-' ix.io <"$1")
 	# copy url to clipboard
 	echo "${url}/" | xsel -ib
@@ -1230,7 +1256,7 @@ alias swcon='sudo systemctl stop NetworkManager && sudo systemctl start connman'
 alias swnm='sudo systemctl stop connman && sudo systemctl start NetworkManager'
 
 # show active device
-ipup() {
+function ipup() {
 	ip link show up | awk -F ":" '/state UP/ {print $2}'
 }
 
@@ -1243,7 +1269,7 @@ alias vl='systemctl list-units | grep pia@'
 # vpn connect; pia-tools will start transmission service
 # see my pia-up and pia-down files (deny by default and stop transmission after)
 # see completion file (for tab completion)
-vc() {
+function vc() {
 	sudo systemctl stop transmission && sudo systemctl start pia@"$1"
 }
 alias vcs='vc Sweden'
@@ -1266,22 +1292,28 @@ alias stoptr='sudo systemctl stop transmission'
 # https://github.com/gotbletu/shownotes/blob/e6fe01c4567a4129558c3911a412cf5af4448cf9/transmission-cli.txt
 # manually add a torrent file or magnent link
 alias toa='transmission-remote -a'
+
 # remove torrent; leaves data alone; give id (e.g. 1) or "all"
-todd() {
+function todd() {
 	transmission-remote -t "$1" --remove
 }
+
 # remove completed torrents (but without a bunch of greps and xargs)
-tord() {
-	transmission-remote -l | awk '/100%.*Done/ {system("transmission-remote -t "$1" -r")}'
+function tord() {
+	transmission-remote -l | \
+		awk '/100%.*Done/ {system("transmission-remote -t "$1" -r")}'
 }
+
 # pause torrent
-topp() {
+function topp() {
 	transmission-remote -t "$1" --stop
 }
+
 # pause all
 alias stopto='transmission-remote -t all --stop'
+
 # unpause
-toup() {
+function toup() {
 	transmission-remote -t "$1" --start
 }
 
@@ -1290,8 +1322,9 @@ alias tol='transmission-remote -l'
 # tell number of seeders
 alias -g tons='transmission-show --scrape' # <torrent file>
 alias tocs='tons'
+
 # continuously show speed
-toss() {
+function toss() {
 	while true; do
 		clear
 		transmission-remote -t "$1" -i | grep Speed
@@ -1319,10 +1352,11 @@ toss() {
 alias adbrestart='adb kill-server ; adb start-server'
 
 export MTP_MOUNT_DIR="$HOME/mtp"
-mountand() {
+
+function mountand() {
 	mkdir -p "$MTP_MOUNT_DIR" && jmtpfs "$MTP_MOUNT_DIR"
 }
-umountand() {
+function umountand() {
 	fusermount -u "$MTP_MOUNT_DIR"
 }
 
@@ -1338,14 +1372,16 @@ umountand() {
 # see ~/.zsh/rsync_bandlist.txt
 function syncandmus() {
 	# add auto-mounting and checking
-	rsync -azv --no-perms --no-times --size-only --progress --delete --include-from="$HOME/.zsh/rsync_bandlist.txt" "$HOME/Music/" "$MTP_MOUNT_DIR/Card/Music"
+	rsync -azv --no-perms --no-times --size-only --progress --delete \
+		--include-from="$HOME/.zsh/rsync_bandlist.txt" \
+		"$HOME/Music/" "$MTP_MOUNT_DIR/Card/Music"
 }
 
 # }}}
 #===============
-# Backup & Mounting {{{
+# GPG {{{
 #===============
-source ~/.zsh/backup_functions.zsh
+alias gencrypt="gpg -e -r"
 
 # }}}
 #===============
@@ -1353,9 +1389,11 @@ source ~/.zsh/backup_functions.zsh
 #===============
 source ~/.config/ranger/ranger_functions
 
-# from omz I think
+# from omz I think; command usage statistics
 function zsh_stats() {
-	fc -l 1 | awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n20
+	fc -l 1 | \
+		awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | \
+		grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n20
 }
 
 # pipe into head; optionally specify line number
@@ -1387,33 +1425,34 @@ function qte() {
 # from https://github.com/paulmillr/dotfiles
 # --------------------------------------------------------------
 function ram() {
-  local sum
-  local items
-  local app="$1"
-  if [ -z "$app" ]; then
-    echo "First argument - pattern to grep from processes"
-  else
-    sum=0
-    for i in `ps aux | grep -i "$app" | grep -v "grep" | awk '{print $6}'`; do
-      sum=$(($i + $sum))
-    done
-    sum=$(echo "scale=2; $sum / 1024.0" | bc)
-    if [[ $sum != "0" ]]; then
-      echo "${fg[blue]}${app}${reset_color} uses ${fg[green]}${sum}${reset_color} MBs of RAM."
-    else
-      echo "There are no processes with pattern '${fg[blue]}${app}${reset_color}' are running."
-    fi
-  fi
+	local sum
+	local items
+	local app="$1"
+	if [ -z "$app" ]; then
+		echo "First argument - pattern to grep from processes"
+	else
+		sum=0
+		for i in `ps aux | grep -i "$app" | grep -v "grep" | awk '{print $6}'`; do
+		sum=$(($i + $sum))
+	done
+		sum=$(echo "scale=2; $sum / 1024.0" | bc)
+	if [[ $sum != "0" ]]; then
+		echo "${fg[blue]}${app}${reset_color} uses ${fg[green]}${sum}${reset_color} MBs of RAM."
+	else
+		echo "There are no processes with pattern '${fg[blue]}${app}${reset_color}' are running."
+	fi
+	fi
 }
 
 
 # http://alias.sh/merge-pdfs
-merge() {
-	tomerge="";
+function pdfmerge() {
+	local tomerge
+	tomerge=""
 	for file in "$@"; do
-		tomerge=$tomerge" "$file;
+		tomerge="$tomerge $file"
 	done
-	pdftk $tomerge cat output mergd.pdf;
+	pdftk "$tomerge" cat output mergd.pdf
 }
 
 # }}}
