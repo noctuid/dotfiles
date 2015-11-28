@@ -1148,10 +1148,23 @@ function grubify() {
 }
 
 # connecting to tv/monitor with hmdi
-alias hdmiin='xrandr --output HDMI1 --auto && ponymix set-profile output:hdmi-stereo'
-alias hdmiout='xrandr --output HDMI1 --off && bspc monitor -r X && ponymix set-profile output:analog-stereo'
-# setroot --restore so that newly added screen is black
-alias hdmiadd='xrandr --output HDMI1 --auto --right-of LVDS1 && bspc monitor HDMI1 -a X && ponymix set-profile output:hdmi-stereo && setroot --restore'
+function hdmiin() {
+	xrandr --output HDMI1 --auto && \
+		ponymix set-profile output:hdmi-stereo
+}
+function hdmiadd() {
+	# rename newly added desktop to X
+	# setroot --restore so that newly added screen is black
+	xrandr --output HDMI1 --auto --right-of LVDS1 && \
+		bspc monitor HDMI1 --reset-desktops X && \
+		ponymix set-profile output:hdmi-stereo && \
+		setroot --restore
+}
+function hdmiout() {
+	xrandr --output HDMI1 --off && \
+		bspc monitor -r X && \
+		ponymix set-profile output:analog-stereo
+}
 
 # vga
 function vgain() {
@@ -1161,7 +1174,7 @@ function vgain() {
 function vgaadd() {
 	geometry=$(xwininfo -root | awk '/geometry/ {gsub("\\+.*",""); print $2}')
 	xrandr --output VGA1 --auto --scale-from "$geometry" --right-of LVDS1 && \
-		bspc monitor VGA1 -a X && setroot --restore
+		bspc monitor VGA1 --reset-desktops X && setroot --restore
 }
 alias vgaout='xrandr --output VGA1 --off && bspc monitor -r X'
 
