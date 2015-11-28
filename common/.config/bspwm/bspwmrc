@@ -52,10 +52,8 @@ fi
 
 # 'Hooks' {{{
 # for all desktops, set up home row navigation bindings on empty desktops
-# matching roman numerals after because can get something like ':FDesktop...'
-bspc control --subscribe | awk '/:F(I|II|III|IV|V|VI|VII|VIII|IX|X):/ { system("killall sxhkd ; sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &"); }' &
-# revert as soon as a desktop is occupied
-bspc control --subscribe | awk '/:O(I|II|III|IV|V|VI|VII|VIII|IX|X):/ { system("killall sxhkd ; sxhkd &"); }' &
+bspc control --subscribe desktop_focus monitor_focus window_manage \
+	window_unmanage | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
 
 # e.g. changing wallpaper on desktop switch
 # bspc control --subscribe | awk -F ':' '$6 ~ /^[FO]/ { system("imlibsetroot -s w -p c /path/to/wallpaper && pkill conky && conky &"); }' &

@@ -1,0 +1,24 @@
+#!/bin/bash
+# switch bindings when changing from empty to occupied desktop and vice versa
+
+previously_empty=$(< /tmp/bspwm-last-desktop-empty)
+
+# helps when rapid close then open (e.g. tdrop's auto_hide):
+sleep 0.2
+
+window_count=$(bspc query --desktop --windows | wc -l)
+if [[ $window_count -gt 0 ]]; then
+	empty=false
+else
+	empty=true
+fi
+echo "$empty" > /tmp/bspwm-last-desktop-empty
+
+if [[ -n $previously_empty ]] && [[ $previously_empty != $empty ]]; then
+	pkill -x sxhkd
+	if $empty; then
+		sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &> /dev/null &
+	else
+		sxhkd &> /dev/null &
+	fi
+fi
