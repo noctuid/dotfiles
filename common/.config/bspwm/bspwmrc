@@ -2,9 +2,9 @@
 # https://wiki.archlinux.org/index.php/Bspwm
 
 # Colors {{{
-bspc config presel_border_color "#B0FFF2"
+bspc config presel_border_color "#b0fff2"
 bspc config focused_border_color "#d0d293"
-bspc config normal_border_color "#1d282c"
+bspc config normal_border_color "#b0b44b"
 bspc config active_border_color "#555753"
 bspc config urgent_border_color "#4e9a06"
 
