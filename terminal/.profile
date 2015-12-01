@@ -20,9 +20,6 @@ if [[ -f "/usr/lib/libstderred.so" ]]; then
 	export LD_PRELOAD="/usr/lib/libstderred.so${LD_PRELOAD:+:$LD_PRELOAD}"
 fi
 
-# only load ~/.config/ranger/rc.conf
-export RANGER_LOAD_DEFAULT_RC=FALSE
-
 export SOURCE=$HOME/src
 # blog dir
 export BLOG=$SOURCE/noctuid.github.io
