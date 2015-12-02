@@ -32,11 +32,11 @@ else
 			mv "$filename" "$no_ap"
 			escaped=$(printf '%q' "$no_ap")
 			if [[ $fm_type == emacs ]]; then
-				bspc rule -a emacs -o floating=true center=true
+				bspc rule -a emacs -o state=floating center=true
 				emacsclient -ce "(evil-define-key 'normal dired-mode-map \"q\" 'delete-frame)" \
 					-e "(dired-jump nil \"$escaped\") (dired-ranger-copy)"
 			else
-				bspc rule -a termite -o floating=true center=true
+				bspc rule -a termite -o state=floating center=true
 				termite -e "/bin/bash -c 'xdo resize -w +300 && xdo move -x -150 && xdo resize -h +200 && \
 					xdo move -y -100 && ranger --selectfile=""$escaped"" --cmd=cut'" &
 			fi
