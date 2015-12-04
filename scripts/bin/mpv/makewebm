@@ -1,0 +1,69 @@
+#!/bin/bash
+# Simple wrapper for creating a webm from a video using ffmpeg
+# https://wiki.installgentoo.com/index.php/WebM#Converting_with_ffmpeg
+# https://superuser.com/questions/556463/converting-video-to-webm-with-ffmpeg-avconv
+
+function print_help() {
+	echo "
+$ makewebm /path/to/video
+
+Creates a webm from  a video.
+
+-w <width>     specify a width for the webm 
+               (default: not scaled to any specific width)
+-o <filename>  specify an output name (default: output.webm)
+-d <dir>       specify the dir to create the frames and output webm in
+               (default: ~/move/gif)
+-q <crf>       specify the crf value from 4-63; lower is higher quality 
+               (default: 10)
+-a             include audio in webm (default: false)
+-h             print help and exit
+"
+
+	if [[ $1 == illegal_opt ]]; then
+		exit 1
+	else
+		exit 0
+	fi
+}
+
+# default values
+cur_time=$(date +%Y.%m.%d_%H:%M:%S)
+outfile=${cur_time}_output.webm
+outdir=$HOME/move/gif
+quality=10
+audio=false
+while getopts :w:o:d:q:ah opt
+do
+	case $opt in
+	w) width=$OPTARG;;
+	o) outfile="$OPTARG";;
+	d) outdir="$OPTARG";;
+	q) quality="$OPTARG";;
+	a) audio=true;;
+	h) print_help;;
+	*) print_help illegal_opt;;
+    esac
+done
+infile=${!#}
+infile=$(readlink -f "$infile")
+
+mkdir -p "$outdir"
+cd "$outdir"
+
+# max video bit rate of 3M
+ffmpeg_command="ffmpeg -i \"$infile\" -c:v libvpx -crf $quality -b:v 3M"
+
+if [[ -n $width ]]; then
+	ffmpeg_command="$ffmpeg_command -vf scale=$width:-1"
+fi
+
+if $audio; then
+	ffmpeg_command="$ffmpeg_command -c:a libvorbis -q:a 4"
+else
+	ffmpeg_command="$ffmpeg_command -an"
+fi
+
+ffmpeg_command="$ffmpeg_command \"$outfile\""
+
+eval "$ffmpeg_command"
