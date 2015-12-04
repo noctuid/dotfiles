@@ -1,104 +1,67 @@
 #!/bin/bash
-# TODO:
-# get -m working with mpv (syntax is weird; doesn't like run "path/to/script" "-m" "${path}")
-# detect if path is a url and maybe automatically download if called from mpv
 
 function print_help() {
 	echo "
-Creates a cut video and optionally creates a gif from it. Takes the filepath as the last argument.
+$ ffcut [options] /path/to/video_file
 
--a <time>  specify start time (not used if setting with mpv)
--b <time>  specify end time (not used if setting with mpv)
--c <bool>  whether to use -c copy with ffmpeg (default: true)
+Creates a cut video and optionally creates a gif from it.
+Meant for use with MPV.
+
+-a <time>  specify start time (default: contents of /tmp/ffcut/start)
+           (see the Time duration section of the ffmpeg-utils manpage for
+           formatting information)
+-b <time>  specify end time (default: contents of /tmp/ffcut/end)
+-c         copy the video section; fast but starts at key frame (start time
+           will be innacurate) (default: false)
 -o <name>  choose an output name for the cut video
--d         use aria2 to download the video (assumes have passed a mpv a direct link to a video)
+           (default: cut_<date>.<extension>)
 -m         make a gif of the cut video
 -h         print help and exit
-
 "
 
-	if [ "$1" == "illegal_opt" ]; then
+	if [[ $1 == illegal_opt ]]; then
 		exit 1
 	else
 		exit 0
 	fi
 }
 
-proper_time() {
-	seconds=${1%.*}
-	milliseconds="${1##*.}"
-	# http://stackoverflow.com/questions/12199631/convert-seconds-to-hours-minutes-seconds-in-bash
-	((h=${seconds}/3600))
-	((m=(${seconds}%3600)/60))
-	((s=${seconds}%60))
-	if $copy && [ "$2" == "start" ]; then
-		# if key frame not close to the beginning, ffmpeg may skip too far aheard; seek to 5 seconds early when using copy in case
-		((s=$s-5))
-	fi
-	printf "%02d:%02d:%02d.%03d" $h $m $s $milliseconds
-}
-
 filepath="${!#}"
 extension="${filepath##*.}"
-output_name="cut_$(date +%m.%d.%y_%H:%M:%S).$extension"
+output_name="cut_$(date +%Y.%m.%d_%H:%M:%S).$extension"
 # in case not given full path
 full_path=$(readlink -f "$filepath")
 
-mkdir -p ~/Move/gif
-cd ~/Move/gif
+mkdir -p ~/move/gif
+cd ~/move/gif
 
-start_time=$(proper_time $(cat start_time.txt) start)
-end_time=$(proper_time $(cat end_time.txt))
-download=false
+start_time=$(< /tmp/ffcut/start)
+end_time=$(< /tmp/ffcut/end)
 make_gif=false
-copy=true
-# mpv hates arguments/flags
-if [ "$1" = "make_gif" ]; then
-	make_gif=true
-fi
-while getopts :a:b:c:o:dmh opt
+copy=false
+while getopts :a:b:c:o:mh opt
 do
 	case $opt in
 	a) start_time=$OPTARG;;
 	b) end_time=$OPTARG;;
-	c) copy=$OPTARG;;
-	o) outputnamed=true
-	   output_name=$OPTARG;;
-	d) download=true;;
+	c) copy=true;;
+	o) output_name=$OPTARG;;
 	m) make_gif=true;;
 	h) print_help;;
 	*) print_help illegal_opt;;
     esac
 done
 
-if $download; then
-	url=$filepath
-	downloaded_name="$(date +%m.%d.%y_%H:%M:%S)"
-	# download with max 4 connection to one server using aria2
-	aria2c -x 4 -o $downloaded_name $url
-	
-	# add extension
-	# find file type with exiftool
-	net_extension=$(exiftool $downloaded_name | awk -F ": " '/File Type/ {print tolower($2)}' )
-	full_path="~/Move/gif/dl_${downloaded_name}.$net_extension"
-	mv $downloaded_name $full_path
-
-	if ! $outputnamed; then
-		# re-assign, because extension for previous variable is often wrong
-		output_name="cut_$(date +%m.%d.%y_%H:%M:%S).$net_extension"
-	fi
-fi
-
 # create new video cut from original
+# copy is faster but must start at a key frame (so time won't be accurate)
 if $copy; then
-	# starting time will be off; alternatively can not use "-c copy" or delete some frames at beginning
-	ffmpeg -i "$full_path" -ss $start_time -to $end_time -c copy -async 1 $output_name
+	ffmpeg -i "$full_path" -ss "$start_time" -to "$end_time" -c copy "$output_name"
 else
-	# transcode; this doesn't work for me, ffmpeg does nothing forever
-	ffmpeg -i "$full_path" -ss $start_time -to $end_time -async 1 $output_name
+	# can take a while
+	ffmpeg -i "$full_path" -ss "$start_time" -to "$end_time" "$output_name"
 fi
 
 # to go ahead and make a gif with default settings
 if $make_gif; then
-	~/bin/mpv/makegif ~/Move/gif/$output_name
+	makegif ~/move/gif/"$output_name"
 fi
