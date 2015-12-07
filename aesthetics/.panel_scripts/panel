@@ -66,7 +66,13 @@ batteryPercent() {
 	elif [[ $batStatus == Charging ]]; then
 		echo "${colour_charge}⮃ ⮒ $batLevel+"
 	elif [[ $batStatus == Discharging ]]; then
-		echo "${colour_dcharge}⮃ ⮑ $batLevel-"
+		if [[ $batLevel -gt 67 ]]; then
+			echo "${colour_dcharge}⮃ ⮏ $batLevel-"
+		elif [[ $batLevel -gt 33 ]]; then
+			echo "${colour_dcharge}⮃ ⮑ $batLevel-"
+		else
+			echo "${colour_dcharge}⮃ ⮐ $batLevel-"
+		fi
 	elif [[ $batStatus == Unknown ]]; then
 		echo "${colour_fcharge}⮃ ⮒ Fully Charged"
 	else
