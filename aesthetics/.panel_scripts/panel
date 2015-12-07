@@ -191,7 +191,7 @@ panelVolume() {
 # originally from:
 # https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L236
 currentTime() {
-	echo  "⭧" "$(clock -f '%a %d %I: %M%P')"
+	echo  "⭧" "$(clock -f '%a %I: %M%P')"
 }
 
 mailCount() {

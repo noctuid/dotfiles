@@ -1,5 +1,5 @@
-# NOTE: This is charley166's conky theme with only slight modifications
-# need conky-lua
+# NOTE: This is charley166's conky theme with some modifications
+# needs conky-lua
 # http://charley166.deviantart.com/art/LSD-conky-config-v2-0-392188352
 
 update_interval 5
@@ -37,17 +37,18 @@ color2 ffffff
 
 lua_load ~/.conky_themes/lsd/black/black_lsd_rings.lua
 lua_draw_hook_post main
-
+# ${goto 10}${voffset 105}${image /tmp/now_playing -p 15,105 -s 100x100}
+# ${goto 49}${voffset 45}CPU${voffset -5}${color}${goto 115}${top_mem name 1}
+# ${goto 115}${font Zekton:style=Bold:size=9}${top_mem mem 1}%
 TEXT
 ${goto 185}${voffset -8}${color0}${font Zekton:style=bold:size=12}noctuid
-${goto 60}${voffset 20}${color}${font}Temperature: 
-${goto 10}${voffset 75}${font Zekton:style=bold:size=30}${time %H:%M}${font}
-${goto 166}${voffset -10}${font Zekton:style=Bold:size=9}Battery
-${alignc -23}${font Zekton:style=Bold:size=9}${battery_percent BAT1}%
-${goto 49}${voffset 45}CPU${voffset -5}${color}${goto 128}RAM
-${goto 130}${font Zekton:style=Bold:size=9}${memperc}%
-${goto 75}${voffset 25}${font Zekton:style=Bold:size=9}HDused
+${goto 60}${voffset 20}${color}${font}Temperature
+${goto 10}${voffset 75}${font Zekton:style=bold:size=30}${time %m/%d}${font}
+${goto 162}${voffset -10}${font Zekton:style=Bold:size=9}Battery
+${goto 152}${font Zekton:style=Bold:size=9}${battery_time BAT1}
+${goto 49}${voffset 45}CPU${voffset -5}${color}${goto 118}Uptime
+${goto 108}${font Zekton:style=Bold:size=9}${uptime}
+${goto 76}${voffset 25}${font Zekton:style=Bold:size=9}HD Used
 ${goto 80}${font Zekton:style=Bold:size=9}${fs_used /home}
 
 ${image ~/.conky_themes/lsd/black/black_lsd.png -p 10,0 -s 255x412}
-
