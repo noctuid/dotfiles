@@ -193,11 +193,10 @@ panelVolume() {
 	fi
 }
 
-# needs sutils: https://github.com/baskerville/sutils
 # originally from:
 # https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L236
 currentTime() {
-	echo  "⭧" "$(clock -f '%a %I: %M%P')"
+	echo  "⭧" "$(date +'%a %d %I: %M%P')"
 }
 
 mailCount() {
@@ -238,7 +237,7 @@ netConnection() {
 			else
 				echo -n "$colour2"" ⮃ ‗▬▪▮ Connecting..."
 			fi
-			echo " $(essid -w "$interface")"
+			# echo " $(iwgetid -r )"
 		fi
 	fi
 }
