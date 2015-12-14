@@ -8,7 +8,9 @@ export BSPWM_STACK=/tmp/bspwm.stack
 export PANEL_HEIGHT=14
 export PANEL_FIFO=/tmp/panel-fifo
 
-export EDITOR="emacsclient -t -a """
+# many programs allow EDITOR to contain options, but some expect a path
+# e.g. with zsh '$EDITOR file' will fail (though 'eval $EDITOR file' will work)
+export EDITOR="emacsclient -t -a \"\""
 export PAGER=vimpager
 export BROWSER=firefox
 export PACMAN=powerpill
