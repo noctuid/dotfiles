@@ -856,7 +856,6 @@ alias -g rldudev='udevadm control --reload-rules'
 #===============
 # System Information {{{
 #===============
-alias sysinfo='sudo dmidecode | grep "System Information" -2'
 function cpuinfo() {
 	${PAGER:-less} /proc/cpuinfo
 }

@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# display system information (like screenfetch, archey, etc.)
+
+time=$(date "+%H:%M")
+date=$(date "+%a %B %d")
+
+termite_font=$(awk '/font/ {sub("font = ",""); print; exit}' \
+	~/.config/termite/config)
+
+uptime=$(uptime --pretty | \
+	sed -r 's/up //; s/ days?,/d/; s/ hours?,/h/; s/ minutes?/m/')
+
+# ram and disk usage information
+ram_info=$(free -h)
+ram_used=$(echo "$ram_info" | awk '/Mem/ {gsub("G",""); print $3}')
+ram_total=$(echo "$ram_info" | awk '/Mem/ {sub("G",""); print $2}')
+ram_percent=$(echo "$ram_info" | awk '/Mem/ {printf("%d", $3/$2 * 100)}')
+ram_info="$ram_used / $ram_total GiB (${ram_percent}%)"
+
+home_info=$(df -h -T /home | tail -n 1)
+home_used=$(echo "$home_info" | awk '{gsub("G",""); print $4}')
+home_total=$(echo "$home_info" | awk '{sub("G",""); print $3}')
+home_percent=$(echo "$home_info" | awk '{print $6}')
+home_type=$(echo "$home_info" | awk '{print $2}')
+home_info="$home_used / $home_total GiB ($home_percent) ($home_type)"
+
+root_info=$(df -h -T / | tail -n 1)
+root_used=$(echo "$root_info" | awk '{gsub("G",""); print $4}')
+root_total=$(echo "$root_info" | awk '{sub("G",""); print $3}')
+root_percent=$(echo "$root_info" | awk '{print $6}')
+root_type=$(echo "$root_info" | awk '{print $2}')
+root_info="$root_used / $root_total GiB ($root_percent) ($root_type)"
+
+albums=$(mpc stats | awk '/Albums/ {print $2}')
+
+resolution=$(xrandr | \
+	awk -F ", " '{sub("current ", ""); gsub(" x ","x"); print $2; exit}')
+
+if [[ -f /tmp/product_name ]]; then
+	computer_name=$(< /tmp/product_name)
+else
+	computer_name=$(sudo dmidecode | \
+		awk '/Product/ {sub(".*Product Name: ", ""); print; exit}')
+	echo "$computer_name" > /tmp/product_name
+fi
+
+cpu_info=$(awk -F ": " '/model name/ {print $2; exit}' /proc/cpuinfo)
+
+kernel=$(uname -srm)
+
+shell=$(basename "$SHELL")
+
+wm=$(xprop -notype -id "$(xprop -root -notype | \
+		awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" \
+		-f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
+
+# distro=$(lsb_release -i -s)
+# distro=$(< /etc/issue | sed 's/ \\r.*//')
+distro=$(awk '/^NAME=/ {sub("NAME=", ""); gsub(/"/,""); print}' /etc/os-release)
+
+package_count=0
+if [[ $distro == NixOS ]]; then
+	package_count=$(find /nix/store/ -mindepth 1 -maxdepth 1 -type d \
+		-not -name "\.*" | wc -l)
+elif [[ $distro == "Arch Linux" ]]; then
+	# explicitly installed packages
+	package_count=$(pacman -Qqe | wc -l)
+fi
+
+# layout and colors are originally from z1lt0id's dotfiles
+# I cannot find the thecat.sh script anymore though
+# https://github.com/z1lt0id/.Dotfiles
+f=3 b=4
+for j in f b; do
+	for i in {0..7}; do
+		printf -v $j$i %b "\e[${!j}${i}m"
+	done
+done
+bld=$'\e[1m'
+rst=$'\e[0m'
+inv=$'\e[7m'
+
+# from original script
+total_size=$(df | grep '^/dev/[hs]d' | \
+	awk '{s+=$2} END {printf("%.0f\n", s/1048576)}')
+total_use=$(df | grep '^/dev/[hs]d' | \
+	awk -M '{s+=$3} END {printf("%.0f\n", s/1048576)}')
+total_percent=$(awk "BEGIN {printf(\"%d\", $total_use/$total_size * 100)}")
+total_info="$total_use / $total_size GiB (${total_percent}%)"
+
+cat << EOF
+$bld
+$f7                    .c0N.   .'c.                  $H the$f1 cat
+$f7         'Okdl:'  ;OMMMMKOKNMMW:;o0l  .'.
+$f7         ;MMMMMMWWMMMMMMMMMMMMMMMMMXKWMMK         $H $f4$time$NC - $f7$date
+$f7         'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMK         $f6 $USER $f7@ $f1$HOSTNAME
+$f7          NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMO
+$f7          dMMMMMMMMMMMMMMMMMMMMMMMMMMMMM:          Editor     »$f4 $EDITOR
+$f7          'MMMMMMMMMMMMMMMMMMMMMMMMMMMMM.          Term Font  »$f4 $termite_font$NC
+$f7          'MMMMMMMMMMMMMMMMMMMMMMMMMMMMM;          Uptime     »$f4 $uptime
+$f7          lMMMMM  MMMMMMMMMM  MMMMMMMMMM,          RAM        »$f4 $ram_info
+$f7          KMMMMM  MMMMMMMMMM  MMMMMMMMMM.          Root       »$f4 $root_info
+$f7         ;WMMMMMkNMMMMMMMMMMONMMMMMMMMMW:          Home       »$f4 $home_info
+$f7       oNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMO         Total      »$f4 $total_info
+$f7      .,cxKWMMMMMMMMMMMMMMMMMMMMMMMMMMMXdxo        Packages   »$f4 $package_count
+$f7         ;kWMMMMMMMMMMMMMMMMMMMMMMMMMMMM:          Albums     »$f4 $albums
+$f7        .::,  .;ok0NMMMMWNK0kdoc;'  'cxK0          Resolution »$f4 $resolution
+$f1                   .:cc:;;.
+$f1                   .o0MMMK'                        Computer »$f4 $computer_name
+$f1                     xMMM:                         CPU      »$f4 $cpu_info
+$f1                     KMMMl                         Kernel   »$f4 $kernel
+$f1                    .MMMMo                         Shell    »$f4 $shell
+$f1                    ,MMMMx                         WM       »$f4 $wm
+$f1                    oMMMMx                         @        »$f4 $distro
+$f1                    OMMMMO
+$f1                    .OMMMd                        $f7"Hacks and glory await!"
+$f1                      :Nl                                        $f7- the$f1 cat
+
+EOF
+# quote from sly https://github.com/capitaomorte/sly
