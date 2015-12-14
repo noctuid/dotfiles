@@ -107,7 +107,7 @@ alt + r
 	guake -t
 
 alt + s
-	tdrop -p bspwm -w 1362 -y 14 -s dropdown termite
+	tdrop -m -a -w -4 -y "$PANEL_HEIGHT" -s dropdown termite
 
 alt + t
 	tdrop -p bspwm -w 1362 -h 750 -y 14 urxvt

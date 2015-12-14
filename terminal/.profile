@@ -5,7 +5,7 @@ export BSPWM_TREE=/tmp/bspwm.tree
 export BSPWM_HISTORY=/tmp/bspwm.history
 export BSPWM_STACK=/tmp/bspwm.stack
 # panel
-export PANEL_HEIGHT=14
+export PANEL_HEIGHT=15
 export PANEL_FIFO=/tmp/panel-fifo
 
 # many programs allow EDITOR to contain options, but some expect a path
