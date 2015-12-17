@@ -45,10 +45,10 @@ ${goto 185}${voffset -8}${color0}${font Zekton:style=bold:size=12}noctuid
 ${goto 60}${voffset 20}${color}${font}Temperature
 ${goto 10}${voffset 75}${font Zekton:style=bold:size=30}${time %m/%d}${font}
 ${goto 162}${voffset -10}${font Zekton:style=Bold:size=9}Battery
-${goto 152}${font Zekton:style=Bold:size=9}${battery_time BAT1}
-${goto 49}${voffset 45}CPU${voffset -5}${color}${goto 118}Uptime
-${goto 108}${font Zekton:style=Bold:size=9}${uptime}
+${alignc -47}${font Zekton:style=Bold:size=9}${battery_time BAT1}
+${goto 49}${voffset 45}CPU${voffset -5}${color}${goto 119}Uptime
+${alignc -4}${font Zekton:style=Bold:size=9}${uptime}
 ${goto 76}${voffset 25}${font Zekton:style=Bold:size=9}HD Used
-${goto 80}${font Zekton:style=Bold:size=9}${fs_used /home}
+${alignc 37}${font Zekton:style=Bold:size=9}${fs_used /home}
 
 ${image ~/.conky_themes/lsd/black/black_lsd.png -p 10,0 -s 255x412}
