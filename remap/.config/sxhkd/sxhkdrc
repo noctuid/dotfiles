@@ -52,12 +52,13 @@ alt + y
 
 # }}}
 
-# Screenshots# {{{
+# screenshots {{{
 Print
-	~/bin/screenshot.sh
+	screenshot
+	# ~/bin/screenshot
 
 alt + p
-	~/bin/screenshot.sh select
+	screenshot select
 
 # }}}
 

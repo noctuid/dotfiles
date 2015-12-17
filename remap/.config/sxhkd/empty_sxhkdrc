@@ -95,16 +95,15 @@ alt + y
 
 # }}}
 
-# Screenshots# {{{
+# Screenshots {{{
 # fullscreen screen shot; lowered quality
 # add xtitle to name
 Print
-	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
-	# needs fixing:
-	# sh ~/bin/screenshot.sh
+	screenshot
+	# ~/bin/screenshot
 
 alt + p
-	scrot -q 75 ~/Move/Screenshots/'%m.%d.%y_%H:%M:%S_-_$wx$h.png'
+	screenshot select
 
 # }}}
 # }}}

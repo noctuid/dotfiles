@@ -5,9 +5,9 @@
 title=$(xtitle | awk -F "-" '{ gsub(/[[:punct:]]/, "") gsub(/\s/, "_"); print $1}')
 
 if [[ $1 == select ]]; then
-	# if use -s won't be able to use $W and $H in name
+	# if use maim's -s, won't be able to use $W and $H in name
 	eval "$(slop)"
-	maim -g "$G" ~/Move/Screenshots/"$(date +%Y.%m.%d_%H:%M:%S)"_-_"$title"_"$W"x"$H".png
+	maim -g "$G" ~/move/screenshots/"$(date +%Y.%m.%d_%H:%M:%S)"_-_"$title"_"$W"x"$H".png
 else
-	maim ~/Move/Screenshots/"$(date +%Y.%m.%d_%H:%M:%S)"_-_"$title".png
+	maim ~/move/screenshots/"$(date +%Y.%m.%d_%H:%M:%S)"_-_"$title".png
 fi
