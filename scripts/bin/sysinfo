@@ -44,7 +44,8 @@ else
 	echo "$computer_name" > /tmp/product_name
 fi
 
-cpu_info=$(awk -F ": " '/model name/ {print $2; exit}' /proc/cpuinfo)
+cpu_info=$(awk -F ": " \
+	'/model name/ {gsub(/\(TM\)|\(R\)/, ""); print $2; exit}' /proc/cpuinfo)
 
 kernel=$(uname -srm)
 
@@ -90,31 +91,31 @@ total_info="$total_use / $total_size GiB (${total_percent}%)"
 
 cat << EOF
 $bld
-$f7                    .c0N.   .'c.                  $H the$f1 cat
-$f7         'Okdl:'  ;OMMMMKOKNMMW:;o0l  .'.
-$f7         ;MMMMMMWWMMMMMMMMMMMMMMMMMXKWMMK         $H $f4$time$NC - $f7$date
-$f7         'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMK         $f6 $USER $f7@ $f1$HOSTNAME
-$f7          NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMO
-$f7          dMMMMMMMMMMMMMMMMMMMMMMMMMMMMM:          Editor     »$f4 $EDITOR
-$f7          'MMMMMMMMMMMMMMMMMMMMMMMMMMMMM.          Term Font  »$f4 $termite_font$NC
-$f7          'MMMMMMMMMMMMMMMMMMMMMMMMMMMMM;          Uptime     »$f4 $uptime
-$f7          lMMMMM  MMMMMMMMMM  MMMMMMMMMM,          RAM        »$f4 $ram_info
-$f7          KMMMMM  MMMMMMMMMM  MMMMMMMMMM.          Root       »$f4 $root_info
-$f7         ;WMMMMMkNMMMMMMMMMMONMMMMMMMMMW:          Home       »$f4 $home_info
-$f7       oNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMO         Total      »$f4 $total_info
-$f7      .,cxKWMMMMMMMMMMMMMMMMMMMMMMMMMMMXdxo        Packages   »$f4 $package_count
-$f7         ;kWMMMMMMMMMMMMMMMMMMMMMMMMMMMM:          Albums     »$f4 $albums
-$f7        .::,  .;ok0NMMMMWNK0kdoc;'  'cxK0          Resolution »$f4 $resolution
-$f1                   .:cc:;;.
-$f1                   .o0MMMK'                        Computer »$f4 $computer_name
-$f1                     xMMM:                         CPU      »$f4 $cpu_info
-$f1                     KMMMl                         Kernel   »$f4 $kernel
-$f1                    .MMMMo                         Shell    »$f4 $shell
-$f1                    ,MMMMx                         WM       »$f4 $wm
-$f1                    oMMMMx                         @        »$f4 $distro
-$f1                    OMMMMO
-$f1                    .OMMMd                        $f7"Hacks and glory await!"
-$f1                      :Nl                                        $f7- the$f1 cat
+$f7                 .c0N.   .'c.              $H the$f1 cat
+$f7      'Okdl:'  ;OMMMMKOKNMMW:;o0l  .'.
+$f7      ;MMMMMMWWMMMMMMMMMMMMMMMMMXKWMMK     $H $f4$time$NC - $f7$date
+$f7      'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMK     $f6 $USER $f7@ $f1$HOSTNAME
+$f7       NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMO
+$f7       dMMMMMMMMMMMMMMMMMMMMMMMMMMMMM:      Editor     »$f4 $EDITOR
+$f7       'MMMMMMMMMMMMMMMMMMMMMMMMMMMMM.      Term Font  »$f4 $termite_font$NC
+$f7       'MMMMMMMMMMMMMMMMMMMMMMMMMMMMM;      Uptime     »$f4 $uptime
+$f7       lMMMMM  MMMMMMMMMM  MMMMMMMMMM,      RAM        »$f4 $ram_info
+$f7       KMMMMM  MMMMMMMMMM  MMMMMMMMMM.      Root       »$f4 $root_info
+$f7      ;WMMMMMkNMMMMMMMMMMONMMMMMMMMMW:      Home       »$f4 $home_info
+$f7    oNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMO     Total      »$f4 $total_info
+$f7   .,cxKWMMMMMMMMMMMMMMMMMMMMMMMMMMMXdxo    Packages   »$f4 $package_count
+$f7      ;kWMMMMMMMMMMMMMMMMMMMMMMMMMMMM:      Albums     »$f4 $albums
+$f7     .::,  .;ok0NMMMMWNK0kdoc;'  'cxK0      Resolution »$f4 $resolution
+$f1                .:cc:;;.
+$f1                .o0MMMK'                    Computer »$f4 $computer_name
+$f1                  xMMM:                     CPU      »$f4 $cpu_info
+$f1                  KMMMl                     Kernel   »$f4 $kernel
+$f1                 .MMMMo                     Shell    »$f4 $shell
+$f1                 ,MMMMx                     WM       »$f4 $wm
+$f1                 oMMMMx                     @        »$f4 $distro
+$f1                 OMMMMO
+$f1                 .OMMMd                     $f7"Hacks and glory await!"
+$f1                   :Nl                                     $f7- the$f1 cat
 
 EOF
 # quote from sly https://github.com/capitaomorte/sly
