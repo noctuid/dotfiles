@@ -60,6 +60,9 @@ Print
 alt + p
 	screenshot select
 
+alt + w
+	screenshot current_window
+
 # }}}
 
 # program hotkeys# {{{

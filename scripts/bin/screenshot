@@ -1,13 +1,16 @@
 #!/bin/bash
 
 # get window title
-# remove punctuation (e.g.forward slashes) and replace whitespace with underscores
-title=$(xtitle | awk -F "-" '{ gsub(/[[:punct:]]/, "") gsub(/\s/, "_"); print $1}')
+# remove punctuation (e.g. "/") and replace whitespace with underscores
+title=$(xtitle | \
+	awk -F "-" '{gsub(/[[:punct:]]/, "") gsub(/\s/, "_"); print $1}')
+date=$(date +%Y.%m.%d_%H:%M:%S)
+outfile="$HOME/move/screenshots/${date}_-_${title}.png"
 
 if [[ $1 == select ]]; then
-	# if use maim's -s, won't be able to use $W and $H in name
-	eval "$(slop)"
-	maim -g "$G" ~/move/screenshots/"$(date +%Y.%m.%d_%H:%M:%S)"_-_"$title"_"$W"x"$H".png
+	maim -s "$outfile"
+elif [[ $1 == current_window ]]; then
+	maim -i "$(xdotool getactivewindow)" "$outfile"
 else
-	maim ~/move/screenshots/"$(date +%Y.%m.%d_%H:%M:%S)"_-_"$title".png
+	maim "$outfile"
 fi
