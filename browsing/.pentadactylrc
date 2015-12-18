@@ -114,9 +114,10 @@ set! browser.download.dir=~/move
 set! browser.startup.page=3
 " pyllyukko/user.js sets to true; brings up page every time start firefox
 set! plugins.update.notifyUser=false
-set! browser.newtab.url=~/dotfiles/aesthetics/homepage/home.html
+" not needed
+" set! browser.newtab.url=~/src/homepage/home.html
 " ~ only expands with gH...
-set! browser.startup.homepage=~/dotfiles/aesthetics/homepage/home.html
+set! browser.startup.homepage=~/src/homepage/home.html
 " a new setting to move cache to same location as profile for use with profile-sync-daemon
 " will need to change if change profile dir though...
 " maybe turn off cache altogether
