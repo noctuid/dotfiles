@@ -177,4 +177,4 @@
 [mpd]
     appname = mpd-notification
     format = ""
-    script = prepare_image.sh
+    script = prepare_image
