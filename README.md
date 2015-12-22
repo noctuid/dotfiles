@@ -4,14 +4,13 @@ These are my dotfiles. Some are pretty heavily commented. If you have interest i
 
 See `aesthetics/` for pretty pictures.
 
-## Pictures:
-![Alt text](https://raw.github.com/noctuid/dotfiles/master/keyboard_ftw.gif "Words of wisdom from Tatsuya")
+## Pictures
+![Alt text](./keyboard_ftw.gif "Words of wisdom from Tatsuya")
 
 See `aesthetics/` for more info on theming, panels, etc.
-![Alt text](https://raw.github.com/noctuid/dotfiles/master/clean.png "SCREENSHOT")
+![Alt text](./clean.png "Clean desktop")
 
-Visualizations in ncmpcpp and album art of current song in ranger (outdated) both opened from vimus (`scripts/bin/music`, outdated)
-![Alt text](https://raw.github.com/noctuid/dotfiles/master/dirty.png "SCREENSHOT")
+![Alt text](./dirty.png "Dirty desktop")
 
 # For More Information:
 I'll add documentation of the specifics once I've cleaned things up.
@@ -119,7 +118,7 @@ makegif -w 800 -O 3 -f 15 -o mygiff.gif <path/to/video>
 I still need to alter it to make it easier to deal with. I couldn't find a good way to be able to seek/use the exact time instead of from a key frame, so often one has to mark a larger section then delete the pictures at the beginning and end in the output directory (which is stupidly hardcoded currently). [These](https://github.com/lvml/mpv-plugin-excerpt) [two](https://gist.github.com/Zehkul/25ea7ae77b30af959be0) mpv plugins would be a better way to cut or crop the video first.
 
 An example gif with default settings (made within mpv):
-![Alt text](https://raw.github.com/noctuid/dotfiles/master/example.gif "Tigre-sama Catches an Arrow")
+![Alt text](./example.gif "Tigre-sama Catches an Arrow")
 
 See  
 `scripts/bin/mpv/`  
