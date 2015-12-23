@@ -695,10 +695,19 @@ source ~/.zsh/backup_functions.zsh
 # if ever start using another init: cat /proc/1/comm
 function poweroff() {
 	pkill -x mpd
-	truecrypt -t -d && devmon --unmount-all --no-gui && sudo systemctl reboot
+	emacsclient --eval "(let (kill-emacs-hook) (kill-emacs))"
+	# never had corruption with tc volumes
+	# maybe this is overly paranoid, but it seems like a good idea
+	truecrypt --text --dismount || return 1
+	devmon --unmount-all --no-gui || return 1
+	if [[ $1 == reboot ]]; then
+		systemctl reboot
+	else
+		systemctl poweroff
+	fi
 }
 
-alias poweroff='sudo systemctl poweroff'
+alias reboot='poweroff reboot'
 
 # }}}
 #===============
