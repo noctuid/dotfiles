@@ -695,7 +695,6 @@ source ~/.zsh/backup_functions.zsh
 # if ever start using another init: cat /proc/1/comm
 function poweroff() {
 	pkill -x mpd
-	truecrypt -t -d ~/ag-sys/else/ACCTS
 	truecrypt -t -d && devmon --unmount-all --no-gui && sudo systemctl reboot
 }
 
@@ -928,8 +927,10 @@ function gvir() {
 	gvim --remote "$1"
 }
 
-# vim as password manager
-alias vpass='mountacct && vim -u ~/.encrypted_vimrc -x ~/blemish/accts.vault'
+# vim as password manager (switched to gpg file with emacs)
+# alias vpass='mountacct && vim -u ~/.encrypted_vimrc -x ~/blemish/accts.vault'
+# edit without backups, undo, history, etc.
+alias vimsens='vim -u ~/.encrypted_vimrc'
 
 # telnet/fun
 alias starwars='telnet towel.blinkenlights.nl'

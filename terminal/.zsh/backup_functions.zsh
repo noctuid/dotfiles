@@ -208,9 +208,7 @@ function umount_z() {
 
 # Shared {{{
 alias mountsoma='mount_tc ~/soma ~/ag-sys'
-alias mountacct='mountsoma && mount_tc ~/ag-sys/else/ACCTS ~/blemish'
-alias umountacct='umount_tc ~/ag-sys/else/ACCTS'
-alias umountsoma='umount_tc ~/ag-sys/else/ACCTS && umount_tc ~/soma'
+alias umountsoma='umount_tc ~/soma'
 
 # sync ~/grive to google drive
 alias sngdrive='cd ~/grive/ && grive --verbose'
@@ -357,7 +355,6 @@ function sntcvol() {
 	fi
 }
 
-# umountacct
 alias snsoma='sndot && sntcvol ~/soma'
 function bahamut() {
 	if [[ $# -ne 1 ]]; then

@@ -13,6 +13,8 @@
 ;; general quickmarks
 (lit/nmap-find-file
      ",a" "~/ag-sys/Else/everything/arch_and_program_info.txt"
+     ;; passwords
+     ",A" "~/ag-sys/else/accts.org.gpg"
      ",b" "~/ag-sys/Else/everything/\#browse.txt"
      ",B" "~/.config/bspwm/bspwmrc"
      ",c" "~/.config/ranger/rc.conf"
