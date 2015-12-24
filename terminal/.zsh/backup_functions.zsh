@@ -230,6 +230,31 @@ function sndot() {
 
 # }}}
 
+# GPG Key Backup {{{
+# secring.gpg no longer stores secret keys (now private-keys-v1.d/):
+# https://www.gnupg.org/faq/whats-new-in-2.1.html#nosecring
+# can back up all of ~/.gnupg
+# can backup pubring.gpg, trustdb.gpg, and private-keys-v1.d/
+# or can export
+
+# already backing up .gnupg in snhome but this might be useful right after
+# creating a new key
+function bkgpgkeys() {
+	mountsoma || return 1
+	mkdir -p ~/ag-sys/backup/gpg
+	backup_rsync --copy-links ~/.gnupg ~/ag-sys/backup/gpg
+	# this is completely redundant and useless but brings me irrational feelings of safety
+	mkdir -p /tmp/gpg-export
+	cd /tmp/gpg-export
+	gpg --armor --export > public_keys.key
+	gpg --armor --export-secret-keys > private_keys.key 
+	gpg --export-ownertrust > owner_trust.txt
+	mv {*.key,*.txt} ~/ag-sys/backup/gpg
+}
+alias bkgpg='bkgpgkeys'
+
+# }}}
+
 # TC Volume Backup {{{
 
 # get the path a tc volume is mounted to
