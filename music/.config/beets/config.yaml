@@ -1,53 +1,66 @@
-# use primarily to fix and import albums
+# TODO:
+# - https://github.com/sbarakat/beets-copyartifactso
+# - https://github.com/nolsto/beets-follow
+
 directory: ~/Music
-library: ~/.config/beets/musiclibrary.blb
+library: ~/Music/library.db
+
+# same as abcde
+paths:
+    default: $albumartist/$album%aunique{}/$track - $title
+    singleton: $albumartist/$album%aunique{}/$title
+    comp: Various/$album%aunique{}/$track - $artist  - $title
+# don't always use original album release date
+original_date: no
+# don't use track numbers relative to disk
+per_disc_numbering: no
 
 import:
-    # don't move/copy
+    # don't copy; move (copy ignored if move enabled anyway)
     copy: no
-    # write metadata to songs; don't care so much about beets database at this point as about correct metadata
-    write: yes
     move: yes
+    # write metadata to songs
+    write: yes
+    # ask if want to resume previous halted session
     resume: ask
+    # record imported directories and skip if try to import again?
     incremental: no
-    quiet_fallback: skip
-    none_rec_action: ask
+    # skip songs there is no recommendation for
+    none_rec_action: skip
+    # don't ask for confirmation for autotagging very close matches
     timid: no
-    log: ~/.config/beets/beetslog.txt
+    log: ~/Music/beetslog.txt
 
-plugins: mpdupdate fetchart lyrics lastgenre chroma fromfilename discogs
+threaded: yes
+
+plugins:
+    fromfilename
+    chroma
+    fetchart
+    lastgenre
+    mpdupdate
+    mpdstats
+    lyrics
+    keyfinder
+    bpm
+
+# will first check for images in folder importing
+fetchart:
+    auto: yes
+
+lastgenre:
+    source: track
+    count: 4
 
 # for use by mpdstats and mpdupdate
 mpd:
     host: localhost
     port: 6600
 
-lastgenre:
-    source: track
-    count: 4
-
-# will first check for images in folder importing
-fetchart:
-    auto: yes
-
 lyrics:
     auto: no
 
-match:
-    strong_rec_thresh: 0.04
-
-threaded: yes
-color: yes
-
-list_format_item: $artist - $album - $title
-list_format_album: $albumartist - $album
-
-original_date: no
-per_disc_numbering: no
-
-paths:
-    default: $albumartist/$album%aunique{}/$track $title
-    singleton: Non-Album/$artist/$title
-    comp: Compilations/$album%aunique{}/$track $title
+keyfinder:
+    auto: no
 
 # vim:set softtabstop=4 shiftwidth=4 tabstop=4 expandtab:
