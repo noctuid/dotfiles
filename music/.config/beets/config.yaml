@@ -2,8 +2,8 @@
 # - https://github.com/sbarakat/beets-copyartifactso
 # - https://github.com/nolsto/beets-follow
 
-directory: ~/Music
-library: ~/Music/library.db
+directory: ~/music
+library: ~/music/library.db
 
 # same as abcde
 paths:
@@ -29,7 +29,7 @@ import:
     none_rec_action: skip
     # don't ask for confirmation for autotagging very close matches
     timid: no
-    log: ~/Music/beetslog.txt
+    log: ~/music/beetslog.txt
 
 threaded: yes
 

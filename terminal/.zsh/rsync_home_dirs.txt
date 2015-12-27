@@ -11,7 +11,7 @@
 + dev/***
 + dotfiles/***
 + move/***
-+ Music/***
++ music/***
 + ps_vita/***
 + vboxshare/***
 + vimwiki/***

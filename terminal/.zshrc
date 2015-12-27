@@ -1396,7 +1396,7 @@ function syncandmus() {
 	# add auto-mounting and checking
 	rsync -azv --no-perms --no-times --size-only --progress --delete \
 		--include-from="$HOME/.zsh/rsync_bandlist.txt" \
-		"$HOME/Music/" "$MTP_MOUNT_DIR/Card/Music"
+		"${XDG_MUSIC_DIR:-$HOME/music}" "$MTP_MOUNT_DIR/Card/Music"
 }
 
 # }}}

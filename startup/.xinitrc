@@ -83,7 +83,7 @@ if [ "$(tty)" = "/dev/tty1" ]; then
 	dunst &
 	# notifications on mpd song changes
 	# https://github.com/vehk/mpdnotify works well with mpdcron also
-	mpd-notification -m ~/Music &
+	mpd-notification -m "${XDG_MUSIC_DIR:-$HOME/music}" &
 
 	# backup hotkey program
 	xchainkeys &

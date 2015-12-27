@@ -1,4 +1,5 @@
 export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_MUSIC_DIR="$HOME/music"
 
 # export for bspwm reloading
 export BSPWM_TREE=/tmp/bspwm.tree

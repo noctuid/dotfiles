@@ -4,7 +4,7 @@
 ####################################################
 # https://github.com/windelicato/dotfiles/blob/master/.ncmpcpp/config
 #
-mpd_music_dir = "~/Music"
+mpd_music_dir = "~/music"
 ncmpcpp_directory = "~/.ncmpcpp"
 mpd_port = "6600"
 mpd_host = "localhost"

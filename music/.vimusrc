@@ -10,7 +10,7 @@ color input white black
 color suggestions green black
 # }}}
 # settings# {{{
-set-library-path ~/Music
+set-library-path ~/music
 song-format %artist% - %title% [%album% %track%]
 # don't rename window based on song
 noautotitle
