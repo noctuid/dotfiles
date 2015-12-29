@@ -68,13 +68,10 @@ if [ "$(tty)" = "/dev/tty1" ]; then
 	compton --config ~/.compton.conf -b &
 
 	# japanese input
-	export XMODIFIERS=@im=SCIM
-	export GTK_IM_MODULE="scim"
-	export QT_IM_MODULE="scim"
-	scim -d
-
-	# another dropdown
-	guake &
+	export XMODIFIERS=@im=ibus
+	export GTK_IM_MODULE=ibus
+	export QT_IM_MODULE=ibus
+	ibus-daemon -d -x
 
 	# sleep after 20 minutes of inactivity
 	xautolock -time 20 -locker "pm-suspend" -detectsleep &

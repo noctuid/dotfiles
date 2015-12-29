@@ -24,11 +24,11 @@ keysym l = l L Home 1 1 exclam
 keysym u = u U End 2 2 at
 keysym y = y Y BackSpace 3 3 numbersign
 
-keysym a = a A Alt_L 
-! section bound in vim as well
-keysym r = r R Escape 
-keysym s = s S Shift_L
-keysym t = t T section section
+! for some reason Hiragana_Katakana doesn't toggle
+keysym a = a A Hiragana
+keysym r = r R Katakana
+keysym s = s S parenleft
+keysym t = t T parenright
 keysym d = d D equal
 
 keysym h = h H Left Left

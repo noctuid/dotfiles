@@ -1,0 +1,12 @@
+# https://unix.stackexchange.com/questions/49452/where-is-config-file-of-ibus-stored/236817#236817
+# load with $ dconf load /desktop/ibus/ < ibus.dconf
+[general]
+engines-order=['xkb:us::eng', 'mozc-jp']
+# mozc doesn't work if this is true
+embed-preedit-text=false
+# prevent from changing to qwerty
+use-system-keyboard-layout=true
+preload-engines=['xkb:us::eng', 'mozc-jp']
+
+[general/hotkey]
+triggers=['<Control>space']
