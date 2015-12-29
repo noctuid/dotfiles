@@ -12,6 +12,8 @@ fi
 #==============================
 # General (for any X session) {{{
 #==============================
+xrdb -load ~/.Xresources
+
 # setup keyboard layout
 setxkbmap us -variant colemak
 xmodmap ~/.Xmodmap_wide

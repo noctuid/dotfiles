@@ -825,8 +825,8 @@ alias aurupd='sudo aura -Au'
 # zshrc
 alias rld='echo "The Matrix has been reloaded" && source ~/.zshrc'
 
-alias rldurxvt='xrdb -load ~/.Xdefaults'
-alias rldxdef='rldurxvt'
+# xrdb -query -all
+alias rldxres='xrdb -load ~/.Xresources'
 
 alias rldless='lesskey ~/.lesskey'
 

@@ -1,0 +1,100 @@
+! for default app settings: /usr/share/X11/app-defaults
+! https://wiki.archlinux.org/index.php/X_resources
+! * URxvt
+! transparency
+! urxvt*.depth:      32
+! alpha then colour
+! urxvt*.background: [65]#1d282c
+
+! ** Perls
+urxvt.perl-ext-common:      default,clipboard
+urxvt.keysym.C-C:           perl:clipboard:copy
+! urxvt.keysym.M-v:           perl:clipboard:paste
+urxvt.keysym.C-V:           perl:clipboard:paste_escaped
+! urxvt.keysym.C-U:           perl:url-select:select_next
+! urxvt.url-select.launcher:  /usr/bin/env firefox -new-tab
+! urxvt.url-select.underline: true
+
+! ** Settings
+urxvt.scrollBar:       false
+urxvt.saveLines:       0
+! fix home and end
+urxvt.keysym.Home:     \033[1~
+urxvt.keysym.End:      \033[4~
+urxvt.cursorUnderline: false
+urxvt.cursorBlink:     true
+urxvt.font:            xft:Inconsolata\\-g:pixelsize=10
+urxvt.letterSpace:     -1
+
+! * Xterm
+xterm*faceName: Iconsolata-g:size=8
+
+! * Term colours
+*background: #1d282c
+*foreground: #2b81a6
+! Black, DarkGrey
+*color0:     #1d282c
+*color8:     #709080
+! DarkRed, Red
+*color1:     #705050
+*color9:     #dca3a3
+! DarkGreen, Green
+*color2:     #a9d152
+*color10:    #90a959
+! DarkYellow, Yellow
+*color3:     #e3b76f
+*color11:    #f0dfaf
+! DarkBlue, Blue
+*color4:     #1d6b8c
+*color12:    #4ba9d1
+! DarkMagenta, Magenta
+*color5:     #dc8cc3
+*color13:    #ec93d3
+! DarkCyan, Cyan
+*color6:     #84d5d9
+*color14:    #93e0e3
+! LightGrey, White
+*color7:     #dcdccc
+*color15:    #ffffff
+
+! ! ! jazz theme based:
+! ! special
+! *.foreground:   #b7e3af
+! *.background:   #050805
+! *.cursorColor:  #b7e3af
+!
+! ! black
+! *.color0:  #151515
+! *.color8:  #202020
+!
+! ! red
+! *.color1:  #8d4a4a
+! *.color9:  #953331
+!
+! ! green
+! *.color2:  #546a29
+! *.color10: #7e9960
+!
+! ! yellow
+! *.color3:  #96a62d
+! *.color11: #909737
+!
+! ! blue
+! *.color4:  #5c737c
+! *.color12: #385e6b
+!
+! ! magenta
+! *.color5:  #7f355e
+! *.color13: #AF4981
+!
+! ! cyan
+! *.color6:  #34676f
+! *.color14: #34676f
+!
+! ! white
+! *.color7:  #c5edbe
+! *.color15: #4a9891
+
+! Local Variables:
+! eval: (rainbow-mode 1)
+! End:
