@@ -1,0 +1,16 @@
+[general]
+# make bars higher
+sensitivity = 300
+# waves are fun too
+mode = normal
+
+[output]
+style = stereo
+
+[color]
+# supported colors are: red, green, yellow, magenta, cyan, white, blue, black.
+background = black
+foreground = cyan
+
+# [smoothing]
+# [eq]

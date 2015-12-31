@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# using glyr; beet lyrics doesn't work for me
+artist=$(mpc --format "%artist%" | head -n 1)
+title=$(mpc --format "%title%" | head -n 1)
+echo "$artist $title"
+glyrc lyrics --artist "$artist" --title "$title" --write stdout | "$PAGER"
