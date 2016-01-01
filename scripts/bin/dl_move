@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# open ranger with downloaded file(s) cut; using instead of 'save as' dialog
+# see corresponding pentadactylrc section: ../../../browsing/.pentadactylrc
+# $ dl_move (toggle|bulk_store|bulk_save|<filename to move>)
+# TODO:
+# - fix emacs support (using ranger.el)
+# - shell escape file name in autocmd so script won't fail
+# - re-use fm_open for moving contents of dir (test -d)
+
+fm_type=ranger
+temp_dir=/tmp/dl_move
+geo="600x400"
+while getopts :e opt
+do
+	case $opt in
+	e) fm_type=emacs;;
+    esac
+done
+
+function fm_open() { # <file to cut>
+	if [[ $fm_type == emacs ]]; then
+		bspc rule -a emacs -o state=floating center=true
+		emacsclient -ce "(lit/nmap dired-mode-map \"q\" 'delete-frame)" \
+			-e "(dired-jump nil \"$1\") (dired-ranger-copy)"
+	else
+		bspc rule -a termite -o state=floating center=true
+		termite --geometry="$geo" -e "ranger --selectfile=""$1"" --cmd=cut" &
+	fi
+}
+
+mkdir -p "$temp_dir"
+# toggle script
+# full path of file passed in, so a file named toggle will be /...toggle
+if [[ $1 == toggle ]]; then
+	if [[ -f "$temp_dir"/off ]]; then
+		rm "$temp_dir"/off
+	else
+		touch "$temp_dir"/off
+	fi
+# turns on "bulk store" mode; all files will be saved in the same temp dir
+elif [[ $1 == bulk_store ]]; then
+	rm "$temp_dir"/off 2> /dev/null
+	mkdir -p "$temp_dir"/temp_store
+	touch "$temp_dir"/temp_on
+# ends "bulk store" mode and opens ranger with the previously saved files cut
+elif [[ $1 == bulk_save ]]; then
+	if [[ $fm_type == ranger ]]; then
+		rm "$temp_dir"/temp_on
+		touch "$temp_dir"/move_to_dir
+		# no way to do this currently (see above ranger issue)
+		# termite --geometry="$geo" -e "ranger --cmd=mark --cmd=cut" &
+		# termite --geometry="$geo" -e "ranger --selectfiles='*'" &
+		
+		# ranger --choosedir=/dev/stdout
+		bspc rule -a termite -o state=floating center=true
+		termite --geometry="$geo" \
+			-e "ranger --choosedir=/$temp_dir/move_to_dir"
+		move_to_dir=$(< "$temp_dir"/move_to_dir)
+		if [[ -n "$move_to_dir" ]]; then
+			mv "$temp_dir"/temp_store/* "$move_to_dir"
+		fi
+		rm "$temp_dir"/move_to_dir
+	fi
+elif [[ ! -f "$temp_dir"/off ]]; then
+	filename=${*: -1}
+	if [[ -f "$temp_dir"/temp_on ]]; then
+		mv "$filename" "$temp_dir"/temp_store
+		file=$(basename "$filename")
+		detox "$temp_dir/temp_store/$file"
+	else
+		# conditionally executing with pentadactyl isn't possible:
+		# https://github.com/5digits/dactyl/issues/29
+		# prevent multiple ranger instances due to autocmd pileup
+		last_filename="$(< "$temp_dir"/last_filename)"
+		echo "$filename" > "$temp_dir"/last_filename
+		if [[ ! $filename =~ ^/tmp.* ]] && \
+			[[ ! $last_filename == "$filename" ]]; then
+			dirname=$(dirname "$filename")
+			detox_info=$(detox -v "$filename")
+			if [[ $(echo "$detox_info" | wc -l) -ge 2 ]]; then
+				newname=$(echo "$detox_info" | tail -n 1 | \
+					awk -F ' -> ' '{print $NF}')
+				filename=$dirname$newname
+			fi
+			fm_open "$filename"
+		fi
+	fi
+fi

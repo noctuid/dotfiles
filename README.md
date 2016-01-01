@@ -53,7 +53,7 @@ I've tried to create a much more generalized version of my dropdown script that 
 See [tdrop](https://github.com/noctuid/tdrop) and make an issue if there isn't already floating support for your wm.
 
 ## Use Ranger Instead of Default GUI Popup for File Saving
-Pentadactyl already has :w and ;s which allow for typing out file paths with tab completion. This is cumbersome especially if you have as large a folder structure as I do. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating term with ranger running and pass the file location to ranger's --selectfile and cut it (see `scripts/bin/ranger/ranger_browser_fm.sh`). I also have a dired section which, when used with emacsclient, can start a lot faster than ranger.
+Pentadactyl already has :w and ;s which allow for typing out file paths with tab completion. This is cumbersome especially if you have as large a folder structure as I do. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating term with ranger running and pass the file location to ranger's --selectfile and cut it (see `scripts/bin/ranger/dl_move`). I also have a dired section which, when used with emacsclient, can start a lot faster than ranger.
 
 See [this post](http://noctuid.github.io/blog/2014/04/30/using-ranger-for-downloads/) for more detailed information and other possibilities.
 
