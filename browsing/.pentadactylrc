@@ -766,9 +766,22 @@ nmap -builtin <leader>s ;s
 
 " }}}
 " }}}
+" #==============================
+" # Autocommands {{{
+" #==============================
+" doen't work if file has double quotes in name
+" need to find a way to escape them after <file> expands to the filename
+" or add something like <file-shell-escaped>
+au DownloadPost * silent !~/bin/dl_move "<file>"
 
-" autocommands
-au Enter * source ~/.pentadactyl/autocommands.penta
+" example of selective execution:
+" command! -nargs=1 maybe-open-ranger <<EOF
+" if !PrivateBrowsingUtils.isWindowPrivate(window)
+" 	silent !~/bin/ranger/dl_move <args>
+" endif
+" EOF
+
+" }}}
 
 " cookie management {{{
 " export cookies with https://addons.mozilla.org/en-US/firefox/addon/export-cookies/ 
