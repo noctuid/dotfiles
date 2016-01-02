@@ -7,6 +7,12 @@
 # - shell escape file name in autocmd so script won't fail
 # - re-use fm_open for moving contents of dir (test -d)
 
+# automatic moving
+if [[ $1  =~ ^.*\.torrent$ ]]; then
+	mv "$1" ~/move/torrents
+	exit 0
+fi
+
 fm_type=ranger
 temp_dir=/tmp/dl_move
 geo="600x400"
