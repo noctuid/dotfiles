@@ -1388,15 +1388,21 @@ function umountand() {
 #  rsync -azvr --no-perms --no-times --size-only --progress --delete --rsh="ssh -p 2222" /path root@hostip:/path
 
 # MTP is an abomination
-# still get io errors and have to unmount and remount
+alias android_rsync='rsync -azvP --no-perms --no-times --size-only'
 
-# by bands:
-# see ~/.zsh/rsync_bandlist.txt
 function syncandmus() {
 	# add auto-mounting and checking
-	rsync -azv --no-perms --no-times --size-only --progress --delete \
-		--include-from="$HOME/.zsh/rsync_bandlist.txt" \
-		"${XDG_MUSIC_DIR:-$HOME/music}" "$MTP_MOUNT_DIR/Card/Music"
+	android_rsync --delete --include-from="$HOME/.zsh/rsync_bandlist.txt" \
+		"${XDG_MUSIC_DIR:-$HOME/music}/" "$MTP_MOUNT_DIR/Card/Music"
+	android_rsync ~/.mpd/playlists/ "$MTP_MOUNT_DIR/Card/Music"
+}
+
+# tophone
+function tophone() {
+	android_rsync --delete ~/wallpaper/phone/ "$MTP_MOUNT_DIR"/Card/wallpaper
+	if [[ -d ~/database/ringtones ]]; then
+		android_rsync --delete ~/database/ringtones/ "$MTP_MOUNT_DIR"/Card/ringtones
+	fi
 }
 
 # }}}
