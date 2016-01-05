@@ -221,8 +221,9 @@ function sndot() {
 	 if mountsoma; then
 		 backup_rsync --exclude={"musiclibrary.blb","bundle/*","elpa/*",".git/*","homepage/*",".mpd/log","mpdscribble.log",".mu/*",".mutt/cache/*","ppsspp/*","spacemacs/*",".vim/undo",".vim/thesaurus",".weechat/logs/*","windows/*",".zgen/*","*.gif","*.png"} ~/dotfiles ~/ag-sys/backup
 		 backup_rsync ~/vimwiki ~/ag-sys/backup
-		 backup_rsync --exclude={"old/*",".git/*"} ~/src/ ~/ag-sys/backup/src
+		 backup_rsync --exclude={"old/*",".git/*"} ~/src ~/ag-sys/backup
 		 backup_rsync ~/school/ ~/ag-sys/backup/current-school
+		 backup_rsync ~/Documents/Anki/ ~/ag-sys/backup/anki
 	 else
 		 return 1
 	 fi
