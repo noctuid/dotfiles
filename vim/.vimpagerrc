@@ -1,3 +1,6 @@
+" display in vim even if text is smaller than terminal window
+" (this is useful when calling pager from ranger)
+let vimpager_passthrough = 0
 " opts
 set ws
 set ic scs
