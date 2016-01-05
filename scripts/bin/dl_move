@@ -4,7 +4,6 @@
 # $ dl_move (toggle|bulk_store|bulk_save|<filename to move>)
 # TODO:
 # - fix emacs support (using ranger.el)
-# - shell escape file name in autocmd so script won't fail
 # - re-use fm_open for moving contents of dir (test -d)
 
 # automatic moving
@@ -16,10 +15,12 @@ fi
 fm_type=ranger
 temp_dir=/tmp/dl_move
 geo="600x400"
+detox=false
 while getopts :e opt
 do
 	case $opt in
 	e) fm_type=emacs;;
+	d) detox=true;;
     esac
 done
 
@@ -71,8 +72,10 @@ elif [[ ! -f "$temp_dir"/off ]]; then
 	filename=${*: -1}
 	if [[ -f "$temp_dir"/temp_on ]]; then
 		mv "$filename" "$temp_dir"/temp_store
-		file=$(basename "$filename")
-		detox "$temp_dir/temp_store/$file"
+		if $detox; then
+			file=$(basename "$filename")
+			detox "$temp_dir/temp_store/$file"
+		fi
 	else
 		# conditionally executing with pentadactyl isn't possible:
 		# https://github.com/5digits/dactyl/issues/29
@@ -81,12 +84,12 @@ elif [[ ! -f "$temp_dir"/off ]]; then
 		echo "$filename" > "$temp_dir"/last_filename
 		if [[ ! $filename =~ ^/tmp.* ]] && \
 			[[ ! $last_filename == "$filename" ]]; then
-			dirname=$(dirname "$filename")
-			detox_info=$(detox -v "$filename")
-			if [[ $(echo "$detox_info" | wc -l) -ge 2 ]]; then
-				newname=$(echo "$detox_info" | tail -n 1 | \
-					awk -F ' -> ' '{print $NF}')
-				filename=$dirname$newname
+			if $detox; then
+				detox_info=$(detox -v "$filename")
+				if [[ $(echo "$detox_info" | wc -l) -ge 2 ]]; then
+					filename=$(echo "$detox_info" | tail -n 1 | \
+						awk -F ' -> ' '{print $NF}')
+				fi
 			fi
 			fm_open "$filename"
 		fi
