@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # open ranger with downloaded file(s) cut; using instead of 'save as' dialog
 # see corresponding pentadactylrc section: ../../../browsing/.pentadactylrc
-# $ dl_move (toggle|bulk_store|bulk_save|<filename to move>)
+# $ dl_move (toggle|bulk_store|</absolute/path/to/file to move>)
 # TODO:
-# - fix emacs support (using ranger.el)
+# - add better emacs support (maybe using ranger.el)
 # - re-use fm_open for moving contents of dir (test -d)
 
 # automatic moving
@@ -27,11 +27,14 @@ done
 function fm_open() { # <file to cut>
 	if [[ $fm_type == emacs ]]; then
 		bspc rule -a emacs -o state=floating center=true
-		emacsclient -ce "(lit/nmap dired-mode-map \"q\" 'delete-frame)" \
-			-e "(dired-jump nil \"$1\") (dired-ranger-copy)"
+		emacsclient -c \
+			-e "(add-hook 'dired-mode-hook (lambda () (evil-local-set-key 'normal \"q\" 'delete-frame)))" \
+			-e "(dired-jump nil \"$1\")" \
+			-e "(call-interactively #'dired-ranger-copy)"
 	else
+		file=$(printf %q "$1")
 		bspc rule -a termite -o state=floating center=true
-		termite --geometry="$geo" -e "ranger --selectfile=""$1"" --cmd=cut" &
+		termite --geometry="$geo" -e "ranger --selectfile=$file --cmd=cut" &
 	fi
 }
 
@@ -45,12 +48,12 @@ if [[ $1 == toggle ]]; then
 		touch "$temp_dir"/off
 	fi
 # turns on "bulk store" mode; all files will be saved in the same temp dir
-elif [[ $1 == bulk_store ]]; then
+elif [[ $1 == bulk_store ]] && [[ ! -f "$tempdir"/temp_on ]]; then
 	rm "$temp_dir"/off 2> /dev/null
 	mkdir -p "$temp_dir"/temp_store
 	touch "$temp_dir"/temp_on
 # ends "bulk store" mode and opens ranger with the previously saved files cut
-elif [[ $1 == bulk_save ]]; then
+elif [[ $1 == bulk_store ]]; then
 	if [[ $fm_type == ranger ]]; then
 		rm "$temp_dir"/temp_on
 		touch "$temp_dir"/move_to_dir
