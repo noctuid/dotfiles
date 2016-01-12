@@ -847,6 +847,9 @@ alias rldsxhkd='pkill -USR1 -x sxhkd'
 
 alias rldconky='conky_switcher'
 
+# battery saving; kill panel, conky, and compton
+alias nopanel='rldbspc nopanel'
+
 # keyboard stuff
 alias rldxmd='xmodmap ~/.Xmodmap'
 # set caps to escape on tap if have to kill xcape

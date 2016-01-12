@@ -2,7 +2,26 @@
 # reload panel and empty desktop checker
 pkill -x bspc
 pkill -x panel
-panel &> /dev/null &
+
+# sxhkd dies when killing panel for some reason
+# make certain it's dead then restart
+pkill -x sxhkd
+sxhkd &> /dev/null &
+
+if [[ $1 == nopanel ]]; then
+	# for conserving battery
+	pkill -x conky
+	pkill -x compton
+	bspc config top_padding 0
+else
+	panel &> /dev/null &
+	if ! pgrep -x conky > /dev/null; then
+		conky_switcher
+	fi
+	if ! pgrep -x compton > /dev/null; then
+		compton &> /dev/null &
+	fi
+fi
 
 # for all desktops, set up home row navigation bindings on empty desktops
 bspc control --subscribe desktop_focus monitor_focus window_manage \
