@@ -122,7 +122,7 @@ silent nmap -group reddit -ex gs open https://ssl.reddit.com/prefs/
 " 4chan"{{{
 group chan -description "eh" -locations 4chan.org
 " different bindings for threads
-group chanthread -description "eh" -locations 4chan.org/(a|b|c|d|e|g|gif|h|lit|mu|r|u|v|w|y)/thread/.*
+group chanthread -description "eh" -locations 4chan.org/.*?/thread/.*
 
 " pass keys"{{{
 silent nmap -group chan h <pass>
@@ -147,13 +147,9 @@ silent nmap -group chan -ex <leader>f execute "silent !~/bin/pentadactyl/dlf.sh 
 
 " Gotos
 silent nmap -group chan -ex ga open http://www.4chan.org/a
-silent nmap -group chan -ex gb open http://www.4chan.org/b
 silent nmap -group chan -ex gC open http://www.4chan.org/c
-silent nmap -group chan -ex gG open http://www.4chan.org/gif
-silent nmap -group chan -ex gh open http://www.4chan.org/h
 silent nmap -group chan -ex gt open http://www.4chan.org/g
 silent nmap -group chan -ex gw open http://www.4chan.org/w
-silent nmap -group chan -ex gy open http://www.4chan.org/y
 
 "}}}
 
@@ -163,9 +159,10 @@ silent nmap -group fullchan -ex <leader>f execute "silent !~/bin/pentadactyl/dlf
 
 " }}}
 
-" Manga and Doujinshi{{{
+" Manga/Comics {{{
 " passkeys (for webcomic reader) https://github.com/ameboide/webcomic_reader
-group comic -description "webcomic reader" -locations fakku.net/(doujinshi|manga)/.*/(read)\#.*,pururin.com/view/.*,e-hentai.org/s/.*,exhentai.org/s/.*,bato\.to/read/.*
+" active fork: https://github.com/anka-213/webcomic_reader
+group comic -description "webcomic reader" -locations bato\.to/reader.*,kissmanga\.com/Manga/.*?/.*
 
 " only pass keys on actual image pages"{{{
 " prev image
@@ -207,11 +204,6 @@ silent nmap -group comic <leader>f -ex dta|silent !~/bin/pentadactyl/dlf.sh comi
 " https://gist.github.com/cympfh/9641089
 "}}}
 
-"Gelbooru"{{{
-group gel -description "jelly" -locations gelbooru.com
-silent nmap -group gel -ex <leader>f execute 'silent !~/bin/pentadactyl/dlf.sh gel "' + buffer.URL + '" &'
-
-"}}}…
 
 " Not using:
 " Graveyard"{{{
