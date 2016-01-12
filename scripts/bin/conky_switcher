@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+mkdir -p /tmp/conky_switcher
+touch /tmp/conky_switcher/color
+current_color=$(< /tmp/conky_switcher/color)
+
+# conky -d is like nohup conky &
+if [[ $1 == white ]]; then
+	pkill -x conky
+	conky -q -d -c ~/.conky_themes/lsd/white/conkyrc
+	echo white > /tmp/conky_switcher/color
+elif [[ $1 == black ]] || [[ -z $current_color ]]; then
+	pkill -x conky
+	conky -q -d -c ~/.conky_themes/lsd/black/conkyrc
+	echo black > /tmp/conky_switcher/color
+else
+	# reload conky with the same theme
+	$0 "$current_color"
+fi

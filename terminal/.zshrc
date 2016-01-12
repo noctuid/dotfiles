@@ -845,7 +845,7 @@ alias fixhwclock='rldtime && sudo hwclock --systohc'
 
 alias rldsxhkd='pkill -USR1 -x sxhkd'
 
-alias rldconky='pkill -x conky ; nohup conky &'
+alias rldconky='conky_switcher'
 
 # keyboard stuff
 alias rldxmd='xmodmap ~/.Xmodmap'
@@ -921,15 +921,8 @@ function def(){
 }
 
 # switch conky theme
-function conkywhite() {
-	pkill -x conky
-	nohup conky -c ~/.conky_themes/lsd/white/.white_conkyrc &> /dev/null &
-}
-
-function conkyblack() {
-	pkill -x conky
-	nohup conky -c ~/.conky_themes/lsd/black/.black_conkyrc &> /dev/null &
-}
+alias conkywhite='conky_switcher white'
+alias conkyblack='conky_switcher black'
 
 # for opening in already open gvim session
 function gvir() {

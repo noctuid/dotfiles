@@ -1,12 +1,10 @@
 #!/bin/bash
-# This script serves as a wrapper for setroot. It will do the following:
-# 1. Set the wallpaper.
-# 2. Copy the command to clipboard.
-# 3. Restart conky.
-
+# wrapper script for setting wallpaper
 setroot "$@"
 
 echo -n "setroot $*" | xsel -bi
 
-killall conky
-conky -q &> /dev/null &
+# if conky is running, reload it with the same theme
+if pgrep -x conky; then
+	conky_switcher
+fi
