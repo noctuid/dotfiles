@@ -219,9 +219,9 @@ alias backup_rsync='rsync -avhmP --delete --delete-excluded --ignore-errors --pr
 # minimal dotfiles/dev/school backup; for files that change quickly
 function sndot() {
 	 if mountsoma; then
-		 backup_rsync --exclude={"musiclibrary.blb","bundle/*","elpa/*",".git/*","homepage/*",".mpd/log","mpdscribble.log",".mu/*",".mutt/cache/*","ppsspp/*","spacemacs/*",".vim/undo",".vim/thesaurus",".weechat/logs/*","windows/*",".zgen/*","*.gif","*.png"} ~/dotfiles ~/ag-sys/backup
+		 backup_rsync --exclude={"musiclibrary.blb","bundle/*","elpa/*","homepage/*",".mpd/log","mpdscribble.log",".mu/*",".mutt/cache/*","ppsspp/*","spacemacs/*",".vim/undo",".vim/thesaurus",".weechat/logs/*","weechat*.log","*.gif","*.png","*.jpg","*.mkv"} ~/dotfiles ~/ag-sys/backup
 		 backup_rsync ~/vimwiki ~/ag-sys/backup
-		 backup_rsync --exclude={"old/*",".git/*"} ~/src ~/ag-sys/backup
+		 backup_rsync --exclude={"old/*","melpa/*","nixpkgs/*"} ~/src ~/ag-sys/backup
 		 backup_rsync ~/school/ ~/ag-sys/backup/current-school
 		 backup_rsync ~/Documents/Anki/ ~/ag-sys/backup/anki
 	 else
