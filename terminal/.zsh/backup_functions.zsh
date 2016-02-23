@@ -538,3 +538,31 @@ function snpsp() {
  }
 
  # }}}
+
+# Restore functions {{{
+alias no_delete_keep_newer_rsync='rsync -avhmP --ignore-errors --prune-empty-dirs'
+
+restore_home() {
+	# $ restore_home /media/something/home/
+	echo "Do you want to sync $1 to ~/ (y/n)?"
+	echo "Remember that the trailing / is important in the first arg."
+	confirm_do echo "Restoring ~/..." || return 1
+	# maybe ignore soma and datab here and use a modified sntcvol
+	# e.g. $ sntcvol /media/something/home/soma ~/
+	no_delete_keep_newer_rsync "$1" ~/
+}
+
+ # from soma to home
+function reverse_sndot() {
+	if mountsoma; then
+		no_delete_keep_newer_rsync ~/ag-sys/backup/dotfiles ~/
+		no_delete_keep_newer_rsync ~/ag-sys/backup/vimwiki ~/
+		no_delete_keep_newer_rsync ~/ag-sys/backup/src ~/
+		no_delete_keep_newer_rsync ~/ag-sys/backup/current-school/ ~/school
+		no_delete_keep_newer_rsync ~/ag-sys/backup/anki/ ~/Documents/Anki/
+	else
+		return 1
+	fi
+}
+
+# }}}
