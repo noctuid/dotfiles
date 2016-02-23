@@ -12,7 +12,7 @@
 # - Using unquoted ${*: -1} to get the last arg
 
 # Help {{{
-function bkhelp() {
+bkhelp() {
 	echo "
 sntcvol          - backup a truecrypt volume to a directory
 Takes two arguments corresponding to the path to the tc volume and the path of
@@ -48,7 +48,7 @@ snpsp            - backup mounted psp memcard to database
 
 # }}}
 
-function confirm_do() {
+confirm_do() {
 	if [[ $# -lt 1 ]]; then
 		echo "An argument corresponding to the action to take is required."
 		return 1
@@ -71,7 +71,7 @@ alias uned="devmon --unmount-recent"
 alias uneda="devmon -unmount-all"
 # eject disk
 alias ej="sudo eject /dev/sr0"
-function maybe_eject() {
+maybe_eject() {
 	echo "Unmount last mounted external drive? (y/n)"
 	confirm_do devmon --unmount-recent --no-gui || return 0
 }
@@ -81,7 +81,7 @@ function maybe_eject() {
 # TC Mounting and Unmounting {{{
 # create mount point if does not exist
 # prevent non-zero return when a volume is already mounted
-function mount_tc() {
+mount_tc() {
 	local tc_volume
 	local mount_point
 	tc_volume=$1
@@ -110,7 +110,7 @@ function mount_tc() {
 }
 
 # prevent non-zero return when a volume is not mounted
-function umount_tc() {
+umount_tc() {
 	if [[ -n $1 ]]; then
 		local tc_volume
 		tc_volume=$1
@@ -132,7 +132,7 @@ function umount_tc() {
 
 # limitations:
 # - Can't choose full path (only directly under $HOME (or /run/media/private/$USER))
-function mount_z() {
+mount_z() {
 	local volume
 	local mount_point
 	volume=$1
@@ -181,7 +181,7 @@ function mount_z() {
 # notes:
 # get "ERROR: Close failed, volume is not open or was opened by a different user"
 # when the reason is actually that the volume is in use
-function umount_z() {
+umount_z() {
 	if [[ -n "$1" ]]; then
 		local volume
 		local volume_full_path
@@ -217,7 +217,7 @@ alias sngdrive='cd ~/grive/ && grive --verbose'
 alias backup_rsync='rsync -avhmP --delete --delete-excluded --ignore-errors --prune-empty-dirs'
 
 # minimal dotfiles/dev/school backup; for files that change quickly
-function sndot() {
+sndot() {
 	 if mountsoma; then
 		 backup_rsync --exclude={"musiclibrary.blb","bundle/*","elpa/*","homepage/*",".mpd/log","mpdscribble.log",".mu/*",".mutt/cache/*","ppsspp/*","spacemacs/*",".vim/undo",".vim/thesaurus",".weechat/logs/*","weechat*.log","*.gif","*.png","*.jpg","*.mkv"} ~/dotfiles ~/ag-sys/backup
 		 backup_rsync ~/vimwiki ~/ag-sys/backup
@@ -240,7 +240,7 @@ function sndot() {
 
 # already backing up .gnupg in snhome but this might be useful right after
 # creating a new key
-function bkgpgkeys() {
+bkgpgkeys() {
 	mountsoma || return 1
 	mkdir -p ~/ag-sys/backup/gpg
 	backup_rsync --copy-links ~/.gnupg ~/ag-sys/backup/gpg
@@ -260,7 +260,7 @@ alias bkgpg='bkgpgkeys'
 
 # get the path a tc volume is mounted to
 # does not "return" directory with trailing slash
-function get_tc_mount_point() {
+get_tc_mount_point() {
 	if [[ $# -ne 1 ]]; then
 		echo "One argument is required:"
 		echo "$ tc_volume_mounted_point /path/to/tc_vol"
@@ -278,7 +278,7 @@ function get_tc_mount_point() {
 	echo -n "$tc_mount_dir"
 }
 
-function sntcvol() {
+sntcvol() {
 	local no_eject
 	no_eject=false
 	while getopts :hn opt
@@ -382,7 +382,7 @@ function sntcvol() {
 }
 
 alias snsoma='sndot && sntcvol ~/soma'
-function bahamut() {
+bahamut() {
 	if [[ $# -ne 1 ]]; then
 		echo "One argument is required: "
 		echo "$ bahamut <directory under /media to backup soma to>"
@@ -398,7 +398,7 @@ alias mountdatab='mount_tc ~/datab ~/database'
 alias umountdatab='umount_tc ~/datab'
 
 alias sndatab='sntcvol ~/datab'
-function sndb() {
+sndb() {
 	if [[ $# -ne 1 ]]; then
 		echo "One argument is required:"
 		echo "$ sndb <directory under /media/ to backup datab to>"
@@ -411,7 +411,7 @@ function sndb() {
 
 # Online Backup {{{
 # ~20mb volume
-function snsmall() {
+snsmall() {
 	mountsoma || return 1
 	mount_tc ~/online_backup/small_soma ~/small_bk || return 1
 	sndot
@@ -447,8 +447,8 @@ function snsmall() {
 
 # }}}
 
-# home backup {{{
-function snhome() {
+# Home Backup {{{
+snhome() {
 	while getopts :h opt
 	do
 		case $opt in
@@ -497,7 +497,7 @@ function snhome() {
 alias cm="qcma --verbose"
 
 # untested:
-function snpsp() {
+snpsp() {
 	while getopts :h opt
 	do
 		case $opt in
@@ -553,7 +553,7 @@ restore_home() {
 }
 
  # from soma to home
-function reverse_sndot() {
+reverse_sndot() {
 	if mountsoma; then
 		no_delete_keep_newer_rsync ~/ag-sys/backup/dotfiles ~/
 		no_delete_keep_newer_rsync ~/ag-sys/backup/vimwiki ~/
