@@ -24,6 +24,6 @@ LABEL=home_hdd /home ext4 defaults,relatime,nodev,nosuid 0 2
 
 # https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption#UUID_and_LABEL
 # see ./crypttab
-/dev/mapper/swap none swap defaults 0 0
+/dev/mapper/cryptswap none swap defaults 0 0
 
 tmpfs /tmp tmpfs nodev,nosuid,size=3G 0 0
