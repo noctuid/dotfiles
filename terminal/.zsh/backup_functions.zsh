@@ -341,17 +341,19 @@ sntcvol() {
 		local unmount_backup
 		tc_mount_dir=$(get_tc_mount_point "$tc_volume" 2> /dev/null)
 		bk_tc_mount_dir=$(get_tc_mount_point "$backed_up_tc_volume" 2> /dev/null)
-		time_stamp=$(date +%Y.%m.%d_%H:%M:%S)
+		time_stamp=$(date +%Y.%m.%d_%T)
 		temp_backup_dir=$HOME/tc-backup-$time_stamp
 		unmount_main=false
 		unmount_backup=false
 		if [[ -z "$tc_mount_dir" ]]; then
-			tc_volume_full_path=$(readlink -f "$backed_up_tc_volume")
+			local tc_volume_full_path
+			tc_volume_full_path=$(readlink -f "$tc_volume")
 			tc_mount_dir=$temp_backup_dir$tc_volume_full_path
 			mount_tc "$tc_volume" "$tc_mount_dir" || return 1
 			unmount_main=true
 		fi
 		if [[ -z "$bk_tc_mount_dir" ]]; then
+			local bk_tc_volume_full_path
 			bk_tc_volume_full_path=$(readlink -f "$backed_up_tc_volume")
 			bk_tc_mount_dir=$temp_backup_dir$bk_tc_volume_full_path
 			mount_tc "$backed_up_tc_volume" "$bk_tc_mount_dir" || return 1
