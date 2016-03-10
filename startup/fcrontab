@@ -1,8 +1,16 @@
+# fcron sends mail with sendmail (I'm using msmtp-mta)
+# mailto can be set to the email address directly
+# I have "me" specified in my msmtp alias file
+DISPLAY=:0
 # run every 3 minutes of uptime (fcron active time)
-@m(no) 3 env DISPLAY=:0 ~/bin/system_check
+@mail(no) 3 ~/bin/xrun ~/bin/system_check
 # run every 2 hours of uptime
-@m(no) 2h env DISPLAY=:0 ~/bin/remind_me
+@mail(no) 2h ~/bin/xrun ~/bin/remind_me
 # empty trash every 2 weeks of uptime
-@m(no) 2w /usr/bin/trash-empty
+@mail(no) 2w /usr/bin/env trash-empty
 # run once a month as soon as computer is on between 8 and 12
 %monthly,erroronlymail,mailto(me) * 20-23 * ~/bin/net/ep_backup.sh
+# check disk health every day as soon as computer is on
+# send an email if checks don't pass
+%daily,erroronlymail,mailto(me) * * smartctl -a /dev/sda
+%daily,erroronlymail,mailto(me) * * smartctl -a /dev/sdb

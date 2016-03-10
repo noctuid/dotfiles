@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# previously I was able to just set DISPLAY=:0 to get notify-send to work with
+# fcron; now I need to set DBUS_SESSION_BUS_ADDRESS as well
+export DISPLAY=:0
+
+wm=$(xprop -notype -id "$(xprop -root -notype | \
+	awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" \
+	-f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
+pid=$(pidof "$wm" || pidof emacs | awk '{print $1}' || \
+	pidof termite | awk '{print $1}')
+dbus=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/"$pid"/environ)
+export DBUS_SESSION_BUS_ADDRESS=${dbus#*=}
+
+"$@"
