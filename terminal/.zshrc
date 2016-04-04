@@ -1185,7 +1185,16 @@ alias vgaout='xrandr --output VGA1 --off && bspc monitor -r X'
 
 # play clipboard (url)
 function mpgo() {
-	mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(xsel -b)"
+	mkdir -p /tmp/mpv
+	clipboard=$(xsel -b)
+	if [[ $clipboard =~ ^http ]]; then
+		echo "$clipboard" > /tmp/mpv/last_link
+		mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(xsel -b)"
+	fi
+}
+
+function mplast() {
+	mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(< /tmp/mpv/last_link)"
 }
 
 # youtube downloading
