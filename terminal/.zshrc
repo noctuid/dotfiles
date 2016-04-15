@@ -1187,7 +1187,7 @@ alias vgaout='xrandr --output VGA1 --off && bspc monitor -r X'
 function mpgo() {
 	mkdir -p /tmp/mpv
 	clipboard=$(xsel -b)
-	if [[ $clipboard =~ ^http ]]; then
+	if [[ $clipboard =~ ^http ]] || [[ -f $clipboard ]]; then
 		echo "$clipboard" > /tmp/mpv/last_link
 		mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(xsel -b)"
 	fi
