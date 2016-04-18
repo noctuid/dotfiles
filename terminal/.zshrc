@@ -1198,7 +1198,7 @@ function mplast() {
 }
 
 # youtube downloading
-alias ytvid='!youtube-dl --restrict-filenames -o "~/move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s"'
+alias ytvid='youtube-dl --restrict-filenames -o "~/move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s"'
 alias ytaudio='youtube-dl --restrict-filenames --extract-audio -o "~/move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s"'
 
 # record audio
