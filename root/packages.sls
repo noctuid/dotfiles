@@ -375,6 +375,7 @@ fonts/themes:
         - bdf-unifont
         # using siji now
         # - stlarch-font-ibx
+        - numix-themes
 font_powerline:
   cmd.run:
     - name: aura -A --noconfirm powerline-fonts-git
@@ -391,14 +392,6 @@ font_ms:
   cmd.run:
     - name: aura -A --noconfirm ttf-ms-fonts
     - unless: pacman -Q ttf-ms-fonts
-theme_numix-shine:
-  cmd.run:
-    - name: aura -A --noconfirm numix-shine-icon-theme-git
-    - unless: pacman -Q numix-shine-icon-theme-git
-theme_numix-archblue:
-  cmd.run:
-    - name: aura -A --noconfirm numix-themes-archblue
-    - unless: pacman -Q numix-themes-archblue
 
 npm:
   pkg.installed:
