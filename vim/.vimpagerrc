@@ -1,6 +1,12 @@
-" display in vim even if text is smaller than terminal window
+" vimpager settings
+let g:vimpager = {}
+let g:less     = {}
+"display in vim even if text is smaller than terminal window
 " (this is useful when calling pager from ranger)
-let vimpager_passthrough = 0
+let g:vimpager_passthrough = 0
+" disable less compatibility; having it on breaks remaps
+let g:less.enabled = 0
+
 " opts
 set ws
 set ic scs
@@ -12,6 +18,9 @@ set showcmd
 set clipboard=unnamedplus
 
 " bindings"{{{
+nnoremap q :q<cr>
+nnoremap i l
+
 " get rid of some of vimpager's bindings
 noremap w w
 noremap b b
