@@ -26,14 +26,14 @@ done
 
 function fm_open() { # <file to cut>
 	if [[ $fm_type == emacs ]]; then
-		bspc rule -a emacs -o state=floating center=true
+		bspc rule -a \*:emacs -o state=floating center=true
 		emacsclient -c \
 			-e "(add-hook 'dired-mode-hook (lambda () (evil-local-set-key 'normal \"q\" 'delete-frame)))" \
 			-e "(dired-jump nil \"$1\")" \
 			-e "(call-interactively #'dired-ranger-copy)"
 	else
 		file=$(printf %q "$1")
-		bspc rule -a termite -o state=floating center=true
+		bspc rule -a \*:termite -o state=floating center=true
 		termite --geometry="$geo" -e "ranger --selectfile=$file --cmd=cut" &
 	fi
 }

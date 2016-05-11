@@ -2,9 +2,7 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_MUSIC_DIR="$HOME/music"
 
 # export for bspwm reloading
-export BSPWM_TREE=/tmp/bspwm.tree
-export BSPWM_HISTORY=/tmp/bspwm.history
-export BSPWM_STACK=/tmp/bspwm.stack
+export BSPWM_STATE=/tmp/bspwm-state.json
 # panel
 export PANEL_HEIGHT=15
 export PANEL_FIFO=/tmp/panel-fifo
@@ -35,6 +33,7 @@ $HOME/bin
 $HOME/bin/mpv
 $HOME/bin/not_mine
 $HOME/bin/dunst
+$HOME/bin/bspwm
 $HOME/.panel_scripts
 # for vimus
 $HOME/.cabal/bin

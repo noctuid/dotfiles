@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# TODO:
+# - maybe use salt to swap out colors
+
+# some colors from old lemonbar defaults 
+# (https://github.com/LemonBoy/bar/blob/3f4ed1600ad1f1bc3a1e838f3c0282ff9b4b1966/config.def.h)
+# others from esn89's panel
+# others randomly picked
+
+COLOR_FG='#FF34322E'
+COLOR_BG='#ff232C31'
+
+# bright red
+COLOR_WM_ICON='%{F#FF6666}'
+
+# lighter green
+COLOR_MUSIC='%{F#A9D152}'
+
+# light blue
+COLOR_TITLE='%{F#78B3CC}'
+
+# * Right Section of Panel
+# light purple
+COLOR_RAM='%{F#7549D6}'
+
+# light red
+COLOR_CHARGING='%{F#CC6666}'
+# dark red
+COLOR_DISCHARGING='%{F#AC4142}'
+# light green
+COLOR_REFRESHING='%{F#90A959}'
+# green/yellow
+COLOR_FULL_CHARGE='%{F#8C9440}'
+# gray
+COLOR_AC='%{F#6C7A80}'
+
+# yellow
+COLOR_BRIGHTNESS='%{F#DE935F}'
+
+# red
+COLOR_MUTE='%{F#AC4142}'
+# dark blue
+COLOR_VOLUME='%{F#2A7A9C}'
+# gray blue
+COLOR_VOLUME_BG='%{F#2D3C46}'
+
+# dark purple
+COLOR_TIME='%{F#A84D95}'
+
+# gray
+COLOR_MAIL='%{F#6C7A80}'
+
+# from esn89's panel
+# light blue
+COLOR_NET='%{F#81A2BE}'
+# gray
+COLOR_NET_BG='%{F#707880}'
+
+# * Desktop Info (Left)
+# mostly defaults from bspwm example panel
+COLOR_DEFAULT_FG="%{F#a7a5a5}"
+COLOR_MONITOR_FG="%{F#8dbcdf}"
+COLOR_FOCUSED_MONITOR_FG="%{F#b1d0e8}"
+COLOR_FREE_FG="%{F#737171}"
+# COLOR_FOCUSED_FREE_FG="#000000"
+# bright pink
+COLOR_FOCUSED_FREE_FG='%{F#FF99FF}'
+# blue
+COLOR_FOCUSED_FREE_UL='%{U#6A9FB5}%{+u}'
+COLOR_OCCUPIED_FG="%{F#a7a5a5}"
+# COLOR_FOCUSED_OCCUPIED_FG="#d6d3d2"
+# bright pink
+COLOR_FOCUSED_OCCUPIED_FG='%{F#FF99FF}'
+# orange
+COLOR_FOCUSED_OCCUPIED_UL='%{U#DE935F}%{+u}'
+COLOR_URGENT_FG="%{F#f15d66}"
+COLOR_FOCUSED_URGENT_FG="%{F#501d1f}"
+# light red
+COLOR_FOCUSED_URGENT_UL='%{U#CC6666}%{+u}'
+# COLOR_STATE_FG="#89b09c"
+COLOR_STATE_FG='%{F#90A959}'
+COLOR_TITLE_FG="%{F#a8a2c0}"
+COLOR_SYS_FG="%{F#b1a57d}"
+
+# vim: set ft=sh:
+# turn on rainbow mode in emacs (not working for now because of alpha):
+# Local Variables:
+# eval: (rainbow-mode 1)
+# End:

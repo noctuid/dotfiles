@@ -35,97 +35,142 @@ case $1 in
 		fi
 		;;
 	dcycle)
-		bspc desktop -C "$2"
+		bspc node @/ -C "$2"
 		;;
 	drotate)
 		if [[ $2 == backward ]]; then
-			bspc desktop -R 270
+			bspc node @/ -R 270
 		elif [[ $2 == forward ]]; then
-			bspc desktop -R 90
+			bspc node @/ -R 90
 		fi
 		;;
 	dbalance)
-		bspc desktop -B
+		bspc node @/ -B
 		;;
 	wsel)
 		if [[ $2 ==  left ]] || [[ $2 == down ]]; then
-			if bspc control --get-status | grep -q "LT"; then
+			if bspc wm --get-status | grep -q "LT"; then
 				# if not monocle, down will go down or left if no windows below
 				if [[ $2 == down ]]; then
-					bspc window -f down || bspc window -f left # || bspc desktop -f prev
+					bspc node -f south || bspc node -f west # || bspc desktop -f prev.local
 				# if not monocle, down will go left or to previous desktop if no windows left
 				else
-					bspc window -f left || bspc desktop -f prev
+					bspc node -f west # || bspc desktop -f prev.local
 				fi
 			# so can change windows w/ same keys even in monocle (e.g. like a tabbed layout)
 			else
-				bspc window -f prev
+				bspc node -f prev.local
 			fi
 		elif [[ $2 == up ]] || [[ $2 == right ]]; then
-			if bspc control --get-status | grep -q "LT"; then
+			if bspc wm --get-status | grep -q "LT"; then
 				if [[ $2 == up ]]; then
-					bspc window -f up || bspc window -f right # || bspc desktop -f next
+					bspc node -f north || bspc node -f east # || bspc desktop -f next.local
 				else
-					bspc window -f right || bspc desktop -f next
+					bspc node -f east # || bspc desktop -f next.local
 				fi
 			else
-				bspc window -f next
+				bspc node -f next.local
 			fi
 		else
-			bspc window -f "$2"
+			bspc node -f "$2"
 		fi
 		;;
 	wmove)
-		bspc window -s "$2"
+		local dir
+		case $2 in
+			left) dir=west;;
+			down) dir=south;;
+			up) dir=north;;
+			right) dir=east;;
+		esac
+		bspc node -s "$dir"
 		;;
 	wmove_tod)
-		bspc window -d ^"$2"
+		bspc node -d ^"$2"
 		;;
 	wresize)
-		if [[ $2 == left ]]; then
-			bspc window --edge right -40 || bspc window --edge left -40
-		elif  [[ $2 == down ]]; then
-			bspc window --edge up +30 || bspc window --edge down +30
-		elif  [[ $2 == up ]]; then
-			bspc window --edge up -30 || bspc window --edge down -30
-		elif  [[ $2 == right ]]; then
-			bspc window --edge right +40 || bspc window --edge left +40
-		fi
+		get_win_prop() { # wid prop
+			xwininfo -id "$1" | awk "/$2/ {print \$2}"
+		}
+		get_mon_percent_prop() { # (width|height) percent
+			bspc query -T -m | jq .rectangle."$1" | \
+				awk "{printf(\"%.0f\", \$1/100 * $2)}"
+		}
+		local wid width height percent width_change height_change
+		wid=$(xdotool getactivewindow)
+		width=$(get_win_prop "$wid" Width)
+		height=$(get_win_prop "$wid" Height)
+		percent=5
+		width_change=$(get_mon_percent_prop width $percent)
+		height_change=$(get_mon_percent_prop height $percent)
+		# using -z works for floating windows too
+		# unfortunately can't use "||" with if they don't resize
+		# so I have to manually check
+		case $2 in
+			left)
+				# bspc node @east -r -40 || bspc node @west -r -40
+				bspc node -z left -"$width_change" 0
+				if [[ $width -eq $(get_win_prop "$wid" Width) ]]; then
+					bspc node -z right -"$width_change" 0
+				fi
+				;;
+			down)
+				# bspc node @south -r +35 || bspc node @north -r +35
+				bspc node -z bottom 0 +"$height_change"
+				if [[ $height -eq $(get_win_prop "$wid" Height) ]]; then
+					bspc node -z top 0 +"$height_change"
+				fi
+				;;
+			up)
+				# bspc node @north -r -35 || bspc node @south -r -35
+				bspc node -z top 0 -"$height_change"
+				if [[ $height -eq $(get_win_prop "$wid" Height) ]]; then
+					bspc node -z bottom 0 -"$height_change"
+				fi
+				;;
+			right)
+				# bspc node @west -r +40 || bspc node @east -r +40
+				bspc node -z right +"$width_change" 0
+				if [[ $width -eq $(get_win_prop "$wid" Width) ]]; then
+					bspc node -z left +"$width_change" 0
+				fi
+				;;
+		esac
 		;;
 	wtoggle)
-		bspc window -t "$2"
+		bspc node -t \~"$2"
 		;;
 	wclose)
-		bspc window -c
+		bspc node -c
 		;;
 	wkill)
-		bspc window -k
+		bspc node -k
 		;;
 	lsel)
 		bspc desktop -l "$2"
 		;;
 	psel)
-		if [[ $2 == canceld ]]; then
-			bspc desktop -c
-		else
-			bspc window -p "$2"
-		fi
+		case $2 in
+			canceld) bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel ;;
+			*) bspc node --presel-dir "$2" ;;
+		esac
 		;;
 	gapc)
 		bspc config -d focused window_gap $(($(bspc config -d focused window_gap) + $2 ))
 		;;
 	splitr)
-		bspc window -r "$2"
+		bspc node --presel-ratio "$2"
 		;;
 	hide_all)
-		bspc control --toggle-visibility
+		# only for current desktop
+		bspc node @/ -g hidden
 		;;
 	reload)
-		bspc query -T > "$BSPWM_TREE"; bspc query -H > "$BSPWM_HISTORY"; bspc quit && pkill panel
+		bspc wm --dump-state > "$BSPWM_STATE" && bspc quit && pkill panell
 		;;
 	quit)
-		 bspc quit 1
-		 ;;
+		bspc quit 1
+		;;
 	*)
 		echo "not a valid action"
 		exit 1

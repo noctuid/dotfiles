@@ -1,13 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # reload panel and empty desktop checker
-pkill -x bspc
-pkill -x panel
 
+# pkill -x panel
+pkill -x lemonbar
+pkill -x bspc
+
+# looks like this is no longer a problem
 # sxhkd dies when killing panel for some reason
 # make certain it's dead then restart
-pkill -x sxhkd
-sxhkd &> /dev/null &
-
+# pkill -x sxhkd
+# sxhkd &> /dev/null &
 if [[ $1 == nopanel ]]; then
 	# for conserving battery
 	pkill -x conky
@@ -23,6 +25,19 @@ else
 	fi
 fi
 
-# for all desktops, set up home row navigation bindings on empty desktops
-bspc control --subscribe desktop_focus monitor_focus window_manage \
-	window_unmanage | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
+# set up home row navigation keybindings on empty desktops
+bspc subscribe desktop_focus monitor_focus node_manage \
+	node_unmanage | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
+
+# change border color depending on layout
+# previous_focused=$(bspc config focused_border_color)
+# 90C3D4 479cb8
+# bspc subscribe report | \
+# 	awk -F ':' '$(NF-2) ~ /^LM/ {system("bspc config focused_border_color \"#6cafc6\""); }' &
+# bspc subscribe report | \
+# 	awk -F ':' '$(NF-2) ~ /^LT/ {system("bspc config focused_border_color \"#d0d293\""); }' &
+# bspc subscribe report | \
+# 	awk -F ':' "\$(NF-2) ~ /^LT/ {system(\"bspc config focused_border_color \\\"$previous_focused\\\"\"); }" &
+
+# changing wallpaper on desktop switch
+# bspc subscribe | awk -F ':' '$6 ~ /^[FO]/ { system("bgset -z /path/to/wallpaper &"); }' &

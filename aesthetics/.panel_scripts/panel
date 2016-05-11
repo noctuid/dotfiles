@@ -1,37 +1,20 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # base panel script:
 # https://github.com/baskerville/bspwm/blob/master/examples/panel/panel
 
-#
-# Colours
-#
+if xdo id -a the_panel > /dev/null ; then
+	printf "%s\n" "The panel is already running." >&2
+	exit 1
+fi
 
-COLOUR_FOREGROUND='#FF34322E'
-COLOUR_BACKGROUND='#FF232C31'
-# colours from esn's panel
-BLUE='%{F#FF5F819D}'
-LIGHT_BLUE='%{F#FF81A2BE}'
-GREEN='%{F#FF8C9440}'
-DARK_GRAY='%{F#FF707880}'
-# from old default colours (https://github.com/LemonBoy/bar/blob/3f4ed1600ad1f1bc3a1e838f3c0282ff9b4b1966/config.def.h)
-GRAY_BLUE='%{F#FF2D3C46}'
-DARK_RED='%{F#FFAC4142}'
-LIGHT_GREEN='%{F#FF90A959}'
-YELLOW='%{F#FFDE935F}'
-GRAY='%{F#FF6C7A80}'
-LIGHT_RED='%{F#FFCC6666}'
-# other
-DARK_BLUE='%{F#FF2A7A9C}'
-PURPLE='%{F#FFA84D95}'
-DARK_PURPLE='%{F#FF7549D6}'
+# * Colors
+source panel_colors
 
-#
-# Functions/Sections
-#
+# * Functions/Sections
 
 # see "M*" section in panel_bar
 songScroll() {
-	zscroll -n -u -b "M⮕ x" -d 0.2 -M "mpc status" -m "playing" -b "M⮕ " \
+	zscroll -n -u -b "M⮕ x" -d 0.3 -M "mpc status" -m "playing" -b "M⮕ " \
 		-s 1 -m "paused" -b "M⮔ " -s 0 "mpc current" > "$PANEL_FIFO" &
 }
 
@@ -52,31 +35,25 @@ memoryPercent() {
 # modified from:
 # https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L217
 batteryPercent() {
-	colour_ac=$1
-	colour_charge=$2
-	colour_dcharge=$3
-	colour_fcharge=$4
-	colour_refresh=$5
-
 	batStatus=$(acpi --battery | awk '{gsub(/,/, ""); print $3}')
 	batLevel=$(acpi --battery | awk '{gsub(/[,%]/, ""); print $4}')
 
 	if [[ -z $batStatus ]]; then
-		echo "${colour_ac}⮃ ⮎ AC"
+		echo "${COLOR_AC}⮃ ⮎ AC"
 	elif [[ $batStatus == Charging ]]; then
-		echo "${colour_charge}⮃ ⮒ $batLevel+"
+		echo "${COLOR_CHARGING}⮃ ⮒ $batLevel+"
 	elif [[ $batStatus == Discharging ]]; then
 		if [[ $batLevel -gt 67 ]]; then
-			echo "${colour_dcharge}⮃ ⮏ $batLevel-"
+			echo "${COLOR_DISCHARGING}⮃ ⮏ $batLevel-"
 		elif [[ $batLevel -gt 33 ]]; then
-			echo "${colour_dcharge}⮃ ⮑ $batLevel-"
+			echo "${COLOR_DISCHARGING}⮃ ⮑ $batLevel-"
 		else
-			echo "${colour_dcharge}⮃ ⮐ $batLevel-"
+			echo "${COLOR_DISCHARGING}⮃ ⮐ $batLevel-"
 		fi
 	elif [[ $batStatus == Unknown ]]; then
-		echo "${colour_fcharge}⮃ ⮒ Fully Charged"
+		echo "${COLOR_FULL_CHARGE}⮃ ⮒ Fully Charged"
 	else
-		echo "${colour_refresh}⮃ Refreshing..."
+		echo "${COLOR_REFRESHING}⮃ Refreshing..."
 	fi
 }
 
@@ -145,26 +122,22 @@ brightnessLevel() {
 # added check for audio output to hdmi
 # added truncation when muted or full volume
 panelVolume() {
-	colour1=$1
-	colour2=$2
-	colour3=$3
-
 	volStatus=$(amixer get Master | awk 'END { gsub(/[\[\]]/, ""); print $6 }')
 	volLevel=$(amixer get Master | awk 'END { gsub(/[%\[\]]/, ""); print $5 }')
 	headphone=$(amixer -c 0 contents | grep "Headphone Jack'" -A 2 | awk -F "=" 'NR==3 { print $2 }')
 	isHDMI=$(ponymix list --output | grep HDMI)
 
 	if [[ $volStatus == on ]] && [[ $headphone == off ]]; then
-		icon="${colour1}⮃ ⮞"
+		icon="${COLOR_VOLUME}⮃ ⮞"
 	elif [[ $volStatus == on ]] && [[ $headphone == on ]];then
-		icon="${colour1}⮃ ⮜"
+		icon="${COLOR_VOLUME}⮃ ⮜"
 	elif [[ $volStatus == off ]] && [[ $headphone == on ]]; then
-		icon="${colour2}⮃ ⮜"
+		icon="${COLOR_MUTE}⮃ ⮜"
 	elif [[ $volStatus == off ]] && [[ $headphone == off ]]; then
-		icon="${colour2}⮃ ⮝"
+		icon="${COLOR_MUTE}⮃ ⮝"
 	else
 		# I don't think this ever happens
-		icon="$colour2?"
+		icon="$COLOR_MUTE?"
 	fi
 
 	# designate if using hdmi connection
@@ -179,16 +152,16 @@ panelVolume() {
 		case $volLevel in
 			# if full volume truncate
 			100) echo "$icon" ;;
-			[0-9]) echo "$icon" "$colour1—$colour3—————————" ;;
-			1*) echo "$icon" "$colour1——$colour3————————" ;;
-			2*) echo "$icon" "$colour1———$colour3———————" ;;
-			3*) echo "$icon" "$colour1————$colour3——————" ;;
-			4*) echo "$icon" "$colour1—————$colour3—————" ;;
-			5*) echo "$icon" "$colour1——————$colour3————" ;;
-			6*) echo "$icon" "$colour1———————$colour3———" ;;
-			7*) echo "$icon" "$colour1————————$colour3——" ;;
-			8*) echo "$icon" "$colour1——————————$colour3—" ;;
-			9*) echo "$icon" "$colour1——————————" ;;
+			[0-9]) echo "$icon" "$COLOR_VOLUME—$COLOR_VOLUME_BG—————————" ;;
+			1*) echo "$icon" "$COLOR_VOLUME——$COLOR_VOLUME_BG————————" ;;
+			2*) echo "$icon" "$COLOR_VOLUME———$COLOR_VOLUME_BG———————" ;;
+			3*) echo "$icon" "$COLOR_VOLUME————$COLOR_VOLUME_BG——————" ;;
+			4*) echo "$icon" "$COLOR_VOLUME—————$COLOR_VOLUME_BG—————" ;;
+			5*) echo "$icon" "$COLOR_VOLUME——————$COLOR_VOLUME_BG————" ;;
+			6*) echo "$icon" "$COLOR_VOLUME———————$COLOR_VOLUME_BG———" ;;
+			7*) echo "$icon" "$COLOR_VOLUME————————$COLOR_VOLUME_BG——" ;;
+			8*) echo "$icon" "$COLOR_VOLUME——————————$COLOR_VOLUME_BG—" ;;
+			9*) echo "$icon" "$COLOR_VOLUME——————————" ;;
 		esac
 	fi
 }
@@ -196,7 +169,7 @@ panelVolume() {
 # originally from:
 # https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel#L236
 currentTime() {
-	echo  "⭧" "$(date +'%a %d %I: %M%P')"
+	echo "⭧" "$(date +'%a %d %I: %M%P')"
 }
 
 mailCount() {
@@ -211,15 +184,11 @@ mailCount() {
 # modified to work with more than just connman (for detecting if wired connection)
 # modified to detect name of interface
 netConnection() {
-	colour1=$1
-	colour2=$2
-	colour3=$3
-
 	# get active interface name
 	interface=$(ip link show up | awk -F ": " '/state UP/ {print $2}')
 	# wired connection
 	if [[ $interface =~ ^e ]]; then
-		echo "${colour1}⮃ W"
+		echo "${COLOR_NET}⮃ W"
 	else
 		# shows up with wired connection for some connection managers it seems (e.g. networkmanager)
 		signalStrength=$(awk 'NR==3 {gsub(/\./, ""); print $3}' /proc/net/wireless)
@@ -229,35 +198,27 @@ netConnection() {
 		else
 			# wireless connection
 			if [[ $signalStrength -gt 64 ]]; then
-				echo -n "${colour1}⮃ ‗▬▪▮"
+				echo -n "${COLOR_NET}⮃ ‗▬▪▮"
 			elif [[ $signalStrength -lt 65 ]] && [[ $signalStrength -gt 39 ]]; then
-				echo -n "${colour1}⮃ ‗▬▪""$colour2""▮""$colour3"
+				echo -n "${COLOR_NET}⮃ ‗▬▪""$COLOR_NET_BG""▮"
 			elif [[ "$signalStrength" -lt 40 ]]; then
-				echo -n "${colour1}⮃ ‗▬""$colour2""▪▮""$colour3"
+				echo -n "${COLOR_NET}⮃ ‗▬""$COLOR_NET_BG""▪▮"
 			else
-				echo -n "$colour2"" ⮃ ‗▬▪▮ Connecting..."
+				echo -n "$COLOR_NET_BG"" ⮃ ‗▬▪▮ Connecting..."
 			fi
-			# echo " $(iwgetid -r )"
+			# echo "$COLOR_NET $(iwgetid -r )"
 		fi
 	fi
 }
 
-#
-# Main
-#
-
-if [[ $(pgrep -cx panel) -gt 1 ]]; then
-	printf "%s\n" "The panel is already running." >&2
-	exit 1
-fi
-
+# * Main
 trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
 [[ -e $PANEL_FIFO ]] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
 
 bspc config top_padding "$PANEL_HEIGHT"
-bspc control --subscribe > "$PANEL_FIFO" &
+bspc subscribe report > "$PANEL_FIFO" &
 
 # only do the following the first time starting panel:
 # scrolling song info (on left)
@@ -266,14 +227,15 @@ songScroll
 titleScroll
 # system info section (right side)
 while true; do
-	# no < for battery, volume, or connection sectiosn because the < changes colour depending on state
-	echo "S""${DARK_PURPLE}⮃ ¤ $(memoryPercent)% \
-$(batteryPercent $GRAY $LIGHT_RED $DARK_RED $GREEN $LIGHT_GREEN) \
-${YELLOW}⮃ $(brightnessLevel) \
-$(panelVolume $DARK_BLUE $DARK_RED $GRAY_BLUE) \
-${PURPLE}⮃ $(currentTime) \
-${GRAY}⮃  $(mailCount) \
-$(netConnection $LIGHT_BLUE $DARK_GRAY $BLUE)" > "$PANEL_FIFO"
+	# no < for battery, volume, or connection sections
+	# because the < changes color depending on state
+	echo "S" "${COLOR_RAM}⮃  $(memoryPercent)% \
+$(batteryPercent) \
+${COLOR_BRIGHTNESS}⮃ $(brightnessLevel) \
+$(panelVolume) \
+${COLOR_TIME}⮃ $(currentTime) \
+${COLOR_MAIL}⮃  $(mailCount) \
+$(netConnection)" > "$PANEL_FIFO"
 	sleep 0.1s
 done &
 
@@ -281,12 +243,26 @@ done &
 # http://blog.gaijinpot.com/choosing-japanese-font/
 # https://wiki.archlinux.org/index.php/Fonts#Japanese
 # IPAGothic is more clear than IPAMincho in lemonbar
-panel_bar < "$PANEL_FIFO" | lemonbar \
+panel_bar < "$PANEL_FIFO" | lemonbar -a 32 -n the_panel \
 	-f "uushi:pixelsize=11" \
-	-f "Stlarch:pizelsize=10" \
+	-f "Siji:pixelsize=11" \
 	-f "IPAGothic:pixelsize=11:weight=bold" \
-	x"$PANEL_HEIGHT" -F "$COLOUR_FOREGROUND" -B "$COLOUR_BACKGROUND" &
+	-g x"$PANEL_HEIGHT" -F "$COLOR_FG" -B "$COLOR_BG" | sh &
+
+count=0
+while : ; do
+	panel_wid=$(xdo id -a the_panel)
+	((count++))
+	if [[ -n $panel_wid ]]; then
+		# prevent bar from being over fullscreen window
+		xdo above -t "$(xdo id -N Bspwm -n root | sort | head -n 1)" "$panel_wid"
+		break
+	elif [[ $count -ge 20 ]]; then
+		break
+	fi
+	sleep 0.5
+done
 
 wait
-# because vim is dumber than emacs:
+
 # vim: set ft=sh:

@@ -1162,12 +1162,14 @@ function hdmiadd() {
 	# setroot --restore so that newly added screen is black
 	xrandr --output HDMI1 --auto --right-of LVDS1 && \
 		bspc monitor HDMI1 --reset-desktops X && \
-		ponymix set-profile output:hdmi-stereo && \
 		setroot --restore
+	if [[ $1 != noa ]]; then
+		ponymix set-profile output:hdmi-stereo
+	fi
 }
 function hdmiout() {
 	xrandr --output HDMI1 --off && \
-		bspc monitor -r X && \
+		bspc desktop X -r && \
 		ponymix set-profile output:analog-stereo
 }
 

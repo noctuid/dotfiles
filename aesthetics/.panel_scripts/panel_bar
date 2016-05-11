@@ -1,88 +1,91 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-#
-# Colours
-#
+source panel_colors
 
-# some old default colours (https://github.com/LemonBoy/bar/blob/3f4ed1600ad1f1bc3a1e838f3c0282ff9b4b1966/config.def.h)
-# foreground
-LIGHT_GREEN='%{F#FF90A959}'
-LIGHTER_GREEN='%{F#FFA9D152}'
-GRAY='%{F#FF6C7A80}'
-BRIGHT_RED='%{F#FFFF6666}'
-LIGHT_PINK='%{F#FFFFD6FC}'
-GRAY_PINK='%{F#FFD9CAD7}'
-BRIGHT_PINK='%{F#FFFF78FF}'
-LIGHT_BLUE='%{F#FF78B3CC}'
-# normal background; same as COLOUR_BACKGROUND in panel
-NORMAL_B='%{B#FF232C31#}'
-DARK_RED_B='%{B#FFAC4142}'
-# underline
-BLUE_U='%{U#FF6A9FB5}'
-YELLOW_U='%{U#FFDE935F}'
-LIGHT_RED_U='%{U#FFCC6666}'
-
-#
-# Positioning
-#
+num_mon=$(bspc query -M | wc -l)
 
 while read -r line; do
 	case $line in
 		S*)
-			# right side of bar (battery, clock, volume, date, mailcount, ram usage, connection)
-			sys_infos="$GRAY${line#?}"
+			# right side of bar (battery, clock, volume, date, mailcount,
+			# ram usage, connection)
+			sys="${line#?}"
 			;;
 		M*)
 			# scrolling music
-			song="$LIGHTER_GREEN${line#?}"
+			song="$COLOR_MUSIC${line#?}"
 			;;
 		T*)
 			# scrolling xtitle output
-			title="$LIGHT_BLUE${line#?}"
+			title="$COLOR_TITLE${line#?}"
 			;;
 		W*)
 			# bspwm internal state
-			wm_infos=""
+			wm=""
 			IFS=':'
-			# this shouldn't be double quoted
+			# shellcheck disable=SC2086
 			set -- ${line#?}
-			while [[ $# -gt 0 ]] ; do
+			while [[ $# -gt 0 ]]; do
 				item=$1
 				name=${item#?}
 				case $item in
-					O*)
-						# focused occupied desktop
-						wm_infos="$wm_infos $YELLOW_U$BRIGHT_PINK%{+u}${name}%{-u}"
+					[mM]*)
+						[[ $num_mon -lt 2 ]] && shift && continue
+						case $item in
+							m*)
+								# monitor
+								FG=$COLOR_MONITOR_FG
+								;;
+							M*)
+								# focused monitor
+								FG=$COLOR_FOCUSED_MONITOR_FG
+								;;
+						esac
+						wm="$wm$FG%{A:bspc monitor -f $name:}$name%{A} "
 						;;
-					F*)
-						# focused free desktop
-						wm_infos="$wm_infos $BLUE_U$GRAY_PINK%{+u}${name}%{-u}"
+					[fFoOuU]*)
+						case $item in
+							f*)
+								# free desktop
+								FG=$COLOR_FREE_FG
+								UL=""
+								;;
+							F*)
+								# focused free desktop
+								FG=$COLOR_FOCUSED_FREE_FG
+								UL=$COLOR_FOCUSED_FREE_UL
+								;;
+							o*)
+								# occupied desktop
+								FG=$COLOR_OCCUPIED_FG
+								UL=""
+								;;
+							O*)
+								# focused occupied desktop
+								FG=$COLOR_FOCUSED_OCCUPIED_FG
+								UL=$COLOR_FOCUSED_OCCUPIED_UL
+								;;
+							u*)
+								# urgent desktop
+								FG=$COLOR_URGENT_FG
+								;;
+							U*)
+								# focused urgent desktop
+								FG=$COLOR_FOCUSED_URGENT_FG
+								UL=$COLOR_FOCUSED_URGENT_UL
+								;;
+						esac
+						wm="$wm$FG$UL%{A:bspc desktop -f $name:}$name%{A}%{-u} "
 						;;
-					U*)
-						# focused urgent desktop
-						wm_infos="$wm_infos $LIGHT_RED_U%{+u}${name}%{-u}"
-						;;
-					o*)
-						# occupied desktop
-						wm_infos="$wm_infos $LIGHT_PINK$name"
-						;;
-					f*)
-						# free desktop
-						wm_infos="$wm_infos $GRAY$name"
-						;;
-					u*)
-						# urgent desktop
-						wm_infos="$wm_infos $DARK_RED_B$name$NORMAL_B"
-						;;
-					L*)
-						# layout
-						layout=$(printf "%s" "${name}" | sed 's/\(.\).*/\U\1/')
-						wm_infos="$wm_infos  $LIGHT_GREEN$layout"
+					[LTG]*)
+						# layout, state and flags
+						# not that useful since pretty obvious
+						# wm="$wm$COLOR_STATE_FG $name "
 						;;
 				esac
 				shift
 			done
 			;;
 	esac
-	printf "%s\n" "%{l}$BRIGHT_RED ⮗ bspwm $wm_infos $song %{c} $title %{r} $sys_infos"
+	printf "%s\n" "%{l}$COLOR_WM_ICON ⮗ bspwm  $wm $song %{c} $title %{r} $sys"
 done

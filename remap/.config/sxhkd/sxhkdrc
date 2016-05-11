@@ -137,9 +137,10 @@ super + W
 # cycle layout (monocle=kind of like fullscreen, but within normal area)
 super + t
 	wm_action lsel next
-# toggle fullscreen
-super + T
-	wm_action wtoggle fullscreen
+
+# toggle states
+super + {shift + t,s,f}
+	wm_action wtoggle {psuedo_tiled,floating,fullscreen}
 
 # }}}
 # Selection {{{
@@ -148,35 +149,25 @@ super + T
 # super + {n,e}
 # 	wm_action wsel {next,prev}
 
-# selection by direction
-super + {h,n,e,i}
-	wm_action wsel {left,down,up,right}
+# selection/movement by direction
+super + {_,shift + }{h,n,e,i}
+	wm_action {wsel,wmove} {left,down,up,right}
 
 # switch last window or desktop
 super + {grave,Tab}
 	wm_action {wsel,dsel} last
 
-# }}}
-# Window Movement {{{
 # move selected window to biggest space
 super + m
 	wm_action wmove biggest
 
-# move window in direction
-super + {H,N,E,I}
-	wm_action wmove {left,down,up,right}
-
 # switch to last window
 super + l
-	wm_action wmsel last
+	wm_action wsel last
 
 # switch with last window (works across desktops)
 super + apostrophe
 	wm_action wmove last
-
-# toggle floating
-super + f
-	wm_action wtoggle floating
 
 # navigate to biggest floating window
 super + F
@@ -187,7 +178,7 @@ super + {comma,period}
 	wm_action dcycle {backward,forward}
 
 # basically rotate windows, but keep relative size
-alt + {comma,forward}
+alt + {comma,period}
 	wm_action drotate {backward,forward}
 
 # balance
@@ -211,6 +202,7 @@ super + {_,shift + }{1-9,0}
 # }}}
 # Resizing {{{
 # using caps layer hnei
+# these can be thought of as moving the split between a window
 super + {Left,Down,Up,Right}
 	wm_action wresize {left,down,up,right}
 
@@ -218,10 +210,12 @@ super + {Left,Down,Up,Right}
 # Preselection {{{
 # direction to split
 super + p ; {h,n,e,i}
-	wm_action psel {left,down,up,right}
+	wm_action psel {west,south,north,east}
 
 # cancel.. current; all
 super + p ; {_,shift + }space
+	wm_action psel {cancel,canceld}
+super + p ; {_,shift + }q
 	wm_action psel {cancel,canceld}
 
 # set presl splitting ratio of current window
@@ -248,21 +242,6 @@ KP_Add
 
 super + k
 	wm_action hide_all
-
-# }}}
-# Mouse shit# {{{
-# when in float, move and resize window
-super + button{1-3}
-	bspc pointer -g {move,resize_side,resize_corner}
-
-super + !button{1-3}
-	bspc pointer -t %i %i
-
-super + @button{1-3}
-	bspc pointer -u
-
-~button1
-	bspc pointer -g focus
 
 # }}}
 # }}}
