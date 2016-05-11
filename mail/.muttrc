@@ -44,8 +44,9 @@ set pipe_decode
 set thorough_search
 # wrap at word end
 set smart_wrap
-# start wrapped lines with +
-set markers
+# start wrapped lines with +; messes up url hinting
+# set markers
+unset markers
 # Retain 5 lines of previous page when scrolling.
 set pager_context=5
 # status bar on top
