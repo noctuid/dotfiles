@@ -20,6 +20,10 @@ set clipboard=unnamedplus
 " bindings"{{{
 nnoremap q :q<cr>
 nnoremap i l
+nnoremap I <nop>
+nnoremap a <nop>
+nnoremap o <nop>
+nnoremap O <nop>
 
 " get rid of some of vimpager's bindings
 noremap w w
