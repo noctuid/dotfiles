@@ -1170,6 +1170,7 @@ function hdmiadd() {
 function hdmiout() {
 	xrandr --output HDMI1 --off && \
 		bspc desktop X -r && \
+		bspc monitor HDMI1 -r && \
 		ponymix set-profile output:analog-stereo
 }
 
