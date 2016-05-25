@@ -276,6 +276,9 @@ case $1 in
 		;;
 esac
 #+end_src
+
+You can see [[./scripts/bin/wm_action]] for my current version of the script with support for resizing based on a percentage of the screen. Neeasade has also [[https://github.com/neeasade/dotfiles/blob/master/wm/.wm/scripts/resize.sh][rewriten my script]] to additionally support resizing window groups
+
 ** Empty Desktop Keybindings
 Why use modifier keys to start a program if there is no active window? I'm using bspc's subscribe command to monitor for when a desktop becomes empty and then switch to a different sxhkd config. This way, I can start my programs with the home row on empty desktops.
 
