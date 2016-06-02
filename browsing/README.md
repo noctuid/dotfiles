@@ -16,9 +16,9 @@ I might be doing something similar with tabgroups if they worked consistently wi
 # Pentadactyl vs. Vimperator
 Right now, pentadactyl is the main reason I'm using firefox. There are no equivalent chromium plugins I'm close to satisfied with (including cvim). Ideally, I'd prefer to use a "lightweight" browser designed with pentadactyl like functionality built in. For me, [qutebrowser](https://github.com/The-Compiler/qutebrowser) is the only alternative browser that looks promising in this regard, and I hope to switch to it in the future since it is being actively developed.
 
-Pentadactyl is a vimperator fork. Both are now on github (pentadactyl has moved since google code is shutting down). The differences between the two are not very clear, and the most comprehensive [comparison](https://www.wikivs.com/wiki/Pentadactyl_vs_Vimperator) I've found isn't particularly accurate. For example, it says that pentadactyl is more focused on "100% vim compatibility." I don't actually understand what this is supposed to mean, but in some regards this is just blatantly false. For example, vimperator uses "noremap" which is deprecated (in favour of "-builtin") in pentadactyl. The looks with both are quite customizable (e.g. I use hints that are styled like in vimium as opposed to the ugly default), so I don't really see any fundamental difference there. As for development, they are both being maintained at least somewhat.
+Pentadactyl was forked from vimperator by the main developers at the time (see the [contribution graphs](https://github.com/vimperator/vimperator-labs/graphs/contributors) for dkearns and kmaglione). Both are now on github (pentadactyl moved since google code shut down). The differences between the two are not very clear, and the most comprehensive [comparison](https://www.wikivs.com/wiki/Pentadactyl_vs_Vimperator) I've found isn't particularly accurate. For example, it says that pentadactyl is more focused on "100% vim compatibility." I don't actually understand what this is supposed to mean, but in some regards this is just blatantly false. For example, vimperator uses "noremap" which is deprecated (in favour of "-builtin") in pentadactyl. The looks with both are quite customizable (e.g. I use hints that are styled like in vimium as opposed to the ugly default), so I don't really see any fundamental difference there. As for development, they are both being maintained at least somewhat.
 
-Here are some specific differences I've actually found. Please correct me if anything is wrong or has changed; there are a lot of annoying naming differences between the two (e.g. ignorekeys v passkeys), so I may have missed something.
+Here are some specific differences I've actually found. Please correct me if anything is wrong or has changed; there are a lot of annoying naming differences between the two (e.g. `ignorekeys` vs `passkeys` and`ignore-all-keys` vs. `pass-all-keys`), so I may have missed something.
 
 ## Pentadactyl Over Vimperator
 Pentadactyl has groups (I'm pretty sure vimperator doesn't) which allow you to have different settings, key mappings, etc. for different urls. I use this, for example, to have more convenient mappings for zooming when the url corresponds to an image. I'm pretty sure vimperator doesn't have this, and that's enough reason for me not to use it (unless I'm wrong).
@@ -31,19 +31,19 @@ Pentadactyl has "if.. else" conditional support in the config file which is very
 
 Pentadactyl supports vim's bar `|` for multiple commands, though it doesn't work with a lot of things and I haven't found it to be that useful. Vimperator uses a `,`, so this is just a syntactic difference.
 
-Pentadactyl doesn't require a restart to be enabled. It also still has passthrough mode which vimperator sadly removed. At the time of writing, vimperator also doesn't allow you to remap certain keys (like \<space\>) which is another reason I wouldn't use it.
+Pentadactyl doesn't require a restart to be enabled. At the time of writing, vimperator also doesn't allow you to remap certain keys (like \<space\>) (see [here](https://github.com/vimperator/vimperator-labs/issues/10); there is a workaround).
 
 ## Vimperator Over Pentadactyl:
-Vimperator has tabgroup management commands built in (e.g. for switching tabgroups, moving tabs between tabgroups, etc.). Pentadactyl has a plugin called TabGroupie, but it's pretty broken and only works half the time. I don't know if the vimperator implementation is better, but it doesn't support renaming tabgroups I think.
+Vimperator has tabgroup management commands built in (e.g. for switching tabgroups, moving tabs between tabgroups, etc.). Pentadactyl has a plugin called TabGroupie, but it's unmaintained and broken now.
 
 Vimperator allows saving your bookmarks to different folders. The issue for this in pentadactyl has been open for years and has a high priority, but I have to doubt at this point that this functionality will ever be added.
 
 Vimperator currently works with firefox nightly with no hassle. This has been a problem with pentadactyl lately (no nightlies; having to update the max version yourself; small fixes coming late for new firefoxes), but right now there are current nightlies for pentadactyl that supposedly work fine with the newest firefox as well. Vimperator seems to be better/faster at keeping up though.
 
-Vimperator has coloured mode indicators, and I don't think pentadactyl does.
+Vimperator has colored indicators (e.g. for modes, when recording a macro, etc.) that look nice, and I don't think pentadactyl does.
 
 ## No Difference
-The differences seem to be pretty small for the most part. They both have autocmds, quickmarks, support for executing shell and js commands, completion (especially nice with `:b` and `:open`), caret mode, and support for setting firefox about:config settings with `set!`.
+The differences seem to be pretty small for the most part. They both have autocmds, quickmarks, support for executing shell and js commands, completion (especially nice with `:b` and `:open`), caret mode, support through selectively passing through some or all keys, and support for setting firefox about:config settings with `set!`.
 
 The startup time and completion performance is supposedly better in pentadactyl according to the aforementioned link. I don't really notice a difference in speed between the two; neither cause any significant slowdown for me.
 
