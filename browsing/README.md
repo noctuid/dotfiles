@@ -29,7 +29,7 @@ The `addons` command in pentadactyl will popup your list of addons with link hin
 
 Pentadactyl has "if.. else" conditional support in the config file which is very nice for me (I couldn't find anything about such a feature in the vimperator documentation). I use this in my `relative-tab-move` command.
 
-Pentadactyl supports vim's bar "|" for multiple commands, though it doesn't work with a lot of things and I haven't found it to be that useful.
+Pentadactyl supports vim's bar `|` for multiple commands, though it doesn't work with a lot of things and I haven't found it to be that useful. Vimperator uses a `,`, so this is just a syntactic difference.
 
 Pentadactyl doesn't require a restart to be enabled. It also still has passthrough mode which vimperator sadly removed. At the time of writing, vimperator also doesn't allow you to remap certain keys (like \<space\>) which is another reason I wouldn't use it.
 
