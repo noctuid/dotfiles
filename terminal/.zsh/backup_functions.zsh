@@ -210,6 +210,13 @@ umount_z() {
 alias mountsoma='mount_tc ~/soma ~/ag-sys'
 alias umountsoma='umount_tc ~/soma'
 
+# mostly used manually
+alias mountdatab='mount_tc ~/datab ~/database'
+alias umountdatab='umount_tc ~/datab'
+
+alias mountmail='mount_tc ~/mail ~/.mail'
+alias umountmail='umount_tc ~/mail'
+
 # sync ~/grive to google drive
 alias sngdrive='cd ~/grive/ && grive --verbose'
 
@@ -395,21 +402,6 @@ bahamut() {
 
 # }}}
 
-# Database Backup {{{
-alias mountdatab='mount_tc ~/datab ~/database'
-alias umountdatab='umount_tc ~/datab'
-
-alias sndatab='sntcvol ~/datab'
-sndb() {
-	if [[ $# -ne 1 ]]; then
-		echo "One argument is required:"
-		echo "$ sndb <directory under /media/ to backup datab to>"
-		return 1
-	fi
-	sndatab /media/"$1"
-}
-
-# }}}
 
 # Online Backup {{{
 # ~20mb volume
@@ -486,10 +478,12 @@ snhome() {
 	# sync truecrypt volumes as well as well
 	# don't sync under home_bk (so can keep --delete-excluded)
 	sntcvol -n ~/soma "$backup_dir" || return 1
-	sndatab "$backup_dir" || return 1
+	sntcvol -n ~/mail "$backup_dir" || return 1
+	sntcvol -n ~/datab "$backup_dir" || return 1 
 	echo "Home backup to $backup_dir completed successfully."
 	notify-send --icon=trophy-gold "Backup Notification" \
 		"Home backup to $backup_dir completed successfully."
+	maybe_eject
  }
 
  # }}}

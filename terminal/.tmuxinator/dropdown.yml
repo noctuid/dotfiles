@@ -9,12 +9,10 @@ windows:
   - main:
         layout: even-horizontal
         panes:
-        - mountsoma && ranger --cmd="tab_new ~/dotfiles" --cmd="tab_new ~/Move" --cmd="tab_new ~/ag-sys/Else/everything" --cmd="tab_new /media" --cmd="tab_move 0 1"
+        - mountsoma && ranger --cmd="tab_new ~/dotfiles" --cmd="tab_new ~/move" --cmd="tab_new ~/ag-sys/else/everything" --cmd="tab_new /media" --cmd="tab_move 0 1"
         - tmux select-window -t 3 && tmux select-pane -t 1
   - mail:
-    - mutt
-  - vim:
-      - vim --servername termgeneral
+    - mountmail && mutt
   # - net:
   #       layout: even-horizontal
   #       panes:
