@@ -59,61 +59,27 @@ batteryPercent() {
 
 # modified from:
 # https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/brightnessScript
-# truncate brightness unless just changed
-mkdir -p /tmp/brightness
-echo "none" > /tmp/brightness/level
-echo "0" > /tmp/brightness/counter
 brightnessLevel() {
-	currentBLevel=$(< /sys/class/backlight/acpi_video0/actual_brightness)
-	# 15 seems to be the normal max?
-	# maxBLevel=$(< /sys/class/backlight/acpi_video0/max_brightness)
-	lastBLevel=$(< /tmp/brightness/level)
-
-	# reset or possibly update counter
-	# how many updates before full brightness meter is no longer displayed after a brightness change
-	maxCount=8
-	if [[ $currentBLevel -eq $lastBLevel ]]; then
-		brightnessCounter=$(< /tmp/brightness/counter)
-		if [[ $brightnessCounter -lt $maxCount ]]; then
-			((brightnessCounter++))
-			echo $brightnessCounter > /tmp/brightness/counter
-		fi
-	else
-		echo 0 > /tmp/brightness/counter
-	fi
-
-	# echo based on current brightness level and panel updates since last brightness change
-	if [[ $brightnessCounter -ge $maxCount ]]; then
-		if [[ $currentBLevel -eq 15 ]]; then
-			echo "•"
-		elif [[ $currentBLevel -eq 0 ]]; then
-			echo "○"
-		else
-			echo "◉"
-		fi
-	else
-		case $currentBLevel in
-			0)  echo "•○○○○○○○○○○○○○○○";;
-			1)  echo "••○○○○○○○○○○○○○○";;
-			2)  echo "•••○○○○○○○○○○○○○";;
-			3)  echo "••••○○○○○○○○○○○○";;
-			4)  echo "•••••○○○○○○○○○○○";;
-			5)  echo "••••••○○○○○○○○○○";;
-			6)  echo "•••••••○○○○○○○○○";;
-			7)  echo "••••••••○○○○○○○○";;
-			8)  echo "•••••••••○○○○○○○";;
-			9)  echo "••••••••••○○○○○○";;
-			10) echo "•••••••••••○○○○○";;
-			11) echo "••••••••••••○○○○";;
-			12) echo "•••••••••••••○○○";;
-			13) echo "••••••••••••••○○";;
-			14) echo "•••••••••••••••○";;
-			15) echo "••••••••••••••••";;
-		esac
-	fi
-
-	# save current brightness level
-	echo "$currentBLevel" > /tmp/brightness/level
+	# cat so || works
+	bLevel=$(cat /sys/class/backlight/acpi_video0/actual_brightness 2> /dev/null || \
+		cat /sys/class/backlight/intel_backlight/actual_brightness 2> /dev/null)
+	maxBLevel=$(cat /sys/class/backlight/acpi_video0/max_brightness 2> /dev/null || \
+		cat /sys/class/backlight/intel_backlight/max_brightness 2> /dev/null)
+	# floors
+	bPercentage=$(awk "BEGIN {printf(\"%d\", $bLevel/$maxBLevel * 10)}")
+	case $bPercentage in
+		0)  echo "○";;
+		1)  echo "•○○○○○○○○○";;
+		2)  echo "••○○○○○○○○";;
+		3)  echo "•••○○○○○○○";;
+		4)  echo "••••○○○○○○";;
+		5)  echo "•••••○○○○○";;
+		6)  echo "••••••○○○○";;
+		7)  echo "•••••••○○○";;
+		8)  echo "••••••••○○";;
+		9)  echo "•••••••••○";;
+		*) echo "•";;
+	esac
 }
 
 # originally from:

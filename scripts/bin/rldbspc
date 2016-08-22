@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # reload panel and empty desktop checker
 
-# pkill -x panel
+# pkill -x panel (no longer works)
+ps aux | awk '/panel/ {system("kill " $2)}'
 pkill -x lemonbar
 pkill -x bspc
 
-# looks like this is no longer a problem
 # sxhkd dies when killing panel for some reason
 # make certain it's dead then restart
-# pkill -x sxhkd
-# sxhkd &> /dev/null &
+pkill -x sxhkd
+sxhkd &> /dev/null &
 if [[ $1 == nopanel ]]; then
 	# for conserving battery
 	pkill -x conky
