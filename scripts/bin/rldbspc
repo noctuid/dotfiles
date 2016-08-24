@@ -2,7 +2,7 @@
 # reload panel and empty desktop checker
 
 # pkill -x panel (no longer works)
-ps aux | awk '/panel/ {system("kill " $2)}'
+ps x | awk '/panel/ {system("kill " $1)}'
 pkill -x lemonbar
 pkill -x bspc
 
