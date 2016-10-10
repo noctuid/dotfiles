@@ -1,5 +1,8 @@
 #!/bin/bash
-# happy fun download time
+# TODO:
+# - rest and jq?
+# - sorted? or sort before piping into uniq
+# - automate comic downloads
 
 site=$1
 url=$2
@@ -11,30 +14,23 @@ takedir() {
 
 takedir ~/database/move
 
-# if [[ $site == fakku ]]; then
-	# mkdir -p fakku && cd fakku
-	# fakku.py (renamed without the .py or change below) in path: https://github.com/darkfeline/fakku_downloader
-	# it broke; using comic
-	# fakku $url &
-if [[ $site == gel ]]; then
-	# in aur https://code.google.com/p/danbooru-v7sh-grabber/
-	takedir gelbooru
-	tag=${url##*=}
-	danbooru-grabber -e gelbooru -dfn post:id_post:widthxpost:height -d "$tag"
-elif [[ $site == *chan ]]; then
+if [[ $site == *chan ]]; then
 	thread=$(curl "$url")
 	if [[ $site == 4chan ]]; then 
 		# downloads images, gifs, and webms in thread
 		# alternatively https://github.com/youurayy/4chan for features like watching
-		title=$(echo "$thread" | grep -o '<meta name="description" content="[^"]*' | sed -e "s/^.*content=\"//" -e "s/ -.*//")
+		title=$(echo "$thread" | grep -o '<meta name="description" content="[^"]*' | \
+			sed -e "s/^.*content=\"//" -e "s/ -.*//")
 		takedir 4chan/"${title//[\/ ]/_}"
-		echo "$thread" | grep -o '<a class="fileThumb" href="//i.4cdn.org/[^"]*' | sed "s%^.*href=\"%https:%" > tmp_urls
+		echo "$thread" | grep -o '<a class="fileThumb" href="//i.4cdn.org/[^"]*' | \
+			sed "s%^.*href=\"%https:%" > tmp_urls
 	else
 		title=$(echo "$thread" | grep -o '<title>[^<]*' | sed 's/^<title>//')
 		takedir 8chan/"${title//[\/ ]/_}"
 		# doesn't work on boards that don't have the media.8ch part
 		# haven't encountered any such boards that I would want to use
-		echo "$thread" | grep -oE '<a href="https://media.8ch.net/[[:lower:]]*/src/[^"]*' | sed "s/<a href=\"//" | uniq > tmp_urls
+		echo "$thread" | grep -oE '<a href="https://media.8ch.net/[[:lower:]]*/src/[^"]*' | \
+			sed "s/<a href=\"//" | uniq > tmp_urls
 	fi
 	aria2c -i tmp_urls
 	rm tmp_urls
