@@ -127,8 +127,9 @@ export PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D"
 #===============
 # 10 second wait then prompt if use rm with *
 setopt RM_STAR_WAIT
-# prompt if removing more than 3 files
-alias rm='rm -I'
+# prompt if removing more than 3 files; don't delete anything from ~/.config/safe-rm
+# trying to almost always use trash-cli instead of rm
+alias rm='safe-rm -I'
 
 # show nonzero exit codes
 setopt print_exit_value
