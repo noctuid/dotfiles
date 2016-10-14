@@ -27,9 +27,11 @@ super + Escape
 
 # brightness# {{{
 alt + e
-	light -As "acpi_video0" 10
+	xbacklight -inc 10
+	# light -A 10
 alt + n
-	light -Us "acpi_video0" 10
+	xbacklight -dec 10
+	# light -U 10
 
 # }}}
 
