@@ -16,7 +16,7 @@ xrdb -load ~/.Xresources
 
 # setup keyboard layout
 setxkbmap us -variant colemak
-xmodmap ~/.Xmodmap_wide
+xmodmap ~/.colemak-DH_custom
 xmodmap ~/.Xmodmap
 xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
 
