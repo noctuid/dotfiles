@@ -246,6 +246,7 @@ silent bmark -keyword full -title 'Search Full Fights' http://anime.fullfights.o
 silent bmark -keyword g -title 'Google' https://www.google.com/search?q=%s&ie=utf-8&oe=utf-8
 silent bmark -keyword gh -title 'Search Github' http://github.com/search?q=%s
 silent bmark -keyword hg -title 'Search with Hoogle' http://www.haskell.org/hoogle/?hoogle=%s
+silent bmark -keyword j -title 'Search with Jisho' http://jisho.org/search/%s
 silent bmark -keyword mal -title 'Search MAL' http://myanimelist.net/anime.php?q=%s
 silent bmark -keyword mmal -title 'Search MAL for manga' http://myanimelist.net/manga.php?q=%s
 silent bmark -keyword mus -title 'Search Albums' http://www.allmusic.com/search/all/%s
