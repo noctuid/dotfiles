@@ -1175,6 +1175,40 @@ function hdmiout() {
 		ponymix set-profile output:analog-stereo
 }
 
+
+# Thinkpad p50
+# alias discrete="sudo cp ~/dotfiles/20-nvidia.conf /etc/X11/xorg.conf.d/"
+# alias hybrid="sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf"
+# this requires discrete graphics enabled in bios
+# dpadd() {
+# 	xrandr --output DP-1 --auto --right-of DP-4 && \
+# 		bspc monitor DP-1 --reset-desktops X && \
+# 		setroot --restore
+# }
+# dpout() {
+# 	xrandr --output DP-1 --off && bspc monitor DP-1 -r
+# }
+
+# For hybrid graphics:
+# Option "UseDisplayDevice" "none" must be commented in
+# /etc/bumblebee/xorg.conf.nvidia
+# intel-virtual-output will only work if already plugged in!
+addvirth() {
+	intel-virtual-output
+	xrandr --output VIRTUAL2 --auto --right-of eDP1
+	bspc monitor VIRTUAL2 --reset-desktops X
+	setroot --restore
+}
+
+offvirth() {
+	xrandr --output VIRTUAL1 --off
+	bspc monitor VIRTUAL2 -r
+	pkill -x intel-virtual-o
+	# will kill extra X server and reset bbswitch (nvidia card now OFF)
+	# a more direct way to do this?
+	sudo systemctl restart bumblebeed
+}
+
 # vga
 function vgain() {
 	geometry=$(xwininfo -root | awk '/geometry/ {gsub("\\+.*",""); print $2}')
