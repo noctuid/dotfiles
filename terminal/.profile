@@ -67,6 +67,9 @@ if ! pidof devmon; then
 		--exec-on-drive "$notify $summary \"Volume %l has been mounted to %d.\"" \
 		--exec-on-unmount "$notify $summary \"Volume %l has been unmounted from %d.\"" &
 fi
+if ! pgrep emacs; then
+	emacs --daemon &
+fi
 
 # startx on login if tty1
 if [[ "$(tty)" == "/dev/tty1" ]]; then

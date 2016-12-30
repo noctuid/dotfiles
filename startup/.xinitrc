@@ -89,7 +89,6 @@ if [ "$(tty)" = "/dev/tty1" ]; then
 	# hotkeys
 	sxhkd &
 
-	emacs --daemon &
 	# start window manager
 	case $1 in
 		hlwm) exec herbstluftwm --locked;;
