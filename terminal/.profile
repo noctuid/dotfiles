@@ -34,6 +34,7 @@ $HOME/bin/mpv
 $HOME/bin/not_mine
 $HOME/bin/dunst
 $HOME/bin/bspwm
+$HOME/bin/optirun
 $HOME/.panel_scripts
 # for vimus
 $HOME/.cabal/bin

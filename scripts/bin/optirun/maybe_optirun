@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if systemctl status bumblebeed | grep running > /dev/null; then
+	optirun "$1" "${@:2}" || "$1" "${@:2}"
+else
+	"$1" "${@:2}"
+fi
