@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # reload panel and empty desktop checker
 
-# pkill -x panel (no longer works)
-ps x | awk '/panel/ {system("kill " $1)}'
-pkill -x lemonbar
+# (doesn't work with #!/usr/bin/env bash shebang)
+# pkill -x panel
+ps ax | awk '!/(awk|lemonbar|panel_bar)/ && /panel/ {system("kill " $1); exit}'
 pkill -x bspc
 
 # sxhkd dies when killing panel for some reason
