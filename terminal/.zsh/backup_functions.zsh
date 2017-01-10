@@ -231,6 +231,7 @@ sndot() {
 		 backup_rsync --exclude={"old/*","melpa/*","nixpkgs/*"} ~/src ~/ag-sys/backup
 		 backup_rsync ~/school/ ~/ag-sys/backup/current-school
 		 backup_rsync ~/Documents/Anki/ ~/ag-sys/backup/anki
+		 backup_rsync ~/.local/share/dolphin-emu/GC/MemoryCardA.USA.raw ~/ag-sys/backup/dolphin
 	 else
 		 return 1
 	 fi
