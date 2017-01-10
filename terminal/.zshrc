@@ -696,6 +696,9 @@ alias dolphin-emu='maybe_optirun dolphin-emu'
 #===============
 source ~/.zsh/backup_functions.zsh
 
+alias mountefi='sudo mount /dev/disk/by-label/SYSTEM /boot/efi'
+alias umountefi='sudo umount /dev/disk/by-label/SYSTEM'
+
 # }}}
 #===============
 # Startup and Shutdown {{{
