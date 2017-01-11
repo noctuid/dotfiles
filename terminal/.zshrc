@@ -685,13 +685,6 @@ alias showa='alias_value'
 alias countalias='alias | wc -l'
 
 #===============
-# optirun {{{
-#===============
-alias mpv='maybe_optirun mpv'
-alias dolphin-emu='maybe_optirun dolphin-emu'
-
-# }}}
-#===============
 # Backup & Mounting {{{
 #===============
 source ~/.zsh/backup_functions.zsh
