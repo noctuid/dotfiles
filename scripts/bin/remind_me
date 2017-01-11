@@ -5,7 +5,7 @@ export HISTFILE=~/.zsh_history
 export HISTSIZE=100000
 fc -R
 last_run() {
-	fc -lrn -t "%m%d" "$1" | tail -n 1 | awk '{print $1}'
+	fc -lrn -t "%m%d" "$1" 2> /dev/null | tail -n 1 | awk '{print $1}'
 }
 today=$(date +%m%d)
 
