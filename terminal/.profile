@@ -102,9 +102,6 @@ if [[ $(tty) == /dev/tty1 ]]; then
 	startx
 elif [[ $- == *i* ]]; then
 	# check if interactive
-	# change caps from backspace to escape
-	# TODO add actual keymap to correct location
-	# loadkeys ~/.vt_caps_esc
 	zsh
 fi
 

@@ -82,6 +82,7 @@ case $1 in
 			down) dir=south;;
 			up) dir=north;;
 			right) dir=east;;
+			*) dir="$2"
 		esac
 		bspc node -s "$dir"
 		;;

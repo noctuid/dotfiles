@@ -64,6 +64,13 @@
     - group: root
     - mode: 644
 
+/usr/lib/systemd/system-sleep/wakeup:
+  file.managed:
+    - source: salt://usr/lib/systemd/system-sleep/wakeup
+    - user: root
+    - group: root
+    - mode: 644
+
 # slimlock service
 /etc/systemd/system/slimlock@.service:
   file.managed:

@@ -27,7 +27,7 @@ fi
 
 # set up home row navigation keybindings on empty desktops
 bspc subscribe desktop_focus monitor_focus node_manage \
-	node_unmanage | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
+	 node_unmanage node_transfer | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
 
 # change border color depending on layout
 # previous_focused=$(bspc config focused_border_color)

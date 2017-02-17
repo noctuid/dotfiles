@@ -14,11 +14,8 @@ fi
 #==============================
 xrdb -load ~/.Xresources
 
-# setup keyboard layout
-setxkbmap us -variant colemak
-xmodmap ~/.colemak-DH_custom
-xmodmap ~/.Xmodmap
-xcape -e 'Mode_switch=Escape;Alt_L=Return;Hyper_R=cedilla' &
+# setup keyboard layout (~/bin/rldkbd)
+rldkbd
 
 # restore background image/settings
 if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/setroot/.setroot-restore" ]; then

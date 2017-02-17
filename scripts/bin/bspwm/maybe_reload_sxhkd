@@ -1,8 +1,11 @@
 #!/bin/bash
 # switch bindings when changing from empty to occupied desktop and vice versa
 
-previously_empty=$(< /tmp/bspwm-last-desktop-empty)
+# since using mouse buttons as modifiers; see .sxhkdrc
+xdotool keyup control shift alt super
 
+touch /tmp/bspwm-last-desktop-empty
+previously_empty=$(< /tmp/bspwm-last-desktop-empty)
 # helps when rapid close then open (e.g. tdrop's auto_hide):
 sleep 0.2
 

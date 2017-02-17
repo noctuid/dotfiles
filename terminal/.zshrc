@@ -854,16 +854,6 @@ alias rldconky='conky_switcher'
 # battery saving; kill panel, conky, and compton
 alias nopanel='rldbspc nopanel'
 
-# keyboard stuff
-alias rldxmd='xmodmap ~/.Xmodmap'
-# set caps to escape on tap if have to kill xcape
-alias rldxcape='pkill -x xcape ; xcape -e "Mode_switch=Escape;Alt_L=Return;Shift_L=Return;ISO_Level3_Shift=cedilla"'
-# necessary because when plug in keyboard, it goes to qwerty
-alias rldkbd='setxkbmap us -variant colemak && xmodmap ~/.colemak-DH_custom && xmodmap ~/.Xmodmap && rldxcape'
-alias rldjcape='pkill -x xcape ; xcape -e "Alt_L=Escape;Shift_L=Return;Mode_switch=Escape;Hyper_R=cedilla"'
-# when using japanese keyboard with double wide mod and extra thumbkeys
-alias rldjp='xmodmap ~/.Xmodmapjp && rldjcape'
-
 # manually reload udev rules
 alias -g rldudev='udevadm control --reload-rules'
 

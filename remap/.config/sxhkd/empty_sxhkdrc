@@ -1,112 +1,225 @@
-# reload normal config (if other bspc subcribes break)
-super + Escape
-    pkill sxhkd && sxhkd
+# TODO ask for way to source another file, multiple configs
+# alternatively use salt
 
+# * Single-key Hotkeys
 # desktop switching
 {a,r,s,t,d,h,n,e,i,o}
-    bspc desktop -f ^{1-9,10}
-
-super + {_,shift + }{1-9,0}
-    bspc {desktop -f,window -d} ^{1-9,10}
+	wm_action dsel {1-9,10}
 
 # launcher
 space
 	dmenu_run -fn 'Droid Sans Mono-10'
 
-Return
-	synapse
-	
-super + u
-	urxvt
-
 u
 	urxvt -e "/bin/zsh"
 
 l
-	bspc desktop -f last
+	wm_action dsel last
 
-# dmenu stuff
+# focus only of course
+s
+	tdrop -a -w 1362 -y 14 -s dropdown termite
 
-# program opening (2 keys so less likely to accidentally open; will test single keys later)
 semicolon ; f
-	firefox
+	firejail --seccomp firefox
 
-semicolon ; a
-	apvlv
-
-# start a new graphical client; -a "" will create a new emacs daemon if one isn't running
-# -c will create a new frame
 semicolon ; e
+	emacsclient -c -a ""
+
+v
 	emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
 
-semicolon ; E
-	emacsclient -c -a "" -e "(lit/o-session-setup)"
+# * Reloading
+# reload wm config or quit
+super + control + {_,shift + }Escape
+	wm_action {reload,quit}
 
-semicolon ; {g,v}
-	{gvim,gvim}
+# reload keyboad layout (if screw it up and can't type)
+F11
+	rldkbd
 
-#
-# keep bindings# {{{
-# Dropdown Terms# {{{
-super + r
-	guake -t
+# make sxhkd reload its configuration files:
+{shift + control + alt + period, super + escape}
+	pkill -USR1 -x sxhkd
 
-alt + r
-	guake -t
+# * General Global Hotkeys
+# Actually one key bound to Shift+Control+Alt
+# Would use hyper if could get working a mod# instead of Num_Lock but can't
+# ** Brightness
+shift + control + alt  + e
+	xbacklight -inc 10
+	# light -A 10
 
-alt + s
-	tdrop -p bspwm -w 1362 -y 14 -s dropdown termite
+shift + control + alt  + n
+	xbacklight -dec 10
+	# light -U 10
 
-alt + t
-	tdrop -p bspwm -w 1362 -h 750 -y 14 urxvt
-
-super + s
-	tdrop -p bspwm -w 1362 -y 14 xterm
-
-F1
-	tdrop -p bspwm -w 1362 -y 14 terminology
-
-# }}}
-
-# brightness# {{{
-alt + e
-	light -As "acpi_video0" 10
-alt + n
-	light -Us "acpi_video0" 10
-# }}}
-
-# volume/music # {{{
-alt + i
+# ** Volume
+shift + control + alt  + i
 	amixer -qD pulse sset Master 5%+
-alt + h
+
+shift + control + alt  + h
 	amixer -qD pulse sset Master 5%-
+
 # mute
-alt + m
+shift + control + alt  + m
 	amixer -qD pulse sset Master toggle
+
 # play/pause
-alt + o
+shift + control + alt  + o
 	mpc toggle
-# previous song
-alt + u
+
+# next/prev
+shift + control + alt  + u
 	mpc prev
-# next song
-alt + y
+
+shift + control + alt  + y
 	mpc next
 
-# }}}
-
-# Screenshots {{{
-# fullscreen screen shot; lowered quality
-# add xtitle to name
+# ** Screenshots
 Print
 	screenshot
 	# ~/bin/screenshot
 
-alt + p
+shift + control + alt  + p
 	screenshot select
 
-alt + w
+shift + control + alt  + w
 	screenshot current_window
 
-# }}}
-# }}}
+# shift + control + alt + v
+# 	mkdir ~/move/srec && cd ~/move/srec && srec -s
+
+# ** Program hotkeys
+shift + control + alt + t
+	termite
+
+shift + control + alt  + f
+	firejail --seccomp firefox
+
+shift + control + alt  + space
+	bemenu-run -p "run: " --fn "Fira Mono 8"
+
+shift + control + alt  + v
+	emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
+
+# ** Clicks
+# TODO clicks don't work when modifier held
+shift + control + alt  + k
+	click middle
+	# ~/bin/click
+
+# regain focus from flash
+shift + control + alt  + a
+	click left
+
+# ** Dropdowns
+shift + control + alt  + s
+	my_tdrop -ma -w -4 -y "$PANEL_HEIGHT" -s dropdown termite
+
+# * Window Management
+# ** General
+# close
+super + w
+	wm_action wclose
+
+# kill
+super + W
+	wm_action wkill
+
+# cycle layout (monocle)
+super + m
+	wm_action lsel next
+
+# toggle states
+super + {f,v}
+	wm_action wtoggle {fullscreen,floating}
+
+# ** Selection and Movement
+# selection/movement by direction
+super + {_,shift +}{u,k,o,y}
+	wm_action {wsel,wmove} {left,down,up,right}
+
+# switch to last window
+super + l
+	wm_action dsel last
+
+# move selected window to biggest space
+super + g
+	wm_action wmove biggest.local
+
+# switch with last window (across desktops)
+super + apostrophe
+	wm_action wmove last
+
+# TODO I don't know why this isn't working
+# navigate to biggest floating window
+super + F
+	wm_action wsel biggest.local.floating
+
+super + b
+	wm_action dbalance
+
+# ** Desktop Movement
+# change to desktop or move selected window to desktop
+super + {_,shift +} {a,r,s,t,d,h,n,e,i,o}
+	wm_action {dsel,wmove_tod} {1-9,10}
+
+# ** Resizing
+# on navigation layer
+# these can be thought of as moving the split between a window
+super + {Left,Down,Up,Right}
+	wm_action wresize {left,down,up,right}
+
+# moving floating windows
+# super + {Left,Down,Up,Right}
+# 	bspc node -v {-20 0,0 20,0 -20,20 0}
+
+# ** Preselection (never use)
+# direction to split
+super + p ; {h,n,e,i}
+	wm_action psel {west,south,north,east}
+
+super + p ; {_,shift + }space
+	wm_action psel {cancel,canceld}
+super + p ; {_,shift + }q
+	wm_action psel {cancel,canceld}
+
+# set presl splitting ratio of current window
+# super + ctrl + {1-9}
+# 	wm_action splitr 0.{1-9}
+
+# ** Adjustment
+super + minus
+	wm_action gapc +4
+
+super + equal
+	wm_action gapc -4
+
+# ** Misc
+# lock
+super + L
+	slimlock
+
+# hide all windows
+KP_Add
+	wm_action hide_all
+
+# * Mouse
+button9
+	wm_action hide_all
+
+# ** Modifiers
+# can't be used with dual-role
+# http://www.linuxforums.org/forum/hardware-peripherals/169773-solved-map-mouse-button-modifier-key.html
+{_,shift +, control +, alt +}{_,shift +, control +, alt +}{_,shift +, control +, alt +} button50
+	xdotool keydown shift control alt
+
+{_,shift +, control +, alt +}{_,shift +, control +, alt +}{_,shift +, control +, alt +} @button50
+	xdotool keyup shift control alt
+
+{_,super +, super + shift + } button51
+	xdotool keydown super
+
+{_,super +, super + shift + } @button51
+	xdotool keyup super
