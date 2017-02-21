@@ -29,13 +29,13 @@
         // - hyper and super (global keybindings with hotkey daemon)
         // - shift and altgr (provide new symbols; potentially used with other
         //   modifiers)
-        // - control, alt, and extend (in-program actions)
+        // - control and alt; extend (in-program actions)
         // Positioning is good for combinations-
         // - Shift and Control across from Super, AltGr, and Alt
         // - Shift next to Extend and Hyper (not really needed for; not too many
         //   actions on these layers; they can be combined with Alt if necessary)
         // - Shift next to control (emacs doesn't support using them together)
-        // Worst position (CapsLock) goes to least used modifier: Control
+        // Worst position goes to least used modifier: Control
         // - Not too many in-program actions using modifiers are needed (only
         //   used for one-off actions that would be less efficient with
         //   modality)
@@ -43,16 +43,30 @@
         // - Alt is favored for in-program actions over control mainly because
         //   emacs can't distinguish between control + letter and control +
         //   shift + letter for historical reasons (which is braindead)
+        // - Doesn't matter when using nice keyboard (more/better thumbkeys)
         // Takes into account neutral vs. right-hand oriented modifiers (only
         // having a modifier on one side of the keyboard is not nearly as big a
         // huge deal for thumbkeys, especially not on external keyboard)-
         // - Extend/Hyper on left hand; mostly used with keys on right side
         //   (especially Extend)
 
+        // Notes on worst position and future improvements:
+        // - Caps is the only pinky modifier, and Super/Win is the thumb
+        //   modifier that requires the most inward movement of the thumb (with
+        //   a wide mod)
+        // - By dual-roling colemak s as extend, caps is eliminated as a
+        //   modifier; it makes sense to put extend on the left home row since
+        //   it isn't really used with left hand keys
+        // - By dual-roling space as shift, shift can be used with modifiers on
+        //   either side (laptop keyboard only; may put shift on both sides on
+        //   ergonomic keyboard); other left modifier moves to shift's old
+        //   position, eliminating the worst thumbkey; may want to swap alt and
+        //   control, putting alt in its original position (which is better);
+
         // dual-role: BackSpace
-        [ "CapsLock", "Control" ],
+        [ "CapsLock", "Extend" ],
         // dual-role: (
-        [ "Win_L", "Extend" ],
+        [ "Win_L", "Control" ],
         // TODO backup super; not supported by XKB? make an issue asking about
         // [ "Control_L", "Win" ],
         // backup caps
@@ -87,9 +101,9 @@
         { "pos": "R", "letters": [ "p", "P" ] },
         { "pos": "T", "letters": [ "b", "B" ] },
         { "pos": "Y", "letters": [ "j", "J" ] },
-        { "pos": "U", "letters": [ "l", "L", "-", "_", "Home" ] },
-        { "pos": "I", "letters": [ "u", "U", "=", "+", "End" ] },
-        { "pos": "O", "letters": [ "y", "Y" ] },
+        { "pos": "U", "letters": [ "l", "L" ] },
+        { "pos": "I", "letters": [ "u", "U", "-", "_", "Home" ] },
+        { "pos": "O", "letters": [ "y", "Y", "=", "+", "End" ] },
         { "pos": "P", "letters": [ ";", ":" ] },
         { "pos": "[", "letters": [ "[", "]" ] },
         { "pos": "]", "letters": [ "{", "}" ] },

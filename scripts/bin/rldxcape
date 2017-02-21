@@ -2,4 +2,4 @@
 # to prevent the need to change in multiple places (~/.zshrc and ~/.xinitrc)
 pkill -x xcape
 # still deciding on
-xcape -e "Control_L=BackSpace;ISO_Level5_Shift=parenleft;Shift_L=Return;ISO_Level3_Shift=Escape;Alt_L=parenleft"
+xcape -e "ISO_Level5_Shift=BackSpace;Control_L=parenleft;Shift_L=Return;ISO_Level3_Shift=Escape;Alt_L=parenleft"
