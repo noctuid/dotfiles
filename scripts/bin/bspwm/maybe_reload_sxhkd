@@ -1,9 +1,6 @@
 #!/bin/bash
 # switch bindings when changing from empty to occupied desktop and vice versa
 
-# since using mouse buttons as modifiers; see .sxhkdrc
-xdotool keyup control shift alt super
-
 touch /tmp/bspwm-last-desktop-empty
 previously_empty=$(< /tmp/bspwm-last-desktop-empty)
 # helps when rapid close then open (e.g. tdrop's auto_hide):
@@ -19,6 +16,8 @@ echo "$empty" > /tmp/bspwm-last-desktop-empty
 
 if [[ -n $previously_empty ]] && [[ $previously_empty != "$empty" ]]; then
 	pkill -x sxhkd
+	# since using mouse buttons as modifiers; see .sxhkdrc
+	xdotool keyup control shift alt super
 	if $empty; then
 		sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &> /dev/null &
 	else

@@ -12,7 +12,7 @@ F11
 	rldkbd
 
 # make sxhkd reload its configuration files:
-{shift + control + alt + period, super + escape}
+{shift + control + alt + period, super + period}
 	pkill -USR1 -x sxhkd
 
 # * General Global Hotkeys
