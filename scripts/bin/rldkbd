@@ -12,7 +12,4 @@ fi
 
 ~/dotfiles/remap/xkb/run-session.sh -m Wide
 
-# KP_0; backup super for now
-xmodmap -e "keycode 90 = Super_L"
-
 rldxcape

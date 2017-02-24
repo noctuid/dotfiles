@@ -67,8 +67,8 @@
         [ "CapsLock", "Extend" ],
         // dual-role: (
         [ "Win_L", "Control" ],
-        // TODO backup super; not supported by XKB? make an issue asking about
-        // [ "Control_L", "Win" ],
+        // backup win
+        [ "Control_L", "Win" ],
         // backup caps
         [ "KP_Min", "CapsLock" ],
         // dual-role: Return
