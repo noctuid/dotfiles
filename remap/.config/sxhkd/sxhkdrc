@@ -110,7 +110,7 @@ super + {f,v}
 
 # ** Selection and Movement
 # selection/movement by direction
-super + {_,shift +}{u,k,o,y}
+super + {_,shift +}{k,u,y,semicolon}
 	wm_action {wsel,wmove} {left,down,up,right}
 
 # switch to last window

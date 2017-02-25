@@ -25,6 +25,10 @@ win_action() {
 # Different Wm/Environment Functions
 #
 
+bspc_state_tiled() {
+	bspc query -d focused -T | jq .layout | grep -q "tiled"
+}
+
 bspc_action() {
 case $1 in
 	dsel)
@@ -49,27 +53,26 @@ case $1 in
 		;;
 	wsel)
 		if [[ $2 ==  left ]] || [[ $2 == down ]]; then
-			if bspc wm --get-status | grep -q "LT"; then
-				# if not monocle, down will go down or left if no windows below
+			if bspc_state_tiled; then
 				if [[ $2 == down ]]; then
-					bspc node -f south || bspc node -f west # || bspc desktop -f prev.local
-				# if not monocle, down will go left or to previous desktop if no windows left
+					# "cw"
+					bspc node -f south || bspc node -f next.local
 				else
-					bspc node -f west # || bspc desktop -f prev.local
-				fi
-			# so can change windows w/ same keys even in monocle (e.g. like a tabbed layout)
-			else
-				bspc node -f prev.local
-			fi
-		elif [[ $2 == up ]] || [[ $2 == right ]]; then
-			if bspc wm --get-status | grep -q "LT"; then
-				if [[ $2 == up ]]; then
-					bspc node -f north || bspc node -f east # || bspc desktop -f next.local
-				else
-					bspc node -f east # || bspc desktop -f next.local
+					bspc node -f west
 				fi
 			else
 				bspc node -f next.local
+			fi
+		elif [[ $2 == up ]] || [[ $2 == right ]]; then
+			if bspc_state_tiled; then
+				if [[ $2 == up ]]; then
+					# "ccw"
+					bspc node -f north || bspc node -f prev.local
+				else
+					bspc node -f east
+				fi
+			else
+				bspc node -f prev.local
 			fi
 		else
 			bspc node -f "$2"
