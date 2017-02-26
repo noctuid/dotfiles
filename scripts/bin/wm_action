@@ -32,7 +32,7 @@ bspc_state_tiled() {
 bspc_action() {
 case $1 in
 	dsel)
-		if [[ $2 =~ ^[0-9]$ ]]; then
+		if [[ $2 =~ ^[0-9]+$ ]]; then
 			bspc desktop -f ^"$2"
 		else
 			bspc desktop -f "$2"
