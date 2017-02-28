@@ -69,7 +69,7 @@
     - source: salt://usr/lib/systemd/system-sleep/wakeup
     - user: root
     - group: root
-    - mode: 644
+    - mode: 755
 
 # slimlock service
 /etc/systemd/system/slimlock@.service:
