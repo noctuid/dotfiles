@@ -101,7 +101,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | DE                      | none                                           |
 | window manager          | bspwm                                          |
 | hotkey daemon           | sxhkd and xchainkeys                           |
-| remapping               | xmodmap (meh; stuck with it)                   |
+| remapping               | klfc (to generate mainly XKB configs)          |
 | screen locker           | slimlock                                       |
 | text editor             | emacs and vim                                  |
 | shell                   | zsh (fish is fine too; eshell occasionally)    |
@@ -205,7 +205,7 @@ I mentioned my reasons for liking pdf-tools above. Zathura is also a nice vim-li
 - Cleaning up older bash scripts
 - Testing post-install scripts
 - Patiently waiting for my keyboardio so I can experiment with multiple persistent key layers, dual-role letter keys, and keyboard macros using tmk firmware
-- Hoping xmodmap dies and we can get better remapping software with smartly implemented dual-role capability on linux; especially with the standard keyboard, this is important for eliminating pinky modifiers (shift hurts my pinky; I often have to use other fingers to press it when typing for extended periods of time, and my hand still ends up hurting)
+- A smart dual-role program (waiting on a bug in a library to be fixed)
 
 * Cool Things I Stole
 ** Use Shell Functions in Ranger
@@ -403,4 +403,4 @@ Some general stuff:
 
 Credit to vaskozl for [[http://forum.colemak.com/viewtopic.php?id=1731&p=1][his thread]] on not using the mouse, which is one of the main reasons I ever took interest in any of this. Credit to DreymaR and lalop for inspiration on layout stuff after I switched to colemak and to bunnfly for the colemak vim config (all from the colemak forum).
 
-Thanks to baskerville/bloom for bspwm and sxhkd. Thanks to kana, Shougo, tpope, junegunn, dhruvasagar, rhysd, etc. for all their awesome vim plugins. Thanks to abo-abo for his awesome emacs packages. Thanks to tuhdo for his great guide on emacs and helm. Thanks to codestation for qcma. Thanks to sol, haasn, etc. for vimus. Thanks to ttzhou for setroot. Thanks to phillipberndt for pqiv.
+Thanks to baskerville/bloom for bspwm and sxhkd. Thanks to kana, Shougo, tpope, junegunn, dhruvasagar, rhysd, etc. for all their awesome vim plugins. Thanks to abo-abo for his awesome emacs packages. Thanks to tuhdo for his great guide on emacs and helm. Thanks to codestation for qcma. Thanks to sol, haasn, etc. for vimus. Thanks to ttzhou for setroot, which solved the problems I'd had with every other wallpaper setter. Thanks to phillipberndt for pqiv, which is a joy to use/configure, especially compared to sxiv. Finding it was like finding a hidden gem. Thanks to 39aldo39 for klfc, which provides a flexible, universal, and understandable format for specifying keyboard layouts; now I never have to use xmodmap again.
