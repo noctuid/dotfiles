@@ -1,4 +1,78 @@
-* Pdf Tools
+* Packages
+** Company Mode
+Consider trying https://github.com/company-mode/company-statistics
+#+begin_src emacs-lisp
+(defun trishume:company-backend-with-yas (backend)
+  "Add :with company-yasnippet to company BACKEND.
+Taken from https://github.com/syl20bnr/spacemacs/pull/179."
+  (if (and (listp backend) (member 'company-yasnippet backend))
+      backend
+    (append (if (consp backend)
+                backend
+              (list backend))
+            '(:with company-yasnippet))))
+
+(defun dgutov:company-preview-if-explicit-action-frontend (command)
+  "Show completions in buffer as cycle through menu.
+https://github.com/company-mode/company-mode/issues/216#issuecomment-69871034"
+  (when (or (not (eq command 'post-command))
+            (and
+             (company-explicit-action-p)
+             company-common
+             (or (eq (company-call-backend 'ignore-case) 'keep-prefix)
+                 (string-prefix-p company-prefix company-common))))
+    (company-preview-frontend command)))
+
+(use-package company
+  :ensure t
+  :defer 3
+  :diminish ""
+  :config
+  (setq company-backends
+        (mapcar #'trishume:company-backend-with-yas company-backends))
+  (global-company-mode))
+
+;; setting idle delay too low can cause a lot of lag depending on the backend
+(setq company-idle-delay 0.15
+      company-tooltip-limit 15
+      company-minimum-prefix-length 2
+      ;; automatically complete after entering menu
+      company-auto-complete #'company-explicit-action-p
+      company-auto-complete-chars " )."
+      company-show-numbers nil
+      ;; company-tooltip-align-annotations t
+      company-frontends
+      (list #'company-pseudo-tooltip-unless-just-one-frontend
+            ;; #'company-echo-metadata-frontend
+            #'dgutov:company-preview-if-explicit-action-frontend))
+
+(defvar noct:company-complete-then-cycle
+  (general-predicate-dispatch #'company-manual-begin
+    (company-explicit-action-p) #'company-complete-common-or-cycle)
+  "Menu-item used to first explicitly enter company menu and then cycle.")
+
+(general-emacs-define-key company-active-map
+  "C-h" nil
+  "C-w" nil
+  "<tab>" noct:company-complete-then-cycle
+  "TAB" noct:company-complete-then-cycle)
+
+(general-emacs-define-key company-active-map
+  :predicate '(company-explicit-action-p)
+  "<return>" #'company-complete-selection
+  "RET" #'company-complete-selection
+  "<up>" #'company-select-previous-or-abort
+  "<down>" #'company-select-next-or-abort)
+
+(use-package company-quickhelp
+  :ensure t
+  :defer t
+  :init
+  (add-hook 'company-mode-hook #'company-quickhelp-mode))
+#+end_src
+
+* Applications
+** Pdf Tools
 #+begin_src emacs-lisp
 (use-package pdf-tools
   :ensure t
@@ -55,8 +129,8 @@
   "j" 'pdf-outline-move-to-page
   (kbd "RET") 'pdf-outline-toggle-subtree)
 #+end_src
-* Elfeed
-** feeds and settings
+** Elfeed
+*** Feeds and Settings
 #+begin_src emacs-lisp
 (setq elfeed-feeds
       '(("http://nullprogram.com/feed/" emacs)
@@ -67,7 +141,7 @@
 
 (setq-default elfeed-search-filter "@3-weeks-ago +unread ")
 #+end_src
-** mappings
+*** Mappings
 Because it's just a buffer, I get some vim bindings for free (e.g. gg and G) and keep my evil remaps (e.g. for helm-swoop).
 #+begin_src emacs-lisp
 ;; mappings for entry list
