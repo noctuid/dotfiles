@@ -93,9 +93,6 @@ if ! pgrep devmon > /dev/null; then
 		   --exec-on-unmount "$notify $summary \"Volume %l has been unmounted from %d.\"" &
 fi
 emacsclient -e 0 &> /dev/null &
-if ! tmux has-session -t dropdown 2> /dev/null; then
-	tmux new-session -s dropdown -d
-fi
 
 # startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then

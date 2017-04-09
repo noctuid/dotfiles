@@ -57,6 +57,10 @@ conky &
 # redshift; better options at this point than xflux
 redshift -c ~/.config/redshift.conf &
 
+if ! tmux has-session -t dropdown 2> /dev/null; then
+	tmux new-session -s dropdown -d
+fi
+
 # }}}
 #==============================
 # TTY Specific {{{
