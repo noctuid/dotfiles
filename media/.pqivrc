@@ -1,0 +1,145 @@
+# * Options
+[options]
+# initially hide info display
+# pqiv also sets the title, so I just look at the information in my panel
+hide-info-box=true
+slideshow-interval=2
+end-of-files-action=wrap-no-reshuffle
+# not using caching (but only 128 and 256 can be cached)
+thumbnail-size=256x256
+
+# already defaults:
+scale-images-up=true
+fade=false
+transparent-background=false
+
+# * Startup Actions
+[actions]
+# hide cursor after 1 second inactivtity
+set_cursor_auto_hide(1)
+# keep user set zoom when switching images
+toggle_scale_mode(4)
+
+# * Keybindings
+[keybindings]
+# defaults:
+# q quit
+# f toggle full screen
+# r reload
+# m toggle montage mode
+
+# ** Toggle
+# <space> { toggle_slideshow(); }
+s { toggle_scale_mode(); }
+# t { toggle_scale_mode(4); }
+b { toggle_info_box(); }
+
+# ** Navigation/ Scrolling
+# file
+g { goto_file_byindex(0); }
+G { goto_file_byindex(-1); }
+l { goto_earlier_file(); }
+h { goto_file_relative(-1); }
+i { goto_file_relative(1); }
+k { goto_file_relative(-10); }
+o { goto_file_relative(10); }
+
+# scrolling
+# TODO percentage shifts
+H { shift_x(-20); }
+n { shift_y(-50); }
+e { shift_y(50); }
+I { shift_x(20); }
+
+@MONTAGE {
+	g { montage_mode_return_cancel(); goto_file_byindex(0); montage_mode_enter(); }
+	G { montage_mode_return_cancel(); goto_file_byindex(-1); montage_mode_enter(); }
+	h { montage_mode_shift_x(-1); }
+	n { montage_mode_shift_y(1); }
+	e { montage_mode_shift_y(-1); }
+	i { montage_mode_shift_x(1); }
+	k { montage_mode_shift_y_pg(1); }
+	o { montage_mode_shift_y_pg(-1); }
+}
+
+# ** Zooming
+u { set_scale_level_relative(0.8); }
+y { set_scale_level_relative(1.2); }
+<equal> { set_scale_level_absolute(1); }
+# found it's not really necessary to change; auto works well
+z { set_interpolation_quality(0); }
+
+# changing thumbnail size
+@MONTAGE {
+	u { send_keys(:t192); }
+	y { send_keys(:t320); }
+	:t128 {
+		set_thumbnail_size(128, 128);
+		bind_key(@MONTAGE { u { send_keys(:t384\); }});
+		bind_key(@MONTAGE { y { send_keys(:t192\); }});
+	}
+	:t192 {
+		set_thumbnail_size(192, 192);
+		bind_key(@MONTAGE { u { send_keys(:t128\); }});
+		bind_key(@MONTAGE { y { send_keys(:t256\); }});
+	}
+	:t256 {
+		set_thumbnail_size(256, 256);
+		bind_key(@MONTAGE { u { send_keys(:t192\); }});
+		bind_key(@MONTAGE { y { send_keys(:t320\); }});
+	}
+	:t320 {
+		set_thumbnail_size(320, 320);
+		bind_key(@MONTAGE { u { send_keys(:t256\); }});
+		bind_key(@MONTAGE { y { send_keys(:t384\); }});
+	}
+	:t384 {
+		set_thumbnail_size(384, 384);
+		bind_key(@MONTAGE { u { send_keys(:t320\); }});
+		bind_key(@MONTAGE { y { send_keys(:t128\); }});
+	}
+	# :t512 {
+	# 	set_thumbnail_size(512, 512);
+	# 	bind_key(@MONTAGE { u { send_keys(:t384\); }});
+	# 	bind_key(@MONTAGE { y { send_keys(:t128\); }});
+	# }
+}
+
+# ** Rotating/ Alignment
+w { flip_horizontally(); }
+v { flip_vertically(); }
+a { rotate_left(); }
+d { rotate_right(); }
+
+# comic keybindings
+<space> { send_keys(:comic_on); }
+:comic_on {
+	set_scale_level_absolute(1);
+	send_keys(:cycleCN);
+	bind_key(<space> { send_keys(:comic_off\); });
+}
+:comic_off {
+	toggle_scale_mode(4);
+	bind_key(h { goto_file_relative(-1\); });
+	bind_key(i { goto_file_relative(1\); });
+	bind_key(<space> { send_keys(:comic_on\); });
+}
+:cycleCN {
+	set_shift_align_corner(CN);
+	bind_key(h { goto_file_relative(-1\); send_keys(:cycleCS\); });
+	bind_key(i { send_keys(:cycleCS\); });
+}
+:cycleCS {
+	set_shift_align_corner(CS);
+	bind_key(h { send_keys(:cycleCN\); });
+	bind_key(i { goto_file_relative(1\); send_keys(:cycleCN\); });
+}
+
+# ** Filters
+cg { command(|convert - -colorspace Gray -); }
+cn { command(|convert - -negate -); }
+
+# ** Animation
+, { animation_set_speed_relative(0.9); }
+. { animation_set_speed_relative(1.1); }
+# TODO keys for pausing and stepping
