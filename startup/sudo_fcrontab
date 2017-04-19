@@ -1,0 +1,4 @@
+# check disk health every day as soon as computer is on
+# send an email if checks don't pass
+%daily,erroronlymail,mailto(me) * * smartctl -a /dev/sda
+%daily,erroronlymail,mailto(me) * * smartctl -a /dev/sdb
