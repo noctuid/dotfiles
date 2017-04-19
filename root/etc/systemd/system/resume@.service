@@ -1,0 +1,13 @@
+[Unit]
+Description=User resume actions
+After=suspend.target
+
+[Service]
+User=%I
+Type=simple
+Environment=DISPLAY=:0
+# Fix button mapping after sleeping
+ExecStart=/usr/bin/env xinput --set-button-map "TPPS/2 IBM TrackPoint" 50 1 51
+
+[Install]
+WantedBy=suspend.target

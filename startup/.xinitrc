@@ -34,8 +34,6 @@ xset r rate 300 35
 xset -b
 # energy star features on
 xset +dpms
-# standby suspend and off; no difference for lcds apparently; blank screen after 5 minutes of inactivity
-xset dpms 0 0 300
 
 # disable system mouse acceleration
 xset mouse 0 0

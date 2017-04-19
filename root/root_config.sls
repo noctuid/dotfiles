@@ -49,6 +49,21 @@
     - group: root
     - mode: 644
 
+# efi partition needs to be mounted
+/boot/efi/EFI/refind/refind.conf:
+  file.managed:
+    - source: salt://boot/efi/EFI/refind/refind.conf
+    - user: root
+    - group: root
+    - mode: 644
+
+/etc/X11/xorg.conf.d/my-xorg.conf:
+  file.managed:
+    - source: salt://etc/X11/xorg.conf.d/my-xorg.conf
+    - user: root
+    - group: root
+    - mode: 644
+
 # /etc/modules-load.d/overlay.conf:
 #   file.managed:
 #     - source: salt://etc/modules-load.d/overlay.conf
@@ -64,12 +79,12 @@
     - group: root
     - mode: 644
 
-/usr/lib/systemd/system-sleep/wakeup:
+/usr/lib/systemd/system/resume@.service:
   file.managed:
-    - source: salt://usr/lib/systemd/system-sleep/wakeup
+    - source: salt://usr/lib/systemd/system/resume@.service
     - user: root
     - group: root
-    - mode: 755
+    - mode: 644
 
 # slimlock service
 /etc/systemd/system/slimlock@.service:

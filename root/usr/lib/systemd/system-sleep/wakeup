@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-if [[ $1 == post ]] && [[ $2 == suspend ]]; then
-	# see ~/bin/rldkbd
-	# sometimes buttons get reset after waking up from sleep
-	xinput --set-button-map "TPPS/2 IBM TrackPoint" 50 1 51
-fi

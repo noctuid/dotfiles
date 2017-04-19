@@ -5,13 +5,13 @@ netctl:
 
 NetworkManager:
   service.running:
-    - enable: True
+    - enable: False
     # - watch:
-    #     - file: /etc/NetworkManager/NetworkManager.conf 
+    #     - file: /etc/NetworkManager/NetworkManager.conf
 
-# connman:
-#   service.running:
-#     - enable: True
+connman:
+  service.running:
+    - enable: True
 
 ntpd:
   service.running:
@@ -44,6 +44,10 @@ slimlock@noctuid:
   service.running:
     - enable: True
 
+resume@noctuid:
+  service.running:
+    - enable: True
+
 # printing
 org.cups.cupsd:
   service.running:
@@ -53,7 +57,15 @@ preload:
   service.running:
     - enable: True
 
+# psd:
+#   service.running:
+#     - enable: True
+
 # using with hostsblock
 kwakd:
+  service.running:
+    - enable: True
+
+systemd-modules-load:
   service.running:
     - enable: True
