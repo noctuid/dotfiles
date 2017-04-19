@@ -1,12 +1,22 @@
 # fcron sends mail with sendmail (I'm using msmtp-mta)
 # mailto can be set to the email address directly
 # I have "me" specified in my msmtp alias file
+
 DISPLAY=:0
+
+!mail(false),mailto(me),erroronlymail
+
 # run every 3 minutes of uptime (fcron active time)
-@mail(no) 3 ~/bin/xrun ~/bin/system_check
-# run every 2 hours of uptime
-@mail(no) 2h ~/bin/xrun ~/bin/remind_me
+@ 3 ~/bin/xrun ~/bin/system_check
+
+# run every day of uptime
+@mail 1d ~/bin/xrun ~/bin/remind_me
+
 # empty trash every 2 weeks of uptime
-@mail(no) 2w /usr/bin/env trash-empty
+@ 2w /usr/bin/env trash-empty
+
 # run once a month as soon as computer is on between 8 and 12
-%monthly,erroronlymail,mailto(me) * 20-23 * ~/bin/net/ep_backup.sh
+%monthly,mail * 20-23 * ~/bin/net/ep_backup.sh
+
+# only in 3.3.0
+# @runatresume ~/bin/xrun xinput --set-button-map "TPPS/2 IBM TrackPoint" 50 1 51

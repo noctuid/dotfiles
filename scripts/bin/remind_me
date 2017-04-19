@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 # run every two hours
 # last backup check; see ~/.zsh/backup_functions
 export HISTFILE=~/.zsh_history
@@ -11,20 +11,24 @@ today=$(date +%m%d)
 
 b_backup=$(last_run bahamut)
 if [[ $((today-b_backup)) -gt 3 ]];then
-	notify-send "No soma backup in over 3 days"
+	echo "No soma backup in over 3 days"
+	exit 1
 fi
 
 s_backup=$(last_run sin)
 if [[ $((today-s_backup)) -gt 7 ]]; then
-	notify-send "No small net backup in over a week"
+	echo "No small net backup in over a week"
+	exit 1
 fi
 
-h_backup=$(last_run bkhsea)
+h_backup=$(last_run snhome)
 if [[ $((today-h_backup)) -gt 14 ]]; then
-	notify-send "No home backup in over two weeks"
+	echo "No home backup in over two weeks"
+	exit 1
 fi
 
 system_update=$(last_run pacupd)
 if [[ $((today-system_update)) -gt 14 ]]; then
-	notify-send "No system update in over two weeks"
+	echo "No system update in over two weeks"
+	exit 1
 fi

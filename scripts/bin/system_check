@@ -1,5 +1,5 @@
-#!/bin/bash
-# running this every 4 minutes with cron
+#!/usr/bin/env bash
+# running this every 3 minutes with cron
 
 # battery check
 battery_level=$(acpi --battery | awk '{gsub(/[,%]/, ""); print $4}')
@@ -27,7 +27,7 @@ fi
 # free space check
 while read -r line; do
 	percent_full=$(echo "$line" | awk '{gsub("%",""); print $5}')
-	if [[ $percent_full -ge 90 ]]; then
+	if [[ $percent_full -ge 95 ]]; then
 		disk=$(echo "$line" | awk '{print $6}')
 		notify-send "$disk is $percent_full% full"
 	fi
