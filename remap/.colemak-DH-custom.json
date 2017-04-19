@@ -2,7 +2,7 @@
 {
     "fullName": "Colemak-DvbgHm Angle(z) Wide Custom",
     "name": "colemak_dh_custom",
-    "shiftstates": [ "None", "Shift", "AltGr", "Shift+AltGr", "Extend" ],
+    "shiftlevels": [ "None", "Shift", "AltGr", "Shift+AltGr", "Extend" ],
     "singletonKeys": [
         // used modifiers (7 total):
         // Shift (capital letters and combined with other modifiers)
@@ -134,7 +134,7 @@
         { "pos": "/", "letters": [ "/", "?", "\\", "", "\\" ] }
 
         // needed if modifier combinations not being detected by sxhkd
-        // { "pos": "A", "shiftstates": [ "Win+AltGr" ], "letters": [ "Win+1" ] }
+        // { "pos": "A", "shiftlevels": [ "Win+AltGr" ], "letters": [ "Win+1" ] }
         // ...
     ],
     "mods": [
