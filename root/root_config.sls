@@ -1,127 +1,13 @@
-/etc/crypttab:
-  file.managed:
-    - source: salt://etc/crypttab
-    - user: root
-    - group: root
-    - mode: 644
+# TODOS:
+# - refind.conf already in place, but for updates:
+#   mount efi to replace refind.conf
 
-/etc/fstab:
-  file.managed:
-    - source: salt://etc/fstab
-    - user: root
-    - group: root
-    - mode: 644
-
-# TODO
-# /etc/resolv.conf:
+/etc:
+  file.recurse:
+    - source: salt://etc
 
 # /etc/sudoers:
 #     file.append:
 #         - name: /etc/sudoers
 #         - text:
-#           - "%truecrypt ALL=(root) NOPASSWD:/usr/bin/truecrypt"
-
-/etc/pacman.conf:
-  file.managed:
-    - source: salt://etc/pacman.conf
-    - user: root
-    - group: root
-    - mode: 644
-
-/etc/connman/main.conf:
-  file.managed:
-    - source: salt://etc/connman/main.conf
-    - user: root
-    - group: root
-    - mode: 644
-
-/etc/NetworkManager/NetworkManager.conf:
-  file.managed:
-    - source: salt://etc/NetworkManager/NetworkManager.conf
-    - user: root
-    - group: root
-    - mode: 644
-
-/etc/default/grub:
-  file.managed:
-    - source: salt://etc/default/grub
-    - user: root
-    - group: root
-    - mode: 644
-
-# efi partition needs to be mounted
-/boot/efi/EFI/refind/refind.conf:
-  file.managed:
-    - source: salt://boot/efi/EFI/refind/refind.conf
-    - user: root
-    - group: root
-    - mode: 644
-
-/etc/X11/xorg.conf.d/my-xorg.conf:
-  file.managed:
-    - source: salt://etc/X11/xorg.conf.d/my-xorg.conf
-    - user: root
-    - group: root
-    - mode: 644
-
-# /etc/modules-load.d/overlay.conf:
-#   file.managed:
-#     - source: salt://etc/modules-load.d/overlay.conf
-#     - user: root
-#     - group: root
-#     - mode: 644
-
-# locate ignored directories
-/etc/updatedb.conf:
-  file.managed:
-    - source: salt://etc/updatedb.conf
-    - user: root
-    - group: root
-    - mode: 644
-
-/usr/lib/systemd/system/resume@.service:
-  file.managed:
-    - source: salt://usr/lib/systemd/system/resume@.service
-    - user: root
-    - group: root
-    - mode: 644
-
-# slimlock service
-/etc/systemd/system/slimlock@.service:
-  file.managed:
-    - source: salt://etc/systemd/system/slimlock@.service
-    - user: root
-    - group: root
-    - mode: 644
-
-# DNS settings
-# /etc/resolv.conf:
-#   file.managed:
-#     - source: salt://etc/pacman.conf
-#     - user: root
-#     - group: root
-#     - mode: 644
-# /etc/unbound/unbound.conf:
-#   file.managed:
-#     - source: salt://etc/unbound/unbound.conf
-#     - user: root
-#     - group: root
-#     - mode: 644
-# /etc/systemd/system/dnscrypt-proxy.service.d/override.conf:
-#   file.managed:
-#     - source: salt://etc/systemd/system/dnscrypt-proxy.service.d/override.conf
-#     - user: root
-#     - group: root
-#     - mode: 644
-# /etc/systemd/system/dnscrypt-proxy.socket.d/override.conf:
-#   file.managed:
-#     - source: salt://etc/systemd/system/dnscrypt-proxy.socket.d/override.conf
-#     - user: root
-#     - group: root
-#     - mode: 644
-# /etc/systemd/system/connman.service.d/override.conf:
-#   file.managed:
-#     - source: salt://etc/systemd/system/connman.service.d/override.conf
-#     - user: root
-#     - group: root
-#     - mode: 644
+#           - "veracrypt ALL=(root) NOPASSWD:/usr/bin/veracrypt"
