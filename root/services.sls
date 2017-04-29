@@ -1,34 +1,52 @@
-# for enabling systemd stuff
+# TODO support for --user services
+
+# * Internet
 netctl:
-  service.running:
+  service.dead:
     - enable: False
 
 NetworkManager:
-  service.running:
+  service.dead:
     - enable: False
-    # - watch:
-    #     - file: /etc/NetworkManager/NetworkManager.conf
+  cmd.run:
+    # TODO override tlp service instead
+    # prevents tlp from starting networkmanager
+    - name: systemctl mask NetworkManager
 
 connman:
   service.running:
     - enable: True
+    # - watch:
+    #     - file: /etc/connman/main.conf
 
+# using with hostsblock
+kwakd:
+  service.running:
+    - enable: True
+
+# * Time Syncing
 ntpd:
   service.running:
     - enable: True
 
-# note that network manager should be masked if installed and not in use
+# * Power Mangement
 tlp:
   service.running:
     - enable: True
-tlp-sleep:
-  service.running:
-    - enable: True
+  # TODO this only needed for tlp-rdw right?
+  # service.dead:
+  #   - name: systemd-rfkill
+  #   - enable: False
 
+tlp-sleep:
+  service.enabled: []
+
+# * Cron
 fcron:
   service.running:
     - enable: True
 
+# * Firewall
 ufw:
   # doesn't work; fix; may have to do with ufw update
   # cmd.run:
@@ -41,18 +59,17 @@ ufw:
     - enable: True
 
 slimlock@noctuid:
-  service.running:
-    - enable: True
+  service.enabled: []
 
 resume@noctuid:
-  service.running:
-    - enable: True
+  service.enabled: []
 
-# printing
+# * Printing
 org.cups.cupsd:
   service.running:
     - enable: True
 
+# * Loading into RAM
 preload:
   service.running:
     - enable: True
@@ -61,11 +78,7 @@ preload:
 #   service.running:
 #     - enable: True
 
-# using with hostsblock
-kwakd:
-  service.running:
-    - enable: True
-
+# * Modules
 systemd-modules-load:
   service.running:
     - enable: True
