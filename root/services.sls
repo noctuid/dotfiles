@@ -41,6 +41,11 @@ tlp:
 tlp-sleep:
   service.enabled: []
 
+# * Bumblebee
+bumblebeed:
+  service.running:
+    - enable: True
+
 # * Cron
 fcron:
   service.running:
@@ -48,13 +53,6 @@ fcron:
 
 # * Firewall
 ufw:
-  # doesn't work; fix; may have to do with ufw update
-  # cmd.run:
-  #   - name: |
-  #       ufw default deny incoming
-  #       ufw default deny outgoing
-  #       ufw allow from 192.168.0.0/24
-  #       ufw enable
   service.running:
     - enable: True
 

@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# all commands should be able to be run multiple times
+# and should fail harmlessly if required software isn't installed
+
+# TODO consider this (though may just be unnecessarily complicated):
+# - adding checks for use with salt's unless
+# - requiring corresponding packages in salt file
+
+# user
+user_services_setup() {
+	systemctl --user start mpd-notification
+	systemctl --user enable mpd-notification
+	# systemctl --user start psd
+	# systemctl --user enable psd
+}
+
+# user
+vt_colors_setup() {
+	sudo setcolors ~/dotfiles/aesthetics/vt_colors/solarized
+}
+
+# root
+freetype_setup() {
+	# https://gist.github.com/cryzed/e002e7057435f02cc7894b9e748c5671
+	# https://wiki.archlinux.org/index.php/font_configuration
+	# just uncomment export line
+	cd /etc/fonts/conf.d || exit 1
+	# enable sub-pixel rgb rendering globally
+	ln -sf ../conf.avail/10-sub-pixel-rgb.conf
+	ln -sf ../conf.avail/11-lcdfilter-default.conf
+	# 10-hinting-slight.conf already linked
+	# requires fonts-meta-extended-lt
+	ln -sf ../conf.avail/30-infinality-aliases.conf
+}
+
+# user
+lambda_txt_setup() {
+	sudo cp ~/dotfiles/.data/lambda /usr/share/fortune/lambda
+	sudo strfile /usr/share/fortune/lambda
+}
+
+# user
+ibus_setup() {
+	dconf load /desktop/ibus/ < ~/dotfiles/remap/.ibus.dconf
+}
+
+# user
+fcron_setup() {
+	fcrontab ~/dotfiles/common/fcrontab
+	sudo fcrontab ~/dotfiles/common/sudo_fcrontab
+}
+
+# root
+ufw_setup() {
+	# https://wiki.archlinux.org/index.php/Uncomplicated_Firewall#Basic_configuration
+	ufw default deny
+	ufw allow from 192.168.0.0/24
+	ufw enable
+}
+
+# user
+bumblebee_setup() {
+	sudo gpasswd -a $USER bumblebee
+	# busID needs to be correct (was by default for me)
+	# lspci | grep VGA | grep NVIDIA
+}
+
+# user
+transmission_setup() {
+	sudo gpasswd -a $USER transmission
+}
+
+"$@"

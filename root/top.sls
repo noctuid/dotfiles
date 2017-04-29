@@ -5,7 +5,7 @@ base:
     - value: powerpill
   # depending on state_auto_order being True (default) to execute in order
   '*':
-    - create_user
     - root_config
     - packages
     - services
+    - setup
