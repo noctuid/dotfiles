@@ -1,0 +1,369 @@
+; TODO:
+; - add mail
+; - fix headphone indicator
+; - zscroll
+; - change underline/fg color for high cpu/ram
+; - truncation of volume/brightness (maybe)
+; Nice:
+; - support for  system tray
+; - support for percentages for padding/width
+; - modules
+; Annoyances:
+; - can't do float percentages it seems
+; - doesn't automatically try other fonts if character doesn't exist
+; - bspwm module can't distinguish between focused occupied and focused empty
+
+[colors]
+background = #222
+background-alt = #444
+foreground = #dfdfdf
+foreground-alt = #555
+primary = #ffb52a
+focused-foreground = #de935f
+monitor-foreground = #8dbcdf
+state-foreground = #90a959
+secondary = #e60053
+alert = #bd2c40
+music = #a9D152
+title = #78b3cc
+; ram = #7549d6
+ram = #5e28d4
+cpu = #905eff
+temperature = #cf1020
+; battery
+charging = #cc6666
+discharging = #ac4142
+full = #8c9440
+; brightness = #de935f
+brightness = #de925e
+brightness-empty = #524236
+volume = #2a7a9c
+; volume-empty = #2d3c46
+volume-empty = #2a3d4e
+volume-mute = #ac4142
+network = #81a2be
+time = #a84d95
+
+[bar/mine]
+; TODO can use own command for?
+monitor = eDP1
+
+width = 100%
+height = 2%
+offset-x = 0
+offset-y = 0
+padding-left = 1
+padding-right = 1
+radius = 0
+; fixed-center = false
+border-size = 0
+; border-color = #00000000
+
+line-size = 1
+line-color = #f00
+
+module-margin-left = 0
+module-margin-right = 2
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+font-0 = benis uushi:pixelsize=10
+font-1 = Unifont:style=Sans-Serif
+font-2 = Wuncon Siji:pixelsize=9
+font-3 = Symbola:pixelsize=10
+font-4 = FuraMonoForPowerline NF:pixelsize=9
+
+modules-left = wm bspwm mpd
+modules-center = xwindow
+modules-right = redshift memory cpu temperature battery xbacklight volume date wlan eth
+
+tray-position = right
+tray-padding = 2
+
+; necessary so panel doesn't cover fullscreen windows
+wm-restack = bspwm
+
+[settings]
+screenchange-reload = true
+
+[global/wm]
+; top_padding
+margin-top = 2%
+margin-bottom = 0
+
+[module/wm]
+type = custom/text
+content =  bspwm
+content-foreground = #ff6666
+content-font = 2
+
+[module/bspwm]
+type = internal/bspwm
+
+; show workspaces from other monitors
+pin-workspaces = false
+
+; TODO only show monitor if more than 1
+format = "<label-monitor> <label-state> <label-mode> "
+
+label-monitor-foreground = ${colors.monitor-foreground}
+
+label-tiled-foreground = ${colors.state-foreground}
+label-monocle-foreground = ${colors.state-foreground}
+
+label-focused = %name%
+label-focused-foreground = ${colors.focused-foreground}
+label-focused-underline= ${colors.primary}
+label-focused-margin-left = 1
+
+label-occupied = %name%
+label-occupied-margin-left = 1
+
+label-empty-foreground = ${colors.foreground-alt}
+; TODO why does this need to be different?
+label-empty-margin-left = 0
+
+label-urgent = %name%
+label-urgent-background = ${colors.alert}
+label-urgent-margin-left = 1
+
+label-monocle = M
+label-tiled = T
+label-fullscreen = F
+label-floating = FL
+label-pseudotiled = P
+label-locked = L
+label-locked-foreground = #bd2c40
+label-sticky = S
+label-sticky-foreground = #fba922
+label-private = P
+label-private-foreground = #bd2c40
+
+[module/mpd]
+type = internal/mpd
+format-online = <label-song> <toggle>
+format-online-foreground = ${colors.music}
+
+; icon-prev = 
+; icon-stop = 
+icon-play = 
+icon-pause = 
+; icon-next = 
+
+label-song-maxlen = 40
+label-song-ellipsis = true
+
+[module/xwindow]
+type = internal/xwindow
+label = %title:0:80:...%
+label-foreground = ${colors.title}
+
+; [module/filesystem]
+; type = internal/fs
+; interval = 25
+
+; mount-0 = /
+; mount-1 = /home
+
+; label-mounted = %{F#0a81f5}%mountpoint%%{F-}: %percentage_used%%
+; label-unmounted = %mountpoint% not mounted
+; label-unmounted-foreground = ${colors.foreground-alt}
+
+; [module/xkeyboard]
+; type = internal/xkeyboard
+; blacklist-0 = num lock
+
+; format-prefix = " "
+; format-prefix-foreground = ${colors.foreground-alt}
+; format-prefix-underline = ${colors.secondary}
+
+; label-layout = %layout%
+; label-layout-underline = ${colors.secondary}
+
+; label-indicator-padding = 2
+; label-indicator-margin = 1
+; label-indicator-background = ${colors.secondary}
+; label-indicator-underline = ${colors.secondary}
+
+[module/redshift]
+type = custom/script
+interval = 5
+format-font = 4
+
+exec = ~/.config/polybar/redshift.sh
+
+[module/memory]
+type = internal/memory
+interval = 3
+label = %percentage_used%%
+
+format-prefix = " "
+format-prefix-foreground = ${colors.ram}
+; format-prefix-foreground = ${colors.foreground-alt}
+
+[module/cpu]
+type = internal/cpu
+interval = 3
+format-prefix = " "
+format-prefix-foreground = ${colors.cpu}
+; format-prefix-foreground = ${colors.foreground-alt}
+label = %percentage%%
+
+[module/temperature]
+type = internal/temperature
+interval = 5
+
+warn-temperature = 75
+
+format = <ramp> <label>
+format-underline =
+format-warn = <ramp> <label-warn>
+format-warn-underline = ${colors.temperature}
+
+label = %temperature%
+label-warn = %temperature%
+label-warn-foreground = ${colors.temperature}
+
+ramp-0 = 
+ramp-1 = 
+ramp-2 = 
+ramp-foreground = ${colors.temperature}
+; ramp-foreground = ${colors.foreground-alt}
+
+[module/battery]
+type = internal/battery
+battery = BAT0
+adapter = AC
+; full-at = 99
+
+format-charging = <animation-charging> <label-charging>
+label-charging = %percentage%%
+
+format-discharging = <ramp-capacity> <label-discharging>
+format-discharging-underline =
+
+format-full-prefix = " "
+format-full-prefix-foreground = ${colors.full}
+; format-full-prefix-foreground = ${colors.foreground-alt}
+
+ramp-capacity-0 = 
+ramp-capacity-1 = 
+ramp-capacity-2 = 
+ramp-capacity-foreground = ${colors.discharging}
+; ramp-capacity-foreground = ${colors.foreground-alt}
+
+animation-charging-0 = 
+animation-charging-1 = 
+animation-charging-2 = 
+animation-charging-foreground = ${colors.charging}
+; animation-charging-foreground = ${colors.foreground-alt}
+animation-charging-framerate = 1500
+
+[module/xbacklight]
+type = internal/xbacklight
+
+format = <label> <bar>
+
+label = 🔅
+label-font = 3
+label-foreground = ${colors.brightness}
+
+bar-width = 10
+bar-indicator =
+bar-indicator-foreground = #ff
+bar-fill = ─
+bar-fill-foreground = ${colors.brightness}
+bar-empty = ─
+bar-empty-foreground = ${colors.brightness-empty}
+; bar-empty-foreground = ${colors.foreground-alt}
+
+; [module/backlight-acpi]
+; inherit = module/xbacklight
+; type = internal/backlight
+; card = intel_backlight
+
+[module/volume]
+type = internal/volume
+
+format-volume = <ramp-volume> <bar-volume>
+
+ramp-volume-0 = 🔈
+ramp-volume-1 = 🔉
+ramp-volume-2 = 🔊
+ramp-volume-foreground = ${colors.volume}
+
+ramp-headphones-0 = 
+ramp-headphones-1 = 
+
+format-muted-prefix = " "
+format-muted-foreground = ${colors.volume-mute}
+; format-muted-foreground = ${colors.foreground-alt}
+; label-muted = sound muted
+
+bar-volume-width = 10
+bar-volume-foreground-0 = ${colors.volume}
+bar-volume-foreground-1 = ${colors.volume}
+bar-volume-foreground-2 = ${colors.volume}
+bar-volume-foreground-3 = ${colors.volume}
+bar-volume-foreground-4 = ${colors.volume}
+bar-volume-foreground-5 = ${colors.volume}
+bar-volume-foreground-6 = #ff5555
+bar-volume-gradient = false
+bar-volume-indicator =
+bar-volume-fill = ─
+bar-volume-empty = ─
+bar-volume-empty-foreground = ${colors.volume-empty}
+; bar-volume-empty-foreground = ${colors.foreground-alt}
+
+[module/date]
+type = internal/date
+interval = 5
+label = %date% %time%
+label-foreground = ${colors.time}
+
+date = %a %d
+date-alt = %Y-%m-%d
+
+time = %I: %M%P
+time-alt = %I: %M%P
+
+format-prefix = " "
+format-prefix-foreground = ${colors.time}
+; format-prefix-foreground = ${colors.foreground-alt}
+format-underline =
+
+[module/wlan]
+type = internal/network
+; TODO command for
+interface = wlp4s0
+interval = 5
+
+format-connected = <ramp-signal> <label-connected>
+format-connected-underline =
+format-connected-foreground = ${colors.network}
+label-connected =
+; label-connected = %essid%
+
+format-disconnected =
+
+ramp-signal-0 = 
+ramp-signal-1 = 
+ramp-signal-2 = 
+ramp-signal-3 = 
+ramp-signal-4 = 
+; ramp-signal-foreground = ${colors.network}
+; ramp-signal-foreground = ${colors.foreground-alt}
+
+[module/eth]
+type = internal/network
+; TODO command for
+interface = enp0s31f6
+interval = 5
+
+format-connected-underline =
+format-connected-prefix = " "
+; format-connected-prefix-foreground = ${colors.foreground-alt}
+label-connected = %local_ip%
+
+format-disconnected =
