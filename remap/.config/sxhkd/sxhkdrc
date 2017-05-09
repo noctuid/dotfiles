@@ -88,7 +88,7 @@ shift + control + alt  + a
 
 # ** Dropdowns
 shift + control + alt  + s
-	my_tdrop -ma -w -4 -y "$PANEL_HEIGHT" -s dropdown termite
+	dropdown
 
 # * Window Management
 # ** General

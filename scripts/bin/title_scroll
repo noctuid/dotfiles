@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+zscroll -n -d 0.3 -l 80 -b "| " -a " |" -u "xtitle" &
+
+wait

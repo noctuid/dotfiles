@@ -1,22 +1,16 @@
 #!/usr/bin/env bash
 # reload panel and empty desktop checker
 
-# (doesn't work with #!/usr/bin/env bash shebang)
-# pkill -x panel
-ps ax | awk '!/(awk|lemonbar|panel_bar)/ && /panel/ {system("kill " $1); exit}'
+pkill -x polybar
 pkill -x bspc
 
-# sxhkd dies when killing panel for some reason
-# make certain it's dead then restart
-pkill -x sxhkd
-sxhkd &> /dev/null &
 if [[ $1 == nopanel ]]; then
 	# for conserving battery
 	pkill -x conky
 	pkill -x compton
 	bspc config top_padding 0
 else
-	panel &> /dev/null &
+	polybar mine &> /dev/null &
 	if ! pgrep -x conky > /dev/null; then
 		conky_switcher
 	fi

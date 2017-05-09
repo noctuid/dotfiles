@@ -5,9 +5,6 @@ export XDG_DOWNLOAD_DIR=$HOME/move
 
 # for bspwm reloading
 export BSPWM_STATE=/tmp/bspwm-state.json
-# panel
-export PANEL_HEIGHT=15
-export PANEL_FIFO=/tmp/panel-fifo
 
 # many programs allow EDITOR to contain options, but some expect a path
 # e.g. with zsh '$EDITOR file' will fail (though 'eval $EDITOR file' will work)
@@ -47,8 +44,6 @@ $HOME/bin/video
 $HOME/bin/not_mine
 $HOME/bin/dunst
 $HOME/bin/bspwm
-$HOME/bin/optirun
-$HOME/.panel_scripts
 # for vimus
 $HOME/.cabal/bin
 # for adb

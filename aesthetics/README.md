@@ -1,7 +1,7 @@
 ### Info
-My panel is lemonbar (see [.config/bspwm/panel](./.panel_scripts/panel)). The current one is based on the default bspwm bar with some modified functions from [esn89's bar](https://github.com/esn89/dotfiles/blob/40589c82a9471dde984f52c96126db02afe8987b/bspwm/.barScripts/panel). I am using [zscroll](https://github.com/noctuid/zscroll) for scrolling. The fonts used in my panel are [uushi](https://github.com/phallus/fonts), [siji](https://github.com/gstk/siji) (for a couple icons), and IPA gothic (for Japanese characters).
+I was previously using lemonbar (as of this commit all pictures show the old panel) but am now using polybar. Lemonbar has some advantages over polybar if you want complete control over everything, but I've found that polybar is sufficiently customizable and scriptable for my needs. Its main advantages for me is that it greatly simplifies the necessary configuration and has some nice features missing from lemonbar like system tray support. I am using [zscroll](https://github.com/noctuid/zscroll) for scrolling. The primary fonts used in my panel are [uushi](https://github.com/phallus/fonts), [siji](https://github.com/gstk/siji) (for a couple icons), and IPA gothic (for Japanese characters).
 
-The monospaced fonts that I generally use are Inconsolata (Inconsolata-g for termite and Iconsolata LGC for emacs) and Fira Mono (for vim and bemenu/dmenu).
+The monospaced fonts that I generally use are Inconsolata (the Nerd Fonts Inconsolata for termite for ranger devicons and Iconsolata LGC for emacs) and Fira Mono (for vim and bemenu/dmenu).
 
 The conky theme is [charley166's lsd theme](http://charley166.deviantart.com/art/LSD-conky-config-v2-0-392188352). I've created a black version and changed the displayed information to get rid of redundancy with my panel.
 

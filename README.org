@@ -109,7 +109,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | terminal emulator       | termite+tdrop+tmuxinator+tmux (also ansi-term) |
 | launcher                | bemenu                                         |
 | wallpaper setter        | setroot                                        |
-| panel                   | lemonbar-xft                                   |
+| panel                   | polybar (previously lemonbar-xft)               |
 | compositor              | compton                                        |
 | notifications           | dunst                                          |
 | file manager            | ranger                                         |

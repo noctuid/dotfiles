@@ -1,7 +1,6 @@
 ; TODO:
 ; - add mail
 ; - fix headphone indicator
-; - zscroll
 ; - change underline/fg color for high cpu/ram
 ; - truncation of volume/brightness (maybe)
 ; Nice:
@@ -9,9 +8,11 @@
 ; - support for percentages for padding/width
 ; - modules
 ; Annoyances:
-; - can't do float percentages it seems
+; - can't do float percentages it seems (for offsets at least)
 ; - doesn't automatically try other fonts if character doesn't exist
 ; - bspwm module can't distinguish between focused occupied and focused empty
+; - can't locally override line-size or other settings it seems
+; - module naming and functionality inconsistencies
 
 [colors]
 background = #222
@@ -59,7 +60,7 @@ radius = 0
 border-size = 0
 ; border-color = #00000000
 
-line-size = 1
+line-size = 2
 line-color = #f00
 
 module-margin-left = 0
@@ -75,7 +76,7 @@ font-3 = Symbola:pixelsize=10
 font-4 = FuraMonoForPowerline NF:pixelsize=9
 
 modules-left = wm bspwm mpd
-modules-center = xwindow
+modules-center = title
 modules-right = redshift memory cpu temperature battery xbacklight volume date wlan eth
 
 tray-position = right
@@ -141,22 +142,17 @@ label-private = P
 label-private-foreground = #bd2c40
 
 [module/mpd]
-type = internal/mpd
-format-online = <label-song> <toggle>
-format-online-foreground = ${colors.music}
+type = custom/script
+exec = ~/bin/song_scroll
+tail = true
 
-; icon-prev = 
-; icon-stop = 
-icon-play = 
-icon-pause = 
-; icon-next = 
+label-foreground = ${colors.music}
 
-label-song-maxlen = 40
-label-song-ellipsis = true
+[module/title]
+type = custom/script
+exec = ~/bin/title_scroll
+tail = true
 
-[module/xwindow]
-type = internal/xwindow
-label = %title:0:80:...%
 label-foreground = ${colors.title}
 
 ; [module/filesystem]
@@ -189,6 +185,7 @@ label-foreground = ${colors.title}
 [module/redshift]
 type = custom/script
 interval = 5
+
 format-font = 4
 
 exec = ~/.config/polybar/redshift.sh
@@ -196,18 +193,21 @@ exec = ~/.config/polybar/redshift.sh
 [module/memory]
 type = internal/memory
 interval = 3
-label = %percentage_used%%
 
 format-prefix = " "
 format-prefix-foreground = ${colors.ram}
 ; format-prefix-foreground = ${colors.foreground-alt}
 
+label = %percentage_used%%
+
 [module/cpu]
 type = internal/cpu
 interval = 3
+
 format-prefix = " "
 format-prefix-foreground = ${colors.cpu}
 ; format-prefix-foreground = ${colors.foreground-alt}
+
 label = %percentage%%
 
 [module/temperature]
@@ -219,11 +219,11 @@ warn-temperature = 75
 format = <ramp> <label>
 format-underline =
 format-warn = <ramp> <label-warn>
-format-warn-underline = ${colors.temperature}
 
 label = %temperature%
 label-warn = %temperature%
 label-warn-foreground = ${colors.temperature}
+label-warn-underline = ${colors.temperature}
 
 ramp-0 = 
 ramp-1 = 
@@ -265,8 +265,7 @@ type = internal/xbacklight
 
 format = <label> <bar>
 
-label = 🔅
-label-font = 3
+label = ☼
 label-foreground = ${colors.brightness}
 
 bar-width = 10
@@ -319,6 +318,13 @@ bar-volume-empty-foreground = ${colors.volume-empty}
 [module/date]
 type = internal/date
 interval = 5
+
+format-prefix = " "
+format-prefix-foreground = ${colors.time}
+; format-prefix-foreground = ${colors.foreground-alt}
+format-underline =
+
+
 label = %date% %time%
 label-foreground = ${colors.time}
 
@@ -327,11 +333,6 @@ date-alt = %Y-%m-%d
 
 time = %I: %M%P
 time-alt = %I: %M%P
-
-format-prefix = " "
-format-prefix-foreground = ${colors.time}
-; format-prefix-foreground = ${colors.foreground-alt}
-format-underline =
 
 [module/wlan]
 type = internal/network

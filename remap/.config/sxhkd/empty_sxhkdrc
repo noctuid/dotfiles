@@ -17,8 +17,8 @@ l
 	wm_action dsel last
 
 # focus only of course
-s
-	tdrop -a -w 1362 -y 14 -s dropdown termite
+f
+	dropdown
 
 semicolon ; f
 	firejail --seccomp firefox
@@ -115,7 +115,7 @@ shift + control + alt  + a
 
 # ** Dropdowns
 shift + control + alt  + s
-	my_tdrop -ma -w -4 -y "$PANEL_HEIGHT" -s dropdown termite
+	dropdown
 
 # * Window Management
 # ** General
