@@ -15,7 +15,9 @@ allow_bold = true
 dynamic_title = true
 urgent_on_bell = true
 clickable_url = false
-font = Inconsolata-g 9
+# for ranger_devicons
+font = InconsolataForPowerline Nerd Font 10
+# font = Inconsolata-g 9
 # font = Source Code Pro 9
 # font = uushi 10
 scrollback_lines = 1000
