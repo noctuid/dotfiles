@@ -19,7 +19,7 @@
 
 # which, whence, type -a, whereis, whatis
 #==============================
-# Sources {{{
+# * Sources
 #==============================
 # Some settings or stuff got/find out about from here:
 # https://wiki.archlinux.org/index.php/Zsh
@@ -31,57 +31,86 @@
 # https://wiki.gentoo.org/wiki/Zsh/HOWTO#
 # https://github.com/phallus/arch-files/blob/master/config/.zshrc
 
-# }}}
 #==============================
-# Plugins {{{
+# * Plugins
 #==============================
-# notifications when long running commands complete
-# https://gist.github.com/jpouellet/5278239
-# also see https://gist.github.com/oknowton/8346801
-zbell_ignore=(man less vimpager vim emacs rn ranger mutt nm ncmpcpp vimus weechat)
-source ~/.zsh/zbell.sh
-
-# https://github.com/tarjoilija/zgen
-source /usr/share/zsh/scripts/zgen/zgen.zsh
-# check if there's no init script
-if ! zgen saved; then
-	echo "Creating a zgen save"
-
-	# for theme
-	zgen oh-my-zsh lib/theme-and-appearance.zsh
-	zgen oh-my-zsh lib/git.zsh
-
-	# plugins
-	zgen oh-my-zsh plugins/command-not-found
-	# zgen load zsh-users/zsh-syntax-highlighting
-	zgen load jimmijj/zsh-syntax-highlighting
-	zgen load zsh-users/zsh-history-substring-search
-	zgen load Tarrasch/zsh-bd
-	# ls improvements
-	zgen load supercrabtree/k
-    # zgen load tarruda/zsh-autosuggestions
-	# zgen load hchbaw/opp.zsh
-	# zgen load Tarrasch/zsh-autoenv
-
-	# completion stuff
-	zgen oh-my-zsh lib/completion.zsh
-	zgen load zsh-users/zsh-completions src
-	# provides ** tab completion for various commands:
-	zgen load junegunn/fzf shell/completion.zsh
-
-	# save all to init script
-	zgen save
+if [[ ! -f ~/.zplug/init.zsh ]]; then
+	git clone https://github.com/b4b4r07/zplug ~/.zplug
 fi
 
-# update repos and remove init script
-alias zpupd='zgen update'
-# update zgen
-alias zupd='zgen selfupdate'
+# in case clone fails
+if [[ -f ~/.zplug/init.zsh ]] ; then
+	source ~/.zplug/init.zsh
 
-# theme
-source ~/.zsh/themes/fox-mod.zsh-theme
+	# theme
+	zplug "denysdovhan/spaceship-zsh-theme", use:spaceship.zsh, as:theme, \
+		hook-load:spaceship_vi_mode_enable
+	# above has to be run before loading zsh-autopair
+	export SPACESHIP_DIR_TRUNC=5
 
-# }}}
+	# syntax highlighting
+	# zplug "jimmijj/chromatic-zsh"
+	# load after compinit and sourcing other plugins
+	# (should be loaded after autosuggestions)
+	# zplug "zsh-users/zsh-syntax-highlighting", defer:2
+	zplug "zdharma/fast-syntax-highlighting", defer:3
+	# color parens and highlight matching paren
+	export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+
+	# autosuggestions
+	zplug "tarruda/zsh-autosuggestions", use:"zsh-autosuggestions.zsh"
+
+	# history substring search (should be loaded after syntax highlighting)
+	# TODO https://github.com/zplug/zplug/issues/314
+	zplug "zsh-users/zsh-history-substring-search", defer:3
+
+	# completion stuff
+	zplug "lib/completion", from:oh-my-zsh, ignore:oh-my-zsh.sh
+	zplug "zsh-users/zsh-completions"
+	zplug "aramboi/zsh-ipfs"
+	# provides ** tab completion for various commands:
+	zplug "junegunn/fzf", use:"shell/completion.zsh"
+
+	# prettier ls
+	zplug "supercrabtree/k"
+
+	# good interactive (by default when more than 1 match) alternative to fasd
+	zplug "b4b4r07/enhancd", use:enhancd.sh
+
+	zplug "hlissner/zsh-autopair", defer:2
+
+	# notifications when long running commands complete
+	# https://gist.github.com/jpouellet/5278239
+	# also see https://gist.github.com/oknowton/8346801
+	zbell_ignore=(man less vimpager vim emacs rn ranger mutt nm ncmpcpp vimus weechat)
+	zplug "jpouellet/5278239", from:gist, use:zbell.sh
+
+	# interesting but not useful for me at the moment
+	# Tarrasch/zsh-autoenv
+	# hchbaw/auto-fu.zsh
+	# https://github.com/joepvd/zsh-hints
+	# https://github.com/hchbaw/zce.zsh
+	# https://github.com/willghatch/zsh-snippets
+	# maybe use at some point
+	# https://github.com/bric3/nice-exit-code
+	# I think doing these in emacs would be preferable
+	# https://github.com/voronkovich/gitignore.plugin.zsh
+	# https://github.com/peterhurford/git-it-on.zsh
+	# https://github.com/adolfoabegg/browse-commit
+	# https://github.com/Tarrasch/zsh-functional
+
+	# install plugins if not all are installed
+	if ! zplug check; then
+		zplug install
+	fi
+
+	# source plugins and add commands to $PATH
+	zplug load
+	# prevents up/down on empty line from causing crash when using history substring search
+	ZSH_AUTOSUGGEST_CLEAR_WIDGETS=("${(@)ZSH_AUTOSUGGEST_CLEAR_WIDGETS:#(up|down)-line-or-history}")
+	ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(history-substring-search-up history-substring-search-down)
+fi
+
 #==============================
 # Completion Settings {{{
 #==============================
