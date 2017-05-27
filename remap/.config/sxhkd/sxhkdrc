@@ -74,7 +74,7 @@ shift + control + alt  + space
 	bemenu-run -p "run: " --fn "Fira Mono 8"
 
 shift + control + alt  + v
-	emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
+	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
 
 # ** Clicks
 # TODO clicks don't work when modifier held

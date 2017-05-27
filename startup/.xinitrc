@@ -68,11 +68,8 @@ if [ "$(tty)" = "/dev/tty1" ]; then
 	# will mess things up if run with a DE like gnome or cinnamon
 	compton --config ~/.compton.conf -b &
 
-	# japanese input
-	export XMODIFIERS=@im=ibus
-	export GTK_IM_MODULE=ibus
-	export QT_IM_MODULE=ibus
-	ibus-daemon -d -x
+	# Japanese input
+	fcitx -r
 
 	# sleep after 20 minutes of inactivity
 	xautolock -time 20 -locker "pm-suspend" -detectsleep &

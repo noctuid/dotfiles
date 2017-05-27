@@ -24,10 +24,10 @@ semicolon ; f
 	firejail --seccomp firefox
 
 semicolon ; e
-	emacsclient -c -a ""
+	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
 
 v
-	emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
+	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
 
 # * Reloading
 # reload wm config or quit

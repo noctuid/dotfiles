@@ -26,6 +26,11 @@ export BLOG=$SOURCE/noctuid.github.io
 GPG_TTY=$(tty)
 export GPG_TTY
 
+# Japanese input
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+
 # stderr in red
 # https://github.com/sickill/stderred
 # https://github.com/NixOS/nix/issues/527 (unset LD_PRELOAD when installing nix)

@@ -4,13 +4,13 @@ restow() {
 	cd ~/dotfiles && \
 	# so can have readmes in each dir without conflict
 	stow -Rvt ~/ aesthetics browsing common common_lisp emacs \
-		games mail media music remap scripts startup terminal vim .mail .aesthetics \
-		.browsing .common .emacs .games .media .music .terminal .vim
+		games input mail media music remap scripts startup terminal vim .mail \
+		.aesthetics .browsing .common .media .music
 }
 
 unstow() {
 	cd ~/dotfiles && \
-	stow -Dvt ~/ aesthetics browsing common common_lisp emacs games mail \
+	stow -Dvt ~/ aesthetics browsing common common_lisp emacs games input mail \
 		media music remap scripts startup terminal vim .mail .aesthetics .browsing \
 		.common .emacs .games .media .music .terminal .vim
 }
