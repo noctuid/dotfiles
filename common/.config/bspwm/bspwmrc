@@ -36,12 +36,5 @@ else
 	bspc desktop -f ^2 &
 fi
 
-# * Window rules
-# these started being floated by default?
-bspc rule -a Emacs state=tiled
-bspc rule -a Pqiv state=tiled
-bspc rule -a Zathura state=tiled
-bspc rule -a "*:libreoffice-writer" state=tiled
-
-# * Hooks and Panel
+# * Window Rules, Hooks, and Panel
 rldbspc

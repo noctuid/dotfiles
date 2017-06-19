@@ -23,6 +23,16 @@ fi
 bspc subscribe desktop_focus monitor_focus node_manage \
 	 node_unmanage node_transfer | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
 
+bspc rule -r '*'
+# https://github.com/baskerville/bspwm/issues/551
+bspc rule -a Emacs state=tiled
+bspc rule -a Pqiv state=tiled
+bspc rule -a Zathura state=tiled
+bspc rule -a "LibreOffice" state=tiled
+bspc rule -a "libreoffice" state=tiled
+# doesn't work
+# bspc rule -a '*:libreoffice-impress' state=tiled
+
 # change border color depending on layout
 # previous_focused=$(bspc config focused_border_color)
 # 90C3D4 479cb8
