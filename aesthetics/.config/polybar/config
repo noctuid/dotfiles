@@ -9,7 +9,6 @@
 ; - modules
 ; Annoyances:
 ; - can't do float percentages it seems (for offsets at least)
-; - doesn't automatically try other fonts if character doesn't exist
 ; - bspwm module can't distinguish between focused occupied and focused empty
 ; - can't locally override line-size or other settings it seems
 ; - module naming and functionality inconsistencies
@@ -70,10 +69,11 @@ background = ${colors.background}
 foreground = ${colors.foreground}
 
 font-0 = benis uushi:pixelsize=10
-font-1 = Unifont:style=Sans-Serif
-font-2 = Wuncon Siji:pixelsize=9
-font-3 = Symbola:pixelsize=10
-font-4 = FuraMonoForPowerline NF:pixelsize=9
+font-1 = IPAGothic:pixelsize=10:weight=bold
+font-2 = Unifont:style=Sans-Serif
+font-3 = Wuncon Siji:pixelsize=9
+font-4 = Symbola:pixelsize=10
+font-5 = FuraMonoForPowerline NF:pixelsize=9
 
 modules-left = wm bspwm mpd
 modules-center = title
@@ -97,7 +97,7 @@ margin-bottom = 0
 type = custom/text
 content =  bspwm
 content-foreground = #ff6666
-content-font = 2
+content-font = 3
 
 [module/bspwm]
 type = internal/bspwm
@@ -186,7 +186,7 @@ label-foreground = ${colors.title}
 type = custom/script
 interval = 5
 
-format-font = 4
+format-font = 5
 
 exec = ~/.config/polybar/redshift.sh
 
