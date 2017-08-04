@@ -227,6 +227,7 @@ alias backup_rsync='rsync -avhmP --delete --delete-excluded --ignore-errors --pr
 sndot() {
 	 if mountsoma; then
 		 backup_rsync --exclude={"musiclibrary.blb","bundle/*","elpa/*","homepage/*",".mpd/log","mpdscribble.log",".mu/*",".mutt/cache/*","ppsspp/*","spacemacs/*",".vim/undo",".vim/thesaurus",".weechat/logs/*","weechat*.log","*.gif","*.png","*.jpg","*.mkv"} ~/dotfiles ~/ag-sys/backup
+		 backup_rsync ~/.local/share/buku/bookmarks.db ~/ag-sys/backup
 		 backup_rsync ~/vimwiki ~/ag-sys/backup
 		 backup_rsync --exclude={"old/*","melpa/*","nixpkgs/*"} ~/src ~/ag-sys/backup
 		 backup_rsync ~/school/ ~/ag-sys/backup/current-school
