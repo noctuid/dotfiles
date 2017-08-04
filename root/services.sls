@@ -29,6 +29,10 @@ ntpd:
   service.running:
     - enable: True
 
+tzupdate:
+  service.running:
+    - enable: True
+
 # * Power Mangement
 tlp:
   service.running:
