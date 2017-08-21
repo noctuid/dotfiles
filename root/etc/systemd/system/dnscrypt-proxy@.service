@@ -1,0 +1,13 @@
+# https://wiki.archlinux.org/index.php/DNSCrypt#Create_systemd_file
+[Unit]
+Description=DNSCrypt client proxy
+Documentation=man:dnscrypt-proxy(8)
+Requires=dnscrypt-proxy@%i.socket
+
+[Service]
+User=dnscrypt
+Type=notify
+NonBlocking=true
+ExecStart=/usr/bin/dnscrypt-proxy \
+    --resolver-name=%i
+Restart=always

@@ -70,4 +70,20 @@ transmission_setup() {
 	sudo gpasswd -a $USER transmission
 }
 
+# root
+dns_setup() {
+	# unbound; also see ./users.sls
+	chattr -i /etc/resolv.conf
+	echo "nameserver 127.0.0.1" > /etc/resolv.conf
+	chattr +i /etc/resolv.conf
+	curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
+	# needed for auto-trust-anchor-file
+	chown root:unbound /etc/unbound
+	chmod 775 /etc/unbound
+	systemctl restart unbound
+	# https://wiki.archlinux.org/index.php/unbound#Testing_validation
+	# https://wiki.archlinux.org/index.php/Resolv.conf#Testing
+	# to test if dns crypt is working, stop all sockets and services
+}
+
 "$@"

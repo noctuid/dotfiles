@@ -1,547 +1,1037 @@
-pacman_related:
+pkgbuild-introspection-pkg:
   pkg.installed:
     - pkgs:
-        # for generating .SRCINFO from PKGBUILD
         - pkgbuild-introspection
-        # updating pacman mirror list
+
+reflector-pkg:
+  pkg.installed:
+    - pkgs:
         - reflector
 
-general:
+pkgfile-pkg:
+  pkg.installed:
+    - pkgs:
+        - pkgfile
+
+connman-pkg:
+  pkg.installed:
+    - pkgs:
+        - connman
+
+networkmanager-pkg:
+  pkg.installed:
+    - pkgs:
+        - networkmanager
+
+network-manager-applet-pkg:
+  pkg.installed:
+    - pkgs:
+        - network-manager-applet
+
+nm-connection-editor-pkg:
+  pkg.installed:
+    - pkgs:
+        - nm-connection-editor
+
+linux-headers-pkg:
+  pkg.installed:
+    - pkgs:
+        - linux-headers
+
+linux-ck-ivybridge-pkg:
   pkg.installed:
     - pkgs:
         - linux-ck-ivybridge
+
+linux-ck-ivybridge-headers-pkg:
+  pkg.installed:
+    - pkgs:
         - linux-ck-ivybridge-headers
-        - broadcom-wl-ck-ivybridge 
-        - virtualbox-ck-host-modules-ivybridge 
-        - git
-        - ntp
-        - wine
-        - winetricks
-        - virtualbox
-        - virtualbox-guest-iso
-        - virtualbox-guest-utils
-        - steam
-        # automatic mounting
-        - udevil
-        # disk health monitoring
-        - smartmontools
-        # filesystem support
+
+broadcom-wl-ck-ivybridge-pkg:
+  pkg.installed:
+    - pkgs:
+        - broadcom-wl-ck-ivybridge
+
+ntfs-3g-pkg:
+  pkg.installed:
+    - pkgs:
         - ntfs-3g
+
+dosfstools-pkg:
+  pkg.installed:
+    - pkgs:
         - dosfstools
+
+exfat-utils-pkg:
+  pkg.installed:
+    - pkgs:
         - exfat-utils
-        # when opening man pages complain wanting uudecode
-        - sharutils
-        # for cl minispec
-        - phantomjs
-        # power management
-        - tlp
-        # firewall
-        - ufw
-# because can't have multiple "cmd.run"s
-# mtp must die
-general_jmptpfs:
-  cmd.run:
-    - name: aura -A --noconfirm jmtpfs-git
-    - unless: pacman -Q jmtpfs-git
-general_roccat:
-  cmd.run:
-    - name: aura -A --noconfirm roccat-tools-konepuremilitary
-    - unless: pacman -Q roccat-tools-konepuremilitary
-# launcher
-general_dmenu:
-  cmd.run:
-    - name: aura -A --noconfirm dmenu-git
-    - unless: pacman -Q dmenu-git
-general_bemenu:
-  cmd.run:
-    - name: aura -A --noconfirm bemenu-git
-    - unless: pacman -Q bemenu-git
-# general_grive:
-  # backup to google drive
-  # cmd.run:
-  #   - name: aura -A --noconfirm grive
-  #   - unless: pacman -Q grive
-general_spideroak:
-  # backup to spideroak
-  cmd.run:
-    - name: aura -A --noconfirm spideroak-one
-    - unless: pacman -Q spideroak-one
-general_connman:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.connman
-    - unless: nix-env -q connman
-general_preload:
-  cmd.run:
-    - name: aura -A --noconfirm preload
-    - unless: pacman -Q preload
 
-# https://wiki.archlinux.org/index.php/CUPS
-printing:
+xf86-input-synaptics-pkg:
   pkg.installed:
     - pkgs:
-        - cups
-        - libcups
-        - splix
-        # - hplip
-        # - gutenprint
-  # necessary still?
-  # cmd.run:
-  #   - name: aura -A --noconfirm samsung-unified-driver
-  #   - unless: samsung-unified-driver
+        - xf86-input-synaptics
 
-gui:
+fcitx-im-pkg:
   pkg.installed:
     - pkgs:
-        - gvim
-        - libreoffice-fresh
-        - mpv
-        - gimp
-        # - flashplugin
-        # pdf viewers
-        - zathura
-        # for column selection/copying, poppler will result in every item in the
-        # first column being put before every item in the second
-        # mupdf will keep the rows on the same line
-        - zathura-pdf-mupdf
-        - zathura-djvu
-        - apvlv
-        # psp emulator
-        - ppsspp
-gui_emacs:
-  cmd.run:
-    - name: aura -A --noconfirm emacs-git
-    - unless: pacman -Q emacs-git
-gui_emacs-24.5:
-  cmd.run:
-    # TODO prevent this from making a symlink to "emacs" and "emacsclient"
-    - name: nix-env -iA nixpkgs.emacs-24.5
-    - unless: nix-env -q emacs-24.5
-gui_qcma:
-  # vita file transfer
-  cmd.run:
-    - name: aura -A --noconfirm qcma-git
-    - unless: pacman -Q qcma-git
+        - fcitx-im
 
-browser:
+fcitx-mozc-pkg:
   pkg.installed:
     - pkgs:
-        - firefox
-        - profile-cleaner
-        - profile-sync-daemon
-        - chromium
-browser_freshplayer:
-  cmd.run:
-    - name: aura -A --noconfirm freshplayerplugin-git
-    - unless: pacman -Q freshplayerplugin-git
+        - fcitx-mozc
 
-terminal/commandline:
+steam-pkg:
   pkg.installed:
     - pkgs:
-        - zsh
-        - tmux
-        - mlocate
-        - shellcheck
-        # fcron is best cron
-        - fcron
-        - xterm
-        - rxvt-unicode
-        - urxvt-perls
-        - xsel
-        - xclip
-        - w3m
-        - surfraw
-        - lsof
-        - lshw
-        - cdu
-        # - ncdu
-        # spell checking
-        - hunspell-en
-        - aspell-en
-        # X utils for scripting
-        - xdotool
-        - xorg-xprop
-        - xorg-xwininfo
-        # font lookup
-        - xorg-xfontsel
-        - xorg-xlsfonts
-        # interactive
-        - xorg-xev
-        # battery info
-        - acpi
-        # file conversion using libreoffice
-        - unoconv
-        # - pandoc
-        # - weechat
-terminal_tmuxinator:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.tmuxinator
-    - unless: nix-env -q tmuxinator
-terminal_termite:
-  cmd.run:
-    - name: aura -A --noconfirm termite-ranger-fix-git
-    - unless: pacman -Q termite-ranger-fix-git
-terminal_trash-cli:
-  cmd.run:
-    - name: aura -A --noconfirm trash-cli-git
-    - unless: pacman -Q trash-cli-git
-terminal_vimpager:
-  cmd.run:
-    - name: aura -A --noconfirm vimpager-git
-    - unless: pacman -Q vimpager-git
-terminal_ranger:
-  cmd.run:
-    - name: aura -A --noconfirm ranger-git
-    - unless: pacman -Q ranger-git
-# TODO get rid of any uses of xsendkey and maybe xdo
-terminal_xdo:
-  cmd.run:
-    - name: aura -A --noconfirm xdo-git
-    - unless: pacman -Q xdo-git
-terminal_xsendkey:
-  cmd.run:
-    - name: aura -A --noconfirm xsendkey
-    - unless: pacman -Q xsendkey
-terminal_light:
-  # controlling backlight
-  cmd.run:
-    - name: aura -A --noconfirm light-git
-    - unless: pacman -Q light-git
-terminal_imgur-cli:
-  cmd.run:
-    - name: aura -A --noconfirm imgur-cli-svn
-    - unless: pacman -Q imgur-cli-svn
-terminal_stderred:
-  cmd.run:
-    - name: aura -A --noconfirm stderred-git
-    - unless: pacman -Q stderred-git
-terminal_fzf:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.fzf
-    - unless: nix-env -q fzf
-terminal_tmsu:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.tmsu
-    - unless: nix-env -q tmsu
+        - steam
 
-mail:
+lib32-curl-pkg:
   pkg.installed:
     - pkgs:
-        # getting mail
-        - isync
-        # sending mail
-        - msmtp
-        # symlinks to sendmail
-        - msmtp-mta
-        # for mutt contacts
-        - abook
-  cmd.run:
-    - name: aura -A --noconfirm mu-git
-    - unless: pacman -Q mu-git
-  # cmd.run:
-  #   - name: aura -A --noconfirm neomutt
-  #   - unless: pacman -Q neomutt
+        - lib32-curl
 
-audio/music:
+mesa-pkg:
   pkg.installed:
     - pkgs:
-        - mpd
-        # backup client
-        - ncmpcpp
-        - mpc
-        # cd ripping
-        - abcde
-        # controlling output
-        - ponymix
-        # I think this fixed wine audio for me (don't remember for certain)
-        - lib32-alsa-plugins
-        - glyr
-music_vimus:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.vimus
-    - unless: nix-env -q vimus
-music_beets:
-  cmd.run:
-    # installs discogs, pyacoustid, fetchart, etc. by default
-    - name: nix-env -iA nixpkgs.beets
-    - unless: nix-env -q beets
-music_mpdscribble:
-  cmd.run:
-    - name: aura -A --noconfirm mpdscribble
-    - unless: pacman -Q mpdscribble
-music_mpd_notification:
-  cmd.run:
-    - name: aura -A --noconfirm mpd-notification
-    - unless: pacman -Q mpd-notification
-audio_pacmixer:
-  cmd.run:
-    - name: aura -A --noconfirm pacmixer
-    - unless: pacman -Q pacmixer
+        - mesa
 
-other_media:
+lib32-mesa-pkg:
   pkg.installed:
     - pkgs:
-        - imagemagick
-        - graphicsmagick
-        - youtube-dl
-        # screenshots
-        - maim
-        # selection
-        - slop
-        # for ranger video preview
-        - ffmpegthumbnailer
-        # ranger info
-        - mediainfo
-  cmd.run:
-    - name: nix-env -iA nixpkgs.ffmpeg-full
-    - unless: nix-env -q ffmpeg-full
+        - lib32-mesa
 
-# # sile
-# # typesetting:
-# #   pkg.installed:
-# #     - pkgs:
-#         # - texlive-bin
-#         # - texlive-latexextra
-
-input/keyboard:
+bumblebee-pkg:
   pkg.installed:
     - pkgs:
-        - sxhkd
-input_mozc:
-  cmd.run:
-    - name: aura -A --noconfirm mozc
-    - unless: pacman -Q mozc
-input_ibus:
-  cmd.run:
-    - name: aura -A --noconfirm ibus-mozc
-    - unless: pacman -Q ibus-mozc
-keyboard_xcape:
-  cmd.run:
-    - name: aura -A --noconfirm xcape
-    - unless: pacman -Q xcape
-keyboard_xchainkeys:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.xchainkeys
-    - unless: nix-env -q xchainkeys
+        - bumblebee
 
-visual:
+bbswitch-dkms-pkg:
   pkg.installed:
     - pkgs:
-        - xautolock
-        - redshift
-        - compton
-        # notifications
-        - libnotify
-        # - dunst
-visual_slimlock:
-  cmd.run:
-    - name: aura -A --noconfirm slimlock-git
-    - unless: pacman -Q slimlock-git
-visual_dunst:
-  cmd.run:
-    - name: aura -A --noconfirm dunst-git
-    - unless: pacman -Q dunst-git
-visual_lemonbar:
-  cmd.run:
-    - name: aura -A --noconfirm lemonbar-xft-git
-    - unless: pacman -Q lemonbar-xft-git
-visual_setroot:
-  cmd.run:
-    - name: aura -A --noconfirm setroot-git
-    - unless: pacman -Q setroot-git
-visual_conky:
-  cmd.run:
-    - name: aura -A --noconfirm conky-lua
-    - unless: pacman -Q conky-lua
-visual_xtitle:
-  cmd.run:
-    - name: aura -A --noconfirm xtitle-git
-    - unless: pacman -Q xtitle-git
+        - bbswitch-dkms
 
-fonts/themes:
+xf86-video-intel-pkg:
   pkg.installed:
     - pkgs:
-        # - infinality-bundle
-        - cairo-infinality-ultimate
-        - fontconfig-infinality-ultimate
-        - freetype2-infinality-ultimate
-        - ibfonts-meta-base
-        - ibfonts-meta-extended
-        - ttf-inconsolata
-        - adobe-source-han-sans-jp-fonts
-        - otf-fira-mono-ibx
-        # japanese font
-        - otf-ipafont
-        # unicode support
-        - bdf-unifont
-        # using siji now
-        # - stlarch-font-ibx
-        - numix-themes
-font_powerline:
-  cmd.run:
-    - name: aura -A --noconfirm powerline-fonts-git
-    - unless: pacman -Q powerline-fonts-git
-font_inconsolata-g:
-  cmd.run:
-    - name: aura -A --noconfirm ttf-inconsolata-g
-    - unless: pacman -Q ttf-inconsolata-g
-font_siji:
-  cmd.run:
-    - name: aura -A --noconfirm siji-git
-    - unless: pacman -Q siji-git
-font_ms:
-  cmd.run:
-    - name: aura -A --noconfirm ttf-ms-fonts
-    - unless: pacman -Q ttf-ms-fonts
+        - xf86-video-intel
 
-npm:
+nvidia-dkms-pkg:
   pkg.installed:
     - pkgs:
-        - nodejs
-        - npm
-npm_packages:
-  cmd.run:
-    - name: npm install livedown
-    - unless: which livedown
-    # this is slow
-    # - unless: npm list | grep livedown
-    - require:
-        # not name of actual package
-        - pkg: npm
+        - nvidia-dkms
 
-pip:
+nvidia-ck-ivybridge-pkg:
   pkg.installed:
     - pkgs:
-        - python-pip
-python_packages:
-  cmd.run:
-    - name: pip install harvey
-    - unless: which harvey
-    # - unless: pip list | grep harvey
-    - require:
-        - pkg: pip
-python_flake8:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.pythonPackages.flake8
-    - unless: nix-env -q flake8
+        - nvidia-ck-ivybridge
 
-dns:
+veracrypt-pkg:
   pkg.installed:
     - pkgs:
-        # resolve
-        - unbound
-        # dnssec validation with unbound
-        - expat
-        # https://wiki.archlinux.org/index.php/DNSCrypt
-        - dnscrypt-proxy
+        - veracrypt
 
-hostsblock:
-  cmd.run:
-    - name: aura -A --noconfirm hostsblock
-    - unless: pacman -Q hostsblock
-kwakd-package:
-  cmd.run:
-    - name: aura -A --noconfirm kwakd
-    - unless: pacman -Q kwakd
-
-lisp/scheme/etc:
-  pkg.installed:
-    - pkgs:
-        - racket
-    # I think guile is in the base install
-    # - guile
-    # - clojure
-lisp_roswell:
-  cmd.run:
-    - name: aura -A --noconfirm roswell
-    - unless: pacman -Q roswell
-lisp_sbcl:
-  cmd.run:
-    - name: ros install sbcl-bin
-    - unless: ros list installed | grep sbcl-bin
-# rust
-  # cmd.run:
-  #   - name: aura -A --noconfirm rust-nightly-bin
-  #   - unless: pacman -Q rust-nightly-bin
-# leiningen
-  # cmd.run:
-  #   - name: nix-env -iA nixpkgs.leiningen
-  #   - unless: nix-env -q leiningen
-
-ghc:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.ghc
-    - unless: nix-env -q ghc
-
-haskell-stack:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.stack
-    - unless: nix-env -q stack
-
-stylish-haskell:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.stylish-haskell
-    - unless: nix-env -q stylish-haskell
-
-hlint:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.hlint
-    - unless: nix-env -q hlint
-
-hindent:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.hindent
-    - unless: nix-env -q hindent
-
-ghc-mod:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.ghc-mod
-    - unless: nix-env -q ghc-mod
-
-hoogle:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.hoogle
-    - unless: nix-env -q hoogle
-
-happy:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.happy
-    - unless: nix-env -q happy
-
-alex:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.haskellPackages.alex
-    - unless: nix-env -q alex
-
-dict:
-  pkg.installed:
-    - pkgs:
-        - sdcv
-        - words
-stardict:
-  cmd.run:
-    - name: aura -A --noconfirm stardict-oald
-    - unless: pacman -Q stardict-oald
-stardict_thesaurus:
-  cmd.run:
-    - name: aura -A --noconfirm stardict-thesaurus-ee
-    - unless: pacman -Q stardict-thesaurus-ee
-
-archive_related:
-  pkg.installed:
-    - pkgs:
-        - unrar
-        - unzip
-        - zip
-        - p7zip
-        # frontend for archive extraction, creation, etc.
-        - atool
-
-# https://bugs.archlinux.org/task/47325?project=1
-encryption:
-  cmd.run:
-    - name: nix-env -iA nixpkgs.truecrypt
-    - unless: nix-env -q truecrypt
-secure_delete:
+secure-delete-pkg:
   cmd.run:
     - name: aura -A --noconfirm secure-delete
     - unless: pacman -Q secure-delete
+
+safe-rm-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm safe-rm
+    - unless: pacman -Q safe-rm
+
+ufw-pkg:
+  pkg.installed:
+    - pkgs:
+        - ufw
+
+pass-pkg:
+  pkg.installed:
+    - pkgs:
+        - pass
+
+git-pkg:
+  pkg.installed:
+    - pkgs:
+        - git
+
+acpi-pkg:
+  pkg.installed:
+    - pkgs:
+        - acpi
+
+tlp-pkg:
+  pkg.installed:
+    - pkgs:
+        - tlp
+
+acpi_call-dkms-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm acpi_call-dkms
+    - unless: pacman -Q acpi_call-dkms
+
+powertop-pkg:
+  pkg.installed:
+    - pkgs:
+        - powertop
+
+cups-pkg:
+  pkg.installed:
+    - pkgs:
+        - cups
+
+libcups-pkg:
+  pkg.installed:
+    - pkgs:
+        - libcups
+
+splix-pkg:
+  pkg.installed:
+    - pkgs:
+        - splix
+
+termite-ranger-fix-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm termite-ranger-fix-git
+    - unless: pacman -Q termite-ranger-fix-git
+
+termite-ranger-fix-terminfo-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm termite-ranger-fix-terminfo-git
+    - unless: pacman -Q termite-ranger-fix-terminfo-git
+
+xterm-pkg:
+  pkg.installed:
+    - pkgs:
+        - xterm
+
+rxvt-unicode-pkg:
+  pkg.installed:
+    - pkgs:
+        - rxvt-unicode
+
+urxvt-perls-pkg:
+  pkg.installed:
+    - pkgs:
+        - urxvt-perls
+
+zsh-pkg:
+  pkg.installed:
+    - pkgs:
+        - zsh
+
+tmux-pkg:
+  pkg.installed:
+    - pkgs:
+        - tmux
+
+ranger-pkg:
+  pkg.installed:
+    - pkgs:
+        - ranger
+
+ffmpegthumbnailer-pkg:
+  pkg.installed:
+    - pkgs:
+        - ffmpegthumbnailer
+
+mediainfo-pkg:
+  pkg.installed:
+    - pkgs:
+        - mediainfo
+
+pv-pkg:
+  pkg.installed:
+    - pkgs:
+        - pv
+
+progress-pkg:
+  pkg.installed:
+    - pkgs:
+        - progress
+
+gvim-pkg:
+  pkg.installed:
+    - pkgs:
+        - gvim
+
+emacs-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm emacs-git
+    - unless: pacman -Q emacs-git
+
+evm-pkg:
+  cmd.run:
+    - runas: noctuid
+    - name: gem install evm
+    - unless: which evm
+    - require:
+        - ruby-pkg
+
+emacs-25.1-pkg:
+  cmd.run:
+    - runas: noctuid
+    - name: evm install emacs-25.1
+    - unless: which emacs-25.1
+    - require:
+        - evm-pkg
+
+qutebrowser-pkg:
+  pkg.installed:
+    - pkgs:
+        - qutebrowser
+
+firefox-pkg:
+  pkg.installed:
+    - pkgs:
+        - firefox
+
+firejail-pkg:
+  pkg.installed:
+    - pkgs:
+        - firejail
+
+profile-cleaner-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm profile-cleaner
+    - unless: pacman -Q profile-cleaner
+
+profile-sync-daemon-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm profile-sync-daemon
+    - unless: pacman -Q profile-sync-daemon
+
+chromium-pkg:
+  pkg.installed:
+    - pkgs:
+        - chromium
+
+w3m-pkg:
+  pkg.installed:
+    - pkgs:
+        - w3m
+
+wine-pkg:
+  pkg.installed:
+    - pkgs:
+        - wine
+
+winetricks-pkg:
+  pkg.installed:
+    - pkgs:
+        - winetricks
+
+libreoffice-fresh-pkg:
+  pkg.installed:
+    - pkgs:
+        - libreoffice-fresh
+
+unoconv-pkg:
+  pkg.installed:
+    - pkgs:
+        - unoconv
+
+pandoc-pkg:
+  pkg.installed:
+    - pkgs:
+        - pandoc
+
+livedown-pkg:
+  cmd.run:
+    - name: npm install -g livedown
+    - unless: which livedown
+    - require:
+        - npm-pkg
+
+gimp-pkg:
+  pkg.installed:
+    - pkgs:
+        - gimp
+
+imagemagick-pkg:
+  pkg.installed:
+    - pkgs:
+        - imagemagick
+
+gifsicle-pkg:
+  pkg.installed:
+    - pkgs:
+        - gifsicle
+
+graphicsmagick-pkg:
+  pkg.installed:
+    - pkgs:
+        - graphicsmagick
+
+transmission-cli-pkg:
+  pkg.installed:
+    - pkgs:
+        - transmission-cli
+
+zathura-pkg:
+  pkg.installed:
+    - pkgs:
+        - zathura
+
+zathura-pdf-mupdf-pkg:
+  pkg.installed:
+    - pkgs:
+        - zathura-pdf-mupdf
+
+zathura-djvu-pkg:
+  pkg.installed:
+    - pkgs:
+        - zathura-djvu
+
+apvlv-pkg:
+  pkg.installed:
+    - pkgs:
+        - apvlv
+
+ppsspp-pkg:
+  pkg.installed:
+    - pkgs:
+        - ppsspp
+
+mlocate-pkg:
+  pkg.installed:
+    - pkgs:
+        - mlocate
+
+lsof-pkg:
+  pkg.installed:
+    - pkgs:
+        - lsof
+
+lshw-pkg:
+  pkg.installed:
+    - pkgs:
+        - lshw
+
+dmidecode-pkg:
+  pkg.installed:
+    - pkgs:
+        - dmidecode
+
+ntp-pkg:
+  pkg.installed:
+    - pkgs:
+        - ntp
+
+tzupdate-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm tzupdate
+    - unless: pacman -Q tzupdate
+
+udevil-pkg:
+  pkg.installed:
+    - pkgs:
+        - udevil
+
+smartmontools-pkg:
+  pkg.installed:
+    - pkgs:
+        - smartmontools
+
+sharutils-pkg:
+  pkg.installed:
+    - pkgs:
+        - sharutils
+
+fcron-pkg:
+  pkg.installed:
+    - pkgs:
+        - fcron
+
+baobab-pkg:
+  pkg.installed:
+    - pkgs:
+        - baobab
+
+ncdu-pkg:
+  pkg.installed:
+    - pkgs:
+        - ncdu
+
+cdu-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm cdu
+    - unless: pacman -Q cdu
+
+virtualbox-pkg:
+  pkg.installed:
+    - pkgs:
+        - virtualbox
+
+virtualbox-host-dkms-pkg:
+  pkg.installed:
+    - pkgs:
+        - virtualbox-host-dkms
+
+virtualbox-ck-host-modules-ivybridge-pkg:
+  pkg.installed:
+    - pkgs:
+        - virtualbox-ck-host-modules-ivybridge
+
+hunspell-en-pkg:
+  pkg.installed:
+    - pkgs:
+        - hunspell-en
+
+aspell-en-pkg:
+  pkg.installed:
+    - pkgs:
+        - aspell-en
+
+sdcv-pkg:
+  pkg.installed:
+    - pkgs:
+        - sdcv
+
+words-pkg:
+  pkg.installed:
+    - pkgs:
+        - words
+
+isync-pkg:
+  pkg.installed:
+    - pkgs:
+        - isync
+
+msmtp-pkg:
+  pkg.installed:
+    - pkgs:
+        - msmtp
+
+msmtp-mta-pkg:
+  pkg.installed:
+    - pkgs:
+        - msmtp-mta
+
+mu-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm mu-git
+    - unless: pacman -Q mu-git
+
+nspluginwrapper-pkg:
+  pkg.installed:
+    - pkgs:
+        - nspluginwrapper
+
+procmail-pkg:
+  pkg.installed:
+    - pkgs:
+        - procmail
+
+alsa-utils-pkg:
+  pkg.installed:
+    - pkgs:
+        - alsa-utils
+
+pulseaudio-alsa-pkg:
+  pkg.installed:
+    - pkgs:
+        - pulseaudio-alsa
+
+pavucontrol-pkg:
+  pkg.installed:
+    - pkgs:
+        - pavucontrol
+
+ponymix-pkg:
+  pkg.installed:
+    - pkgs:
+        - ponymix
+
+mpd-pkg:
+  pkg.installed:
+    - pkgs:
+        - mpd
+
+mpc-pkg:
+  pkg.installed:
+    - pkgs:
+        - mpc
+
+ncmpcpp-pkg:
+  pkg.installed:
+    - pkgs:
+        - ncmpcpp
+
+abcde-pkg:
+  pkg.installed:
+    - pkgs:
+        - abcde
+
+glyr-pkg:
+  pkg.installed:
+    - pkgs:
+        - glyr
+
+perl-musicbrainz-discid-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm perl-musicbrainz-discid
+    - unless: pacman -Q perl-musicbrainz-discid
+
+perl-webservice-musicbrainz-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm perl-webservice-musicbrainz
+    - unless: pacman -Q perl-webservice-musicbrainz
+
+cdrtools-pkg:
+  pkg.installed:
+    - pkgs:
+        - cdrtools
+
+lib32-alsa-plugins-pkg:
+  pkg.installed:
+    - pkgs:
+        - lib32-alsa-plugins
+
+beets-pkg:
+  pkg.installed:
+    - pkgs:
+        - beets
+
+pyacoustid-pkg:
+  cmd.run:
+    - name: pip install pyacoustid
+    - unless: which pyacoustid
+    - require:
+        - python-pip-pkg
+
+requests-pkg:
+  cmd.run:
+    - name: pip install requests
+    - unless: which requests
+    - require:
+        - python-pip-pkg
+
+python-mpd-pkg:
+  cmd.run:
+    - name: pip install python-mpd
+    - unless: which python-mpd
+    - require:
+        - python-pip-pkg
+
+pylast-pkg:
+  cmd.run:
+    - name: pip install pylast
+    - unless: which pylast
+    - require:
+        - python-pip-pkg
+
+texlive-bin-pkg:
+  pkg.installed:
+    - pkgs:
+        - texlive-bin
+
+texlive-latexextra-pkg:
+  pkg.installed:
+    - pkgs:
+        - texlive-latexextra
+
+python-pygments-pkg:
+  pkg.installed:
+    - pkgs:
+        - python-pygments
+
+sxhkd-pkg:
+  pkg.installed:
+    - pkgs:
+        - sxhkd
+
+xautolock-pkg:
+  pkg.installed:
+    - pkgs:
+        - xautolock
+
+redshift-pkg:
+  pkg.installed:
+    - pkgs:
+        - redshift
+
+compton-pkg:
+  pkg.installed:
+    - pkgs:
+        - compton
+
+libnotify-pkg:
+  pkg.installed:
+    - pkgs:
+        - libnotify
+
+dunst-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm dunst-git
+    - unless: pacman -Q dunst-git
+
+fonts-meta-extended-lt-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm fonts-meta-extended-lt
+    - unless: pacman -Q fonts-meta-extended-lt
+
+ttf-dejavu-pkg:
+  pkg.installed:
+    - pkgs:
+        - ttf-dejavu
+
+otf-fira-mono-pkg:
+  pkg.installed:
+    - pkgs:
+        - otf-fira-mono
+
+ttf-inconsolata-pkg:
+  pkg.installed:
+    - pkgs:
+        - ttf-inconsolata
+
+ttf-inconsolata-g-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm ttf-inconsolata-g
+    - unless: pacman -Q ttf-inconsolata-g
+
+noto-fonts-cjk-pkg:
+  pkg.installed:
+    - pkgs:
+        - noto-fonts-cjk
+
+otf-ipafont-pkg:
+  pkg.installed:
+    - pkgs:
+        - otf-ipafont
+
+adobe-source-han-sans-jp-fonts-pkg:
+  pkg.installed:
+    - pkgs:
+        - adobe-source-han-sans-jp-fonts
+
+bdf-unifont-pkg:
+  pkg.installed:
+    - pkgs:
+        - bdf-unifont
+
+siji-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm siji-git
+    - unless: pacman -Q siji-git
+
+ttfautohint-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm ttfautohint
+    - unless: pacman -Q ttfautohint
+
+otfcc-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm otfcc
+    - unless: pacman -Q otfcc
+
+yargs-pkg:
+  cmd.run:
+    - name: npm install -g yargs
+    - unless: which yargs
+    - require:
+        - npm-pkg
+
+pad-pkg:
+  cmd.run:
+    - name: npm install -g pad
+    - unless: which pad
+    - require:
+        - npm-pkg
+
+patel-pkg:
+  cmd.run:
+    - name: npm install -g patel
+    - unless: which patel
+    - require:
+        - npm-pkg
+
+cubic2quad-pkg:
+  cmd.run:
+    - name: npm install -g cubic2quad
+    - unless: which cubic2quad
+    - require:
+        - npm-pkg
+
+bezier-js-pkg:
+  cmd.run:
+    - name: npm install -g bezier-js
+    - unless: which bezier-js
+    - require:
+        - npm-pkg
+
+libspiro-js-pkg:
+  cmd.run:
+    - name: npm install -g libspiro-js
+    - unless: which libspiro-js
+    - require:
+        - npm-pkg
+
+topsort-pkg:
+  cmd.run:
+    - name: npm install -g topsort
+    - unless: which topsort
+    - require:
+        - npm-pkg
+
+toml-pkg:
+  cmd.run:
+    - name: npm install -g toml
+    - unless: which toml
+    - require:
+        - npm-pkg
+
+caryll-shapeops-pkg:
+  cmd.run:
+    - name: npm install -g caryll-shapeops
+    - unless: which caryll-shapeops
+    - require:
+        - npm-pkg
+
+otfcc-c2q-pkg:
+  cmd.run:
+    - name: npm install -g otfcc-c2q
+    - unless: which otfcc-c2q
+    - require:
+        - npm-pkg
+
+unorm-pkg:
+  cmd.run:
+    - name: npm install -g unorm
+    - unless: which unorm
+    - require:
+        - npm-pkg
+
+polybar-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm polybar-git
+    - unless: pacman -Q polybar-git
+
+xtitle-git-pkg:
+  pkg.installed:
+    - pkgs:
+        - xtitle-git
+
+conky-lua-nv-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm conky-lua-nv
+    - unless: pacman -Q conky-lua-nv
+
+numix-gtk-theme-pkg:
+  pkg.installed:
+    - pkgs:
+        - numix-gtk-theme
+
+unbound-pkg:
+  pkg.installed:
+    - pkgs:
+        - unbound
+
+expat-pkg:
+  pkg.installed:
+    - pkgs:
+        - expat
+
+dnscrypt-proxy-pkg:
+  pkg.installed:
+    - pkgs:
+        - dnscrypt-proxy
+
+rar-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm rar
+    - unless: pacman -Q rar
+
+unzip-pkg:
+  pkg.installed:
+    - pkgs:
+        - unzip
+
+zip-pkg:
+  pkg.installed:
+    - pkgs:
+        - zip
+
+p7zip-pkg:
+  pkg.installed:
+    - pkgs:
+        - p7zip
+
+atool-pkg:
+  pkg.installed:
+    - pkgs:
+        - atool
+
+htop-pkg:
+  pkg.installed:
+    - pkgs:
+        - htop
+
+fasd-pkg:
+  pkg.installed:
+    - pkgs:
+        - fasd
+
+jmtpfs-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm jmtpfs
+    - unless: pacman -Q jmtpfs
+
+r-pkg:
+  pkg.installed:
+    - pkgs:
+        - r
+
+tk-pkg:
+  pkg.installed:
+    - pkgs:
+        - tk
+
+ripgrep-pkg:
+  pkg.installed:
+    - pkgs:
+        - ripgrep
+
+fzf-pkg:
+  pkg.installed:
+    - pkgs:
+        - fzf
+
+cowsay-pkg:
+  pkg.installed:
+    - pkgs:
+        - cowsay
+
+fortune-mod-pkg:
+  pkg.installed:
+    - pkgs:
+        - fortune-mod
+
+harvey-pkg:
+  cmd.run:
+    - name: pip install harvey
+    - unless: which harvey
+    - require:
+        - python-pip-pkg
+
+nodejs-pkg:
+  pkg.installed:
+    - pkgs:
+        - nodejs
+
+npm-pkg:
+  pkg.installed:
+    - pkgs:
+        - npm
+
+python-pip-pkg:
+  pkg.installed:
+    - pkgs:
+        - python-pip
+
+ruby-pkg:
+  pkg.installed:
+    - pkgs:
+        - ruby
+
+roswell-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm roswell
+    - unless: pacman -Q roswell
+
+sbcl-bin-pkg:
+  cmd.run:
+    - name: ros install sbcl-bin
+    - unless: ros list installed | grep sbcl-bin
+    - require:
+        - roswell-pkg
+
+phantomjs-pkg:
+  pkg.installed:
+    - pkgs:
+        - phantomjs
+
+racket-pkg:
+  pkg.installed:
+    - pkgs:
+        - racket
+
+shellcheck-pkg:
+  pkg.installed:
+    - pkgs:
+        - shellcheck
+
+jq-pkg:
+  pkg.installed:
+    - pkgs:
+        - jq
+
+maim-pkg:
+  pkg.installed:
+    - pkgs:
+        - maim
+
+slop-pkg:
+  pkg.installed:
+    - pkgs:
+        - slop
+
+xdotool-pkg:
+  pkg.installed:
+    - pkgs:
+        - xdotool
+
+xorg-server-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-server
+
+xorg-xinit-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-xinit
+
+xorg-xprop-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-xprop
+
+xorg-xwininfo-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-xwininfo
+
+xorg-xfontsel-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-xfontsel
+
+xorg-xlsfonts-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-xlsfonts
+
+xorg-xsetroot-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-xsetroot
+
+xorg-xev-pkg:
+  pkg.installed:
+    - pkgs:
+        - xorg-xev
+
+xsel-pkg:
+  pkg.installed:
+    - pkgs:
+        - xsel
+
+xclip-pkg:
+  pkg.installed:
+    - pkgs:
+        - xclip
+

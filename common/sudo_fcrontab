@@ -3,3 +3,5 @@
 !erroronlymail,mailto(me)
 %daily * * smartctl -a /dev/sda
 %daily * * smartctl -a /dev/sdb
+# may be better as systemd service since can run after network is up
+%monthly * * * curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache

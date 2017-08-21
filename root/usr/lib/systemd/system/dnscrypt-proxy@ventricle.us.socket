@@ -1,0 +1,10 @@
+[Unit]
+Description=dnscrypt-proxy listening socket
+
+[Install]
+WantedBy=sockets.target
+
+[Socket]
+ListenStream=127.0.0.1:5301
+ListenDatagram=127.0.0.1:5301
+

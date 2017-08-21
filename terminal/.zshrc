@@ -1354,6 +1354,13 @@ function ipup() {
 	ip link show up | awk -F ":" '/state UP/ {print $2}'
 }
 
+# in case something goes wrong
+fixresolv() {
+	sudo chattr -i /etc/resolv.conf
+	sudo cp ~/dotfiles/.root/etc/resolv.conf.backup /etc/resolv.conf
+	sudo chattr +i /etc/resolv.conf
+}
+
 # }}}
 
 # vpn {{{

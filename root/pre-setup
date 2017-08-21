@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# setup that has to happen before
+# TODO post setup, reload units
+
+# as sudo
+dns_setup() {
+	# dnscrypt
+	chattr -i /etc/resolv.conf
+	echo "nameserver 127.0.0.1" > /etc/resolv.conf
+	chattr +i /etc/resolv.conf
+	# unbound root hints
+	curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
+	# needed for auto-trust-anchor-file
+	chown root:unbound /etc/unbound
+	chmod 775 /etc/unbound
+}

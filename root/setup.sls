@@ -64,3 +64,8 @@ transmission setup:
     - name: extra-setup transmission_setup
     - source: salt://extra-setup
     - runas: {{ user }}
+
+dns setup:
+  cmd.script:
+    - name: extra-setup dns_setup
+    - source: salt://extra-setup

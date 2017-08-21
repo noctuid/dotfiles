@@ -6,6 +6,10 @@
   file.recurse:
     - source: salt://etc
 
+/usr:
+  file.recurse:
+    - source: salt://usr
+
 # /etc/sudoers:
 #     file.append:
 #         - name: /etc/sudoers

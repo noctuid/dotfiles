@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# Handling as much of post-install as possible with salt:
+# - most package installation
+# - root config file syncing
+# - services
+# - additional package setup
+
+# Script must be in same directory as config files
+
+if [[ $EUID -eq 0 ]]; then
+	echo "Must not be run as root."
+	exit 1
+fi
+
+cd "$(dirname "$0")"
+
+setup_salt() {
+	if ! pacman -Q salt &> /dev/null; then
+		echo "Installing salt."
+		sleep 1
+		sudo powerpill -S --noconfirm salt || return 1
+	fi
+	# clear previous files
+	sudo rm -r /srv/salt || true
+	sudo mkdir -p /srv/salt
+	sudo cp ./top.sls /srv/salt
+	sudo cp ./users.sls /srv/salt
+	sudo cp ./root_config.sls /srv/salt
+	sudo cp ./packages.sls /srv/salt
+	sudo cp ./pre_service_setup.sls /srv/salt
+	sudo cp ./services.sls /srv/salt
+	sudo cp ./setup.sls /srv/salt
+	sudo cp ./extra-setup /srv/salt
+	sudo sed -i -e "s/set user =/set user = '$USER'/g" \
+		 -e "s;set xdg =;set xdg = '$XDG_RUNTIME_DIR';g" \
+		 -e "s/set display =/set display = '$DISPLAY'/g" \
+		 -e "s;set dbus =;set dbus = '$DBUS_SESSION_BUS_ADDRESS';g" \
+		 /srv/salt/setup.sls
+	sudo cp -r ./etc /srv/salt
+	# overwrite any example configuration files
+	sudo cp -r ../.root/etc /srv/salt
+}
+
+generate_packages_sls() {
+	# TODO alternatively could use templating for each package type:
+	# https://docs.saltstack.com/en/latest/topics/tutorials/states_pt3.html
+	# shellcheck disable=SC2188
+	> ~/dotfiles/root/packages.sls
+	while read -r line; do
+		if [[ -z $line ]] || [[ $line =~ \# ]]; then
+			continue
+		fi
+
+		package=$(echo $line | awk '{print $1}')
+		method=$(echo $line | awk '{print $2}')
+		method=${method:-pac}
+		nix_path=$(echo $line | awk '{print $3}')
+
+		echo "$package-pkg:" >> ~/dotfiles/root/packages.sls
+		if [[ $method == pac ]]; then
+			# TODO powerpill instead?
+			echo "  pkg.installed:
+    - pkgs:
+        - $package
+" >> ~/dotfiles/root/packages.sls
+		elif [[ $method == aur ]]; then
+			# I've had a lot of problems with aura, but it's the only aur helper
+			# I'm aware of that can run as sudo and has a --noconfirm option
+			# TODO try pacaur with - runas
+			echo "  cmd.run:
+    - name: aura -A --noconfirm $package
+    - unless: pacman -Q $package
+" >> ~/dotfiles/root/packages.sls
+		elif [[ $method == nix ]]; then
+			# TODO -require? install nix where?
+			echo "  cmd.run:
+	- runas: $USER
+    - name: nix-env -iA $nix_path
+    - unless: nix-env -q $package
+" >> ~/dotfiles/root/packages.sls
+		elif [[ $method == ros ]]; then
+			echo "  cmd.run:
+    - name: ros install $package
+    - unless: ros list installed | grep $package
+    - require:
+        - roswell-pkg
+" >> ~/dotfiles/root/packages.sls
+		elif [[ $method == pip ]]; then
+			echo "  cmd.run:
+    - name: pip install $package
+    - unless: which $package
+    - require:
+        - python-pip-pkg
+" >> ~/dotfiles/root/packages.sls
+		elif [[ $method == gem ]]; then
+			echo "  cmd.run:
+    - runas: $USER
+    - name: $method install $package
+    - unless: which $package
+    - require:
+        - ruby-pkg
+" >> ~/dotfiles/root/packages.sls
+		elif [[ $method == evm ]]; then
+			echo "  cmd.run:
+    - runas: $USER
+    - name: $method install $package
+    - unless: which $package
+    - require:
+        - $method-pkg
+" >> ~/dotfiles/root/packages.sls
+		elif [[ $method == npm ]]; then
+			echo "  cmd.run:
+    - name: npm install -g $package
+    - unless: which $package
+    - require:
+        - $method-pkg
+" >> ~/dotfiles/root/packages.sls
+		fi
+	done < ~/dotfiles/root/packages
+}
+
+generate_packages_sls
+setup_salt
+sudo salt-call --local state.apply
