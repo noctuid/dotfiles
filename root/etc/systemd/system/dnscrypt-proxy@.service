@@ -3,6 +3,12 @@
 Description=DNSCrypt client proxy
 Documentation=man:dnscrypt-proxy(8)
 Requires=dnscrypt-proxy@%i.socket
+After=network.target
+Before=nss-lookup.target
+
+[Install]
+Also=dnscrypt-proxy@%i.socket
+WantedBy=multi-user.target
 
 [Service]
 User=dnscrypt
