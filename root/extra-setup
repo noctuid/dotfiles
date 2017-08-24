@@ -12,6 +12,8 @@ user_services_setup() {
 	systemctl --user enable mpd-notification
 	# systemctl --user start psd
 	# systemctl --user enable psd
+	systemctl --user start udiskie
+	systemctl --user enable udiskie
 }
 
 # user

@@ -1,0 +1,9 @@
+
+[Unit]
+Description=Udiskie Automounting Daemon
+
+[Service]
+ExecStart=/usr/bin/env udiskie --quiet --tray
+
+[Install]
+WantedBy=default.target

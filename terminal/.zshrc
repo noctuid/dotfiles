@@ -730,7 +730,7 @@ function poweroff() {
 	# never had corruption with tc volumes
 	# maybe this is overly paranoid, but it seems like a good idea
 	truecrypt --text --dismount || return 1
-	devmon --unmount-all --no-gui || return 1
+	udiskie-umount --all || return 1
 	if [[ $1 == reboot ]]; then
 		systemctl reboot
 	else

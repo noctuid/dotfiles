@@ -81,17 +81,7 @@ if ! pidof mpdscribble > /dev/null; then
 	# scrobble to last.fm/libre.fm
 	mpdscribble &
 fi
-if ! pgrep devmon > /dev/null; then
-	# auto mount usbs and such
-	# using variables to prevent long unbreakable lines and to re-use text
-	notify="notify-send --icon=media-removable"
-	summary="'Devmon Notification'"
-	# FIXME: %l and %d do not work on unmount with devmon version 1.1.8
-	# https://github.com/IgnorantGuru/udevil/issues/67
-	devmon --no-gui \
-		   --exec-on-drive "$notify $summary \"Volume %l has been mounted to %d.\"" \
-		   --exec-on-unmount "$notify $summary \"Volume %l has been unmounted from %d.\"" &
-fi
+# if ! pidof mpdscribble > /dev/null; then
 emacsclient -e 0 &> /dev/null &
 
 # startx on login if tty1
