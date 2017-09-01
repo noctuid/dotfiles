@@ -74,17 +74,17 @@ if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
 	cd ~/ && source .nix-profile/etc/profile.d/nix.sh
 fi
 
-# * Automatic Program Startup
-# https://wiki.archlinux.org/index.php/Music_Player_Daemon#Autostart_on_tty_login
-[[ ! -s ~/.mpd/pid ]] && mpd
-if ! pidof mpdscribble > /dev/null; then
-	# scrobble to last.fm/libre.fm
-	mpdscribble &
-fi
-# if ! pidof mpdscribble > /dev/null; then
-emacsclient -e 0 &> /dev/null &
+# import environment variables for use with user units
+# NOTE: will give failure message "Invalid environment assigments"
+# all my important env variables show up in show-environment though
+dbus-update-activation-environment --systemd --all
+# with --enable, these will block login
+# also want evironment variables available for emacs
+# starting emacs (in any way) slows down loading after login a little
+systemctl --user --no-block start emacs
+systemctl --user --no-block start mpd
 
-# startx on login if tty1
+# * Startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then
 	startx
 elif [[ $- == *i* ]]; then

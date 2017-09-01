@@ -8,12 +8,15 @@
 
 # user
 user_services_setup() {
-	systemctl --user start mpd-notification
-	systemctl --user enable mpd-notification
-	# systemctl --user start psd
-	# systemctl --user enable psd
 	systemctl --user start udiskie
 	systemctl --user enable udiskie
+	# emacs, mpd, and mpd-notification block login for a long time
+	# starting in ~/.profile instead
+	# mpd-notification service fails quickly
+	# systemctl --user start mpd-notification
+	# systemctl --user enable mpd-notification
+	# systemctl --user start psd
+	# systemctl --user enable psd
 }
 
 # user
