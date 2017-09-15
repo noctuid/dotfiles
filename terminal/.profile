@@ -41,6 +41,9 @@ fi
 # for java
 export CLASSPATH=$CLASSPATH:/usr/share/java/junit.jar:/usr/share/java/hamcrest-core.jar:.
 
+# for python
+export WORKON_HOME=~/.virtualenvs
+
 # * Setting PATH
 pathdirs="
 # personal scripts
