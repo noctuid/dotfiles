@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+rofi -matching fuzzy -font "Fira Mono 12" -show run

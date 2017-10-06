@@ -71,7 +71,7 @@ shift + control + alt  + f
 	firejail --seccomp firefox
 
 shift + control + alt  + space
-	bemenu-run -p "run: " --fn "Fira Mono 8"
+	launcher
 
 shift + control + alt  + v
 	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
