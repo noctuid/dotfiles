@@ -731,6 +731,9 @@ function poweroff() {
 	# maybe this is overly paranoid, but it seems like a good idea
 	truecrypt --text --dismount || return 1
 	udiskie-umount --all || return 1
+	if command -v tmsu &> /dev/null; then
+		tmsu unmount -a || return 1
+	fi
 	if [[ $1 == reboot ]]; then
 		systemctl reboot
 	else
