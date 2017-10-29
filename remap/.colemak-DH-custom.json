@@ -96,10 +96,10 @@
         { "pos": "+", "letters": [ "=", "+", "Switch_VT_12" ] },
 
         { "pos": "Q", "letters": [ "q", "Q", "Tab" ] },
-        { "pos": "W", "letters": [ "w", "W", "", "", "Control+w" ] },
-        { "pos": "E", "letters": [ "f", "F", "`", "~", "Control+f" ] },
-        { "pos": "R", "letters": [ "p", "P" ] },
-        { "pos": "T", "letters": [ "b", "B" ] },
+        { "pos": "W", "letters": [ "w", "W", "`", "~", "Control+w" ] },
+        { "pos": "E", "letters": [ "f", "F", "[", "]", "Control+f" ] },
+        { "pos": "R", "letters": [ "p", "P", "{", "}" ] },
+        { "pos": "T", "letters": [ "b", "B", "|" ] },
         { "pos": "Y", "letters": [ "j", "J" ] },
         { "pos": "U", "letters": [ "l", "L" ] },
         { "pos": "I", "letters": [ "u", "U", "-", "_", "Home" ] },
@@ -108,12 +108,11 @@
         { "pos": "[", "letters": [ "[", "]" ] },
         { "pos": "]", "letters": [ "{", "}" ] },
 
-        { "pos": "\\", "letters": [ "\\", "|" ] },
         { "pos": "A", "letters": [ "a", "A", "1", "!" ] },
         { "pos": "S", "letters": [ "r", "R", "2", "@" ] },
         { "pos": "D", "letters": [ "s", "S", "3", "#" ] },
         { "pos": "F", "letters": [ "t", "T", "4", "$" ] },
-        { "pos": "G", "letters": [ "g", "G" ] },
+        { "pos": "G", "letters": [ "g", "G" ,"\\" ] },
         { "pos": "H", "letters": [ "m", "M" ] },
         { "pos": "J", "letters": [ "n", "N", "7", "&", "Down" ] },
         { "pos": "K", "letters": [ "e", "E", "8", "*", "Up" ] },
@@ -128,10 +127,9 @@
         { "pos": "B", "letters": [ "z", "Z" ] },
         { "pos": "N", "letters": [ "k", "K", "", "", "PageDown" ] },
         { "pos": "M", "letters": [ "h", "H", "6", "^", "Left" ] },
-        // symbols on extend since altgr+ hard to reach on laptop keyboard
-        { "pos": ",", "letters": [ ",", "<", "[", "", "[" ] },
-        { "pos": ".", "letters": [ ".", ">", "]", "", "]" ] },
-        { "pos": "/", "letters": [ "/", "?", "\\", "", "\\" ] }
+        { "pos": ",", "letters": [ ",", "<" ] },
+        { "pos": ".", "letters": [ ".", ">" ] },
+        { "pos": "/", "letters": [ "/", "?" ] }
 
         // needed if modifier combinations not being detected by sxhkd
         // { "pos": "A", "shiftlevels": [ "Win+AltGr" ], "letters": [ "Win+1" ] }
