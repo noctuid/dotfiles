@@ -54,8 +54,8 @@ Print
 	screenshot
 	# ~/bin/screenshot
 
-shift + control + alt  + p
-	screenshot select
+# shift + control + alt  + p
+# 	screenshot select
 
 shift + control + alt  + w
 	screenshot current_window
@@ -75,6 +75,9 @@ shift + control + alt  + space
 
 shift + control + alt  + v
 	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
+
+shift + control + alt + p
+	  emacsclient -ce "(progn (proced) (general-def 'normal local \"q\" #'delete-frame))"
 
 # ** Clicks
 # TODO clicks don't work when modifier held
