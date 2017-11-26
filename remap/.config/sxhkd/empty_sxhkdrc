@@ -23,6 +23,9 @@ f
 semicolon ; f
 	firejail --seccomp firefox
 
+q
+	firejail --seccomp qutebrowser --enable-webengine-inspector
+
 semicolon ; e
 	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
 
