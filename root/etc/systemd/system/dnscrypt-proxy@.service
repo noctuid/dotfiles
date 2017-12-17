@@ -1,19 +1,26 @@
 # https://wiki.archlinux.org/index.php/DNSCrypt#Create_systemd_file
+# improve startup time:
+# https://github.com/jedisct1/dnscrypt-proxy/issues/342#issuecomment-169134349
 [Unit]
 Description=DNSCrypt client proxy
 Documentation=man:dnscrypt-proxy(8)
-Requires=dnscrypt-proxy@%i.socket
 After=network.target
 Before=nss-lookup.target
 
 [Install]
-Also=dnscrypt-proxy@%i.socket
 WantedBy=multi-user.target
 
 [Service]
 User=dnscrypt
-Type=notify
+Type=forking
 NonBlocking=true
-ExecStart=/usr/bin/dnscrypt-proxy \
-    --resolver-name=%i
+ExecStart=/usr/bin/env bash -c 'input=%i; name=$${input%:*}; port=$${input#*:}; \
+    /usr/bin/env dnscrypt-proxy \
+    --local-address=127.0.0.1:$port \
+    --resolver-name=$name \
+    --daemonize'
 Restart=always
+
+# https://www.freedesktop.org/software/systemd/man/systemd.exec.html
+Nice=-10
+IOSchedulingPriority=0

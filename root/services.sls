@@ -88,11 +88,11 @@ systemd-modules-load:
 # * DNS
 # both of these have DNSSEC validation and no logs
 # none of the anycast servers have DNSSEC validation (impossible?)
-dnscrypt-proxy@ventricle.us:
+dnscrypt-proxy@ventricle.us:5301:
   service.running:
     - enable: True
 
-dnscrypt-proxy@dnscrypt.org-fr:
+dnscrypt-proxy@dnscrypt.org-fr:5302:
   service.running:
     - enable: True
 
