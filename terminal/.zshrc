@@ -1247,15 +1247,24 @@ alias vgaout='xrandr --output VGA1 --off && bspc monitor -r X'
 # play clipboard (url)
 function mpgo() {
 	mkdir -p /tmp/mpv
-	clipboard=$(xsel -b)
+	if [[ -n $1 ]]; then
+		clipboard=$1
+	else
+		clipboard=$(xsel -b)
+	fi
 	if [[ $clipboard =~ ^http ]] || [[ -f $clipboard ]]; then
 		echo "$clipboard" > /tmp/mpv/last_link
-		mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(xsel -b)"
+		# ytdl messes up direct links for some reason (slow)
+		mpv --no-ytdl --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$clipboard"
+	elif [[ $clipboard =~ ^magnet ]]; then
+		echo "$clipboard" > /tmp/mpv/last_link
+		 peerflix  "$clipboard" --mpv -- --no-ytdl \
+			--screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
 	fi
 }
 
 function mplast() {
-	mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$(< /tmp/mpv/last_link)"
+	mpgo "$(< /tmp/mpv/last_link)"
 }
 
 # youtube downloading
