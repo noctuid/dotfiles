@@ -42,41 +42,54 @@ F11
 	rldkbd
 
 # make sxhkd reload its configuration files:
-{shift + control + alt + period, super + escape}
+{mode_switch + super + period, super + period}
+	pkill -USR1 -x sxhkd
+
+# * Reloading
+# reload wm config or quit
+super + control + {_,shift + }Escape
+	wm_action {reload,quit}
+
+# reload keyboad layout (if screw it up and can't type)
+F11
+	rldkbd
+
+# make sxhkd reload its configuration files:
+{mode_switch + super + period, super + period}
 	pkill -USR1 -x sxhkd
 
 # * General Global Hotkeys
 # Actually one key bound to Shift+Control+Alt
 # Would use hyper if could get working a mod# instead of Num_Lock but can't
 # ** Brightness
-shift + control + alt  + e
+mode_switch + super + e
 	xbacklight -inc 10
 	# light -A 10
 
-shift + control + alt  + n
+mode_switch + super + n
 	xbacklight -dec 10
 	# light -U 10
 
 # ** Volume
-shift + control + alt  + i
+mode_switch + super + i
 	amixer -qD pulse sset Master 5%+
 
-shift + control + alt  + h
+mode_switch + super + h
 	amixer -qD pulse sset Master 5%-
 
 # mute
-shift + control + alt  + m
+mode_switch + super + m
 	amixer -qD pulse sset Master toggle
 
 # play/pause
-shift + control + alt  + o
+mode_switch + super + o
 	mpc toggle
 
 # next/prev
-shift + control + alt  + u
+mode_switch + super + u
 	mpc prev
 
-shift + control + alt  + y
+mode_switch + super + y
 	mpc next
 
 # ** Screenshots
@@ -84,40 +97,43 @@ Print
 	screenshot
 	# ~/bin/screenshot
 
-shift + control + alt  + p
-	screenshot select
+# mode_switch + super + p
+# 	screenshot select
 
-shift + control + alt  + w
+mode_switch + super + w
 	screenshot current_window
 
-# shift + control + alt + v
+# mode_switch + super+ v
 # 	mkdir ~/move/srec && cd ~/move/srec && srec -s
 
 # ** Program hotkeys
-shift + control + alt + t
+mode_switch + super + t
 	termite
 
-shift + control + alt  + f
+mode_switch + super + f
 	firejail --seccomp firefox
 
-shift + control + alt  + space
+mode_switch + super + space
 	launcher
 
-shift + control + alt  + v
-	emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
+mode_switch + super + v
+	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
+
+mode_switch + super + p
+	emacsclient -ce "(progn (proced) (delete-other-windows) (general-def 'normal 'local \"q\" #'delete-frame))"
 
 # ** Clicks
 # TODO clicks don't work when modifier held
-shift + control + alt  + k
+mode_switch + super + k
 	click middle
 	# ~/bin/click
 
 # regain focus from flash
-shift + control + alt  + a
+mode_switch + super + a
 	click left
 
 # ** Dropdowns
-shift + control + alt  + s
+mode_switch + super + s
 	dropdown
 
 # * Window Management
@@ -138,10 +154,13 @@ super + m
 super + {f,v}
 	wm_action wtoggle {fullscreen,floating}
 
+super + c
+	wm_action sticky
+
 # ** Selection and Movement
 # selection/movement by direction
-super + {_,shift +}{u,k,o,y}
-	wm_action {wsel,wmove} {left,down,up,right}
+super + {_,shift +}{u,y,k,semicolon}
+	wm_action {wsel,wmove} {left,right,down,up}
 
 # switch to last window
 super + l
@@ -169,9 +188,7 @@ super + {_,shift +} {a,r,s,t,d,h,n,e,i,o}
 	wm_action {dsel,wmove_tod} {1-9,10}
 
 # ** Resizing
-# on navigation layer
-# these can be thought of as moving the split between a window
-super + {Left,Down,Up,Right}
+super + control + {h,n,e,i}
 	wm_action wresize {left,down,up,right}
 
 # moving floating windows
@@ -213,16 +230,17 @@ button9
 	wm_action hide_all
 
 # ** Modifiers
-# can't be used with dual-role
+# buttons should not simulate dual-role keys (won't work consistently and will
+# result in unwanted keypresses)
 # http://www.linuxforums.org/forum/hardware-peripherals/169773-solved-map-mouse-button-modifier-key.html
-{_,shift +, control +, alt +}{_,shift +, control +, alt +}{_,shift +, control +, alt +} button50
-	xdotool keydown shift control alt
-
-{_,shift +, control +, alt +}{_,shift +, control +, alt +}{_,shift +, control +, alt +} @button50
-	xdotool keyup shift control alt
-
 {_,super +, super + shift + } button51
 	xdotool keydown super
 
 {_,super +, super + shift + } @button51
 	xdotool keyup super
+
+{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +} button50
+	xdotool keydown super Mode_switch
+
+{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +} @button50
+	xdotool keyup super Mode_switch

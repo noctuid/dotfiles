@@ -141,6 +141,9 @@ case $1 in
 				;;
 		esac
 		;;
+	sticky)
+		bspc node -g sticky
+		;;
 	wtoggle)
 		bspc node -t \~"$2"
 		;;
