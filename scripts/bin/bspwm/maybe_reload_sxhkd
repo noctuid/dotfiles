@@ -14,7 +14,7 @@ else
 fi
 echo "$empty" > /tmp/bspwm-last-desktop-empty
 
-if [[ -n $previously_empty ]] && [[ $previously_empty != "$empty" ]]; then
+if [[ $previously_empty != "$empty" ]]; then
 	pkill -x sxhkd
 	# since using mouse buttons as modifiers; see .sxhkdrc
 	xdotool keyup control shift alt super

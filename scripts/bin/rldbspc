@@ -20,8 +20,8 @@ else
 fi
 
 # set up home row navigation keybindings on empty desktops
-bspc subscribe desktop_focus monitor_focus node_manage \
-	 node_unmanage node_transfer | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
+bspc subscribe desktop_focus node_add node_remove node_transfer \
+	| xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
 
 bspc rule -r '*'
 # https://github.com/baskerville/bspwm/issues/551
