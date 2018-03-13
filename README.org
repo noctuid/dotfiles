@@ -1,27 +1,7 @@
-*Dotfiles*
+* About
+These are my dotfiles. If you are interested in keyboard-based programs (tui, cli, vim-inspired programs, emacs, etc.), keyboard ergonomics, Colemak, etc., this repo may be of some use. Most newer config files are consistently formatted (org-style headings/outline) and well-commented. However, the state of this repository is generally not up-to-date with my actual configuration, older config files may be a mess, and my actual configuration may have bugs, organization issues, or only work with a specific version of the relevant program (e.g. I've had alter my bspwm configuration for most updates), so I'd advise against copying anything without first testing it. I move any scripts that become significant/generally useful from my dotfiles into their own repos (e.g. [[https://github.com/noctuid/general.el][general.el]] and [[https://github.com/noctuid/tdrop][tdrop]]). That said, if you have any comments, questions, or suggestions regarding this repo, feel free to make an issue.
 
-These are my dotfiles. Some are pretty heavily commented. If you have interest in tui/cli programs, keyboard-based programs, keyboard ergonomics, colemak, vim, and/or emacs, this repo may be of some use. It's still kind of a mess, and some things really need to be cleaned up or updated (e.g. my config for bspwm here won't work for the latest version). Feel free to make an issue if you have an comments, questions, or suggestions.
-
-* *Table of Contents*
-- [[#pictures][Pictures]]
-- [[#summary][Summary]]
-- [[#why-the-keyboard][Why the Keyboard?]]
-- [[#why-emacs][Why Emacs?]]
-- [[#programs][Programs]]
-- [[#working-on][Working On]]
-- [[#cool-things-i-stole][Cool Things I Stole]]
-- [[#interesting-workflow-excerpts][Interesting Workflow Excerpts]]
-  - [[#make-any-terminal-emulator-dropdown-regardless-of-wm][Make Any Terminal Emulator Dropdown Regardless of WM]]
-  - [[#consolidate-bspwm-resizing-keybindings][Consolidate Bspwm Resizing Keybindings]]
-  - [[#empty-desktop-keybindings][Empty Desktop Keybindings]]
-  - [[#use-ranger-instead-of-default-gui-popup-for-file-saving][Use Ranger Instead of Default GUI Popup for File Saving]]
-  - [[#block-layout-in-emacsvim-and-examples-of-context-dependent-keybindings][Block Layout in Emacs/Vim and Examples of Context-dependent Keybindings]]
-  - [[#stream-any-video-in-mpv][Stream Any Video in MPV]]
-  - [[#make-gifswebms-in-mpv][Make Gifs/Webms in MPV]]
-  - [[#home-row-window-mangement][Home Row Window Mangement]]
-  - [[#create-a-modal-interface-for-programs-that-dont-support-rebinding][Create a Modal Interface for Programs That Don't Support Rebinding]]
-- [[#credit][Credit]]
-
+** Other Notes
 I have some notes on software related to aesthetics (e.g. compton and conky) [[./aesthetics/][here]]. [[./browsing/][Here]] are some notes on browser-related software (e.g. pentadactyl and vimperator). I'll eventually add my notes on vim, emacs, and text editing [[./emacs/.emacs.d/][here]] and my notes on keyboards, keyboard layouts, and keybindings/remappings [[./remap/][here]].
 
 Also see [[http://noctuid.github.io/][my blog]] if you're interested.
@@ -29,6 +9,37 @@ Also see [[http://noctuid.github.io/][my blog]] if you're interested.
 Some resources from others:
 - [[https://colemakmods.github.io/mod-dh/][stevep99's Colemak Mod-DH (Dvbg/Hm swap)]]
 - [[http://forum.colemak.com/viewtopic.php?id=1858][Tarmak - Colemak transitional layouts]]
+
+* Table of Contents                                                     :toc:
+- [[#about][About]]
+  - [[#other-notes][Other Notes]]
+- [[#pictures][Pictures]]
+- [[#workflow-summary][Workflow Summary]]
+- [[#on-rodent-extermination-why-the-keyboard-why-vim][On Rodent Extermination (Why the Keyboard? Why Vim?)]]
+- [[#on-the-unix-philosophy-why-emacs][On the Unix Philosophy (Why Emacs?)]]
+- [[#programs][Programs]]
+  - [[#os-and-package-managers][OS and Package Managers]]
+  - [[#configuration-management-installation-automation][Configuration Management/ Installation Automation]]
+  - [[#window-manager][Window Manager]]
+  - [[#hotkey-daemon][Hotkey Daemon]]
+  - [[#browser][Browser]]
+  - [[#image-viewer][Image Viewer]]
+  - [[#wallpaper-setter][Wallpaper Setter]]
+  - [[#file-manager][File Manager]]
+  - [[#pdf-viewer][Pdf Viewer]]
+  - [[#terminal-emulator][Terminal Emulator]]
+- [[#working-on][Working On]]
+- [[#interesting-workflow-excerpts][Interesting Workflow Excerpts]]
+  - [[#make-any-terminal-emulator-dropdown-regardless-of-wm][Make Any Terminal Emulator Dropdown Regardless of WM]]
+  - [[#empty-desktop-keybindings][Empty Desktop Keybindings]]
+  - [[#use-rangerdired-instead-of-default-gui-popup-for-file-saving][Use Ranger/Dired Instead of Default GUI Popup for File Saving]]
+  - [[#block-layout-in-emacsvim-and-examples-of-context-dependent-keybindings][Block Layout in Emacs/Vim and Examples of Context-dependent Keybindings]]
+  - [[#stream-any-video-in-mpv][Stream Any Video in MPV]]
+  - [[#make-gifswebms-in-mpv][Make Gifs/Webms in MPV]]
+  - [[#consolidate-bspwm-resizing-keybindings][Consolidate Bspwm Resizing Keybindings]]
+  - [[#home-row-window-mangement-outdated][Home Row Window Mangement (Outdated)]]
+  - [[#create-a-modal-interface-for-programs-that-dont-support-rebinding][Create a Modal Interface for Programs That Don't Support Rebinding]]
+- [[#credit][Credit]]
 
 * Pictures
 #+CAPTION: Words of Wisdom
@@ -41,194 +52,274 @@ See [[./aesthetics/][aesthetics/]] for more info on theming, panels, etc.
 
 #+CAPTION: Unclean Desktop
 [[./dirty.png]]
-* Summary
+
+* Workflow Summary
 The goals for my workflow are to achieve speed and efficiency, cut wasted time and movement, and eliminate hand, pinky, and wrist pain.
 
-My philosophy when choosing software is to pick customizable, keyboard-friendly programs that are configured in plain text. Setup should be automated. Human-editable configuration files prevent the need to repeatedly configure programs with a GUI, and keeping these files in a central location allows for better organization and easier backups (which should be performed regularly).
+My philosophy when choosing software is to pick customizable, keyboard-friendly programs that are configured in plain text. Setup should be automated. Human-editable configuration files prevent the need to ever configure programs with a mouse/GUI, and keeping these files in a central location allows for better organization and easier backups (which should be performed regularly as well as automatic snapshots).
 
-Modal editing should be used any time consecutive commands/actions are taken. Prefix keys, letter chords (e.g. vim-arpeggio and key-chord or dual-role keys), and thumb modifiers should be used for commands/actions that take place one at a time (e.g. deleting the last word when making a typo or window management). The fewest number of keys possible should be used to perform all actions, and the most comfortable keys should be personalized for the most frequently used actions.
+The most frequently used programs should be opened automatically and bound to a key instead of opened with a launcher. Sessions should be automatically saved and set up. Navigation of any sort (window, file, etc.) should be quick and not get in the way of the task at hand. Time shouldn't be wasted switching to and using the mouse. Symbols (e.g. parentheses, brackets, and programming operators) and keys like backspace and enter should be remapped or put on a layer based on their frequency of use. Similarly, modifier keys should be re-arranged and put into the most comfortable locations.
 
-The keyboard and keyboard layout used should ideally limit necessary movement away from the home row (and horizontal movement that requires hand repositioning), eliminate the need for pinky modifiers, and keep wrists straight. This can be achieved by using an ergonomic keyboard and ergonomic keyboard layout with a wide mod if necessary. Ideally, a keyboard should be split, vertically staggered, adjustably tented, support hardware remapping (with tmk firmware), and have a well positioned thumbcluster. In the absence of an ergonomic keyboard, a wide mod can help to keep wrists straight and is also useful for making RAlt more accessible to the thumb. An ISO layout can allow for a wider wide mod. A long term goal of mine is to learn stenography, but the barrier of entry is high.
+Modal editing should be preferred any time non-text-insertion commands/actions are taken consecutively and repeatedly as it saves keypresses and allows for differentiating between different modes or types of actions. Prefix keys, letter chords (e.g. vim-arpeggio and key-chord or dual-role keys), and thumb modifiers (best method when possible) should be preferred for one-off commands/actions (e.g. window management, basic line navigation, pasting at the cursor, deleting the previous word after mistyping a word, etc.). I don't follow these rules perfectly. I use modifiers for the most frequently used one-off commands but generally use modal prefix keys over modified prefix keys (i.e. when prefix keys become necessary because there are not enough =<modifier>+<key>= combinations available for some type of action, I prefer modal prefix keys). For example, I use modal keybindings for file/buffer/window/workgroup management keybindings in emacs even though these are one-off actions. Although =ESC SPC f= is longer than =C-SPC f= (e.g. for a ~find-file~ equivalent), this doesn't matter too much in practice since I am always in normal state If I am not typing, making the =ESC= unnecessary. Some may prefer to use modal editing only for consecutive, contextual, and/or composable editing commands and to instead consistently use modifiers regardless of mode/state when prefix keys become necessary to group one-off actions.
 
-The most frequently used programs should be opened automatically and bound to a key instead of opened with a launcher. Sessions should be automatically saved and set up. Navigation of any sort (window, file, etc.) should be quick and not get in the way of the task at hand. Time shouldn't be wasted switching to and using the rodent. Symbols (e.g. parentheses, brackets, and programming operators) and keys like backspace and enter should be remapped or put on a layer based on their frequency of use. Similarly, modifier keys should be re-arranged and put into the most comfortable locations.
+The fewest number of keys possible should be used to perform all actions (e.g. more than 2 keys for one-off actions is undesirable), and the most comfortable keys should be used for the most frequently used actions. That said, I think personalization is more important with regards to key sequence length than with to key position. For example, the philosophy of [[https://github.com/xahlee/xah-fly-keys][xah-fly-keys]] is to put the most frequently used commands on the most comfortable key positions. For me this is overkill not because I think this system requires too much memorization but because I think that it is hard to determine which commands should get the best positions (my command frequency has changed drastically over the years). I don't consider the difference in effort required to press most keys (excluding the worst keys like =z= and =b=) to be significant enough to justify this extra work. As a simpler method of choosing keybindings, I prefer using mnemonics so that commands are tied to related letters as opposed to keyboard positions. I do use some positional keybindings but they are all directional (e.g. QWERTY =mjkl= for directional keys) as opposed to being related to effort.
 
-* Why the Keyboard?
-I prefer software that was created with keyboard usage in mind. Some general things I look for are as follows:
+On the other hand, the positions of letters themselves can be more objectively optimized since there is a limited set of letters and letter/digraph frequency by language (and other statistics) can be more reasonably analyzed (e.g. see some of the reasoning behind [[https://colemak.com/Ergonomic][Colemak]] and [[https://colemakmods.github.io/mod-dh/][Colemak Mod-DH]]). The keyboard and keyboard layout used should ideally limit movement away from the home row (and horizontal movement that requires hand repositioning), eliminate the need for pinky modifiers, and keep wrists straight. This can be achieved by using an ergonomic keyboard and ergonomic keyboard layout with a wide mod (i.e. right hand moved over one or two keys) if necessary. Ideally, a keyboard should be split, vertically staggered, adjustably tented, support hardware remapping (e.g. see [[https://github.com/qmk/qmk_firmware][qmk]] and [[https://github.com/keyboardio/Kaleidoscope][kaleidoscpoe]]), and have a well positioned thumbcluster. The Keyboardio Model 01 is the only keyboard at the time of writing that meets these requirements well enough for me personally (e.g. the thumbcluster on the ergodox does not look like it would be comfortable to me). In the absence of an ergonomic keyboard, a wide mod can help to keep wrists straight and is also useful for making RAlt more accessible to the thumb. An ISO layout can allow for a wider wide mod. Using the TrackPoint buttons as modifiers on a ThinkPad allows for more thumb modifiers. As for the specific keyboard layout, I don't think it matters that much as long as it isn't QWERTY (but please be cautioned about [[file:remap/README.org::*Switching%20Keyboard%20Layout][switching keyboard layout]]). I personally prefer rolls to finger alternation and am not a huge fan of Dvorak, but look at the reasoning behind any layout you are interested in and decide for yourself what you prefer. A long term goal of mine is to learn stenography, but the barrier of entry is high.
+
+* On Rodent Extermination (Why the Keyboard? Why Vim?)
+I prefer software created with keyboard usage in mind because it is generally more efficient and can help reduce wrist pain (which I used to have problems with). Some general things I look for are as follows:
 
 - Can be operated entirely with the keyboard
 - Has modality (à la vim)
 - Allows for sequence/multi-key keybindings (à la vim)
 - Has some level of scriptability and the ability to call shell commands
 
-None are these are absolute requirements of course. I'm happy to use a mouse with GIMP or games. However, the keyboard is usually faster for any action that doesn't involve precise movement or interaction with specific pixels. This is mainly because the keyboard allows for lot more possible actions (through single, combined, and/or sequential keypresses) and because there is no need for precision. Certainly, mice can have a huge number of potential actions if you consider small parts of the screen as separate actions, but a system designed in this way would require inhuman precision and be unintuitive. The upside of the mouse in the first place is that it allows for a more intuitive user interface. GUIs designed with the mouse in mind use nested menus to prevent taking up too much screen space. Using keys instead of navigating through menus may require some memorization (though software like which-key eliminates the need for that), but it is ultimately far more efficient and frees up screen space as a bonus.
+None are these are absolute requirements of course. I'm happy to use a mouse with GIMP or games. However, the keyboard is usually faster for any action that doesn't involve precise movement or interaction with specific pixels. This is mainly because the keyboard allows for lot more possible actions (through single, combined, and/or sequential keypresses) and because there is no need for precision. Certainly, mice can have a huge number of potential actions if you consider small parts of the screen as separate actions, but a system designed in this way would require inhuman precision and would be unintuitive. The upside of the mouse in the first place is that it allows for a more intuitive user interface. GUIs designed with the mouse in mind use nested menus to prevent taking up too much screen space. Using keys instead of navigating through menus may require some memorization (though software like which-key eliminates the need for that), but it is ultimately far more efficient and can free up screen space as a bonus.
 
-I've found the keyboard to be more efficient for pretty much everything, including navigating to an arbitrary character in some text. People often seem to bring this up as case where the mouse is quicker. I've tested myself using vim-sneak and the mouse and found sneak to be significantly faster for me. Furthermore, I don't generally want to move to a random character, and the keyboard is far more elegant when you want to move by an actual unit like a sentence or paragraph or when you want to do something like jump to a typo or error.
+I've found the keyboard to be more efficient for pretty much everything, including navigating to an arbitrary character in some text. People seem often to bring this up as case where the mouse is quicker. I've tested myself using [[https://github.com/justinmk/vim-sneak][vim-sneak]] and [[https://github.com/hlissner/evil-snipe][evil-snipe]] and the mouse and found 2-char searching to be significantly faster for me. Furthermore, I don't generally want to move to a random character, and the keyboard is far more elegant when you want to move by an actual unit like a sentence or paragraph or when you want to do something like jump to a typo or error.
 
-Standard keyboards may generally be poorly designed (QWERTY, horizontal stagger, lack of thumb keys, and poorly placed modifiers), but the mouse is inefficient /by design/ without possibility for improvement (except for making it more like the keyboard by adding more buttons). That's not to say it's completely useless or that learning keybindings is always best. I'm happy to use the mouse for lesser-used programs (e.g. GParted) or to type out commands on the command line when it makes sense. However, I've found that for most simple applications, learning keybindings takes a few minutes, and for more complicated ones (e.g. vim), some investment pays off a lot (with regards to both efficiency and possibly wrist pain).
+Standard keyboards may generally be poorly designed (QWERTY, horizontal stagger, lack of thumb keys, and poorly placed modifiers), but the mouse is inefficient /by design/ without possibility for improvement (except for making it more like the keyboard by adding more buttons). That's not to say it's completely useless or that learning keybindings is always best. Again, I'm fine with using the mouse for lesser-used programs (e.g. GParted) or typing out commands on the command line instead of using keybindings when it makes sense. However, I've found that for most simple applications, learning keybindings takes a few minutes (especially if the keybindings are based off vim's and you already know vim), and for more complicated ones (e.g. the editor), some investment pays off a lot (with regards to both efficiency and possibly wrist pain).
 
-When it comes to modality, I'm not a complete purist either. Modality doesn't make sense for actions taken in isolation (like deleting one word backwards or moving to the end of the line before continuing to type). Of course, modality doesn't preclude the use of modifier keybindings, so I use them when it makes sense. That said, I find modality (or just letter keybindings if there is no text entry) makes sense most everywhere. Modality saves keypresses in any situation where you start executing multiple actions in a row. For every new action, you save the need to press a modifier you would have had to press otherwise. Furthermore, the vim style of having operators, motions, and text objects makes for great composability. The main exception for me is window managers. You can have modal keybindings with quite a few window managers, and [[https://github.com/HarveyHunt/howm][howm]] even embraces this style by default and provides operators and motions. Since I personally don't usually take more than one or two window management related actions at a time, I'd find modality to be extremely inefficient here though and stick mainly to thumb-modifier keybindings.
+When it comes to modality, I'm not a complete purist either. Modality doesn't make sense for actions taken in isolation (like deleting one word backwards or moving to the end of the line before continuing to type), and it is not the answer to "Emacs pinky," RSI, etc. (a better keyboard and/or layout is). Improved ergonomics can be a major benefit if you are using a standard keyboard, but it's not the main one. Of course, modality doesn't preclude the use of modifier keybindings, so I use them when it makes sense. That said, I find modality (or just letter keybindings if there is no text entry) makes sense almost everywhere. Modality saves keypresses in any situation where you start executing multiple actions in a row. The downside is the key(s) required for mode switching, but for every new action, you save the need to press a modifier you would have had to press otherwise. This means that when an extra key is required to switch modes, it is quickly made up for. Furthermore, the vim style of having operators, motions, and text objects makes for great composability. Finally, different modes allow for contextual key reuse (e.g. =i= can be used for text objects in the visual and operator pending modes).
+
+The main exception where I dislike modality is with window managers. You can have modal keybindings with quite a few window managers, and [[https://github.com/HarveyHunt/howm][howm]] even embraces this style by default and provides operators and motions. Since I personally don't usually take more than one or two window management related actions at a time, I find modality to be extremely inefficient here and stick to thumb-modifier keybindings.
 
 It's also worth noting that modality isn't exclusive to vim. Even emacs users who have little interest in vim make use of [[https://github.com/abo-abo/hydra][hydra]] (the equivalent of sub modes/user created modes in vim) to save keypresses. Org speedkeys (or [[https://github.com/abo-abo/worf][worf]]) and [[https://github.com/abo-abo/lispy][lispy]] could also be seen as "contextually" modal.
 
-As for sequence keybindings, I find them vital for programs where a lot of actions need to be bound. I much prefer two keypresses on the home row to using Control or some modifier, but that in part has to do with not having a decent keyboard with easily accessible thumb keys.
+As for sequence keybindings, they are vital for programs where any significant number of actions need to be bound. It is unfortunate that many commandline programs do not support them (e.g. every cli feed reader I've tried at the time of writing).
 
-Finally, scriptability is almost always nice. I especially love software that is configured in an actual language or in commands that would be valid for that program's "command line" (e.g. vim, emacs, vimus, and pentadactyl). It's not even necessary for the program itself to provide the scripting language. For example, bspwm and lemonbar can be scripted in essentially any language. In many cases a simple config file will do for me though, especially when keys can be bound to external programs.
+Finally, scriptability is almost always nice. I especially love software that is configured in an actual language or in commands that would be valid for that program's "command line" (e.g. vim, emacs, vimus, and pentadactyl). It's not even necessary for the program itself to provide the scripting language. For example, bspwm, lemonbar, polybar, etc. can be scripted in essentially any language. In some cases a simple config file will do for me though, especially when keys can be bound to external programs.
 
-* Why Emacs?
-I have no attachment to the Unix philosophy. I care mainly about practicality and reusability. If you consider emacs as a single, monolithic program, then it completely violates the Unix philospohy. On the other hand, if you consider it to be an ecosystem, there are many individual packages written for it that do one thing well, and they can usually be combined to work well with each other.
+* On the Unix Philosophy (Why Emacs?)
+I have no attachment to the Unix philosophy. I care mainly about practicality and reusability. If you consider emacs as a single, monolithic program, then it completely violates the Unix philospohy. On the other hand, if you consider it to be an ecosystem, there are many individual packages written for it that do one thing well, and they can generally be combined to work well with each other (e.g. =ivy=, =which-key=, etc.).
 
-It turns out that, for me, emacs is the best interface for anything text-related from a user and developer standpoint. Standalone programs that aim to be vim-like have to re-implement a modal keybinding system, vim motions, etc., and it's very unlikely that they'll have advanced functionality like fuzzy searching or text objects or be easily programmable. Every application for emacs gets vim functionality for free with evil. Motions, text objects, and operators are always available for navigating and copying text, and modal keybindings can be used for anything. Even for those who dislike modality, emacs offers programmability and many other useful packages. With ivy (or helm) and flx, you can fuzzy search the text of any buffer with immediate, visible context displayed for results. This, of course, applies even if the buffer is not a file on the disk (e.g. an irc buffer or terminal). You can use abbreviations, snippets, and autocompletion anywhere you can type text if you so desire. You can use a package like [[https://github.com/noctuid/link-hint.el][link-hint]] to copy or open links, buttons, file paths, etc. using the home row. Packages like avy, hydra, ivy, and evil can be useful even when you're not editing text but instead reading your mail or chatting on irc or jabber. If you choose to have emacs be your mail client, irc client, mpd client, feed reader, man page viewer, etc., you have a whole ecosystem of functionality that would not otherwise be available.
+It turns out that, for me, emacs is the best interface for anything text-related from a user and developer standpoint. Standalone programs that aim to be vim-like have to re-implement a modal keybinding system, vim motions, etc., and it's unlikely that they'll have advanced functionality like fuzzy searching or text objects or be easily programmable. Every application for emacs gets vim functionality for free with evil. Motions, text objects, and operators are always available for navigating and copying text, and modal keybindings can be used for anything. Even for those who dislike modality, emacs offers programmability and many other useful packages. With ivy (or helm), you can (fuzzy) search the text of any buffer with immediate, visible results. This, of course, applies even if the buffer is not a file on the disk (e.g. an irc buffer or shell/terminal buffer). You can use abbreviations, snippets, autocompletion, etc. anywhere you can type text if you so desire. You can use a package like [[https://github.com/noctuid/link-hint.el][link-hint]] to copy or open links, buttons, file paths, etc. using the home row. Packages like avy, hydra, ivy, and evil can be useful even when you're not editing text but instead reading your mail or communicating on irc or jabber. If you choose to have emacs be your mail client, irc client, mpd client, feed reader, man page viewer, etc., you have a whole ecosystem of functionality that would not otherwise be available.
 
-Some people scoff at the idea of running a terminal in a text editor. Certainly, there are some general ways to get some of the useful functionality I mentioned without re-implementing it across programs. Terminal programs are often keyboard friendly. Consider the vim navigation mode for scrollback and copying provided by some terminals. Tmux's copy mode allows for using vim keys for navigation regardless of the terminal. There are plenty of ways to do "link-hinting" for terminal programs. Zsh has text objects builtin now. You can integrate fasd and fzf with a lot of terminal applications (like ranger). Still, none of this comes close to the functionality available in emacs. How may tui applications provide full, customizable vim keys for navigation and copying? None. Tmux's copy mode is not all that efficient, especially when compared to navigating text with more advanced vim motions and avy (compare to sneak or easymotion). For some types of applications, there aren't even any that allow for sequence keybindings (i.e. I don't know of any standalone feed readers that do). Link-hinting in terminals is often error prone (e.g. for urls split across lines) and lacks customizability (e.g. one must use numbers for termite's link opening functionality). For this reason, I'm actually using [[https://github.com/noctuid/link-hint.el#using-for-links-in-terminal-with-tmux][emacs to do this]] even when opening urls outside of emacs. Integration with fzf is usually limited to actions on files or directories. On the other hand, many applications in emacs have good integration with helm and ivy. For example, you can use helm to search your emails or to switch to an IRC channel you have open.
+So the main reason that I use emacs is that, to me, it has the most generally useful text-manipulation libraries (e.g. evil, avy, ivy, etc.) as well as the most and best text-based applications (e.g. mu4e/notmuch/gnus, dired, erc/circe, nov.el, etc.) out of any program in existence. I think it unlikely that any program will catch up to emacs even with regards to just editing (ignoring vim itself, although I prefer emacs' packages and evil). The other reason I prefer emacs is because of its extensibility and basic design. While emacs lisp is lacking compared to other lisps, there is no existing editor configuration language that I would prefer to emacs lisp, and there is no primary configuration language that I dislike more than vimscript. There are also various design decisions in emacs that I prefer (e.g. emacs' hierarchical lookup for various keymaps vs. having to use buffer-local keybindings for everything). While there are a lot of design principles from other editors I wish emacs had like "Incredibly high performance" and reliability (see [[https://github.com/google/xi-editor][Xi]]), none of these editors come close in terms of functionality, and functionality is king.
 
-Also consider that emacs has an advantage over most tui programs in that it can nicely display formatted text and images. This isn't to say that I think emacs is always the best for any type of application. I'd never use it as my primary image viewer or browser, but there are some things it does unexpectedly well. Using eww can be great for reading html, and though I was skeptical at first, I've found myself liking pdf-tools more than zathura in some cases. Being able to use bookmarks or helm to get to my recently viewed pdfs is great. Unfortunately, pdfs in emacs aren't text, so you don't get all the features you would get otherwise. There are useful commands like =pdf-occur= though, and the outline menu can help with navigation. While you can't use vim keys to copy text directly, you can open a buffer with the text from the current page iserted and use evil to copy what you want there. In zathura and apvlv, there currently isn't any way at all to use the keyboard to copy text.
+Some people scoff at the idea of running a terminal in a text editor, but terminals' text editing capabilities are pitiful, and using emacs or vim to, for example, edit the current input requires extra keypresses. Certainly, there are some general ways to get some of the useful functionality I mentioned without re-implementing it across programs. Terminal programs are often keyboard friendly. Consider the vim navigation mode for scrollback and copying provided by some terminals. Tmux's copy mode allows for using vim keys for navigation regardless of the terminal. There are plenty of ways to do "link-hinting" for terminal programs. Zsh has text objects builtin now. You can integrate fasd and fzf with a lot of terminal applications (like ranger). Still, none of this comes close to the functionality available in emacs. How may tui applications provide customizable keys for navigation and copying on par with vim? There are no non-editor programs that do. Tmux's copy mode is not all that efficient, especially when compared to navigating text with more advanced vim motions and avy (compare to sneak or easymotion). Many tui applications don't even support sequence keybindings. Link-hinting in terminals is often error prone (e.g. for urls split across lines) and lacks customizability (e.g. one must use numbers for termite's link opening functionality). For this reason, I'm actually using [[https://github.com/noctuid/link-hint.el#using-for-links-in-terminal-with-tmux][emacs to do this]] even when opening urls outside of emacs. Integration with fzf is usually limited to actions on files or directories. On the other hand, many applications in emacs have good integration with helm and ivy. For example, you can use helm to search your emails, add to your mpd playlist, or to switch to an irc channel you have open.
 
-Let's also not forget the wonder of being able to customize everything in emacs lisp. As much as I prefer other lisps, emacs lisp still makes a great configuration and scripting language for a text editor.
+Also consider that emacs has an advantage over most tui programs in that it can nicely display formatted text and images. This isn't to say that I think emacs is always the best for any type of application. I'd never use it as my primary image viewer or browser (unfortunately emacs is far from the perfect ecosystem for everything), but there are some things it does unexpectedly well. Using eww can be great for reading html, and though I was skeptical at first, I've found myself liking pdf-tools and nov.el more than zathura in some cases. Being able to use bookmarks or helm/ivy to get to recently viewed pdfs is great. Unfortunately, pdfs in emacs aren't text, so you don't get all the features you would get otherwise. There are useful commands like =pdf-occur= though, and the outline menu can help with navigation. While you can't use vim keys to copy text directly, you can open a buffer with the text from the current page iserted and use evil to copy what you want there. In zathura and apvlv, there currently isn't any way at all to use the keyboard to copy text.
 
-The only slight disadvantage I've found of using emacs for these types of applications is that things may not look as good. For example, while I think emacs' irc clients look pretty good, I doubt they'll ever look anywhere as good as a riced weechat or irssi. Mingus looks ugly compared to ncmpcpp. Mu4e doesn't look as good as mutt. The same goes for elfeed when compared to newsbeuter or canto. In all these cases, the emacs versions are more minimal too, which some may prefer. I care more about functionality, so this doesn't really bother me.
+The only slight disadvantage I've found of using emacs for these types of applications is that things may not look as good. For example, while I think emacs' irc clients look pretty good, I doubt they'll ever look anywhere as good as a riced weechat or irssi. Mingus looks ugly compared to ncmpcpp. Mu4e doesn't look as good as mutt in my opinion. The same goes for elfeed when compared to newsbeuter or canto. For most of these, emacs version's UI is more minimal too, which some may prefer. I care more about functionality, so this doesn't really bother me.
 
 * Programs
-Here I've organized my thoughts from trying from trying out and choosing various programs.
+Here I've organized my thoughts from trying from trying out and choosing various programs. Arrows indicate switching primary program.
 
-| Type                    | Program                                        |
-|-------------------------+------------------------------------------------|
-| distro                  | arch                                           |
-| package manager         | pacman+powerpill+pacnanny+<any aur helper>     |
-|                         | nix                                            |
-| boot loader             | rEFind and GRUB                                |
-| config management/setup | bash+saltstack+stow                            |
-| display manager         | none                                           |
-| DE                      | none                                           |
-| window manager          | bspwm                                          |
-| hotkey daemon           | sxhkd and xchainkeys                           |
-| remapping               | klfc (to generate mainly XKB configs)          |
-| screen locker           | slimlock                                       |
-| text editor             | emacs and vim                                  |
-| shell                   | zsh (fish is fine too; eshell occasionally)    |
-| network manager         | connman (stuck on NetworkManager for now)      |
-| terminal emulator       | termite+tdrop+tmuxinator+tmux (also ansi-term) |
-| launcher                | bemenu                                         |
-| wallpaper setter        | setroot                                        |
-| panel                   | polybar (previously lemonbar-xft)               |
-| compositor              | compton                                        |
-| notifications           | dunst                                          |
-| file manager            | ranger                                         |
-| mass renaming           | ranger's :bulkrename (and wdired)              |
-| browser                 | firefox+pentadactyl (eventually qutebrowser)   |
-| password manager        | pass                                           |
-| image viewer            | pqiv (previously sxiv and feh)                 |
-| media player            | mpv                                            |
-| mail sending            | msmtp                                          |
-| mail fetching           | isync (previously offlineimap)                 |
-| mail client             | emacs+mu4e (previously mutt+abook+notmuch)     |
-| irc client              | emacs+circe (previously weechat)               |
-| feed reader             | emacs+elfeed (previously canto)                |
-| pdf viewer              | emacs+pdf-tools and zathura (previously apvlv) |
-| music                   | mpd+vimus                                      |
-| cd ripping              | abcde                                          |
-| music tagging           | beets                                          |
-| scheduling              | fcron                                          |
-| firewall                | ufw                                            |
-| encryption              | truecrypt/undecided                            |
-| backup                  | rsync/undecided                                |
-| fuzzy searching         | ivy+flx (emacs), FZF (terminal), unite (vim)   |
-| pager                   | vimpager (and woman in emacs)                  |
-| screenshots             | maim+slop (goodbye scrot)                      |
-| torrent client          | transmission                                   |
-| video recording         | ffmpeg+slop                                    |
-| audio/video conversion  | ffmpeg                                         |
-| torrent client          | transmission                                   |
-| tagging                 | tmsu (dont' really use)                        |
-| download manager        | aria2c (haven't tried saldl)                   |
-| calendar                | emacs+org+calfw                                |
-| language input          | ibus/undecided                                 |
-| typesetting             | have only tried LaTeX (and groff I guess)      |
-| markup/notes            | org                                            |
-| VC                      | git                                            |
-| fonts                   | inconsolata (LGC), fira-mono, uushi, siji      |
+| Type                      | Program                                                    |
+|---------------------------+------------------------------------------------------------|
+| distro                    | Ubuntu->Mint->Arch                                         |
+| kernel                    | linux-ck                                                   |
+| config management/setup   | bash+SaltStack+stow                                        |
+| arch package manager      | pacman+powerpill+pacnanny+(yaourt->pacaur->trizen or yay?) |
+| universal package manager | nix                                                        |
+| emacs package manager     | package.el->straight.el                                    |
+| vim plugin manager        | neobundle->dein or vim-plug?                               |
+| shell plugin manager      | antigen->antigen-hs->zgen->zplug                           |
+| tmux plugin manager       | tpm                                                        |
+| boot loader               | GRUB->rEFInd                                               |
+| display manager           | none                                                       |
+| DE                        | everything->none                                           |
+| window manager            | everything->bspwm                                          |
+| hotkey daemon             | sxhkd and xchainkeys                                       |
+| remapping                 | xmodmap->klfc (to generate mainly XKB configs)             |
+| screen locker             | slimlock                                                   |
+| text editor               | notepad++->gedit->sublime->vim->emacs (tried all vim alts) |
+| shell                     | bash->zsh (fish is fine too; eshell occasionally)          |
+| terminal multiplexor      | tmux                                                       |
+| network manager           | connman (NetworkManager as backup)                         |
+| old terminal emulators    | gnome-terminal->xfce4-terminal->guake->URxvt->termite      |
+| terminal emulator         | (termite and xst->kitty?)+tdrop+tmux (also ansi-term)      |
+| launcher                  | dmenu->bemenu->rofi                                        |
+| wallpaper setter          | everything->setroot                                        |
+| panel                     | lemonbar(-xft)->polybar                                    |
+| compositor                | compton                                                    |
+| notifications             | dunst                                                      |
+| file manager              | ranger->(maybe eventually) dired/ranger.el                 |
+| mass renaming             | ranger's :bulkrename (and wdired)                          |
+| browser                   | firefox+pentadactyl (eventually->qutebrowser)              |
+| password manager          | pass                                                       |
+| image viewer              | everything (mainly feh and sxiv)->pqiv                     |
+| media player              | vlc/mplayer->mpv                                           |
+| mail sending              | msmtp                                                      |
+| mail fetching             | offlineimap->isync                                         |
+| mail client               | mutt+abook+notmuch->emacs+mu4e                             |
+| irc client                | weechat->emacs+circe                                       |
+| feed reader               | canto->emacs+elfeed                                        |
+| pdf viewer                | apvlv->emacs+pdf-tools and zathura                         |
+| music                     | clementine/a lot->mpd+(ncmpcpp->vimus->mingus)             |
+| cd ripping                | abcde                                                      |
+| music tagging             | beets                                                      |
+| scheduling                | fcron                                                      |
+| firewall                  | ufw                                                        |
+| encryption                | truecrypt->veracrypt                                       |
+| backup                    | rsync->(eventually)borg                                    |
+| searching                 | helm->ivy+flx (emacs), FZF (terminal), unite (vim)         |
+| pager                     | vimpager (and woman in emacs)                              |
+| screenshots               | scrot->maim+slop                                           |
+| torrent client            | transmission                                               |
+| video recording           | ffmpeg+slop                                                |
+| audio/video conversion    | ffmpeg                                                     |
+| torrent client            | transmission                                               |
+| tagging                   | tmsu (don't really use)                                    |
+| download manager          | aria2c (haven't tried saldl)                               |
+| calendar                  | emacs+org+calfw                                            |
+| language input            | scim->ibus->fcitx                                          |
+| typesetting               | have only tried LaTeX (and groff I guess)                  |
+| markup/notes              | doc->odt->markdown->org                                    |
+| VC                        | git                                                        |
+| fonts                     | inconsolata (LGC), fira-mono/code, uushi, siji             |
 
-** OS and Package Manager
-I started out using debian-based distros but quickly switched to Arch mainly for the minimal base installation, pacman, the aur, the wiki, and the rolling-release system. I love that essentially all the software I use is available in the aur. On the other hand, I hate having to recompile all my aur packages to ensure nothing breaks after a system update. This isn't always necessary if major packages (like gpg) haven't been updated, but it often makes me wish that more programs were in the official repos. As for aur helpers, I don't really have a strong preference. I've mainly used yaourt, but I've been using aura and pacaur more recently. I like that pacaur and yaourt can be used for both the aur and official repos at once, and I like that aura is run as root from the start like pacman, but I don't really use any of their advanced functionality. As for my actual kernel, I'm using linux-ck for bfq and bfs. I've found bfq to help to prevent my laptop from freezing as badly during large file transfers.
+** OS and Package Managers
+I started out using debian-based distros but quickly switched to Arch mainly for the minimal base installation, pacman, the aur, the wiki, and the rolling-release system. I love that essentially all the software I use is available in the aur (though I like that a good portion of my aur-only packages are in the official nix repos better). On the other hand, I hate having to recompile all my aur packages to ensure nothing breaks after a system update. This isn't always technically necessary if major packages (like gpg) haven't been updated, but it's risky not to. This makes me wish that more programs were in the official repos. As for aur helpers, I don't really have a strong preference. I'm mainly using trizen since pacaur development died; I really like that it asks to retry instead of quitting (e.g. if I leave it alone for a while after it's done/wrong password). Bauerbill and aura are also interesting. I like that pacaur can be used for both the aur and official repos at once, and I like that aura is run as root from the start like pacman, but I don't really use any of their advanced functionality.
 
-I've been using [[https://nixos.org/nix/][nix]] more and more, and it solves most of the annoyances I have with pacman. Nix is great because it's a distro-independent package manager that takes a "functional" approach to package management. I really love being able to have multiple versions of packages (and of their dependencies) installed at once. This makes it easy for me to test my emacs packages with multiple versions of emacs. It also means updating something like ncurses or gtk won't break an older version of a program (different programs can use different versions of a dependency). Having everything under =/nix= means that nix can be used on any distro without conflicting with any packages installed by another package manager. Nix also gives you a good level of customizability by allowing packages to be compiled with or without certain features, but it also provides binaries if you don't need to customize a package.
+As for my actual kernel, I'm using linux-ck for bfq and bfs. I've found bfq to help to prevent my laptop from freezing as badly during large file transfers. This is less of an issue on my current laptop, but it's easy enough to CK that I haven't considered switching back to the default kernel.
+
+I've been using [[https://nixos.org/nix/][nix]] more and more, and it solves most of the annoyances I have with pacman. Nix is great because it's a distro-independent package manager that takes a "functional" approach to package management. I really love being able to have multiple versions of packages (and of their dependencies) installed at once. This makes it easy for me to test my emacs packages with multiple versions of emacs (edit: evm does this better). It also means updating something like ncurses or gtk won't break an older version of a program (different programs can use different versions of a dependency). Having everything under =/nix= means that nix can be used on any distro without conflicting with any packages installed by another package manager. Nix also gives you a good level of customizability by allowing packages to be compiled with or without certain features, but it also provides binaries if you don't need to customize a package.
 
 I've ended up liking most things about nix a lot more than other package managers, and despite its non-traditional approach, it still makes writing packages fairly simple. To be honest, for the few simple packages I've written, it was even more straightforward than writing a PKGBUILD. That said, nix isn't as polished as pacman. By default, searching for packages is extremely slow (though [[https://github.com/madjar/nox][nox]] fixes this), and while installing packages isn't slow, it's definitely not as fast as using pacman and powerpill. It is also missing some of the packages I use, but that is changing quickly, and anyone can make a pull request to add a package.
 
-I doubt I'll switch away from Arch for primarily practical reasons (popularity and good support), but I am interested in trying out other distros like CRUX and gentoo. For me the, the most important features of a distro are the package manager, the size of the community, maturity, and how easily the installation can be scripted (e.g. not having to uninstall a bunch of default programs, a DE, or a display manager). [[https://nixos.org/][NixOS]] is exceptional with regards to the last point. NixOS provides a single central configuration file that replaces the fstab and pretty much all root config files. You can use it to do things like create your user, set your hostname, set your timezone, and install all the packages you use. Changes are saved, so you can rollback to a previous configuration in GRUB if you break something. This means that NixOS has builtin support for a declarative installation without the need to do almost any manual setup. My first install in virtualbox took about ten minutes using the basic template configuration. You configure your system once and then forget about it; this is how things should be. It's not too hard to achieve this with scripts on Arch, but the way NixOS does things is much simpler and cleaner.
+I doubt I'll switch away from Arch for primarily practical reasons (popularity and good support), but I am interested in trying out other distros like CRUX and gentoo. For me the, the most important features of a distro are the package manager, size of the community, level of maturity, and how easily the installation can be scripted (including a minimal installation so uninstalling defaults insn't necessary). [[https://nixos.org/][NixOS]] is exceptional for automated installation. It provides a single central configuration file that replaces the fstab and pretty much all root config files. You can use it to do things like create your user, set your hostname, set your timezone, and install all the packages you use. Changes are saved, so you can rollback to a previous configuration in the bootloader if you break something. This means that NixOS has builtin support for a declarative installation without the need to do almost any manual setup. My first install in virtualbox took about ten minutes using the basic template configuration. You configure your system once and then forget about it; this is how things should be. It's not too hard to achieve this with scripts on Arch, but the way NixOS does things is much simpler and cleaner.
 
-On the other hand, the way NixOS works makes it harder (or impossible) to manually install software. You can't just ~make && make install~. Nix doesn't put programs under =/usr/bin= or =/bin=; they go under =/nix= and are symlinked into ~\~/.nix-profile/bin~. There are a few programs that I need to update frequently (some bug has been fixed or feature added), and while the process to do this on NixOS can be mostly automated, it's not nearly as simple as updating a package from the aur. This isn't a big deal, but it could pose a problem for me in the case that I needed to quickly install a package that wasn't already in the repos. Some other reasons I'm hesitant to switch are the lack of a lot of packages I use, the lack of startx, and the lack of support/popularity (e.g. the documentation/wiki is lacking). The package situation is constantly improving though, and nix has a lot of packages that aren't even in the official Arch repos. For now I'm happy to be able to use both nix and pacman.
+On the other hand, the way NixOS works makes it harder (or impossible) to manually install software. You can't just ~make && make install~. Nix doesn't put programs under =/usr/bin= or =/bin=; they go under =/nix= and are symlinked into =~/.nix-profile/bin=. There are a few programs that I need to update frequently (some bug has been fixed or feature added), and while the process to do this on NixOS can be mostly automated, it's not nearly as simple as updating a package from the aur. This isn't a big deal, but it could pose a problem for me in the case that I needed to quickly install a package that wasn't already in the repos. Some other reasons I'm hesitant to switch are the lack of a lot of packages I use, the lack of startx, and the lack of support/popularity (e.g. the documentation/wiki is lacking). The package situation is constantly improving though, and nix has a lot of packages that aren't even in the official Arch repos. For now, I'm happy to be able to use both nix and pacman.
 
-As for guix, I see it as a less popular (less packages), more restricted (only libre packages are allowed) version of nix. My laptop won't even work properly with linux-libre, so GuixSD isn't really an option for me. I'd probably prefer to use scheme over the nix DSL, but the nix DSL is pretty simple and good enough for the task I think (especially considering that a lot of package managers just use bash). What major benefits guix has to the end user, I'm not sure. The command names for guix seem more reasonable to me, and it has a nice emacs package. On the other hand, it's worth noting that nix is on github, whereas the primary way to interact with the guix community is the mailing list. For these reasons, I have to doubt that guix will ever be useful to more than a small niche of people. I still hope to play around with guix and Sheperd (previously dmd) more in the future and would still recommend checking it out.
+As for guix, I see it as a less popular (less packages), more restricted (only libre packages are allowed) version of nix. My laptop won't even work properly with linux-libre, so GuixSD isn't really an option for me. I might prefer to use scheme over the nix DSL, but the nix DSL is pretty simple and good enough for the task I think (especially considering that a lot of package managers just use bash). I'm not sure what major benefits guix has to the end user. The command names for guix seem more reasonable to me, and it has a nice emacs package. On the other hand, it's worth noting that nix is on github, whereas the primary way to interact with the guix community is the mailing list. For these reasons, I have to doubt that guix will ever be useful to more than a small niche of people. I still hope to play around with guix and Sheperd (previously dmd) more in the future and would still recommend looking into guix.
 
 ** Configuration Management/ Installation Automation
-Installing Arch manually every time is needlessly tedious. Automation of this process isn't nearly as nice as on NixOS or GuixSD, but it's not too hard to write a script to do the initial configuration you would always do. The post-install setup is a lot more tedious, especially if you don't remember what packages you normally install. This is why I prefer a declarative setup. Initially I had an ugly bash script do everything before deciding to try using a Configuration Management tool. I'm not that familiar with the different CM tools, but I ended up choosing saltstack as it seemed to be simpler for what I wanted to do and I liked the use of simple yaml files (I did not look too much into ansible though).
+Installing Arch manually every time is needlessly tedious. Automation of this process isn't nearly as nice as on NixOS or GuixSD, but it's not too hard to write a script to do the initial configuration you would always do. The post-install setup is a lot more tedious, especially if you don't remember what packages you normally install. This is why I prefer a declarative setup. Initially I had an ugly bash script do everything before deciding to try using a Configuration Management tool. I'm not that familiar with the different CM tools, but I ended up choosing SaltStack as it seemed to be simpler for what I wanted to do (e.g. yaml files; I did not look too much into ansible though).
 
-I'm still using a bash script as a base to do the necessary setup for my salt configuration. It updates the pacman mirrorlist and installs salt, powerpill, and aura. I'm using aura for installing aur packages with salt because it can be run as root without problems (and salt doesn't have a plugin to install aur packages). My salt configuration has formulas for creating my user, setting up my root configuration files, installing all my packages (including those installed by other programs like =nix= and =pip=), and enabling/starting my services. The feedback given by salt is really nice and is one reason I prefer it to just installing a list of packages despite the increased verbosity.
+I'm still using a bash script as a base to do the necessary setup for my salt configuration. It updates the pacman mirrorlist and installs salt, powerpill, and an aur helper (as salt doesn't have a plugin to install aur packages). My salt configuration has formulas for creating my user, setting up my root configuration files, installing all my packages (including those installed by other programs like =nix= and =pip=), and enabling/starting my services. The feedback given by salt is really nice and is one reason I prefer it to just installing a list of packages.
 
-After all this, my bash script just uses [[https://www.gnu.org/software/stow/][stow]] to set up the configuration files in my home directory. I prefer to keep all my dotfiles under =~/dotfiles= since it is less cluttered and means I don't have to make my home directory a git repository. Stow also allows me to have my dotfiles further categorized into sections (e.g. =music=). I've looked at the countlss "dotfile managers", and most of them just make things more complicated (e.g. by requiring every managed config file have an entry) or don't allow for categorizing dotfiles into different directories. Stow is simple and does everything I need, so I have no intention of switching to something else.
+After all this, my bash script just uses [[https://www.gnu.org/software/stow/][stow]] to set up the configuration files in my home directory. I prefer to keep all my dotfiles under =~/dotfiles= since it is less cluttered and means I don't have to make my home directory a git repository. Stow also allows me to have my dotfiles further categorized into sections (e.g. =music=). I've looked at the countless "dotfile managers", and most of them just make things more complicated (e.g. by requiring every managed config file have an entry) or don't allow for categorizing dotfiles into different directories. Stow is simple and does everything I need, so I have no intention of switching to something else.
 
+# TODO
 See [[./root]] for these scripts. I'll add my install and post-install bash scripts once I get the chance to test them more thoroughly.
 
 ** Window Manager
 This is probably my most selective pick, considering just how many window managers there are (I've tried dozens, many when testing [[https://github.com/noctuid/tdrop][tdrop]]). After finding out about tiling window managers, I used awesome and xmonad with a DE for a while before switching to using just bspwm. I tried herbstluftwm and i3 as well and like them for mostly the same reasons I like bspwm, but bspwm is by far my favorite. The reason is that while it is extremely simple, it is also extremely scriptable and has a lot of advanced functionality if you need it.
 
- When I was using xmonad and awesome, I knew very little about haskell or lua and had config files full of snippets I didn't understand just to have basic the functionality I wanted. In contrast, bspwm has a simple, straightforward configuration file and has everything I want out of the box (e.g. highly customizable keybindings). I like that the hotkey daemon is separate (unlike with most window managers) and that all interaction with bspwm is done through a command line program, bspc. This basically makes bspwm scriptable in pretty much any language (though I've never needed to use anything other than bash). I don't use a lot of bspwm's more advanced functionality (read the man page; it's capable of a ton), but I do use its query, subscribe, and rule commands a lot. They make doing a lot of things trivial (e.g. automatically taking actions when certain events occur).
+ When I was using xmonad and awesome, I knew very little about haskell or lua and had config files full of snippets I didn't understand just to have basic the functionality I wanted. In contrast, bspwm has a simple, straightforward configuration file and has everything I want out of the box (e.g. highly customizable keybindings). I like that the hotkey daemon is separate (unlike with most window managers) and that all interaction with bspwm is done through a command line program: =bspc=. This basically makes bspwm scriptable in pretty much any language (though I've never needed to use anything other than bash). I don't use a lot of bspwm's more advanced functionality (see the man page; it's capable of a ton), but I do use its query, subscribe, and rule commands a lot. They make doing a lot of things trivial (e.g. automatically taking actions when certain events occur).
+
+I've tried exwm, but it is not really for me (see this relevant [[https://www.reddit.com/r/emacs/comments/74hetz/emacs_everywhere/dnz5gdf/][discussion]]). I don't need my WM to do a lot. Bspwm offers more functionality than I need already, and switching to exwm would be entirely downsides for me. Exwm has seen significant improvements, but I'd be more likely to switch to something like stumpwm/paulownia if I really wanted a lisp WM. Key simulation is a not a feature unique to exwm; it's just built in. I don't need ivy/helm for window switching; I use very few windows. Given how often I've seen various packages slow/crash emacs, I'm pretty hesitant to use it as a window manager even with a minimal configuration. Many people use it without issues, so this concern is probably unwarranted if exwm is configured sanely.
 
 ** Hotkey Daemon
-Here's one area where I prefer adherence to the Unix philosophy. I find it kind of annoying that there are so many window managers that implement keybinding functionality that can't be used with other window managers. I also happen to like sxhkd better than the WM specific alternatives. Compared to xbindkeys, it has saner syntax (imho) and a lot more functionality. It allows for prefix, modal, and modifier keybindings. That said, last time I tried using deeply nested keys, it was buggy, so I generally use xchainkeys when I want to mess around with that sort of thing.
-
-** Panel
-I'm using [[https://github.com/LemonBoy/bar][lemonbar]] (the xft version). You use it by simply piping text into it, so it's scriptable in pretty much any language. For this reason, it may also be hard o get started with, but bspwm's [[https://github.com/baskerville/bspwm/tree/master/examples/panel][example panel]] is a good start. It doesn't have tray or image support, but I don't personally need these.
+Here's one area where I prefer adherence to the Unix philosophy. I find it kind of annoying that there are so many window managers that implement keybinding functionality independently. I also happen to like sxhkd better than every WM-specific keybinding method I've tried. Compared to xbindkeys, it has saner syntax in my opinion and has a lot more functionality. It allows for prefix, modal, and modifier keybindings. That said, deeply nested keybindings were buggy last time I tried them, so I'd recommend xchainkeys as a potential alternative.
 
 ** Browser
-Pentadactyl is a mammoth of vimmy goodness, and, unfortunately, nothing else currently comes close. As for firefox itself, I do like that it has a lot of security and privacy related settings, but I don't like the direction it's been taking recently, and it is extremely slow. Every time I use qutebrowser, I'm astonished by how blazingly fast it is. It already supports pass integration. As soon as it allows for domain-specific settings/keybindings and has tabgroups and support for userscripts, I'll probably switch to it.
+# TODO
+See the [[./browsing/]] README.
 
 ** Image Viewer
-My image manager of choice is [[https://github.com/phillipberndt/pqiv][pqiv]]. I was previously using sxiv but never found it to be very convenient/hospitable. Pqiv is a keyboard-focused image viewer like sxiv, but it fixes pretty much everything I disliked about sxiv. Unlike sxiv, it has an actual config file that's read at run time. You can bind shell commands to any key directly in the config file, whereas in sxiv you can only have one external key-handler used with a prefix key. For this reason, I'd previously been using a fork of sxiv with ugly, duplicated code to add more key-handlers. Pqiv is also the only image viewer I'm aware of that has vim-like sequence key bindings. It allows for binding keys to multiple commands and even allows for cycling the behavior of keys. This means you can implement something like a 4-corner cycle for reading comics directly in the config file. Speaking of comics, it supports viewing images in archives (e.g. cbz). It's even scriptable, and you can send commands to a running instance or have it watch a directory and automatically update its image list. It also allows viewing the output of running commands on an image (e.g. imagemagick). Pqiv even supports viewing video and webms if you want.
+My image manager of choice is [[https://github.com/phillipberndt/pqiv][pqiv]]. I was previously using sxiv but never found it to be very convenient/hospitable. Pqiv is a keyboard-focused image viewer like sxiv, but it fixes pretty much everything I disliked about sxiv. Unlike sxiv, it has an actual config file that's read at runtime. You can bind shell commands to any key directly in the config file, whereas in sxiv you can only have one external key-handler used with a prefix key. For this reason, I'd previously been using a fork of sxiv with ugly, duplicated code to add more key-handlers. Pqiv is also the only image viewer I'm aware of that has vim-like sequence key bindings. It allows for binding keys to multiple commands and even allows for cycling the behavior of keys. This means you can implement something like a 4-corner cycle for reading comics directly in the config file. Speaking of comics, it supports viewing images in archives (e.g. cbz). It's even scriptable, and you can send commands to a running instance or have it watch a directory and automatically update its image list. It also allows viewing the output of running commands on an image (e.g. imagemagick). Pqiv even supports viewing video and webms if you want to.
 
 Given all this, I think it's a crime pqiv isn't more popular. I'd definitely recommend trying it out.
 
 ** Wallpaper Setter
-I pretty much tried every wallpaper setter without being happy with any of them even for basic functionality (most of them don't have feh's option to fit to either the width or height to fill the screen). The best I'd tried were imlibsetroot and feh. I don't use feh as an image viewer, and ended up liking [[https://github.com/ttzhou/setroot][setroot]] even better, so it takes the cake for me. I've written some more about it [[./aesthetics/][here]].
+# TODO
+ See the [[./aesthetics/]] README.
 
 ** File Manager
 Dired can be a good file manager, and I'm using it more, but ranger is far more polished out of the box. I especially love rifle and how well ranger does previews. The only thing that bothers me about it is how slow it can be to load when starting or entering certain directories.
 
-As for mass renaming, there are a ton of solutions (e.g. vidir, wdired, vim-renamer, and tmfan), but they all basically end up involving editing the directory structure in a file. I end up using ranger's =:bulkrename= and emacs' wdired since they are both builtin and work well.
+As for mass renaming, there are a ton of solutions (e.g. vidir, wdired, vim-renamer, and tmfan), but they all basically end up involving editing the directory structure in a file. I use ranger's =:bulkrename= and emacs' wdired since they are both builtin and work well.
 
 ** Pdf Viewer
-I mentioned my reasons for liking pdf-tools above. Zathura is also a nice vim-like pdf viewer, but I dislike the lack of tab support (apvlv has tabs btw), especially when I have related pdfs open. Using tabbed is disgusting for any program (just compare pressing a single key to creating a new tab with some global key like =alt+shift+t=).
+I mentioned my reasons for liking pdf-tools above. Zathura is also a nice vim-like pdf viewer, but I dislike the lack of tab support (which apvlv does support), especially when I have related pdfs open. Using suckless' tabbed is awful; it's not aware of the context of programs and just compare pressing a single key to creating a new tab with some global key like =alt+shift+t=.
+
+** Terminal Emulator
+I don't need much functionality from a terminal emulator. Editors will always do selection/search better than terminal emulators, and tmux does it better or just as well than most terminal emulators. Tmux also does splits/tabs better or just as well as most terminal emulators (see [[https://news.ycombinator.com/item?id=13342516][here]] for an alternate opinion on multiplexors from the author of kitty). The main thing I want from a terminal emulator is image capability (for ranger image previews), correct/out-of-the-box handling of fonts/icons, and correct handling of input. Currently, termite and xst are my favorite terminals that meet these requirements, but kitty is the terminal I'm the most excited about (it has what seems to me the best method for image display among any terminal emulator and speed, truecolor support, ligature support, and extensibility are all nice bonuses). I plan on switching once the input issues are fixed.
 
 * Working On
-- Cleaning up all config files and adding them here
-- Cleaning up and adding emacs init file
-- Cleaning up older bash scripts
-- Testing post-install scripts
-- Patiently waiting for my keyboardio so I can experiment with multiple persistent key layers, dual-role letter keys, and keyboard macros using tmk firmware
-- A smart dual-role program (waiting on a bug in a library to be fixed)
-
-* Cool Things I Stole
-** Use Shell Functions in Ranger
-
-[[https://bbs.archlinux.org/viewtopic.php?pid=895749#p895749][source]]
-
-In =commands.py=, replace the matching line with the following under =class shell(Command):=
-
-#+BEGIN_EXAMPLE
-    self.fm.execute_command('bash -c "source /path/to/file;' + command + '"', flags=flags)
-#+END_EXAMPLE
-
-Note that you shouldn't use the line in the thread because the quoting order will kill ranger's handling of escaping.
-
-The downside of this is that the shell command is slower if you have a lot of functions. Because of this, it may make sense to source a file only with the needed functions instead of the entire rc file. You bind keys to shell commands directly in the =rc.conf= instead, but this is nice for more complex functions that don't quite warrant their own script.
-
-See [[./media/.config/ranger/ranger_functions][my ranger functions]].
+Major TODO items:
+- Clean up all config files and add them here
+- Clean up and add emacs init file
+- Clean up/remove older bash scripts
+- Test/add post-install scripts
+- Fix dual role on keyboardio
+- Switch to veracrypt, borg, and LVM on LUKS
 
 * Interesting Workflow Excerpts
 ** Make Any Terminal Emulator Dropdown Regardless of WM
 I've tried to create a much more generalized version of my dropdown script that works well with more window managers and has extra functionality that other dropdowns don't have. For example, it can automatically resize a dropdown when changing monitors and supports turning any window into a dropdown.
 
-See [[https://github.com/noctuid/tdrop][tdrop]] and make an issue if there isn't already floating support for your wm.
+See [[https://github.com/noctuid/tdrop][tdrop]] and feel free to make an issue if there isn't already floating support for your wm.
+
+** Empty Desktop Keybindings
+Why use modifier keys to start a program if there is no active window? I'm using bspc's subscribe command to monitor for when a desktop becomes empty and then switch to a different sxhkd config. This way, I can start my programs with the home row on empty desktops.
+
+It would also be possible to use a single config file and check for every single key whether the desktop is empty, but this would be uglier, so I haven't bothered trying it. The approach I'm using doesn't usually cause problems, and I've mostly (completely I think) prevented rapid changes between an empty and non-empty desktop (e.g. dropdown toggling) from resulting in the wrong sxhkd config being loaded. The only annoyance with this is that sxhkd configs can't source other configs, so I have all the normal keybindings replicated in the new sxhkd config.
+
+See my [[file:./common/.config/bspwm/bspwmrc][bspwmrc]] and the corresponding [[file:./scripts/bin/bspwm/maybe_reload_sxhkd][script]].
+
+** Use Ranger/Dired Instead of Default GUI Popup for File Saving
+Pentadactyl already has :w and ;s, which allow for typing out file paths with tab completion. This is cumbersome especially for deeply nested directories. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating terminal with ranger running and pass the file location to ranger's --selectfile and cut it (see [[file:./scripts/bin/ranger/dl_move][dl_move]]). The script also works with dired which when used with emacsclient can potentially start a lot faster than ranger. Qutebrowser doesn't currently have a way to replicate this autocommand, but you can use a script to open the most recent download.
+
+See [[http://noctuid.github.io/blog/2014/04/30/using-ranger-for-downloads/][this post]] for more detailed information and other possibilities.
+
+I've found that pentadactyl's =upload file:= prompt that appears when you hint an upload link to be nice but not a universal solution for uploads (i.e. this doesn't work for every website). Right now, I do image uploads and mail attachment from the commandline/ranger (see [[file:./media/.config/ranger/ranger_functions][ranger_functions]]). When I have to use the upload gui I often paste in file locations after copying them in ranger.
+
+** Block Layout in Emacs/Vim and Examples of Context-dependent Keybindings
+Using tabs is only useless if you're trying to use one buffer per tab (in an editor that supports buffers/a bufferline). I use tabs (or workgroups/perspectives/whatever in emacs) as workspaces. I set them up with names so I can see which tab corresponds to which subject and can easily jump to them with =<space><home row>=. I also use a script that sets up custom keybindings for different tab/workspace names. For example, I use =,= as a prefix key to jump to specific files depending on tab name. I have a general set of these "quickmarks" and specific ones that either correspond to files by frequency of use (=,f=, =,s=, and =,t= for first, second, and third) or by name (e.g. =, r= for readme, =, t= for todo file, etc.).
+
+This drastically reduces the time it takes to get to a specific file as well as the complexity of the keybindings. This is the order of preference for me when it comes to file navigation:
+
+1. navigate to open buffer or quickmarks (2-4 keys; 2 for right tab/workgroup, maybe 2 for getting correct pane or using a quickmark)
+2. interactive search of open buffers, mru files, current dir, and current project (unite in vim; helm, ivy, projectile, etc. in emacs)
+3. switch from above to search with locate (or maybe ag if searching for by contents) (unite in vim; helm or ivy in emacs)
+4. file manager with quickmarked dirs as last resort (ranger if in terminal; otherwise dired or vimfiler)
+
+On the commandline, I find fasd to usually be the fastest way to get to a specific directory. Previously I was using deer, blscd, or just ranger with bookmarks and =f= to get places. Enhancd is also worth noting, and fzf is what I would use if I did't already have a directory in my fasd history. That said, I'm using the commandline a lot less especially for directory-dependent work, so I haven't needed fzf in a while.
+
+Quickmarks for files are fast, but the less you use a keybinding, the more forgettable it is. I find workspaces that are automatically set up with my most frequently used files and the "f s t" keybindings I previously described to be a nice way to keep both keystrokes and memorization to a minimum. Which-key can also serve as a useful reminder, but even without quickmarks, helm/unite/etc. can be used to very quickly get to pretty much anywhere. I have one key bound to open ivy for open buffers and mru files, and key to switch to searching with locate for the current search. If I'm working in a repo, I use fuzzy searching with ivy and projectile, which is lightning fast.
+
+In vim/emacs, I am using =m= as a prefix key for whatever major mode/filetype I'm currently in (with =M= instead used for marks). In org mode, =m<keys>= performs org mode navigation, clocking, todo, etc. In code files, I use =m<keys>= to compile or run the current file as well as for repl interaction, error navigation, etc.
+
+As for other, non-vim/emacs examples, I have context bindings for empty vs. non-empty workspaces/desktops. On empty desktops, I have sxhkd automatically restarted with a custom config where single keys are mapped to open programs and switch desktops. Why use more keys than necessary? The transition time to get used to the difference was insignificant, so I don't think consistency is of any benefit here.
+
+In firefox, I also use the space bar as a prefix key for tab navigation. I bind =<space><home row>= to a command that will go to tab 1-10 in the curent tab range (e.g. =<space>a= on tab 24 will go to tab 21). I also have keybindings to switch to specific tab groups and set up a few custom key bindings depending on tab group. I haven't done much with this though since TabGroupie works very inconsistently (with pentadactyl but not vimperator), and qutebrowser doesn't have an equivalent of tab broups.
+
+Pentadactyl's groups (not related to tab groups) are probably the best example for taking advantage of different contexts. I use them to set up site-specific keybindings. For example, on reddit, I pass through keys for use with RES (and userscripts that make keybindings for other websites) and also add custom goto bindings with the prefix =g= for going to specific subreddits. I use this to set up more convenient zoom bindings on image urls. This also allows setting up custom key bindings for sites that have non-configurable key bindings (e.g. gmail).
+
+The best example I've seen of key-reuse is [[https://github.com/abo-abo/lispy][lispy]]. Org speed keys and [[https://github.com/abo-abo/worf][worf]] are also good examples.
+
+See:
+- [[file:./vim/.navigation.vim][.navigation.vim]] and [[file:./emacs/.emacs.d/navigation.el][navigation.el]]
+- [[file:./common/.config/bspwm/bspwmrc][bspwmrc]] and [[file:./remap/.config/sxhkd/empty_sxhkdrc][empty_sxhkdrc]]
+- [[file:./browsing/.pentadactylrc][.pentadactylrc]] (search =relative-move=)
+- [[file:./browsing/.pentadactyl/groups.penta][groups.penta]]
+
+** Stream Any Video in MPV
+Existing solutions for playing videos in the player of your choice (e.g. mplayer or vlc) are limited in what they work with. There are quite a few programs that allow this for a few sites such as youtube and daily motion. Consider youtube-viewer, quvi, and youtube-dl (used by mpv by default), which now supports a large number of popular websites. Still, youtube-dl doesn't work on a lot of sites I use, and I'm not particularly fond of the mozplugger/viewtube approach either where your player is basically embedded in the browser (even if this worked with all sites).
+
+This is a relatively simple thing to do in actuality. The reason existing solutions are site specific is because they operate based on the site url. Mpv will have no problem playing pretty much any video if you pass it the direct link, so all you need to do is write a script to fetch the link of playing media.
+
+There's certainly a much better way to do this, but I only know how to get this link manually: you open the browser inspector and go to the network/media tab. When you play the video, the direct link will show up. You can also use the media sniffer firefox plugin (which is short and could probably easily be turned into a pentdactyl plugin). Previously I scripted clicks to automatically start the inspector and open this link, but it became to much of a hassle to use, so I just manually use the inspector at the moment.
+
+** Make Gifs/Webms in MPV
+I thought it would be efficient to set up bindings within mpv to create gifs. Now that mpv has a-b looping (issue #1241), I've gone back to using a script (=ffcut=) that first cuts part of a video out and then optionally makes a gif from that part. I've also fixed =ffcut= to accurately cut videos by default. The alternative, directly copying sections of the video, is faster but requires starting from a key frame, making the timing inaccurate. [[https://github.com/lvml/mpv-plugin-excerpt][These]] [[https://gist.github.com/Zehkul/25ea7ae77b30af959be0][two]] mpv plugins may be better ways to cut/crop/convert a video, but I personally like =ffcut=.
+
+The =makegif= script is just a wrapper for ffmpeg, imagemagick, and optionally gifsicle that takes a video, makes frames from it, and then creates an optimized 600 width 10 fps gif. It has much improved (though it may be annoying as-is to users other than myself due to the default output directory). For example, if the output gif is not satisfactory, one can simply use the frames already created and try different options:
+
+#+begin_src shell
+makegif <path/to/video>
+# notice that there are some extra frames at the end
+# go to the location of the frames and delete a few at the end
+makegif -u
+# use max optimization with gifsicle and increase fuzz percent
+makegif -u -O 3 -z 1.8
+# changing fps or width values requires remaking the frames
+# (unless you want something sped up/slowed down):
+makegif -w 800 -O 3 -f 15 -o mygif.gif <path/to/video>
+#+end_src
+
+I also have a =makewebm= script that behaves similarly.
+
+An example gif with default settings (made within mpv):
+[[./example.gif]]
+
+See:
+- [[file:./scripts/bin/video/][bin/video]]
+- [[file:./media/.mpv/input.conf][input.conf]]
 
 ** Consolidate Bspwm Resizing Keybindings
 I never really liked the default way of resizing in bspwm. I prefer to have keybindings do something else in cases where the normal command would fail. I've been using the style where the directions "act on the split." Consider an example where there are only two windows (left and right). If the left window was selected, =super + alt + h= would shrink the left window on the right and grow the right window on the left (moving the split between them to the left). It would act the same if the right window was selected instead.
@@ -236,6 +327,7 @@ I never really liked the default way of resizing in bspwm. I prefer to have keyb
 I find this behavior more consistent, and it consolidates two sets of keybindings (the default =super + alt + {h,j,k,l}= and =super + alt + shift {h,k,j,l}=). Now that bspwm's resizing command works on both tiled and floating windows, all three types of the resizing keybindings can be combined into one. Using the following script, =super + alt + {h,j,k,l}= can both have the behavior described above on tiled windows and resize in a direction for floating windows. It might be more useful to actually move a floating window, but I don't use floating windows that often, so I don't have a strong opinion here. That would require an extra check to see if the window was floating.
 
 Unfortunately, the resize commands don't have a non-zero exit status if they don't do anything, so unlike with the tiled-only solution (see the commented out commands), the width and height need to be explicitly checked to see if they have changed. I'm getting the dimensions from =xwininfo=, but they could also be gotten from bspc's query command.
+# TODO is this outdated?
 #+begin_src bash
 wid=$(xdotool getactivewindow)
 wininfo=$(xwininfo -id "$wid")
@@ -277,92 +369,10 @@ case $1 in
 esac
 #+end_src
 
-You can see [[./scripts/bin/wm_action]] for my current version of the script with support for resizing based on a percentage of the screen. Neeasade has also [[https://github.com/neeasade/dotfiles/blob/master/wm/.wm/scripts/resize.sh][rewriten my script]] to additionally support resizing window groups
+You can see [[./scripts/bin/wm_action]] for my current version of the script with support for resizing based on a percentage of the screen. Neeasade has also [[https://github.com/neeasade/dotfiles/blob/f6971201579bf3284559d3be824ad1bb11931f68/wm/.wm/scripts/interact/resize.sh][rewriten my script]] to additionally support resizing window groups
 
-** Empty Desktop Keybindings
-Why use modifier keys to start a program if there is no active window? I'm using bspc's subscribe command to monitor for when a desktop becomes empty and then switch to a different sxhkd config. This way, I can start my programs with the home row on empty desktops.
-
-It would also be possible to use a single config file and check for every single key whether the desktop is empty, but this would be uglier, so I haven't bothered trying it. The approach I'm using doesn't usually cause problems, and I've mostly prevented rapid changes between an empty and non-empty desktop (e.g. dropdown toggling) from resulting in the wrong sxhkd config being loaded.
-
-See my [[file:./common/.config/bspwm/bspwmrc][bspwmrc]] and the corresponding [[file:./scripts/bin/bspwm/maybe_reload_sxhkd][script]].
-
-** Use Ranger Instead of Default GUI Popup for File Saving
-Pentadactyl already has :w and ;s, which allow for typing out file paths with tab completion. This is cumbersome especially for deeply nested directories. I used to just use an alias to open ranger in my downloads folder and save there automatically. I found even then that I didn't always get around to moving stuff, so now I have an autocommand to send the file name on download to a script which will open a floating terminal with ranger running and pass the file location to ranger's --selectfile and cut it (see [[file:./scripts/bin/ranger/dl_move][dl_move]]). I also have a dired section which, when used with emacsclient, can start a lot faster than ranger.
-
-See [[http://noctuid.github.io/blog/2014/04/30/using-ranger-for-downloads/][this post]] for more detailed information and other possibilities.
-
-I've found that pentadactyl's =upload file:= prompt that appears when you hint an upload link to be nice but not a universal solution for uploads (i.e. this doesn't work for every website). Right now, I do image uploads and mail attachment from the commandline/ranger (see [[file:./media/.config/ranger/ranger_functions][ranger_functions]]). When I have to use the upload gui I often paste in file locations after copying them in ranger.
-
-** Block Layout in Emacs/Vim and Examples of Context-dependent Keybindings
-Using tabs is only useless if you're trying to use one buffer per tab (in an editor that supports buffers/a bufferline). I use tabs (or workgroups in emacs) as workspaces. I set them up with names so I can see which tab corresponds to which subject and can easily jump to them with =<space><home row>=. In vim, I use a script that also sets up custom keybindings for different tab names. For example, I use comma as a prefix key to jump to specific files depending on tab name. I have a general set of these "quickmarks" and specific ones that either correspond to files by frequency of use (,f ,s ,t for first, second, and third) or by name.
-
-This drastically reduces the time it takes to get to a specific file as well as the complexity of the keybindings. This is the order of preference for me when it comes to file navigation:
-
-1. navigate to open buffer or quickmarks (2-4 keys; 2 for right tab/workgroup, maybe 2 for getting correct pane or using a quickmark)
-2. interactive search of open buffers, mru files, current dir, and current project (unite in vim; helm, ivy, and projectile in emacs)
-3. search with locate (or maybe ag if searching for by contents) (unite in vim; helm or ivy in emacs)
-4. file manager w/ quickmarked dirs as last resort (ranger if in terminal vim; otherwise dired or vimfiler)
-
-On the commandline, I find fasd to usually be the fastest way to get to a specific directory. Previously I was using deer, blscd, or just ranger with bookmarks and =f= to get places. Enhancd is also worth noting, and fzf is what I use if I don't already have a directory in my fasd history. That said, I'm working less on the command line and more in my editor.
-
-Quickmarks for files are fast, but the less you use a keybinding, the more forgettable it is. I find workspaces that are automatically set up with my most frequently used files and the "f s t" keybindings I previously described to be a nice way to keep both keystrokes and memorization to a minimum. Which-key can also serve as a useful reminder, but even without quickmarks, helm or unite can be used to very quickly get to pretty much anywhere. I have one key bound to open helm with sources for open buffers, most recently used files, and the current directory all at once. If nothing is found, it automatically falls back to using locate. If I'm working in a repo, I use fuzzy searching with ivy and projectile, which is lightning fast.
-
-In vim/emacs, I am using =m= as a prefix key for whatever major mode/filetype I'm currently in (with =M= instead used for marks). In org mode, =m<keys>= performs org mode navigation, clocking, todo, etc. In code files, I use =m<keys>= to compile or run the current file as well as for repl interaction, error navigation, etc.
-
-As for other, non-vim/emacs examples, I have context bindings for empty vs. non-empty workspaces/desktops. On empty desktops, I have sxhkd automatically restarted with a custom config where single keys are mapped to open programs and switch desktops. Why use more keys than necessary? The transition time to get used to the difference was insignificant, so I don't think consistency is of any benefit here.
-
-In firefox, I also use the space bar as a prefix key for tab navigation. I bind =<space><home row>= to a command that will go to tab 1-10 in the curent tab range (e.g. =<space>a= on tab 24 will go to tab 21). I also have key bindings to switch to specific tab groups and setup a few custom key bindings depending on tab group. I haven't done much with this though since TabGroupie works very inconsistently. Pentadactyl's groups (not related to tab groups) are probably the best example for taking advantage of different contexts. I use them to set up site-specific keybindings. For example, on reddit, I pass through keys for use with RES and also add custom goto bindings with the prefix g for going to specific subreddits. I use this to set up more convenient zoom bindings on image urls. This also allows setting up custom key bindings for sites that have non-configurable key bindings.
-
-The best example I've seen of key-reuse is [[https://github.com/abo-abo/lispy][lispy]]. Org speed keys and [[https://github.com/abo-abo/worf][worf]] are also good examples.
-
-See:
-- [[file:./vim/.navigation.vim][.navigation.vim]] and [[file:./emacs/.emacs.d/navigation.el][navigation.el]]
-- [[file:./common/.config/bspwm/bspwmrc][bspwmrc]] and [[file:./remap/.config/sxhkd/empty_sxhkdrc][empty_sxhkdrc]]
-- [[file:./browsing/.pentadactylrc][.pentadactylrc]] (search =relative-move=)
-- [[file:./browsing/.pentadactyl/groups.penta][groups.penta]]
-
-** Stream Any Video in MPV
-Existing solutions for playing videos in the player of your choice (e.g. mplayer or vlc) are limited in what they work with. There are quite a few programs that allow this for a few sites such as youtube and daily motion. Consider youtube-viewer, quvi, and youtube-dl (used by mpv by default), which now supports a large number of popular websites. Still, youtube-dl doesn't work on a lot of sites I use, and I'm not particularly fond of the mozplugger/viewtube approach either where your player is basically embedded in the browser(even if this worked with all sites).
-
-This is a relatively simple thing to do in actuality. The reason existing solutions are site specific is because they operate based on the site url. Mpv  will have no problem playing pretty much any video if you pass it the direct link, so all you need to do is write a script to fetch the link of playing media.
-
-There's certainly a much better way to do this, but I only know how to get this link manually: you open up firebug (or control+shift+j in chrome) and go to the net/media tab. When you play the video, the direct link will show up. You can also use the media sniffer firefox plugin (which is short and could probably easily be turned into a pentdactyl plugin). What I've done is scripted the clicks. This is mouse location dependent; the areas that need to be clicked will depend on menu size (which depends on the gtk theme or window size if firebug or something similar is being used). Because of this, doing things this way is kind of an ugly hack compared to using youtube-dl, but it works consistently for me. You can also just use a key to open firebug and copy the link by hand.
-
-Requirements: Firefox with pentadactyl, firebug or the media sniffer plugin, MPV, and Firefox
-
-Some problems with playing videos in mpv is that very rarely the video will quit in the middle or the buffering will be slow (it usually depends on the site). For some sites, the playing video can't be detected by firebug, but I've only encountered this on two websites out of the dozens I've tried.
-
-See:
-- [[file:./browsing/.pentadactylrc][.pentadactylrc]] (seach MPV)
-
-** Make Gifs/Webms in MPV
-I thought it would be efficient to set up bindings within mpv to create gifs. Now that mpv has an a-b loop (issue #1241), I've gone back to using a script (=ffcut=) that first cuts part of a video out and then optionally makes a gif from that part. I've also fixed =ffcut= to accurately cut videos by default. he alternative, directly copying sections of the video, is faster but requires starting from a key frame making it innacurate. [[https://github.com/lvml/mpv-plugin-excerpt][These]] [[https://gist.github.com/Zehkul/25ea7ae77b30af959be0][two]] mpv plugins may be better ways to cut/crop/convert a video, but I personally like =ffcut=.
-
-The =makegif= script is just a wrapper for ffmpeg, imagemagick, and optionally gifsicle that takes a video, makes frames from it, and then creates an optimized 600 width 10 fps gif. It has much improved (though it may be annoying as-is to users other than myself due to the default output directory). For example, if the output gif is not satisfactory, one can simply use the frames already created and try different options:
-
-#+begin_src shell
-makegif <path/to/video>
-# notice that there are some extra frames at the end
-# go to the location of the frames and delete a few at the end
-makegif -u
-# use max optimization with gifsicle and increase fuzz percent
-makegif -u -O 3 -z 1.8
-# changing fps or width values requires remaking the frames
-# (unless you want something sped up/slowed down):
-makegif -w 800 -O 3 -f 15 -o mygif.gif <path/to/video>
-#+end_src
-
-I also have a =makewebm= script that behaves similarly.
-
-An example gif with default settings (made within mpv):
-[[./example.gif]]
-
-See:
-- [[file:./scripts/bin/video/][bin/video]]
-- [[file:./media/.mpv/input.conf][input.conf]]
-
-** Home Row Window Mangement
-This started as something I did for fun, but I've actually found it pretty useful, especially for switching desktops. This setup is a litle weird and not universally applicable. For that reason, I can't say it is a better way of doing window management, but I think it is interesting. I might abandon this method in favor of thumbkey modifiers if I get a better keyboard.
+** Home Row Window Mangement (Outdated)
+Note: This started as something I did for fun, but I've actually found it pretty useful, especially for switching desktops. Now I've abandoned this method and I see it as a horrible but interesting workaround for a lack of thumbkeys.
 
 For me, window management is pretty much split between tmux and bspwm. Bspwm takes care of all my gui windows (and occasionally a terminal window), and tmux takes care of all my terminal sessions, windows, splits, etc. There is also tab/split management within programs, but that already doesn't require the use of modifier keys.
 
@@ -403,4 +413,4 @@ Some general stuff:
 
 Credit to vaskozl for [[http://forum.colemak.com/viewtopic.php?id=1731&p=1][his thread]] on not using the mouse, which is one of the main reasons I ever took interest in any of this. Credit to DreymaR and lalop for inspiration on layout stuff after I switched to colemak and to bunnfly for the colemak vim config (all from the colemak forum).
 
-Thanks to baskerville/bloom for bspwm and sxhkd. Thanks to kana, Shougo, tpope, junegunn, dhruvasagar, rhysd, etc. for all their awesome vim plugins. Thanks to abo-abo for his awesome emacs packages. Thanks to tuhdo for his great guide on emacs and helm. Thanks to codestation for qcma. Thanks to sol, haasn, etc. for vimus. Thanks to ttzhou for setroot, which solved the problems I'd had with every other wallpaper setter. Thanks to phillipberndt for pqiv, which is a joy to use/configure, especially compared to sxiv. Finding it was like finding a hidden gem. Thanks to 39aldo39 for klfc, which provides a flexible, universal, and understandable format for specifying keyboard layouts; now I never have to use xmodmap again.
+Thanks to baskerville/bloom for bspwm and sxhkd. Thanks to kana, Shougo, tpope, junegunn, dhruvasagar, rhysd, etc. for all their awesome vim plugins. Thanks to abo-abo for his awesome emacs packages. Thanks to tuhdo for his great guide on emacs and helm. Thanks to codestation for qcma. Thanks to sol, haasn, etc. for vimus. Thanks to ttzhou for setroot, which solved the problems I'd had with every other wallpaper setter. Thanks to phillipberndt for pqiv, which is a hidden gem and a joy to use/configure (especially compared to sxiv). Thanks to 39aldo39 for klfc which provides a flexible, universal, and understandable format for specifying keyboard layouts; now I never have to use xmodmap (which is annoyingly buggy) again.
