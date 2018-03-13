@@ -17,6 +17,7 @@ Some resources from others:
 - [[#workflow-summary][Workflow Summary]]
 - [[#on-rodent-extermination-why-the-keyboard-why-vim][On Rodent Extermination (Why the Keyboard? Why Vim?)]]
 - [[#on-the-unix-philosophy-why-emacs][On the Unix Philosophy (Why Emacs?)]]
+  - [[#what-exactly-can-emacs-replace][What Exactly Can Emacs Replace?]]
 - [[#programs][Programs]]
   - [[#os-and-package-managers][OS and Package Managers]]
   - [[#configuration-management-installation-automation][Configuration Management/ Installation Automation]]
@@ -102,6 +103,38 @@ Some people scoff at the idea of running a terminal in a text editor, but termin
 Also consider that emacs has an advantage over most tui programs in that it can nicely display formatted text and images. This isn't to say that I think emacs is always the best for any type of application. I'd never use it as my primary image viewer or browser (unfortunately emacs is far from the perfect ecosystem for everything), but there are some things it does unexpectedly well. Using eww can be great for reading html, and though I was skeptical at first, I've found myself liking pdf-tools and nov.el more than zathura in some cases. Being able to use bookmarks or helm/ivy to get to recently viewed pdfs is great. Unfortunately, pdfs in emacs aren't text, so you don't get all the features you would get otherwise. There are useful commands like =pdf-occur= though, and the outline menu can help with navigation. While you can't use vim keys to copy text directly, you can open a buffer with the text from the current page iserted and use evil to copy what you want there. In zathura and apvlv, there currently isn't any way at all to use the keyboard to copy text.
 
 The only slight disadvantage I've found of using emacs for these types of applications is that things may not look as good. For example, while I think emacs' irc clients look pretty good, I doubt they'll ever look anywhere as good as a riced weechat or irssi. Mingus looks ugly compared to ncmpcpp. Mu4e doesn't look as good as mutt in my opinion. The same goes for elfeed when compared to newsbeuter or canto. For most of these, emacs version's UI is more minimal too, which some may prefer. I care more about functionality, so this doesn't really bother me.
+
+** What Exactly Can Emacs Replace?
+Emacs has applications for almost everything, and they are often better than cli equivalents (even ignoring the fact that you get vim selection/search and the functionality from dozens of other packages such as ivy/helm, avy, and various evil extension packages automatically in every single application). Here are some examples for popular types software (the vast majority of which will work in terminal emacs):
+
+| Type                  | Programs/packages                                                          |
+|-----------------------+----------------------------------------------------------------------------|
+| email                 | mu4e or notmuch.el or gnus (or wanderlust, etc.) with isync and msmtp      |
+| file management       | dired (possibly with ranger.el) and wdired                                 |
+| pdf viewer            | pdf-tools                                                                  |
+| epub viewer           | nove.el                                                                    |
+| feed reader           | elfeed                                                                     |
+| music                 | emms, bongo, or mpd with mingus, simple-mpc, mpdel, etc.                   |
+| browser               | eww or emacs-w3m                                                           |
+| irc/chat              | jabber and erc or circe or rcirc                                           |
+| vc                    | magit                                                                      |
+| diff                  | emacs-vdiff                                                                |
+| notes                 | org                                                                        |
+| todo management       | org possibly with something like org-journal                               |
+| journal               | org                                                                        |
+| bookmarks             | org possibly with something like org-board                                 |
+| calender              | org and calfw (google calender integration possible)                       |
+| password management   | emacs integration comes with pass/password-store; there are other packages |
+| (emacs) notifications | sauron                                                                     |
+| math                  | calc                                                                       |
+| search/fuzzy finder   | ivy/counsel, helm, or ido and flx                                          |
+| launcher              | counsel-linux-app                                                          |
+| terminal/shell        | ansi-term or emacs-libvterm or eshell                                      |
+| repls                 | emacs has direct repl integration (e.g. generally using comint)            |
+
+You can find a lot more if you have more specific needs. There are also mixers, last.fm support for emms (or externally with mpd), an application for transmission, one for browsing stack overflow, at least one for twitter, one for reddit, applications for package management with the aur, nix, and guix, etc. While not relevant to commandline usage, emacs supports viewing images.
+
+These applications are generally better than cli, tui, and gui equivalents in terms of functionality and keyboard efficiency. That said, I still prefer ranger and use transmission from the commandline with just a few simple aliases for the moment. I will continue to use rofi, dunst, etc., and will probably end up using buku for bookmarks. I still use zathura for now, and will probably never use emacs as an dedicated image viewer or web browser. That said, for anything primarily text based (with some images thrown in here and there), emacs is generally the way to go in my opinion.
 
 * Programs
 Here I've organized my thoughts from trying from trying out and choosing various programs. Arrows indicate switching primary program.
