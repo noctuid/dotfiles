@@ -83,7 +83,7 @@ if [ "$(tty)" = "/dev/tty1" ]; then
 	# backup hotkey program
 	xchainkeys &
 	# hotkeys
-	sxhkd &
+	sxhkd -c ~/.config/sxhkd/empty_sxhkdrc &>> /tmp/sxhkd.log &
 
 	# start window manager
 	case $1 in
