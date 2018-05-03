@@ -45,6 +45,19 @@
 
 (defalias 'yes-or-no-p #'y-or-n-p)
 
+;; ** Benchmarking
+(defvar noct:benchmark-init nil)
+
+(defvar noct:benchmark-init-files
+  '("~/.emacs.d/straight/build/benchmark-init/benchmark-init.elc"
+    "~/.emacs.d/straight/build/benchmark-init/benchmark-init-modes.elc"))
+
+(when (and noct:benchmark-init
+           (file-exists-p (car noct:benchmark-init-files)))
+  (dolist (file noct:benchmark-init-files)
+    (load-file file))
+  (benchmark-init/activate))
+
 ;; ** Faster Untangling
 (require 'noct-util)
 
