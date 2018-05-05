@@ -79,7 +79,8 @@ transmission_setup() {
 dns_setup() {
 	# unbound; also see ./users.sls
 	chattr -i /etc/resolv.conf
-	echo "nameserver 127.0.0.1" > /etc/resolv.conf
+	echo -e "nameserver 127.0.0.1\noptions edns0 single-request-reopen" \
+		 > /etc/resolv.conf
 	chattr +i /etc/resolv.conf
 	curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
 	# needed for auto-trust-anchor-file

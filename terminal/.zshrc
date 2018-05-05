@@ -1357,9 +1357,16 @@ alias startcon='sudo systemctl start connman'
 alias rldcon='sudo systemctl stop connman && sleep 3 && sudo systemctl start connman'
 alias conenwifi='connmanctl enable wifi'
 alias conlist='connmanctl scan wifi && connmanctl services'
-alias con='connmanctl connect'
-alias swcon='sudo systemctl stop NetworkManager && sudo systemctl start connman'
-alias swnm='sudo systemctl stop connman && sudo systemctl start NetworkManager'
+function con() { # name
+	local long_name
+	long_name=$(conlist | awk "/$1/ {print \$3}")
+	echo "$long_name"
+	connmanctl connect "$long_name"
+}
+
+# mask to prevent from starting with tlp (still an issue?)
+alias swcon='sudo systemctl stop NetworkManager && sudo systemctl mask NetworkManager && sudo systemctl start connman && fixresolv'
+alias swnm='sudo systemctl stop connman && sudo systemctl unmask NetworkManager && sudo systemctl start NetworkManager && fixresolv'
 
 # show active device
 function ipup() {
@@ -1367,15 +1374,16 @@ function ipup() {
 }
 
 # in case something goes wrong
-fixresolv() {
+backupresolv() {
 	sudo chattr -i /etc/resolv.conf
 	sudo cp ~/dotfiles/.root/etc/resolv.conf.backup /etc/resolv.conf
 	sudo chattr +i /etc/resolv.conf
 }
 
-restoreresolv() {
+fixresolv() {
 	sudo chattr -i /etc/resolv.conf
-	echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
+	echo -e "nameserver 127.0.0.1\noptions edns0 single-request-reopen" \
+		 | sudo tee /etc/resolv.conf
 	sudo chattr +i /etc/resolv.conf
 }
 

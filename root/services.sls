@@ -19,6 +19,10 @@ connman:
     # - watch:
     #     - file: /etc/connman/main.conf
 
+systemd-networkd-wait-online:
+  service.running:
+    - enable: True
+
 # using with hostsblock
 kwakd:
   service.running:
@@ -86,13 +90,7 @@ systemd-modules-load:
     - enable: True
 
 # * DNS
-# both of these have DNSSEC validation and no logs
-# none of the anycast servers have DNSSEC validation (impossible?)
-dnscrypt-proxy@ventricle.us:5301:
-  service.running:
-    - enable: True
-
-dnscrypt-proxy@dnscrypt.org-fr:5302:
+dnscrypt-proxy:
   service.running:
     - enable: True
 
