@@ -1,5 +1,10 @@
 # TODO support for --user services
 
+# * Entropy
+rngd:
+  sevrice.running:
+    - enable: True
+
 # * Internet
 netctl:
   service.dead:
