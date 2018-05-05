@@ -1,6 +1,3 @@
-# TODO ask for way to source another file, multiple configs
-# alternatively use salt
-
 # * Single-key Hotkeys
 # desktop switching
 {a,r,s,t,d,h,n,e,i,o}
@@ -11,14 +8,17 @@ space
 	launcher
 
 u
-	urxvt -e "/bin/zsh"
+	urxvt
+
+k
+	kitty
 
 l
 	wm_action dsel last
 
 # focus only of course
 f
-	dropdown
+	dropdown -s dropdown kitty
 
 semicolon ; f
 	firejail --seccomp firefox
@@ -30,217 +30,4 @@ semicolon ; e
 	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
 
 v
-	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
-
-# * Reloading
-# reload wm config or quit
-super + control + {_,shift + }Escape
-	wm_action {reload,quit}
-
-# reload keyboad layout (if screw it up and can't type)
-F11
-	rldkbd
-
-# make sxhkd reload its configuration files:
-{mode_switch + super + period, super + period}
-	pkill -USR1 -x sxhkd
-
-# * Reloading
-# reload wm config or quit
-super + control + {_,shift + }Escape
-	wm_action {reload,quit}
-
-# reload keyboad layout (if screw it up and can't type)
-F11
-	rldkbd
-
-# make sxhkd reload its configuration files:
-{mode_switch + super + period, super + period}
-	pkill -USR1 -x sxhkd
-
-# * General Global Hotkeys
-# Actually one key bound to Shift+Control+Alt
-# Would use hyper if could get working a mod# instead of Num_Lock but can't
-# ** Brightness
-mode_switch + super + e
-	xbacklight -inc 10
-	# light -A 10
-
-mode_switch + super + n
-	xbacklight -dec 10
-	# light -U 10
-
-# ** Volume
-mode_switch + super + i
-	amixer -qD pulse sset Master 5%+
-
-mode_switch + super + h
-	amixer -qD pulse sset Master 5%-
-
-# mute
-mode_switch + super + m
-	amixer -qD pulse sset Master toggle
-
-# play/pause
-mode_switch + super + o
-	mpc toggle
-
-# next/prev
-mode_switch + super + u
-	mpc prev
-
-mode_switch + super + y
-	mpc next
-
-# ** Screenshots
-Print
-	screenshot
-	# ~/bin/screenshot
-
-# mode_switch + super + p
-# 	screenshot select
-
-mode_switch + super + w
-	screenshot current_window
-
-# mode_switch + super+ v
-# 	mkdir ~/move/srec && cd ~/move/srec && srec -s
-
-# ** Program hotkeys
-mode_switch + super + t
-	termite
-
-mode_switch + super + f
-	firejail --seccomp firefox
-
-mode_switch + super + space
-	launcher
-
-mode_switch + super + v
-	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a "" -e '(wg-open-session "~/.emacs.d/.emacs_workgroups")'
-
-mode_switch + super + p
-	emacsclient -ce "(progn (proced) (delete-other-windows) (general-def 'normal 'local \"q\" #'delete-frame))"
-
-# ** Clicks
-# TODO clicks don't work when modifier held
-mode_switch + super + k
-	click middle
-	# ~/bin/click
-
-# regain focus from flash
-mode_switch + super + a
-	click left
-
-# ** Dropdowns
-mode_switch + super + s
-	dropdown
-
-# * Window Management
-# ** General
-# close
-super + w
-	wm_action wclose
-
-# kill
-super + W
-	wm_action wkill
-
-# cycle layout (monocle)
-super + m
-	wm_action lsel next
-
-# toggle states
-super + {f,v}
-	wm_action wtoggle {fullscreen,floating}
-
-super + c
-	wm_action sticky
-
-# ** Selection and Movement
-# selection/movement by direction
-super + {_,shift +}{u,y,k,semicolon}
-	wm_action {wsel,wmove} {left,right,down,up}
-
-# switch to last window
-super + l
-	wm_action dsel last
-
-# move selected window to biggest space
-super + g
-	wm_action wmove biggest.local
-
-# switch with last window (across desktops)
-super + apostrophe
-	wm_action wmove last
-
-# TODO I don't know why this isn't working
-# navigate to biggest floating window
-super + F
-	wm_action wsel biggest.local.floating
-
-super + b
-	wm_action dbalance
-
-# ** Desktop Movement
-# change to desktop or move selected window to desktop
-super + {_,shift +} {a,r,s,t,d,h,n,e,i,o}
-	wm_action {dsel,wmove_tod} {1-9,10}
-
-# ** Resizing
-super + control + {h,n,e,i}
-	wm_action wresize {left,down,up,right}
-
-# moving floating windows
-# super + {Left,Down,Up,Right}
-# 	bspc node -v {-20 0,0 20,0 -20,20 0}
-
-# ** Preselection (never use)
-# direction to split
-super + p ; {h,n,e,i}
-	wm_action psel {west,south,north,east}
-
-super + p ; {_,shift + }space
-	wm_action psel {cancel,canceld}
-super + p ; {_,shift + }q
-	wm_action psel {cancel,canceld}
-
-# set presl splitting ratio of current window
-# super + ctrl + {1-9}
-# 	wm_action splitr 0.{1-9}
-
-# ** Adjustment
-super + minus
-	wm_action gapc +4
-
-super + equal
-	wm_action gapc -4
-
-# ** Misc
-# lock
-super + L
-	slimlock
-
-# hide all windows
-KP_Add
-	wm_action hide_all
-
-# * Mouse
-button9
-	wm_action hide_all
-
-# ** Modifiers
-# buttons should not simulate dual-role keys (won't work consistently and will
-# result in unwanted keypresses)
-# http://www.linuxforums.org/forum/hardware-peripherals/169773-solved-map-mouse-button-modifier-key.html
-{_,super +, super + shift + } button51
-	xdotool keydown super
-
-{_,super +, super + shift + } @button51
-	xdotool keyup super
-
-{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +} button50
-	xdotool keydown super Mode_switch
-
-{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +} @button50
-	xdotool keyup super Mode_switch
+	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""

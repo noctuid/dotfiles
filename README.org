@@ -162,7 +162,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | terminal multiplexor      | tmux                                                       |
 | network manager           | connman (NetworkManager as backup)                         |
 | old terminal emulators    | gnome-terminal->xfce4-terminal->guake->URxvt->termite      |
-| terminal emulator         | (termite and xst->kitty?)+tdrop+tmux (also ansi-term)      |
+| terminal emulator         | (termite and xst->kitty)+tdrop+tmux (also ansi-term)      |
 | launcher                  | dmenu->bemenu->rofi                                        |
 | wallpaper setter          | everything->setroot                                        |
 | panel                     | lemonbar(-xft)->polybar                                    |
