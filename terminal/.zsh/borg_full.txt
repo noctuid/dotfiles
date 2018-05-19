@@ -12,8 +12,6 @@ P sh
 # directories are recursively included by default
 + .cabal
 + .cargo
-# TODO move to .emacs.d
-+ .elfeed
 + .emacs.d
 + .fonts
 + .gem
