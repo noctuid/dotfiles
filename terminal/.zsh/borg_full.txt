@@ -1,0 +1,70 @@
+# -*- mode: conf-space; -*-
+# NOTE update ~/.config/safe-rm when update this (only have major folders there)
+# TODO
+# /home/noctuid/.local/share/Anki2 ?
+# maybe vboxshare
+
+# default
+P sh
+
+! **/.ignore
+! **/_no_backup
+# directories are recursively included by default
++ .cabal
++ .cargo
+# TODO move to .emacs.d
++ .elfeed
++ .emacs.d
++ .fonts
++ .gem
++ .ghc
++ .gnupg
++ .ipython/profile_default/history.sqlite
++ .lein/repl-history
++ .local/share/buku/bookmarks.db
+# memory card and game settings
++ .local/share/dolphin-emu
++ .local/share/qutebrowser/greasemonkey
++ .local/share/qutebrowser/sessions
+# bookmarks and history
++ .local/share/zathura
++ .lyrics
++ .mail
++ .mozilla
+# TODO move to .emacs.d
++ .mu
++ .npm
++ .password-store
++ .python_history
++ .ros_history
++ .roswell
++ .sbcl_history
++ .ssh
+# + .stack/**
++ .tmsu
++ .tmux/plugins
+
++ ag-sys
++ anime
++ database
++ Documents/Anki
++ dotfiles
++ Downloads
++ manga
++ move
++ music
++ Pictures
++ ps_vita
++ quicklisp
++ school
++ src
++ vboxshare
++ Videos
+# TODO get rid of
++ vimwiki
+# TODO add after cleaning up
+# + VirtualBox VMs/**
++ wallpaper
+
+# don't backup other folders
+- *

@@ -186,7 +186,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | scheduling                | fcron                                                      |
 | firewall                  | ufw                                                        |
 | encryption                | truecrypt->veracrypt                                       |
-| backup                    | rsync->(eventually)borg                                    |
+| backup                    | rsync->borg                                                |
 | searching                 | helm->ivy+flx (emacs), FZF (terminal), unite (vim)         |
 | pager                     | vimpager (and woman in emacs)                              |
 | screenshots               | scrot->maim+slop                                           |

@@ -1,5 +1,0 @@
-#compdef bahamut=sndb
-
-_arguments \
-'-h[help]' \
-':backup directory:_path_files -W /media'

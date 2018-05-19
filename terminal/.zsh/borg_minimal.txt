@@ -1,0 +1,37 @@
+# -*- mode: conf-space; -*-
+# for small, most frequently changed files
+# default
+P sh
+
+! **/.ignore
+! **/_no_backup
+! **/.cask
+! **/.emacs_backup
+! **/nixpkgs
+! **/melpa
+! **/org-mode
+# keep trash for now; doesn't really get big
+# ! .Trash
+
++ .gnupg
++ .local/share/buku/bookmarks.db
+# memory card and game settings
++ .local/share/dolphin-emu
++ .password-store
++ .ssh
+
+# repl history
++ .ipython/profile_default/history.sqlite
++ .lein/repl-history
++ .python_history
++ .ros_history
++ .sbcl_history
+
++ ag-sys
+# currently not using Anki on laptop (and anki has backup mechanism)
+# + Documents/Anki
++ dotfiles
++ src
+
+# don't backup other folders
+- *
