@@ -1,5 +1,4 @@
 [include]
-	# For username, credentials, etc.
 	# https://stackoverflow.com/questions/8505335/hiding-github-token-in-gitconfig
 	path = ~/.gitconfig.local
 [core]
@@ -11,3 +10,16 @@
 	ui = true
 [push]
 	default = simple
+[user]
+	name = Fox Kiester
+	email = noct@posteo.net
+	signingkey = noct@posteo.net
+[github]
+	user = noctuid
+[commit]
+	# automatically sign commits
+	gpgsign = true
+[tag]
+	# https://git-scm.com/docs/git-config#git-config-tagforceSignAnnotated
+	# sign annotated tags
+	forceSignAnnotated = true
