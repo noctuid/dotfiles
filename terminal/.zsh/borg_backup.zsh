@@ -12,7 +12,7 @@
 # - borg's chunking works on large files (e.g. VMs) even if they are moved
 # - borg supports mounting, extracting from, and restoring backup archives
 # - borg uses /tmp or you can set TMPDIR
-# - borg stores symlinks by default (wanted behavior); see
+# - borg stores symlinks as symlinks by default (wanted behavior); see
 #   https://github.com/borgbackup/borg/issues/1003
 # - hardlinks and most useful attributes are stored as well
 #   (https://borgbackup.readthedocs.io/en/stable/usage/general.html)
