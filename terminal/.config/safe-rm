@@ -1,6 +1,8 @@
 /
 /boot
 /boot/*
+/dev
+/dev/*
 /etc
 /etc/*
 /media
@@ -18,9 +20,12 @@
 ~/database/*
 ~/dotfiles
 ~/dotfiles/*
+~/.emacs.d
+~/.emacs.d/*
 ~/.mail
 ~/.mail/*
 ~/move
+~/move/*
 ~/music
 ~/music/*
 ~/school
