@@ -15,3 +15,87 @@ The downside of modality is that context switching is not always automatic and u
 That all said, it's clear that modality is (only) suited for situations where related actions are taken in sequence. You can get away with binding some one-off actions in normal mode if you default to it (e.g. I dedicate certain prefix keys to window/buffer/file navigation in normal mode), but using modality for all one-off actions will of course be inefficient and potentially jarring. This is where chords come in. Chords are perfectly suited for triggering the most commonly used one-off actions. When typing text, chords are much better suited for any action that is taken once before returning to typing. This might include actions like deleting the current word (e.g. after a typo), deleting the current line, and basic navigation commands. It's worth noting that even vim binds chords in insert mode (e.g. =C-u= to delete to the beginning of the current insertion).
 
 People may prefer to mainly stick to one style or the other, but normal vs. visual vs. insert vs. etc. mode is not the only type of modality. A lot of the benefits of modality can be had without using Vim's style of having multiple editing modes by default. Some Emacs users prefer to not use evil but still make uses of hydras for grouping related keybindings. Some Vim users rely on chords for one-off navigational/editing tasks in insert mode. The best system is not one or the other but a compromise between the two.
+
+* Why /Vim/'s Modal System?
+Vim is by no means perfect, but it provides a good model for modal editing, and newer "replacements" are arguably not improvements despite what they may claim.
+
+To reiterate on the previously listed benefits of modality:
+- modality reduces the number of required modifiers
+- modality can reduce the number of required keystrokes by allowing for key reuse in different modes/contexts, so that fewer or no prefix keys (modified or unmodified) are required for commands
+
+Vim-style modality can also save keystrokes through composability (though this can be done without modality).
+
+As previously discussed, modality also has downsides. Taking advantage of modality's benefits while avoiding its downsides involves first identifying a context where only certain actions make sense and then creating a new mode for that context. This context should usually either involve executing actions multiple times in sequence (e.g. normal mode) or be automatically entered and/or exited (e.g. operator-pending mode) in order to make up for or eliminate the extra keypresses required for mode switching.
+
+Further benefiting from modality involves identifying /new/ contexts that meet these requirements. Having /more/ modes, not less, is arguably better. Consider [[https://github.com/abo-abo/lispy][lispy]] and [[https://github.com/abo-abo/worf][worf]] which create modes based on the context of the cursor position for lisp structural editing and org mode commands respectively. [[https://github.com/abo-abo/hydra][Hydra]] and vim-submode let you create new modes any time you find you can prevent redundant keypresses by grouping together related functionality. Evil also lets you define new states/modes.
+
+The more modes, the more keys can be reused. =o= can perform a different action in insert mode, normal mode, visual mode, in a special location with =lispy-mode=, when navigating a file's history with =git-timemachine=, etc. Another good example is operator-pending mode. While its not like other traditional modes in that it is automatically entered/exited, it facilitates both composability and key reuse (e.g. =i= can be used for both insertion in normal mode and as a prefix key for text objects in operator-pending mode).
+
+While some of vim's default modes are arguably less useful, they don't get in your way. You can simply choose to not use them. On the other hand, any new modal system that eliminates useful modes or allows for only a single modes is not taking full advantage of modality's benefits and is arguably a step backwards.
+
+A lot of people think that ergonomics is a (or /the/) primary benefit of modality (e.g. modalka claims "Modal editing is more efficient, but most importantly, it is better for your health."). This is an incidental benefit of modality not an inherent one. When using an intelligently designed keyboard, I doubt modality gives any significant benefit or helps much with preventing pain/RSI.
+
+In summary, there is not just one benefit to modality. Any modal system that only focuses on /potential/ ergonomic benefits or doesn't optimize for key reuse is incomplete.
+
+** Why not Kakoune?
+Note that this section only refers to kakoune's modal model (i.e. the reversal of verbs and objects and the default normal/visual hybrid mode) and not to its other functionality. See kakoune's section on =Improving the editing model= from [[http://kakoune.org/why-kakoune/why-kakoune.html#_why_a_modal_text_editor][this page]] for reference. To summarize the listed benefits of kakoune's model:
+
+- It allows for automatic visual feedback in order to correct mistakes without the need to explicitly enter visual state using =v=
+- It provides automatic selections when navigating
+
+Kakoune's system has clear downsides though, and in my opinion, it is a broken solution to a non-issue.
+
+*** Reversing the Verb Object Grammar Hurts Key Reuse
+Kakoune removes visual mode and, more importantly, operator-pending mode. In vim, you can, for example, use =o= in visual mode to switch to the other side of the selection, and you can use =i= and =a= in visual or operating-pending mode to access text objects (even though these keys would insert in normal mode). You can bind keys like =dp=, =coc=, etc. because operator-pending mode is a separate context. This is not the case in kakoune. To use text objects, you now have to use modifiers (=M-i= and =M-a= for inner/outer text objects). This means that for a lot of common operations, kakoune actually requires more modifiers than vim (e.g =diw= vs. =<a-i>wd=).
+
+*** Navigation and Selection Are Not the Same
+Automatic selections are not an enticing feature to me. If I want to delete to the next word, I'll type =dw=. I've never actually made the mistake of using a motion before realizing that I actually wanted to perform an operation with that motion. Combining navigation and selection is non-intuitive to me. Not only are automatic selections potentially distracting if you aren't used to them, but kakoune's model of additionally distinguishing between extending and replacing the selected region (as the result of combining normal and visual mode) requires binding twice as many keys for every motion. This eats up keys that could potentially be put to better use.
+
+*** Instantaneous Feedback is Usually Unnecessary
+Kakoune claims that the lack of visual feedback is a big problem with vim's modal model. It really isn't. The example kakoune gives on the previously linked page is that if users used =dtf= in vim they might accidentally delete to the wrong =f=, have to undo, go back to the original position, and then try again with =d2tf=.
+
+This is an extremely misleading example for several reasons. For one, =dtf.= is sufficient. There is no need to undo, and there is no need to move the cursor/point back to the initial position. You'd only have to undo if you gave a count /too large/, and even then, you wouldn't have to move the cursor after undoing. Not only is the example wrong about how to handle this case in vim, it's also wrong about how to handle this case in kakoune. Like =tf= in vim, =tf= in kakoune will only move the point if not already before =f= character. This could be changed, but currently =Tf= will do nothing after a =tf= in kakoune, so kakoune actually requires =tfLTfd= to handle this mistake, which is actually much worse than =dft.= in vim. Kakoune does support repeating a motion with =<a-.>=, but as far as I know, there is currently no equivalent that extends the selection. Even if there was, and even if =t= did always move past the current character, =tf<a-s-.>d= still requires modifiers unlike =dtf.=. Repeating an operation might be jarring to some (it's not to me personally) since the buffer is altered after each operation, but it's just one possible solution in vim.
+
+Furthermore, the effect of many motions and text objects is obvious; visual confirmation is often completely unnecessary. Deleting the current word, sentence, or parentheses block does not involve uncertainty. =t= and =f= are basically the "dumbest" motions in that they don't move by clear units like paragraphs or words but instead jump to arbitrary characters. The majority of my operator usage has no possibility for mistakes apart from mistyping. It doesn't make sense to me to optimize a modal model around rarer cases like the =dtf= example, even if I thought a visual selection was the ideal way to handle these cases.
+
+Visual mode is one keypress away in vim if you do need it for whatever reason. Why force a pseudo-visual mode as the default when visual feedback usually isn't necessary and can be already used on demand in vim? Ignoring the possibility of repeating full operations or motions, compare =vtftfd= in vim to =tfTfd= (assuming it did work) in kakoune. The vim version is merely one keypress longer, and the kakoune version requires a modifier key because kakoune introduces a whole new concept of whether or not the current selection should be extended. If a text object is used instead of a motion, kakoune still requires using a modifier because of the elimination of operator-pending mode.
+
+Finally, and most importantly, visual selections are arguably an inferior method for feedback when dealing with tricky motions and text objects.
+
+*** Visual Selections Don't Prevent Mistakes; Overlays Do
+Kakoune's visual feedback won't prevent you from making mistakes. Compared to normal mode, all visual mode or kakoune's default mode do is give you the opportunity to correct a mistaken count before running an operator. I think this is fundamentally a wrong approach to the issue. A much better approach is to prevent mistakes in the first place by, for example, putting overlays on all possible locations a motion or text object could affect. Using overlays, there is no need to guess or check a count.
+
+Using [[https://github.com/abo-abo/avy/tree/2d613eb050d94c1cdfb403da7446883ce6d35baa][avy]] (e.g. [[https://github.com/noctuid/targets.el][evil-easymotion]] for motions or [[https://github.com/noctuid/targets.el][targets.el]] for text objects) or a similar overlay plugin makes mistakes impossible (apart from mistyping). It may require an extra keypress, but you can immediately know what keys to press instead of manually counting, and correcting mistakes requires extra keypresses anyway.
+
+*** Multiple Selections
+If there is something that I am missing, feel free to correct me, but I don't think that kakoune's normal/visual hybrid model really enhances multiple cursors/selections. You still have to use a command to create multiple selections (e.g. =%=). For the same reasons I listed before, I don't think automatic selections help much in this regard either. I do think kakoune's decision to eliminate usage of ex commands by using selection for everything is certainly interesting, but that design choice is separable from a hybrid normal/visual mode.
+
+** Why not other Emacs packages?
+The main problem with a lot of alternative "modal" packages in Emacs is that they only provide one mode or only focus on "ergonomics" as a benefit. Because of this, they only provide a small portion of what modality has to offer.
+
+For example, the only benefit provided by [[https://github.com/chrisdone/god-mode][god-mode]] is that it makes modifiers unnecessary. It requires an extra prefix key for commands that would normally require a non-control modifier, does not facilitate key reuse by providing modes tailored towards different contexts, does not provide composability or prefer editing commands that make sense to take in sequence, and does not address any of the downsides of modality (e.g. it does not provide commands that do something useful and switch modes simultaneously). Getting a keyboard with well-placed thumbkeys is a arguably a better solution if the only thing you care about is ergonomics.
+
+Another popular package is [[https://github.com/mrkkrp/modalka][modalka]]. While modalka lets you customize all your keybindings from the beginning, it doesn't really have any other advantages over god mode as far as modality goes. It is modal, but it doesn't focus on the actual advantages of modality, and because you can only have one mode (at the time of writing), it does not allow for you to customize it yourself to take full advantage of the benefits of modality. Modalka has this to say about evil:
+
+#+begin_quote
+What's wrong with it? Well, you see, Emacs is very flexible and can be Vim, of course, with sufficient effort, but Emacs is not Vim. Emacs has different traditional keybindings and other parts of Emacs ecosystem follow these conventions (mostly). Then if you are using evil-mode to edit text you will need to either accept that you edit text with different set of key bindings than key bindings used everywhere else or try to “convert” Emacs further.
+
+To convert Emacs further you will need sort of bridge package for every more-or-less complex thing: evil-org, evil-smartparens, et cetera.
+
+Evil by itself is fairly complex and hooks deep into Emacs internals and can cause incompatibilities with other packages. It also makes it harder (or at least intricate) to hack Emacs.
+
+Modalka feels vanilla, it lets you use Emacs how it is supposed to be used, but adds modal interface when you need to edit text, that looks like a more natural solution (at least for me).
+#+end_quote
+
+I disagree with this for the following reasons:
+- Vim vs. Emacs editing conventions may be very different, but text editing is also very different from using an application like elfeed. Differences in conventions matter much less often when using some non-editing application's default keybindings. The main difference in conventions that is still relevant is =j= and =k= vs. =n= and =p=, and it is trivial to bind =j= and =k= to act as =n= and =p= in any number of modes en masse. There are other convention differences (like killing vs deleting), but they matter less often. Evil provides great tools that make simple "bridging" easy and automatic.
+- Emacs /editing/ conventions have to be altered if the goal is to maximize efficiency (e.g. composability). To me, Emacs is great because compatibility with the default editing style is unnecessary.
+- Different Emacs packages use different keybindings for actions like sorting and filtering. Using something like [[https://github.com/emacs-evil/evil-collection][evil-collection]] is potentially more consistent than using vanilla keybindings.
+- I don't understand the point about Evil making it harder to hack on emacs or causing incompatibilities. I'd have to see an example.
+
+There are other packages like [[https://github.com/jyp/boon][boon]] that allow for multiple modes and are more similar to evil (e.g. focus on composability). These are better, but there really is no other alternative that is as developed as Evil. As for creating new modes, I think [[https://github.com/abo-abo/hydra][hydra]] is generally a better alternative.
+
+** Vis
+[[https://github.com/martanne/vis][Vis]] is interesting in that it pretty much takes the opposite approach of kakoune while still focusing on multiple selection support. Instead of de-emphasizing ex mode, it extends it to make it suitable for more easily creating multiple selections. Selection is not line based like it is in vim. I didn't even know that vim had this limitation because you can operate on the visually selected part of a line in evil using =:`<,`>=; vim ex commands cannot operate on a subsection of a line.
+
+Vis takes the same approach as vim for modality (insert, normal, operator-pending, etc.), so I don't have anything new to say about its model.
