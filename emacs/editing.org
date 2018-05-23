@@ -1,5 +1,7 @@
 *Notes on Text Editing*
 * Why Modality /and/ Chording?
+/Note: When I say chording here, I'm talking about using modifiers not chords like in steno or key-chord.el./
+
 Modality and chording are not mutually exclusive. They both have a good use case and can be used together. Even if they don't realize it, Emacs and Vim generally don't exclusively stick to one model.
 
 Modality saves keystrokes by reducing the number of required modifier keys (usually to zero). Even if you don't care about the number of modifiers required (e.g. you have a well-placed thumbcluster on your keyboard), modality saves keypresses by allowing the same keys to be used for different actions in different contexts. Trying to jam every command into one context quickly results having to further contextualize keybindings using prefix keys (i.e. longer sequences of keys are required for common actions). This is not ideal any time you want to take related actions in sequence. With modality, instead of using a prefix every time, you only need to use it the first time. There are plenty of commonly used Emacs packages that embrace some form of modality like hydra, lispy, org speed keys/worf, etc.
