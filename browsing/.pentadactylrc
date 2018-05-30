@@ -646,7 +646,7 @@ au Enter * source ~/.pentadactyl/groups.penta
 
 " pass all keys 'mode' (i.e. on reddit, 4chan, gmail, and other places with custom bindings)
 nmap -builtin , <pass-all-keys>
-silent nmap -ex <leader>F silent !~/bin/dlf.sh
+silent nmap -ex <leader>g execute 'silent !nohup dlg "' + buffer.URL + '" &> /dev/null &'
 
 "}}}
 

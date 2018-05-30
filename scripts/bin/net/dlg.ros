@@ -1,0 +1,36 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+;;; * Setup
+(ros:ensure-asdf)
+
+(ql:quickload '(sh-utils) :silent t)
+
+(sh-utils:defpackage-sh :noct.script.dlg)
+
+(in-package :noct.script.dlg)
+
+;;; * Main
+(defun main (&rest argv)
+  (let ((url (car argv))
+        (dir (cadr argv)))
+    (if dir
+        (takedir dir)
+        (let* ((json-info
+                 (cadr (assoc 2
+                              (parse-json
+                               (run/s `(gallery-dl --range 0 --dump-json ,url))
+                               :as :hash-table))))
+               (site (gethash "category" json-info))
+               (title (gethash "title" json-info))
+               (tags (gethash "search_tags" json-info)))
+          (takedir (concat "~/database/move/gallery/"
+                           site "/" title "/" tags))))
+    ;; prevent duplicates
+    ;; https://github.com/aria2/aria2/issues/865
+    (sh-if `(pipe (gallery-dl --get-urls ,url)
+                  (aria2c --auto-file-renaming=false -c -x 4 -i -))
+           (notify-success "Download finished.")
+           (notify-failure "Download failed."))))

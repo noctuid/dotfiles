@@ -48,7 +48,9 @@ export WORKON_HOME=~/.virtualenvs
 pathdirs="
 # personal scripts
 $HOME/bin
+$HOME/ebin
 $HOME/bin/video
+$HOME/bin/net
 $HOME/bin/not_mine
 $HOME/bin/dunst
 $HOME/bin/bspwm

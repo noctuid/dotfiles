@@ -348,6 +348,7 @@ nmap('tl', 'jump-mark "\'"')
 nmap('ty', 'spawn -d mpv {url}')
 
 # ** Downloads
+nmap('tg', 'spawn --detach dlg "{url}"')
 nmap('td', 'download-open')
 
 # ** Zooming
