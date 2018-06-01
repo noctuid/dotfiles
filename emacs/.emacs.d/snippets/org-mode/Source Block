@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: Org source Block
+# key: src
+# preferred to org mode block templates
+# --
+#+begin_src ${1:lang}
+$0
+#+end_src

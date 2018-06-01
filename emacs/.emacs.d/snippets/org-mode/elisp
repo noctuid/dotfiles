@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: Elisp org source block
+# key: es
+# --
+#+begin_src emacs-lisp
+$0
+#+end_src

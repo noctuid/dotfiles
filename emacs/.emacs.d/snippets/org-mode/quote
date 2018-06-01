@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Org block quote
+# key: q
+# --
+#+begin_quote
+${1:quote} -- ${2:person}
+#+end_quote

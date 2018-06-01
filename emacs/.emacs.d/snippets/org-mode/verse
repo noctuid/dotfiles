@@ -1,7 +1,7 @@
 # -*- mode: snippet; require-final-newline: nil -*-
-# name: Org Verse Block
+# name: Org verse block
 # key: v
 # --
 #+begin_verse
-$1
+$0
 #+end_verse

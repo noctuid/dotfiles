@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Org link
+# key: l
+# --
+[[`(current-kill 0)`][$0]]
