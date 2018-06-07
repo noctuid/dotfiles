@@ -166,7 +166,6 @@ luks_create() {
     echo "Create an lvm volume group on $partition? (y/n)"
     confirm_do echo || return 0
     if sudo cryptsetup open "$partition" luks_"$label" \
-            && sudo pvcreate /dev/mapper/luks_"$label" \
             && sudo vgcreate "$label"_group /dev/mapper/luks_"$label"
     then
         echo "New LUKS partition is mounted at /dev/mapper/luks_$label."
