@@ -73,6 +73,8 @@ Please create a new user before running the post-install script:
 - useradd user
 - passwd user
 
+If installing from existing system, consider copying over /var/lib/connman.
+
 After running the post-install script, you should do the following:
 - exit the chroot with 'exit'
 - umount mounted partitions with 'umount -R /mnt'
