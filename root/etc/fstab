@@ -1,29 +1,22 @@
+# -*- mode: conf-space; -*-
 # /etc/fstab: static file system information
-#
-# <file system>	<dir>	<type>	<options>	<dump>	<pass>
-# if 1 for dump, dump utility (whatever that is) will make a backup
-# pass used by fsck to decide what to check; 0 is no, 1 highest priority then 2
-
-# https://wiki.archlinux.org/index.php/Fstab#atime_options
-# atime updates atime of files with each read (useful for servers, not desktops really)
-# with noatime, no writes with read (can cause problem with old mail notifiers, e.g. mutt without maildir format)
-# relatime only updates atime with modification (default)
-
-# discard for TRIM with ssd
-# don't remount root; https://wiki.archlinux.org/index.php/Improve_boot_performance#Filesystem_mounts
-# LABEL=root_ssd / ext4 defaults,noatime,discard 0 1
-# see boot configuration for root mounting
-
+# <file system>	<dir>	<type>	<options>	<dump>	<fsck>
+# https://wiki.archlinux.org/index.php/Fstab
 # https://wiki.archlinux.org/index.php/Security#Mount_options
+# https://wiki.archlinux.org/index.php/Fstab#atime_options
+# not using discard:
+# https://wiki.archlinux.org/index.php/Solid_State_Drive#Periodic_TRIM
 
-LABEL=boot_ssd /boot ext4 defaults,noatime,discard,nodev,nosuid,noexec 0 2
-LABEL=mozilla_ssd /home/noctuid/.mozilla ext4 defaults,noatime,discard,nosuid,nodev 0 2
+# don't remount root; https://wiki.archlinux.org/index.php/Improve_boot_performance#Filesystem_mounts
+# see ../boot/efi/EFI/refind/refind.conf root mounting
+# LABEL=root_ssd / ext4 defaults,noatime 0 1
 
-LABEL=var_hdd /var ext4 defaults,noatime,nodev,nosuid 0 2
-LABEL=home_hdd /home ext4 defaults,relatime,nodev,nosuid 0 2
+LABEL=boot /boot ext4 defaults,noatime,nodev,nosuid,noexec 0 2
 
-# https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption#UUID_and_LABEL
-# see ./crypttab
-/dev/mapper/cryptswap none swap defaults 0 0
+# LVM
+/dev/cryptlinux_group/var /var ext4 defaults,noatime,nodev,nosuid 0 2
+# I sometimes sort by atime; relatime is default
+/dev/cryptlinux_group/home /home ext4 defaults,relatime,lazytime,nodev,nosuid 0 2
+/dev/cryptlinux_group/swap none swap defaults 0 0
 
-tmpfs /tmp tmpfs nodev,nosuid,size=3G 0 0
+tmpfs /tmp tmpfs nodev,nosuid,size=4G 0 0

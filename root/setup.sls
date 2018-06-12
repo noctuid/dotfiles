@@ -2,24 +2,38 @@
 
 # meant to be changed before running
 {% set user = %}
-{% set xdg = %}
-{% set display = %}
-{% set dbus = %}
+# not available
+# xdg
+# not used
+# display
+# dbus
 
 user services setup:
   cmd.script:
     - name: extra-setup user_services_setup
     - source: salt://extra-setup
-    - env:
-        - XDG_RUNTIME_DIR: {{ xdg }}
+    # TODO was this ever needed for anything?
+    # - env:
+    #     - XDG_RUNTIME_DIR: xdg
     - runas: {{ user }}
+
+refind setup:
+  cmd.script:
+    - name: extra-setup refind_setup
+    - source: salt://extra-setup
+
+initramfs setup:
+  cmd.script:
+    - name: extra-setup initramfs_setup
+    - source: salt://extra-setup
 
 # TODO does this last after restart?
 set vt colors:
   cmd.script:
     - name: extra-setup vt_colors_setup
+    - env:
+        - HOME: "/home/{{ user }}"
     - source: salt://extra-setup
-    - runas: {{ user }}
 
 freetype setup:
   cmd.script:
@@ -30,21 +44,20 @@ freetype setup:
 lambda txt setup:
   cmd.script:
     - name: extra-setup lambda_txt_setup
-    - source: salt://extra-setup
-    - runas: {{ user }}
-
-ibus setup:
-  cmd.script:
-    - name: extra-setup ibus_setup
-    - source: salt://extra-setup
     - env:
-        - DISPLAY: {{ display }}
-        - DBUS_SESSION_BUS_ADDRESS: {{ dbus }}
-    - runas: {{ user }}
+        - HOME: "/home/{{ user }}"
+    - source: salt://extra-setup
 
 fcron setup:
   cmd.script:
     - name: extra-setup fcron_setup
+    - env:
+        - HOME: "/home/{{ user }}"
+    - source: salt://extra-setup
+
+fcron user setup:
+  cmd.script:
+    - name: extra-setup fcron_user_setup
     - source: salt://extra-setup
     - runas: {{ user }}
 
@@ -56,16 +69,32 @@ ufw setup:
 bumblebee setup:
   cmd.script:
     - name: extra-setup bumblebee_setup
+    - env:
+        - USER: "{{ user }}"
     - source: salt://extra-setup
-    - runas: {{ user }}
 
 transmission setup:
   cmd.script:
     - name: extra-setup transmission_setup
+    - env:
+        - USER: "{{ user }}"
     - source: salt://extra-setup
-    - runas: {{ user }}
 
 dns setup:
   cmd.script:
     - name: extra-setup dns_setup
+    - source: salt://extra-setup
+
+ranger devicons setup:
+  cmd.script:
+    - name: extra-setup ranger_devicons_setup
+    - env:
+        - HOME: "/home/{{ user }}"
+    - source: salt://extra-setup
+
+service setup:
+  cmd.script:
+    - name: extra-setup service_setup
+    - env:
+        - USER: "{{ user }}"
     - source: salt://extra-setup

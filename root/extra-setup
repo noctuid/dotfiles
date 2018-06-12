@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# for program configuration/setup
 # all commands should be able to be run multiple times
 # and should fail harmlessly if required software isn't installed
 
@@ -6,11 +7,16 @@
 # - adding checks for use with salt's unless
 # - requiring corresponding packages in salt file
 
+set -euo pipefail
+
+mkdir -p /tmp/build
+
+# * User Systemd Services
 # user
 user_services_setup() {
-	systemctl --user start udiskie
+	# systemctl --user start udiskie
 	systemctl --user enable udiskie
-	# emacs, mpd, and mpd-notification block login for a long time
+	# TODO emacs, mpd, and mpd-notification block login for a long time
 	# starting in ~/.profile instead
 	# mpd-notification service fails quickly
 	# systemctl --user start mpd-notification
@@ -19,42 +25,64 @@ user_services_setup() {
 	# systemctl --user enable psd
 }
 
-# user
-vt_colors_setup() {
-	sudo setcolors ~/dotfiles/aesthetics/vt_colors/solarized
+# * rEFInd
+# root
+refind_setup() {
+	if [[ -z "$(ls -A /boot/efi)" ]]; then
+		mount LABEL=SYSTEM /boot/efi
+	fi
+	# install or update refind
+	refind-install
 }
 
+# * initramfs
+# root
+initramfs_setup() {
+	mkinitcpio --preset custom
+}
+
+# * Console Colors
+# root; $HOME set in setup.sls (not /root)
+vt_colors_setup() {
+	setcolors ~/dotfiles/aesthetics/vt_colors/solarized
+}
+
+# * Font
 # root
 freetype_setup() {
 	# https://gist.github.com/cryzed/e002e7057435f02cc7894b9e748c5671
 	# https://wiki.archlinux.org/index.php/font_configuration
 	# just uncomment export line
-	cd /etc/fonts/conf.d || exit 1
+	cd /etc/fonts/conf.d
 	# enable sub-pixel rgb rendering globally
-	ln -sf ../conf.avail/10-sub-pixel-rgb.conf
-	ln -sf ../conf.avail/11-lcdfilter-default.conf
+	ln -sf ../conf.avail/10-sub-pixel-rgb.conf .
+	ln -sf ../conf.avail/11-lcdfilter-default.conf .
 	# 10-hinting-slight.conf already linked
 	# requires fonts-meta-extended-lt
-	ln -sf ../conf.avail/30-infinality-aliases.conf
+	ln -sf ../conf.avail/30-infinality-aliases.conf .
 }
 
-# user
+# * Lambda Fortunes
+# root
 lambda_txt_setup() {
-	sudo cp ~/dotfiles/.data/lambda /usr/share/fortune/lambda
-	sudo strfile /usr/share/fortune/lambda
+	# again, $HOME set by setup.sls when running
+	cp ~/dotfiles/.data/lambda /usr/share/fortune/lambda
+	strfile /usr/share/fortune/lambda
 }
 
-# user
-ibus_setup() {
-	dconf load /desktop/ibus/ < ~/dotfiles/remap/.ibus.dconf
-}
-
-# user
+# * Fcron
+# root
 fcron_setup() {
-	fcrontab ~/dotfiles/common/fcrontab
-	sudo fcrontab ~/dotfiles/common/sudo_fcrontab
+	# $HOME changed by setup.sls
+	fcrontab ~/dotfiles/common/sudo_fcrontab
 }
 
+# user
+fcron_user_setup() {
+	fcrontab ~/dotfiles/common/fcrontab
+}
+
+# * UFW
 # root
 ufw_setup() {
 	# https://wiki.archlinux.org/index.php/Uncomplicated_Firewall#Basic_configuration
@@ -63,18 +91,21 @@ ufw_setup() {
 	ufw enable
 }
 
-# user
+# * Bumblebee
+# root; $USER changed when run by setup.sls
 bumblebee_setup() {
-	sudo gpasswd -a $USER bumblebee
+	gpasswd -a "$USER" bumblebee
 	# busID needs to be correct (was by default for me)
 	# lspci | grep VGA | grep NVIDIA
 }
 
-# user
+# * Transmission
+# root; $USER changed when run by setup.sls
 transmission_setup() {
-	sudo gpasswd -a $USER transmission
+	gpasswd -a "$USER" transmission
 }
 
+# * DNS
 # root
 dns_setup() {
 	# unbound; also see ./users.sls
@@ -89,7 +120,51 @@ dns_setup() {
 	systemctl restart unbound
 	# https://wiki.archlinux.org/index.php/unbound#Testing_validation
 	# https://wiki.archlinux.org/index.php/Resolv.conf#Testing
-	# to test if dns crypt is working, stop all sockets and services
+	# to test if dnscrypt is working, need to stop all proxies
 }
 
+# * Ranger Devicons
+# root
+# no AUR package
+ranger_devicons_setup() {
+	mkdir -p /tmp/build
+	if [[ ! -d /tmp/build/ranger_devicons ]]; then
+		git clone https://github.com/alexanderjeurissen/ranger_devicons \
+			/tmp/build/ranger_devicons
+	fi
+	cd /tmp/build/ranger_devicons
+	make install
+}
+
+# * Services
+# root; USER changed
+service_setup() {
+	systemctl enable rngd
+	systemctl enable fstrim.timer
+	systemctl disable netctl
+	systemctl disable NetworkManager
+	systemctl mask NetworkManager
+	systemctl enable connman
+	# slow; necessary for dnscrypt-proxy?
+	# systemctl enable systemd-networkd-wait-online
+	systemctl enable kwakd
+	systemctl enable ntpd
+	systemctl enable tzupdate
+	systemctl enable tlp
+	systemctl enable tlp-sleep
+	systemctl enable bumblebeed
+	# enabled in fcron_setup
+	# systemctl enable fcron
+	systemctl enable ufw
+	systemctl enable slimlock@"$USER"
+	systemctl enable resume@"$USER"
+	# don't need immediately or frequently
+	# systemctl enable org.cups.cupsd
+	systemctl enable preload
+	systemctl enable systemd-modules-load
+	systemctl enable dnscrypt-proxy
+	systemctl enable unbound
+}
+
+# * Main
 "$@"

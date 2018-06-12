@@ -5,6 +5,11 @@ rngd:
   sevrice.running:
     - enable: True
 
+# * Disk
+fstrim.timer:
+  service.running:
+    - enable: True
+
 # * Internet
 netctl:
   service.dead:
@@ -24,6 +29,7 @@ connman:
     # - watch:
     #     - file: /etc/connman/main.conf
 
+# TODO check if necessary
 systemd-networkd-wait-online:
   service.running:
     - enable: True
@@ -76,9 +82,8 @@ resume@noctuid:
   service.enabled: []
 
 # * Printing
-org.cups.cupsd:
-  service.running:
-    - enable: True
+# org.cups.cupsd:
+#   service.enabled: []
 
 # * Loading into RAM
 preload:

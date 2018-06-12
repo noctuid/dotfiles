@@ -1,137 +1,177 @@
 pkgbuild-introspection-pkg:
-  pkg.installed:
-    - pkgs:
-        - pkgbuild-introspection
+  cmd.run:
+    - name: aura -A --noconfirm pkgbuild-introspection
+    - unless: pacman -Q pkgbuild-introspection
 
 reflector-pkg:
-  pkg.installed:
-    - pkgs:
-        - reflector
+  cmd.run:
+    - name: powerpill -S --noconfirm reflector
+    - unless: pacman -Q reflector
 
 pkgfile-pkg:
-  pkg.installed:
-    - pkgs:
-        - pkgfile
+  cmd.run:
+    - name: powerpill -S --noconfirm pkgfile
+    - unless: pacman -Q pkgfile
+
+pacman-contrib-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm pacman-contrib
+    - unless: pacman -Q pacman-contrib
+
+yay-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm yay
+    - unless: pacman -Q yay
+
+refind-efi-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm refind-efi
+    - unless: pacman -Q refind-efi
 
 connman-pkg:
-  pkg.installed:
-    - pkgs:
-        - connman
+  cmd.run:
+    - name: powerpill -S --noconfirm connman
+    - unless: pacman -Q connman
 
 networkmanager-pkg:
-  pkg.installed:
-    - pkgs:
-        - networkmanager
+  cmd.run:
+    - name: powerpill -S --noconfirm networkmanager
+    - unless: pacman -Q networkmanager
 
 network-manager-applet-pkg:
-  pkg.installed:
-    - pkgs:
-        - network-manager-applet
+  cmd.run:
+    - name: powerpill -S --noconfirm network-manager-applet
+    - unless: pacman -Q network-manager-applet
 
 nm-connection-editor-pkg:
-  pkg.installed:
-    - pkgs:
-        - nm-connection-editor
+  cmd.run:
+    - name: powerpill -S --noconfirm nm-connection-editor
+    - unless: pacman -Q nm-connection-editor
 
 linux-headers-pkg:
-  pkg.installed:
-    - pkgs:
-        - linux-headers
+  cmd.run:
+    - name: powerpill -S --noconfirm linux-headers
+    - unless: pacman -Q linux-headers
 
-linux-ck-ivybridge-pkg:
-  pkg.installed:
-    - pkgs:
-        - linux-ck-ivybridge
+linux-ck-skylake-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm linux-ck-skylake
+    - unless: pacman -Q linux-ck-skylake
 
-linux-ck-ivybridge-headers-pkg:
-  pkg.installed:
-    - pkgs:
-        - linux-ck-ivybridge-headers
+linux-ck-skylake-headers-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm linux-ck-skylake-headers
+    - unless: pacman -Q linux-ck-skylake-headers
 
-broadcom-wl-ck-ivybridge-pkg:
-  pkg.installed:
-    - pkgs:
-        - broadcom-wl-ck-ivybridge
+broadcom-wl-ck-skylake-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm broadcom-wl-ck-skylake
+    - unless: pacman -Q broadcom-wl-ck-skylake
+
+bspwm-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm bspwm
+    - unless: pacman -Q bspwm
 
 ntfs-3g-pkg:
-  pkg.installed:
-    - pkgs:
-        - ntfs-3g
+  cmd.run:
+    - name: powerpill -S --noconfirm ntfs-3g
+    - unless: pacman -Q ntfs-3g
 
 dosfstools-pkg:
-  pkg.installed:
-    - pkgs:
-        - dosfstools
+  cmd.run:
+    - name: powerpill -S --noconfirm dosfstools
+    - unless: pacman -Q dosfstools
 
 exfat-utils-pkg:
-  pkg.installed:
-    - pkgs:
-        - exfat-utils
+  cmd.run:
+    - name: powerpill -S --noconfirm exfat-utils
+    - unless: pacman -Q exfat-utils
 
 xf86-input-synaptics-pkg:
-  pkg.installed:
-    - pkgs:
-        - xf86-input-synaptics
+  cmd.run:
+    - name: powerpill -S --noconfirm xf86-input-synaptics
+    - unless: pacman -Q xf86-input-synaptics
 
 fcitx-im-pkg:
-  pkg.installed:
-    - pkgs:
-        - fcitx-im
+  cmd.run:
+    - name: powerpill -S --noconfirm fcitx-im
+    - unless: pacman -Q fcitx-im
 
 fcitx-mozc-pkg:
-  pkg.installed:
-    - pkgs:
-        - fcitx-mozc
+  cmd.run:
+    - name: powerpill -S --noconfirm fcitx-mozc
+    - unless: pacman -Q fcitx-mozc
+
+fcitx-table-other-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm fcitx-table-other
+    - unless: pacman -Q fcitx-table-other
 
 steam-pkg:
-  pkg.installed:
-    - pkgs:
-        - steam
+  cmd.run:
+    - name: powerpill -S --noconfirm steam
+    - unless: pacman -Q steam
 
 lib32-curl-pkg:
-  pkg.installed:
-    - pkgs:
-        - lib32-curl
+  cmd.run:
+    - name: powerpill -S --noconfirm lib32-curl
+    - unless: pacman -Q lib32-curl
 
 mesa-pkg:
-  pkg.installed:
-    - pkgs:
-        - mesa
+  cmd.run:
+    - name: powerpill -S --noconfirm mesa
+    - unless: pacman -Q mesa
 
 lib32-mesa-pkg:
-  pkg.installed:
-    - pkgs:
-        - lib32-mesa
+  cmd.run:
+    - name: powerpill -S --noconfirm lib32-mesa
+    - unless: pacman -Q lib32-mesa
+
+steam-native-runtime-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm steam-native-runtime
+    - unless: pacman -Q steam-native-runtime
+
+intel-ucode-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm intel-ucode
+    - unless: pacman -Q intel-ucode
 
 bumblebee-pkg:
-  pkg.installed:
-    - pkgs:
-        - bumblebee
+  cmd.run:
+    - name: powerpill -S --noconfirm bumblebee
+    - unless: pacman -Q bumblebee
 
 bbswitch-dkms-pkg:
-  pkg.installed:
-    - pkgs:
-        - bbswitch-dkms
+  cmd.run:
+    - name: powerpill -S --noconfirm bbswitch-dkms
+    - unless: pacman -Q bbswitch-dkms
+
+primus-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm primus
+    - unless: pacman -Q primus
 
 xf86-video-intel-pkg:
-  pkg.installed:
-    - pkgs:
-        - xf86-video-intel
+  cmd.run:
+    - name: powerpill -S --noconfirm xf86-video-intel
+    - unless: pacman -Q xf86-video-intel
 
 nvidia-dkms-pkg:
-  pkg.installed:
-    - pkgs:
-        - nvidia-dkms
+  cmd.run:
+    - name: powerpill -S --noconfirm nvidia-dkms
+    - unless: pacman -Q nvidia-dkms
 
-nvidia-ck-ivybridge-pkg:
-  pkg.installed:
-    - pkgs:
-        - nvidia-ck-ivybridge
+nvidia-utils-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm nvidia-utils
+    - unless: pacman -Q nvidia-utils
 
-veracrypt-pkg:
-  pkg.installed:
-    - pkgs:
-        - veracrypt
+nvidia-ck-skylake-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm nvidia-ck-skylake
+    - unless: pacman -Q nvidia-ck-skylake
 
 secure-delete-pkg:
   cmd.run:
@@ -144,155 +184,194 @@ safe-rm-pkg:
     - unless: pacman -Q safe-rm
 
 ufw-pkg:
-  pkg.installed:
-    - pkgs:
-        - ufw
+  cmd.run:
+    - name: powerpill -S --noconfirm ufw
+    - unless: pacman -Q ufw
 
 pass-pkg:
-  pkg.installed:
-    - pkgs:
-        - pass
+  cmd.run:
+    - name: powerpill -S --noconfirm pass
+    - unless: pacman -Q pass
+
+passff-host-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm passff-host
+    - unless: pacman -Q passff-host
+
+firejail-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm firejail
+    - unless: pacman -Q firejail
 
 git-pkg:
-  pkg.installed:
-    - pkgs:
-        - git
+  cmd.run:
+    - name: powerpill -S --noconfirm git
+    - unless: pacman -Q git
 
 acpi-pkg:
-  pkg.installed:
-    - pkgs:
-        - acpi
+  cmd.run:
+    - name: powerpill -S --noconfirm acpi
+    - unless: pacman -Q acpi
 
 tlp-pkg:
-  pkg.installed:
-    - pkgs:
-        - tlp
+  cmd.run:
+    - name: powerpill -S --noconfirm tlp
+    - unless: pacman -Q tlp
 
 acpi_call-dkms-pkg:
   cmd.run:
-    - name: aura -A --noconfirm acpi_call-dkms
+    - name: powerpill -S --noconfirm acpi_call-dkms
     - unless: pacman -Q acpi_call-dkms
 
 powertop-pkg:
-  pkg.installed:
-    - pkgs:
-        - powertop
+  cmd.run:
+    - name: powerpill -S --noconfirm powertop
+    - unless: pacman -Q powertop
+
+preload-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm preload
+    - unless: pacman -Q preload
 
 cups-pkg:
-  pkg.installed:
-    - pkgs:
-        - cups
+  cmd.run:
+    - name: powerpill -S --noconfirm cups
+    - unless: pacman -Q cups
 
 libcups-pkg:
-  pkg.installed:
-    - pkgs:
-        - libcups
+  cmd.run:
+    - name: powerpill -S --noconfirm libcups
+    - unless: pacman -Q libcups
 
 splix-pkg:
-  pkg.installed:
-    - pkgs:
-        - splix
-
-termite-ranger-fix-git-pkg:
   cmd.run:
-    - name: aura -A --noconfirm termite-ranger-fix-git
-    - unless: pacman -Q termite-ranger-fix-git
+    - name: powerpill -S --noconfirm splix
+    - unless: pacman -Q splix
 
-termite-ranger-fix-terminfo-git-pkg:
+kitty-pkg:
   cmd.run:
-    - name: aura -A --noconfirm termite-ranger-fix-terminfo-git
-    - unless: pacman -Q termite-ranger-fix-terminfo-git
+    - name: powerpill -S --noconfirm kitty
+    - unless: pacman -Q kitty
 
 xterm-pkg:
-  pkg.installed:
-    - pkgs:
-        - xterm
+  cmd.run:
+    - name: powerpill -S --noconfirm xterm
+    - unless: pacman -Q xterm
 
 rxvt-unicode-pkg:
-  pkg.installed:
-    - pkgs:
-        - rxvt-unicode
+  cmd.run:
+    - name: powerpill -S --noconfirm rxvt-unicode
+    - unless: pacman -Q rxvt-unicode
 
 urxvt-perls-pkg:
-  pkg.installed:
-    - pkgs:
-        - urxvt-perls
+  cmd.run:
+    - name: powerpill -S --noconfirm urxvt-perls
+    - unless: pacman -Q urxvt-perls
 
 zsh-pkg:
-  pkg.installed:
-    - pkgs:
-        - zsh
+  cmd.run:
+    - name: powerpill -S --noconfirm zsh
+    - unless: pacman -Q zsh
 
 tmux-pkg:
-  pkg.installed:
-    - pkgs:
-        - tmux
+  cmd.run:
+    - name: powerpill -S --noconfirm tmux
+    - unless: pacman -Q tmux
 
 ranger-pkg:
-  pkg.installed:
-    - pkgs:
-        - ranger
+  cmd.run:
+    - name: powerpill -S --noconfirm ranger
+    - unless: pacman -Q ranger
 
 ffmpegthumbnailer-pkg:
-  pkg.installed:
-    - pkgs:
-        - ffmpegthumbnailer
+  cmd.run:
+    - name: powerpill -S --noconfirm ffmpegthumbnailer
+    - unless: pacman -Q ffmpegthumbnailer
 
 mediainfo-pkg:
-  pkg.installed:
-    - pkgs:
-        - mediainfo
+  cmd.run:
+    - name: powerpill -S --noconfirm mediainfo
+    - unless: pacman -Q mediainfo
+
+trash-cli-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm trash-cli
+    - unless: pacman -Q trash-cli
 
 pv-pkg:
-  pkg.installed:
-    - pkgs:
-        - pv
+  cmd.run:
+    - name: powerpill -S --noconfirm pv
+    - unless: pacman -Q pv
 
 progress-pkg:
-  pkg.installed:
-    - pkgs:
-        - progress
+  cmd.run:
+    - name: powerpill -S --noconfirm progress
+    - unless: pacman -Q progress
+
+htop-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm htop
+    - unless: pacman -Q htop
+
+fasd-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm fasd
+    - unless: pacman -Q fasd
+
+cowsay-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm cowsay
+    - unless: pacman -Q cowsay
+
+fortune-mod-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm fortune-mod
+    - unless: pacman -Q fortune-mod
 
 gvim-pkg:
-  pkg.installed:
-    - pkgs:
-        - gvim
+  cmd.run:
+    - name: powerpill -S --noconfirm gvim
+    - unless: pacman -Q gvim
+
+vimpager-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm vimpager-git
+    - unless: pacman -Q vimpager-git
 
 emacs-git-pkg:
   cmd.run:
     - name: aura -A --noconfirm emacs-git
     - unless: pacman -Q emacs-git
 
-evm-pkg:
+cask-pkg:
   cmd.run:
-    - runas: noctuid
-    - name: gem install evm
-    - unless: which evm
-    - require:
-        - ruby-pkg
+    - name: aura -A --noconfirm cask
+    - unless: pacman -Q cask
 
 emacs-25.1-pkg:
   cmd.run:
-    - runas: noctuid
     - name: evm install emacs-25.1
-    - unless: which emacs-25.1
-    - require:
-        - evm-pkg
+    - unless: evm list | grep "emacs-25.1 \[I\]"
 
 qutebrowser-pkg:
-  pkg.installed:
-    - pkgs:
-        - qutebrowser
+  cmd.run:
+    - name: powerpill -S --noconfirm qutebrowser
+    - unless: pacman -Q qutebrowser
+
+qt5-webengine-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm qt5-webengine
+    - unless: pacman -Q qt5-webengine
 
 firefox-pkg:
-  pkg.installed:
-    - pkgs:
-        - firefox
+  cmd.run:
+    - name: powerpill -S --noconfirm firefox
+    - unless: pacman -Q firefox
 
-firejail-pkg:
-  pkg.installed:
-    - pkgs:
-        - firejail
+firefox-esr-bin-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm firefox-esr-bin
+    - unless: pacman -Q firefox-esr-bin
 
 profile-cleaner-pkg:
   cmd.run:
@@ -305,156 +384,216 @@ profile-sync-daemon-pkg:
     - unless: pacman -Q profile-sync-daemon
 
 chromium-pkg:
-  pkg.installed:
-    - pkgs:
-        - chromium
+  cmd.run:
+    - name: powerpill -S --noconfirm chromium
+    - unless: pacman -Q chromium
 
 w3m-pkg:
-  pkg.installed:
-    - pkgs:
-        - w3m
+  cmd.run:
+    - name: powerpill -S --noconfirm w3m
+    - unless: pacman -Q w3m
+
+mpv-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm mpv
+    - unless: pacman -Q mpv
+
+pqiv-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm pqiv-git
+    - unless: pacman -Q pqiv-git
 
 wine-pkg:
-  pkg.installed:
-    - pkgs:
-        - wine
+  cmd.run:
+    - name: powerpill -S --noconfirm wine
+    - unless: pacman -Q wine
 
 winetricks-pkg:
-  pkg.installed:
-    - pkgs:
-        - winetricks
+  cmd.run:
+    - name: powerpill -S --noconfirm winetricks
+    - unless: pacman -Q winetricks
 
 libreoffice-fresh-pkg:
-  pkg.installed:
-    - pkgs:
-        - libreoffice-fresh
+  cmd.run:
+    - name: powerpill -S --noconfirm libreoffice-fresh
+    - unless: pacman -Q libreoffice-fresh
 
 unoconv-pkg:
-  pkg.installed:
-    - pkgs:
-        - unoconv
+  cmd.run:
+    - name: powerpill -S --noconfirm unoconv
+    - unless: pacman -Q unoconv
 
 pandoc-pkg:
-  pkg.installed:
-    - pkgs:
-        - pandoc
+  cmd.run:
+    - name: powerpill -S --noconfirm pandoc
+    - unless: pacman -Q pandoc
+
+wkhtmltopdf-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm wkhtmltopdf
+    - unless: pacman -Q wkhtmltopdf
+
+poppler-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm poppler
+    - unless: pacman -Q poppler
+
+odt2txt-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm odt2txt
+    - unless: pacman -Q odt2txt
 
 livedown-pkg:
   cmd.run:
     - name: npm install -g livedown
-    - unless: which livedown
+    - unless: command -v livedown
     - require:
         - npm-pkg
 
 gimp-pkg:
-  pkg.installed:
-    - pkgs:
-        - gimp
+  cmd.run:
+    - name: powerpill -S --noconfirm gimp
+    - unless: pacman -Q gimp
 
 imagemagick-pkg:
-  pkg.installed:
-    - pkgs:
-        - imagemagick
+  cmd.run:
+    - name: powerpill -S --noconfirm imagemagick
+    - unless: pacman -Q imagemagick
 
 gifsicle-pkg:
-  pkg.installed:
-    - pkgs:
-        - gifsicle
+  cmd.run:
+    - name: powerpill -S --noconfirm gifsicle
+    - unless: pacman -Q gifsicle
 
 graphicsmagick-pkg:
-  pkg.installed:
-    - pkgs:
-        - graphicsmagick
+  cmd.run:
+    - name: powerpill -S --noconfirm graphicsmagick
+    - unless: pacman -Q graphicsmagick
 
 transmission-cli-pkg:
-  pkg.installed:
-    - pkgs:
-        - transmission-cli
+  cmd.run:
+    - name: powerpill -S --noconfirm transmission-cli
+    - unless: pacman -Q transmission-cli
+
+peerflix-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm peerflix-git
+    - unless: pacman -Q peerflix-git
 
 zathura-pkg:
-  pkg.installed:
-    - pkgs:
-        - zathura
+  cmd.run:
+    - name: powerpill -S --noconfirm zathura
+    - unless: pacman -Q zathura
 
 zathura-pdf-mupdf-pkg:
-  pkg.installed:
-    - pkgs:
-        - zathura-pdf-mupdf
+  cmd.run:
+    - name: powerpill -S --noconfirm zathura-pdf-mupdf
+    - unless: pacman -Q zathura-pdf-mupdf
 
 zathura-djvu-pkg:
-  pkg.installed:
-    - pkgs:
-        - zathura-djvu
-
-apvlv-pkg:
-  pkg.installed:
-    - pkgs:
-        - apvlv
+  cmd.run:
+    - name: powerpill -S --noconfirm zathura-djvu
+    - unless: pacman -Q zathura-djvu
 
 ppsspp-pkg:
-  pkg.installed:
-    - pkgs:
-        - ppsspp
+  cmd.run:
+    - name: powerpill -S --noconfirm ppsspp
+    - unless: pacman -Q ppsspp
+
+dolphin-emu-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm dolphin-emu
+    - unless: pacman -Q dolphin-emu
 
 mlocate-pkg:
-  pkg.installed:
-    - pkgs:
-        - mlocate
+  cmd.run:
+    - name: powerpill -S --noconfirm mlocate
+    - unless: pacman -Q mlocate
 
 lsof-pkg:
-  pkg.installed:
-    - pkgs:
-        - lsof
+  cmd.run:
+    - name: powerpill -S --noconfirm lsof
+    - unless: pacman -Q lsof
 
 lshw-pkg:
-  pkg.installed:
-    - pkgs:
-        - lshw
+  cmd.run:
+    - name: powerpill -S --noconfirm lshw
+    - unless: pacman -Q lshw
 
 dmidecode-pkg:
-  pkg.installed:
-    - pkgs:
-        - dmidecode
+  cmd.run:
+    - name: powerpill -S --noconfirm dmidecode
+    - unless: pacman -Q dmidecode
+
+sharutils-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm sharutils
+    - unless: pacman -Q sharutils
 
 ntp-pkg:
-  pkg.installed:
-    - pkgs:
-        - ntp
+  cmd.run:
+    - name: powerpill -S --noconfirm ntp
+    - unless: pacman -Q ntp
+
+chrony-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm chrony
+    - unless: pacman -Q chrony
 
 tzupdate-pkg:
   cmd.run:
     - name: aura -A --noconfirm tzupdate
     - unless: pacman -Q tzupdate
 
-udevil-pkg:
-  pkg.installed:
-    - pkgs:
-        - udevil
+udiskie-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm udiskie
+    - unless: pacman -Q udiskie
 
 smartmontools-pkg:
-  pkg.installed:
-    - pkgs:
-        - smartmontools
+  cmd.run:
+    - name: powerpill -S --noconfirm smartmontools
+    - unless: pacman -Q smartmontools
 
-sharutils-pkg:
-  pkg.installed:
-    - pkgs:
-        - sharutils
+hdparm-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm hdparm
+    - unless: pacman -Q hdparm
+
+rng-tools-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm rng-tools
+    - unless: pacman -Q rng-tools
+
+xcape-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm xcape
+    - unless: pacman -Q xcape
+
+klfc-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm klfc
+    - unless: pacman -Q klfc
+
+arduino-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm arduino
+    - unless: pacman -Q arduino
 
 fcron-pkg:
-  pkg.installed:
-    - pkgs:
-        - fcron
+  cmd.run:
+    - name: powerpill -S --noconfirm fcron
+    - unless: pacman -Q fcron
 
 baobab-pkg:
-  pkg.installed:
-    - pkgs:
-        - baobab
+  cmd.run:
+    - name: powerpill -S --noconfirm baobab
+    - unless: pacman -Q baobab
 
 ncdu-pkg:
-  pkg.installed:
-    - pkgs:
-        - ncdu
+  cmd.run:
+    - name: powerpill -S --noconfirm ncdu
+    - unless: pacman -Q ncdu
 
 cdu-pkg:
   cmd.run:
@@ -462,54 +601,54 @@ cdu-pkg:
     - unless: pacman -Q cdu
 
 virtualbox-pkg:
-  pkg.installed:
-    - pkgs:
-        - virtualbox
+  cmd.run:
+    - name: powerpill -S --noconfirm virtualbox
+    - unless: pacman -Q virtualbox
 
 virtualbox-host-dkms-pkg:
-  pkg.installed:
-    - pkgs:
-        - virtualbox-host-dkms
-
-virtualbox-ck-host-modules-ivybridge-pkg:
-  pkg.installed:
-    - pkgs:
-        - virtualbox-ck-host-modules-ivybridge
+  cmd.run:
+    - name: powerpill -S --noconfirm virtualbox-host-dkms
+    - unless: pacman -Q virtualbox-host-dkms
 
 hunspell-en-pkg:
-  pkg.installed:
-    - pkgs:
-        - hunspell-en
+  cmd.run:
+    - name: powerpill -S --noconfirm hunspell-en
+    - unless: pacman -Q hunspell-en
 
 aspell-en-pkg:
-  pkg.installed:
-    - pkgs:
-        - aspell-en
+  cmd.run:
+    - name: powerpill -S --noconfirm aspell-en
+    - unless: pacman -Q aspell-en
+
+enchant-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm enchant
+    - unless: pacman -Q enchant
 
 sdcv-pkg:
-  pkg.installed:
-    - pkgs:
-        - sdcv
+  cmd.run:
+    - name: powerpill -S --noconfirm sdcv
+    - unless: pacman -Q sdcv
 
 words-pkg:
-  pkg.installed:
-    - pkgs:
-        - words
+  cmd.run:
+    - name: powerpill -S --noconfirm words
+    - unless: pacman -Q words
 
 isync-pkg:
-  pkg.installed:
-    - pkgs:
-        - isync
+  cmd.run:
+    - name: powerpill -S --noconfirm isync
+    - unless: pacman -Q isync
 
 msmtp-pkg:
-  pkg.installed:
-    - pkgs:
-        - msmtp
+  cmd.run:
+    - name: powerpill -S --noconfirm msmtp
+    - unless: pacman -Q msmtp
 
 msmtp-mta-pkg:
-  pkg.installed:
-    - pkgs:
-        - msmtp-mta
+  cmd.run:
+    - name: powerpill -S --noconfirm msmtp-mta
+    - unless: pacman -Q msmtp-mta
 
 mu-git-pkg:
   cmd.run:
@@ -517,59 +656,59 @@ mu-git-pkg:
     - unless: pacman -Q mu-git
 
 nspluginwrapper-pkg:
-  pkg.installed:
-    - pkgs:
-        - nspluginwrapper
+  cmd.run:
+    - name: powerpill -S --noconfirm nspluginwrapper
+    - unless: pacman -Q nspluginwrapper
 
 procmail-pkg:
-  pkg.installed:
-    - pkgs:
-        - procmail
+  cmd.run:
+    - name: powerpill -S --noconfirm procmail
+    - unless: pacman -Q procmail
 
 alsa-utils-pkg:
-  pkg.installed:
-    - pkgs:
-        - alsa-utils
+  cmd.run:
+    - name: powerpill -S --noconfirm alsa-utils
+    - unless: pacman -Q alsa-utils
 
 pulseaudio-alsa-pkg:
-  pkg.installed:
-    - pkgs:
-        - pulseaudio-alsa
+  cmd.run:
+    - name: powerpill -S --noconfirm pulseaudio-alsa
+    - unless: pacman -Q pulseaudio-alsa
 
 pavucontrol-pkg:
-  pkg.installed:
-    - pkgs:
-        - pavucontrol
+  cmd.run:
+    - name: powerpill -S --noconfirm pavucontrol
+    - unless: pacman -Q pavucontrol
 
 ponymix-pkg:
-  pkg.installed:
-    - pkgs:
-        - ponymix
+  cmd.run:
+    - name: powerpill -S --noconfirm ponymix
+    - unless: pacman -Q ponymix
 
 mpd-pkg:
-  pkg.installed:
-    - pkgs:
-        - mpd
+  cmd.run:
+    - name: powerpill -S --noconfirm mpd
+    - unless: pacman -Q mpd
 
 mpc-pkg:
-  pkg.installed:
-    - pkgs:
-        - mpc
+  cmd.run:
+    - name: powerpill -S --noconfirm mpc
+    - unless: pacman -Q mpc
 
 ncmpcpp-pkg:
-  pkg.installed:
-    - pkgs:
-        - ncmpcpp
+  cmd.run:
+    - name: powerpill -S --noconfirm ncmpcpp
+    - unless: pacman -Q ncmpcpp
 
 abcde-pkg:
-  pkg.installed:
-    - pkgs:
-        - abcde
+  cmd.run:
+    - name: powerpill -S --noconfirm abcde
+    - unless: pacman -Q abcde
 
 glyr-pkg:
-  pkg.installed:
-    - pkgs:
-        - glyr
+  cmd.run:
+    - name: powerpill -S --noconfirm glyr
+    - unless: pacman -Q glyr
 
 perl-musicbrainz-discid-pkg:
   cmd.run:
@@ -582,92 +721,107 @@ perl-webservice-musicbrainz-pkg:
     - unless: pacman -Q perl-webservice-musicbrainz
 
 cdrtools-pkg:
-  pkg.installed:
-    - pkgs:
-        - cdrtools
+  cmd.run:
+    - name: powerpill -S --noconfirm cdrtools
+    - unless: pacman -Q cdrtools
 
 lib32-alsa-plugins-pkg:
-  pkg.installed:
-    - pkgs:
-        - lib32-alsa-plugins
+  cmd.run:
+    - name: powerpill -S --noconfirm lib32-alsa-plugins
+    - unless: pacman -Q lib32-alsa-plugins
 
 beets-pkg:
-  pkg.installed:
-    - pkgs:
-        - beets
+  cmd.run:
+    - name: powerpill -S --noconfirm beets
+    - unless: pacman -Q beets
 
 pyacoustid-pkg:
   cmd.run:
     - name: pip install pyacoustid
-    - unless: which pyacoustid
+    - unless: pip list | grep ^pyacoustid
     - require:
         - python-pip-pkg
 
 requests-pkg:
   cmd.run:
     - name: pip install requests
-    - unless: which requests
+    - unless: pip list | grep ^requests
     - require:
         - python-pip-pkg
 
 python-mpd-pkg:
   cmd.run:
     - name: pip install python-mpd
-    - unless: which python-mpd
+    - unless: pip list | grep ^python-mpd
     - require:
         - python-pip-pkg
 
 pylast-pkg:
   cmd.run:
     - name: pip install pylast
-    - unless: which pylast
+    - unless: pip list | grep ^pylast
     - require:
         - python-pip-pkg
 
+youtube-dl-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm youtube-dl
+    - unless: pacman -Q youtube-dl
+
+aria2-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm aria2
+    - unless: pacman -Q aria2
+
 texlive-bin-pkg:
-  pkg.installed:
-    - pkgs:
-        - texlive-bin
+  cmd.run:
+    - name: powerpill -S --noconfirm texlive-bin
+    - unless: pacman -Q texlive-bin
 
 texlive-latexextra-pkg:
-  pkg.installed:
-    - pkgs:
-        - texlive-latexextra
+  cmd.run:
+    - name: powerpill -S --noconfirm texlive-latexextra
+    - unless: pacman -Q texlive-latexextra
 
 python-pygments-pkg:
-  pkg.installed:
-    - pkgs:
-        - python-pygments
+  cmd.run:
+    - name: powerpill -S --noconfirm python-pygments
+    - unless: pacman -Q python-pygments
 
 sxhkd-pkg:
-  pkg.installed:
-    - pkgs:
-        - sxhkd
+  cmd.run:
+    - name: powerpill -S --noconfirm sxhkd
+    - unless: pacman -Q sxhkd
 
 xautolock-pkg:
-  pkg.installed:
-    - pkgs:
-        - xautolock
+  cmd.run:
+    - name: powerpill -S --noconfirm xautolock
+    - unless: pacman -Q xautolock
 
 redshift-pkg:
-  pkg.installed:
-    - pkgs:
-        - redshift
+  cmd.run:
+    - name: powerpill -S --noconfirm redshift
+    - unless: pacman -Q redshift
 
 compton-pkg:
-  pkg.installed:
-    - pkgs:
-        - compton
+  cmd.run:
+    - name: powerpill -S --noconfirm compton
+    - unless: pacman -Q compton
 
 libnotify-pkg:
-  pkg.installed:
-    - pkgs:
-        - libnotify
+  cmd.run:
+    - name: powerpill -S --noconfirm libnotify
+    - unless: pacman -Q libnotify
 
 dunst-git-pkg:
   cmd.run:
     - name: aura -A --noconfirm dunst-git
     - unless: pacman -Q dunst-git
+
+rofi-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm rofi
+    - unless: pacman -Q rofi
 
 fonts-meta-extended-lt-pkg:
   cmd.run:
@@ -675,44 +829,54 @@ fonts-meta-extended-lt-pkg:
     - unless: pacman -Q fonts-meta-extended-lt
 
 ttf-dejavu-pkg:
-  pkg.installed:
-    - pkgs:
-        - ttf-dejavu
+  cmd.run:
+    - name: powerpill -S --noconfirm ttf-dejavu
+    - unless: pacman -Q ttf-dejavu
 
 otf-fira-mono-pkg:
-  pkg.installed:
-    - pkgs:
-        - otf-fira-mono
+  cmd.run:
+    - name: powerpill -S --noconfirm otf-fira-mono
+    - unless: pacman -Q otf-fira-mono
 
 ttf-inconsolata-pkg:
-  pkg.installed:
-    - pkgs:
-        - ttf-inconsolata
+  cmd.run:
+    - name: powerpill -S --noconfirm ttf-inconsolata
+    - unless: pacman -Q ttf-inconsolata
 
 ttf-inconsolata-g-pkg:
   cmd.run:
     - name: aura -A --noconfirm ttf-inconsolata-g
     - unless: pacman -Q ttf-inconsolata-g
 
+phallus-fonts-git-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm phallus-fonts-git
+    - unless: pacman -Q phallus-fonts-git
+
+otf-fura-mono-powerline-git-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm otf-fura-mono-powerline-git
+    - unless: pacman -Q otf-fura-mono-powerline-git
+
 noto-fonts-cjk-pkg:
-  pkg.installed:
-    - pkgs:
-        - noto-fonts-cjk
+  cmd.run:
+    - name: powerpill -S --noconfirm noto-fonts-cjk
+    - unless: pacman -Q noto-fonts-cjk
 
 otf-ipafont-pkg:
-  pkg.installed:
-    - pkgs:
-        - otf-ipafont
+  cmd.run:
+    - name: powerpill -S --noconfirm otf-ipafont
+    - unless: pacman -Q otf-ipafont
 
 adobe-source-han-sans-jp-fonts-pkg:
-  pkg.installed:
-    - pkgs:
-        - adobe-source-han-sans-jp-fonts
+  cmd.run:
+    - name: powerpill -S --noconfirm adobe-source-han-sans-jp-fonts
+    - unless: pacman -Q adobe-source-han-sans-jp-fonts
 
 bdf-unifont-pkg:
-  pkg.installed:
-    - pkgs:
-        - bdf-unifont
+  cmd.run:
+    - name: powerpill -S --noconfirm bdf-unifont
+    - unless: pacman -Q bdf-unifont
 
 siji-git-pkg:
   cmd.run:
@@ -724,122 +888,132 @@ ttfautohint-pkg:
     - name: aura -A --noconfirm ttfautohint
     - unless: pacman -Q ttfautohint
 
-otfcc-pkg:
-  cmd.run:
-    - name: aura -A --noconfirm otfcc
-    - unless: pacman -Q otfcc
-
 yargs-pkg:
   cmd.run:
     - name: npm install -g yargs
-    - unless: which yargs
+    - unless: command -v yargs
     - require:
         - npm-pkg
 
 pad-pkg:
   cmd.run:
     - name: npm install -g pad
-    - unless: which pad
+    - unless: command -v pad
     - require:
         - npm-pkg
 
 patel-pkg:
   cmd.run:
     - name: npm install -g patel
-    - unless: which patel
+    - unless: command -v patel
     - require:
         - npm-pkg
 
 cubic2quad-pkg:
   cmd.run:
     - name: npm install -g cubic2quad
-    - unless: which cubic2quad
+    - unless: command -v cubic2quad
     - require:
         - npm-pkg
 
 bezier-js-pkg:
   cmd.run:
     - name: npm install -g bezier-js
-    - unless: which bezier-js
+    - unless: command -v bezier-js
     - require:
         - npm-pkg
 
 libspiro-js-pkg:
   cmd.run:
     - name: npm install -g libspiro-js
-    - unless: which libspiro-js
+    - unless: command -v libspiro-js
     - require:
         - npm-pkg
 
 topsort-pkg:
   cmd.run:
     - name: npm install -g topsort
-    - unless: which topsort
+    - unless: command -v topsort
     - require:
         - npm-pkg
 
 toml-pkg:
   cmd.run:
     - name: npm install -g toml
-    - unless: which toml
+    - unless: command -v toml
     - require:
         - npm-pkg
 
 caryll-shapeops-pkg:
   cmd.run:
     - name: npm install -g caryll-shapeops
-    - unless: which caryll-shapeops
+    - unless: command -v caryll-shapeops
     - require:
         - npm-pkg
 
 otfcc-c2q-pkg:
   cmd.run:
     - name: npm install -g otfcc-c2q
-    - unless: which otfcc-c2q
+    - unless: command -v otfcc-c2q
     - require:
         - npm-pkg
 
 unorm-pkg:
   cmd.run:
     - name: npm install -g unorm
-    - unless: which unorm
+    - unless: command -v unorm
     - require:
         - npm-pkg
 
-polybar-git-pkg:
+setroot-git-pkg:
   cmd.run:
-    - name: aura -A --noconfirm polybar-git
-    - unless: pacman -Q polybar-git
+    - name: aura -A --noconfirm setroot-git
+    - unless: pacman -Q setroot-git
 
 xtitle-git-pkg:
-  pkg.installed:
-    - pkgs:
-        - xtitle-git
-
-conky-lua-nv-pkg:
   cmd.run:
-    - name: aura -A --noconfirm conky-lua-nv
-    - unless: pacman -Q conky-lua-nv
+    - name: aura -A --noconfirm xtitle-git
+    - unless: pacman -Q xtitle-git
 
 numix-gtk-theme-pkg:
-  pkg.installed:
-    - pkgs:
-        - numix-gtk-theme
+  cmd.run:
+    - name: powerpill -S --noconfirm numix-gtk-theme
+    - unless: pacman -Q numix-gtk-theme
+
+numix-icon-theme-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm numix-icon-theme-git
+    - unless: pacman -Q numix-icon-theme-git
+
+setcolors-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm setcolors-git
+    - unless: pacman -Q setcolors-git
 
 unbound-pkg:
-  pkg.installed:
-    - pkgs:
-        - unbound
+  cmd.run:
+    - name: powerpill -S --noconfirm unbound
+    - unless: pacman -Q unbound
 
 expat-pkg:
-  pkg.installed:
-    - pkgs:
-        - expat
+  cmd.run:
+    - name: powerpill -S --noconfirm expat
+    - unless: pacman -Q expat
 
 dnscrypt-proxy-pkg:
-  pkg.installed:
-    - pkgs:
-        - dnscrypt-proxy
+  cmd.run:
+    - name: powerpill -S --noconfirm dnscrypt-proxy
+    - unless: pacman -Q dnscrypt-proxy
+
+hostblock-bin-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm hostblock-bin
+    - unless: pacman -Q hostblock-bin
+
+kwakd-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm kwakd
+    - unless: pacman -Q kwakd
 
 rar-pkg:
   cmd.run:
@@ -847,34 +1021,24 @@ rar-pkg:
     - unless: pacman -Q rar
 
 unzip-pkg:
-  pkg.installed:
-    - pkgs:
-        - unzip
+  cmd.run:
+    - name: powerpill -S --noconfirm unzip
+    - unless: pacman -Q unzip
 
 zip-pkg:
-  pkg.installed:
-    - pkgs:
-        - zip
+  cmd.run:
+    - name: powerpill -S --noconfirm zip
+    - unless: pacman -Q zip
 
 p7zip-pkg:
-  pkg.installed:
-    - pkgs:
-        - p7zip
+  cmd.run:
+    - name: powerpill -S --noconfirm p7zip
+    - unless: pacman -Q p7zip
 
 atool-pkg:
-  pkg.installed:
-    - pkgs:
-        - atool
-
-htop-pkg:
-  pkg.installed:
-    - pkgs:
-        - htop
-
-fasd-pkg:
-  pkg.installed:
-    - pkgs:
-        - fasd
+  cmd.run:
+    - name: powerpill -S --noconfirm atool
+    - unless: pacman -Q atool
 
 jmtpfs-pkg:
   cmd.run:
@@ -882,61 +1046,98 @@ jmtpfs-pkg:
     - unless: pacman -Q jmtpfs
 
 r-pkg:
-  pkg.installed:
-    - pkgs:
-        - r
+  cmd.run:
+    - name: powerpill -S --noconfirm r
+    - unless: pacman -Q r
 
 tk-pkg:
-  pkg.installed:
-    - pkgs:
-        - tk
+  cmd.run:
+    - name: powerpill -S --noconfirm tk
+    - unless: pacman -Q tk
 
 ripgrep-pkg:
-  pkg.installed:
-    - pkgs:
-        - ripgrep
+  cmd.run:
+    - name: powerpill -S --noconfirm ripgrep
+    - unless: pacman -Q ripgrep
 
 fzf-pkg:
-  pkg.installed:
-    - pkgs:
-        - fzf
+  cmd.run:
+    - name: powerpill -S --noconfirm fzf
+    - unless: pacman -Q fzf
 
-cowsay-pkg:
-  pkg.installed:
-    - pkgs:
-        - cowsay
-
-fortune-mod-pkg:
-  pkg.installed:
-    - pkgs:
-        - fortune-mod
+fd-rs-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm fd-rs-git
+    - unless: pacman -Q fd-rs-git
 
 harvey-pkg:
   cmd.run:
     - name: pip install harvey
-    - unless: which harvey
+    - unless: pip list | grep ^harvey
     - require:
         - python-pip-pkg
 
+clojure-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm clojure
+    - unless: pacman -Q clojure
+
 nodejs-pkg:
-  pkg.installed:
-    - pkgs:
-        - nodejs
+  cmd.run:
+    - name: powerpill -S --noconfirm nodejs
+    - unless: pacman -Q nodejs
 
 npm-pkg:
-  pkg.installed:
-    - pkgs:
-        - npm
+  cmd.run:
+    - name: powerpill -S --noconfirm npm
+    - unless: pacman -Q npm
 
 python-pip-pkg:
-  pkg.installed:
-    - pkgs:
-        - python-pip
+  cmd.run:
+    - name: powerpill -S --noconfirm python-pip
+    - unless: pacman -Q python-pip
+
+yapf-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm yapf
+    - unless: pacman -Q yapf
+
+ipython-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm ipython
+    - unless: pacman -Q ipython
+
+python-ipdb-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-ipdb
+    - unless: pacman -Q python-ipdb
+
+autoflake-pkg:
+  cmd.run:
+    - name: pip install autoflake
+    - unless: pip list | grep ^autoflake
+    - require:
+        - python-pip-pkg
+
+python-jedi-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-jedi
+    - unless: pacman -Q python-jedi
+
+python-virtualenv-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-virtualenv
+    - unless: pacman -Q python-virtualenv
+
+python-virtualenvwrapper-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-virtualenvwrapper
+    - unless: pacman -Q python-virtualenvwrapper
 
 ruby-pkg:
-  pkg.installed:
-    - pkgs:
-        - ruby
+  cmd.run:
+    - name: powerpill -S --noconfirm ruby
+    - unless: pacman -Q ruby
 
 roswell-pkg:
   cmd.run:
@@ -950,88 +1151,93 @@ sbcl-bin-pkg:
     - require:
         - roswell-pkg
 
-phantomjs-pkg:
-  pkg.installed:
-    - pkgs:
-        - phantomjs
-
 racket-pkg:
-  pkg.installed:
-    - pkgs:
-        - racket
+  cmd.run:
+    - name: powerpill -S --noconfirm racket
+    - unless: pacman -Q racket
 
 shellcheck-pkg:
-  pkg.installed:
-    - pkgs:
-        - shellcheck
+  cmd.run:
+    - name: powerpill -S --noconfirm shellcheck
+    - unless: pacman -Q shellcheck
 
 jq-pkg:
-  pkg.installed:
-    - pkgs:
-        - jq
+  cmd.run:
+    - name: powerpill -S --noconfirm jq
+    - unless: pacman -Q jq
 
 maim-pkg:
-  pkg.installed:
-    - pkgs:
-        - maim
+  cmd.run:
+    - name: powerpill -S --noconfirm maim
+    - unless: pacman -Q maim
 
 slop-pkg:
-  pkg.installed:
-    - pkgs:
-        - slop
+  cmd.run:
+    - name: powerpill -S --noconfirm slop
+    - unless: pacman -Q slop
 
 xdotool-pkg:
-  pkg.installed:
-    - pkgs:
-        - xdotool
+  cmd.run:
+    - name: powerpill -S --noconfirm xdotool
+    - unless: pacman -Q xdotool
 
 xorg-server-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-server
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-server
+    - unless: pacman -Q xorg-server
 
 xorg-xinit-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-xinit
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xinit
+    - unless: pacman -Q xorg-xinit
+
+xorg-xinput-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xinput
+    - unless: pacman -Q xorg-xinput
 
 xorg-xprop-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-xprop
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xprop
+    - unless: pacman -Q xorg-xprop
 
 xorg-xwininfo-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-xwininfo
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xwininfo
+    - unless: pacman -Q xorg-xwininfo
 
 xorg-xfontsel-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-xfontsel
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xfontsel
+    - unless: pacman -Q xorg-xfontsel
 
 xorg-xlsfonts-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-xlsfonts
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xlsfonts
+    - unless: pacman -Q xorg-xlsfonts
 
 xorg-xsetroot-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-xsetroot
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xsetroot
+    - unless: pacman -Q xorg-xsetroot
 
 xorg-xev-pkg:
-  pkg.installed:
-    - pkgs:
-        - xorg-xev
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xev
+    - unless: pacman -Q xorg-xev
 
 xsel-pkg:
-  pkg.installed:
-    - pkgs:
-        - xsel
+  cmd.run:
+    - name: powerpill -S --noconfirm xsel
+    - unless: pacman -Q xsel
 
 xclip-pkg:
-  pkg.installed:
-    - pkgs:
-        - xclip
+  cmd.run:
+    - name: powerpill -S --noconfirm xclip
+    - unless: pacman -Q xclip
+
+android-tools-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm android-tools
+    - unless: pacman -Q android-tools
 

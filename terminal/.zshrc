@@ -729,7 +729,6 @@ function poweroff() {
 	emacsclient --eval "(let (kill-emacs-hook) (kill-emacs))"
 	# never had corruption with tc volumes
 	# maybe this is overly paranoid, but it seems like a good idea
-	truecrypt --text --dismount || return 1
 	udiskie-umount --all || return 1
 	if command -v tmsu &> /dev/null; then
 		tmsu unmount -a || return 1

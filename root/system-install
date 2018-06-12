@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mount=/mnt
+
+# * Helper Functions
+check_connection() {
+	# ping default gateway; http://stackoverflow.com/a/932187/2744245
+	ping -c 1 -q "$(ip r | awk '/default/ {print $3}')" &> /dev/null
+}
+
+boot_efi_home_exist() {
+	[[ -d "$mount"/boot ]] && [[ -d "$mount"/boot/efi ]] \
+		&& [[ -d "$mount"/home ]]
+}
+
+prompt_continue() {
+	echo "continue? [y/n]"
+	read -r reply
+	if [[ $reply != y ]]; then
+		exit 0
+	fi
+}
+
+# * Base Install
+base_install() {
+	# with the base group, the first initramfs will be generated and installed
+	# to the new system's boot path
+	# use host's package cache
+	pacstrap -c -i "$mount" base base-devel
+}
+
+# * Chroot
+chroot_setup() {
+	arch-chroot "$mount" /bin/bash
+}
+
+# * Main
+main() {
+	if [[ $EUID -ne 0 ]]; then
+		echo "Please run this script as root."
+		exit 1
+	fi
+	if ! boot_efi_home_exist; then
+		echo "Please make sure that all partitions are mounted under $mount
+(including the ESP as $mount/boot/EFI)."
+		echo "Using 'lsblk -o name,label,size' may be useful to determine how
+		which partitions are which."
+		exit 1
+	fi
+	if ! check_connection; then
+		echo "Please connect to the internet before continuing."
+		exit 1
+	fi
+
+	echo "Please read notes on installation and read the wiki for any changes.
+- [[file:~/ag-sys/else/arch_and_program_info.org::*Arch%20Installation][Arch
+	Installation]]
+- https://wiki.archlinux.org/index.php/Installation_guide"
+
+	echo
+
+	echo "This script does the following setup:
+- Performs base installation with pacstrap
+- Chroots into $mount with arch-chroot
+
+NOTE: This script is not sufficient for a working installation. Please run the
+post-install script from inside the chroot after this script. It will set the
+timezone, hostname, install the bootloader, update the initramfs, create the
+main user, etc.
+
+Please create a new user before running the post-install script:
+- useradd user
+- passwd user
+
+After running the post-install script, you should do the following:
+- exit the chroot with 'exit'
+- umount mounted partitions with 'umount -R /mnt'
+- reboot"
+	prompt_continue
+	base_install
+	chroot_setup
+}
+
+main

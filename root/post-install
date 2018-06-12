@@ -1,0 +1,357 @@
+#!/usr/bin/env bash
+# Goal: idempotent post-install setup script
+# Notes:
+# - almost nothing needs to be done manually; this handles all installation
+#   steps after the user has mounted the partitions, run ./system-install, and
+#   created a user and set that user's password
+#   - initial necessary configuration (bootloader, initramfs, time, hostname)
+#   - home and root configuration file syncing
+#   - adding the user to groups
+#   - package installation
+#   - package configuration/setup (e.g. font setup)
+#   - service activation
+# - this script does not work perfectly, mainly because aura consistently hangs
+#   for certain packages and incorrectly claims others are not aur packages (I
+#   had to fiddle with the package list to prevent the script from hanging)
+# - this script is meant to be usable after running arch-chroot, so that the
+#   system can be fully set up before the first boot (the reasoning is that it's
+#   easier to set up a new system from an existing system; testing can be done
+#   before completely moving over to a new harddrive, for example; you can also
+#   just copy the system over:
+#   https://wiki.archlinux.org/index.php/Install_from_existing_Linux#From_a_host_running_Arch_Linux
+#   I prefer a clean, declarative installation though); because of this, it
+#   must work around some limitations:
+#   - runs as root since sudo does not work with a password in arch-chroot
+#     (would either need to have NOPASSWD for user or potentially use an askpass
+#     program if that is possible)
+#   - starting services fails from chroot of course, but so does enabling with
+#     salt; not using salt for services currently
+
+# Using salt mainly for nice messaging
+# potential salt alternatives
+# https://github.com/shawndellysse/farch
+# https://github.com/rycee/home-manager/
+# https://github.com/NixOS/nixpkgs/pull/9250
+# aconfmgr (not for me but potentially useful)
+
+# TODO
+# - add flag to use current user instead of requiring it to be $user (checking
+#   $user makes sense for a new install but not for an existing one)
+# - install evm with a package manager
+# - tlp config (charging rates)
+# - maybe don't update mirrorlist every time (takes a while)
+# - aura problems
+
+# absolutely don't change this; caught so many errors during testing
+set -euo pipefail
+
+# can use tzselect to find
+timezone=America/New_York
+hostname=bahamut
+user=noctuid
+uhome=/home/"$user"
+
+# * Helpers
+prompt_continue() {
+	echo "continue? [y/n]"
+	read -r reply
+	if [[ $reply != y ]]; then
+		exit 0
+	fi
+}
+
+# * Basic Setup
+# * Sudo
+sudo_setup() {
+	echo "Updating sudo configuration."
+	sleep 1
+	# set up /etc/sudoers
+	# - allow root to execute any command
+	# - allow users in wheel group to use sudo
+	echo 'root ALL=(ALL) ALL
+%wheel ALL=(ALL) ALL' | EDITOR='tee' visudo
+	# potentially dangerous without sudo and proper setup; risky
+	# sudo passwd -l root
+}
+
+# ** Time
+time_setup() {
+	echo "Updating timezone and clock."
+	sleep 1
+	ln -sf /usr/share/zoneinfo/"$timezone" /etc/localtime
+	hwclock --systohc --utc
+}
+
+# ** Locale
+locale_setup() {
+	echo "Performing locale configuration."
+	sleep 1
+	echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+	# necessary because of Emacs bug
+	echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
+	locale-gen
+	echo "LANG=en_US.UTF-8" > /etc/locale.conf
+}
+
+# ** Hostname
+hostname_setup() {
+	echo "Updating hostname."
+	sleep 1
+	echo "$hostname" > /etc/hostname
+	sed -i "/127.0.0.1/ s/$/ $hostname/" /etc/hosts
+	sed -i "/::1/ s/$/ $hostname/" /etc/hosts
+}
+
+# * Pacman/AUR
+pac_install() {
+	if ! pacman -Q "$1" &> /dev/null; then
+		echo "Installing $1."
+		sleep 1
+		if pacman -Q powerpill &> /dev/null; then
+			powerpill -S --noconfirm "$1"
+		else
+			pacman -S --noconfirm "$1"
+		fi
+	fi
+}
+
+update_mirror_list() {
+	pac_install reflector
+	echo "Updating mirrorlist with reflector."
+	sleep 1
+	# update server list by speed
+	reflector --verbose -l 200 --sort rate --save /etc/pacman.d/mirrorlist
+}
+
+update_pac_config() {
+	cp "$uhome"/dotfiles/root/etc/pacman.conf /etc/
+}
+
+install_aura() {
+	if ! pacman -Q aura-bin &> /dev/null; then
+		echo "Installing aura."
+		sleep 1
+		powerpill -S --noconfirm --needed base-devel
+		pac_install git
+		if [[ ! -d "$uhome"/build/aura-bin ]]; then
+			mkdir -p "$uhome"/build
+			git clone https://aur.archlinux.org/aura-bin.git "$uhome"/build/aura-bin
+		fi
+		cd "$uhome"/build/aura-bin
+		# can't be run as root
+		sudo -u "$user" makepkg --noconfirm -fsr
+		pacman -U *.pkg.tar.xz
+	fi
+}
+
+# * Home Config Setup
+home_config_setup() {
+	echo "Symlinking user config files."
+	sleep 1
+	pac_install stow
+	source "$uhome"/dotfiles/terminal/.zsh/stow_functions
+	HOME="$uhome" restow
+}
+
+# * TODO Nix
+# TODO fix; do extra necessary setup
+install_nix() {
+	# use nix install script
+	pacman -Q nix || aura -A nix
+	# TODO don't use aur; use install script and either need to delete /nix (maybe) or chown to user
+	# add unstable channell
+	nix-channel --update
+}
+
+# * EVM
+# have had problems installing evm with gem
+install_evm() {
+	if [[ ! -d "$uhome"/.evm ]]; then
+		git clone https://github.com/rejeep/evm.git "$uhome"/.evm
+	fi
+}
+
+# * Salt
+setup_salt() {
+	pac_install salt
+	# clear previous files (don't exit on rm failure)
+	rm -r /srv/salt &> /dev/null || true
+	mkdir -p /srv/salt
+	# cd to the directory of this script
+	cd "$(dirname "$0")"
+	cp ./top.sls /srv/salt
+	cp ./users.sls /srv/salt
+	cp ./root_config.sls /srv/salt
+	cp ./packages.sls /srv/salt
+	cp ./pre_service_setup.sls /srv/salt
+	cp ./services.sls /srv/salt
+	cp ./setup.sls /srv/salt
+	cp ./extra-setup /srv/salt
+	# TODO xdg used for user services
+	# I don't think display is used at all
+	# nor is dbus... can probably remvoe all of these
+
+	sed -i -e "s/set user =/set user = '$user'/g" /srv/salt/setup.sls
+	# sed -i -e "s/set user =/set user = '$user'/g" \
+		# 	-e "s;set xdg =;set xdg = '$XDG_RUNTIME_DIR';g" \
+		# 	-e "s/set display =/set display = '$DISPLAY'/g" \
+		# 	-e "s;set dbus =;set dbus = '$DBUS_SESSION_BUS_ADDRESS';g" \
+		# 	/srv/salt/setup.sls
+	cp -r ./etc /srv/salt
+	cp -r ./boot /srv/salt
+	cp -r ./usr /srv/salt
+	# overwrite any example configuration files
+	cp -r ../.root/etc /srv/salt
+}
+
+generate_packages_sls() {
+	# TODO alternatively could use templating for each package type:
+	# https://docs.saltstack.com/en/latest/topics/tutorials/states_pt3.html
+	# shellcheck disable=SC2188
+	> "$uhome"/dotfiles/root/packages.sls
+	while read -r line; do
+		if [[ -z $line ]] || [[ $line =~ \# ]]; then
+			continue
+		fi
+
+		package=$(echo $line | awk '{print $1}')
+		method=$(echo $line | awk '{print $2}')
+		method=${method:-pac}
+		nix_path=$(echo $line | awk '{print $3}')
+
+		echo "$package-pkg:" >> "$uhome"/dotfiles/root/packages.sls
+		# 		if [[ $method == pac ]]; then
+		# 			# TODO powerpill instead?
+		# 			echo "  pkg.installed:
+		#     - pkgs:
+		#         - $package
+		# " >> "$uhome"/dotfiles/root/packages.sls
+		if [[ $method == pac ]]; then
+			echo "  cmd.run:
+    - name: powerpill -S --noconfirm $package
+    - unless: pacman -Q $package
+" >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == aur ]]; then
+			# I've had a lot of problems with aura, but it's one of the only aur
+			# helpers I'm aware of that can run as sudo and has a --noconfirm
+			# option
+			echo "  cmd.run:
+    - name: aura -A --noconfirm $package
+    - unless: pacman -Q $package
+" >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == nix ]]; then
+			# TODO -require? install nix where?
+			echo "  cmd.run:
+	- runas: $user
+    - name: nix-env -iA $nix_path
+    - unless: nix-env -q $package
+" >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == ros ]]; then
+			echo "  cmd.run:
+    - name: ros install $package
+    - unless: ros list installed | grep $package
+    - require:
+        - roswell-pkg
+" >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == pip ]]; then
+			echo "  cmd.run:
+    - name: pip install $package
+    - unless: pip list | grep ^$package
+    - require:
+        - python-pip-pkg
+" >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == gem ]]; then
+			echo "  cmd.run:
+    - runas: $user
+    - name: $method install $package
+    - unless: gem list -i \"^$package\$\"
+    - require:
+        - ruby-pkg
+" >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == evm ]]; then
+			# - require:
+			# - $method-pkg
+			# - runas: $user
+			echo "  cmd.run:
+    - name: $method install $package
+    - unless: evm list | grep \"$package \[I\]\"
+" >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == npm ]]; then
+			# currently only using for commands and npm list is weird
+			echo "  cmd.run:
+    - name: npm install -g $package
+    - unless: command -v $package
+    - require:
+        - $method-pkg
+" >> "$uhome"/dotfiles/root/packages.sls
+		fi
+	done < "$uhome"/dotfiles/root/packages
+}
+
+# * Main
+main() {
+	if [[ $EUID -ne 0 ]]; then
+		echo "Please run as root."
+		exit 1
+	fi
+	if ! id -u "$user"; then
+		echo "Please create $user:
+- useradd $user
+- passwd $user
+
+Note that this script will take care of adding the user to groups."
+		exit 1
+	fi
+	if [[ "$(passwd --status "$user" | awk '{print $2}')" == NP ]]; then
+		echo "Please give $user a password
+- passwd $user"
+		exit 1
+	fi
+
+	echo "Prerequisites:
+- Inside chroot (or on existing installation that should be updated)
+- Internet connection
+- Base system has already been installed (system-install)
+- $user has been created (give the user a password before rebooting)
+- /home/\$user/dotfiles is in place and up to date
+
+Current variables:
+- Timezone: $timezone
+- Hostname: $hostname
+- Username: $user
+
+Please make sure that the ESP is already mounted under /boot/efi if installing a
+new system."
+	prompt_continue
+
+	# must be mounted before try to copy refind.conf over
+	if [[ -z "$(ls -A /boot/efi)" ]]; then
+		mount LABEL=SYSTEM /boot/efi
+	fi
+
+	echo "Performing basic setup..."
+	sudo_setup
+	time_setup
+	locale_setup
+	hostname_setup
+
+	home_config_setup
+
+	update_mirror_list
+	# need for xyne repo for powerpill
+	update_pac_config
+	pac_install powerpill
+	export PACMAN=powerpill
+	install_aura
+
+	install_evm
+
+	echo "Installing and running salt."
+	sleep 1
+	generate_packages_sls
+	setup_salt
+	# keep log level at info, otherwise don't know where aura frezes
+	salt-call --log-level info --local state.apply
+}
+
+main

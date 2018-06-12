@@ -1,3 +1,0 @@
-# https://wiki.archlinux.org/index.php/Dm-crypt/Swap_encryption#UUID_and_LABEL
-# see ./fstab as well
-cryptswap LABEL=cryptswap /dev/urandom swap,offset=2048,cipher=aes-xts-plain64,size=512

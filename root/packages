@@ -1,0 +1,553 @@
+# An organized list of my packages
+# TODO switch to dkms for as much as possible
+# TODO switch away from aur as much as possible
+# TODO don't do global installations with pip, etc.
+# https://www.reddit.com/r/archlinux/comments/770fch/lpt_install_python_modules_using_pacman_instead/
+
+# TODO:
+# - python setup (see todos below)
+
+# <package> <method (defaults to using pacman)> <extra information>
+
+# * Pacman-related
+# for generating .SRCINFO from PKGBUILD
+pkgbuild-introspection aur
+# for updating pacman mirror list
+reflector
+pkgfile
+# for paccache and other utilities
+pacman-contrib
+# aur helper
+yay aur
+
+# * Booatloader
+refind-efi
+
+# * Internet
+connman
+# backup
+networkmanager
+network-manager-applet
+nm-connection-editor
+
+# * Linux/CK
+# linux (already installed)
+# for dkms
+linux-headers
+# linux-ck-ivybridge
+# linux-ck-ivybridge-headers
+# broadcom-wl-ck-ivybridge
+linux-ck-skylake
+linux-ck-skylake-headers
+broadcom-wl-ck-skylake
+# virtualbox-ck-host-modules-ivybridge
+# removed from repo-ck
+# virtualbox-ck-host-modules-skylake
+
+# * Window Manager
+bspwm
+
+# * Filesystem Support
+ntfs-3g
+dosfstools
+exfat-utils
+
+# * Input
+xf86-input-synaptics
+
+# scim -> ibus -> fcitx
+fcitx-im
+fcitx-mozc
+# latex input
+fcitx-table-other
+
+# * Graphics/Drivers/Steam
+steam
+lib32-curl
+mesa
+# for steam?
+lib32-mesa
+steam-native-runtime
+
+# ** Microcode
+intel-ucode
+
+# ** Bumblebee
+# https://wiki.archlinux.org/index.php/bumblebee
+bumblebee
+bbswitch-dkms
+primus
+# intel-virtual-output
+xf86-video-intel
+nvidia-dkms
+nvidia-utils
+# for linux-ck
+# nvidia-ck-ivybridge
+nvidia-ck-skylake
+
+# * Security
+# encryption
+# veracrypt
+secure-delete aur
+safe-rm aur
+# firewall management
+ufw
+# password management
+pass
+passff-host aur
+# sandboxing
+firejail
+
+# * VCS
+git
+
+# * Power Management/Battery
+acpi
+tlp
+# for thinkpad charging/discharging rates
+acpi_call-dkms
+powertop
+
+# * Performance
+preload aur
+# not using currently; may not use again
+# psd
+
+# * Printing
+# https://wiki.archlinux.org/index.php/CUPS
+cups
+libcups
+splix
+# samsung-unified-driver aur
+# hplip
+# gutenprint
+
+# * Terminals
+# favorite terminals
+kitty
+# TODO both of these fail with aura
+# termite-ranger-fix-git aur
+# termite-ranger-fix-terminfo-git aur
+# xst-git aur
+# backup
+xterm
+rxvt-unicode
+urxvt-perls
+
+# * Shell/TUI/CLI
+# zplug installed in zshrc
+zsh
+
+tmux
+
+ranger
+# for ranger video preview
+ffmpegthumbnailer
+# ranger info (alterantively exiftool)
+mediainfo
+
+trash-cli
+
+# progress bars:
+# https://github.com/DeeNewcum/dotfiles/blob/master/bin/eta
+# http://www.theiling.de/projects/bar.html
+# https://github.com/Xfennec/progress
+# e.g. dd if=$source | pv | dd of=$target
+pv
+# for coreutils commands (e.g. cp, dd)
+progress
+
+htop
+
+fasd
+
+# random/fun
+cowsay
+fortune-mod
+
+# * Editors
+gvim
+vimpager-git aur
+# TODO aura fails
+emacs-git aur
+# evm gem
+cask aur
+emacs-25.1 evm
+
+# * Browsers
+qutebrowser
+qt5-webengine
+firefox
+# using for now
+firefox-esr-bin aur
+profile-cleaner aur
+profile-sync-daemon aur
+chromium
+# used, for example, by ranger for image preview and html preview
+w3m
+# - flashplugin
+
+# * Video/Images
+mpv
+pqiv-git aur
+# mpv-git aur
+
+# * Wine
+wine
+winetricks
+# wine-staging
+# wine-git aur
+# winetricks-git aur
+
+# * DOC, PPT, etc. Editing/Conversion
+libreoffice-fresh
+unoconv
+pandoc
+wkhtmltopdf
+# for pdfunite, pdftotext (ranger preview), etc.
+poppler
+# for ranger previews
+odt2txt
+
+# * Markdown Preview
+livedown npm
+
+# * Image Editing
+gimp
+imagemagick
+gifsicle
+graphicsmagick
+# waifu2x-converter-cpp-cuda-git aur
+
+# * Torrents
+# includes trasmission-show (used for ranger)
+transmission-cli
+peerflix-git aur
+
+# * PDF Viewer
+zathura
+# for column selection/copying, poppler will result in every item in the
+# first column being put before every item in the second
+# mupdf will keep the rows on the same line
+zathura-pdf-mupdf
+zathura-djvu
+# another backup
+# TODO aura failure
+# apvlv aur
+
+# * Emulators
+ppsspp
+dolphin-emu
+
+# * General Utilities
+mlocate
+# to find what files in use that are preventing unmounting
+lsof
+# hardware info
+lshw
+# for sysinfo script
+dmidecode
+
+# when opening man pages, complains wanting uudecode
+sharutils
+
+# * Time Syncing
+# time syncing
+ntp
+# recommended over ntpd
+chrony
+# automatic timezone setting
+tzupdate aur
+
+# * Disk Utilities
+# automatic mounting
+udiskie
+# disk health monitoring
+smartmontools
+# SATA/IDE device parameters (e.g. check for trim support)
+hdparm
+
+# * Entropy
+rng-tools
+
+# * Keyboard Remapping
+xcape
+# klfc cabal
+klfc aur
+arduino
+
+# * Cron
+fcron
+
+# * Disk Usage
+baobab
+ncdu
+cdu aur
+
+# * Virtualbox
+# don't install virtualbox-guest-dkms (not a guest)
+virtualbox
+# dkms is alternative for virtualbox-host-modules-arch
+virtualbox-host-dkms
+
+# * Spelling/Dictionary/English
+hunspell-en
+aspell-en
+enchant
+sdcv
+words
+
+# * Mail
+# old
+# neomutt
+# for mutt contacts
+# abook
+# notmuch
+
+# getting mail
+isync
+# sending mail
+msmtp
+# symlinks sendmail to msmtp
+msmtp-mta
+# mu and mu4e (email client)
+mu-git aur
+
+# http://www.djcbsoftware.nl/code/mu/mu4e/Reading-messages.html#Reading-messages
+nspluginwrapper
+# used for formail to get header information
+procmail
+
+# * Sound/Music
+# for amixer and alsamixer
+alsa-utils
+# required for amixer to work without sudo (even when in audio group)
+pulseaudio-alsa
+pavucontrol
+ponymix
+mpd
+mpc
+# vimus nix nixpkgs.haskellPackages.vimus
+# backup client
+ncmpcpp
+# cd ripping
+abcde
+# abcde optional dependences needed
+glyr
+perl-musicbrainz-discid aur
+perl-webservice-musicbrainz aur
+cdrtools
+
+# I think this fixed wine audio for me (don't remember for certain)
+lib32-alsa-plugins
+
+beets
+# TODO lib so will always install
+pyacoustid pip
+requests pip
+python-mpd pip
+pylast pip
+
+# * Downloading
+youtube-dl
+# youtube-dl-git aur
+# installed already for powerpill
+aria2
+
+# * Typesetting
+texlive-bin
+texlive-latexextra
+# sile
+# for syntax highlignt in latex export and elsewhere
+python-pygments
+
+# * Hotkey Daemon
+sxhkd
+# xchainkeys nix
+
+# * Screen locker
+xautolock
+# TODO aura can't install
+# slimlock-git aur
+
+# * Compositing/Redshift
+redshift
+compton
+
+# * Notifications
+libnotify
+dunst-git aur
+
+# * Launchers
+# bemenu
+rofi
+
+# * Fonts
+# includes cantarell, ubuntu, droid, gsfonts, liberation, noto, etc.
+fonts-meta-extended-lt aur
+ttf-dejavu
+
+# monospace fonts
+otf-fira-mono
+ttf-inconsolata
+ttf-inconsolata-g aur
+# otf-inconsolata-lgc aur
+# hack-font nix
+# for uushi
+phallus-fonts-git
+otf-fura-mono-powerline-git
+
+# other languages
+noto-fonts-cjk
+otf-ipafont
+adobe-source-han-sans-jp-fonts
+# unicode
+bdf-unifont
+# additional symbols
+# based on stlarch
+siji-git aur
+# microsft fonts; extra requirements; https://wiki.archlinux.org/index.php/Microsoft_fonts
+# ttf-ms-win-10 aur
+
+ttfautohint aur
+# TODO freezes aura
+# otfcc aur
+yargs npm
+pad npm
+patel npm
+cubic2quad npm
+bezier-js npm
+libspiro-js npm
+topsort npm
+toml npm
+caryll-shapeops npm
+otfcc-c2q npm
+unorm npm
+
+# * Appearance/Theming
+# TODO aura hangs here
+# polybar-git aur
+setroot-git aur
+xtitle-git aur
+# TODO aura hangs building this
+# conky-lua-nv aur
+numix-gtk-theme
+# for icons
+numix-icon-theme-git aur
+# for framebuffer colors
+setcolors-git aur
+
+# * DNS
+# validating, recursive, caching resolver
+unbound
+# dnssec validation with unbound
+expat
+# https://wiki.archlinux.org/index.php/DNSCrypt
+dnscrypt-proxy
+hostblock-bin aur
+kwakd aur
+
+# * Archive related
+# unrar
+# for creation; in conflict with unrar
+rar aur
+unzip
+zip
+p7zip
+# frontend for archive extraction, creation, etc.
+atool
+
+# * MTPFS
+# the worst filesystem
+jmtpfs aur
+
+# * Statistics
+r
+# require for R install package popup
+tk
+
+# * Search/Fuzzy finder
+ripgrep
+fzf
+fd-rs-git aur
+
+# * Programming
+# ** Licensing
+harvey pip
+
+# ** Clojure
+clojure
+
+# ** Javascript
+nodejs
+npm
+
+# ** Python
+python-pip
+# TODO
+# setuptools is required for anaconda
+# install from nix
+# flake8 and/or pylint
+# python-pylint pacman
+# isort pip or python-isort
+yapf
+ipython
+python-ipdb
+# python-importmagic aur
+# python-epc aur
+# or pip
+autoflake pip
+python-jedi
+python-virtualenv
+python-virtualenvwrapper
+
+# ** Ruby
+# for gem
+ruby
+
+# ** Rust
+# rust-nightly-bin aur
+
+# ** Common Lisp
+roswell aur
+sbcl-bin ros
+# for cl minispec
+# TODO freezes aura
+# phantomjs aur
+
+# ** Racket
+racket
+
+# ** Bash/Shell Scripting
+shellcheck
+jq
+
+# * Screenshots
+# screenshots
+maim
+# selection
+slop
+
+# * X Related
+xdotool
+xorg-server
+xorg-xinit
+xorg-xinput
+xorg-xprop
+xorg-xwininfo
+xorg-xfontsel
+xorg-xlsfonts
+xorg-xsetroot
+xorg-xev
+xorg-xbacklight
+# clipboard
+xsel
+xclip
+
+# * Android
+# for adb
+android-tools
+
+# /* Local Variables:
+# /* mode: conf-unix
+# /* End:
