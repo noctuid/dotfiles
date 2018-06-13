@@ -21,6 +21,7 @@ c = c  # type: ConfigContainer # noqa: F821 pylint: disable=E0602,C0103
 # - content.user_stylesheets
 
 # ** TODO Add/Look Into
+# - reload configuration
 # - difference between url and url:pretty/pretty-url
 # - make sanitize command ('history-clear ;; download-clear'; TODO
 #   clear-cookies)
@@ -30,21 +31,34 @@ c = c  # type: ConfigContainer # noqa: F821 pylint: disable=E0602,C0103
 # - require permissions per page to use flash
 # - spell checking (https://github.com/qutebrowser/qutebrowser/issues/700)
 # - change background/active tab colors
-# - loading bar under tabs
+# - loading bar under tabs (like firefox)
 # - maybe equivalent of readability bookmarklet
+# - try webrtc and fingerprint test sites
+# - strictfocus equivalent
+# - maybe use buku for adding bookmarks (and bind a key to query in terminal or
+#   something); or org https://orgmode.org/worg/org-contrib/org-protocol.html;
+#   http://www.diegoberrocal.com/blog/2015/08/19/org-protocol/
+# - zn/e instead of oi for consistency; zoom reset; text vs full zoom
+# - count for tw
+# - way to get feed info like with pentadactyl's :pageinfo
+# - commit quickmarks if havent; gmail quickmark
+# - key to get rid of highlights (or automatic)
+# - locally disable javascript (e.g. message about adblock)
 
 # ** Nice Things About Qutebrowser
 # - more sophisticated completion than pentadactyl (e.g. " " like ".*")
-# - very fast/responsive
+# - very fast/responsive (though I've had session files even for small sessions
+#   that made it unusable; TODO look into replicating this)
 # - navigation wizardry with :navigate (prev|next|up)
 
 # ** Missing Functionality/ Wishlist
 # *** Necessary for Everyday Usage
+# - Better cursor behavior in insert mode (this is cause of constant annoyance
+#   for me; https://github.com/qutebrowser/qutebrowser/issues/2668;
+#   https://github.com/qutebrowser/qutebrowser/pull/3834;
+#   https://github.com/qutebrowser/qutebrowser/pull/3906)
 # - custom command instead of file browser or post download auto-command
 #   (currently have to manually run :download-open; TODO make issue)
-# - insert editing keys (e.g. rl-backward-kill-word doesn't work in insert;
-#   TODO make issue)
-# - consistent tab width like firefox (TODO make issue)
 # - single key quickmarks (real quickmarks;
 #   https://github.com/qutebrowser/qutebrowser/issues/711; also
 #   https://github.com/qutebrowser/qutebrowser/issues/882)
@@ -55,10 +69,15 @@ c = c  # type: ConfigContainer # noqa: F821 pylint: disable=E0602,C0103
 
 # *** Major
 # - plugin support (https://github.com/qutebrowser/qutebrowser/issues/30)
-#   - security: decentraleyes, cookie auto delete (dedicated issue:
+#   - security: secure pasword fill plugin, decentraleyes, cookie auto delete
+#     (dedicated issue:
 #     https://github.com/qutebrowser/qutebrowser/issues/1660), privacy badger
 #     (a ghosterey/disconnect/privacy badger equivalent), agent
 #     spoofing/browser fingerprint minimization, etc.
+#   - related issues to above:
+#     https://github.com/qutebrowser/qutebrowser/issues/2160
+#     https://github.com/qutebrowser/qutebrowser/issues/2235
+#     https://github.com/qutebrowser/qutebrowser/issues/1659
 #   - hover zoom/imagus equivalent (if userscript doesn't work)
 #   - DownThemAll equivalent (particularly in conjunction with comic/gallery
 #     userscript)
@@ -66,18 +85,17 @@ c = c  # type: ConfigContainer # noqa: F821 pylint: disable=E0602,C0103
 #   - "automatically spawn mpv on video pages"
 # - HTTPS everywhere (https://github.com/qutebrowser/qutebrowser/issues/335)
 # - tabgroups (https://github.com/qutebrowser/qutebrowser/issues/49)
-# - autocmds (https://github.com/qutebrowser/qutebrowser/issues/35)
+# - autocmds/setlocal (https://github.com/qutebrowser/qutebrowser/issues/35)
 # - undo completion/history
 #   (https://github.com/qutebrowser/qutebrowser/issues/32; also see
 #   https://github.com/qutebrowser/qutebrowser/issues/1031)
 # - same-window, tab-unique inspector instead of separate windows
 #   (https://github.com/qutebrowser/qutebrowser/issues/1400)
-# - don't autoplay videos
-#   (https://github.com/qutebrowser/qutebrowser/issues/1643)
 
 # *** Minor
-# - better ad-blocking (e.g. youtube not supported;
-#   https://github.com/qutebrowser/qutebrowser/issues/29)
+# - better ad-blocking (e.g. youtube not supported; other sites still have lots
+#   of ads visible)
+#   https://github.com/qutebrowser/qutebrowser/issues/29
 # - way to reference ~ / $HOME in filename (TODO make issue)
 # - simpler key syntax (c instead of Ctrl,  esc instead of Escape, etc.;
 #   TODO make issue)
@@ -94,6 +112,14 @@ c = c  # type: ConfigContainer # noqa: F821 pylint: disable=E0602,C0103
 # - configurable completion
 #   (https://github.com/qutebrowser/qutebrowser/issues/836)
 # - support recursive command aliasing (alias an alias)
+# - insert editing keys (e.g. rl-backward-kill-word doesn't work in insert but
+#   can use fake-key as a workaround)
+#   https://github.com/qutebrowser/qutebrowser/issues/68
+# - show whether js is enabled
+#   https://github.com/qutebrowser/qutebrowser/issues/1795
+#   https://github.com/qutebrowser/qutebrowser/issues/1052
+# - embedded editor/pterosaur equivalent
+#   https://github.com/qutebrowser/qutebrowser/issues/827
 
 # * Helper Functions
 def bind(key, command, mode):  # noqa: E302
@@ -112,14 +138,25 @@ def imap(key, command):
     bind(key, command, 'insert')
 
 
+def cmap(key, command):
+    """Bind key to command in command mode."""
+    bind(key, command, 'command')
+
+
+# def cimap(key, command):
+#     """Bind key to command in command mode and insert mode."""
+#     cmap(key, command)
+#     imap(key, command)
+
+
+def tmap(key, command):
+    """Bind key to command in caret mode."""
+    bind(key, command, 'caret')
+
+
 def pmap(key, command):
     """Bind key to command in passthrough mode."""
     bind(key, command, 'passthrough')
-
-
-def cmap(key, command):
-    """Bind key to command in caret mode."""
-    bind(key, command, 'caret')
 
 
 def unmap(key, mode):
@@ -136,6 +173,7 @@ def nunmap(key):
 # ** Session
 # always restore opened sites when opening qutebrowser
 c.auto_save.session = True
+c.session.lazy_restore = True
 
 # ** Tabs
 # open new tabs (middleclick/ctrl+click) in the background
@@ -144,6 +182,7 @@ c.tabs.background = True
 c.tabs.select_on_remove = 'prev'
 # open unrelated tabs after the current tab not last
 c.tabs.new_position.unrelated = 'next'
+c.tabs.min_width = 200
 
 c.tabs.title.format = '{index}{private}{title_sep}{title}'
 
@@ -166,7 +205,7 @@ c.scrolling.bar = True
 c.keyhint.delay = 250
 
 # ** Editor
-c.editor.command = ['emacsclient', '-c', '-a', '""', '+{line}:{column}', '{}']
+c.editor.command = ['emacsclient', '-c', '-a', ' ', '+{line}:{column}', '{}']
 
 # ** Hints
 # don't require enter after hint keys
@@ -201,7 +240,8 @@ c.downloads.open_dispatcher = 'dl_move {}'
 # don't timeout for during partially entered command
 c.input.partial_timeout = 0
 # arrow key link element navigation; works okay on some pages
-c.input.spatial_navigation = True
+# unfortunately affects hnei too (move-to commands)
+# c.input.spatial_navigation = True
 
 # ** Home/Start Page
 # TODO generic user home directory reference instead
@@ -238,12 +278,15 @@ c.url.searchengines = \
     }
 
 # ** Bookmarklets/Custom Commands
-c.aliases['archive'] = 'open -t http://web.archive.org/save/{url}'
-c.aliases['view-archive'] = 'open -t http://web.archive.org/web/*/{url}'
-c.aliases['va'] = 'open -t http://web.archive.org/web/*/{url}'
+c.aliases['archive'] = 'open --tab http://web.archive.org/save/{url}'
+c.aliases['view-archive'] = 'open --tab http://web.archive.org/web/*/{url}'
+c.aliases['va'] = 'open --tab http://web.archive.org/web/*/{url}'
 c.aliases['view-google-cache'] = \
     'open http://www.google.com/search?q=cache:{url}'
 c.aliases['vgc'] = 'open http://www.google.com/search?q=cache:{url}'
+
+# ** Media
+c.content.autoplay = False
 
 # * Key Bindings
 # ** Miscellaneous Swaps
@@ -263,11 +306,12 @@ nmap('H', 'forward')
 # lose scroll right
 nmap('l', 'tab-focus last')
 
-nmap('b', 'set-cmd-text -s :buffer')
+nmap('b', 'set-cmd-text --space :buffer')
 
 # ** Colemak Swaps
-nmap('n', 'run-with-count 5 scroll down')
-nmap('e', 'run-with-count 5 scroll up')
+# https://github.com/qutebrowser/qutebrowser/issues/2668#issuecomment-309098314
+nmap('n', 'scroll-page 0 0.2')
+nmap('e', 'scroll-page 0 -0.2')
 nmap('N', 'tab-prev')
 # no default binding
 nmap('E', 'tab-next')
@@ -276,29 +320,44 @@ nmap('E', 'tab-next')
 nmap('k', 'search-next')
 nmap('K', 'search-prev')
 
-cmap('n', 'move-to-next-line')
-cmap('e', 'move-to-prev-line')
-cmap('i', 'move-to-next-char')
+tmap('n', 'move-to-next-line')
+tmap('e', 'move-to-prev-line')
+tmap('i', 'move-to-next-char')
 # add back e functionality
-cmap('j', 'move-to-end-of-word')
+tmap('j', 'move-to-end-of-word')
 
-cmap('N', 'scroll down')
-cmap('E', 'scroll up')
-cmap('I', 'scroll right')
+tmap('N', 'scroll down')
+tmap('E', 'scroll up')
+tmap('I', 'scroll right')
 
 # ** Hinting
 # I think I like this better than going to first input
 nmap('gi', 'hint inputs')
+# TODO ts for download hinting instead of :d
+# TODO ti for image hinting in background (rebind :inspector)
 
-# ** Tabs and Windows
-nmap('o', 'set-cmd-text -s :open -t')
-nmap('O', 'set-cmd-text -s :open')
-
-# lose tab-only and download-clear
-nmap('c', 'set-cmd-text :open -t -r {url:pretty}')
-
+# ** Miscellaneous
 nmap('gn', 'navigate previous')
 nmap('ge', 'navigate next')
+
+nmap('tm', 'messages --tab')
+nmap('th', 'help --tab')
+nmap('tr', 'stop')
+
+# @: - run last ex command
+nmap('t;','set-cmd-text : ;; completion-item-focus --history prev ;; '
+     + 'command-accept')
+
+# ** Tabs and Windows
+nmap('o', 'set-cmd-text -s :open --tab')
+nmap('O', 'set-cmd-text -s :open')
+
+# open homepage in new tab
+nmap('tt', 'open --tab')
+
+# lose tab-only and download-clear
+nmap('c', 'set-cmd-text :open --related {url:pretty}')
+nmap('C', 'set-cmd-text :open --tab --related {url:pretty}')
 
 # open new private window
 nmap('tp', 'open -p')
@@ -307,9 +366,18 @@ nmap('tp', 'open -p')
 nmap('tn', 'tab-move -')
 nmap('te', 'tab-move +')
 
+# ** TODO Tabgroups
+# - title should be displayed somewhere
+# - create new group (vn)
+# - move tab to different group (vM; vm - without switching)
+# - switch to different group (vv completion)
+# - keys for specific tap groups (e.g. wr,  prog, main, mango)
+# - rename tab group (vr)
+# - delete tab group (vd)
+
 # ** Yanking and Pasting
 # don't need primary or extra yanks
-nmap('p', 'open -t -- {clipboard}')
+nmap('p', 'open --tab -- {clipboard}')
 nmap('P', 'open -- {clipboard}')
 nmap('y', 'yank')
 nmap('Y', 'yank selection')
@@ -320,11 +388,17 @@ imap('<Ctrl-i>', 'open-editor')
 nmap('gF', 'view-source --edit')
 
 # ** Insert/RL
-# TODO not supported in insert mode
-# imap('<Ctrl-w>', 'rl-backward-kill-word')
+imap('<Ctrl-w>', 'fake-key <Ctrl-backspace>')
+imap('¸', 'fake-key <Ctrl-backspace>')
+cmap('¸', 'fake-key --global <Ctrl-backspace>')
+
 # nunmap('<Ctrl-w>')
 # prevent c-w from closing tab
 del c.bindings.default['normal']['<Ctrl-W>']
+
+# C-y for pasting
+imap('<Ctrl-y>', 'fake-key <Ctrl-v>')
+cmap('<Ctrl-y>', 'fake-key --global <Ctrl-v>')
 
 # ** Passthrough
 nmap(',', 'enter-mode passthrough')
@@ -332,12 +406,12 @@ pmap('<Escape>', 'leave-mode')
 
 # ** Undo
 # no :undo completion currently
-# nmap('U', 'set-cmd-text -s :undo')
+# nmap('U', 'set-cmd-text --space :undo')
 
 # ** Quickmarks and Marks
-nmap("'", 'set-cmd-text -s :quickmark-load -t')
-# nmap('B', 'set-cmd-text -s :bookmark-load -t')
-nmap("t'", 'set-cmd-text -s :bookmark-load -t')
+nmap("'", 'set-cmd-text -s :quickmark-load --tab')
+# nmap('B', 'set-cmd-text -s :bookmark-load --tab')
+nmap("t'", 'set-cmd-text -s :bookmark-load --tab')
 
 # add back mark jumping
 nmap('"', 'enter-mode jump_mark')
@@ -345,11 +419,17 @@ nmap('tl', 'jump-mark "\'"')
 
 # ** Spawn/Shell
 # "y" for youtube-dl
-nmap('ty', 'spawn -d mpv {url}')
+nmap('ty', 'spawn --detach mpv "{url}"')
 
 # ** Downloads
+# TODO download video and audio
+# nmap -ex <leader>Y execute "silent !youtube-dl --restrict-filenames -o '~/move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s' " + buffer.URL + " &"
+# nmap -ex <leader>A execute "silent !youtube-dl --restrict-filenames --extract-audio -o '~/move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s' " + buffer.URL + " &"
+nmap('tw', 'download --dest ~/database/move/ ;; tab-close')
 nmap('tg', 'spawn --detach dlg "{url}"')
 nmap('td', 'download-open')
+nmap('tr', 'spawn --detach dl_move bulk_store')
+nmap('tc', 'download-clear')
 
 # ** Zooming
 nmap('zi', 'zoom-in')
@@ -357,3 +437,14 @@ nmap('zo', 'zoom-out')
 
 # ** Inspector
 nmap('ti', 'inspector')
+
+# * TODO Per Domain
+# ~/.pentadactyl/groups.penta
+# ** Settings
+# ** Keybindings
+
+# * TODO Greasemonkey
+# supposed to work with qutebrowser
+# - https://greasyfork.org/en/scripts/404-mouseover-popup-image-viewer is
+# - try ccd0/4chan x
+# - https://github.com/untamed0/Show-Just-Image-3
