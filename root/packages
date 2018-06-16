@@ -19,6 +19,7 @@ pkgfile
 pacman-contrib
 # aur helper
 yay aur
+pacnanny aur
 
 # * Booatloader
 refind-efi
@@ -165,6 +166,12 @@ fasd
 cowsay
 fortune-mod
 
+# backup
+borg
+
+# sanitizing filenames
+detox
+
 # * Editors
 gvim
 vimpager-git aur
@@ -191,6 +198,7 @@ w3m
 mpv
 pqiv-git aur
 # mpv-git aur
+gallery-dl
 
 # * Wine
 wine
