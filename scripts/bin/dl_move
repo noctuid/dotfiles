@@ -8,7 +8,7 @@
 
 # automatic moving
 if [[ $1  =~ ^.*\.torrent$ ]]; then
-	mv "$1" ~/move/torrents
+	mv "$1" /home/transmission/torrents
 	exit 0
 fi
 

@@ -200,6 +200,10 @@ setup_salt() {
 	cp -r ./etc /srv/salt
 	cp -r ./boot /srv/salt
 	cp -r ./usr /srv/salt
+	cp -r ./var /srv/salt
+	# can't use alternative separator here
+	sed -i "/^ *\//d" \
+		/srv/salt/var/lib/transmission/.config/transmission-daemon/settings.json
 	# overwrite any example configuration files
 	cp -r ../.root/etc /srv/salt
 }

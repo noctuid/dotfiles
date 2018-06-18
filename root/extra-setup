@@ -102,6 +102,14 @@ bumblebee_setup() {
 # * Transmission
 # root; $USER changed when run by setup.sls
 transmission_setup() {
+	# make download directory and watch directory
+	mkdir -p /home/transmission/{Downloads,torrents}
+	# may chown as "$USER":transmission in future (first suggestion on archwiki)
+	# but this setup works fine currently
+	chown -R transmission:transmission /home/transmission
+	# give transmission user and group rwx permissions
+	chmod -R 775 /home/transmission
+	# add user to transmission group
 	gpasswd -a "$USER" transmission
 }
 
