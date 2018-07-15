@@ -1,57 +1,91 @@
-# default configuration that applies to every file
+# TODO:
+# - maybe don't show screenshot messages unless failure
+
+# * Default Profile
 [default]
-# screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%f_-_%tH:%tM:%tS
-# F title with removed extension
-# screenshot-template=~/Move/Screenshots/%tm.%td.%ty_%tH:%tM:%tS_-_%F
+save-position-on-quit
 
-# for long filenames with characters that give "error writing screenshot":
-screenshot-template=~/Move/Screenshots/%ty.%tm.%td_%tH:%tM:%tS
+# disable screen blanking while video playing (default)
+# stop-screensaver
+
+# ** Video
+# use settings from builtin gpu-hq profile
+# https://wiki.archlinux.org/index.php/mpv#High_quality_configurations
+# "This loads high quality OpenGL options. Most users can run these without any
+# problems, but they are not enabled by default to avoid causing problems for
+# the few users who cannot run them."
+profile=gpu-hq
+# gpu-api=
+# see if this causes any issues with speed; default scaling for gpu-hq seems
+# fine though
+# scale=ewa_lanczossharp
+# cscale=ewa_lanczossharp
+# prefer changing audio speed to dropping frames ("a slight change in audio
+# pitch is often less noticeable than dropped frames")
+video-sync=display-resample
+
+# "Hardware decoding is known to sometimes cause problems and as such it is
+# considered "usually a bad idea unless absolutely needed" by the developers.
+# For that reason and because it typically offers very similar performance to
+# software decoding it is disabled by default. Moreover, depending on the video
+# card, drivers installed, and file being decoded hardware decoding may perform
+# differently or may not even be used at all leading to inconsistent behavior
+# that can be difficult to debug."
+
+# "The main difference between hardware decoding and software decoding is that
+# in software decoding the file will be decompressed and then moved onto the
+# video card whereas with hardware decoding it will be moved to the video card
+# first and then decompressed. In either case, video playback will still be
+# hardware accelerated via the video card."
+
+# hwdec=no # default
+
+# ** Screenshots
+# F is title with removed extension; if include some filenames cause errors
+# saving the screenshot
+screenshot-template=~/move/Screenshots/%tY.%tm.%td_%tH:%tM:%tS
+# jpeg is default
 screenshot-format=png
-screenshot-png-compression=5
-sub-scale=1
 
-# do I understand this option? not really; but 5.1 plays through speakers instead of hdmi connection (alsa related?)
-audio-channels=empty
-
-framedrop=decoder
-
-# try to use high quality opengl output, with standard opengl, classic xv, and wayland as fallbacks
-# note: opengl has numerous quality/performance trade-off options.
-# as per the mpv(1), "opengl-hq" is just an alias for "opengl:lscale=lanczos2:dither-depth=auto:fbo-format=rgb16"
-vo=opengl-hq,opengl,xv,wayland
-
-# use alsa for audio output, choose pulse, or oss4 as fallback
-ao=alsa,pulse,oss
-
-# scale the subtitles to the 3% of the screen size
+# ** Subtitles
+# prefered audio/subtitle languages
+alang=jpn,jp,eng,en
+slang=eng,en
+# generally fixes subtitles not showing up at first after seeking
+demuxer-mkv-subtitle-preroll=yes
+# subtitle file will be loaded if contains media file name
+sub-auto=fuzzy
+# scale the subtitles to the 3% of the window size with sub-scale-by-window=yes
 # sub-scale=3
 
-# set the window title using the media filename (see Property Expansion section of mpv(1))
-title="mpv - ${filename}"
+# ** Cache
+# enable cache for network streams only (default)
+cache=auto
+# don't pause when the cache is running low
+no-cache-pause
+# increase cache size to 100MB
+cache-default=100000
+# prefetch about 30 seconds audio/video
+# cache-secs=30
 
-# disable screensaver
-stop-screensaver="yes"
+# ** OSD/OSC
+script-opts=osc-layout=bottombar
+# smaller OSD border size
+osd-border-size=1
+# osd-font="Fira Sans"
 
-# execute a command every 30 seconds
-# useful to disable a non-standard-compliant screensavers and to work around buggy behaviours
-# BE WARNED: to avoid dangerous commands is your responsibility
-#heartbeat-cmd="xscreensaver-command -deactivate &" # stop xscreensaver
-
-# custom heartbeat frequency in seconds
-#heartbeat-interval=600
-
-# correct pitch when speed is faster or slower than 1.0
-af=scaletempo
-
-# allow to seek in a file which is still downloading whilst watching it
-# from manpage:"this switch has no effect in the typical case" (usually done automatically by demuxers)
-#idx=yes
-
-# allow to increase the maximal volume to 600%
-#softvol-max=600
-
-# gapless audio play
-gapless-audio
+# hidetimeout=
+# disable osd messages
+# osd-duration=0
+# also
+# cursor-autohide-
 
 # custom terminal seek bar
 term-osd-bar-chars = "──╼ ·"
+
+# * Webm/Gif Settings
+[extension.webm]
+loop-file=inf
+
+[extension.gif]
+loop-file=inf
