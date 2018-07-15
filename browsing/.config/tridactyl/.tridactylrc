@@ -1,0 +1,176 @@
+# * Missing Functionality
+# ** Currently Unfixable
+# - Can't work on every page (about:*, data:*, view-source:* and file:*);
+#   very jarring
+
+# ** Most Important
+# - Can currently only customize normal mode keybindings:
+#   https://github.com/cmcaine/tridactyl/issues/304
+# - DownloadPost autocommand
+#   https://github.com/cmcaine/tridactyl/issues/807
+# - Better completion (multiple issues open); no setting or undo completion;
+#   can't use space as .*
+# - Allow changing hint CSS/theme (hints look awful)
+#   https://github.com/cmcaine/tridactyl/issues/94
+#   https://github.com/cmcaine/tridactyl/issues/491
+# - Doesn't seem to be a way to yank the selected text
+# - Better find mode (slow, can't see what typed, etc.):
+#   https://github.com/cmcaine/tridactyl/issues/64
+# - Prevent keybinding hijacking for default firefox shortcuts:
+#   https://github.com/cmcaine/tridactyl/issues/374
+# - Local/site-specific settings/keybindings:
+#   https://github.com/cmcaine/tridactyl/issues/808
+# - Better hinting:
+#   https://github.com/cmcaine/tridactyl/issues/353 (rapid hinting)
+#   https://github.com/cmcaine/tridactyl/issues/90 (yank hinting; no dedicated issue)
+#   https://github.com/cmcaine/tridactyl/issues/28
+
+# ** Major
+# - Set about:config settings:
+#   https://github.com/cmcaine/tridactyl/issues/468
+# - Tabg group integration:
+#   https://github.com/cmcaine/tridactyl/issues/811
+# - Autocommands overwrite each other:
+#   https://github.com/cmcaine/tridactyl/issues/650
+
+# ** More Minor
+# - Popup showing commands for incomplete key sequences (like qutebrowser,
+#   which-key, etc.)
+# - Visual/caret mode:
+#   https://github.com/cmcaine/tridactyl/issues/32
+#   https://github.com/cmcaine/tridactyl/issues/564
+# - Tab history list:
+#   https://github.com/cmcaine/tridactyl/issues/242
+# - Maybe TST support:
+#   https://github.com/cmcaine/tridactyl/issues/377
+# - Other autocommand issues:
+#   https://github.com/cmcaine/tridactyl/issues/727
+
+# ** Very Minor
+# - Local marks:
+#   https://github.com/cmcaine/tridactyl/issues/604
+
+# * Cool
+# - Shows up-to-date bindings in help page
+# - Mode indicator is purple in private mode
+
+# * Useful/TODO
+# pin
+# exclaim and exclaim_quiet
+# antive, installnative , and fixamo
+# guiset
+# - bind : to hint ...
+
+# default keybindings:
+# https://github.com/cmcaine/tridactyl/blob/af61d8a42e55fa8590ef91e90f474528bcd82ba5/src/config.ts#L37
+
+# :js
+# urlmodify
+
+# * Settings
+# ** Quickmarks
+# TODO
+
+# ** Search Engines
+# set searchengine
+# set searchurls.KEYWORD URL
+
+# ** New Commands and Aliases
+# xa qall
+# exaliases
+
+# ** Editor
+# TODO set editorcmd
+
+# ** Tabs
+# relatedopenpos
+# tabopenpos
+
+# ** Hinting
+set hintchars "arstdhneiowfpluy"
+# hintfiltermode
+# hintnames
+
+# ** Homepage
+# TODO
+# newtab
+
+# ** Appearance
+
+# * Key Bindings
+# TODO reload config with :source?
+
+# ** Miscellaneous Swaps
+bind ; fillcmdline
+
+# ** Colemak Swaps
+# consider scrollpage 0.2
+bind n scrollline 10
+bind e scrollline -10
+
+# ** Tabs and Windows
+bind o fillcmdline tabopen
+bind O fillcmdline open
+
+# open search?
+
+bind c current_url open
+bind C current_url tabopen
+
+bind tn tabmove -1
+bind te tabmove +1
+
+bind N tabprev
+bind E tabnext
+
+# ** History
+bind h back
+bind H forward
+
+# ** Changlist and Jumplist
+# not fully implemented
+# bind ... changelistjump
+bind tl jumpprev
+bind tL jumpnext
+
+# ** Searching
+# WIP; not very usalbe
+# bind / find
+# bind k findnext
+# bind K findnext -1
+
+# ** Yanking and Pasting
+bind y clipboard yankshort
+
+# swap p and P
+bind p clipboard tabopen
+bind P clipboard open
+
+# ** Tab Groups
+
+# ** Navigate Next/Prev/Inc
+bind gn followpage prev
+bind ge followpage next
+# bind sohething urlincrement
+# urlroot and rulparent
+# see setting followpagepatterns.next
+
+# ** Hinting
+# bind ;i hint -i
+# bind ;I hint -I
+# bind ;k hint -k
+# bind ;y hint -y
+# bind ;p hint -p
+# bind ;P hint -P
+# bind ;r hint -r
+# bind ;s hint -s
+# bind ;S hint -S
+# bind ;a hint -a
+# bind ;A hint -A
+# bind ;; hint -;
+# bind ;# hint -#
+# bind ;v hint -W exclaim_quiet mpv
+# bind ;w hint -w
+
+# * AutoCmds
+# Curently, 'TriStart', 'DocStart', 'DocEnd', 'TabEnter' and 'TabLeft' are supported.
