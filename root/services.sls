@@ -100,7 +100,7 @@ systemd-modules-load:
     - enable: True
 
 # * DNS
-dnscrypt-proxy:
+dnscrypt-proxy.socket:
   service.running:
     - enable: True
 
