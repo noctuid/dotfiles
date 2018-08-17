@@ -44,7 +44,7 @@ require_nofilter = true
 # defaults below are commented
 
 # cloudflare
-fallback_resolver = '1.1.1.1'
+fallback_resolver = '1.1.1.1:53'
 
 # using unbound
 cache = false
