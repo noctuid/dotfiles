@@ -225,28 +225,6 @@ maybe_eject() {
 	confirm_do udiskie-umount "$1" || return 1
 }
 
-# ** GPG Backup
-# secring.gpg no longer stores secret keys (now private-keys-v1.d/):
-# https://www.gnupg.org/faq/whats-new-in-2.1.html#nosecring
-# can back up all of ~/.gnupg
-# can backup pubring.gpg, trustdb.gpg, and private-keys-v1.d/
-# or can export
-
-# already backing up .gnupg but this might be useful right after creating a new
-# key
-bkgpgkeys() {
-	mkdir -p ~/ag-sys/backup/gpg
-	backup_rsync --copy-links ~/.gnupg ~/ag-sys/backup/gpg
-	# this is completely redundant
-	mkdir -p /tmp/gpg-export
-	cd /tmp/gpg-export || return 1
-	gpg --armor --export > public_keys.key
-	gpg --armor --export-secret-keys > private_keys.key
-	gpg --export-ownertrust > owner_trust.txt
-	mv {*.key,*.txt} ~/ag-sys/backup/gpg
-}
-alias bkgpg='bkgpgkeys'
-
 # * Minimal Backup
 # For things that change most frequently and for most important smaller things
 borg_small() {

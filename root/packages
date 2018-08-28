@@ -102,6 +102,9 @@ firejail
 # * VCS
 git
 
+# * SSH
+openssh
+
 # * Power Management/Battery
 acpi
 tlp
