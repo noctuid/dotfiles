@@ -397,12 +397,16 @@ rofi
 # includes cantarell, ubuntu, droid, gsfonts, liberation, noto, etc.
 fonts-meta-extended-lt aur
 ttf-dejavu
+otf-fira-sans
 
 # monospace fonts
 otf-fira-mono
 ttf-inconsolata
 ttf-inconsolata-g aur
 # otf-inconsolata-lgc aur
+office-code-pro aur
+# fails to install
+# ttf-agave aur
 # hack-font nix
 # for uushi
 phallus-fonts-git
@@ -412,8 +416,13 @@ otf-fura-mono-powerline-git
 noto-fonts-cjk
 otf-ipafont
 adobe-source-han-sans-jp-fonts
+
 # unicode
-bdf-unifont
+# https://github.com/rolandwalker/unicode-fonts
+# bdf-unifont
+ttf-symbola
+noto-fonts-emoji
+
 # additional symbols
 # based on stlarch
 siji-git aur
