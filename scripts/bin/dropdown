@@ -6,4 +6,4 @@ polybar_padding=$(xprop -id "$polybar_wid"  _NET_WM_STRUT_PARTIAL | \
 bspc_padding=$(bspc config top_padding)
 padding=${polybar_padding:-$bspc_padding}
 
-my_tdrop -ma -w -4 -y "$padding" -s dropdown termite
+tdrop -ma -w -4 -y "$padding" "$@"

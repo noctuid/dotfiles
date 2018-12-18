@@ -91,7 +91,10 @@ mode_switch + super + a
 
 # ** Dropdowns
 mode_switch + super + s
-	dropdown
+	dropdown -s dropdown kitty
+
+mode_switch + super + r
+	dropdown -n ranger -h 97% -f "zsh -c \"ranger --cmd='set preview_images_method kitty'; zsh -i\"" kitty
 
 # * Window Management
 # ** General
