@@ -48,14 +48,21 @@
 
 (defalias 'yes-or-no-p #'y-or-n-p)
 
+(defun noct:command-line-flag-specified-p (flag)
+  "Return whether FLAG was specified as an argument to emacs."
+  (cl-loop for arg in command-line-args
+           if (string= arg flag)
+           return t))
+
 ;; ** Benchmarking
-(defvar noct:benchmark-init nil)
+(cl-pushnew (cons "--benchmark-init" #'ignore) command-switch-alist
+            :test #'equal)
 
 (defvar noct:benchmark-init-files
   '("~/.emacs.d/straight/build/benchmark-init/benchmark-init.elc"
     "~/.emacs.d/straight/build/benchmark-init/benchmark-init-modes.elc"))
 
-(when (and noct:benchmark-init
+(when (and (noct:command-line-flag-specified-p "--benchmark-init")
            (cl-every (lambda (x) (file-exists-p x))
                      noct:benchmark-init-files) )
   (dolist (file noct:benchmark-init-files)
@@ -90,9 +97,7 @@
 (cl-pushnew (cons "--with-demoted-errors" #'ignore) command-switch-alist
             :test #'equal)
 
-(if (cl-loop for arg in command-line-args
-             if (string= arg "--with-demoted-errors")
-             return t)
+(if (noct:command-line-flag-specified-p "--with-demoted-errors")
     ;; this prevents errors in one source block from preventing other source
     ;; blocks from running
     (noct:tangle-awaken t nil t)
