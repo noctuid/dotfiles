@@ -68,22 +68,42 @@ Only source blocks that meet these requirements will be tangled:
 
 (defun noct:tangle-org-init (file &optional load compile demote-errors)
   "Tangle org init FILE if it has not already been tangled.
-If LOAD is non-nil, load it as well. If COMPILE is non-nil, compile it first. If
-DEMOTE-ERRORS is non-nil, wrap each source block with `with-demoted-errors'."
+If LOAD is non-nil, load it as well (the newest between the compiled and
+non-compiled). If COMPILE is non-nil and the uncompiled file is newer, compile
+it afterwards. If DEMOTE-ERRORS is non-nil, wrap each source block with
+`with-demoted-errors'.
+
+When there are no errors loading the tangled file, save it with a \"-stable.el\"
+or \"-stable.elc\" suffix (depending on which was loaded).
+
+Compiling after loading ensures that all required functionality is available. A
+nil LOAD and non-nil COMPILE will not work for my personal config (have to add
+everything under ~/.emacs.d/straight/build to `load-path' in an
+`eval-when-compile', run `straight-use-package-mode' so :straight is recognized,
+etc., etc.; it's easier to compile afterwards)."
   (let* ((base-file (file-name-sans-extension file))
          (org-init file)
          (init-tangled (if demote-errors
                            (format "%s-demoted-errors.el" base-file)
                          (concat base-file ".el")))
-         (init-compiled (concat init-tangled "c")))
+         (init-compiled (concat init-tangled "c"))
+         (init-tangled-stable (concat base-file "-stable.el"))
+         (init-compiled-stable (concat init-tangled-stable "c")))
     (when (or (not (file-exists-p init-tangled))
               (file-newer-than-file-p org-init init-tangled))
       (schurig-tangle-config-org org-init init-tangled demote-errors))
+    (when load
+      (let ((load-prefer-newer t))
+        (load-file init-tangled)
+        (unless demote-errors
+          ;; successfully loaded without errors; save stable configuration
+          (if (file-newer-than-file-p init-tangled init-compiled)
+              (copy-file init-tangled init-tangled-stable t)
+            (when (file-exists-p init-compiled)
+              (copy-file init-compiled init-compiled-stable t))))))
     (when (and compile
                (file-newer-than-file-p init-tangled init-compiled))
-      (byte-compile-file init-tangled load))
-    (when (and load (not compile))
-      (load-file init-tangled))))
+      (byte-compile-file init-tangled))))
 
 (defun noct:tangle-awaken (&optional load compile demote-errors)
   "Tangle awaken.org."

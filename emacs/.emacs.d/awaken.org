@@ -1,183 +1,4856 @@
-* Packages
-** Company Mode
-Consider trying https://github.com/company-mode/company-statistics
+#+TITLE: Wake Up Snorlax!
+#+AUTHOR: noctuid
+#+TODO: TODO(t) IN-PROGRESS(p) WAITING(w) | DONE(d) CANCELED(c)
+
+# [[./todo.org]]
+
+# I'm using ~org-sort-entries~ (with =a=) for sorting many subheadings.
+
+* Initial Notes
+** Org Configuration
+I moved my Emacs init file to org after becoming comfortable enough with evil to use Emacs instead of vim for editing my init file. The initial reason I switched to org was to be able to use org's outline syntax instead of marker folds (={{{...}}}=). The main reasons I haven't switched back are because I prefer writing notes using org's markup and soft-wrapping over using comments and hard-wrapping. Also, org's extra features and packages like [[https://github.com/abo-abo/worf][worf]] make org very convenient and powerful, and I like being able to easily export to other formats.
+
+That said, using an org init file has a lot of downsides as well. Input lag can be an issue for larger org files depending on the enabled minor modes, having to first open a new buffer to edit an elisp source block can be annoying, and ~org-babel-load-file~ is very slow and requires loading org mode. Also, org's outline syntax can easily be used in non-org files, so that is not a unique feature of an org configuration.
+
+There are ways to mitigate these issues though. After disabling some minor modes (mainly =git-gutter-mode=), input lag is not an issue for me. Using ~polymode~ allows editing elisp directly in the same buffer. Previously, ~polymode~ was completely unusable for me in large files because moving the point into a code block froze Emacs for a couple of seconds. A lot of work has gone into polymode, and speed is no longer an issue (thank you @vspinu), but my polymode config still needs work. On the other hand, ~org-edit-special~ may be desirable as a form of narrowing. Finally, slow tangling can be dealt with either by tangling (asynchronously) after startup or by [[http://www.holgerschurig.de/en/emacs-efficiently-untangling-elisp/][using a custom tangling function]]. Both of these solutions don't require loading org during startup.
+
+** Changes From Default Evil/Vim Keybindings
+As great as vim's default keybindings are, they aren't tailored towards my most commonly used actions/commands, and I don't use QWERTY, so I change a lot of them. Some of these are common swaps (e.g. =;= as =:=), but a lot of these changes are more opinionated.
+
+*** Basic Swaps/Changes
+- line movement keys swapped (e.g. swapping default =j= and =gj=)
+- =Y= consistent with =D= (see ~evil-want-Y-yank-to-eol~)
+- =a= and =A= swapped
+- =;= instead of =:=
+- =:= as ~eval-expression~ (default =;= moved to =r= prefix)
+- =/= as a swiper command (default =/= moved to =r= prefix)
+- =RET= for following (e.g. links or jumping to definitions like =M-.= or vim's =C-]=) and for confirmation/finalization (e.g. finalizing org capture, finalizing git commit, exiting org source mode buffer, etc.)
+
+*** Colemak Swaps/Changes
+- =hnei= instead of =hjkl= (for text editing, only =ne= are used)
+- default =n= and =N= to =k= and =K=
+- default =K= to =N=
+- default =e= to =j=
+- =H= for "jump to beginning" commands (e.g. beginning of heading or function)
+- =l= as =C-o= and =L= as =C-i=; =i= is kept for entering insert state
+
+The default =J= (join) and (particularly) =K= (doc lookup) are useful in vim; so I keep their functionality. I don't use the default =H= or =L= (which swap/move windows) at all, so I remap them to more useful commands.
+I find =C-o= (~evil-jump-backward~) to be a command that deserves a better position, so I rebind =l= to it (mnemonic "[l]ast") instead of using =l= for insertion, which is a common Colemak change. For symmetry, I also remove =h=, so =hi= do not perform horizontal movement. The vertical movement keybindings are useful enough for me to keep, especially when using relative line numbers. I use a modifier with =h= and =i= if I need horizontal movement (navigation layer; not part of Emacs config). In modes where insertion doesn't make sense and horizontal movement is more useful (e.g. =mu4e= and =dired=), I keep =hnei=.
+
+Although I now use Colemak-DH (where =m= is in the QWERTY =h= position), I still use =h= as "left." This is partially because all my configuration files already used =h= before I switchedB. ecause the idea of Colemak-DH is to move =h= to a better location, I don't think any changes are necessary.
+
+*** Standard Prefixes
+These are global prefixes that are sometimes bound in =general-override-mode-map= (whose evil auxiliary keymaps are evil intercept keymaps). =m= and =,= do not need to be bound globally since they are specific to the current major mode and group respectively. Keys like =r= that may not be useful in every major mode are not bound in an evil intercept map either. =SPC= and =t= are the main keys that are bound in evil intercept maps, so that their functionality will always be available.
+
+Having a lot of prefixes helps to keep the number of keypresses required for a command at around two for the most common commands. I've remapped my least used vim letter keys as prefixes (which conveniently happen to also be home row keys for Colemak). =s= and =r= are probably the least generic/useful default vim keys. The default =s= and =S= are equivalent to =cl= and =cc=. They aren't useful enough to me to deserve dedicated keys. The same is true for =r= (~evil-replace~), and I don't use =R= (~evil-replace-state~) at all. I use =x= occasionally (e.g. =xp= is convenient for swapping characters), so I keep it. I never use =X=, but it's not in a good enough position for me to want to repurpose it. On the other hand, =SPC= is generally the best position on the keyboard and doesn't have a unique keybinding either (same as =l=), so its one of my most used prefix keys.
+
+The more "controversial" keys I use as prefixes are =m=, =h=, =t=, and =T=. I used ='= a lot more than =m= in vim and didn't use =m= at all until recently in Emacs (you can persist markers, but you have to use =desktop-mode= or extract the code to do it yourself). I don't use =M= at all (~evil-window-middle~, which moves the point to the middle of the window), so I move ~evil-set-marker~ to =M= and use =m= as a prefix. As for =t=, =T=, =f=, and =F=, I prefer to use a two-char search command that will search across lines and allow selection with avy when there is more than one match (like =vim-sneak= or =vim-easymotion=). I bind these commands to =f= and =F= and use =t= as a prefix key as I can just change the characters I search for if I want to go to the character before some other character.
+
+- =SPC=: for buffer/file/group navigation/management
+- =,=: for "quickmarked" files/applications for the current group
+- =r=: for "[r]emote" movement and for "[r]emoved" (or "[r]emapped") keys
+  - used for remote motions (motions using avy; also used for remote text objects in =evil-(inner|outer)-text-objects-map=)
+  - used for preserving some clobbered keys (e.g. the default =;=, =,=, and =/= are now prefixed with =r=)
+- =s=: for "[s]tarting" applications (mu4e, elfeed, mingus, woman, proced, calc, etc.) and for "[s]traight" commands (on =ss= currently)
+- =t=: previously my "leader" key in vim
+  - window navigation/management
+  - other general-purpose commonly used commands (e.g. ~link-hint-open-link~)
+- =T=: used for one-off "gi[t]" commands (previously on =tg=; haven't completely switched over yet)
+- =h=: bound to ~help-command~
+- =m=: used for "[m]ajor [m]ode" specific keybindings (e.g. org commands)
+- =tt=: used to "[t]oggle" options and minor modes (previously I was using =co=, but I didn't want =c= to be a prefix everywhere)
+
+** Configuration Principles
+My configuration may not meet these requirements at this point in time, but these are the goals.
+
+- Speed
+  - Aggressively use autoloads and ~with-eval-after-load~ to cut down on startup time when it makes sense. Don't do this for functionality that should be available immediately. Previously I had a lot of ~use-package~ statments =:defer <time>=. I avoid this now unless I think it's unlikely I need to use a package immediately and there's no better way to autoload it.
+  - Configuration should work when using the daemon (e.g. some functionality that relies on GUI Emacs needs to be run later). When using the daemon, startup time isn't as important, but it should still be fast. I try to keep ~emacs-init-time~ at around 1 second (when I started using Emacs, I was requiring everything during initialization, and startup could take 20-60 seconds on my old laptop).
+  - Use profiling to diagnose performance issues during and after startup.
+- Intelligent handling of errors in init file
+  - Localize recoverable errors and convert them to warnings whenever possible (e.g. if a package fails to install, warn and don't run its configuration). This means wrapping anything that requires a package to be loaded in a ~with-eval-after-load~ (usually via ~use-package~ or ~general-with-package~).
+  - Isolate sections (source blocks) where possible, so that one section failing will not affect other sections. When there is some non-recoverable error somewhere in my init (e.g. ~(call-to-misspelled-function)~), I can start Emacs with =--with-demoted-errors= (flag I'm handling in =./init.el=) to demote errors for every source block. This means that I can still use Emacs with most of my configuration to fix my init file without needing to switch to a stable configuration or a different editor.
+  - Use a stable init file for errors that break everything (e.g. missing/extra parens). I'm automatically saving my configuration when it succesfully loads with a =-stable.el= suffix, and I can load this configuration by specifying =--stable=. As for package breakage, straight can handle locking versions/commits.
+  - Don't assume that any packages besides the core packages (e.g. =straight=, =use-package=, =general=, and =evil=) have been loaded. Sections should otherwise be independent and reorderable.
+  - Conditionally load non-portable functionality to prevent errors when using on other computers. Don't rely on unpushed functionality in personal packages (I've been really bad about this).
+- Idempotency
+  - Make configuration idempotent, so that any part can be run again without issues. It isn't as important to be able to reload the whole file in Emacs as it is for other software since it's more normal to just incrementally eval whatever you're working on.
+- Short/Sane/Consistent Keybindings
+  - As mentioned in the previous section, I prefer to have a lot of prefix keys to keep keybindings shorter.
+  - I need to work on keybinding consistency (=m= keybindings are slightly different between programming modes). I plan to use and contribute to =evil-collection= more in the future to do this.
+- Readability/Editabilty
+  - Document issues and the purpose of any code that might not be immediately clear later. All non-trivial functions should have docstrings.
+  - Use one big org file for fast/easy navigation.
+
+I have some more package-specific guidelines listed in the use-package, straight.el, and general.el sections below.
+
+** Style Guidelines
+- Sharp quote all functions (including commands in keybindings).
+- Don't enable minor modes with a =+1= argument (any argument is unnecessary when ~define-minor-mode~ is used; the mode is only toggled when the command is called interactively; this means that it is not necessary to use a lambda or named function to enable a minor mode with ~add-hook~).
+- Generally try to follow these [[https://github.com/bbatsov/emacs-lisp-style-guide][Emacs Lisp Style Guidelines]].
+
+* Utilities/Helper Packages and Basic Setup
+** CL Lib
+Used throughout configuration.
 #+begin_src emacs-lisp
-(defun trishume:company-backend-with-yas (backend)
-  "Add :with company-yasnippet to company BACKEND.
-Taken from https://github.com/syl20bnr/spacemacs/pull/179."
-  (if (and (listp backend) (member 'company-yasnippet backend))
-      backend
-    (append (if (consp backend)
-                backend
-              (list backend))
-            '(:with company-yasnippet))))
+(require 'cl-lib)
+#+end_src
 
-(defun dgutov:company-preview-if-explicit-action-frontend (command)
-  "Show completions in buffer as cycle through menu.
-https://github.com/company-mode/company-mode/issues/216#issuecomment-69871034"
-  (when (or (not (eq command 'post-command))
-            (and
-             (company-explicit-action-p)
-             company-common
-             (or (eq (company-call-backend 'ignore-case) 'keep-prefix)
-                 (string-prefix-p company-prefix company-common))))
-    (company-preview-frontend command)))
+** Helpers
+*** General
+#+begin_src emacs-lisp
+(defconst noct:lisp-mode-hooks
+  '(emacs-lisp-mode-hook
+    eshell-mode-hook
+    ielm-mode-hook
+    scheme-mode-hook
+    sly-mrepl-mode-hook
+    clojure-mode-hook
+    lisp-mode-hook)
+  "List of hooks for all used lisp modes.")
 
-(use-package company
-  :ensure t
+(defun noct:kill-this-buffer ()
+  "`kill-this-buffer' with no menu-bar checks.
+`kill-this-buffer' is supposed to be called from the menu bar.
+See https://www.reddit.com/r/emacs/comments/64xb3q/killthisbuffer_sometimes_just_stops_working/."
+  (interactive)
+  (if (minibufferp)
+      (abort-recursive-edit)
+    (kill-buffer (current-buffer))))
+
+(defun noct:inhibit-message-advice (oldfun &rest args)
+  "Apply OLDFUN to ARGS with `inhibit-message' non-nil."
+  (let ((inhibit-message t))
+    (apply oldfun args)))
+
+(defun noct:inhibit-error-advice (oldfunc &rest args)
+  "Run OLDFUN with ARGS, demoting errors to warnings.
+Unlike with `with-demoted-errors', do this regardless of the value of
+`debug-on-error'."
+  (let (debug-on-error)
+    (condition-case err
+        (apply oldfunc args)
+      (error
+       (display-warning 'noct-error (format "Demoted error: %S" err))
+       nil))))
+
+(cl-defun noct:basename (&optional (file (buffer-file-name)))
+  "Return the basename of FILE."
+  (file-name-sans-extension (file-name-nondirectory file)))
+
+;; TODO simplest way to evaluate /parts/ of a variable once only
+(defmacro noct:letenv (env-binds &rest body)
+  "Bind ENV-BINDS temporarily while running BODY.
+Restore the old values for all specified environment variables after running
+BODY (even on failure)."
+  (declare (indent 1) (debug let))
+  (let ((original-env (cl-gensym)))
+    `(let ((,original-env
+            (list ,@(mapcar (lambda (bind)
+                              `(cons ,(car bind) (getenv ,(car bind))))
+                            env-binds))))
+       (unwind-protect
+           (progn
+             ,@(mapcar (lambda (bind)
+                         `(setenv ,(car bind) ,(cadr bind)))
+                       env-binds)
+             ,@body)
+         ,@(mapcar (lambda (bind)
+                     `(setenv ,(car bind)
+                              (alist-get ,(car bind)
+                                         ,original-env
+                                         nil
+                                         nil
+                                         #'equal)))
+                   env-binds)))))
+
+;; TODO handling minor modes that should only be enabled for GUI frames is
+;; difficult; previously, I was toggling modes using `focus-in-hook' (now
+;; obsolete), and it didn't work well
+;; TODO for daemon, probably would be better to run once and add to
+;; `server-after-make-frame-hook'
+;; (defmacro noct:if-gui-p (then else &optional once)
+;;   "Every time a frame is created, run THEN if it is a GUI frame.
+;; Otherwise run ELSE. If ONCE is non-nil, only run THEN or ELSE the first time a
+;; frame is created."
+;;   (declare (indent 1)))
+
+(defmacro noct:after-gui (&rest body)
+  "Run BODY once after the first GUI frame is created."
+  (declare (indent 0) (debug t))
+  `(if (display-graphic-p)
+       ,@body
+     (general-add-hook 'server-after-make-frame-hook
+                       (lambda () ,@body)
+                       nil
+                       nil
+                       t)))
+
+;; TODO use something more sophisticated?
+;; alternatively, username check alone should be enough
+(defconst noct:personal-computer-p
+  (and (string= (user-login-name) "noctuid")
+       (file-directory-p "~/ag-sys")))
+#+end_src
+
+*** TODO Popup Handling
+Generally, I have one or two "main" windows open at a time (split horizontally). I like to display "popups" at the top (e.g. help mode windows, magit buffers, etc.). Previously, I used shackle, but for such a simple setup, it's easy enough to use =display-buffer-alist= directly.
+#+begin_src emacs-lisp
+;; https://web.archive.org/web/20160409014815/https://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
+(defmacro noct:match-major-mode (mode)
+  "Create a function that returns whether the current `major-mode' is MODE."
+  (let ((name (intern (format "noct:match-%s" mode))))
+    `(progn
+       (defun ,name (buffer-or-name _action)
+         (ignore-errors
+           (let ((buffer (get-buffer buffer-or-name)))
+             (eq ',mode (buffer-local-value 'major-mode buffer)))))
+       #',name)))
+
+(defun noct:display-and-select-buffer (func buffer alist)
+  "Call FUNC with BUFFER and ALIST.
+Select the window afterwards if possible. This is modified from
+`shackle--display-buffer-reuse'. Additionally set the window to be fixed size."
+  (let ((window (funcall func buffer alist)))
+    (when (and window (window-live-p window))
+      (select-window window t))
+    ;; TODO this breaks slots
+    ;; (with-current-buffer buffer
+    ;;   (setq window-size-fixed t))
+    window))
+
+(defun noct:display-buffer-reuse-window (buffer alist)
+  "Call `display-buffer-reuse-window' with BUFFER and ALIST.
+Select the window afterwards if possible."
+  (noct:display-and-select-buffer #'display-buffer-reuse-window buffer alist))
+
+(defun noct:display-buffer-in-side-window (buffer alist)
+  "Call `display-buffer-in-side-window' with BUFFER and ALIST.
+Select the window afterwards if possible."
+  (noct:display-and-select-buffer #'display-buffer-in-side-window buffer alist))
+
+(defmacro noct:handle-popup (condition &optional slot)
+  "Display popups matching CONDITION in a side window at the top.
+When SLOT is non-nil, display popup buffers in that SLOT in the side window."
+  `(cl-pushnew `(,(if (and (symbolp ',condition)
+                           (string-match "-mode$" (symbol-name ',condition)))
+                      (noct:match-major-mode ,condition)
+                    ,condition)
+                 (noct:display-buffer-reuse-window
+                  ;; won't keep popping up new windows at the top
+                  noct:display-buffer-in-side-window)
+                 (side . top)
+                 (slot . ,,slot)
+                 (window-height . 0.4))
+               display-buffer-alist
+               :test #'equal))
+
+(defun noct:side-window-p ()
+  "Return non-nil if the selected window is a side window."
+  (window-parameter (selected-window) 'window-side))
+#+end_src
+
+** =package.el=
+Currently, I only use =package.el= if I want to use the package list buffer. I generally don't use it for installing anything.
+#+begin_src emacs-lisp
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                         ("melpa" . "https://melpa.org/packages/")))
+#+end_src
+
+** =straight.el= and =use-package.el=
+When I first tried emacs, I thought the idea of using centralized package repositories was interesting but was annoyed when packages I wanted to use weren't (yet) in any package archive. Alternatives like =el-get= and =quelpa= weren't quite what I wanted. =straight.el= is nice in that it fully replaces =package.el= for me while still making use of recipes from elpa, melpa, and emacsmirror. This means that while you can specify your own recipe, it's usually not necessary.
+
+I use straight to compile/autoload my personal local packages (=straight.el= makes this easy since they are treated the same way as other packages). I also occasionally use it to contribute to packages (by directly working with the downloaded repo). Even if I didn't use it for development, having the git repos available locally is useful for many reasons. It's great to have READMEs and other files available locally, to be able to use git blame, and to be able to switch to or lock any commit.
+
+Since ~setq~, ~add-hook~, and ~evil-define-key~ can all be used before the specified settings, hooks, and keymaps exist, I previously preferred to use them outside of ~use-package~. I didn't like nesting these inside of ~use-package~ especially for more complicated packages where my configuration is split across many headings. On the other hand, this can potentially affect startup time. I considered writing my configuration so that headings could be /optionally/ tangled into a previous =:config= section or to optionally tangle headings into a new ~with-eval-after-load~ call (specifically ~general-with-package~ provided by general.el). I decided this would be too convoluted/misleading and am now just using ~general-with-package~ manually. I've stopped being bothered with the nesting.
+
+Here are the guidelines I follow for using ~use-package~ keywords and the order I use them in.
+
+Package installation:
+- =:straight= to specify recipes for custom or local packages
+
+Package loading:
+- =:disabled= for disabled packages (e.g. unused themes)
+- =:if=, =:when=, and =:unless= for conditionally loading/configuring the package
+- =:after= when it only makes sense to load one package after another (not used for "core" packages like =evil= that are loaded immediately) (usually not necessary)
+- =:demand t= for packages that should be loaded immediately (e.g. =evil=)
+- =:defer number= for packages whose functionality should be quickly available but is not necessary immediately (use sparingly)
+- =:ghook= to add to hooks that will later run and load the package
+- =:mode= as a temporary solution for major modes that don't add to =auto-mode-alist=
+- =:commands= as a temporary solution for packages that don't have autoload cookies
+- =:general= for any keybindings meant to load the package (and not others; I use this keyword only to make it very clear how the package will be loaded)
+- =:init= for any settings that need to be set before loading the package (e.g. =evil-want-keybinding=) and for function calls meant to load the package (e.g. enabling a global minor mode, setting another package's variable to a function from this package, etc.)
+
+Note that using =:after= will put the rest of the non-installation configuration in an ~eval-after-load~ (including the =:init= section, the =(require package)= statement generated from =:demand t=, etc.). Also note that by default only =:init= can fail if the package isn't successfully installed (see ~use-package-check-before-init~); specifying =:demand=, for example, will cause an error if the package fails to install.
+
+As a workaround, I'm setting a default value for =:when= in ~use-package-defaults~ (that is used even when =:when= is explicitly specified) to prevent package configuration if package installation fails. See [[https://github.com/jwiegley/use-package/issues/693][issue 693]] and [[https://github.com/jwiegley/use-package/issues/739][issue 739]].
+
+Package configuration:
+- =:diminish= (or =:delight=) for diminishing minor mode names
+- =:gfhook= for any setup configuration for a mode (e.g. set local variables or enable/disable minor modes)
+- =:config= for any basic package setup; more complicated setup should go in specific subheadings
+
+In the =:config= section, I generally put settings (~setq~ then any face configuration then ~add-hook~), then keybindings, then enabling any modes, and then any other configuration.
+
+*** Straight
+Install, load, and configure =straight.el=:
+#+begin_src emacs-lisp
+(setq straight-enable-use-package-integration t ; default
+      ;; check for modifications (to determine whether a package needs to be
+      ;; rebuilt) using `after-save-hook' instead of during startup or always
+      ;; rebuilding packages (https://github.com/raxod502/straight.el/issues/41)
+      ;; drops loading straight from ~0.88s to ~0.05s for me; needs to be set
+      ;; before loading straight
+      straight-check-for-modifications 'live
+      ;; install packages by default (like use-package's `use-package-always-ensure')
+      straight-use-package-by-default t
+      ;; store all autoloads in one file; default t
+      ;; doesn't significantly affect init time for me
+      straight-cache-autoloads t)
+
+;; Install and load straight.el
+;; https://github.com/raxod502/straight.el#getting-started
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el"
+                         user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  ;; (benchmark 1 `(load ,bootstrap-file nil 'nomessage))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
+
+*** Use-package
+Install =use-package.el= with optional dependencies and configure:
+#+begin_src emacs-lisp
+;; install use-package
+(straight-use-package 'use-package)
+
+;; requiring use package is still necessary when loading a compiled file to be
+;; able to alter `use-package-defaults' below; not requiring when loading a
+;; compiled file doesn't seem to really affect startup time
+;; (eval-when-compile
+;;   (require 'use-package))
+(require 'use-package)
+
+(setq use-package-always-defer t)
+
+;; demote installation errors to messages
+;; this variable is no longer changed by straight
+;; (advice-add use-package-ensure-function :around #'noct:use-package-ensure)
+(advice-add 'straight-use-package :around #'noct:inhibit-error-advice)
+;; can test with something like this:
+;; (use-package does-not-exist)
+
+;; don't do anything if installation fails
+;; like `use-package-check-before-init' but works for :config and other keywords
+(cl-pushnew '(:when
+              (lambda (package &rest _)
+                `(locate-library (symbol-name ',package)))
+              t)
+            use-package-defaults
+            :test #'equal)
+
+(use-package diminish
+  :demand t)
+
+;; diminish works fine with '(:eval); I don't think there are any advantages of
+;; delight that I'm making use of
+;; TODO Consider removing entirely
+(use-package delight
+  :demand t)
+
+;; TODO https://github.com/raxod502/straight.el/issues/72
+(setq org-version "9.1.7")
+(defun noct:org-version ()
+  "9.1.7")
+
+(advice-add 'org-version :override #'noct:org-version)
+
+;; (straight-use-package 'git)
+
+;; (defun org-git-version ()
+;;   "The Git version of org-mode.
+;; Inserted by installing org-mode or when a release is made."
+;;   (require 'git)
+;;   (let ((git-repo (expand-file-name
+;;                    "straight/repos/org/" user-emacs-directory)))
+;;     (string-trim
+;;      (git-run "describe"
+;;               "--match=release\*"
+;;               "--abbrev=6"
+;;               "HEAD"))))
+
+;; (defun org-release ()
+;;   "The release version of org-mode.
+;; Inserted by installing org-mode or when a release is made."
+;;   (require 'git)
+;;   (let ((git-repo (expand-file-name
+;;                    "straight/repos/org/" user-emacs-directory)))
+;;     (string-trim
+;;      (string-remove-prefix
+;;       "release_"
+;;       (git-run "describe"
+;;                "--match=release\*"
+;;                "--abbrev=0"
+;;                "HEAD")))))
+
+;; (setq org-version "9.1.7")
+;; (provide 'org-version)
+#+end_src
+
+** Async Init Tangling
+See =./init.el=. This is installed as a dependency by other packages, but I'm installing it here to be explicit.
+#+begin_src emacs-lisp
+(use-package async)
+#+end_src
+
+** =general.el=
+Principles:
+- Prefer using ~general-def~ or a more specific wrapper for all keybindings (more concise than ~define-key~, consistent interface to all keybindings, syntax is mostly interchangeable with builtin and evil definers, records keybindings, etc.).
+- Prefer using general hook and setting wrappers (e.g. ~general-setq~ instead of ~setq~ and ~general-pushnew~ instead of ~cl-pushnew~ or ~add-to-list~; they allow recording settings/hooks and call ~defcustom~ :set functions unlike ~setq~).
+- Use =:general= and =:ghook= keywords for keybindings and hooks meant to load packages.
+- Use ~general-with-package~ instead of ~use-package~ if the ~use-package~ statement would only have =:config= and not install the package (like ~with-eval-after-load~ but allows automatically recording the package name with keybindings and settings). All general functions should appear in either a ~general-with-package~ or a ~use-package~ statement if there is a specific, corresponding package.
+#+begin_src emacs-lisp
+(use-package annalist
+  :straight (annalist
+             :type git
+             :host github
+             :repo "noctuid/annalist.el"
+             :local-repo "~/src/emacs/annalist")
+  :demand t)
+
+(use-package general
+  :straight (general
+             :type git
+             :host github
+             :repo "noctuid/general.el"
+             :local-repo "~/src/emacs/general")
+  :demand t)
+
+(general-add-hook 'annalist-describe-hook
+                  (lambda () (visual-fill-column-mode -1)))
+
+(general-auto-unbind-keys)
+
+(eval-and-compile
+  (defalias 'gsetq #'general-setq)
+  (defalias 'gsetq-local #'general-setq-local)
+  (defalias 'gsetq-default #'general-setq-default))
+
+;; NOTE may rename these based on purpose and do find and replace if ever decide
+;; to change the keybindings
+(general-create-definer general-spc
+  :states 'normal
+  :keymaps 'override
+  :prefix "SPC")
+
+(general-create-definer general-t
+  :states 'normal
+  :keymaps 'override
+  :prefix "t")
+
+(general-create-definer general-r
+  :states 'normal
+  :prefix "r")
+
+(general-create-definer general-s
+  :keymaps 'normal
+  :prefix "s")
+
+(general-create-definer general-m
+  :states 'normal
+  :prefix "m")
+
+(general-create-definer general-comma
+  :states 'normal
+  :keymaps 'override
+  :prefix ",")
+#+end_src
+
+** Evil and Evil Collection
+#+begin_src emacs-lisp
+(use-package evil
+  :init
+  (gsetq evil-overriding-maps nil
+         ;; evil-intercept-maps nil
+         evil-insert-state-bindings nil
+         ;; must be set before loading evil no matter what
+         evil-want-keybinding nil
+         ;; required for gn
+         evil-search-module 'evil-search
+         evil-ex-search-persistent-highlight nil
+         ;; Y like D
+         evil-want-Y-yank-to-eol t)
+  (evil-mode)
+  :config
+  ;; use `general-key-dispatch' for "c" (e.g. to bind cx to `evil-exchange')
+  (general-def :prefix-map 'noct:c-map
+    "c" (general-simulate-key (#'evil-change "c")))
+  (general-def 'normal
+    "c" (general-key-dispatch #'evil-change
+          :inherit-keymap noct:c-map))
+  (general-def 'visual "c" #'evil-change)
+  ;; add back wanted insert state keybindings
+  (general-def 'insert
+    "C-o" #'evil-execute-in-normal-state
+    "C-r" #'evil-paste-from-register
+    "C-w" #'evil-delete-backward-word
+    "¸" #'evil-delete-backward-word))
+
+(use-package evil-collection
+  :straight (evil-collection
+             :type git
+             :host github
+             :repo "emacs-evil/evil-collection"
+             :local-repo "~/src/forks/evil-collection"
+             :fork (:host github :repo "noctuid/evil-collection")))
+#+end_src
+
+*** Settings
+**** Improvements from Vim
+#+begin_src emacs-lisp
+;; I always disliked this behavior in vim
+(gsetq evil-move-cursor-back nil
+       ;; this doesn't matter as much with above setting
+       evil-move-beyond-eol t
+       ;; default to inserting `<,`> when run `evil-ex' in visual char state;
+       ;; unlike vim, ex commands will only apply to the selected region instead
+       ;; of the selected lines when `<,`> is used
+       evil-ex-visual-char-range t)
+#+end_src
+
+**** Normal State Everywhere
+Use normal state as the default state for all modes.
+#+begin_src emacs-lisp
+;; not necessary to set `evil-normal-state-modes' (since normal is the default
+;; state) but it's more explicit
+(gsetq evil-normal-state-modes (append evil-emacs-state-modes
+                                       evil-normal-state-modes)
+       evil-emacs-state-modes nil
+       evil-motion-state-modes nil)
+#+end_src
+
+**** Appearance
+I prefer to distinguish mode by cursor color/shape instead of having to look at some indicator on the mode line.
+#+begin_src emacs-lisp
+(gsetq evil-mode-line-format nil
+       evil-normal-state-cursor '(box "orchid")
+       evil-normal-state-cursor '(box "dark gray")
+       evil-motion-state-cursor '(box "YellowGreen")
+       evil-insert-state-cursor '(bar "Blue")
+       evil-emacs-state-cursor '(bar "Red")
+       evil-visual-state-cursor '(box "#F86155"))
+#+end_src
+
+**** Undo Granularity
+#+begin_src emacs-lisp
+;; insert is one change, even if use <left>, <right>, etc.
+
+;; the problem with `evil-want-fine-undo' non-nil is that a lot of things that
+;; end up being just self-insertion become undo points (e.g. `lispy-space')
+;; (gsetq evil-want-fine-undo t)
+#+end_src
+
+*** Advice
+#+begin_src emacs-lisp
+;; TODO move this stuff to some dedicated non-package-specific heading
+(defun noct:nop-kill-new (orig-func &rest args)
+  "Run ORIG-FUNC with ARGS preventing any `kill-new's from running."
+  ;; http://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
+  (cl-letf (((symbol-function 'kill-new) #'ignore))
+    (apply orig-func args)))
+
+;; don't copy for C-w or visually selected text
+(general-add-advice '(evil-visual-paste
+                      evil-delete-backward-word
+                      lispyville-delete-backward-word)
+                    :around #'noct:nop-kill-new)
+#+end_src
+
+*** Remaps
+**** General Swaps/Changes
+#+begin_src emacs-lisp
+(general-def 'normal
+  "Q" "@q"
+  "t." #'evil-ex-repeat
+  "tv" #'evil-visual-block
+  ;; swap a and A
+  "a" #'evil-append-line
+  "A" #'evil-append)
+
+(defun noct:norm@q ()
+  "Apply macro in q register on selected lines. "
+  (interactive)
+  (evil-ex-normal (region-beginning) (region-end) "@q"))
+
+;; comparable to "xnoremap Q :norm @q<cr>" in vim
+(general-def 'visual "Q" #'noct:norm@q)
+
+;; since using m as prefix
+(general-def 'normal "M" #'evil-set-marker)
+
+;; change xall
+(evil-ex-define-cmd "xa[ll]" #'save-buffers-kill-terminal)
+
+;; camelCase word (not a remap but affects word keybindings)
+(global-subword-mode)
+#+end_src
+
+**** Colemak Swaps
+#+begin_src emacs-lisp
+;; swap visual and real line movement commands
+(evil-redirect-digit-argument evil-motion-state-map
+                              "0" #'evil-beginning-of-visual-line)
+
+(general-def 'motion
+  "n" #'evil-next-visual-line
+  "e" #'evil-previous-visual-line
+  "^" #'evil-first-non-blank-of-visual-line
+  "$" #'evil-end-of-visual-line
+  "gn" #'evil-next-line
+  "ge" #'evil-previous-line
+  "g0" #'evil-beginning-of-line
+  "g$" #'evil-end-of-line
+  "g^" #'evil-first-non-black)
+
+;; add back lost keys
+(general-def 'motion
+  "j" #'evil-forward-WORD-end
+  "gj" #'evil-backward-WORD-end
+  "k" #'evil-ex-search-next
+  "K" #'evil-ex-search-previous
+  "gk" #'evil-next-match)
+
+;; l for "[l]ast"
+(general-def 'motion
+  "l" #'evil-jump-backward
+  "L" #'evil-jump-forward)
+
+(general-def '(normal insert)
+  "C-l" #'evil-switch-to-windows-last-buffer)
+#+end_src
+
+**** Escape Everywhere
+Escape should be bound to ~keyboard-quit~ or ~keyboard-escape-quit~ in various minibuffer keymaps.
+#+begin_src emacs-lisp
+(general-def '(minibuffer-local-map
+               minibuffer-local-ns-map
+               minibuffer-local-completion-map
+               minibuffer-local-must-match-map
+               minibuffer-local-isearch-map)
+  "<escape>" #'keyboard-escape-quit)
+#+end_src
+
+**** Insert State Timeout Keybindings
+Have pretty much switched to using =C-y=, but I'm keeping this around for now.
+#+begin_src emacs-lisp
+(general-def '(insert minibuffer-local-map ivy-minibuffer-map)
+  "." (general-key-dispatch #'self-insert-command
+        :timeout 0.3
+        "yp" #'yank))
+#+end_src
+
+*** Repeat in Visual State
+https://github.com/emacs-evil/evil/issues/742
+#+begin_src emacs-lisp
+;; make v, V, and C-v start recording
+(evil-set-command-property 'evil-visual-char :repeat t)
+(evil-set-command-property 'evil-visual-line :repeat t)
+(evil-set-command-property 'evil-visual-block :repeat t)
+
+(defun noct:evil-repeat-motion (flag)
+  "Repeation for motions. Motions are recorded by keystroke but only in insert state."
+  ;; also record motions in visual state
+  (when (memq evil-state '(insert replace visual))
+    (evil-repeat-keystrokes flag)))
+(general-add-advice 'evil-repeat-motion :override #'noct:evil-repeat-motion)
+
+(defun noct:evil-repeat-start ()
+  "Start recording a new repeat into `evil-repeat-info'."
+  ;; don't stop recording in visual state
+  (unless (evil-visual-state-p)
+    (evil-repeat-reset t)
+    (evil-repeat-record-buffer)))
+(general-add-advice 'evil-repeat-start :override #'noct:evil-repeat-start)
+
+(defun noct:evil-repeat-stop ()
+  "Stop recording a repeat.
+Update `evil-repeat-ring' with the accumulated changes
+in `evil-repeat-info' and clear variables."
+  ;; don't stop recording in visual state
+  (unless (evil-visual-state-p)
+    (unwind-protect
+        (when (and (evil-repeat-recording-p))
+          (setq evil-repeat-info
+                (evil-normalize-repeat-info evil-repeat-info))
+          (when (and evil-repeat-info evil-repeat-ring)
+            (ring-insert evil-repeat-ring evil-repeat-info)))
+      (evil-repeat-reset nil))))
+(general-add-advice 'evil-repeat-stop :override #'noct:evil-repeat-stop)
+#+end_src
+
+** =straight.el= Keybindings
+Now that =general.el= and =evil= are installed, I set up some keybindings for interactive usage of =straight.el=.
+#+begin_src emacs-lisp
+(general-s :infix "s"
+  "p" #'straight-pull-package
+  "P" #'straight-pull-all
+  "r" #'straight-rebuild-package
+  "c" #'straight-check-all
+  "f" #'straight-freeze-versions
+  "t" #'straight-thaw-versions
+  "u" #'straight-use-package)
+#+end_src
+
+** Hydra
+I generally avoid =:exit t= hydras; =which-key= is automatic and good enough already. I've removed a lot of my hydras. I am planning on adding more back when I get a chance, but I probably won't use ~defhydra~ during initialization.
+#+begin_src emacs-lisp
+(use-package hydra
+  :config
+  (gsetq hydra-is-helpful t
+         ;; prevents message from disappearing
+         hydra-lv t))
+#+end_src
+
+* Basic and Builtin Functionality
+** General Settings
+#+begin_src emacs-lisp
+;; split horizontally on right (i.e. split line going from top to bottom)
+;; http://stackoverflow.com/questions/2081577/setting-emacs-split-to-horizontal
+(gsetq split-height-threshold nil
+       split-width-threshold 0)
+
+(gsetq
+ ;; like scrolloff in vim
+ scroll-margin 5
+ ;; recenter the point if it goes >20 lines past what is visible
+ ;; the default (0) is kind of annyoying because it recenters even if you just
+ ;; go one line down from the window bottom, but a higher value is nice to
+ ;; automatically recenter after any bigger jump
+ scroll-conservatively 20
+ ;; scroll-preserve-screen-position t
+ )
+
+(gsetq sentence-end-double-space nil)
+
+;; don't ask; follow symlinks to file under version control
+(gsetq find-file-visit-truename t
+       vc-follow-symlinks t)
+
+;; put path before buffer name when uniquifying a buffer (instead of after)
+(gsetq uniquify-buffer-name-style 'forward)
+
+;; use system trash for file deletion (includes dired and backups)
+(gsetq delete-by-moving-to-trash t)
+
+;; quickly display current incomplete keystrokes in echo area
+(gsetq echo-keystrokes 0.1)
+
+;; save clipboard to kill ring before replacing
+(gsetq save-interprogram-paste-before-kill t)
+
+;; a lot of unix tools expect this; it's required for the crontab, for example
+(gsetq require-final-newline t)
+
+;; new in emacs 26; kill running processes without confirmation on Emacs exit
+(gsetq confirm-kill-processes nil)
+
+;; I don't use bidirectional text; improves speed for long lines (even when no
+;; bidirectional text)
+(gsetq-default bidi-display-reordering nil)
+
+;; (terminal-coding-system) already defaults to utf-8-unix (linux)
+;; (set-terminal-coding-system 'utf-8)
+;; (keyboard-coding-system) already defaults to utf-8-unix (linux)
+;; (set-keyboard-coding-system 'utf-8)
+;; same for `default-file-name-coding-system'
+;; (set-file-name-coding-system 'utf-8)
+;; this is mainly just a combination of the past three
+;; (prefer-coding-system 'utf-8)
+
+;; defaults to "English"
+;; (set-language-environment 'utf-8)
+#+end_src
+
+** Appearance
+*** Font
+#+begin_src emacs-lisp
+(defun noct:set-font (&rest _)
+  "Set the font."
+  (interactive)
+  ;; more convenient syntax than `set-frame-font'
+  ;; (set-face-attribute 'default nil :font "Fira Mono-10")
+  ;; ;; Fira Mono and Code don't have italic; add a font with italic
+  ;; (set-face-attribute 'italic nil :family "Office Code Pro")
+  (set-face-attribute 'default nil :font "Office Code Pro-10"))
+
+;; this is slow on the first run (0.01-0.05 seconds)
+;; (noct:set-font)
+;; instead set the default font in ./early-init.el; works with daemon as well
+
+;; https://www.djcbsoftware.nl/code/mu/mu4e/Fancy-characters.html#Fancy-characters
+(use-package unicode-fonts
+  :disabled t
+  :init
+  ;; TODO somewhat slow; worth it?
+  ;; TODO when running when starting the server, ends up invalidating the cache and
+  ;; doing everything again
+  (noct:after-gui
+    (unicode-fonts-setup)))
+#+end_src
+
+*** Mode Line
+I've been using my own modeline for a while but I'll probably switch to doom-modeline (still fast and looks much better).
+#+begin_src emacs-lisp
+;; http://emacs-fu.blogspot.com/2011/08/customizing-mode-line.html
+(gsetq-default mode-line-format
+               (list
+                ;; error message about full memory
+                "%e"
+                ;; space on left (or - if term)
+                mode-line-front-space
+                ;; report multilingual input; e.g. U: for utf-8
+                mode-line-mule-info
+                ;; for emacsclient frame identification
+                mode-line-client
+                ;; ** if modified, -- if not, %% if RO, %- if RO and modified
+                mode-line-modified
+                ;; indicates a remote buffer
+                mode-line-remote
+                mode-line-frame-identification
+                mode-line-buffer-identification
+                "   "
+                ;; current group
+                '(:eval (when (fboundp 'fg-mode-line-string)
+                          (fg-mode-line-string)))
+                ;; line and column
+                "(" ;; '%02' to set to 2 chars at least; prevents flickering
+                (propertize "%02l" 'face 'font-lock-type-face) ","
+                (propertize "%02c" 'face 'font-lock-type-face)
+                ") "
+
+                ;; relative position, size of file
+                "["
+                (propertize "%p" 'face 'font-lock-constant-face)
+                "/"
+                (propertize "%I" 'face 'font-lock-constant-face)
+                "] "
+
+                ;; the current major mode for the buffer.
+                "["
+                '(:eval (propertize "%m" 'face 'font-lock-string-face
+                                    'help-echo buffer-file-coding-system))
+                "] "
+
+                '(:eval (when (bound-and-true-p org-mode-line-string)
+                          (concat "Clock: <"
+                                  (string-trim-left org-mode-line-string)
+                                  "> ")))
+
+                '(:eval (when (bound-and-true-p auto-compile-mode)
+                          (mode-line-auto-compile-control)))
+
+                ;; instead of mode-line-modes; eval is necessary for it to be
+                ;; up-to-date
+                '(:eval minor-mode-alist)
+
+                ;; fill with ' '
+                "% "))
+
+(force-mode-line-update)
+#+end_src
+
+** Auth Source
+#+begin_src emacs-lisp
+(general-with-package 'auth-source
+  ;; use encrypted authinfo file by default
+  (gsetq auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc")))
+#+end_src
+
+** Auto Compression
+Automatically uncompress (for editing) and recompress (when saving) compressed files (e.g. =.gz= files).
+#+begin_src emacs-lisp
+(use-package jka-compr
+  :init (auto-compression-mode))
+#+end_src
+
+** Auto Saving
+#+begin_src emacs-lisp
+(gsetq auto-save-interval 30
+       auto-save-timeout 5
+       ;; don't create auto-save ~ files
+       auto-save-default nil)
+
+(auto-save-visited-mode)
+
+(defun noct:save ()
+  "If in a file buffer and not executing/recording a macro, save."
+  (when (and (buffer-file-name)
+             (not (or executing-kbd-macro defining-kbd-macro)))
+    (let ((inhibit-message t))
+      (save-buffer))))
+
+(add-hook 'evil-insert-state-exit-hook #'noct:save)
+#+end_src
+
+** Backup
+#+begin_src emacs-lisp
+(gsetq backup-directory-alist
+       ;; TODO disable backup/undo history for gpg files entirely?
+       '(("." . "~/ag-sys/.emacs_backup/"))
+       ;; don't delink hardlinks
+       backup-by-copying t
+       ;; add version numbers to backups
+       version-control t
+       ;; automatically delete old versions
+       delete-old-versions t
+       kept-new-versions 30
+       kept-old-versions 20
+       ;; backup files under version control too
+       vc-make-backup-files t)
+#+end_src
+
+** Bookmarks
+#+begin_src emacs-lisp
+(general-s
+  "b" #'bookmark-set
+  "j" #'bookmark-jump)
+#+end_src
+
+** Disabling Defaults
+#+begin_src emacs-lisp
+;; disable startup messages
+(gsetq inhibit-startup-message t
+       ;; ...
+       ;; inhibit-startup-echo-area-message (user-login-name)
+       inhibit-splash-screen t)
+
+(general-add-advice 'startup-echo-area-message :override #'ignore)
+
+;; don't flash screen (e.g. when at end of buffer and use `evil-next-line')
+;; this is the default
+;; (gsetq visible-bell nil)
+
+;; no tool bar, scroll bar, or menu
+;; NOTE these combined add 0.2~0.3 seconds to init according to
+;; `emacs-init-time' and `profile-dotemacs'; it is now possible to prevent them
+;; ever displaying in ~/.emacs.d/early-init.el
+;; https://github.com/raxod502/radian/issues/180
+;; (tool-bar-mode -1)
+;; (scroll-bar-mode -1)
+;; (menu-bar-mode -1)
+
+;; no tooltip popups (use echo area instead)
+(tooltip-mode -1)
+
+;; don't blink cursor (infuriating)
+(blink-cursor-mode -1)
+#+end_src
+
+** Fill Column
+Also see [[#whitespace][Whitespace Mode]].
+#+begin_src emacs-lisp
+(gsetq-default fill-column 80)
+#+end_src
+
+** History/Savehist
+Persist minibuffer and search history.
+#+begin_src emacs-lisp
+(gsetq kill-ring-max 300)
+
+(gsetq history-length 3000
+       history-delete-duplicates t)
+
+(gsetq savehist-file "~/.emacs.d/tmp/savehist"
+       ;; default
+       ;; savehist-save-minibuffer-history t
+       savehist-additional-variables '(mark-ring
+                                       global-mark-ring
+                                       search-ring
+                                       regexp-search-ring
+                                       extended-command-history)
+       savehist-autosave-interval 60)
+
+(savehist-mode)
+#+end_src
+
+** H Prefix/Help Mode
+Some keys in =help-mode-map= that are worth noting:
+- =P=: ~describe-package~
+- =S=: ~info-lookup-symbol~
+- =b=: ~describe-bindings~
+- =e=: ~view-echo-area-messages~ (pulls up messages buffer)
+- =l=: ~view-lossage~
+- =r=: ~info-emacs-manual~
+- =s=: ~describe-syntax~
+- =n=: ~view-emacs-news~
+
+Obvious ones:
+- =f=: ~describe-function~
+- =i=: ~info-mode~
+- =k=: ~describe-key~
+- =m=: ~describe-mode~
+- =v=: ~describe-variable~
+
+#+begin_src emacs-lisp
+(general-with-package 'help-mode
+  (general-def 'normal "h" #'help-command)
+
+  (general-def help-map
+    ;; swap c and C
+    "c" #'describe-coding-system
+    "C" #'describe-key-briefly
+    ;; [p]ackage
+    "p" #'apropos-library)
+
+  (general-def 'normal help-mode-map
+    "q" #'quit-window
+    "ESC" #'quit-window)
+
+  (noct:handle-popup help-mode))
+#+end_src
+
+** Indentation
+#+begin_src emacs-lisp
+;; don't use tabs for indenting by default
+(gsetq-default indent-tabs-mode nil
+               tab-width 4)
+#+end_src
+
+** Minibuffer
+#+begin_src emacs-lisp
+(gsetq enable-recursive-minibuffers t)
+
+(minibuffer-depth-indicate-mode)
+
+;; https://www.reddit.com/r/emacs/comments/4d8gvt/how_do_i_automatically_close_the_minibuffer_after/
+(defun helper:kill-minibuffer ()
+  "Exit the minibuffer if it is active."
+  (when (and (>= (recursion-depth) 1)
+             (active-minibuffer-window))
+    (abort-recursive-edit)))
+
+(general-add-hook 'mouse-leave-buffer-hook #'helper:kill-minibuffer)
+
+;; equality checks don't work (or are run too soon)
+;; TODO finds some way to tell if the minibuffer is the selected window
+;; (defun noct:kill-minibuffer ()
+;;   "Kill the minibuffer if it is not the active window."
+;;   (unless (and (>= (recursion-depth) 1)
+;;                (or (not (windowp (active-minibuffer-window)))
+;;                    (equal (active-minibuffer-window)
+;;                           (selected-window))
+;;                    (minibuffer-window-active-p (selected-window))))
+;;     (abort-recursive-edit)))
+;; (add-hook 'window-configuration-change-hook #'noct:kill-minibuffer)
+#+end_src
+
+** Recentf
+#+begin_src emacs-lisp
+;; ivy also automatically enables recentf-mode
+(use-package recentf
   :defer 3
+  :config
+  (gsetq recentf-max-saved-items 1000)
+
+  ;; I haven't had many issues with unwanted files getting in the way
+  ;; https://www.reddit.com/r/emacs/comments/3g468d/stop_recent_files_showing_elpa_packages/
+  ;; (gsetq recentf-exclude '("^/var/folders\\.*" "COMMIT_EDITMSG\\'" ".*-autoloads\\.el\\'" "[/\\]\\.elpa/" ))
+
+  (recentf-load-list)
+
+  ;; save recentf every 5 minutes
+  (run-at-time (current-time) 300 #'recentf-save-list))
+#+end_src
+
+** Save Place
+#+begin_src emacs-lisp
+(save-place-mode)
+#+end_src
+
+** Scratch Buffer
+Suggested [[https://www.reddit.com/r/emacs/comments/4agorq/got_bored_of_the_initial_scratch_message_so/][here]].
+#+begin_src emacs-lisp
+;; put fortune in scratch buffer
+(gsetq initial-scratch-message
+       (format
+        ";; %s\n\n"
+        (replace-regexp-in-string
+         "\n" "\n;; " ; comment each line
+         (replace-regexp-in-string
+          "\n$" ""                       ; remove trailing linebreak
+          ;; TODO use gnusay
+          (shell-command-to-string "cowsay -W 80 $(fortune lambda)")))))
+
+;; potentially improve startup time (packages enabled for emacs-lisp-mode not
+;; loaded immediately)
+(gsetq initial-major-mode 'fundamental-mode)
+
+(use-package persistent-scratch
+  :init
+  (gsetq persistent-scratch-autosave-interval 60)
+  (run-with-idle-timer 3 nil
+                       (lambda ()
+                         (persistent-scratch-setup-default)
+                         (with-current-buffer "*scratch*"
+                           (emacs-lisp-mode)))))
+#+end_src
+
+** TODO Sudo Editing
+This configuration allows automatically editing root owned files (as opposed to opening them in read only mode). Alternatively, if you usually edit root files from the terminal, emacsclient works fine with sudoedit.
+#+begin_src emacs-lisp
+;; function modified from comment here:
+;; http://emacsredux.com/blog/2013/04/21/edit-files-as-root/
+;; TODO still needs some adjustment
+(defun noct:maybe-sudo-edit ()
+  "If the current file is exists and is unwritable, edit it as root with sudo."
+  (let* ((file buffer-file-name)
+         (parent (file-name-directory file)))
+    (when (and file
+               (not (file-writable-p file))
+               ;; might want to create a file
+               (or (file-exists-p file)
+                   (and (file-exists-p parent)
+                        (not (file-writable-p parent))))
+               ;; don't want to edit Emacs source files as root
+               (not (string-match "/usr/share/emacs/.*" (buffer-file-name))))
+      (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name)))))
+
+(general-add-hook 'find-file-hook #'noct:maybe-sudo-edit)
+#+end_src
+
+** Text Scaling Keybindings
+#+begin_src emacs-lisp
+(general-def 'normal
+  "C-=" #'text-scale-increase
+  "C--" #'text-scale-decrease)
+#+end_src
+
+** Toggle Settings Keybindings
+#+begin_src emacs-lisp
+(general-def
+  :prefix-command 'noct:toggle
+  :prefix-map 'noct:toggle-map
+  "d" #'toggle-debug-on-error
+  "q" #'toggle-debug-on-quit
+  "A" #'auto-fill-mode
+  "t" #'toggle-truncate-lines)
+
+(general-t "o" #'noct:toggle)
+#+end_src
+
+** TRAMP
+#+begin_src emacs-lisp
+;; backup files locally when using tramp
+(gsetq tramp-backup-directory-alist backup-directory-alist)
+
+;; https://www.gnu.org/software/emacs/manual/html_node/tramp/Auto_002dsave-and-Backup.html
+;; disable backup when using su/sudo
+(gsetq backup-enable-predicate
+       (lambda (name)
+         (and (normal-backup-enable-predicate name)
+              (not
+               (let ((method (file-remote-p name 'method)))
+                 (when (stringp method)
+                   (member method '("su" "sudo"))))))))
+#+end_src
+
+* Completion, Selection, and Matching/Sorting
+** AMX
+Intelligently sorted =M-x=.
+#+begin_src emacs-lisp
+(use-package amx
+  :general (general-t  ";" #'amx)
+  :config (amx-mode))
+#+end_src
+
+** Avy
+#+begin_src emacs-lisp
+(use-package avy
+  :config
+  (gsetq avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)
+         avy-all-windows nil)
+
+  (general-def '(normal insert)
+    "C-." #'avy-resume)
+
+  (general-def 'normal
+    "r ." #'avy-resume)
+
+  (general-add-advice 'avy-resume :after #'evil-normal-state))
+#+end_src
+
+** Company
+*** Setup
+#+begin_src emacs-lisp
+(use-package company
+  :init (global-company-mode)
   :diminish ""
   :config
-  (setq company-backends
-        (mapcar #'trishume:company-backend-with-yas company-backends))
-  (global-company-mode))
+  ;; setting idle delay too low can cause a lot of lag depending on the backend
+  (gsetq company-idle-delay 0.2
+         company-tooltip-limit 15
+         company-minimum-prefix-length 2
+         ;; e.g.for yasnippet annotations
+         ;; company-tooltip-align-annotations t
+         company-show-numbers t)
 
-;; setting idle delay too low can cause a lot of lag depending on the backend
-(setq company-idle-delay 0.15
-      company-tooltip-limit 15
-      company-minimum-prefix-length 2
-      ;; automatically complete after entering menu
-      company-auto-complete #'company-explicit-action-p
-      company-auto-complete-chars " )."
-      company-show-numbers nil
-      ;; company-tooltip-align-annotations t
-      company-frontends
-      (list #'company-pseudo-tooltip-unless-just-one-frontend
-            ;; #'company-echo-metadata-frontend
-            #'dgutov:company-preview-if-explicit-action-frontend))
+  (defun trishume:company-backend-with-yas (backends)
+    "Add :with company-yasnippet to company BACKENDS.
+Taken from https://github.com/syl20bnr/spacemacs/pull/179."
+    (if (and (listp backends) (memq 'company-yasnippet backends))
+        backends
+      (append (if (consp backends)
+                  backends
+                (list backends))
+              '(:with company-yasnippet))))
 
-(defvar noct:company-complete-then-cycle
-  (general-predicate-dispatch #'company-manual-begin
-    (company-explicit-action-p) #'company-complete-common-or-cycle)
-  "Menu-item used to first explicitly enter company menu and then cycle.")
+  ;; add yasnippet to all backends
+  (gsetq company-backends
+         (mapcar #'trishume:company-backend-with-yas company-backends))
 
-(general-emacs-define-key company-active-map
-  "C-h" nil
-  "C-w" nil
-  "<tab>" noct:company-complete-then-cycle
-  "TAB" noct:company-complete-then-cycle)
+  (general-def noct:toggle-map "c" #'company-mode)
 
-(general-emacs-define-key company-active-map
-  :predicate '(company-explicit-action-p)
-  "<return>" #'company-complete-selection
-  "RET" #'company-complete-selection
-  "<up>" #'company-select-previous-or-abort
-  "<down>" #'company-select-next-or-abort)
+  ;; tab more similar to vim (tab tabs through completions)
+  (require 'company-tng)
 
-(use-package company-quickhelp
-  :ensure t
-  :defer t
+  (company-tng-configure-default)
+
+  (general-def company-active-map
+    "TAB" #'company-complete-common-or-cycle
+    [tab] #'company-complete-common-or-cycle
+    ;; don't take over these keys
+    "C-h" nil
+    "C-w" nil))
+#+end_src
+
+*** Company in Minibuffer
+#+begin_src emacs-lisp :tangle no
+;; modified from https://gist.github.com/Bad-ptr/7787596
+;; TODO needs work
+;; also would be nice to setup `eval-expression' in childframe
+(general-with-package 'company
+  (defvar noct:eval-expression-commands
+    (list
+     ;; #'execute-extended-command
+     #'eval-expression
+     #'eldoc-eval-expression)
+    "Commands for evaluating emacs lisp in the minibuffer.")
+
+  (defvar company-minibuffer-mode)
+
+  (defun company-elisp-minibuffer (command &optional arg &rest ignored)
+    "`company-mode' completion back-end for Emacs Lisp in the minibuffer."
+    (interactive (list 'interactive))
+    (cl-case command
+      ('prefix (and (minibufferp)
+                    (cl-case company-minibuffer-mode
+                      ('execute-extended-command (company-grab-symbol))
+                      (t (company-capf `prefix)))))
+      ('candidates
+       (cl-case company-minibuffer-mode
+         ('execute-extended-command (all-completions arg obarray 'commandp))
+         (t nil)))))
+
+  (defun minibuffer-company ()
+    (unless company-mode
+      (when (and global-company-mode (memq this-command noct:eval-expression-commands))
+
+        (setq-local company-minibuffer-mode this-command)
+
+        (setq-local completion-at-point-functions
+                    (list (if (fboundp 'elisp-completion-at-point)
+                              #'elisp-completion-at-point
+                            #'lisp-completion-at-point) t))
+
+        (setq-local company-backends '((company-elisp-minibuffer company-capf)))
+
+        (company-mode 1)
+
+        (when (eq this-command #'execute-extended-command)
+          (company-complete)))))
+
+  (general-add-hook 'minibuffer-setup-hook #'minibuffer-company))
+#+end_src
+
+*** Org Mode Fix
+https://github.com/company-mode/company-mode/issues/50
+#+begin_src emacs-lisp
+(general-with-package 'company
+  ;; something is removing this for some reason
+  (general-pushnew #'org-self-insert-command company-begin-commands))
+#+end_src
+
+*** Company Try Hard
+I haven't run into a case yet where I would need this but am leaving this placeholder for now.
+
+*** Company LSP (completion backend)
+#+begin_src emacs-lisp
+(use-package company-lsp
+  :after company
   :init
-  (add-hook 'company-mode-hook #'company-quickhelp-mode))
+  (general-pushnew '(company-lsp :with company-yasnippet) company-backends)
+  :config
+  ;; TODO fix; company-lsp is not causing this issue
+  (general-def [company-dummy-event] #'company-ignore))
 #+end_src
 
-* Applications
-** Pdf Tools
+*** Company Box (child frame frontend)
+Looks nice and replaces =company-quickhelp= as well.
 #+begin_src emacs-lisp
-(use-package pdf-tools
-  :ensure t
-  ;; :mode ("\\.pdf$" . pdf-view-mode)
-  :init (pdf-tools-install))
+(use-package company-box
+  :ghook 'company-mode-hook
+  :diminish ""
+  :config
+  ;; https://github.com/sebastiencs/company-box/pull/42
+  ;; (require 'all-the-icons)
+  ;; (setq company-box-icons-elisp
+  ;;       (list
+  ;;        (all-the-icons-octicon "file-binary")
+  ;;        (all-the-icons-faicon  "cogs")
+  ;;        (all-the-icons-wicon   "tornado")
+  ;;        (all-the-icons-wicon   "tornado")))
+  (gsetq company-box-show-single-candidate t
+         company-box-icons-elisp (list "f" "v" "ft" "fc")))
+#+end_src
 
-(defun lit/pdf-page-as-text ()
-  "Inserts current pdf page into a buffer for keyboard selection."
+*** Company Childframe (child frame frontend)
+#+begin_src emacs-lisp
+(use-package company-childframe
+  :disabled t
+  :ghook 'company-mode-hook
+  :init
+  ;; prevent startup warning/message
+  (gsetq company-childframe-notification nil)
+  :diminish "")
+#+end_src
+
+** FLX
+Helper library for fuzzy matching/finding (used by ivy, for example).
+#+begin_src emacs-lisp
+(use-package flx)
+#+end_src
+
+** Helm
+TODO Try more helm.
+*** Setup
+#+begin_src emacs-lisp
+(use-package helm
+  :config
+  ;; altered helm-mini (similar to helm-for-files)
+  (gsetq helm-mini-default-sources
+         '(helm-source-buffers-list
+           helm-source-recentf
+           helm-source-files-in-current-dir
+           helm-source-locate
+           helm-source-buffer-not-found))
+
+  ;; can always cancel out of fuzzy with a space
+  (gsetq helm-buffers-fuzzy-matching t
+         helm-recentf-fuzzy-match t
+         helm-locate-fuzzy-match t
+         helm-semantic-fuzzy-match t
+         helm-imenu-fuzzy-match t)
+
+  ;; settings for helm-find-files
+  (gsetq helm-ff-search-library-in-sexp t
+         helm-ff-file-name-history-use-recentf t
+         helm-ff-skip-boring-files t)
+
+  (general-def 'helm-map
+    "<tab>" #'helm-execute-persistent-action
+    "¸" #'evil-delete-backward-word)
+
+  (helm-autoresize-mode))
+
+;; Filtering:
+;; - ^<text> (to start with)
+;; - *<major mode>, e.g. *dired or *!dired
+;; - /<dir> or !/<dir>
+;; @<text> for filtering by buffer contents
+
+;; ./ to reach default dir quickly; ~/ for home or / for root or ../ for back
+#+end_src
+
+*** Helm FLX
+#+begin_src emacs-lisp
+(use-package helm-flx
+  :after helm
+  :demand t
+  :config
+  (helm-flx-mode))
+#+end_src
+
+*** Helm Posframe
+#+begin_src emacs-lisp
+(use-package helm-posframe
+  :after helm
+  :demand t
+  :config
+  (gsetq helm-posframe-poshandler #'noct:posframe-poshandler-frame-top-center)
+  ;; TODO no border setting currently; make issue
+  ;; (when (display-graphic-p)
+  ;;   (gsetq helm-posframe-border-width (round (* 0.001 (x-display-pixel-width)))
+  ;;          ;; this is in columns (i.e. character width) not pixels
+  ;;          helm-posframe-width 120))
+  (helm-posframe-enable))
+#+end_src
+
+** Ivy
+*** Setup
+#+begin_src emacs-lisp
+(use-package ivy
+  :init (ivy-mode)
+  :diminish ""
+  :config
+  (gsetq ivy-height 25
+         ivy-wrap t
+         ;; wait for user to stop typing for this long before refreshing dynamic
+         ;; collections
+         ivy-dynamic-exhibit-delay-ms 50
+         ivy-use-selectable-prompt t
+         ivy-count-format "%d/%d "
+         ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
+  ;; ivy-sort-functions-alist
+  ;; ivy-initial-inputs-alist
+
+  (general-def ivy-minibuffer-map
+    "<escape>" #'minibuffer-keyboard-quit
+    "C-w" #'evil-delete-backward-word
+    "¸" #'evil-delete-backward-word
+    "<next>" #'ivy-scroll-up-command
+    "<prior>" #'ivy-scroll-down-command
+    "C-e" #'previous-history-element
+    "C-n" #'next-history-element
+    "M-a" #'ivy-avy
+    "M-d" #'ivy-dispatching-done
+    "M-c" #'ivy-occur)
+
+  (general-def 'normal "?" #'ivy-resume)
+  (general-r "?" #'evil-search-backward)
+
+  (ivy-set-actions
+   t
+   `(("h" (lambda (x) (helpful-command (intern x))) "helpful")
+     (,(kbd "RET") xref-find-definitions "follow")
+     ("f" xref-find-definitions "follow"))))
+
+;; TODO bind for more functions (e.g. not locate)
+;; "<up>" #'ivy-previous-line-and-call
+;; "<down>" #'ivy-next-line-and-call
+
+;; TODO consider adding better keybindings for these:
+;; ivy-call
+;; ivy-dispatching-call
+#+end_src
+
+*** Ivy Occur/ Wgrep
+TODO evil bindings stop working after wgrep finish edit
+#+begin_src emacs-lisp
+(use-package wgrep
+  :config
+  (general-def 'normal wgrep-mode-map
+    "RET" #'wgrep-finish-edit))
+
+(general-with-package 'ivy
+  (general-def 'normal '(ivy-occur-mode-map ivy-occur-grep-mode-map)
+    "n" #'ivy-occur-next-line
+    "e" #'ivy-occur-previous-line
+    "w" #'ivy-wgrep-change-to-wgrep-mode
+    "RET" #'ivy-occur-press-and-switch
+    ;; TODO ivy-occur-revert-buffer
+    ;; ivy-occur-press
+    "a" #'ivy-occur-read-action
+    "o" #'ivy-occur-dispatch
+    "c" #'ivy-occur-toggle-calling
+    "d" #'ivy-occur-delete-candidate))
+#+end_src
+
+*** Ivy Hydra
+#+begin_src emacs-lisp
+(use-package ivy-hydra
+  :after ivy
+  :demand t
+  :config
+  (general-def hydra-ivy/keymap
+    "j" nil
+    "k" nil
+    "n" #'hydra-ivy/ivy-next-line
+    "e" #'hydra-ivy/ivy-previous-line
+    "<escape>" #'hydra-ivy/keyboard-escape-quit-and-exit))
+#+end_src
+
+*** Ivy Rich
+#+begin_src emacs-lisp
+(use-package ivy-rich
+  ;; requires counsel when enabling `ivy-rich-mode'
+  :after counsel
+  :demand t
+  :config
+  ;; default `ivy-switch-buffer' is good enough; remove transformer before
+  ;; enabling `ivy-rich-mode'
+  (cl-remf ivy-rich-display-transformers-list 'ivy-switch-buffer)
+  (ivy-rich-mode))
+#+end_src
+
+*** Ivy Posframe
+#+begin_src emacs-lisp
+(use-package ivy-posframe
+  ;; NOTE doesn't work in terminal but enabling mode won't cause issues
+  ;; just always enabling instead of adding to hooks to deal with daemon
+  ;; :when (display-graphic-p)
+  :demand t
+  :config
+  ;; this is in columns (i.e. character width) not pixels
+  (gsetq ivy-posframe-width 120)
+
+  (noct:after-gui
+    ;; pixels
+    (gsetq ivy-posframe-border-width (round (* 0.001 (x-display-pixel-width)))))
+
+  (defun noct:posframe-poshandler-frame-top-center (info)
+    (cons (/ (- (plist-get info :parent-frame-width)
+                (plist-get info :posframe-width))
+             2)
+          (round (* 0.02 (x-display-pixel-height)))))
+
+  ;; TODO posframe currently requires this naming
+  (defun ivy-posframe-display-at-frame-top-center (str)
+    (ivy-posframe--display str #'noct:posframe-poshandler-frame-top-center))
+
+  (gsetq ivy-display-function #'ivy-posframe-display-at-frame-top-center)
+
+  (custom-set-faces '(internal-border ((t :weight bold
+                                          :background "slate gray"))))
+
+  (ivy-posframe-enable))
+#+end_src
+
+*** Ivy All the Icons
+Add icons to ivy/counsel commands.
+#+begin_src emacs-lisp
+(use-package all-the-icons-ivy
+  ;; :when (display-graphic-p)
+  :demand t
+  :config
+  (all-the-icons-ivy-setup))
+#+end_src
+
+*** Dynamically Switch Between Matching Methods
+Unlike helm, ivy can't automatically do fuzzy and space as =.*= matching at the same time (see [[https://github.com/abo-abo/swiper/issues/360][this issue]]). Here is an expiremental hack for automatically switching between the two. I am not currently using this (not tangled).
+#+begin_src emacs-lisp :tangle no
+(general-with-package 'ivy
+  ;; dosen't work
+  ;; (defun ivy--regex-fuzzy-ignore-space (oldfun str)
+  ;;   (funcall oldfun (replace-regexp-in-string " " "" str)))
+
+  ;; (general-add-advice 'ivy--regex-fuzzy :around #'ivy--regex-fuzzy-ignore-space)
+
+  (defvar noct--initial-ivy-regex-function nil)
+
+  (defun noct:ivy-space-switch-to-regex ()
+    (interactive)
+    (unless (eq ivy--regex-function 'ivy--regex-ignore-order)
+      (setq ivy--old-re nil)
+      (setq noct--initial-ivy-regex-function ivy--regex-function)
+      (setq ivy--regex-function 'ivy--regex-ignore-order))
+    (self-insert-command 1))
+
+  (general-def ivy-minibuffer-map
+    "SPC" #'noct:ivy-space-switch-to-regex)
+
+  (defun noct:ivy-maybe-reset-regex-function ()
+    (interactive)
+    (when (active-minibuffer-window)
+      (let ((input (replace-regexp-in-string "\n.*" "" (minibuffer-contents))))
+        (when (and noct--initial-ivy-regex-function
+                   (not (string-match " " input)))
+          (setq ivy--old-re nil)
+          (setq ivy--regex-function noct--initial-ivy-regex-function)
+          (setq noct--initial-ivy-regex-function nil)))))
+
+  (general-add-advice '(ivy-backward-delete-char
+                        ivy-delete-char)
+                      :after #'noct:ivy-maybe-reset-regex-function))
+#+end_src
+
+*** Headlong
+Select candidate as soon as there is only one (like the headlong package but for ivy). This is used for cases where you know there is a correct match in the candidates and there aren't too many candidates. Right now, I'm using it mainly for dired (like ranger's =f=), but this could be used elsewhere.
+#+begin_src emacs-lisp
+;; TODO consider making a PR with a better implementation
+(defvar noct:ivy-command nil)
+(defvar noct:ivy-major-mode nil)
+
+(defun noct:set-ivy-info (&rest _)
+  (setq noct:ivy-command this-command
+        noct:ivy-major-mode major-mode))
+
+(general-add-advice 'ivy-read :before #'noct:set-ivy-info)
+
+(defun noct:wait-for-user (seconds)
+  "Wait for user to stop typing for SECONDS."
+  (while (not (sit-for seconds t))
+    (discard-input)))
+
+(defun noct:premature-select ()
+  (cond ((or (and (memq noct:ivy-command '(counsel-find-file dired-goto-file))
+                  (memq noct:ivy-major-mode '(ranger-mode dired-mode)))
+             (eq noct:ivy-command #'projectile-find-test-file))
+         (cond ((= ivy--length 0)
+                (backward-delete-char-untabify 1))
+               ((= ivy--length 1)
+                (noct:wait-for-user 0.2)
+                (ignore-errors (ivy-done)))))))
+
+(general-add-advice 'ivy--exhibit :after #'noct:premature-select)
+
+;; (defvar noct:block-input nil)
+;; (defun noct:maybe-block-input ()
+;;   (when noct:block-input
+;;     (setq noct:block-input nil)
+;;     (sleep-for 2)
+;;     (discard-input)))
+
+;; (general-add-hook 'post-command-hook #'noct:maybe-block-input)
+#+end_src
+
+*** Counsel
+#+begin_src emacs-lisp
+(use-package counsel
+  :general
+  (general-t
+    ;; looks nicer than helm-show-kill-ring to me
+    "p" #'counsel-yank-pop)
+
+  (general-def help-map "a" #'counsel-apropos)
+
+  (general-spc "y" #'counsel-semantic-or-imenu)
+
+  ((insert normal) "C-:" #'counsel-minibuffer-history)
+
+  ;; extra counsel/[i]vy commands
+  (general-s :infix "i"
+    "a" #'counsel-linux-app
+    "o" #'counsel-outline
+    "i" #'counsel-imenu
+    "v" #'counsel-set-variable
+    "p" #'counsel-list-processes
+    "b" #'counsel-descbinds
+    "d" #'counsel-dash
+    "l" #'counsel-load-theme
+    "u" #'counsel-unicode-char
+    "g" #'counsel-git-log
+    "s" #'counsel-git-stash)
+
+  :init (counsel-mode)
+  :diminish ""
+  :config
+  (gsetq counsel-yank-pop-height ivy-height))
+#+end_src
+
+** Manual Completion
+#+begin_src emacs-lisp
+(general-def 'insert
+  "C-n" #'complete-symbol)
+#+end_src
+
+** Prescient
+#+begin_src emacs-lisp
+(use-package prescient
+  :config
+  ;; persist usage statistics
+  (prescient-persist-mode))
+
+(use-package company-prescient
+  :after company
+  :demand t
+  :config
+  ;; use prescient sorting for company
+  (company-prescient-mode))
+
+(use-package ivy-prescient
+  :after ivy
+  :demand t
+  :config
+  ;; use prescient filtering/sorting for ivy
+  (ivy-prescient-mode))
+#+end_src
+
+* Group/Session Management/Navigation
+** Framegroups
+#+begin_src emacs-lisp
+(use-package framegroups
+  :demand t
+  :straight (framegroups
+             :type git
+             :host github
+             :repo "noctuid/framegroups.el"
+             :local-repo "~/src/emacs/framegroups")
+  :config
+  (defun noct:framegroup-setup (name &rest _)
+    "Set up main framegroups."
+    (interactive)
+    (pcase name
+      ;; emacs configuration
+      ("emacs"
+       (find-file "~/.emacs.d/awaken.org"))
+      ;; org agenda/todo
+      ("log"
+       (find-file "~/ag-sys/else/log.org"))
+      ;; programming and personal notes
+      ("notes"
+       (find-file "~/ag-sys/else/arch_and_program_info.org"))
+      ;; programming projects
+      ("prog"
+       (find-file "~/src"))
+      ;; dotfiles
+      ("config"
+       (find-file "~/.profile"))
+      ;; writing
+      ("wr"
+       (find-file "~/ag-sys/else/scrawl/prose/pots/plot.org"))
+      ;; ebooks and more notes
+      ("cons"
+       (find-file "~/ag-sys/else/consume/books.org"))
+      ("mail"
+       (mu4e))
+      ("music"
+       (mingus))))
+
+  ;; TODO bind globally on middle mouse on primary computer
+  (general-spc
+    "," #'noct:framegroup-setup
+    "l" #'fg-switch-to-last-frame
+    "a" (fg-switch "emacs")
+    "r" (fg-switch "log")
+    "s" (fg-switch "notes")
+    "t" (fg-switch "prog")
+    "d" (fg-switch "config")
+    ;; "h"
+    "n" (fg-switch "wr")
+    "e" (fg-switch "cons")
+    "i" (fg-switch "mail")
+    "o" (fg-switch "music"))
+
+  (general-add-hook 'fg-create-hook #'noct:framegroup-setup))
+#+end_src
+
+** TODO Desktop.el
+#+begin_src emacs-lisp
+;; TODO desktop isn't a package; this is in loaddefs
+(use-package destkop
+  :disabled t
+  :straight nil
+  :init (desktop-save-mode)
+  :config
+  (gsetq desktop-restore-frames nil)
+
+  (general-pushnew 'evil-markers-alist desktop-locals-to-save)
+
+  (desktop-auto-save-set-timer))
+#+end_src
+
+** Navigation Quickmarks
+*** Quickmark Helpers
+#+begin_src emacs-lisp
+(defmacro noct:f (file)
+  "Wrapper for creating `find-file' commands."
+  `(lambda () (interactive) (find-file ,file)))
+
+(defun noct:goto-fuzzy (name)
+  "Goto the shortest filename in the root of the project that starts with NAME.
+NAME should be lowercase as the uppercase version will also be checked."
   (interactive)
-  (pdf-view-mark-whole-page)
-  (pdf-view-kill-ring-save)
-  (switch-to-buffer (make-temp-name "temp"))
-  (yank))
+  (require 'projectile nil t)
+  (let* ((project-root (or (ignore-errors (projectile-project-root))
+                           default-directory))
+         (files (or (file-expand-wildcards (concat project-root name "*"))
+                    (file-expand-wildcards (concat project-root (upcase name)
+                                                   "*")))))
+    (when files
+      (find-file (car (sort files
+                            (lambda (x y)
+                              (< (length x) (length y)))))))))
 
-(evil-define-key 'normal pdf-view-mode-map
-  "h" 'backward-page
-  "n" '(lambda () (interactive) (pdf-view-next-line-or-next-page 5))
-  "e" '(lambda () (interactive) (pdf-view-previous-line-or-previous-page 5))
-  "i" 'forward-page
-  (kbd "RET") 'pdf-view-scroll-up-or-next-page
-  "m" 'pdf-view-position-to-register
-  "M" 'pdf-view-position-to-register
-  "'" 'pdf-view-jump-to-register
-  "=" 'pdf-view-scale-reset
-  "u" 'pdf-view-shrink
-  "y" 'pdf-view-enlarge
-  "w" 'pdf-view-fit-width-to-window
-  "W" 'pdf-view-fit-height-to-window
-  ;; open urls
-  "f" 'pdf-links-action-perform
-  "l" 'pdf-history-backward
-  "L" 'pdf-history-forward
-  "/" 'pdf-occur
-  "o" 'pdf-outline
-  ;; go to specific page number (can take number argument)
-  "j" 'pdf-view-goto-page
-  "b" 'pdf-view-midnight-minor-mode
-  [down-mouse-1] 'pdf-view-mouse-extend-region
-  "y" 'pdf-view-kill-ring-save
-  ;; for easier selection; just `kill-this-buffer' when done
-  "Y" 'lit/pdf-page-as-text)
+(defun noct:goto-makefile ()
+  (interactive)
+  (noct:goto-fuzzy "makefile"))
 
-(add-to-list 'golden-ratio-exclude-modes 'pdf-outline-buffer-mode)
-(evil-define-key 'normal pdf-outline-buffer-mode-map
-  "q" 'pdf-outline-quit-and-kill
-  "i" 'pdf-outline-follow-link
-  "a" 'pdf-outline-follow-link-and-quit
-  ;; display link without leaving outline buffer
-  "I" 'pdf-outline-display-link
-  "o" 'pdf-outline-select-pdf-window
-  ;; in outline buffer move to page that is in view buffer
-  "p" 'pdf-outline-move-to-current-page
-  ;; like pdf-view-goto-page
-  "j" 'pdf-outline-move-to-page
-  (kbd "RET") 'pdf-outline-toggle-subtree)
+(defun noct:goto-todo ()
+  (interactive)
+  (noct:goto-fuzzy "todo"))
+
+(defun noct:goto-readme ()
+  (interactive)
+  (noct:goto-fuzzy "readme"))
+
+(defun noct:goto-messages ()
+  (interactive)
+  (switch-to-buffer "*Messages*"))
+
+(defun noct:goto-scratch ()
+  (interactive)
+  (switch-to-buffer "*scratch*"))
+
+(defun noct:goto-main ()
+  "Go to the shortest filename named the same as the project root dirname.
+If projectile is not installed, the current directory's name is used instead.
+Globbing is used to find a matching file."
+  (interactive)
+  (require 'projectile nil t)
+  (let ((dir-name
+         (file-name-nondirectory
+          (directory-file-name
+           (file-name-directory
+            (or (ignore-errors (projectile-project-root))
+                default-directory))))))
+    (noct:goto-fuzzy dir-name)))
 #+end_src
-** Elfeed
-*** Feeds and Settings
+
+*** General Quickmarks
 #+begin_src emacs-lisp
-(setq elfeed-feeds
-      '(("http://nullprogram.com/feed/" emacs)
-        ("http://oremacs.com/atom.xml" emacs)
-        ("http://feeds.feedburner.com/usevim" vim)
-        ("http://blog.binchen.org/rss.xml" emacs)
-        ("http://wololo.net/feed/" psp/vita)))
+(defun noct:bind-general-quickmarks (&rest _)
+  (general-comma
+    "a" (noct:f "~/ag-sys/else/arch_and_program_info.org")
+    "A" (noct:f "~/ag-sys/else/accts.org.gpg")
+    "b" (noct:f "~/ag-sys/else/browse.org")
+    "B" (noct:f "~/.config/bspwm/bspwmrc")
+    "c" (noct:f "~/.config/ranger/rc.conf")
+    "d" #'projectile-edit-dir-locals
+    "e" (noct:f "~/.emacs.d/awaken.org")
+    "E" (noct:f "~/.emacs.d/lisp/.private.el.gpg")
+    "g" (noct:f "~/ag-sys/else/gaming/games.org")
+    "i" (noct:f "~/ag-sys/else/interaction.org")
+    "I" (noct:f "~/ag-sys/else/scrawl/ideas.org")
+    "j" (noct:f "~/ag-sys/else/japanese/japanese.org")
+    "J" (noct:f "~/ag-sys/else/journal.org")
+    "l" (noct:f "~/ag-sys/else/log.org")
+    "L" (noct:f "~/ag-sys/else/life.org")
+    "m" (noct:f "~/ag-sys/else/mind.org")
+    "M" #'noct:goto-messages
+    "o" #'ff-find-other-file
+    "p" (noct:f "~/.pentadactylrc")
+    "q" (noct:f "~/.config/qutebrowser/config.py")
+    "r" (noct:f "~/ag-sys/else/remapping.org")
+    "S" #'noct:goto-scratch
+    "t" (noct:f "~/.tmux.conf")
+    "v" (noct:f "~/.vimrc")
+    "w" (noct:f "~/ag-sys/else/workflow.org")
+    "x" (noct:f "~/.xinitrc")
+    "y" (noct:f "~/ag-sys/else/other/skill_toys/skill_toys.org")
+    "z" (noct:f "~/.zshrc")
+    "2" (noct:f "~/ag-sys/else/20xx.org")))
 
-(setq-default elfeed-search-filter "@3-weeks-ago +unread ")
+(noct:bind-general-quickmarks)
 #+end_src
-*** Mappings
-Because it's just a buffer, I get some vim bindings for free (e.g. gg and G) and keep my evil remaps (e.g. for helm-swoop).
+
+
+*** Group-specific Quickmarks
 #+begin_src emacs-lisp
-;; mappings for entry list
-(evil-define-key 'normal elfeed-search-mode-map
-  ;; fetch feed updates; default: G
-  "o" 'elfeed-update
-  ;; refreash view of feed listing; default: g
-  "O" 'elfeed-search-update--force
-  ;; filter
-  "f" 'elfeed-search-live-filter
-  ;; reset to default filter
-  "F" '(lambda () (interactive) (elfeed-search-set-filter "@3-weeks-ago +unread "))
-  ;; open url in specified browser
-  "b" 'elfeed-search-browse-url
-  ;; read current entry or selected (remove unread tag)
-  "h" 'elfeed-search-untag-all-unread
-  ;; enter show mode on entry
-  "i" 'elfeed-search-show-entry
-  ;; mark current entry or selected unread
-  "u" 'elfeed-search-tag-all-unread
-  ;; add a tag to current entry or selected
-  "a" 'elfeed-search-tag-all
-  ;; star entries to come back later to and do something about
-  "s" '(lambda () (interactive) (elfeed-search-toggle-all '*))
-  ;; remove a tag from current entry or selected
-  "d" 'elfeed-search-untag-all)
-
-;; mappings for when reading a post
-(evil-define-key 'normal elfeed-show-mode-map
-  (kbd "RET") 'elfeed-search-browse-url
-  "h" 'elfeed-kill-buffer
-  ;; next post
-  "i" 'elfeed-show-next
-  ;; add a tag to current entry
-  "a" 'elfeed-show-tag
-  "s" '(lambda () (interactive) (elfeed-search-toggle-all '*))
-  ;; remove a tag from current entry
-  "d" 'elfeed-show-untag)
+;; TODO consider removing this pattern
+;; [f]irst, [s]econd, [t]hird for most used files
+(defun noct:bind-group-quickmarks (name &rest _)
+  (pcase name
+    ("emacs"
+     (general-comma
+       "," (noct:f "~/.emacs.d/init.el")
+       "f" (noct:f "~/.emacs.d/awaken.org")
+       "s" (noct:f "~/.emacs.d/unclean.org")
+       "t" (noct:f "~/.emacs.d/todo.org")))
+    ;; "log"
+    ("notes"
+     (general-comma
+       "," (noct:f "~/ag-sys/else/20xx.org")
+       "f" (noct:f "~/ag-sys/else/20xx.org")
+       "s" (noct:f "~/ag-sys/else/interaction.org")
+       "t" (noct:f "~/ag-sys/else/workflow.org")))
+    ("prog"
+     (general-comma
+       "," #'noct:goto-main
+       "r" #'noct:goto-readme
+       "t" #'noct:goto-todo
+       "T" #'projectile-find-test-file
+       "m" #'noct:goto-makefile
+       "p" (general-l
+            (eww-open-file
+             "~/ag-sys/library/programming/common_lisp/pcl_html/index.html"))
+       "l"
+       (general-l
+        (eww-open-file
+         "~/ag-sys/library/programming/common_lisp/minispec/html/index.html"))))
+    ("config"
+     (general-comma
+       "," (noct:f "~/dotfiles/README.org")
+       "r" (noct:f "~/dotfiles/remap/README.org")
+       ;; TODO
+       ;; "e" (noct:f "~/dotfiles/editing.org")
+       "b" (noct:f "~/dotfiles/browsing/README.org")))
+    ("wr"
+     (general-comma
+       "," (noct:f "~/ag-sys/else/scrawl/prose/standards+procedure.org")
+       "f" (noct:f "plot.org")
+       "s" (noct:f "draft_a.org")
+       "t" (noct:f "~/ag-sys/else/scrawl/prose/pots/misc.org")
+       "w" (noct:f "world.org")
+       "m" (noct:f "misc.org")
+       "b" (noct:f "bio.org")
+       "i" (noct:f "~/ag-sys/else/scrawl/ideas.org")
+       "c" (noct:f "~/ag-sys/else/scrawl/prose/lndn/landon.org")
+       "g" (noct:f "~/ag-sys/else/scrawl/prose/gen_misc.org")))
+    ("cons"
+     (general-comma
+       "f" (noct:f "~/ag-sys/else/consume/books.org")
+       "s" (noct:f "~/ag-sys/else/consume/nim.org")
+       "t" (noct:f "~/ag-sys/else/consume/movies.org")
+       "m" (noct:f "~/ag-sys/else/consume/music.org")))))
 #+end_src
+
+*** Hook
+#+begin_src emacs-lisp
+(when noct:personal-computer-p
+  (general-with-package 'framegroups
+    (general-add-hook '(fg-create-hook fg-after-switch-hook)
+                      (list #'noct:bind-general-quickmarks
+                            #'noct:bind-group-quickmarks)
+                      t)))
+#+end_src
+
+* Window Management/Navigation
+** Ace Window
+I generally only use two windows in a frame, but once I start pulling up help buffers, magit status, etc., this can be useful. It also replaces ~other-window~, so it's nice for two windows as well.
+#+begin_src emacs-lisp
+(use-package ace-window
+  :general (general-t "w" #'ace-window)
+  :config
+  (gsetq aw-keys '(?a ?r ?s ?t ?d ?g ?h ?e)
+         aw-scope 'frame))
+#+end_src
+
+** Window Splitting/Movement Keybindings
+#+begin_src emacs-lisp
+(defun noct:kill-buffer-delete-window ()
+  "Kill the current buffer and then delete the current window."
+  (interactive)
+  (noct:kill-this-buffer)
+  (delete-window))
+
+(defun noct:vsplit ()
+  "Vertically split window and switch to new window."
+  (interactive)
+  (split-window-vertically)
+  (other-window 1))
+
+(defun noct:hsplit ()
+  "Horizontally split window and switch to new window."
+  (interactive)
+  (split-window-horizontally)
+  (other-window 1))
+
+(general-t
+  "q" #'delete-window
+  "d" #'delete-window
+  "k" #'noct:kill-this-buffer
+  "D" #'noct:kill-buffer-delete-window
+  "-" #'noct:vsplit
+  "'" #'noct:hsplit)
+
+(defun noct:zoom-win ()
+  "Toggle making the current window the only one."
+  (interactive)
+  (if (= (count-windows) 1)
+      (winner-undo)
+    (delete-other-windows)))
+
+(general-t
+  "h" #'windmove-left
+  "n" #'windmove-down
+  "e" #'windmove-up
+  "i" #'windmove-right
+  "z" #'noct:zoom-win)
+#+end_src
+
+** Window Too Small For Splitting Fix
+See [[https://github.com/rnkn/olivetti/issues/12][here]].
+#+begin_src emacs-lisp
+(defun rnkn-split-window-right-ignore (&optional size)
+  (if (car size) size (list (/ (window-total-width) 2))))
+
+(general-add-advice 'split-window-right
+                    :filter-args #'rnkn-split-window-right-ignore)
+#+end_src
+
+** Winner
+#+begin_src emacs-lisp
+(use-package winner
+  :init (winner-mode)
+  :config
+  (general-t
+    "l" #'winner-undo
+    "L" #'winner-redo))
+#+end_src
+
+** Zoom
+I still need to work on my configuration for this. See [[https://github.com/cyrus-and/zoom/issues/17][this issue]] for information on using fixed-sized windows with zoom (there is no perfect solution, and it looks like it would be very difficult to support).
+#+begin_src emacs-lisp
+(use-package zoom
+  :general (noct:toggle-map "z" #'zoom-mode)
+  :init (zoom-mode)
+  :diminish " ⊞"
+  :config
+  (gsetq zoom-size '(0.618 . 0.618)))
+#+end_src
+
+* Buffer Management/Navigation
+** Counsel/Swiper/Ivy
+It's a bit hard to decide how to organize counsel, ivy, and swiper since they're all intertwined. I previously had all counsel and ivy configuration together, but I've split them into multiple use-package expression and put the buffer/file related configuration here.
+
+*** Setup
+#+begin_src emacs-lisp
+(use-package ivy
+  ;; it would make more sense for this to be in counsel
+  :general (general-spc "f" #'ivy-switch-buffer)
+  :config
+  ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’
+  (gsetq ivy-use-virtual-buffers t))
+
+(use-package swiper
+  :general (general-spc "b" #'swiper-all)
+  :config
+  (gsetq swiper-goto-start-of-match t))
+
+;; `counsel-mode' is enabled in previous counsel use-package expression
+(use-package counsel
+  :general
+  ('normal "/" #'counsel-grep-or-swiper)
+  (general-spc "l" #'counsel-locate)
+  :config
+  ;; add back evil-ex-search-forward
+  (general-r "/" #'evil-ex-search-forward))
+#+end_src
+
+*** Locate/Find/FD/FZF
+#+begin_src emacs-lisp
+(use-package counsel
+  :general
+  (general-spc
+    "z" #'noct:ripgrep-fzf
+    "Z" #'noct:fd-fzf)
+  :config
+  (defun noct:fd-fzf (&optional initial-input)
+    "Run `counsel-fzf' using fd as fzf's default command."
+    (interactive)
+    (noct:letenv (("FZF_DEFAULT_COMMAND" "fd"))
+      (counsel-fzf initial-input)))
+
+  ;; have heard some people say ripgrep is faster than fd for files; haven't
+  ;; really tried enough to compare
+  (defun noct:ripgrep-fzf (&optional initial-input)
+    "Run `counsel-fzf' using ripgrep as fzf's default command."
+    (interactive)
+    (noct:letenv (("FZF_DEFAULT_COMMAND" "rg --files"))
+      (counsel-fzf initial-input)))
+
+  (defun noct:ivy-switch-to-locate ()
+    "Switch to using locate, preserving the current input.
+Requires lexical binding."
+    (interactive)
+    (let ((input (ivy--input)))
+      (ivy-quit-and-run (counsel-locate input))))
+
+  (defun noct:ivy-switch-to-fzf ()
+    "Switch to using fzf, preserving the current input."
+    (interactive)
+    (let ((input (ivy--input)))
+      (ivy-quit-and-run (noct:ripgrep-fzf input))))
+
+  (general-def ivy-switch-buffer-map
+    "C-l" #'noct:ivy-switch-to-locate
+    "C-f" #'noct:ivy-switch-to-fzf))
+#+end_src
+
+*** TODO Counsel Grep
+Configure ~counsel-grep~ to go to the end of matches and integrate with evil.
+
+TODO: This should be in counsel (variable to jump to match end and evil integration that's already done for swiper).
+#+begin_src emacs-lisp
+(general-with-package 'counsel
+  (gsetq counsel-grep-base-command
+         ;; TODO it would be way better if ripgrep supported trimming the line
+         ;; don't quote %s (breaks regex)
+         "rg --max-columns 200 --smart-case --line-number --color never --no-heading %s %s"
+         counsel-rg-base-command
+         "rg --max-columns 200 --smart-case --line-number --color never --no-heading %s .")
+
+  (defun noct:match-beginning ()
+    "Go to the beginning of the last match."
+    (when-let ((beg (match-beginning 0)))
+      (goto-char beg)))
+
+  ;; swiper does these but counsel-grep doesn't
+  (defun noct:add-ivy-text-to-history ()
+    "Add the last ivy search to `regexp-search-ring'."
+    (add-to-history
+     'regexp-search-ring
+     (ivy--regex ivy-text)
+     regexp-search-ring-max))
+
+  (defun noct:evil-search-action ()
+    "Update evil search information based on last ivy search."
+    (when (and (bound-and-true-p evil-mode)
+               (eq evil-search-module 'evil-search))
+      (add-to-history 'evil-ex-search-history ivy-text)
+      (setq evil-ex-search-pattern (list ivy-text t t))
+      (setq evil-ex-search-direction 'forward)
+      (when evil-ex-search-persistent-highlight
+        (evil-ex-search-activate-highlight evil-ex-search-pattern))))
+
+
+  (general-add-hook 'counsel-grep-post-action-hook (list
+                                                    #'noct:match-beginning
+                                                    #'noct:add-ivy-text-to-history
+                                                    #'noct:evil-search-action)))
+#+end_src
+
+** Projectile
+Alternatively, there is the builtin ~project-find-file~, [[https://github.com/technomancy/find-file-in-project][find-file-in-project]], and [[https://github.com/h/find-file-in-repository][find-file-in-repository]]. Projectile has a lot of other useful commands though.
+
+*** Setup
+#+begin_src emacs-lisp
+(use-package projectile
+  :general
+  (general-spc
+    "p" #'projectile-find-file
+    "P" #'projectile-find-file-in-known-projects
+    "c" #'projectile-switch-project
+    "D" #'projectile-dired)
+  (general-t
+    "s" #'projectile-replace
+    "t" #'projectile-test-project)
+  :diminish ""
+  :config
+  (gsetq projectile-enable-caching t
+         projectile-project-test-cmd "make test")
+  (when (featurep 'ivy)
+    ;; as fallback; using counsel-projectile comamnds instead
+    (gsetq projectile-completion-system 'ivy))
+
+  (projectile-mode)
+
+  (projectile-cleanup-known-projects)
+
+  (projectile-register-project-type
+   'emacs '("Cask")
+   :compile "make compile"
+   :test "make test"
+   :test-prefix "test-"
+   :test-suffix ".el"))
+#+end_src
+
+*** Counsel Projectile
+#+begin_src emacs-lisp
+;; TODO won't make remaps before first projectile command run
+;; either have to make the remaps manually or load this before
+(use-package counsel-projectile
+  :general (general-spc "/" #'noct:counsel-projectile-rg)
+  :config
+  (gsetq counsel-projectile-sort-files t)
+
+  (counsel-projectile-mode)
+
+  ;; rg is faster than git grep
+  ;; `counsel-projectile-rg' doesn't work outside of a project
+  (defun noct:counsel-projectile-rg ()
+    "Call `counsel-projectile-rg' if in a project or `counsel-rg' if not."
+    (interactive)
+    (if (projectile-project-p)
+        (counsel-projectile-rg)
+      (counsel-rg))))
+#+end_src
+
+** Outline/Outshine
+#+begin_src emacs-lisp
+(use-package outline
+  :ghook ('prog-mode-hook #'outline-minor-mode)
+  :diminish outline-minor-mode
+  :config
+  (general-def 'normal outline-minor-mode-map
+    "SPC u" #'counsel-outline
+    "TAB" #'outline-toggle-children))
+
+(use-package outshine
+  :ghook 'outline-minor-mode-hook)
+#+end_src
+
+* UI/Appearance/Visual/Formatting
+** Adaptive Wrap
+This package, for example, will visually indent soft-wrapped lines that are bullet points.
+#+begin_src emacs-lisp
+(use-package adaptive-wrap
+  :ghook ('text-mode-hook #'adaptive-wrap-prefix-mode))
+#+end_src
+
+** All the Icons
+A helper library for inserting icons (used by other packages in my config).
+#+begin_src emacs-lisp
+(use-package all-the-icons
+  :init
+  (defun all-the-icons-maybe-install-fonts ()
+    "Install fonts for all the icons if they have not been installed."
+    ;; workaround for this functionality not being included by default
+    ;; https://github.com/domtronn/all-the-icons.el/issues/120
+    (when (display-graphic-p)
+      (let ((font-dest (cl-case window-system
+                         (x  (concat (or (getenv "XDG_DATA_HOME")
+                                         (concat (getenv "HOME") "/.local/share"))
+                                     "/fonts/"))
+                         (mac (concat (getenv "HOME") "/Library/Fonts/" ))
+                         (ns (concat (getenv "HOME") "/Library/Fonts/" )))))
+        (unless (file-exists-p (concat font-dest "all-the-icons.ttf"))
+          (all-the-icons-install-fonts t)))))
+
+  (noct:after-gui
+    (all-the-icons-maybe-install-fonts)))
+#+end_src
+
+** Builtin Line Numbers
+#+begin_src emacs-lisp
+(gsetq-default display-line-numbers 'visual
+               display-line-numbers-widen t
+               ;; default
+               display-line-numbers-current-absolute t)
+
+(custom-set-faces '(line-number-current-line ((t :weight bold
+                                                 :foreground "goldenrod"
+                                                 :background "slate gray"))))
+
+;; (defun noct:maybe-disable-absolute-current ()
+;;   (when (> (count-lines (point-min) (point-max)) 9999)
+;;     (setq-local display-line-numbers-current-absolute nil)))
+;; (general-add-hook 'find-file-hook #'noct:maybe-disable-absolute-current)
+
+(defun noct:relative ()
+  (setq-local display-line-numbers 'visual))
+
+(defun noct:absolute ()
+  (setq-local display-line-numbers t))
+
+(general-add-hook 'evil-insert-state-entry-hook #'noct:absolute)
+(general-add-hook 'evil-insert-state-exit-hook #'noct:relative)
+#+end_src
+
+** Evil Visual Mark Mode
+Display an overlay for evil marks in normal state.
+#+begin_src emacs-lisp
+(use-package evil-visual-mark-mode
+  :init (evil-visual-mark-mode)
+  ;; :config
+  ;; TODO how to render after restoring marks with desktop?
+  ;; this doesn't work
+  ;; (general-add-hook 'desktop-after-read-hook
+  ;;                   (lambda ()
+  ;;                     (dolist (buffer (buffer-list))
+  ;;                       (with-current-buffer buffer
+  ;;                         (evil-visual-mark-render)))))
+  )
+#+end_src
+
+** Highlight Escape Sequences
+Highlights escaped characters.
+#+begin_src emacs-lisp
+(use-package highlight-escape-sequences
+  :init (hes-mode))
+#+end_src
+
+** Posframe
+A helper library for child frames (e.g. used with company and ivy).
+#+begin_src emacs-lisp
+(use-package posframe)
+#+end_src
+
+** Rainbow Mode
+This will colorize something like #F3A111. I am enabling this locally in files with colors.
+#+begin_src emacs-lisp
+(use-package rainbow-mode)
+#+end_src
+
+** Show Paren
+Smartparens' version is unfortunately too slow.
+#+begin_src emacs-lisp
+(use-package paren
+  :init (show-paren-mode)
+  :config (gsetq show-paren-delay 0))
+#+end_src
+
+** Stripe Buffer
+#+begin_src emacs-lisp
+(use-package stripe-buffer
+  :ghook ('org-mode-hook #'turn-on-stripe-table-mode))
+#+end_src
+
+** Themes
+*** Disable Old Theme When Switching
+#+begin_src emacs-lisp
+;; https://emacs.stackexchange.com/questions/3112/how-to-reset-color-theme
+;; undo old theme before switching to new theme
+;; circadian does this too when switching themes
+(defun noct:undo-themes (&rest _)
+  (mapc #'disable-theme custom-enabled-themes))
+
+(general-add-advice 'load-theme :before #'noct:undo-themes)
+#+end_src
+
+*** Installed Themes
+#+begin_src emacs-lisp
+(use-package twilight-bright-theme)
+
+(use-package nord-theme)
+
+(use-package gruvbox-theme)
+
+;; dead
+;; (use-package gruvbox-dark-theme
+;;   :straight (gruvbox-dark-theme :type git
+;;                                 :fetcher github
+;;                                 :repo "d125q/gruvbox-dark-emacs")
+;;   :init (load-theme 'gruvbox-dark t))
+
+(use-package lenlen-theme
+  :disabled t
+  :ghook ('after-init-hook (lambda () (require 'lenlen-theme))))
+
+(use-package solarized-theme)
+
+(use-package jazz-theme)
+
+(use-package ujelly-theme)
+
+(use-package warm-night-theme)
+
+(use-package flatui-theme)
+
+(use-package labburn-theme)
+
+(use-package tao-theme)
+
+(use-package doom-themes
+  :config
+  (with-eval-after-load 'org
+    (set-face-attribute 'org-level-1 nil :height 1.0 :weight 'semi-bold
+                        :background nil)
+    (set-face-attribute 'org-block nil :background nil)
+    (set-face-attribute 'org-block-begin-line nil :background nil)
+    (set-face-attribute 'org-ellipsis nil :background nil)))
+
+(use-package kaolin-themes)
+#+end_src
+
+*** Current Theme/Circadian
+#+begin_src emacs-lisp
+(use-package circadian
+  :init
+  (gsetq circadian-themes '(
+                            ;; ("8:00" . twilight-bright)
+                            ;; ("20:00" . nord)
+                            ("20:00" . gruvbox-dark-soft)))
+  (circadian-setup))
+#+end_src
+
+** Visual Fill Column
+Soft wrap lines at =fill-column=.
+#+begin_src emacs-lisp
+(use-package visual-fill-column
+  :ghook 'text-mode-hook
+  :general (noct:toggle-map "v" #'visual-fill-column-mode))
+#+end_src
+
+** Visual Line mode
+#+begin_src emacs-lisp
+;; https://github.com/abo-abo/swiper/issues/925
+;; (global-visual-line-mode)
+;; soft-wrap lines
+(general-add-hook 'text-mode-hook #'visual-line-mode)
+(diminish 'visual-line-mode)
+
+;; show right-curly arrow on right of wrapped lines
+(gsetq visual-line-fringe-indicators '(nil right-curly-arrow))
+#+end_src
+
+** Whitespace
+#+begin_src emacs-lisp
+;; http://ergoemacs.org/emacs/whitespace-mode.html
+;; http://www.emacswiki.org/emacs/WhiteSpace
+(use-package whitespace
+  :init (global-whitespace-mode)
+  :diminish global-whitespace-mode
+  :config
+  (gsetq whitespace-style
+         (list 'face 'trailing 'space-before-tab::tab 'tab-mark 'newline-mark)
+         whitespace-display-mappings
+         '((newline-mark ?\n [?\¬ ?\n])
+           (tab-mark ?\t [?\! ?\t] [?\! ?\t])))
+  (general-add-hook 'prog-mode-hook (lambda ()
+                                      (setq-local whitespace-style
+                                                  (cons 'lines-tail whitespace-style)))))
+#+end_src
+
+* Text Editing/Interaction
+** =rect-ext.el=
+#+begin_src emacs-lisp
+;; TODO push `rect-ext-evil-ex'
+;; TODO eventualy switch to more generic narrowing solution
+(when (file-directory-p "~/src/emacs/rectangle-ext/")
+  (use-package rect-ext
+    :straight (rect-ext
+               :type git
+               :host github
+               :repo "noctuid/rect-ext.el"
+               :local-repo "~/src/emacs/rectangle-ext/")
+    :general
+    ('(normal visual)
+     ";" #'rect-ext-evil-ex
+     "r;" #'evil-repeat-find-char)))
+#+end_src
+
+** TODO Aggressive Fill Paragraph
+Too aggressive, but I like the idea. Will come back to.
+#+begin_src emacs-lisp
+(use-package aggressive-fill-paragraph
+  :disabled t
+  :ghook 'prog-mode-hook)
+#+end_src
+
+** Alignment (evil-lion and align)
+Don't really use.
+#+begin_src emacs-lisp
+(use-package evil-lion
+  :general ('normal
+            "gl" #'evil-lion-left
+            "gL" #'evil-lion-right))
+
+(general-def 'visual "ta" #'align)
+#+end_src
+
+** TODO Auto Insert
+TODO Tries to insert things when running straight commands (need to find a good way to identify when user deliberately created a file).
+#+begin_src emacs-lisp
+(use-package autoinsert
+  :disabled t
+  :init (auto-insert-mode)
+  :config
+  (gsetq auto-insert-query nil
+         ;; insert "/usr/bin/env interpreter" for shebangs
+         executable-prefix-env t))
+#+end_src
+
+** Commenting
+Automatic integration with org source blocks is nice. Evilnc jumps to the beginning of the block currently. Evil-commentary moves the point to the next line and scrolls the window, which is even worse. With polymode, any commenting command should work fine in a source block.
+
+Evilnc also has comment text objects, but they were fairly broken last time I tried them, and I've implemented my own comment text object. Evilnc is definitely more actively maintained and has tests, which is why I'm currently using it.
+#+begin_src emacs-lisp
+(use-package evil-nerd-commenter
+  :general
+  (general-t (normal visual) 'override "c" #'evilnc-comment-or-uncomment-lines)
+  ('normal "gc" #'evilnc-comment-operator))
+
+(use-package evil-commentary
+  :disabled t
+  :general
+  (general-t (normal visual) 'override "c" #'evil-commentary-line)
+  ('normal "gc" #'evil-commentary))
+
+;; interesting idea, but it doesn't actually list all comments
+;; (defun counsel-imenu-comments ()
+;;   (interactive)
+;;   (let* ((imenu-create-index-function #'evilnc-imenu-create-index-function))
+;;     (unless (featurep 'counsel) (require 'counsel))
+;;     (counsel-imenu)))
+#+end_src
+
+** Smart Parens
+[[https://github.com/Fuco1/smartparens/wiki/Permissions#filters][Info on filters]]
+
+[[https://github.com/Fuco1/smartparens/wiki/Permissions#pre-and-post-action-hooks][Info on pre and post action hooks]]
+
+#+begin_src emacs-lisp
+(use-package smartparens
+  :init
+  (require 'smartparens-config)
+  (smartparens-global-mode)
+  :diminish " ⦅⦆"
+  :config
+  ;; typing closing delimiter always jumps out of expression even if not right
+  ;; before closing; causes Emacs to hang in this file
+  ;; (gsetq sp-autoskip-closing-pair 'always)
+
+  ;; this also makes Emacs hang in this file
+  ;; (show-smartparens-global-mode)
+
+  (sp-with-modes '(java-mode c-mode sh-mode)
+    (sp-local-pair "{" nil
+                   ;; don't currently have any global handlers; still use :add
+                   :post-handlers '(:add ("||\n[i]" "RET"))))
+
+
+  (defun noct:at-end-of-shell-if-p (_id _action _context)
+    (looking-back (rx "if" (1+ any) ";" (0+ space) "then")
+                  (line-beginning-position)))
+
+  ;; like endwise.vim; probably better to just use snippet
+  (sp-with-modes '(sh-mode)
+    (sp-local-pair "then" "\nfi"
+                   :when '(noct:at-end-of-shell-if-p
+                           ("RET"))))
+
+  ;; TODO this won't work with `electric-slash' in c-mode
+  (sp-with-modes '(java-mode c-mode)
+    (sp-local-pair "/*" "*/"
+                   :post-handlers '(:add ("* ||\n[i]" "RET")
+                                         ("\n * ||\n[i]" "*")))))
+#+end_src
+
+** auto-yasnippet
+#+begin_src emacs-lisp
+(use-package auto-yasnippet
+  :general
+  (general-s
+    "c" #'aya-create
+    "x" #'aya-expand))
+#+end_src
+
+** Yasnippet
+*** Setup
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :diminish yas-minor-mode
+  :defer 3
+  :general
+  (general-s "y" #'yas-new-snippet)
+  (general-def help-map
+    ;; unbound by default
+    "y" #'yas-describe-tables)
+  :config
+  ;; never expand snippets in normal state
+  (general-def 'normal yas-minor-mode-map
+    [remap yas-expand] #'ignore)
+
+  (general-def 'normal snippet-mode-map
+    "RET" #'yas-load-snippet-buffer-and-close
+    "mt" #'yas-tryout-snippet)
+
+  (yas-global-mode)
+
+  (defun yas-try-expand-first (orig-func &rest args)
+    "Expand a snippet before the point or call ORIG-FUNC."
+    (let ((yas-fallback-behavior nil))
+      (unless (and (called-interactively-p 'interactive)
+                   (yas-expand))
+        (apply orig-func args))))
+  (general-add-advice 'noct:org-tab-insert :around #'yas-try-expand-first)
+
+  ;; https://github.com/joaotavora/yasnippet/blob/master/doc/faq.org#why-doesnt-tab-navigation-work-with-flyspell
+  (general-add-hook 'flyspell-incorrect-hook
+                    (lambda (_0 _1 _2)
+                      (and (bound-and-true-p yas-active-field-overlay)
+                           (overlay-buffer yas-active-field-overlay)))))
+#+end_src
+
+*** Extra Snippets
+#+begin_src emacs-lisp
+(use-package yasnippet-snippets
+  :after yasnippet
+  :demand t)
+#+end_src
+
+** Undo
+*** Undohist
+Make Emacs undo persistent
+#+begin_src emacs-lisp
+(use-package undohist
+  :disabled t
+  :init (undohist-initialize))
+#+end_src
+
+*** Undo Tree
+Undo tree is a great package but is unmaintained and extremely buggy.
+
+[[https://github.com/syl20bnr/spacemacs/issues/774][Issue on spacemacs related to corruption]]
+
+[[https://github.com/emacs-evil/evil/issues/1074][Issue on evil related to corruption]]
+
+#+begin_src emacs-lisp
+;; http://ergoemacs.org/emacs/emacs_undo_cult_problem.html
+;; "Goddamn motherf�cking emacs undo."
+(use-package undo-tree
+  :diminish " 🌴"
+  :init (global-undo-tree-mode)
+  :config
+  (gsetq undo-tree-visualizer-timestamps t
+         undo-tree-visualizer-diff t
+         ;; buggy
+         undo-tree-enable-undo-in-region nil
+         ;; don't store undo history in same directory as file
+         undo-tree-history-directory-alist '((".*" . "~/ag-sys/.emacs_undo"))
+         ;; don't autosave history (corruption)
+         undo-tree-history-autosave t)
+
+  (general-def noct:toggle-map "u" #'undo-tree-mode)
+
+  (general-def 'normal
+    "u" #'undo-tree-undo
+    "U" #'undo-tree-redo)
+
+  (general-t "u" #'undo-tree-visualize))
+#+end_src
+
+** Evil Motions and Text objects
+*** Things
+Still experimental.
+#+begin_src emacs-lisp
+(use-package things-evil
+  :straight (things
+             :type git
+             :host github
+             :repo "noctuid/things.el"
+             :local-repo "~/src/emacs/things")
+  :demand t
+  :config
+  (general-def '(visual operator) "RET" #'things-evil-last-text-object)
+
+  (general-def '(inner outer) "p" nil)
+  ;; temporary
+  (general-def '(visual operator) "I" nil "A" nil)
+
+  (things-evil-define aggregated-comment things-aggregated-comment :last-key "p" :keys "c")
+
+  (things-evil-define string things-string :last-key "p" :keys "S")
+
+  (evil-define-text-object evil-a-buffer (count &optional beg end type)
+    "Select the entire buffer."
+    (evil-range (point-min) (point-max)))
+
+  (general-def '(inner outer) "e" #'evil-a-buffer)
+
+  (things-evil-define line things-line :last-key "p" :keys "l")
+
+  (things-evil-define function things-function :last-key "p" :keys "f")
+
+  (things-define-pair 'things-paren "(" ")")
+  (things-evil-define paren things-paren :last-key "p" :keys "(")
+
+  (things-define-pair 'things-bracket "[" "]")
+  (things-evil-define bracket things-bracket :last-key "p" :keys "[")
+
+  (things-define-pair 'things-curly "{" "}")
+  (things-evil-define curly things-curly :last-key "p" :keys "{")
+
+  (things-define-pair 'things-angle "<" ">")
+  (things-evil-define angle things-angle :last-key "p" :keys "<")
+
+  (things-define-separator 'things-comma ",")
+  (things-evil-define comma things-comma :last-key "p" :keys ","))
+#+end_src
+
+*** Evil Snipe and Easy Motion
+**** Evil Snipe
+#+begin_src emacs-lisp
+(use-package evil-snipe
+  :general
+  (general-r
+    "f" #'evil-snipe-f
+    "F" #'evil-snipe-F
+    "t" #'evil-snipe-t
+    "T" #'evil-snipe-T
+    ";" #'evil-snipe-repeat
+    "," #'evil-snipe-repeat-reverse)
+
+  (general-add-hook 'evil-snipe-local-mode-hook
+                    (lambda () (diminish 'evil-snipe-local-mode)))
+  :diminish ""
+  :config
+  (gsetq evil-snipe-smart-case t
+         ;; search visible part of buffer
+         evil-snipe-scope 'visible
+         ;; include matches behind cursor for repeating
+         evil-snipe-repeat-scope 'whole-visible
+         ;; tab to refine search (add another char)
+         evil-snipe-tab-increment t
+         ;; don't automatically bind s and S
+         evil-snipe-auto-disable-substitute nil
+         ;; don't automatically bind ; and ,
+         evil-snipe-override-evil-repeat-keys nil
+         ;; doesn't do right thing since binding evil-snipe-s to f not s
+         ;; overriding evil-snipe--transient-map below
+         evil-snipe-repeat-keys t
+         ;; don't scroll window
+         evil-snipe-auto-scroll nil
+         ;; don't highlight after jump
+         evil-snipe-enable-highlight nil
+         ;; don't highlight while typing chars (TODO might be nice, but it doesn't
+         ;; automatically clear, at least with my setup)
+         evil-snipe-enable-incremental-highlight nil)
+
+  (general-def evil-snipe-mode-s-map
+    "f" #'evil-snipe-repeat
+    "F" #'evil-snipe-repeat-reverse)
+
+  (diminish 'evil-snipe-override-mode)
+  (diminish 'evil-snipe-override-local-mode)
+
+  (defun noct:snipe-transient-map (orig &rest _)
+    (funcall orig "f" "F"))
+
+  (general-add-advice 'evil-snipe--transient-map :around #'noct:snipe-transient-map))
+#+end_src
+
+**** Evil Easymotion
+TODO Use things.el instead.
+#+begin_src emacs-lisp
+(use-package evil-easymotion
+  :general
+  (general-def 'motion
+    "f" #'noct:snipe-forward
+    "F" #'noct:snipe-backward)
+
+  ;; TODO combine next two statements when general supports modifier prefixes
+  (general-def 'motion
+    "rn" #'evilem-next-line
+    "re" #'evilem-prev-line
+    "rw" #'evilem-forward-begin
+    "rW" #'evilem-forward-WORD-begin
+    "rb" #'evilem-backward-word-begin
+    "rB" #'evilem-backward-WORD-begin
+    "rs" #'evilem-sentence-nav-forward
+    "rS" #'evilem-sentence-nav-backward
+    "rp" #'evilem-forward-paragraph
+    "rP" #'evilem-backward-paragraph)
+
+  ;; can't use control since can't distinguish certain keys (can rebind in
+  ;; `input-decode' map to get working, though will only work for GUI)
+  (general-def '(insert emacs)
+    "M-n" #'evilem-next-line
+    "M-e" #'evilem-prev-line
+    "M-w" #'evilem-forward-begin
+    "M-W" #'evilem-forward-WORD-begin
+    "M-b" #'evilem-backward-word-begin
+    "M-B" #'evilem-backward-WORD-begin
+    "M-s" #'evilem-sentence-nav-forward
+    "M-S" #'evilem-sentence-nav-backward
+    "M-p" #'evilem-forward-paragraph
+    "M-P" #'evilem-backward-paragraph)
+
+  :config
+  (evilem-make-motion noct:snipe-forward #'evil-snipe-repeat
+                      :pre-hook (save-excursion
+                                  ;; TODO :bind doesn't work anymore?
+                                  (let (evil-snipe-enable-highlight)
+                                    (call-interactively #'evil-snipe-s))))
+  (evilem-make-motion noct:snipe-backward #'evil-snipe-repeat
+                      :pre-hook (save-excursion
+                                  (let (evil-snipe-enable-highlight)
+                                    (call-interactively #'evil-snipe-S))))
+
+  (defun noct:next-line ()
+    (interactive)
+    (evil-next-line)
+    (beginning-of-line))
+
+  (defun noct:prev-line ()
+    (interactive)
+    (evil-previous-line)
+    (beginning-of-line))
+
+  (evilem-make-motion evilem-next-line
+                      #'noct:next-line
+                      :pre-hook (setq evil-this-type 'line)
+                      :bind ((temporary-goal-column (current-column))
+                             (line-move-visual t)))
+
+  (evilem-make-motion evilem-prev-line
+                      #'noct:prev-line
+                      :pre-hook (setq evil-this-type 'line)
+                      :bind ((temporary-goal-column (current-column))
+                             (line-move-visual t)))
+
+  (evilem-make-motion evilem-forward-word-begin
+                      #'evil-forward-word-begin)
+  (evilem-make-motion evilem-forward-WORD-begin
+                      #'evil-forward-WORD-begin)
+  (evilem-make-motion evilem-backward-word-begin
+                      #'evil-backward-word-begin)
+  (evilem-make-motion evilem-backward-WORD-begin
+                      #'evil-backward-WORD-begin)
+
+  (evilem-make-motion evilem-sentence-nav-forward
+                      #'sentence-nav-evil-forward)
+  (evilem-make-motion evilem-sentence-nav-backward
+                      #'sentence-nav-evil-backward)
+  (evilem-make-motion noct:sentence-easymotion
+                      (list #'sentence-nav-forward
+                            #'sentence-nav-backward))
+
+
+  (evilem-make-motion evilem-forward-paragraph
+                      #'evil-forward-paragraph)
+  (evilem-make-motion evilem-backward-paragraph
+                      #'evil-backward-paragraph))
+#+end_src
+
+*** Sentence Navigation
+Needs to be updated to use =things.el= and needs to have more tests.
+#+begin_src emacs-lisp
+(use-package sentence-navigation
+  :straight (sentence-navigation
+             :type git
+             :host github
+             :repo "noctuid/emacs-sentence-navigation"
+             :local-repo "~/src/emacs/sentence-navigation")
+  :general
+  ;; TODO different keybinding?
+  ('normal
+   ")" #'sentence-nav-evil-forward
+   "(" #'sentence-nav-evil-backward
+   "g)" #'sentence-nav-evil-forward-end
+   "g(" #'sentence-nav-evil-backward-end)
+  ('inner "s" #'sentence-nav-evil-inner-sentence)
+  ('a "s" #'sentence-nav-evil-a-sentence)
+  :config
+  ;; set # as comment character for org mode; TODO shouldn't have to do this
+  (modify-syntax-entry ?# "<" text-mode-syntax-table)
+  (with-eval-after-load 'org
+    (modify-syntax-entry ?# "<" org-mode-syntax-table)))
+#+end_src
+
+*** Column Text Object
+Needs to be updated to use =things.el= and needs to have more tests.
+#+begin_src emacs-lisp
+(use-package evil-textobj-column
+  :straight (evil-textobj-column
+             :type git
+             :host github
+             :repo "noctuid/evil-textobj-column"
+             :local-repo "~/src/emacs/evil-textobj-column")
+  :general ('inner
+            "k" #'evil-textobj-column-word
+            "K" #'evil-textobj-column-WORD))
+#+end_src
+
+** Evil Matchit
+#+begin_src emacs-lisp
+(use-package evil-matchit
+  :general
+  ('normal "ro" #'evilmi-jump-items))
+#+end_src
+
+** Evil Numbers
+This package is unfortunately unmaintained.
+#+begin_src emacs-lisp
+(use-package evil-numbers
+  ;; use version that supports g C-a
+  ;; https://github.com/janpath/evil-numbers/issues/3
+  :straight (evil-numbers :type git :host github :repo "janpath/evil-numbers")
+  :general ('normal
+            "C-a" #'evil-numbers/inc-at-pt
+            "C-x" #'evil-numbers/dec-at-pt
+            "g C-a" #'evil-numbers/inc-at-pt-incremental
+            "g C-x" #'evil-numbers/dec-at-pt-incremental))
+#+end_src
+
+** Evil Surround
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :init (global-evil-surround-mode)
+  ;; https://github.com/timcharper/evil-surround/pull/48
+  :config
+  (general-def 'visual evil-surround-mode-map
+    "s" #'evil-surround-region))
+#+end_src
+
+** Evil Exchange
+#+begin_src emacs-lisp
+(use-package evil-exchange
+  :general (noct:c-map "x" #'evil-exchange))
+#+end_src
+
+** Evil Replace with Register
+#+begin_src emacs-lisp
+(use-package evil-replace-with-register
+  :general
+  (general-defs
+    'normal
+    "gr" #'evil-replace-with-register
+    'visual
+    "p" #'evil-replace-with-register))
+#+end_src
+
+** Link Hint
+#+begin_src emacs-lisp
+(use-package link-hint
+  :straight (link-hint
+             :type git
+             :host github
+             :repo "noctuid/link-hint.el"
+             :local-repo  "~/src/emacs/link-hint/")
+  :general ('normal
+            "tf" #'link-hint-open-link
+            "tF" #'link-hint-open-multiple-links
+            "gf" #'link-hint-open-link-at-point)
+  :config
+  (gsetq browse-url-generic-program (getenv "BROWSER")
+         browse-url-browser-function #'browse-url-generic))
+#+end_src
+
+* Version Control
+[[https://github.com/tarsius/git-elisp-overview][List of git related packages]]
+** Git Major Modes
+#+begin_src emacs-lisp
+;; https://github.com/magit/git-modes
+(use-package gitattributes-mode)
+
+(use-package gitconfig-mode)
+
+(use-package gitignore-mode
+  :mode "/.dockerignore\\'")
+#+end_src
+
+** Browse at Remote
+#+begin_src emacs-lisp
+(use-package browse-at-remote
+  :general (general-t "RET" #'browse-at-remote))
+#+end_src
+
+** Git Link
+#+begin_src emacs-lisp
+(use-package git-link
+  :general ('normal "gy" #'git-link))
+#+end_src
+
+** Git Gutter
+This is the only package that allows in-buffer hunk staging that I'm aware of. It slows Emacs to a crawl in large files with a lot of unstaged changes (like this one). I plan on eventually switching to diff-hl.
+#+begin_src emacs-lisp
+(defun noct:maybe-enable-git-gutter ()
+  "Enable git gutter except for org init file."
+  (unless (and buffer-file-name
+               (string= (file-name-nondirectory buffer-file-name) "awaken.org"))
+    (git-gutter-mode)))
+
+(use-package git-gutter
+  :diminish ""
+  :ghook ('find-file-hook #'noct:maybe-enable-git-gutter)
+  :general
+  (general-t
+    "gn" (list #'git-gutter:next-hunk :jump t)
+    "ge" (list #'git-gutter:previous-hunk :jump t)
+    "gh" #'git-gutter:stage-hunk
+    "gi" #'git-gutter:revert-hunk)
+  :config
+  (gsetq git-gutter:modified-sign "~"
+         git-gutter:handled-backends '(git hg)
+         ;; hide when no changes
+         git-gutter:hide-gutter t
+         git-gutter:update-interval 2)
+  ;; if switch to diff-hl and only use for hunk commands
+  ;; (setq git-gutter:display-p nil)
+
+  (general-def noct:toggle-map "g" #'git-gutter-mode))
+#+end_src
+
+** Diff HL
+Diff-hl is nice but currently doesn't support staging hunks or detecting/showing staged changes. Diff-hl also has a dired mode, but I think that I prefer dired-k.
+#+begin_src emacs-lisp
+(use-package diff-hl
+  :disabled t
+  :diminish ""
+  :init
+  (global-diff-hl-mode)
+  (diff-hl-flydiff-mode)
+  :config
+  (with-eval-after-load 'magit
+    (general-add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
+
+  ;; TODO need a better solution than this
+  ;; (defun noct:change-diff-location ()
+  ;;   "Put diff markers in the margin or fringe based on (display-graphic-p)."
+  ;;   (if (display-graphic-p)
+  ;;       (when diff-hl-margin-mode
+  ;;         (diff-hl-margin-mode -1))
+  ;;     (diff-hl-margin-mode)))
+
+  ;; (general-add-hook 'focus-in-hook #'noct:change-diff-location)
+  )
+#+end_src
+
+** Magit
+*** Setup
+#+begin_src emacs-lisp
+(use-package magit
+  :general
+  ('normal 'override "S" #'magit-status)
+  (general-t
+    "ga" #'magit-stage-file
+    "gr" #'magit-rebase-interactive
+    "gl" #'magit-log-all
+    "gL" #'magit-log-buffer-file'
+    "gc" #'magit-commit
+    "gp" #'magit-push
+    ;; "gf" #'magit-file-dispatch
+    "gf" #'magit-pull
+    "gb" #'magit-blame)
+  :config
+  (when (featurep 'ivy)
+    (gsetq magit-completing-read-function #'ivy-completing-read)))
+#+end_src
+
+*** Section Configuration
+**** Status Mode Sections
+Show staged changes then unstaged changes then untracked files.
+#+begin_src emacs-lisp
+(general-with-package 'magit
+  (gsetq magit-status-sections-hook
+         (cl-loop for section in magit-status-sections-hook
+                  unless (memq section '(magit-insert-untracked-files
+                                         magit-insert-unstaged-changes))
+                  collect section
+                  and when (eq section 'magit-insert-staged-changes)
+                  append (list 'magit-insert-unstaged-changes
+                               'magit-insert-untracked-files))))
+#+end_src
+
+**** Revision Mode Sections
+Show GPG information when examining a commit (see [[https://github.com/magit/magit/issues/2797][this magit issue]]).
+#+begin_src emacs-lisp
+(general-with-package 'magit
+  ;; https://gist.github.com/fice-t/c84c3bc7007d0d4bcacfeb2c0e42ac27
+  (defun magit-rev-format-items (format &optional rev args)
+    (with-temp-buffer
+      (magit-rev-insert-format format rev args)
+      (split-string (buffer-string) "\0")))
+
+  (defun magit-insert-revision-gpg (rev)
+    (let* ((res (magit-rev-format-items "%G?%x00%GS%x00%GK%x00%GG" rev))
+           (type (aref (car res) 0)))
+      (unless (eq type ?N)
+        (let* ((signer (cl-second res))
+               (key (cl-third res))
+               (raw (string-trim-right (cl-fourth res) "\n+"))
+               face
+               status)
+          (pcase type
+            (?G (setq face 'magit-signature-good)
+                (setq status "VALID"))
+            (?B (setq face 'magit-signature-bad)
+                (setq status "BAD"))
+            (?U (setq face 'magit-signature-untrusted)
+                (setq status "UNKNOWN"))
+            (?X (setq face 'magit-signature-expired)
+                (setq status "EXPIRED"))
+            (?Y (setq face 'magit-signature-expired-key)
+                (setq status "EXPIRED KEY"))
+            (?R (setq face 'magit-signature-revoked)
+                (setq status "REVOKED"))
+            (?E (setq face 'magit-signature-error)
+                (setq status "ERROR")))
+          (magit-insert-section (gpg status (not (eq type ?E)))
+            (insert "GPG Status: "
+                    (propertize (or status "") 'face face)
+                    " (press "
+                    (substitute-command-keys "\\[magit-section-toggle]")
+                    " to toggle raw output)\n")
+            (unless (string= signer "")
+              (magit-insert-section (gpg signer)
+                (insert "GPG Signer: "
+                        (propertize signer 'face face)
+                        "\n")))
+            (unless (string= key "")
+              (magit-insert-section (gpg key)
+                (insert "GPG Key:    "
+                        (propertize key 'face face)
+                        "\n")))
+            (insert "\n")
+            (magit-insert-heading)
+            (magit-insert-section (gpg raw)
+              (insert (propertize raw 'face face)
+                      "\n\n")))))))
+
+  ;; https://github.com/magit/magit/issues/2797#issuecomment-338388572
+  (magit-add-section-hook 'magit-revision-sections-hook
+                          #'magit-insert-revision-gpg
+                          #'magit-insert-revision-headers
+                          t))
+#+end_src
+
+*** Window Positioning
+#+begin_src emacs-lisp
+(noct:handle-popup magit-status-mode)
+(noct:handle-popup magit-log-mode)
+(noct:handle-popup magit-revision-mode 1)
+#+end_src
+
+*** Keybindings
+#+begin_src emacs-lisp
+(general-with-package 'magit
+  (general-def 'normal magit-mode-map
+    "<tab>" #'magit-section-toggle
+    "RET" #'magit-visit-thing
+    "C-n" #'magit-section-forward
+    "C-e" #'magit-section-backward
+    "N" #'magit-section-forward-sibling
+    "E" #'magit-section-backward-sibling
+    "H" #'magit-section-up
+    "+" #'magit-diff-more-context
+    "-" #'magit-diff-less-context
+    "=" #'magit-diff-default-context
+    "$" #'magit-process-buffer
+    "%" #'magit-worktree
+    ;; swap apply and pick (pick commits immediately)
+    "a" #'magit-cherry-pick
+    "A" #'magit-cherry-apply
+    "b" #'magit-branch
+    "B" #'magit-bisect
+    "c" #'magit-commit
+    "d" #'magit-diff
+    "D" #'magit-diff-refresh
+    ;; not using ediff commands
+    ;; "e" #'magit-ediff-dwim
+    ;; "E" #'magit-ediff
+    ;; swap fetch and pull
+    "f" #'magit-pull
+    "F" #'magit-fetch
+    "gr" #'magit-refresh
+    "gR" #'magit-refresh-all
+    ;; "h" #'magit-dispatch
+    "?" #'magit-dispatch
+    "i" #'magit-gitignore
+    ;; e.g. discard
+    "k" #'magit-delete-thing
+    "K" #'magit-file-untrack
+    "l" #'magit-log
+    "L" #'magit-log-refresh
+    "m" #'magit-merge
+    "M" #'magit-remote
+    "o" #'magit-submodule
+    "O" #'magit-subtree
+    "p" #'magit-push
+    "q" #'magit-mode-bury-buffer
+    "r" #'magit-rebase
+    "R" #'magit-file-rename
+    "T" #'magit-tag
+    ;; "T" #'magit-notes
+    "s" #'magit-stage-file
+    "S" #'magit-stage-modified
+    "u" #'magit-unstage-file
+    "U" #'magit-unstage-all
+    ;; swap revert and revert-no-commit
+    ;; TODO visual state and yanking
+    "v" #'magit-revert
+    "V" #'magit-revert-no-commit
+    "w" #'magit-am
+    "W" #'magit-patch
+    "x" #'magit-reset-quickly
+    "X" #'magit-reset
+    "y" #'magit-show-refs
+    ;; show commits in branch not merged upstream
+    "Y" #'magit-cherry
+    "z" #'magit-stash
+    "Z" #'magit-stash
+    ":" #'magit-git-command
+    "!" #'magit-run)
+
+  (general-def 'normal magit-log-mode-map
+    "q" #'magit-log-bury-buffer
+    "RET" #'magit-show-commit
+    "v" #'magit-revert)
+
+  ;; e.g. for c F
+  (general-def 'normal magit-log-select-mode-map
+    "RET" #'magit-log-select-pick)
+
+  (general-def 'normal magit-blame-mode-map
+    "q" #'magit-blame-quit))
+#+end_src
+
+*** With Editor
+#+begin_src emacs-lisp
+(use-package with-editor
+  :config
+  (general-def 'normal with-editor-mode-map
+    "RET" #'with-editor-finish
+    "q" #'with-editor-cancel))
+#+end_src
+
+*** Transient
+#+begin_src emacs-lisp
+(use-package transient
+  :config
+  ;; higlight infix arguments that do not have equivalent cli args
+  (gsetq transient-highlight-mismatched-keys t
+         ;; e.g. will now show since and until on log transient
+         transient-default-level 7
+         ;; TODO issue with it failing because \.\.\. in history
+         transient-save-history nil)
+  (general-def transient-map
+    "<escape>" #'transient-quit-one
+    "q" #'transient-quit-one))
+#+end_src
+
+*** Forge
+#+begin_src emacs-lisp
+(use-package forge
+  :after magit
+  :demand t
+  :config
+  (general-def 'normal magit-mode-map
+    "'" #'forge-dispatch))
+#+end_src
+
+** TODO Git Commit Insert Issue
+Currently broken for github.
+#+begin_src emacs-lisp
+(use-package git-commit-insert-issue
+  :ghook 'git-commit-mode-hook)
+#+end_src
+
+** Git Time Machine
+#+begin_src emacs-lisp
+(use-package git-timemachine
+  :general (general-t "gt" #'git-timemachine)
+  :config
+  (general-def 'normal git-timemachine-mode-map
+    "h" #'git-timemachine-show-previous-revision
+    "i" #'git-timemachine-show-next-revision
+    "a" #'git-timemachine-kill-abbreviated-revision
+    "b" #'git-timemachine-blame
+    "c" #'git-timemachine-show-commit
+    "q" #'git-timemachine-quit))
+#+end_src
+
+** Vdiff
+*** Setup
+TODO
+- should be able to handle visual line mode like vimdiff can (just more blank lines on one side); minor
+- do something like this: https://oremacs.com/2017/03/18/dired-ediff/
+- hydra
+
+#+begin_src emacs-lisp
+(defvar noct:no-truncate-lines-p nil)
+(defvar noct:vdiff-disabled-zoom nil)
+(defvar noct:vdiff-disabled-visual-lines nil)
+(defvar noct:vdiff-enabled-truncation nil)
+
+(defun noct:vdiff-setup ()
+  "Alter modes/settings for proper hunk alignment with `vdiff-mode'.
+Restore previous settings after disabling `vdiff-mode'."
+  (cond ((bound-and-true-p vdiff-mode)
+         (when (bound-and-true-p zoom-mode)
+           (setq noct:vdiff-disabled-zoom t)
+           (zoom-mode -1))
+         (when visual-line-mode
+           (setq noct:vdiff-disabled-visual-lines t)
+           (visual-line-mode -1))
+         (when (not truncate-lines)
+           (setq noct:vdiff-enabled-truncation t)
+           (toggle-truncate-lines +1)))
+        (t
+         (when noct:vdiff-disabled-zoom
+           (setq noct:vdiff-disabled-zoom nil)
+           (zoom-mode))
+         (when noct:vdiff-disabled-visual-lines
+           (setq noct:vdiff-disabled-visual-lines nil)
+           (visual-line-mode))
+         (when noct:vdiff-enabled-truncation
+           (setq noct:vdiff-enabled-truncation nil)
+           (toggle-truncate-lines -1)))))
+
+(declare-function vdiff-merge-conflict "vdiff")
+(defun noct:vdiff-resolve-conflicts ()
+  "Run `vdiff-merge-conflict' on the current file."
+  (interactive)
+  (vdiff-merge-conflict buffer-file-name))
+
+(use-package vdiff
+  :general
+  ;; resolve [m]erge conflicts
+  (general-t "gm" #'noct:vdiff-resolve-conflicts)
+  :gfhook #'noct:vdiff-setup
+  :config
+  ;; automatically highlight word differences
+  (gsetq vdiff-auto-refine t)
+
+  ;; bind dp and do
+  ;; ~/src/forks/evil-collection/evil-collection-vdiff.el
+  (evil-collection-init 'evil-collection-vdiff)
+
+  (general-def 'visual (vdiff-mode vdiff-32ay-mode)
+    :definer 'minor-mode
+    "p" #'vdiff-send-changes
+    "o" #'vdiff-receive-changes)
+
+  (general-def 'normal (vdiff-mode vdiff-3way-mode)
+    :definer 'minor-mode
+    "<tab>" #'vdiff-toggle-fold
+    "mn" #'vdiff-next-hunk
+    "me" #'vdiff-previous-hunk
+    "mw" #'vdiff-toggle-whitespace
+    "RET" #'vdiff-quit
+    "gr" #'vdiff-refresh
+    "q" #'vdiff-quit)
+
+  ;; TODO would be preferable to have a setting for this
+  ;; for example, stay on working directory buffer when running
+  ;; `vdiff-magit-stage'
+  (defun noct:vdiff-switch-to-b (&rest args)
+    "Select the window containing buffer b.
+Meant to be called after `vdiff-buffers' with its args."
+    (select-window (get-buffer-window (cadr args))))
+
+  (general-add-advice 'vdiff-buffers :after #'noct:vdiff-switch-to-b))
+#+end_src
+
+*** Magit Vdiff
+#+begin_src emacs-lisp
+(declare-function vdiff-magit-stage "vdiff-magit")
+(defun noct:vdiff-stage ()
+  "Run `vdiff-magit-stage' on the current file."
+  (interactive)
+  (vdiff-magit-stage buffer-file-name))
+
+(use-package vdiff-magit
+  :general
+  (magit-mode-map
+   "e" #'vdiff-magit-dwim
+   "E" #'vdiff-magit)
+  (general-t
+    "gd" #'noct:vdiff-stage)
+  :config
+  (gsetq vdiff-magit-stage-is-2way t)
+
+  (transient-replace-suffix 'magit-dispatch "e"
+    '("e" "Vdiff (dwim)" vdiff-magit-dwim))
+  (transient-replace-suffix 'magit-dispatch "E"
+    '("E" "Vdiff transient" vdiff-magit)))
+#+end_src
+
+** Magit Todos
+#+begin_src emacs-lisp
+(use-package magit-todos
+  :after magit
+  :demand t
+  :config (magit-todos-mode))
+#+end_src
+
+* Writing/Prose/Input
+There is also artbollocks, which highlight certain weasel words like "very" and can give a readability score, but it's not nearly as sophisticated as other software like languagetool. I'm currently using vale over write-good and proselint, but I haven't tried anything extensively. I need to try proselint more (flycheck has integration with by default). Some of the warnings/errors these packages give can be annoying.
+
+** Langtool
+Quite slow in larger buffers and not integrated with flycheck. Languagetool itself is a pretty impressive piece of software though with ~30k commits currently.
+#+begin_src emacs-lisp
+;; grammar checking
+(use-package langtool
+  :config
+  (gsetq langtool-default-language "en-US"
+         langtool-java-classpath
+         "/usr/share/languagetool:/usr/share/java/languagetool/*"))
+#+end_src
+
+** Typo
+For typographical editing (not fixing typos).
+#+begin_src emacs-lisp
+(use-package typo
+  :general (noct:toggle-map "\"" #'typo-mode))
+#+end_src
+
+** Vale
+[[https://github.com/errata-ai/vale][Value]] supports proselint and write-good styles with configuration.
+#+begin_src emacs-lisp
+(use-package flycheck-vale
+  :after flycheck
+  :demand t
+  :config (flycheck-vale-setup))
+#+end_src
+
+** Fcitx
+#+begin_src emacs-lisp
+(use-package fcitx
+  :defer 5
+  :config
+  (fcitx-aggressive-setup))
+#+end_src
+
+** TODO Flyspell
+*** Setup
+#+begin_src emacs-lisp
+(use-package flyspell
+  ;; TODO need to disable for large files and debug errors
+  :disabled t
+  :ghook
+  ('text-mode-hook #'turn-on-flyspell)
+  ;; will check just comments and strings
+  ('prog-mode-hook #'flyspell-prog-mode)
+  :diminish ""
+  :config
+  ;; TODO try enchant
+  ;; http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
+  ;; TODO not using gsetq because `ispell-program-name' has a :set function that
+  ;; errors; `ispell-find-hunspell-dictionaries' is not working correctly
+  (setq ispell-program-name "hunspell"
+        ispell-local-dictionary "en_US"
+        ispell-local-dictionary-alist
+        '(("en_US"
+           "[[:alpha:]]"
+           "[^[:alpha:]]"
+           "[']"
+           nil
+           ("-d" "en_US")
+           nil
+           utf-8)))
+
+  ;; (gsetq ispell-program-name "aspell"
+  ;;        ispell-extra-args '("--sug-mode=ultra" "--lang=en_US"))
+
+  (general-def noct:toggle-map "s" #'flyspell-mode)
+
+  ;; https://stackoverflow.com/questions/22107182/in-emacs-flyspell-mode-how-to-add-new-word-to-dictionary
+  ;; slightly altered to accept a position
+  (defun anon:flyspell-save-word (&optional pt)
+    (interactive)
+    (setq pt (or pt (point)))
+    (save-excursion
+      (goto-char pt)
+      (let ((word (flyspell-get-word)))
+        (when (consp word)
+          (flyspell-do-correct 'save nil (car word) pt
+                               (cadr word) (caddr word) pt)))))
+
+  (general-def 'normal
+    "z=" nil
+    ;; Note: just use ace-flyspell unless already on word
+    "zg" #'anon:flyspell-save-word))
+
+#+end_src
+
+*** Flyspell Lazy
+This makes things less convenient (some cases where errors that aren't detected), but flyspell is usually the issue when I'm having input lag and profile. It would be awesome if flycheck got spellchecking support ([[https://github.com/flycheck/flycheck/issues/382][relevant issue]]) because flyspell is awful in comparison.
+#+begin_src emacs-lisp
+(use-package flyspell-lazy
+  :after flyspell
+  :init (flyspell-lazy-mode 1))
+#+end_src
+
+*** Flyspell Correct
+#+begin_src emacs-lisp
+(use-package flyspell-correct
+  :config
+  (gsetq flyspell-correct-interface #'flyspell-correct-ivy))
+
+(use-package flyspell-correct-ivy)
+#+end_src
+
+*** Ace Flyspell
+#+begin_src emacs-lisp
+(use-package ace-flyspell
+  :general (general-r "s" #'noct:flyspell-dwim)
+  :config
+  (gsetq ace-flyspell-handler #'flyspell-correct-at-point)
+
+  (defun noct:flyspell-dwim (arg)
+    "Correct or save a word.
+If there is a mispelled word at point, correct it. With a prefix ARG, save the
+word in the dictionary. Otherise, select a mispelled word using avy. Save when
+pressing \".\" before selecting the word. Otherwise, correct it."
+    (interactive "P")
+    (let ((avy-dispatch-alist '((?\. . anon:flyspell-save-word))))
+      (if (or (and (eq flyspell-auto-correct-pos (point))
+                   (consp flyspell-auto-correct-region))
+              (not (flyspell-word)))
+          (if arg
+              (anon:flyspell-save-word)
+            (funcall ace-flyspell-handler))
+        ;; doesn't have an autolaod
+        (ace-flyspell-correct-word)))))
+#+end_src
+
+* Other Major Mode Configuration
+** Alda
+#+begin_src emacs-lisp
+(use-package alda-mode
+  :config
+  (general-m alda-mode-map
+    "b" #'alda-play-buffer))
+#+end_src
+
+** Apropos
+#+begin_src emacs-lisp
+(use-package apropos
+  :straight nil
+  :init
+  (noct:handle-popup apropos-mode)
+  :config
+  (general-def apropos-mode-map "q" #'quit-window))
+#+end_src
+
+** TODO AUCTeX
+# https://www.emacswiki.org/emacs/AUCTeX
+# https://www.gnu.org/software/auctex/manual/auctex/Quick-Start.html
+# https://tex.stackexchange.com/questions/20843/useful-shortcuts-or-key-bindings-or-predefined-commands-for-emacsauctex
+# http://wiki.contextgarden.net/What_is_ConTeXt
+# http://pmrb.free.fr/contextref.pdf
+
+** Conf Mode
+#+begin_src emacs-lisp
+(defun noct:conf-unix-setup ()
+  (setq-local indent-tabs-mode t))
+
+(use-package conf-mode
+  :straight nil
+  :mode ("rc\\'" . conf-unix-mode)
+  :gfhook
+  ('conf-unix-mode #'noct:conf-unix-setup)
+  ('(conf-unix-mode-hook conf-xdefaults-mode-hook) #'outline-minor-mode))
+#+end_src
+
+** Comint
+#+begin_src emacs-lisp
+(use-package comint
+  :straight nil
+  :config
+  (general-def 'insert comint-mode-map
+    ;; history
+    "<up>" #'comint-previous-input
+    "<down>" #'comint-next-input))
+#+end_src
+
+** Compilation mode
+#+begin_src emacs-lisp
+(use-package compile
+  :straight nil
+  :config
+  ;; http://stackoverflow.com/a/20788581/2744245
+  (defun my-colorize-compilation-buffer ()
+    (require 'ansi-color)
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+
+  (general-add-hook 'compilation-filter-hook #'my-colorize-compilation-buffer))
+#+end_src
+
+** Debugger
+#+begin_src emacs-lisp
+(general-with-package 'debug
+  (general-def 'normal debugger-mode-map
+    "q" #'quit-window)
+
+  (general-add-hook 'debugger-mode-hook #'evil-normalize-keymaps))
+#+end_src
+
+** Helpful
+#+begin_src emacs-lisp
+(use-package helpful
+  :general
+  (general-def help-map
+    "h" #'helpful-at-point
+    "RET" #'helpful-visit-reference)
+  :init
+  ;; using this instead of binding them directly allows taking an alternate action
+  ;; without also opening the helpful buffer
+  (gsetq counsel-describe-function-function #'helpful-callable
+         counsel-describe-variable-function #'helpful-variable)
+  :config
+  (general-def 'normal helpful-mode
+    :definer 'minor-mode
+    "q" #'quit-window)
+
+  (noct:handle-popup helpful-mode))
+#+end_src
+
+** Info mode
+#+begin_src emacs-lisp
+(use-package info
+  :config
+  (general-pushnew (list "/home/noctuid/.emacs.d/info/")
+                   Info-additional-directory-list)
+
+  (general-def 'normal Info-mode-map
+    "ESC" #'quit-window))
+#+end_src
+
+** Lilypond
+#+begin_src emacs-lisp
+(use-package lilypond-mode
+  ;; emacs mode comes with lilypond
+  :straight nil
+  :config
+  (defun noct:lilypond-generate-midi ()
+    "Produce a MIDI for the current lilypond file."
+    (interactive)
+    (async-shell-command (concat "lilypond " (shell-quote-argument buffer-file-name))))
+
+  (general-m LilyPond-mode-map
+    "c" #'noct:lilypond-generate-midi))
+#+end_src
+
+** Markdown
+#+begin_src emacs-lisp
+(use-package vmd-mode)
+
+(use-package markdown-mode
+  :config
+  (general-m markdown-mode-map
+    ;; preview
+    "p" #'vmd-mode))
+#+end_src
+
+** Multiple Major Modes/Polymode
+#+begin_src emacs-lisp
+(use-package poly-org
+  ;; TODO shouldn't be enabled by default
+  :disabled t
+  :init (general-def noct:toggle-map "o" #'poly-org-mode)
+  :config
+  (general-def 'normal poly-org-mode-map "SPC u" #'worf-goto)
+
+  (with-eval-after-load 'lispy
+    (mapc (lambda (x)
+            (advice-add x :around #'pm-execute-narrowed-to-span))
+          (append (apropos-internal "^lispy-" #'commandp)
+                  (apropos-internal "^special-lispy-" #'commandp))))
+
+  (general-add-advice '(outline-toggle-children
+                        counsel-outline
+                        counsel-semantic-or-imenu
+                        worf-goto)
+                      :around #'polymode-with-current-base-buffer))
+#+end_src
+
+** Pentadactyl
+#+begin_src emacs-lisp
+(use-package dactyl-mode
+  ;; package doesn't add to `auto-mode-alist'
+  :mode "\\.pentadactylrc\\'")
+#+end_src
+
+** SaltStack
+#+begin_src emacs-lisp
+(use-package salt-mode)
+#+end_src
+
+** Special Mode
+Used for =*Warnings*= buffer, for example.
+#+begin_src emacs-lisp
+(general-def 'normal special-mode-map
+  "q" #'quit-window)
+#+end_src
+
+** Vimrc Mode
+#+begin_src emacs-lisp
+(use-package vimrc-mode)
+#+end_src
+
+** Which Key
+#+begin_src emacs-lisp
+(use-package which-key
+  :defer 5
+  :diminish ""
+  :config
+  (gsetq which-key-idle-delay 0.5
+         which-key-side-window-location 'top
+         which-key-sort-order 'which-key-key-order-alpha
+         which-key-max-display-columns 5)
+
+  (general-def noct:toggle-map "w" #'which-key-mode)
+
+  (general-s "W" #'which-key-show-top-level)
+
+  (which-key-mode)
+
+  (defun noct:mode-replacement (kb)
+    "More generic version of a which-key example."
+    (cons (car kb)
+          (let ((mode-name (cdr kb))
+                (mode (intern (cdr kb))))
+            (cond ((and (boundp mode)
+                        (symbol-value mode))
+                   (concat "[X] " mode-name))
+                  ((boundp mode)
+                   (concat "[ ] " mode-name))
+                  (t
+                   mode-name)))))
+
+  (general-pushnew (cons '(nil . "-mode\\'") #'noct:mode-replacement)
+                   which-key-replacement-alist))
+#+end_src
+
+** Woman
+#+begin_src emacs-lisp
+(use-package woman
+  :general (general-s "w" #'woman))
+#+end_src
+
+** Xmodmap
+I'm not really using xmodmap files anymore. Config taken from [[https://www.emacswiki.org/emacs/XModMapMode][here]].
+#+begin_src emacs-lisp
+(define-generic-mode 'xmodmap-mode
+  '(?!)
+  '("add" "clear" "keycode" "keysym" "remove" "pointer")
+  nil
+  '("[xX]modmap\\(rc\\)?\\'")
+  nil
+  "Simple mode for xmodmap files.")
+#+end_src
+
+** YAML mode
+#+begin_src emacs-lisp
+(use-package yaml-mode)
+#+end_src
+
+* Programming
+** General and Prog Mode
+*** Prog Mode Setup
+#+begin_src emacs-lisp
+(general-add-hook 'after-save-hook
+                  #'executable-make-buffer-file-executable-if-script-p)
+
+(defun noct:prog-mode-setup ()
+  (setq-local comment-auto-fill-only-comments t))
+
+(general-add-hook 'prog-mode-hook (list #'noct:prog-mode-setup #'auto-fill-mode))
+#+end_src
+
+*** Prog Mode Keybindings
+#+begin_src emacs-lisp
+(general-with-package 'prog-mode
+  (general-m prog-mode-map
+    "c" #'compile
+    "g" #'first-error
+    ;; "n" #'next-error
+    ;; "e" #'previous-error
+    "n" #'flycheck-next-error
+    "e" #'flycheck-previous-error
+    "E" #'flycheck-list-errors))
+#+end_src
+
+*** Makefile Executor
+#+begin_src emacs-lisp
+(use-package makefile-executor
+  :general
+  (general-m prog-mode-map
+    "m" #'makefile-executor-execute-project-target))
+#+end_src
+
+*** Semantic
+Lispy, for example, relies on semantic.
+**** Bug Workaround
+See [[https://github.com/company-mode/company-mode/issues/525][this issue]].
+#+begin_src emacs-lisp
+(general-with-package 'semantic
+  ;; updated from:
+  ;; https://github.com/company-mode/company-mode/issues/525#issuecomment-348635719
+  (defun semantic-completion-advice (adviced-f &rest r)
+    "Check if POINT it's inside a string or comment before calling semantic-*"
+    (unless (or
+             ;; in string
+             (nth 3 (syntax-ppss))
+             ;; in comment
+             (save-excursion
+               (unless (eolp)
+                 (forward-char 1))
+               (nth 4 (syntax-ppss))))
+      (apply adviced-f r)))
+
+  (general-add-advice '(semantic-analyze-completion-at-point-function
+                        semantic-analyze-notc-completion-at-point-function
+                        semantic-analyze-nolongprefix-completion-at-point-function)
+                      :around #'semantic-completion-advice))
+#+end_src
+
+*** Visual
+**** Rainbow Delimiters
+[[https://github.com/istib/rainbow-blocks][rainbow-blocks]] is a fork of rainbow-delimeters that highlights the entire block. There is also [[https://github.com/seanirby/rainbow-blocks-bg][rainbow-blocks-bg]]. I personally find these to be too much color.
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :ghook
+  noct:lisp-mode-hooks
+  'c-mode-hook
+  :config
+  (general-def noct:toggle-map "r" #'rainbow-delimiters-mode))
+#+end_src
+
+**** Highlight Parentheses
+#+begin_src emacs-lisp
+(use-package highlight-parentheses
+  :ghook 'prog-mode-hook
+  :diminish ""
+  :config
+  (gsetq hl-paren-colors '("firebrick1"))
+
+  (custom-set-faces '(hl-paren-face ((t :inherit show-paren-match)))))
+#+end_src
+
+**** Eldoc
+#+begin_src emacs-lisp
+(use-package eldoc
+  :init (global-eldoc-mode)
+  :diminish global-eldoc-mode
+  :config (gsetq eldoc-idle-delay 0.2))
+#+end_src
+
+**** Higlight Numbers
+#+begin_src emacs-lisp
+(use-package highlight-numbers
+  :ghook 'prog-mode-hook)
+#+end_src
+
+**** TODO Fixmes
+***** Fic Mode
+Doesn't work well (highlighting doesn't show up for new... goes away if go to line)
+#+begin_src emacs-lisp
+(use-package fic-mode
+  :disabled t
+  :ghook 'prog-mode-hook
+  :config
+  (gsetq fic-highlighted-words '("TODO" "FIXME" "OPTIMIZE" "HACK" "REVIEW" "BUG"))
+
+  ;; remove white background
+  (set-face-attribute 'fic-face nil :background nil)
+  (set-face-attribute 'fic-author-face nil :background nil))
+#+end_src
+***** Fixmee Mode
+Breaks syntax highlighting.
+#+begin_src emacs-lisp
+(use-package fixmee
+  :disabled t
+  :init (global-fixmee-mode))
+#+end_src
+
+***** Alternate Solution
+#+begin_src emacs-lisp
+(defun noct:font-lock-todo ()
+  (font-lock-add-keywords
+   nil
+   ;; https://github.com/bbatsov/emacs-lisp-style-guide#comment-annotations
+   '(("\\<\\(TODO\\|FIXME\\|OPTIMIZE\\|HACK\\|REVIEW\\|BUG\\)"
+      1 font-lock-warning-face prepend))))
+
+(general-add-hook 'prog-mode-hook #'noct:font-lock-todo)
+#+end_src
+
+*** Aggressive Indent
+#+begin_src emacs-lisp
+(use-package aggressive-indent
+  :init
+  (electric-indent-mode -1)
+  (global-aggressive-indent-mode)
+  :diminish ""
+  :config
+  (general-pushnew 'python-mode aggressive-indent-excluded-modes)
+  (general-pushnew 'asm-mode aggressive-indent-excluded-modes)
+  (general-pushnew 'nix-mode aggressive-indent-excluded-modes)
+
+  (general-def noct:toggle-map "a" #'aggressive-indent-mode))
+#+end_src
+
+*** Dumb Jump
+#+begin_src emacs-lisp
+(use-package dumb-jump
+  :general ('normal "gd" #'dumb-jump-go)
+  :config
+  ;; TODO first check that ivy and rg are installed
+  (gsetq dumb-jump-selector 'ivy
+         dumb-jump-prefer-searcher 'rg))
+#+end_src
+
+*** Smart Jump
+#+begin_src emacs-lisp
+(use-package smart-jump
+  :general
+  ('normal "gs" #'smart-jump-go)
+  (general-m prog-mode-map "x" #'smart-jump-references)
+  ;; TODO consider this
+  ;; (general-def prog-mode-map
+  ;;   "RET" #'smart-jump-go
+  ;;   "<S-Return>" #'smart-jump-back)
+  :config
+  (smart-jump-setup-default-registers))
+#+end_src
+
+*** Electric Operator Mode
+This is a maintained fork of =electric-spacing=.
+#+begin_src emacs-lisp
+(use-package electric-operator
+  :ghook
+  'python-mode-hook
+  'c-mode-hook)
+#+end_src
+
+*** TODO Electric Case
+*** Flycheck
+**** Setup
+#+begin_src emacs-lisp
+(use-package flycheck
+  ;; TODO why is `after-init-hook' recommended?
+  :ghook ('after-init-hook #'global-flycheck-mode)
+  :diminish ""
+  :config
+  ;; decrease delay before showing error
+  (gsetq flycheck-display-errors-delay 0.4)
+
+  (general-def noct:toggle-map "f" #'flycheck-mode)
+
+  (general-m
+    "f" #'flycheck-list-errors
+    "n" #'flycheck-next-error
+    "e" #'flycheck-previous-error)
+
+  (general-def 'normal flycheck-error-list-mode
+    "q" #'quit-window))
+#+end_src
+
+**** Flycheck Pos Tip
+#+begin_src emacs-lisp
+(use-package flycheck-pos-tip
+  :ghook 'flycheck-mode-hook)
+#+end_src
+
+**** TODO Flycheck Posframe
+TODO Way to distable line numbers; posframe doesn't go away immediately when moving beteen errors (also happens with flycheck-pos-tip-mode); tooltip is also more obvious (border around childframe probably necessary)
+#+begin_src emacs-lisp
+(use-package flycheck-posframe
+  :disabled t
+  :ghook 'flycheck-mode-hook
+  :config (flycheck-posframe-configure-pretty-defaults))
+#+end_src
+
+*** Xref
+#+begin_src emacs-lisp
+(general-with-package 'xref
+  (defun noct:xref-find-definition ()
+    "Call `xref-find-definitions' but prompt for identifier.
+Don't immediately jump to the symbol at the point."
+    (interactive)
+    (call-interactively #'xref-find-definitions))
+
+  (general-def help-map "x" #'noct:xref-find-definition))
+
+(use-package ivy-xref
+  :init
+  (gsetq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+#+end_src
+
+*** LSP
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :config
+  (gsetq lsp-prefer-flymake nil)
+
+  (general-def 'normal lsp-mode-map
+    "N" #'lsp-describe-thing-at-point
+    "RET" #'lsp-find-definition
+    ;; execute code action
+    )
+
+  (general-m lsp-mode-map
+    "i" #'lsp-goto-implementation
+    "D" #'lsp-find-declaration
+    ;; cross (x) references
+    "x" #'lsp-find-references
+    "r" #'lsp-rename
+    "=" #'lsp-format-buffer))
+
+(use-package lsp-ui)
+
+(use-package company-lsp)
+#+end_src
+
+** Lisps (General)
+*** Lispy
+TODO
+- Use c-8 and c-9 and c-ret more
+- probably split this section up
+
+#+begin_src emacs-lisp
+(use-package lispy
+  :straight (lispy
+             :type git
+             :host github
+             :repo "abo-abo/lispy"
+             :local-repo "~/src/forks/lispy"
+             :fork (:host github :repo "noctuid/lispy"))
+  :ghook
+  noct:lisp-mode-hooks
+  ;; TODO RET doesn't work first time run `eval-expression'
+  'eval-expression-minibuffer-setup-hook
+  ;; use shortcake as lighter!
+  :diminish " 🍰"
+  :config
+  ;; for insertion; some looking at checks too though
+  ;; (gsetq-default lispy-outline-header ";; ")
+  (gsetq lispy-avy-keys avy-keys
+         lispy-avy-style-paren 'at-full
+         ;; lispy-avy-style-char 'at-full
+         ;; lispy-avy-style-symbol 'at-full
+         ;; lispy-eval-display-style 'overlay
+         lispy-safe-delete t
+         lispy-safe-copy t
+         lispy-safe-paste t
+         lispy-safe-actions-no-pull-delimiters-into-comments t
+         lispy-delete-sexp-from-within t
+         lispy-parens-only-left-in-string-or-comment nil
+         ;; TODO see how performant is at larger thresholds and optimize
+         lispy-safe-threshold 5000
+         lispy-use-sly t
+         ;; allow space before asterisk for headings (e.g. ";; *")
+         lispy-outline (rx (and bol ";;" (or (and ";" (not (any "#")))
+                                             (and (0+ space) (1+ "*"))))))
+
+  (general-def noct:toggle-map "l" #'lispy-mode)
+
+  (general-def 'normal lispy-mode-map
+    "SPC y" #'lispy-goto)
+
+  (defun noct:lispy-tab (arg)
+    "`outline-toggle-children' if at a heading or `lispy-indent-adjust-parens'."
+    (interactive "p")
+    (if (looking-at lispy-outline)
+        (outline-toggle-children)
+      (lispy-indent-adjust-parens arg)))
+
+  (general-def lispy-mode-map-lispy
+    "]" nil
+    "[" nil
+    ;; "[" #'lispy-brackets-auto-wrap
+    ":" nil
+    "(" #'lispy-parens-auto-wrap
+    ;; "{" #'lispy-braces-auto-wrap
+    "TAB" #'noct:lispy-tab
+    "<backtab>" #'lispy-dedent-adjust-parens
+    "M-h" #'lispy-beginning-of-defun
+    "<C-return>" #'lispy-alt-line
+    "M-d" #'lispy-kill-at-point)
+
+  ;; override lh-knight for colemak keys
+  (defhydra lh-knight ()
+    "knight"
+    ("n" lispy-knight-down)
+    ("e" lispy-knight-up)
+    ("z" nil))
+
+  ;; TODO this needs a lot of work
+  (defun noct:lispy-delete (arg)
+    "Copy and delete current sexp.
+Passes ARG to `lispy-delete' or `lispy-delete-backward'."
+    (interactive "p")
+    (let ((regionp (region-active-p)))
+      (cond ((or (lispy-left-p)
+                 regionp)
+             (lispy-new-copy)
+             (lispy-delete arg)
+             (unless regionp
+               (lispy--indent-for-tab)
+               ;; (when (and (looking-at "[[:space:]]*$")
+               ;;            (lispy-looking-back "^[[:space:]]*"))
+               ;;   (delete-region (line-beginning-position)
+               ;;                  (1+ (line-end-position))))
+               (cond ((ignore-errors (forward-list))
+                      (backward-list)
+                      ;; (lispy-delete-backward 1)
+                      )
+                     ((ignore-errors (backward-list))
+                      (forward-list)
+                      ;; (lispy-delete 1)
+                      (backward-list)
+                      )
+                     (t))))
+            ((lispy-right-p)
+             (lispy-new-copy)
+             (lispy-delete-backward arg)))))
+
+  (general-def lispy-mode-map
+    :definer 'lispy
+    "n" #'lispy-down                    ; lose lispy-new-copy -> y
+    "e" #'lispy-up                      ; lose lispy-eval -> l
+    "i" #'lispy-right                   ; lose lispy-tab -> t
+    ;; N and E instead of s and w
+    "N" #'lispy-move-down               ; lose lispy-narrow -> w
+    "E" #'lispy-move-up                 ; lose lispy-eval-and-insert -> L
+    "l" #'lispy-eval                    ; (freed by i)
+    "L" #'lispy-eval-and-insert         ; (unbound)
+    "y" #'lispy-new-copy                ; lose lispy-occur -> /
+    "/" #'lispy-occur                   ; lose lispy-splice -> x
+    "w" #'lispy-narrow                  ; lose lispy-move-up -> f
+    "x" #'lispy-splice                  ; lose lispy-x -> c
+    "c" #'lispy-x                       ; lose lispy-clone -> q
+    "f" #'lispy-ace-paren               ; lose lispy-flow -> k
+    "F" #'lispy-ace-char                ; lose lispy-follow
+    "q" #'lispy-clone                   ; (freed by f)
+    "t" #'lispy-tab                     ; lose lispy-teleport -> j
+    "j" #'lispy-teleport                ; (freed by n)
+    "d" #'noct:lispy-delete             ; lose lispy-different -> o
+    ;; like in visual state
+    "o" #'lispy-different               ; lose lispy-other-mode (don't use)
+    "J" #'lispy-goto-mode               ; from lispy-other-mode (freed by N)
+    "k" #'lispy-flow                    ; (freed by e)
+    ;; swap p and P
+    "p" #'lispy-paste
+    "P" #'lispy-eval-other-window
+    ;; swap m and v
+    "v" #'lispy-mark-list
+    "m" #'lispy-view
+    ;; swap H and A; makes more sense given h and a
+    "H" #'lispy-beginning-of-defun
+    "A" #'lispy-ace-symbol-replace
+    ;;  make slurp/barf behavior directional (as opposed to grow/shrink)
+    ">" #'lispy-slurp-or-barf-right
+    "<" #'lispy-slurp-or-barf-left
+    ;; useful for writing tests
+    "s" #'lispy-stringify-oneline       ; (freed by N)
+    "S" #'lispy-string-oneline)
+
+  (defun noct:paren-advice (&rest _)
+    (unless (lispy--in-string-or-comment-p)
+      (let ((map (make-sparse-keymap)))
+        ;; easy way to undo unwanted wrap on reaction
+        ;; instead of planning with a prefix arg
+        (define-key map ")"
+          (lambda ()
+            (interactive)
+            (call-interactively #'lispy-barf-to-point)
+            (backward-char)))
+        (set-transient-map map))))
+
+  (general-add-advice 'lispy-parens-auto-wrap :after #'noct:paren-advice))
+#+end_src
+
+*** Lispyville
+#+begin_src emacs-lisp
+(use-package lispyville
+  :straight (lispyville
+             :type git
+             :host github
+             :repo "noctuid/lispyville"
+             :local-repo "~/src/emacs/lispyville/")
+  :ghook 'lispy-mode-hook
+  ;; :diminish " 🍙"
+  :config
+  (gsetq lispyville-motions-put-into-special t)
+
+  (general-def noct:toggle-map "y" #'lispyville-mode)
+
+  (lispyville-set-key-theme
+   '(operators c-w prettify slurp/barf-cp insert mark-toggle))
+
+  (general-def lispy-mode-map
+    :definer 'lispy
+    "v" #'lispyville-toggle-mark-type)
+
+  (general-def 'normal lispyville-mode-map
+    "H" #'lispyville-beginning-of-defun
+    "(" #'lispyville-left
+    ")" #'lispyville-right)
+
+  ;; unfortunately can't use functions with :diminish or :delight
+  ;; (delight 'lispyville-mode (lispyville-mode-line-string " 🍙" " 🍙") t)
+  (diminish 'lispyville-mode (lispyville-mode-line-string " 🍙" " 🍙")))
+#+end_src
+
+*** Highlight Quoted
+#+begin_src emacs-lisp
+(use-package highlight-quoted
+  :ghook noct:lisp-mode-hooks)
+#+end_src
+
+*** Highlight Stages (Macros)
+For quasi-quoted expressions.
+#+begin_src emacs-lisp
+(use-package highlight-stages
+  :ghook noct:lisp-mode-hooks
+  :diminish ""
+  :config
+  (gsetq highlight-stages-highlight-real-quote nil))
+#+end_src
+
+** C
+#+begin_src emacs-lisp
+(use-package cc-mode
+  :config
+  (gsetq-default c-basic-offset 4)
+  (setf (alist-get 'other c-default-style) "linux")
+
+  (general-def 'insert c-mode-map
+    "RET" #'c-indent-new-comment-line))
+#+end_src
+
+** cc-mode
+** Clojure
+TODO look at these:
+- https://github.com/candid82/flycheck-joker
+- https://github.com/clojure-emacs/squiggly-clojure
+- https://github.com/sanel/monroe
+- https://github.com/seanirby/cider-buddy
+- etc.
+
+*** Setup
+#+begin_src emacs-lisp
+(use-package clojure-mode)
+#+end_src
+
+*** Cider
+TODO read docs
+- https://cider.readthedocs.io/en/latest/
+- https://www.youtube.com/watch?v=aYA4AAjLfT0
+#+begin_src emacs-lisp
+(use-package cider
+  :ghook 'clojure-mode-hook
+  :config
+  (general-m clojure-mode-map
+    "j" #'cider-jack-in
+    "l"  #'cider-eval-last-sexp
+    "n" #'cider-repl-set-ns
+    "b" #'cider-load-buffer
+    "d" #'cider-eval-defun-at-point)
+
+  (general-def 'normal clojure-mode-map
+    "RET" #'cider-find-var
+    "N" #'cider-doc)
+
+  ;; repl maps
+  (general-def 'insert cider-repl-mode-map
+    "<up>" #'cider-repl-backward-input
+    "<down>" #'cider-repl-forward-input))
+#+end_src
+
+** Emacs Lisp
+*** Setup
+#+begin_src emacs-lisp
+(use-package elisp-mode
+  :straight nil
+  :config
+  ;; increase docstring fill column
+  (gsetq emacs-lisp-docstring-fill-column 80)
+
+  (general-defs '(normal visual)
+    ":" #'eval-expression)
+
+  (general-def '(insert normal)
+    "C-;" #'eval-expression)
+
+  (defun noctuid:byte-compile ()
+    "Byte compile the current file."
+    (interactive)
+    (byte-compile-file (buffer-file-name)))
+
+  (general-m emacs-lisp-mode-map
+    "b" #'eval-buffer
+    "d" #'eval-defun
+    "c" #'noctuid:byte-compile)
+
+  (general-def 'normal emacs-lisp-mode-map
+    "RET" #'xref-find-definitions
+    "<S-Return>" #'pop-tag-mark
+    "N" #'helpful-at-point))
+#+end_src
+
+*** TODO Indentation Setup
+Builtin indentation should be better...
+#+begin_src emacs-lisp
+;; https://emacs.stackexchange.com/questions/10230/how-to-indent-keywords-aligned
+;; https://github.com/Fuco1/.emacs.d/blob/af82072196564fa57726bdbabf97f1d35c43b7f7/site-lisp/redef.el#L20-L94
+(defun fuco1/lisp-indent-function (indent-point state)
+  "This function is the normal value of the variable `lisp-indent-function'.
+The function `calculate-lisp-indent' calls this to determine
+if the arguments of a Lisp function call should be indented specially.
+
+INDENT-POINT is the position at which the line being indented begins.
+Point is located at the point to indent under (for default indentation);
+STATE is the `parse-partial-sexp' state for that position.
+
+If the current line is in a call to a Lisp function that has a non-nil
+property `lisp-indent-function' (or the deprecated `lisp-indent-hook'),
+it specifies how to indent.  The property value can be:
+
+- `defun', meaning indent `defun'-style
+  \(this is also the case if there is no property and the function
+  has a name that begins with \"def\", and three or more arguments);
+
+- an integer N, meaning indent the first N arguments specially
+  (like ordinary function arguments), and then indent any further
+  arguments like a body;
+
+- a function to call that returns the indentation (or nil).
+  `lisp-indent-function' calls this function with the same two arguments
+  that it itself received.
+
+This function returns either the indentation to use, or nil if the
+Lisp function does not specify a special indentation."
+  (let ((normal-indent (current-column))
+        (orig-point (point)))
+    (goto-char (1+ (elt state 1)))
+    (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
+    (cond
+     ;; car of form doesn't seem to be a symbol, or is a keyword
+     ((and (elt state 2)
+           (or (not (looking-at "\\sw\\|\\s_"))
+               (looking-at ":")))
+      (if (not (> (save-excursion (forward-line 1) (point))
+                  calculate-lisp-indent-last-sexp))
+          (progn (goto-char calculate-lisp-indent-last-sexp)
+                 (beginning-of-line)
+                 (parse-partial-sexp (point)
+                                     calculate-lisp-indent-last-sexp 0 t)))
+      ;; Indent under the list or under the first sexp on the same
+      ;; line as calculate-lisp-indent-last-sexp.  Note that first
+      ;; thing on that line has to be complete sexp since we are
+      ;; inside the innermost containing sexp.
+      (backward-prefix-chars)
+      (current-column))
+     ((and (save-excursion
+             (goto-char indent-point)
+             (skip-syntax-forward " ")
+             (not (looking-at ":")))
+           (save-excursion
+             (goto-char orig-point)
+             (looking-at ":")))
+      (save-excursion
+        (goto-char (+ 2 (elt state 1)))
+        (current-column)))
+     (t
+      (let ((function (buffer-substring (point)
+                                        (progn (forward-sexp 1) (point))))
+            method)
+        (setq method (or (function-get (intern-soft function)
+                                       'lisp-indent-function)
+                         (get (intern-soft function) 'lisp-indent-hook)))
+        (cond ((or (eq method 'defun)
+                   (and (null method)
+                        (> (length function) 3)
+                        (string-match "\\`def" function)))
+               (lisp-indent-defform state indent-point))
+              ((integerp method)
+               (lisp-indent-specform method state
+                                     indent-point normal-indent))
+              (method
+               (funcall method indent-point state))))))))
+
+;; https://github.com/abo-abo/oremacs/blob/github/modes/ora-elisp-style-guide.el
+(require 'cl-indent)
+
+(defun noct:lispy-indent-setup ()
+  "Make indentation settings compliant with lispy's."
+  (interactive)
+  (setq-local lisp-indent-function #'common-lisp-indent-function)
+  (put 'if 'common-lisp-indent-function 2)
+  (put 'defface 'common-lisp-indent-function 1)
+  (put 'define-minor-mode 'common-lisp-indent-function 1)
+  (put 'define-derived-mode 'common-lisp-indent-function 3)
+  (put 'cl-flet 'common-lisp-indent-function
+       (get 'flet 'common-lisp-indent-function))
+  (put 'cl-labels 'common-lisp-indent-function
+       (get 'labels 'common-lisp-indent-function))
+  ;; additional
+  (put 'cl-macrolet 'common-lisp-indent-function (get 'flet 'common-lisp-indent-function))
+  (aggressive-indent-mode -1))
+
+(defun noct:elisp-indent-setup ()
+  (when (eq major-mode 'emacs-lisp-mode)
+    (cond ((when (buffer-file-name)
+             (string-match
+              ".*lispy/"
+              (file-name-directory (buffer-file-name))))
+           (noct:lispy-indent-setup))
+
+          (t
+           (setq-local lisp-indent-function #'fuco1/lisp-indent-function)
+           (put 'cl-macrolet 'lisp-indent-function
+                (get 'flet 'common-lisp-indent-function))
+           (put 'cl-macrolet 'fuco1/lisp-indent-function
+                (get 'flet 'common-lisp-indent-function))))))
+
+(general-add-hook '(find-file-hook emacs-lisp-mode-hook) #'noct:elisp-indent-setup)
+#+end_src
+
+*** Cl-lib Highlight
+Highlight =cl= functions that aren't prefixed with =cl-=.
+#+begin_src emacs-lisp
+(use-package cl-lib-highlight
+  ;; elisp-mode is loaded before emacs-lisp-buffer
+  ;; :after elisp-mode
+  :ghook ('emacs-lisp-mode-hook #'cl-lib-highlight-initialize nil nil t)
+  :config (cl-lib-highlight-warn-cl-initialize))
+#+end_src
+
+*** Highlight Defined
+Highlight defined elisp symbols.
+#+begin_src emacs-lisp
+(use-package highlight-defined
+  :ghook 'emacs-lisp-mode-hook)
+#+end_src
+
+*** Macrostep
+#+begin_src emacs-lisp
+(use-package macrostep
+  :general
+  (lispy-mode-map
+   :definer 'lispy
+   ;; don't really use `lispy-view' (I've swapped v and m)
+   "m" #'macrostep-expand)
+  :diminish " 🍔"
+  :config
+  ;; ~/src/forks/evil-collection/evil-collection-macrostep.el
+  (evil-collection-init 'macrostep))
+#+end_src
+
+*** Buttercup
+#+begin_src emacs-lisp
+(use-package buttercup)
+#+end_src
+
+*** Cask
+#+begin_src emacs-lisp
+(use-package cask-mode)
+#+end_src
+
+*** IELM
+#+begin_src emacs-lisp
+(general-with-package 'ielm
+  (general-def 'normal ielm-map
+    "mb" #'eval-buffer
+    "md" #'eval-defun
+    "RET" #'xref-find-definitions
+    "<S-Return>" #'pop-tag-mark
+    "N" #'helpful-at-point)
+
+  (with-eval-after-load 'lispy
+    (defun noct:ielm-newline-or-return ()
+      "An alternative to setting `ielm-dynamic-return' to nil.
+This will only run `ielm-return' when at the end of the buffer."
+      (interactive)
+      (if (looking-at "\\'")
+          (ielm-return)
+        (lispy-newline-and-indent)))
+
+    (general-def 'insert ielm-map
+      "RET" #'noct:ielm-newline-or-return)))
+#+end_src
+
+*** Flycheck Package
+#+begin_src emacs-lisp
+(use-package flycheck-package
+  :after flycheck
+  :demand t
+  :config
+  (flycheck-package-setup)
+
+  (defun noct:disable-flycheck-emacs-lisp-checkdoc ()
+    "Disable the emacs lisp package and checkdoc checkers."
+    (when (featurep 'flycheck)
+      (cl-pushnew 'emacs-lisp-checkdoc flycheck-disabled-checkers)))
+  (general-add-hook 'org-src-mode-hook #'noct:disable-flycheck-emacs-lisp-checkdoc)
+
+  (defun noct:maybe-disable-flycheck-emacs-lisp-checkdoc ()
+    (when (and buffer-file-name
+               (string= (file-name-nondirectory buffer-file-name) "init.el"))
+      (noct:disable-flycheck-emacs-lisp-checkdoc)))
+  (general-add-hook 'find-file-hook #'noct:maybe-disable-flycheck-emacs-lisp-checkdoc))
+#+end_src
+
+** Groovy/Gradle
+#+begin_src emacs-lisp
+(use-package groovy-mode)
+#+end_src
+
+** Haskell
+TODO
+- Try [[http://chrisdone.github.io/intero/][Intero]] and [[https://github.com/jyp/dante][Dantle]] and HIE/LSP; [[http://haroldcarr.com/posts/2017-10-24-emacs-haskell-dev-env.html][Relevant article]]; https://www.reddit.com/r/haskell/comments/9bxbwp/which_ide_are_you_using_for_hakell/
+
+*** Setup
+#+begin_src emacs-lisp
+;; https://github.com/haskell/haskell-mode/wiki
+(use-package haskell-mode
+  :config
+  (general-m haskell-mode-map
+    "N" #'haskell-navigate-imports
+    "i" #'haskell-mode-format-imports
+    "c" #'haskell-compile
+    ;; #'haskell-debug
+    "b" #'haskell-process-load-file
+    "f" #'haskell-mode-stylish-buffer))
+#+end_src
+
+*** GHC
+#+begin_src emacs-lisp
+(use-package ghc
+  :ghook ('haskell-mode-hook #'ghc-init)
+  :config
+  (general-m haskell-mode-map
+    "n" #'ghc-goto-next-error
+    "e" #'ghc-goto-prev-error
+    "?" #'ghc-display-errors))
+#+end_src
+
+*** Company GHC
+#+begin_src emacs-lisp
+(use-package company-ghc
+  :after company
+  :init
+  (general-pushnew '(company-ghc :with company-yanippet) company-backends))
+#+end_src
+
+*** Flycheck Haskell
+#+begin_src emacs-lisp
+(use-package flycheck-haskell
+  :ghook ('flycheck-mode-hook #'flycheck-haskell-setup))
+#+end_src
+
+*** Hindent
+[[https://github.com/chrisdone/hindent][Hindent - Haskell pretty print er]]. There are an unholy number of pretty printers (also stylish-haskell and brittany); [[https://github.com/quchen/prettyprinter][prettyprinter]] seems to be the most recommended at the moment.
+#+begin_src emacs-lisp
+(use-package hindent
+  :ghook 'haskell-mode-hook
+  :config
+  (general-m haskell-mode-map
+    "q" #'hindent-reformat-decl-or-fill))
+#+end_src
+
+*** TODO HaRe
+*** TODO SHM
+*** TODO Hasktags
+** Nix
+#+begin_src emacs-lisp
+(use-package nix-mode)
+#+end_src
+
+** PKGBUILD mode
+#+begin_src emacs-lisp
+(use-package pkgbuild-mode)
+#+end_src
+
+** Python
+TODO:
+- look at https://github.com/python-rope/ropemacs
+- look at https://github.com/millejoh/emacs-ipython-notebook
+- look at https://github.com/anachronic/importmagic.el
+- dap-mode
+- look at poetry vs. pip-tools vs. pipenv
+https://frostming.com/2019/01-04/pipenv-poetry
+
+*** Setup/LSP
+#+begin_src emacs-lisp
+(use-package python
+  :init
+  (with-eval-after-load 'lsp-clients
+    (setq lsp-clients-python-settings
+          (plist-put lsp-clients-python-settings
+                     :plugins.pydocstyle.enabled t)))
+  :gfhook #'lsp)
+#+end_src
+
+*** LPY
+#+begin_src emacs-lisp
+(use-package function-args)
+
+(use-package lpy
+  :straight (lpy :type git :host github :repo "abo-abo/lpy")
+  :ghook 'python-mode-hook
+  :config
+  (general-def lpy-mode-map
+    :definer 'lpy
+    ;; basic Colemak navigation
+    "n" #'lpy-down                      ; lose lispy-new-copy -> y
+    "e" #'lpy-up                        ; lose lispy-eval -> l
+    "i" #'lpy-right                     ; lose lpy-tab -> t
+    ;; s and w don't exist
+    "l" #'lispy-eval                    ; (freed by i)
+    "L" #'lispy-eval-and-insert         ; (unbound)
+    "y" #'lispy-new-copy                ; lose lpy-occur -> /
+    "/" #'lpy-occur                     ; lose lpy-contents
+    "w" #'lispy-narrow                  ; (unbound)
+    ;; "W" #'lispy-widen
+    ;; lispy-x
+    "t" #'lpy-tab       ; lose lpy-teleport -> j
+    "j" #'lpy-teleport  ; (freed by n)
+    ;; d
+    "o" #'lispy-different ; lose lpy-open (weird currently; requires active region)
+    "k" #'lispy-flow      ; (freed by e)
+    ;; swap m and v
+    "v" #'lpy-mark
+    "m" #'lpy-view
+    ;; unbound
+    "H" #'lispy-beginning-of-defun))
+#+end_src
+
+*** REPL
+#+begin_src emacs-lisp
+(general-with-package 'python
+  ;; use ipython
+  (gsetq python-shell-interpreter "ipython"
+         python-shell-interpreter-args "-i")
+  ;; doesn't work
+  ;; (gsetq python-shell-interpreter "ptpython"
+  ;;        python-shell-interpreter-args "")
+
+  (general-m python-mode-map
+    "b" #'python-shell-send-buffer
+    "d" #'python-shell-send-defun
+    ;; "l" 'python-shell-send-line
+    ;; "m" #'python-shell-switch-to-shell
+    ";" #'python-shell-switch-to-shell)
+
+  (general-def 'visual python-mode-map
+    ;; eva[l]
+    "l" #'python-shell-send-region)
+
+  ;; automatically start shell for commands that use it
+  (defun noct:python-shell-get-process (&rest _)
+    "Return the python process, starting it if necessary."
+    (or (python-shell-get-process)
+        (progn (run-python)
+               (python-shell-get-process))))
+
+  (general-add-advice 'python-shell-get-process-or-error
+                      :override #'noct:python-shell-get-process))
+#+end_src
+
+*** Pydoc
+Better than default LSP equivalent.
+#+begin_src emacs-lisp
+(use-package pydoc
+  :general
+  (general-m python-mode-map
+    "h" #'pydoc-at-point
+    "/" #'pydoc))
+#+end_src
+
+*** TODO Pylookup
+Currently requires running =make= for setup and is not on MELPA.
+#+begin_src emacs-lisp
+(use-package pylookup
+  :straight (pylookup :type git :host github :repo "tsgates/pylookup")
+  :general
+  (general-m python-mode-map
+    "H" #'pylookup-lookup-at-pount
+    "?" #'pylookup-lookup))
+#+end_src
+
+*** Linting
+#+begin_src emacs-lisp
+(with-eval-after-load 'flycheck
+  ;; also use pylint
+  (flycheck-add-next-checker 'python-flake8 'python-pylint))
+#+end_src
+
+*** Docstrings
+#+begin_src emacs-lisp
+;; adds syntax highlighting for reST (and epydoc) docstrings and makes filling
+;; work as expected.(for all multi-line strings)
+(use-package python-docstring
+  :ghook 'python-mode-hook
+  :diminish "")
+
+;; allows inserting reST docstring skeleton
+(use-package sphinx-doc
+  :ghook 'python-mode-hook
+  :diminish ""
+  :config
+  (general-m python-mode-map
+    "s" #'sphinx-doc))
+#+end_src
+
+*** Formatting
+#+begin_src emacs-lisp
+(use-package py-isort)
+;; (general-add-hook 'before-save-hook 'py-isort-before-save)
+
+;; using black with lsp instead now
+;; (use-package py-yapf)
+;; (use-package py-autopep8)
+
+(general-with-package 'python
+  ;; TODO consider ignoring this convention
+  (general-add-hook 'python-mode-hook (lambda () (setq-local fill-column 79)))
+
+  ;;  https://gist.github.com/kracekumar/77d29c7410199fd2cda4
+  (defun python-remove-unused-imports ()
+    "Use Autoflake to remove unused function.
+$ autoflake --remove-all-unused-imports -i unused_imports.py"
+    (interactive)
+    (when (eq major-mode 'python-mode)
+      (shell-command (concat "autoflake --remove-all-unused-imports -i "
+			                 (shell-quote-argument (buffer-file-name))))
+      (revert-buffer t t t))
+    nil)
+
+  ;; isort alone is already too slow to add to before-save-hook
+  ;; (benchmarks at almost a second)
+  (defun noct:python-format-buffer ()
+    (interactive)
+    (python-remove-unused-imports)
+    (py-isort-buffer)
+    (lsp-format-buffer))
+
+  (general-def 'normal python-mode-map
+    "m=" #'noct:python-format-buffer))
+#+end_src
+
+*** TODO Debugger
+*** TODO Pyvenv
+TODO look at other packages...
+https://github.com/robert-zaremba/auto-virtualenvwrapper.el
+https://github.com/marcwebbie/auto-virtualenv
+https://github.com/ssbb/pyenv-mode-auto
+#+begin_src emacs-lisp
+(use-package pyvenv
+  :general
+  (general-m python-mode-map
+    "v" #'pyvenv-workon
+    "V" #'pyvenv-deactivate))
+#+end_src
+
+*** Pytest
+#+begin_src emacs-lisp
+(use-package pytest
+  :general (general-m python-mode-map "t" #'pytest-all)
+  :config
+  (gsetq pytest-cmd-flags "-x -s -vv"))
+#+end_src
+
+*** TODO Pycoverage
+Needs extra setup (need to pip install cov2emacs that is in source directory).
+#+begin_src emacs-lisp
+(use-package pycoverage
+  :disabled t
+  :ghook 'python-mode-hook)
+#+end_src
+
+** R (ESS)
+#+begin_src emacs-lisp
+;; TODO having issues with this
+;; (use-package ess)
+#+end_src
+
+** Scheme and Racket
+*** Geiser
+#+begin_src emacs-lisp
+(use-package geiser
+  :config
+  (gsetq geiser-active-implementations '(chicken guile racket))
+
+  (general-def 'insert geiser-repl-mode-map
+    "¸" 'sp-backward-kill-word)
+
+  (general-m (scheme-mode-map racket-mode-map)
+    "b" #'geiser-eval-buffer
+    "d" #'geiser-eval-definition
+    "s" #'geiser-eval-last-sexp))
+#+end_src
+
+*** Racket
+#+begin_src emacs-lisp
+(use-package racket-mode)
+#+end_src
+
+** Shell Mode (Bash, Zsh)
+#+begin_src emacs-lisp
+(defun noct:sh-mode-setup ()
+  (setq indent-tabs-mode t))
+
+(use-package sh-script
+  ;; TODO switch scripts to just spaces
+  :gfhook ('sh-mode-hook #'noct:sh-mode-setup)
+  :config
+  (with-eval-after-load 'flycheck
+    (general-pushnew 'zsh flycheck-shellcheck-supported-shells)))
+
+(use-package company-shell
+  :after company
+  :init
+  (general-pushnew '(company-shell company-shell-env) company-backends))
+#+end_src
+
+** Shen
+#+begin_src emacs-lisp
+(use-package shen-mode)
+#+end_src
+
+* Miscellaneous
+** Benchmark Init
+This is installed here and manually (and temporarily) enabled in my =init.el=.
+#+begin_src emacs-lisp
+(use-package benchmark-init)
+#+end_src
+
+** Profile Dotemacs
+This is installed here and manually (and temporarily) enabled in my =init.el=.
+#+begin_src emacs-lisp
+(use-package profile-dotemacs)
+#+end_src
+
+** Memory Usage
+I don't use this often, but it can be useful for profiling.
+#+begin_src emacs-lisp
+(use-package memory-usage)
+#+end_src
+
+** Free Keys
+I really use this but keep it around just in case.
+#+begin_src emacs-lisp
+(use-package free-keys)
+#+end_src
+
+** Hardhat Mode
+For making certain files read-only automatically.
+#+begin_src emacs-lisp
+(use-package hardhat
+  ;; https://github.com/rolandwalker/hardhat/issues/13
+  :init
+  (defvar ert--running-tests nil)
+  (global-hardhat-mode)
+  :diminish global-hardhat-mode)
+#+end_src
+
+* Blog
+** Ox Hugo
+Haven't set up yet.
+#+begin_src emacs-lisp
+(use-package ox-hugo
+  :after ox)
+#+end_src
+
+* Fun/Games
+** Fireplace
+#+begin_src emacs-lisp
+(use-package fireplace)
+#+end_src
+
+* Removed
+- Various org presentation packages (only used once; haven't decided on one)
+- hippie expand (just using company now)
+- workgoups2, elscreen, etc. (switched to framegroups)
+- eval in repl (never used)
+- quickrun (never used)
+- helm-swoop (switched to swiper)
+- ediff (switched to vdiff)
+- nlinum (switched to builtin line numbers)
+- unfill (never used)
+- weather (never used)
+- anyblock (switched to targets/things)
+- company quickhelp (company-box replaces it; doesn't work well with company childframe)
+- vertigo (switched to using counts and relative line numbers)
+- golden ratio (switched to zoom)
+- multiple cursors and evil-mc (never found a great use case for)
+- key chord (old usage was not ideal or saving much effort; input lag causes accidental actions)
+- evil-visual-star (I don't use \* that often and a dedicated text object would be preferable to overriding \* in visual state)
+- evil-goggles (really cool package but from a practical standpoint I don't need it)
+- evil-anzu (using mainly swiper now which supports this functionality)
+- shackle (easy enough to do what I want with =display-buffer-alist= directly)
+- circe, ERC, and jabber (for now; haven't used IRC or jabber much in a while)
+- shell-pop (not really using Emacs terminals at all; may add back with libvterm keybinding)
+- jammer and schrute-mode (good idea but found too intrusive/annoying)
+- adjust-parens (I updated lispy to have this functionality)
+- cleverparens (using lispyville)
+- slime (using sly)
+- elisp-slime-nav-mode (using xref and helpful)
+- historian and company-statistics (replaced with prescient)

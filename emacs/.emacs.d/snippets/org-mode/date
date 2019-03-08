@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: date
+# name: Current Date
 # key: date
 # --
 `(format-time-string "[%F %a]")`
