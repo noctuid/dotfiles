@@ -272,6 +272,14 @@ generate_packages_sls() {
     - require:
         - ruby-pkg
 " >> "$uhome"/dotfiles/root/packages.sls
+		elif [[ $method == go ]]; then
+			echo "  cmd.run:
+    - runas: $user
+    - name: $method get $package
+    - unless: go list '...' | grep $package
+    - require:
+        - go-pkg
+" >> "$uhome"/dotfiles/root/packages.sls
 		elif [[ $method == evm ]]; then
 			# - require:
 			# - $method-pkg

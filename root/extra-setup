@@ -86,6 +86,7 @@ fcron_user_setup() {
 # root
 ufw_setup() {
 	# https://wiki.archlinux.org/index.php/Uncomplicated_Firewall#Basic_configuration
+	ufw --force reset
 	ufw default deny
 	ufw allow from 192.168.0.0/24
 	ufw enable

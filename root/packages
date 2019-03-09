@@ -87,6 +87,8 @@ nvidia-utils
 nvidia-ck-skylake
 
 # * Security
+wireguard-tools
+wireguard-dkms
 # encryption
 # veracrypt
 secure-delete aur
@@ -149,6 +151,8 @@ ranger
 ffmpegthumbnailer
 # ranger info (alterantively exiftool)
 mediainfo
+# for kitty image preview
+python-pillow-simd aur
 
 trash-cli
 
@@ -177,6 +181,8 @@ detox
 
 # * Editors
 gvim
+neovim
+vim-dein-git aur
 vimpager-git aur
 # TODO aura fails
 emacs-git aur
@@ -202,6 +208,8 @@ mpv
 pqiv-git aur
 # mpv-git aur
 gallery-dl
+# color picker
+gpick
 
 # * Wine
 wine
@@ -222,6 +230,7 @@ odt2txt
 
 # * Markdown Preview
 livedown npm
+vmd npm
 
 # * Image Editing
 gimp
@@ -301,12 +310,16 @@ virtualbox
 # dkms is alternative for virtualbox-host-modules-arch
 virtualbox-host-dkms
 
-# * Spelling/Dictionary/English
-hunspell-en
+# * Spelling/Dictionary/Grammar/English
+hunspell-en_US
 aspell-en
 enchant
 sdcv
 words
+
+# grammar
+languagetool
+github.com/errata-ai/vale go
 
 # * Mail
 # old
@@ -447,7 +460,7 @@ unorm npm
 # * Appearance/Theming
 # TODO aura hangs here
 # polybar-git aur
-setroot-git aur
+setroot aur
 xtitle-git aur
 # TODO aura hangs building this
 # conky-lua-nv aur
@@ -468,9 +481,9 @@ hostblock-bin aur
 kwakd aur
 
 # * Archive related
-# unrar
-# for creation; in conflict with unrar
-rar aur
+unrar
+# for creation; in conflict with unrar; doesn't exist anymore
+# rar aur
 unzip
 zip
 p7zip
@@ -498,28 +511,75 @@ harvey pip
 # ** Clojure
 clojure
 
+# ** C
+gdb
+
+# ** Go
+go
+
 # ** Javascript
 nodejs
 npm
 
 # ** Python
 python-pip
-# TODO
-# setuptools is required for anaconda
-# install from nix
-# flake8 and/or pylint
-# python-pylint pacman
-# isort pip or python-isort
-yapf
-ipython
-python-ipdb
-# python-importmagic aur
-# python-epc aur
-# or pip
-autoflake pip
+
+# completions, definitions, references, etc.
 python-jedi
+# completions and renaming
+python-rope
+
+# repl
+ipython
+ptpython aur
+
+# debugger
+python-ipdb
+
+# virtual environments
 python-virtualenv
 python-virtualenvwrapper
+
+# testing
+python-pytest
+
+# for importmagic.el; resolve unimported symbols
+python-epc aur
+python-importmagic aur
+
+# lsp implementation
+python-language-server
+
+# *** Linting
+# error linter
+python-pyflakes
+# style linting; previously called pep8
+python-pycodestyle
+# complexity checker
+python-mccabe
+# docstring style checker
+python-pydocstyle
+# wraps pyflakes, pycodestyle, and mccabe
+flake8
+# more warnings
+python-pylint
+
+# *** Formatting
+# sort imports
+python-isort
+python-pyls-isort-git aur
+
+# remove unused variables and imports using pyflakes
+python-autoflake aur
+
+# formatting
+# yapf
+# less configurable; deterministic
+python-black
+python-language-server-black aur
+
+# pre-commit hook configuration
+python-pre-commit aur
 
 # ** Ruby
 # for gem

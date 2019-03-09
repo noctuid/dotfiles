@@ -23,6 +23,11 @@ yay-pkg:
     - name: aura -A --noconfirm yay
     - unless: pacman -Q yay
 
+pacnanny-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm pacnanny
+    - unless: pacman -Q pacnanny
+
 refind-efi-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm refind-efi
@@ -173,6 +178,16 @@ nvidia-ck-skylake-pkg:
     - name: powerpill -S --noconfirm nvidia-ck-skylake
     - unless: pacman -Q nvidia-ck-skylake
 
+wireguard-tools-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm wireguard-tools
+    - unless: pacman -Q wireguard-tools
+
+wireguard-dkms-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm wireguard-dkms
+    - unless: pacman -Q wireguard-dkms
+
 secure-delete-pkg:
   cmd.run:
     - name: aura -A --noconfirm secure-delete
@@ -207,6 +222,11 @@ git-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm git
     - unless: pacman -Q git
+
+openssh-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm openssh
+    - unless: pacman -Q openssh
 
 acpi-pkg:
   cmd.run:
@@ -293,6 +313,11 @@ mediainfo-pkg:
     - name: powerpill -S --noconfirm mediainfo
     - unless: pacman -Q mediainfo
 
+python-pillow-simd-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm python-pillow-simd
+    - unless: pacman -Q python-pillow-simd
+
 trash-cli-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm trash-cli
@@ -328,10 +353,30 @@ fortune-mod-pkg:
     - name: powerpill -S --noconfirm fortune-mod
     - unless: pacman -Q fortune-mod
 
+borg-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm borg
+    - unless: pacman -Q borg
+
+detox-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm detox
+    - unless: pacman -Q detox
+
 gvim-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm gvim
     - unless: pacman -Q gvim
+
+neovim-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm neovim
+    - unless: pacman -Q neovim
+
+vim-dein-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm vim-dein-git
+    - unless: pacman -Q vim-dein-git
 
 vimpager-git-pkg:
   cmd.run:
@@ -403,6 +448,16 @@ pqiv-git-pkg:
     - name: aura -A --noconfirm pqiv-git
     - unless: pacman -Q pqiv-git
 
+gallery-dl-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm gallery-dl
+    - unless: pacman -Q gallery-dl
+
+gpick-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm gpick
+    - unless: pacman -Q gpick
+
 wine-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm wine
@@ -447,6 +502,13 @@ livedown-pkg:
   cmd.run:
     - name: npm install -g livedown
     - unless: command -v livedown
+    - require:
+        - npm-pkg
+
+vmd-pkg:
+  cmd.run:
+    - name: npm install -g vmd
+    - unless: command -v vmd
     - require:
         - npm-pkg
 
@@ -610,10 +672,10 @@ virtualbox-host-dkms-pkg:
     - name: powerpill -S --noconfirm virtualbox-host-dkms
     - unless: pacman -Q virtualbox-host-dkms
 
-hunspell-en-pkg:
+hunspell-en_US-pkg:
   cmd.run:
-    - name: powerpill -S --noconfirm hunspell-en
-    - unless: pacman -Q hunspell-en
+    - name: powerpill -S --noconfirm hunspell-en_US
+    - unless: pacman -Q hunspell-en_US
 
 aspell-en-pkg:
   cmd.run:
@@ -634,6 +696,19 @@ words-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm words
     - unless: pacman -Q words
+
+languagetool-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm languagetool
+    - unless: pacman -Q languagetool
+
+github.com/errata-ai/vale-pkg:
+  cmd.run:
+    - runas: noctuid
+    - name: go get github.com/errata-ai/vale
+    - unless: go list '...' | grep github.com/errata-ai/vale
+    - require:
+        - go-pkg
 
 isync-pkg:
   cmd.run:
@@ -833,6 +908,11 @@ ttf-dejavu-pkg:
     - name: powerpill -S --noconfirm ttf-dejavu
     - unless: pacman -Q ttf-dejavu
 
+otf-fira-sans-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm otf-fira-sans
+    - unless: pacman -Q otf-fira-sans
+
 otf-fira-mono-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm otf-fira-mono
@@ -847,6 +927,11 @@ ttf-inconsolata-g-pkg:
   cmd.run:
     - name: aura -A --noconfirm ttf-inconsolata-g
     - unless: pacman -Q ttf-inconsolata-g
+
+office-code-pro-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm office-code-pro
+    - unless: pacman -Q office-code-pro
 
 phallus-fonts-git-pkg:
   cmd.run:
@@ -873,10 +958,15 @@ adobe-source-han-sans-jp-fonts-pkg:
     - name: powerpill -S --noconfirm adobe-source-han-sans-jp-fonts
     - unless: pacman -Q adobe-source-han-sans-jp-fonts
 
-bdf-unifont-pkg:
+ttf-symbola-pkg:
   cmd.run:
-    - name: powerpill -S --noconfirm bdf-unifont
-    - unless: pacman -Q bdf-unifont
+    - name: powerpill -S --noconfirm ttf-symbola
+    - unless: pacman -Q ttf-symbola
+
+noto-fonts-emoji-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm noto-fonts-emoji
+    - unless: pacman -Q noto-fonts-emoji
 
 siji-git-pkg:
   cmd.run:
@@ -1015,10 +1105,10 @@ kwakd-pkg:
     - name: aura -A --noconfirm kwakd
     - unless: pacman -Q kwakd
 
-rar-pkg:
+unrar-pkg:
   cmd.run:
-    - name: aura -A --noconfirm rar
-    - unless: pacman -Q rar
+    - name: powerpill -S --noconfirm unrar
+    - unless: pacman -Q unrar
 
 unzip-pkg:
   cmd.run:
@@ -1082,6 +1172,16 @@ clojure-pkg:
     - name: powerpill -S --noconfirm clojure
     - unless: pacman -Q clojure
 
+gdb-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm gdb
+    - unless: pacman -Q gdb
+
+go-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm go
+    - unless: pacman -Q go
+
 nodejs-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm nodejs
@@ -1097,32 +1197,30 @@ python-pip-pkg:
     - name: powerpill -S --noconfirm python-pip
     - unless: pacman -Q python-pip
 
-yapf-pkg:
+python-jedi-pkg:
   cmd.run:
-    - name: powerpill -S --noconfirm yapf
-    - unless: pacman -Q yapf
+    - name: powerpill -S --noconfirm python-jedi
+    - unless: pacman -Q python-jedi
+
+python-rope-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-rope
+    - unless: pacman -Q python-rope
 
 ipython-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm ipython
     - unless: pacman -Q ipython
 
+ptpython-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm ptpython
+    - unless: pacman -Q ptpython
+
 python-ipdb-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm python-ipdb
     - unless: pacman -Q python-ipdb
-
-autoflake-pkg:
-  cmd.run:
-    - name: pip install autoflake
-    - unless: pip list | grep ^autoflake
-    - require:
-        - python-pip-pkg
-
-python-jedi-pkg:
-  cmd.run:
-    - name: powerpill -S --noconfirm python-jedi
-    - unless: pacman -Q python-jedi
 
 python-virtualenv-pkg:
   cmd.run:
@@ -1133,6 +1231,86 @@ python-virtualenvwrapper-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm python-virtualenvwrapper
     - unless: pacman -Q python-virtualenvwrapper
+
+python-pytest-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-pytest
+    - unless: pacman -Q python-pytest
+
+python-epc-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm python-epc
+    - unless: pacman -Q python-epc
+
+python-importmagic-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm python-importmagic
+    - unless: pacman -Q python-importmagic
+
+python-language-server-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-language-server
+    - unless: pacman -Q python-language-server
+
+python-pyflakes-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-pyflakes
+    - unless: pacman -Q python-pyflakes
+
+python-pycodestyle-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-pycodestyle
+    - unless: pacman -Q python-pycodestyle
+
+python-mccabe-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-mccabe
+    - unless: pacman -Q python-mccabe
+
+python-pydocstyle-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-pydocstyle
+    - unless: pacman -Q python-pydocstyle
+
+flake8-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm flake8
+    - unless: pacman -Q flake8
+
+python-pylint-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-pylint
+    - unless: pacman -Q python-pylint
+
+python-isort-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-isort
+    - unless: pacman -Q python-isort
+
+python-pyls-isort-git-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm python-pyls-isort-git
+    - unless: pacman -Q python-pyls-isort-git
+
+python-autoflake-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm python-autoflake
+    - unless: pacman -Q python-autoflake
+
+python-black-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm python-black
+    - unless: pacman -Q python-black
+
+python-language-server-black-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm python-language-server-black
+    - unless: pacman -Q python-language-server-black
+
+python-pre-commit-pkg:
+  cmd.run:
+    - name: aura -A --noconfirm python-pre-commit
+    - unless: pacman -Q python-pre-commit
 
 ruby-pkg:
   cmd.run:
@@ -1225,6 +1403,11 @@ xorg-xev-pkg:
   cmd.run:
     - name: powerpill -S --noconfirm xorg-xev
     - unless: pacman -Q xorg-xev
+
+xorg-xbacklight-pkg:
+  cmd.run:
+    - name: powerpill -S --noconfirm xorg-xbacklight
+    - unless: pacman -Q xorg-xbacklight
 
 xsel-pkg:
   cmd.run:
