@@ -3539,6 +3539,13 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   (general-add-hook 'compilation-filter-hook #'my-colorize-compilation-buffer))
 #+end_src
 
+** Crontab
+#+begin_src emacs-lisp
+(use-package crontab-mode
+  ;; kinda works for fcron
+  :mode "fcrontab")
+#+end_src
+
 ** Debugger
 #+begin_src emacs-lisp
 (general-with-package 'debug
