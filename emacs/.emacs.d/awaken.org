@@ -250,6 +250,12 @@ When SLOT is non-nil, display popup buffers in that SLOT in the side window."
   (window-parameter (selected-window) 'window-side))
 #+end_src
 
+*** Email Info and Variables
+#+begin_src emacs-lisp
+(when (locate-library "noct-info")
+  (require 'noct-info))
+#+end_src
+
 ** =package.el=
 Currently, I only use =package.el= if I want to use the package list buffer. I generally don't use it for installing anything.
 #+begin_src emacs-lisp
@@ -871,7 +877,10 @@ I've been using my own modeline for a while but I'll probably switch to doom-mod
 #+begin_src emacs-lisp
 (general-with-package 'auth-source
   ;; use encrypted authinfo file by default
-  (gsetq auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc")))
+  (gsetq auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc"))
+  (when (featurep 'noct-info)
+    ;; use asymmetric encryption for authinfo.gpg
+    (gsetq auth-source-gpg-encrypt-to (list user-mail-address))))
 #+end_src
 
 ** Auto Compression
@@ -1103,27 +1112,32 @@ Suggested [[https://www.reddit.com/r/emacs/comments/4agorq/got_bored_of_the_init
                            (emacs-lisp-mode)))))
 #+end_src
 
-** TODO Sudo Editing
+** Sudo Editing
 This configuration allows automatically editing root owned files (as opposed to opening them in read only mode). Alternatively, if you usually edit root files from the terminal, emacsclient works fine with sudoedit.
+
+I've switched away from putting this function in a hook because it can be jarring and because there are some situations where I only want to read these files.
 #+begin_src emacs-lisp
 ;; function modified from comment here:
 ;; http://emacsredux.com/blog/2013/04/21/edit-files-as-root/
-;; TODO still needs some adjustment
 (defun noct:maybe-sudo-edit ()
   "If the current file is exists and is unwritable, edit it as root with sudo."
+  (interactive)
   (let* ((file buffer-file-name)
-         (parent (file-name-directory file)))
+         (parent (file-name-directory file))
+         ;; don't try to lookup password with auth-source
+         auth-sources)
     (when (and file
                (not (file-writable-p file))
-               ;; might want to create a file
                (or (file-exists-p file)
+                   ;; might want to create a file
                    (and (file-exists-p parent)
                         (not (file-writable-p parent))))
                ;; don't want to edit Emacs source files as root
                (not (string-match "/usr/share/emacs/.*" (buffer-file-name))))
       (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name)))))
 
-(general-add-hook 'find-file-hook #'noct:maybe-sudo-edit)
+;; [S]u[d]o or [S]udo e[d]it
+(general-s "d" #'noct:maybe-sudo-edit)
 #+end_src
 
 ** Text Scaling Keybindings

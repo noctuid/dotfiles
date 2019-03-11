@@ -149,7 +149,7 @@ home_config_setup() {
 	echo "Symlinking user config files."
 	sleep 1
 	pac_install stow
-	source "$uhome"/dotfiles/terminal/.zsh/stow_functions
+	source "$uhome"/dotfiles/terminal/.zsh/stow_functions.sh
 	HOME="$uhome" restow
 }
 

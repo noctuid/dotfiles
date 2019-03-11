@@ -746,7 +746,7 @@ alias reboot='poweroff reboot'
 #===============
 # Symlink All Dotfiles With Stow {{{
 #===============
-source ~/.zsh/stow_functions
+source ~/.zsh/stow_functions.sh
 
 # }}}
 #===============
