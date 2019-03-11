@@ -2095,12 +2095,12 @@ Configure ~counsel-grep~ to go to the end of matches and integrate with evil.
 TODO: This should be in counsel (variable to jump to match end and evil integration that's already done for swiper).
 #+begin_src emacs-lisp
 (general-with-package 'counsel
-  (gsetq counsel-grep-base-command
-         ;; TODO it would be way better if ripgrep supported trimming the line
-         ;; don't quote %s (breaks regex)
-         "rg --max-columns 200 --smart-case --line-number --color never --no-heading %s %s"
-         counsel-rg-base-command
-         "rg --max-columns 200 --smart-case --line-number --color never --no-heading %s .")
+  (let ((rg-flags (concat "--max-columns 200 --hidden --smart-case "
+                          "--line-number --color never --no-heading ")))
+    (gsetq counsel-grep-base-command (concat "rg " rg-flags "%s %s")
+           ;; TODO it would be way better if ripgrep supported trimming the line
+           ;; don't quote %s (breaks regex)
+           counsel-rg-base-command (concat "rg " rg-flags "%s .")))
 
   (defun noct:match-beginning ()
     "Go to the beginning of the last match."
