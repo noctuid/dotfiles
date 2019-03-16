@@ -2933,10 +2933,11 @@ This package is unfortunately unmaintained.
              :host github
              :repo "noctuid/link-hint.el"
              :local-repo  "~/src/emacs/link-hint/")
-  :general ('normal
-            "tf" #'link-hint-open-link
-            "tF" #'link-hint-open-multiple-links
-            "gf" #'link-hint-open-link-at-point)
+  :general
+  (general-t
+    "f" #'link-hint-open-link
+    "F" #'link-hint-open-multiple-links)
+  ('normal "gf" #'link-hint-open-link-at-point)
   :config
   (gsetq browse-url-generic-program (getenv "BROWSER")
          browse-url-browser-function #'browse-url-generic))
