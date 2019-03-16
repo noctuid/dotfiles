@@ -1077,6 +1077,13 @@ Obvious ones:
 ;; (add-hook 'window-configuration-change-hook #'noct:kill-minibuffer)
 #+end_src
 
+** OSX
+#+begin_src emacs-lisp
+(when (eq system-type 'darwin)
+  ;; use command as control
+  (gsetq mac-command-modifier 'control))
+#+end_src
+
 ** Recentf
 #+begin_src emacs-lisp
 ;; ivy also automatically enables recentf-mode
