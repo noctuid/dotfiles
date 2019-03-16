@@ -4524,7 +4524,7 @@ TODO
 (use-package company-ghc
   :after company
   :init
-  (general-pushnew '(company-ghc :with company-yanippet) company-backends))
+  (general-pushnew '(company-ghc :with company-yasnippet) company-backends))
 #+end_src
 
 *** Flycheck Haskell
