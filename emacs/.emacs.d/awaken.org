@@ -3486,6 +3486,8 @@ This makes things less convenient (some cases where errors that aren't detected)
   :config
   (gsetq flyspell-correct-interface #'flyspell-correct-ivy))
 
+;; TODO since not many completions and often use `ivy-avy' anyway, consider
+;; using https://github.com/clemera/frog-menu
 (use-package flyspell-correct-ivy)
 #+end_src
 
