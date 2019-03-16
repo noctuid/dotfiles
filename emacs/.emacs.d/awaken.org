@@ -480,6 +480,13 @@ Principles:
   :prefix ",")
 #+end_src
 
+** No Littering
+Consistently sets the paths for various configuration, history, temporary, etc. files created by Emacs packages (e.g. =savehist-file=).
+#+begin_src emacs-lisp
+(use-package no-littering
+  :demand t)
+#+end_src
+
 ** Evil and Evil Collection
 #+begin_src emacs-lisp
 (use-package evil
@@ -977,17 +984,17 @@ Persist minibuffer and search history.
 (gsetq history-length 3000
        history-delete-duplicates t)
 
-(gsetq savehist-file "~/.emacs.d/tmp/savehist"
-       ;; default
-       ;; savehist-save-minibuffer-history t
-       savehist-additional-variables '(mark-ring
-                                       global-mark-ring
-                                       search-ring
-                                       regexp-search-ring
-                                       extended-command-history)
-       savehist-autosave-interval 60)
-
-(savehist-mode)
+(use-package savehist
+  :ghook 'after-init-hook
+  :config
+  ;; default
+  ;; savehist-save-minibuffer-history t
+  (gsetq savehist-additional-variables '(mark-ring
+                                         global-mark-ring
+                                         search-ring
+                                         regexp-search-ring
+                                         extended-command-history)
+         savehist-autosave-interval 60))
 #+end_src
 
 ** H Prefix/Help Mode
