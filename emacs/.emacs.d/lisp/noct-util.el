@@ -56,9 +56,10 @@ Only source blocks that meet these requirements will be tangled:
                 (push (concat "(let (debug-on-error)\n"
                               "(with-demoted-errors \"Init error: %S\"\n"
                               body
-                              "))")
+                              "))\n\n")
                       body-list)
-              (push body body-list))))))
+              (push (concat body "\n")
+                    body-list))))))
     (with-temp-file elfile
       ;; NOTE this could potentially cause problems
       (insert (format ";; Don't edit this file, edit %s instead ... -*- lexical-binding: t -*-\n\n"
