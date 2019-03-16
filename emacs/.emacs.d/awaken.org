@@ -2397,7 +2397,7 @@ Soft wrap lines at =fill-column=.
 #+begin_src emacs-lisp
 (use-package visual-fill-column
   :ghook 'text-mode-hook
-  :general (noct:toggle-map "v" #'visual-fill-column-mode))
+  :general (noct:toggle-map "V" #'visual-fill-column-mode))
 #+end_src
 
 ** Visual Line mode
@@ -2410,6 +2410,8 @@ Soft wrap lines at =fill-column=.
 
 ;; show right-curly arrow on right of wrapped lines
 (gsetq visual-line-fringe-indicators '(nil right-curly-arrow))
+
+(general-def noct:toggle-map "v" #'visual-line-mode)
 #+end_src
 
 ** Whitespace
