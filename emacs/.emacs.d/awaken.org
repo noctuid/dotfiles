@@ -301,7 +301,9 @@ In the =:config= section, I generally put settings (~setq~ then any face configu
 *** Straight
 Install, load, and configure =straight.el=:
 #+begin_src emacs-lisp
-(setq straight-enable-use-package-integration t ; default
+(setq straight-repository-branch 'develop
+      ;; default
+      straight-enable-use-package-integration t
       ;; check for modifications (to determine whether a package needs to be
       ;; rebuilt) using `after-save-hook' instead of during startup or always
       ;; rebuilding packages (https://github.com/raxod502/straight.el/issues/41)
@@ -330,6 +332,10 @@ Install, load, and configure =straight.el=:
       (eval-print-last-sexp)))
   ;; (benchmark 1 `(load ,bootstrap-file nil 'nomessage))
   (load bootstrap-file nil 'nomessage))
+
+;; straight now fixes `org-version' by default (see `straight-fix-org'); this
+;; has to be earlier in the config file for it to work correctly
+(straight-use-package 'org-plus-contrib)
 #+end_src
 
 *** Use-package
@@ -371,44 +377,6 @@ Install =use-package.el= with optional dependencies and configure:
 ;; TODO Consider removing entirely
 (use-package delight
   :demand t)
-
-;; TODO https://github.com/raxod502/straight.el/issues/72
-(setq org-version "9.1.7")
-(defun noct:org-version ()
-  "9.1.7")
-
-(advice-add 'org-version :override #'noct:org-version)
-
-;; (straight-use-package 'git)
-
-;; (defun org-git-version ()
-;;   "The Git version of org-mode.
-;; Inserted by installing org-mode or when a release is made."
-;;   (require 'git)
-;;   (let ((git-repo (expand-file-name
-;;                    "straight/repos/org/" user-emacs-directory)))
-;;     (string-trim
-;;      (git-run "describe"
-;;               "--match=release\*"
-;;               "--abbrev=6"
-;;               "HEAD"))))
-
-;; (defun org-release ()
-;;   "The release version of org-mode.
-;; Inserted by installing org-mode or when a release is made."
-;;   (require 'git)
-;;   (let ((git-repo (expand-file-name
-;;                    "straight/repos/org/" user-emacs-directory)))
-;;     (string-trim
-;;      (string-remove-prefix
-;;       "release_"
-;;       (git-run "describe"
-;;                "--match=release\*"
-;;                "--abbrev=0"
-;;                "HEAD")))))
-
-;; (setq org-version "9.1.7")
-;; (provide 'org-version)
 #+end_src
 
 ** Async Init Tangling
