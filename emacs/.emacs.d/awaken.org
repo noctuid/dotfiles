@@ -307,7 +307,7 @@ Install, load, and configure =straight.el=:
       ;; rebuilding packages (https://github.com/raxod502/straight.el/issues/41)
       ;; drops loading straight from ~0.88s to ~0.05s for me; needs to be set
       ;; before loading straight
-      straight-check-for-modifications 'live
+      straight-check-for-modifications '(check-on-save find-when-checking)
       ;; install packages by default (like use-package's `use-package-always-ensure')
       straight-use-package-by-default t
       ;; store all autoloads in one file; default t
