@@ -3398,6 +3398,7 @@ For typographical editing (not fixing typos).
 ** Fcitx
 #+begin_src emacs-lisp
 (use-package fcitx
+  :when (executable-find "fcitx")
   :defer 5
   :config
   (fcitx-aggressive-setup))
