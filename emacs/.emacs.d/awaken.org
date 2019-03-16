@@ -488,6 +488,7 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
 #+end_src
 
 ** Evil and Evil Collection
+*** Setup
 #+begin_src emacs-lisp
 (use-package evil
   :init
@@ -598,8 +599,13 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
   "a" #'evil-append-line
   "A" #'evil-append)
 
+(general-def 'motion ";" nil)
+(general-def 'normal
+  ";" #'evil-ex)
+(general-r ";" #'evil-repeat-find-char)
+
 (defun noct:norm@q ()
-  "Apply macro in q register on selected lines. "
+  "Apply macro in q register on selected lines."
   (interactive)
   (evil-ex-normal (region-beginning) (region-end) "@q"))
 
@@ -608,6 +614,9 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 
 ;; since using m as prefix
 (general-def 'normal "M" #'evil-set-marker)
+
+;; exit emacs state with ESC (in GUI emacs)
+(general-def 'emacs "<escape>" #'evil-normal-state)
 
 ;; change xall
 (evil-ex-define-cmd "xa[ll]" #'save-buffers-kill-terminal)
@@ -618,10 +627,10 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 
 **** Colemak Swaps
 #+begin_src emacs-lisp
-;; swap visual and real line movement commands
 (evil-redirect-digit-argument evil-motion-state-map
                               "0" #'evil-beginning-of-visual-line)
 
+;; swap visual and real line movement commands
 (general-def 'motion
   "n" #'evil-next-visual-line
   "e" #'evil-previous-visual-line
@@ -2424,19 +2433,16 @@ Soft wrap lines at =fill-column=.
 * Text Editing/Interaction
 ** =rect-ext.el=
 #+begin_src emacs-lisp
-;; TODO push `rect-ext-evil-ex'
 ;; TODO eventualy switch to more generic narrowing solution
-(when (file-directory-p "~/src/emacs/rectangle-ext/")
-  (use-package rect-ext
-    :straight (rect-ext
-               :type git
-               :host github
-               :repo "noctuid/rect-ext.el"
-               :local-repo "~/src/emacs/rectangle-ext/")
-    :general
-    ('(normal visual)
-     ";" #'rect-ext-evil-ex
-     "r;" #'evil-repeat-find-char)))
+(use-package rect-ext
+  :straight (rect-ext
+             :type git
+             :host github
+             :repo "noctuid/rect-ext.el"
+             :local-repo "~/src/emacs/rectangle-ext/")
+  :general
+  ('normal
+   [remap evil-ex] #'rect-ext-evil-ex))
 #+end_src
 
 ** TODO Aggressive Fill Paragraph
