@@ -53,7 +53,11 @@
 (defalias 'yes-or-no-p #'y-or-n-p)
 
 (defun noct:command-line-flag-specified-p (flag)
-  "Return whether FLAG was specified as an argument to emacs."
+  "Return whether FLAG was specified as an argument to Emacs.
+Also tell Emacs to ignore FLAG when processing command line arguments."
+  ;; prevent message about the option being unknown
+  (cl-pushnew (cons flag #'ignore) command-switch-alist
+              :test #'equal)
   (cl-loop for arg in command-line-args
            if (string= arg flag)
            return t))
@@ -80,9 +84,6 @@
 (run-with-timer 120 120 #'noct:async-init-tangle)
 
 ;; * Start Benchmarking
-(cl-pushnew (cons "--benchmark-init" #'ignore) command-switch-alist
-            :test #'equal)
-
 (defvar noct:benchmark-init-files
   '("~/.emacs.d/straight/build/benchmark-init/benchmark-init.elc"
     "~/.emacs.d/straight/build/benchmark-init/benchmark-init-modes.elc"))
@@ -103,26 +104,21 @@
       debug-on-quit t)
 
 (cond ((noct:command-line-flag-specified-p "--with-demoted-errors")
-       ;; prevent message about the option being unknown
-       (cl-pushnew (cons "--with-demoted-errors" #'ignore) command-switch-alist
-                   :test #'equal)
        ;; this prevents errors in one source block from preventing other source
        ;; blocks from running
-       (noct:tangle-awaken t nil t))
+       (noct:tangle-awaken t nil nil t))
       ((noct:command-line-flag-specified-p "--stable")
-       (cl-pushnew (cons "--stable" #'ignore) command-switch-alist
-                   :test #'equal)
        (load-file "~/.emacs.d/awaken-stable.el")
        ;; TODO remove
        (when (file-exists-p "~/.emacs.d/unclean-stable.el")
          (load-file "~/.emacs.d/unclean-stable.el")))
       ((noct:command-line-flag-specified-p "--profile-dotemacs")
-       (cl-pushnew (cons "--profile-dotemacs" #'ignore) command-switch-alist
-                   :test #'equal)
        (load-file "~/.emacs.d/straight/build/profile-dotemacs/profile-dotemacs.elc")
        (setq profile-dotemacs-file (expand-file-name "~/.emacs.d/awaken.el")
              profile-dotemacs-low-percentage 1)
        (profile-dotemacs))
+      ((noct:command-line-flag-specified-p "--retangle")
+       (noct:tangle-awaken t nil t))
       (t
        (noct:tangle-awaken t)))
 

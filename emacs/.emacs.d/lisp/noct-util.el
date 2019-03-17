@@ -67,12 +67,13 @@ Only source blocks that meet these requirements will be tangled:
       (apply #'insert (reverse body-list)))
     (message "Wrote %s ..." elfile)))
 
-(defun noct:tangle-org-init (file &optional load compile demote-errors)
+(defun noct:tangle-org-init (file &optional load compile retangle demote-errors)
   "Tangle org init FILE if it has not already been tangled.
 If LOAD is non-nil, load it as well (the newest between the compiled and
-non-compiled). If COMPILE is non-nil and the uncompiled file is newer, compile
-it afterwards. If DEMOTE-ERRORS is non-nil, wrap each source block with
-`with-demoted-errors'.
+non-compiled). If RETANGLE is non-nil, tangle FILE even if it is not newer than
+the current tangled file. If COMPILE is non-nil and the uncompiled file is
+newer, compile it afterwards. If DEMOTE-ERRORS is non-nil, wrap each source
+block with `with-demoted-errors'.
 
 When there are no errors loading the tangled file, save it with a \"-stable.el\"
 or \"-stable.elc\" suffix (depending on which was loaded).
@@ -90,7 +91,8 @@ etc., etc.; it's easier to compile afterwards)."
          (init-compiled (concat init-tangled "c"))
          (init-tangled-stable (concat base-file "-stable.el"))
          (init-compiled-stable (concat init-tangled-stable "c")))
-    (when (or (not (file-exists-p init-tangled))
+    (when (or retangle
+              (not (file-exists-p init-tangled))
               (file-newer-than-file-p org-init init-tangled))
       (schurig-tangle-config-org org-init init-tangled demote-errors))
     (when load
@@ -106,12 +108,27 @@ etc., etc.; it's easier to compile afterwards)."
                (file-newer-than-file-p init-tangled init-compiled))
       (byte-compile-file init-tangled))))
 
-(defun noct:tangle-awaken (&optional load compile demote-errors)
-  "Tangle awaken.org."
-  (noct:tangle-org-init "~/.emacs.d/awaken.org" load compile demote-errors)
-  ;; TODO clean and move everything to awaken.org
-  (when (file-exists-p "~/.emacs.d/unclean.org")
-    (noct:tangle-org-init "~/.emacs.d/unclean.org" load compile demote-errors)))
+(defun noct:tangle-awaken (&optional load compile retangle demote-errors)
+  "Tangle awaken.org.
+LOAD, COMPILE, RETANGLE, and DEMOTE-ERRORS are passed to
+`noct:tangle-org-init'."
+  (cond
+   ((and (featurep 'straight) load)
+    (straight-transaction
+      (straight-mark-transaction-as-init)
+      (noct:tangle-org-init "~/.emacs.d/awaken.org" load compile retangle
+                            demote-errors)
+      ;; TODO clean and move everything to awaken.org
+      (when (file-exists-p "~/.emacs.d/unclean.org")
+        (noct:tangle-org-init "~/.emacs.d/unclean.org" load compile retangle
+                              demote-errors))))
+   (t
+    (noct:tangle-org-init "~/.emacs.d/awaken.org" load compile retangle
+                          demote-errors)
+    ;; TODO clean and move everything to awaken.org
+    (when (file-exists-p "~/.emacs.d/unclean.org")
+      (noct:tangle-org-init "~/.emacs.d/unclean.org" load compile retangle
+                            demote-errors)))))
 
 (provide 'noct-util)
 ;;; noct-util.el ends here
