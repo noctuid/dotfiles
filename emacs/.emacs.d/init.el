@@ -65,10 +65,34 @@ Also tell Emacs to ignore FLAG when processing command line arguments."
 ;; ** Faster Untangling
 (require 'noct-util)
 
+(defun noct:emacs-id-file ()
+  "Return the file containing the unique id for the newest Emacs instance."
+  ;; `expand-file-name' handles existent/non-existent trailing slash
+  (expand-file-name ".emacs-pid" user-emacs-directory))
+
+(defun noct:current-emacs-id ()
+  "Return the unique id for the current Emacs instance."
+  (format "%s" before-init-time))
+
+(defun noct:newest-emacs-id ()
+  "Return the unique id for the newest Emacs instance."
+  (with-temp-buffer
+    (insert-file-contents (noct:emacs-id-file))
+    (buffer-string)))
+
+(defun noct:newest-emacs-instance-p ()
+  "Return whether the current Emacs instance is the newest one."
+  (string= (noct:current-emacs-id) (noct:newest-emacs-id)))
+
+(write-region (noct:current-emacs-id) nil
+              (noct:emacs-id-file))
+
 (defun noct:async-init-tangle ()
-  "Tangle org init file asynchronously. "
+  "Tangle org init file asynchronously.
+Only tangle when the current Emacs instance is the newest one."
   (interactive)
-  (when (require 'async nil t)
+  (when (and (noct:newest-emacs-instance-p)
+             (require 'async nil t))
     (let ((inhibit-message t))
       (message "Asynchronously tangling org init file...")
       (async-start (lambda ()
@@ -77,6 +101,7 @@ Also tell Emacs to ignore FLAG when processing command line arguments."
                      ;; byte-compilation makes no noticeable difference for
                      ;; current config; not byte compiling since it potentially
                      ;; causes other annoying problems
+                     ;; loading so that stable configurations are saved
                      (noct:tangle-awaken t))
                    (lambda (_)
                      (message "Finished tangling org init file."))))))
