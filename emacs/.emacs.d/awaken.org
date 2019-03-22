@@ -3563,6 +3563,14 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   (general-add-hook 'debugger-mode-hook #'evil-normalize-keymaps))
 #+end_src
 
+** Diff Mode
+#+begin_src emacs-lisp
+(use-package diff-mode
+  :config
+  (general-def 'normal diff-mode-map
+    "q" #'quit-window))
+#+end_src
+
 ** Helpful
 #+begin_src emacs-lisp
 (use-package helpful
