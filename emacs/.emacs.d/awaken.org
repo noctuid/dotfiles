@@ -4791,6 +4791,16 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
 #+end_src
 
 * Miscellaneous
+** Backup Each Save
+Backup files on every save to prevent ever losing work.
+#+begin_src emacs-lisp
+(use-package backup-each-save
+  :when noct:personal-computer-p
+  :ghook ('after-save-hook #'backup-each-save)
+  :config
+  (gsetq backup-each-save-mirror-location "~/.emacs-backups"))
+#+end_src
+
 ** Benchmark Init
 This is installed here and manually (and temporarily) enabled in my =init.el=.
 #+begin_src emacs-lisp
