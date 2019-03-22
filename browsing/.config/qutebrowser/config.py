@@ -253,7 +253,7 @@ c.url.searchengines = \
     {'DEFAULT': 'https://www.startpage.com/do/search?query={}&?prf=7de10a290cc3cee4fa552d4b43dc3f48',  # noqa: E501
      'aff': 'http://www.anime4fun.com/search?keyword={}',
      'bt': 'http://bato.to/search?name_cond=c&name={}',
-     'am': 'http://www.amazon.com/s/url=search-alias%3Daps&field-keywords={}',
+     'am': 'https://smile.amazon.com/s?k={}',
      'aw': 'http://wiki.archlinux.org/index.php?search={}',
      'az': 'http://search.azlyrics.com/search.php?q={}',
      'd': 'http://duckduckgo.com/?q={}',
