@@ -237,7 +237,7 @@ gimp
 imagemagick
 gifsicle
 graphicsmagick
-# waifu2x-converter-cpp-cuda-git aur
+waifu2x-converter-cpp-cuda-git aur
 
 # * Torrents
 # includes trasmission-show (used for ranger)
@@ -422,8 +422,9 @@ office-code-pro aur
 # ttf-agave aur
 # hack-font nix
 # for uushi
-phallus-fonts-git
-otf-fura-mono-powerline-git
+phallus-fonts-git aur
+otf-fura-mono-powerline-git aur
+otf-nerd-fonts-fira-code aur
 
 # other languages
 noto-fonts-cjk

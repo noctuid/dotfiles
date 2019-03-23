@@ -1,9 +1,4 @@
-function m() {
-	mkdir -p $1
-	# cd $1 # I wish
-}
-
-# from: https://github.com/z1lt0id/awesome/blob/master/.bashrc 
+# from: https://github.com/z1lt0id/awesome/blob/master/.bashrc
 # sanitize - set file/directory owner and permissions to normal values (644/755)
 # recursive
 # Usage: sanitize <file>
@@ -36,7 +31,7 @@ upscale() { # image (ratio)
 	name=${1%.*}
 	extension=${1##*.}
 	ratio=${2:-2}
-	waifu2x -i "$1" -o "${name}_upscaled${ratio}x.$extension"
+	waifu2x-converter-cpp -i "$1" -o "${name}_upscaled${ratio}x.$extension"
 }
 
 imp() {
@@ -53,25 +48,31 @@ imp() {
 	while getopts t:c:a opt
 	do
 		case $opt in
-		t) title=$optarg;;
-		c) caption=$optarg;;
-		# n) name=$optarg;;
-		a) anon=true;;
+			t) title=$optarg;;
+			c) caption=$optarg;;
+			# n) name=$optarg;;
+			a) anon=true;;
 		esac
 	done
 	if $anon; then
 		# send info to file (e.g. in case want delete url or imgur page as well)
 		imgur upload $filename > ${filename%.*}.txt
-		awk '/original/ {print $2}' ${filename%.*}.txt | xclip -selection clipboard
+		awk '/original/ {print $2}' ${filename%.*}.txt \
+			| xclip -selection clipboard
 	else
 		# using xclip; xsel doesn't work consistently for some reason
-		imgur --user=angelicsedition --ask-pass upload -t "$title" -c "$caption" "$filename" | awk '/original/ {print $2}' | xclip -selection clipboard
+		imgur --user=angelicsedition --ask-pass upload -t "$title" \
+			  -c "$caption" "$filename" | awk '/original/ {print $2}' \
+			| xclip -selection clipboard
 	fi
 }
 
 # extract archive then delete it
 exd() {
-	atool -x $1 && rm $1
+	atool -x "$1" && rm "$1"
 }
 
 # vim: ft=sh:
+# Local Variables:
+# mode: sh
+# End:

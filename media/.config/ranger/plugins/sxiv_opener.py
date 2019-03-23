@@ -1,6 +1,7 @@
 import ranger.api
 # https://github.com/hut/ranger/pull/205#issuecomment-70960474
-# allows sxiv opener to work with rifle commands that don't start with "sxiv " but contain it
+# allows sxiv opener to work with rifle commands that don't start with "sxiv "
+# also for pqiv
 
 old_hook_ready = ranger.api.hook_ready
 
@@ -14,20 +15,39 @@ def hook_ready(self):
 
         if self.settings.open_all_images and \
                 len(self.thisdir.marked_items) == 0 and \
-                re.match(r'^.*sxiv ', command):
+                re.match(r'^(.*sxiv|feh|imv|.*pqiv) ', command):
 
-            images = [f.basename for f in self.thisdir.files if f.image]
+            images = [f.relative_path for f in self.thisdir.files if f.image]
+            media = [f.relative_path for f in self.thisdir.files if f.image
+                     or f.video]
             escaped_filenames = " ".join(shell_quote(f) \
                     for f in images if "\x00" not in f)
 
-            if images and self.thisfile.basename in images and \
+            if (images and self.thisfile.relative_path in images) or \
+                    (media and self.this)and \
                     "$@" in command:
                 new_command = None
 
                 if 'sxiv ' in command:
-                    number = images.index(self.thisfile.basename) + 1
+                    number = images.index(self.thisfile.relative_path) + 1
                     new_command = command.replace("sxiv ",
                             "sxiv -n %d " % number, 1)
+
+                if command[0:4] == 'feh ':
+                    new_command = command.replace("feh ",
+                        "feh --start-at %s " % \
+                        shell_quote(self.thisfile.relative_path), 1)
+
+                if command[0:4] == 'imv ':
+                    number = images.index(self.thisfile.relative_path) + 1
+                    new_command = command.replace("imv ",
+                            "imv -n %d " % number, 1)
+
+                if 'pqiv ' in command:
+                    number = images.index(self.thisfile.relative_path)
+                    new_command = command.replace("pqiv ",
+                            "pqiv --action \"goto_file_byindex(%d)\" " % \
+                            number, 1)
 
                 if new_command:
                     command = "set -- %s; %s" % (escaped_filenames,
