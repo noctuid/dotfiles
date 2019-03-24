@@ -14,6 +14,7 @@ save-position-on-quit
 # "This loads high quality OpenGL options. Most users can run these without any
 # problems, but they are not enabled by default to avoid causing problems for
 # the few users who cannot run them."
+# I have keybindings to switch between this and low-latency
 profile=gpu-hq
 # gpu-api=
 # see if this causes any issues with speed; default scaling for gpu-hq seems
