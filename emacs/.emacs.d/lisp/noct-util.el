@@ -112,6 +112,7 @@ etc., etc.; it's easier to compile afterwards)."
   "Tangle awaken.org.
 LOAD, COMPILE, RETANGLE, and DEMOTE-ERRORS are passed to
 `noct:tangle-org-init'."
+  (interactive)
   (cond
    ((and (featurep 'straight) load)
     (straight-transaction

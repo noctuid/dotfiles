@@ -87,13 +87,21 @@ Also tell Emacs to ignore FLAG when processing command line arguments."
 (write-region (noct:current-emacs-id) nil
               (noct:emacs-id-file))
 
+(defvar noct:async-tangle-in-progress nil
+  "Whether currently asynchronously tangling init.")
+
 (defun noct:async-init-tangle ()
   "Tangle org init file asynchronously.
 Only tangle when the current Emacs instance is the newest one."
   (interactive)
   (when (and (noct:newest-emacs-instance-p)
+             ;; don't try to tangle if already tangling; possible for overlap to
+             ;; happen if something goes wrong and the process hangs; can end up
+             ;; killing cpu
+             (not noct:async-tangle-in-progress)
              (require 'async nil t))
     (let ((inhibit-message t))
+      (setq noct:async-tangle-in-progress t)
       (message "Asynchronously tangling org init file...")
       (async-start (lambda ()
                      (push "~/.emacs.d/lisp" load-path)
@@ -104,9 +112,11 @@ Only tangle when the current Emacs instance is the newest one."
                      ;; loading so that stable configurations are saved
                      (noct:tangle-awaken t))
                    (lambda (_)
+                     (setq noct:async-tangle-in-progress nil)
                      (message "Finished tangling org init file."))))))
 
-(run-with-timer 120 120 #'noct:async-init-tangle)
+(defvar noct:async-tangle-timer (run-with-timer 120 120 #'noct:async-init-tangle)
+  "Holds the timer to asynchronously tangle so it can be easily canceled.")
 
 ;; * Start Benchmarking
 (defvar noct:benchmark-init-files
