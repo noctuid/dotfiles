@@ -113,13 +113,13 @@ fi
 
 # * Startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then
-	startx
+	nvidia-xrun
 elif [[ $- == *i* ]]; then
 	# check if interactive
 	zsh
 fi
 
 # not posix compliant; check as bash with shellcheck
-# /* Local Variables:
-# /* sh-shell: bash
-# /* End:
+# Local Variables:
+# sh-shell: bash
+# End:

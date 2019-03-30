@@ -66,13 +66,6 @@ ufw setup:
     - name: extra-setup ufw_setup
     - source: salt://extra-setup
 
-bumblebee setup:
-  cmd.script:
-    - name: extra-setup bumblebee_setup
-    - env:
-        - USER: "{{ user }}"
-    - source: salt://extra-setup
-
 transmission setup:
   cmd.script:
     - name: extra-setup transmission_setup

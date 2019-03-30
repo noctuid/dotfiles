@@ -73,11 +73,9 @@ steam-native-runtime
 # ** Microcode
 intel-ucode
 
-# ** Bumblebee
-# https://wiki.archlinux.org/index.php/bumblebee
-bumblebee
+# ** Nvidia
+nvidia-xrun aur
 bbswitch-dkms
-primus
 # intel-virtual-output
 xf86-video-intel
 nvidia-dkms
@@ -621,6 +619,7 @@ xorg-xlsfonts
 xorg-xsetroot
 xorg-xev
 xorg-xbacklight
+light
 # clipboard
 xsel
 xclip

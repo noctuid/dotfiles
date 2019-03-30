@@ -92,14 +92,6 @@ ufw_setup() {
 	ufw enable
 }
 
-# * Bumblebee
-# root; $USER changed when run by setup.sls
-bumblebee_setup() {
-	gpasswd -a "$USER" bumblebee
-	# busID needs to be correct (was by default for me)
-	# lspci | grep VGA | grep NVIDIA
-}
-
 # * Transmission
 # root; $USER changed when run by setup.sls
 transmission_setup() {
@@ -161,7 +153,6 @@ service_setup() {
 	systemctl enable tzupdate
 	systemctl enable tlp
 	systemctl enable tlp-sleep
-	systemctl enable bumblebeed
 	# enabled in fcron_setup
 	# systemctl enable fcron
 	systemctl enable ufw

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+xrandr --dpi 96
+
+./.xinitrc
+
+# vim: set ft=sh:
+# Local Variables:
+# mode:sh
+# sh-shell: bash
+# End:

@@ -1175,76 +1175,117 @@ function grubify() {
 	convert "$1" -colorspace rgb "${1%.*}_rgb.$extension"
 }
 
-# connecting to tv/monitor with hmdi
-function hdmiin() {
-	xrandr --output HDMI1 --auto && \
-		ponymix set-profile output:hdmi-stereo
+# *** Connecting to External Displays
+# **** Helpers
+monitor_get_primary() {
+	xrandr --listmonitors | awk '/0:/ {print $NF}'
 }
-function hdmiadd() {
-	# rename newly added desktop to X
-	# setroot --restore so that newly added screen is black
-	xrandr --output HDMI1 --auto --right-of LVDS1 && \
-		bspc monitor HDMI1 --reset-desktops X && \
+
+monitor_get_dimensions() { # monitor
+	xrandr --query \
+		| awk -F '+| ' "/^$1/ {gsub(\"primary \",\"\"); print \$3}"
+}
+
+monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
+	# exit if any command or any part of a pipe fails
+	# using subshell so this only lasts for this function
+	set -e -o pipefail
+	name=$1
+	right_of_primary=$2
+	add_bspwm_desktop=$3
+	primary=$(monitor_get_primary)
+
+	# ensure disconnected (for when want to switch between mirroring and
+	# separate desktop)
+	monitor_disconnect "$name"
+
+	if [[ -n $right_of_primary ]]; then
+		xrandr --output "$name" --auto --right-of "$primary"
+		# primary seems to be the connected monitor that is alphabetically
+		# first; ensure that the primary monitor doesn't change (keep it as the
+		# laptop screen) by explicitly setting it
+		xrandr --output "$primary" --primary
+		# restore wallpaper (keep the wallpaper on the primary screen; make the
+		# new monitor black instead of copying the wallpaper)
 		setroot --restore
-	if [[ $1 != noa ]]; then
-		ponymix set-profile output:hdmi-stereo
+	else
+		# mirror screen
+		primary_geometry=$(monitor_get_dimensions "$primary")
+		xrandr --output "$name" --auto --scale-from "$primary_geometry"
+		# don't want any new desktops since just mirroring; bspc adds the
+		# monitor and a desktop by default
+		bspc monitor "$name" --remove
 	fi
-}
-function hdmiout() {
-	xrandr --output HDMI1 --off && \
-		bspc desktop X -r && \
-		bspc monitor HDMI1 -r && \
-		ponymix set-profile output:analog-stereo
-}
 
+	# add new desktop/workspace for the monitor
+	# TODO could potentially allow word splitting to add more than one desktop
+	if [[ -n $add_bspwm_desktop ]]; then
+		bspc monitor "$name" --reset-desktops "$add_bspwm_desktop"
+	fi
 
-# Thinkpad p50
-# alias discrete="sudo cp ~/dotfiles/20-nvidia.conf /etc/X11/xorg.conf.d/"
-# alias hybrid="sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf"
-# this requires discrete graphics enabled in bios
-# dpadd() {
-# 	xrandr --output DP-1 --auto --right-of DP-4 && \
-# 		bspc monitor DP-1 --reset-desktops X && \
-# 		setroot --restore
-# }
-# dpout() {
-# 	xrandr --output DP-1 --off && bspc monitor DP-1 -r
-# }
+	# update audio output
+	# audio through hdmi doesn't work on current laptop...
+	# ponymix set-profile output:hdmi-stereo
+)
 
-# For hybrid graphics:
-# Option "UseDisplayDevice" "none" must be commented in
-# /etc/bumblebee/xorg.conf.nvidia
-# intel-virtual-output will only work if already plugged in!
-addvirth() {
-	intel-virtual-output
-	xrandr --output VIRTUAL2 --auto --right-of eDP1
-	bspc monitor VIRTUAL2 --reset-desktops X
-	setroot --restore
+monitor_disconnect() ( # output_name
+	# exit if any command or any part of a pipe fails
+	set -e -o pipefail
+	name=$1
+	xrandr --output "$name" --off
+	if bspc query --monitors --names | grep --quiet "^${name}$"; then
+		bspc monitor "$name" --remove
+	fi
+	# ponymix set-profile output:analog-stereo
+)
+
+# **** HDMI (old)
+# connecting to tv/monitor with hmdi
+hdmiin() {
+	monitor_connect HDMI1
+	# ponymix set-profile output:hdmi-stereo
 }
 
-offvirth() {
-	xrandr --output VIRTUAL1 --off
-	bspc monitor VIRTUAL2 -r
-	pkill -x intel-virtual-o
-	# will kill extra X server and reset bbswitch (nvidia card now OFF)
-	# a more direct way to do this?
-	sudo systemctl restart bumblebeed
+hdmiadd() {
+	monitor_connect HDM1 true X
 }
 
-# vga
-function vgain() {
-	geometry=$(xwininfo -root | awk '/geometry/ {gsub("\\+.*",""); print $2}')
-	xrandr --output VGA1 --auto --scale-from "$geometry"
+hdmiout() {
+	monitor_diconnect HDMI1 true
 }
-function vgaadd() {
-	geometry=$(xwininfo -root | awk '/geometry/ {gsub("\\+.*",""); print $2}')
-	xrandr --output VGA1 --auto --scale-from "$geometry" --right-of LVDS1 && \
-		bspc monitor VGA1 --reset-desktops X && setroot --restore
-}
-alias vgaout='xrandr --output VGA1 --off && bspc monitor -r X'
 
-# play clipboard (url)
-function mpgo() {
+# **** VGA (old)
+vgain() {
+	monitor_connect VGA1
+}
+
+vgaadd() {
+	monitor_connect VGA1 true X
+}
+
+alias vgaout='monitor_disconnect VGA1'
+
+# **** Thinkpad p50 and p52
+# discrete is wonkier (e.g. compton doesn't work) and there doesn't seem to be a
+# real advantage to using it (can just run X with graphics card on demand)
+alias discrete="sudo cp ~/dotfiles/20-nvidia.conf /etc/X11/xorg.conf.d/"
+alias hybrid="sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf"
+
+# discrete grapics in bios or hybrid and nvidia-xrun
+nvadd() {
+	monitor_connect DP-1 true X
+}
+
+nvmirror() {
+	monitor_connect DP-1
+}
+
+nvout() {
+	monitor_disconnect DP-1 true
+}
+
+# *** play clipboard (url)
+mpgo() {
 	mkdir -p /tmp/mpv
 	if [[ -n $1 ]]; then
 		clipboard=$1

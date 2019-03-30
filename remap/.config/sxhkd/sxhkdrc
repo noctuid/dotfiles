@@ -20,12 +20,12 @@ F11
 # Would use hyper if could get working a mod# instead of Num_Lock but can't
 # ** Brightness
 mode_switch + super + e
-	xbacklight -inc 10
-	# light -A 10
+	light -A 10
+	# xbacklight -inc 10
 
 mode_switch + super + n
-	xbacklight -dec 10
-	# light -U 10
+	light -U 10
+	# xbacklight -dec 10
 
 # ** Volume
 mode_switch + super + i

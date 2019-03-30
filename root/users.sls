@@ -6,7 +6,6 @@ noctuid:
         - wheel
         - uucp
         # wait for these to be created
-        # - bumblebee
         # - transmission
         - games
         # lockfile access

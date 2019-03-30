@@ -1,6 +1,8 @@
 ; TODO:
 ; - add mail
-; - fix headphone indicator
+; - add gpu on/off indicator
+; - fix headphone indicator; switch to script
+;   https://github.com/jaagr/polybar/issues/578#issuecomment-301122388
 ; - change underline/fg color for high cpu/ram
 ; - truncation of volume/brightness (maybe)
 ; Nice:
@@ -45,9 +47,6 @@ network = #81a2be
 time = #a84d95
 
 [bar/mine]
-; TODO can use own command for?
-monitor = eDP1
-
 width = 100%
 height = 2%
 offset-x = 0
@@ -68,6 +67,7 @@ module-margin-right = 2
 background = ${colors.background}
 foreground = ${colors.foreground}
 
+; order matters (first have priority)
 font-0 = benis uushi:pixelsize=10
 font-1 = IPAGothic:pixelsize=10:weight=bold
 font-2 = Unifont:style=Sans-Serif
@@ -77,7 +77,7 @@ font-5 = FuraMonoForPowerline NF:pixelsize=9
 
 modules-left = wm bspwm mpd
 modules-center = title
-modules-right = redshift memory cpu temperature battery xbacklight volume date wlan eth
+modules-right = redshift memory cpu temperature battery backlight volume date wlan eth
 
 tray-position = right
 tray-padding = 2
@@ -97,7 +97,6 @@ margin-bottom = 0
 type = custom/text
 content =  bspwm
 content-foreground = #ff6666
-content-font = 3
 
 [module/bspwm]
 type = internal/bspwm
@@ -220,8 +219,8 @@ format = <ramp> <label>
 format-underline =
 format-warn = <ramp> <label-warn>
 
-label = %temperature%
-label-warn = %temperature%
+label = %temperature-c%
+label-warn = %temperature-c%
 label-warn-foreground = ${colors.temperature}
 label-warn-underline = ${colors.temperature}
 
@@ -260,13 +259,15 @@ animation-charging-foreground = ${colors.charging}
 ; animation-charging-foreground = ${colors.foreground-alt}
 animation-charging-framerate = 1500
 
-[module/xbacklight]
-type = internal/xbacklight
+[module/backlight]
+type = internal/backlight
+card = intel_backlight
 
 format = <label> <bar>
 
 label = ☼
 label-foreground = ${colors.brightness}
+label-font = 5
 
 bar-width = 10
 bar-indicator =
@@ -283,7 +284,7 @@ bar-empty-foreground = ${colors.brightness-empty}
 ; card = intel_backlight
 
 [module/volume]
-type = internal/volume
+type = internal/alsa
 
 format-volume = <ramp-volume> <bar-volume>
 
@@ -292,8 +293,10 @@ ramp-volume-1 = 🔉
 ramp-volume-2 = 🔊
 ramp-volume-foreground = ${colors.volume}
 
+; bigger?
 ramp-headphones-0 = 
-ramp-headphones-1 = 
+ramp-headphones-foreground = ${colors.volume}
+; ramp-headphones-font = 4
 
 format-muted-prefix = " "
 format-muted-foreground = ${colors.volume-mute}

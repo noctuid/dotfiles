@@ -60,11 +60,6 @@ tlp:
 tlp-sleep:
   service.enabled: []
 
-# * Bumblebee
-bumblebeed:
-  service.running:
-    - enable: True
-
 # * Cron
 fcron:
   service.running:
