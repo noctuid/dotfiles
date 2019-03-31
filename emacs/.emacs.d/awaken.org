@@ -2059,7 +2059,8 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
   (defun noct:fd-fzf (&optional initial-input)
     "Run `counsel-fzf' using fd as fzf's default command."
     (interactive)
-    (noct:letenv (("FZF_DEFAULT_COMMAND" "fd"))
+    (noct:letenv (("FZF_DEFAULT_COMMAND"
+                   "fd --hidden --no-ignore --exclude .git"))
       (counsel-fzf initial-input)))
 
   ;; have heard some people say ripgrep is faster than fd for files; haven't
@@ -2067,7 +2068,8 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
   (defun noct:ripgrep-fzf (&optional initial-input)
     "Run `counsel-fzf' using ripgrep as fzf's default command."
     (interactive)
-    (noct:letenv (("FZF_DEFAULT_COMMAND" "rg --files"))
+    (noct:letenv (("FZF_DEFAULT_COMMAND"
+                   "rg --files --no-ignore --hidden --follow --glob '!.git'"))
       (counsel-fzf initial-input)))
 
   (defun noct:ivy-switch-to-locate ()
