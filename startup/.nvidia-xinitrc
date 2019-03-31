@@ -1,5 +1,20 @@
 xrandr --dpi 96
 
+# shellcheck disable=SC1090
+. ~/bin/helpers/monitor.sh
+
+# set laptop screen to primary monitor (so setroot and redshift recognize it as
+# the primary monitor/output); this is not the default when using nvidia-xrun
+
+# primary seems to be the connected monitor that is alphabetically first; ensure
+# that the primary monitor stays as the laptop screen after connecting to other
+# outputs by explicitly setting it
+
+# this is required for redshift to recognize laptop screen as crtc 0 at all
+
+# this assumes no outputs are plugged in when starting X
+xrandr --output "$(monitor_get_primary)" --primary
+
 ./.xinitrc
 
 # vim: set ft=sh:

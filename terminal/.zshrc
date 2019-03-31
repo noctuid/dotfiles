@@ -1194,10 +1194,6 @@ monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
 
 	if [[ -n $right_of_primary ]]; then
 		xrandr --output "$name" --auto --right-of "$primary"
-		# primary seems to be the connected monitor that is alphabetically
-		# first; ensure that the primary monitor doesn't change (keep it as the
-		# laptop screen) by explicitly setting it
-		xrandr --output "$primary" --primary
 		# restore wallpaper (keep the wallpaper on the primary screen; make the
 		# new monitor black instead of copying the wallpaper)
 		setroot --restore
