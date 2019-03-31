@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# using separate file so can guarantee it's run with bash (normally is anyway
+# but it should work even if .xinitrc is initially run with dash)
+
+# * Defaults
+# from default /etc/X11/xinit/xinitrc
+if [[ -d /etc/X11/xinit/xinitrc.d ]]; then
+	for f in /etc/X11/xinit/xinitrc.d/?*.sh; do
+		# shellcheck disable=SC1090
+		[[ -x $f ]] && source "$f"
+	done
+	unset f
+fi
+
+# replacing instead of default merge
+xrdb -load ~/.Xresources
+
+# * Java Fixes
+# https://wiki.archlinux.org/index.php/java#Non-reparenting_window_managers_/_Grey_window_/_Programs_not_drawing_properly
+# intellij won't work otherwise with bspwk
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+# https://wiki.archlinux.org/index.php/java#Impersonate_another_window_manager
+# breaks keybindings and other stuff
+# wmname LG3D
+
+# * Bell
+# die bell
+xset -b
+
+# * Keyboard/Input
+# setup keyboard layout (~/bin/rldkbd)
+rldkbd
+
+# faster key repeat rate and shorter delay (default is 660 25)
+# https://github.com/39aldo39/klfc/issues/10
+xset -r 25
+xset r rate 400 35
+
+# Japanese input
+fcitx -r
+
+# hotkey daemon
+# set SXHKD_EXTRA_CONFIGS to empty for DE/WMs with their own keybinding config
+if [[ ! -v $SXHKD_EXTRA_CONFIGS ]]; then
+	SXHKD_EXTRA_CONFIGS=(~/.config/sxhkd/wm_sxhkdrc ~/.config/sxhkd/extra_sxhkdrc)
+fi
+sxhkd "${SXHKD_EXTRA_CONFIGS[@]}" &>> /tmp/sxhkd_"$DISPLAY".log &
+
+# backup hotkey program
+xchainkeys &
+
+# * Mouse/Pointer
+# disable mouse acceleration
+# see ../root/etc/X11/xorg.conf.d/my-xorg.conf
+
+# disable mousepad when typing
+# i- disable for x second(s) after last keypress
+# k- ignore modifier keys (i.e. control left click)
+# t- only disable scrolling and clicking
+syndaemon -k -i 1 -d
+
+# set cursor look
+xsetroot -cursor_name left_ptr &
+
+# TODO hide cursor after a second
+# https://github.com/Airblader/unclutter-xfixes/issues/40
+# unclutter -idle 1 -b
+
+# * Screen
+# blank after 20 minutes of inactivity
+# see ../root/etc/X11/xorg.conf.d/my-xorg.conf
+
+# sleep after 25
+xautolock -time 25 -locker "pm-suspend" -detectsleep &
+
+# * Fonts
+# TODO remove all custom fonts or switch to ~/.local/share/fonts
+# https://wiki.archlinux.org/index.php/fonts#Manual_installation
+xset +fp ~/.fonts
+xset fp rehash
+
+# * Wallpaper
+# restore background image/settings
+if [[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/setroot/.setroot-restore ]]; then
+	setroot --restore
+else
+	setroot --bg-color "#00ff00"
+fi
+
+# * Other Daemons
+# redshift; better options at this point than xflux
+redshift &
+
+# notifications
+dunst &
+
+# notifications when mpd song changes
+# https://github.com/vehk/mpdnotify works well with mpdcron also
+mpd-notification -m "${XDG_MUSIC_DIR:-$HOME/music}" &
+
+# * Non-DE Daemons
+if [[ -z $IS_DE ]]; then
+	# will mess things up if run with a DE like gnome or cinnamon that already
+	# has a compositor
+	compton --daemon
+fi
+
+# * Start WM/DE
+session=${1:-bspwm}
+exec "$session"

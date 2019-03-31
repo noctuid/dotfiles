@@ -14,13 +14,15 @@ else
 fi
 echo "$empty" > /tmp/bspwm-last-desktop-empty
 
-if [[ $previously_empty != "$empty" ]] || ! pgrep sxhkd &> /dev/null; then
-	pkill -x sxhkd
+if [[ $previously_empty != "$empty" ]]; then
 	# since using mouse buttons as modifiers; see .sxhkdrc
 	xdotool keyup control shift alt super
+	# this is still hackish but probably less so than before
 	if $empty; then
-		sxhkd ~/.config/sxhkd/empty_sxhkdrc &>> /tmp/sxhkd.log &
+		ln -f -s ~/.config/sxhkd/empty_sxhkdrc ~/.config/sxhkd/extra_sxhkdrc
 	else
-		sxhkd &>> /tmp/sxhkd.log &
+		ln -f -s /dev/null ~/.config/sxhkd/extra_sxhkdrc
 	fi
+	# tell sxhkd to reload its config
+	pkill -USR1 -x sxhkd
 fi

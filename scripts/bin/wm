@@ -1,6 +1,0 @@
-#! /bin/sh
-# from loop example bspwm (for reloading)
-
-while true ; do
-  bspwm || break
-done

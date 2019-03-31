@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# kill and (re)run a program for the current X session only
+
+identifier="$1"
+pidfile=/tmp/"$identifier"_"$DISPLAY".pid
+
+if [[ -f "$pidfile" ]]; then
+	pkill --pidfile "$pidfile"
+fi
+
+"${@:2}" &
+echo $! > "$pidfile"

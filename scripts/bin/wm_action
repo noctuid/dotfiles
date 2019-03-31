@@ -173,7 +173,7 @@ case $1 in
 		bspc node @/ -g hidden
 		;;
 	reload)
-		bspc wm --dump-state > "$BSPWM_STATE" && bspc quit && pkill panell
+		bspc wm --restart
 		;;
 	quit)
 		bspc quit 1

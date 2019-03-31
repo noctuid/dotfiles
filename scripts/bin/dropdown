@@ -5,5 +5,6 @@ polybar_padding=$(xprop -id "$polybar_wid"  _NET_WM_STRUT_PARTIAL | \
 	awk -F "," '{gsub(/ /, ""); print $3}' 2> /dev/null)
 bspc_padding=$(bspc config top_padding)
 padding=${polybar_padding:-$bspc_padding}
+border=$(($(bspc config border_width)*2))
 
-tdrop -ma -w -4 -y "$padding" "$@"
+tdrop -ma -w -"$border" -y "$padding" "$@"

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+pkill -x conky
+pkill -x compton
+pkill -x polybar
+bspc config top_padding 0

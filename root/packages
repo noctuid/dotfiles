@@ -348,6 +348,7 @@ pulseaudio-alsa
 pavucontrol
 ponymix
 mpd
+mpd-notification aur
 mpc
 # vimus nix nixpkgs.haskellPackages.vimus
 # backup client

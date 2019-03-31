@@ -1,37 +1,22 @@
 #!/usr/bin/env bash
-# reload panel and empty desktop checker
-
-pkill -x polybar
-pkill -x bspc
-
-if [[ $1 == nopanel ]]; then
-	# for conserving battery
-	pkill -x conky
-	pkill -x compton
-	bspc config top_padding 0
-else
-	polybar mine &> /dev/null &
-	if ! pgrep -x conky > /dev/null; then
-		conky_switcher
-	fi
-	if ! pgrep -x compton > /dev/null; then
-		compton &> /dev/null &
-	fi
-fi
+# reload bspwm rules
 
 # set up home row navigation keybindings on empty desktops
-bspc subscribe desktop_focus node_add node_remove node_transfer \
+xrestart bspc_empty_desktop_subscribe \
+		 bspc subscribe desktop_focus node_add node_remove node_transfer \
 	| xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd &
 
 bspc rule -r '*'
+bspc rule -a Steam follow=false state=floating
+bspc rule -a Steam.exe follow=false state=floating
 # https://github.com/baskerville/bspwm/issues/551
 bspc rule -a Emacs state=tiled
 bspc rule -a Pqiv state=tiled
 bspc rule -a Zathura state=tiled
+# https://github.com/baskerville/bspwm/issues/655
 bspc rule -a "LibreOffice" state=tiled
 bspc rule -a "libreoffice" state=tiled
-# doesn't work
-# bspc rule -a '*:libreoffice-impress' state=tiled
+bspc rule -a "Soffice" state=tiled
 
 # change border color depending on layout
 # previous_focused=$(bspc config focused_border_color)

@@ -1,5 +1,8 @@
-#!/usr/bin/env bash
 # to prevent the need to change in multiple places (~/.zshrc and ~/.xinitrc)
-pkill -x xcape
 # still deciding on
-xcape -e "ISO_Level5_Shift=BackSpace;Control_L=parenleft;Shift_L=Return;ISO_Level3_Shift=Escape;Alt_L=parenleft"
+xrestart xcape \
+		 xcape -e "ISO_Level5_Shift=BackSpace;Control_L=Tab;Shift_L=Return;ISO_Level3_Shift=Escape;Alt_L=parenleft" &
+
+# Local Variables:
+# mode: sh
+# End:

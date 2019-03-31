@@ -1177,14 +1177,7 @@ function grubify() {
 
 # *** Connecting to External Displays
 # **** Helpers
-monitor_get_primary() {
-	xrandr --listmonitors | awk '/0:/ {print $NF}'
-}
-
-monitor_get_dimensions() { # monitor
-	xrandr --query \
-		| awk -F '+| ' "/^$1/ {gsub(\"primary \",\"\"); print \$3}"
-}
+source ~/bin/helpers/monitor.sh
 
 monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
 	# exit if any command or any part of a pipe fails

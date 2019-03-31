@@ -1,3 +1,4 @@
+# Base sxhkdrc
 # Limitations:
 # - chaining isn't perfect (use xchainkeys instead)
 # - can only use level 1 (unshifted) key for prefix (can use keys in layer with modifier though)
@@ -105,95 +106,6 @@ mode_switch + super + s
 
 mode_switch + super + r
 	dropdown -n ranger -h 97% -f "zsh -c \"ranger --cmd='set preview_images_method kitty'; zsh -i\"" kitty
-
-# * Window Management
-# ** General
-# close
-super + w
-	wm_action wclose
-
-# kill
-super + W
-	wm_action wkill
-
-# cycle layout (monocle)
-super + m
-	wm_action lsel next
-
-# toggle states
-super + {f,v}
-	wm_action wtoggle {fullscreen,floating}
-
-super + c
-	wm_action sticky
-
-# ** Selection and Movement
-# selection/movement by direction
-super + {_,shift +}{u,y,k,semicolon}
-	wm_action {wsel,wmove} {left,right,down,up}
-
-# switch to last window
-super + l
-	wm_action dsel last
-
-# move selected window to biggest space
-super + g
-	wm_action wmove biggest.local
-
-# switch with last window (across desktops)
-super + apostrophe
-	wm_action wmove last
-
-# TODO I don't know why this isn't working
-# navigate to biggest floating window
-super + F
-	wm_action wsel biggest.local.floating
-
-super + b
-	wm_action dbalance
-
-# ** Desktop Movement
-# change to desktop or move selected window to desktop
-super + {_,shift +} {a,r,s,t,d,h,n,e,i,o}
-	wm_action {dsel,wmove_tod} {1-9,10}
-
-# ** Resizing
-super + control + {h,n,e,i}
-	wm_action wresize {left,down,up,right}
-
-# moving floating windows
-# super + {Left,Down,Up,Right}
-# 	bspc node -v {-20 0,0 20,0 -20,20 0}
-
-# ** Preselection (never use)
-# direction to split
-super + p ; {h,n,e,i}
-	wm_action psel {west,south,north,east}
-
-super + p ; {_,shift + }space
-	wm_action psel {cancel,canceld}
-super + p ; {_,shift + }q
-	wm_action psel {cancel,canceld}
-
-# set presl splitting ratio of current window
-# super + ctrl + {1-9}
-# 	wm_action splitr 0.{1-9}
-
-# ** Adjustment
-super + minus
-	wm_action gapc +4
-
-super + equal
-	wm_action gapc -4
-
-# ** Misc
-# lock
-super + L
-	slimlock
-
-# hide all windows
-KP_Add
-	wm_action hide_all
 
 # * Mouse
 button9
