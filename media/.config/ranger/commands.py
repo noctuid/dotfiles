@@ -1,6 +1,7 @@
 # default config: /usr/share/doc/ranger/config/commands.py
 from ranger.api.commands import *
 from ranger.core.loader import CommandLoader
+import os
 
 
 # overriden for function import
@@ -135,6 +136,7 @@ class take(Command):
 
 
 # https://github.com/hut/ranger/wiki/Commands#fzf-integration
+# updated to use rg/fd instead of find
 class fzf_select(Command):
     """
     :fzf_select
@@ -147,16 +149,16 @@ class fzf_select(Command):
     """
     def execute(self):
         import subprocess
+        rg = "rg --files --no-ignore --hidden --follow --glob '!.git'"
+        fd = "fd --type directory --no-ignore --hidden --exclude .git"
         if self.quantifier:
             # match only directories
-            command = "find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune \
-            -o -type d -print 2> /dev/null | sed 1d | cut -b3- | fzf +m"
+            command = f"FZF_DEFAULT_COMMAND=\"{fd}\" fzf"
         else:
             # match files and directories
-            command = "find -L . \( -path '*/\.*' -o -fstype 'dev' -o -fstype 'proc' \) -prune \
-            -o -print 2> /dev/null | sed 1d | cut -b3- | fzf +m"
+            command = f"FZF_DEFAULT_COMMAND=\"{rg}\" fzf"
         fzf = self.fm.execute_command(command, stdout=subprocess.PIPE)
-        stdout, stderr = fzf.communicate()
+        stdout, _ = fzf.communicate()
         if fzf.returncode == 0:
             fzf_file = os.path.abspath(stdout.decode('utf-8').rstrip('\n'))
             if os.path.isdir(fzf_file):
