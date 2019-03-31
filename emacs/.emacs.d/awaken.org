@@ -1804,6 +1804,10 @@ NAME should be lowercase as the uppercase version will also be checked."
   (interactive)
   (switch-to-buffer "*scratch*"))
 
+(defun noct:goto-backtrace ()
+  (interactive)
+  (switch-to-buffer "*Backtrace*"))
+
 (defun noct:goto-main ()
   "Go to the shortest filename named the same as the project root dirname.
 If projectile is not installed, the current directory's name is used instead.
@@ -1828,6 +1832,7 @@ Globbing is used to find a matching file."
     "b" (noct:f "~/ag-sys/else/browse.org")
     "B" (noct:f "~/.config/bspwm/bspwmrc")
     "c" (noct:f "~/.config/ranger/rc.conf")
+    "C" #'noct:goto-backtrace
     "d" #'projectile-edit-dir-locals
     "e" (noct:f "~/.emacs.d/awaken.org")
     "E" (noct:f "~/.emacs.d/lisp/.private.el.gpg")
@@ -1836,6 +1841,8 @@ Globbing is used to find a matching file."
     "I" (noct:f "~/ag-sys/else/scrawl/ideas.org")
     "j" (noct:f "~/ag-sys/else/japanese/japanese.org")
     "J" (noct:f "~/ag-sys/else/journal.org")
+    ;; pretty useful log file since most programs are started from sxhkd
+    "K" (noct:f (format "/tmp/sxhkd_%s.log" (getenv "DISPLAY")))
     "l" (noct:f "~/ag-sys/else/log.org")
     "L" (noct:f "~/ag-sys/else/life.org")
     "m" (noct:f "~/ag-sys/else/mind.org")
@@ -1848,14 +1855,15 @@ Globbing is used to find a matching file."
     "t" (noct:f "~/.tmux.conf")
     "v" (noct:f "~/.vimrc")
     "w" (noct:f "~/ag-sys/else/workflow.org")
-    "x" (noct:f "~/.xinitrc")
+    "x" (noct:f "~/.bxinitrc")
+    "X" (noct:f "/var/log/Xorg.0.log")
     "y" (noct:f "~/ag-sys/else/other/skill_toys/skill_toys.org")
     "z" (noct:f "~/.zshrc")
+    "Z" (noct:f "~/.zsh_history")
     "2" (noct:f "~/ag-sys/else/20xx.org")))
 
 (noct:bind-general-quickmarks)
 #+end_src
-
 
 *** Group-specific Quickmarks
 #+begin_src emacs-lisp
