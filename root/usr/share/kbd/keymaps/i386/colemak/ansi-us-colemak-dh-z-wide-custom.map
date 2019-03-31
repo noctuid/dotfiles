@@ -49,6 +49,8 @@ keycode  37  =  n             N            ntilde           Ntilde         Contr
 keycode  38  =  e             E            eacute           Eacute         Control_e
 keycode  39  =  i             I            iacute           Iacute         Control_i
 keycode  40  =  o             O            oacute           Oacute         Control_o
+# replace enter with '
+keycode  28  =  apostrophe    quotedbl     otilde           Otilde
 
 keycode  86  =  minus         underscore   asciitilde       asciitilde     Control_underscore
 keycode  44  =  x             X            dead_circumflex  asciitilde     Control_x
@@ -61,6 +63,8 @@ keycode  50  =  m             M            asciitilde       asciitilde     Contr
 keycode  51  =  h             H            asciitilde       asciitilde     Control_h
 keycode  52  =  comma         less         dead_cedilla     asciitilde
 keycode  53  =  period        greater      asciitilde       asciitilde
+# make right shift /
+keycode  54  =  slash         question     questiondown     asciitilde     Delete
 
 keycode  57  =  space         space        space            nobreakspace   nul
 
@@ -70,10 +74,14 @@ keycode  58 =    BackSpace     BackSpace        BackSpace         BackSpace
 keycode   1 = Escape
 keycode  14 = Delete
 keycode  15 = Tab
-keycode  28 = Return
-        alt     keycode  28 = Meta_Control_m
+# keycode  28 = Return
+        # alt     keycode  28 = Meta_Control_m
 keycode  29 = Control
 keycode  42 = Shift
-keycode  54 = Shift
+# keycode  54 = Shift
 keycode  56 = Alt
 keycode  97 = Control
+
+# Local Variables:
+# mode: conf-unix
+# End:
