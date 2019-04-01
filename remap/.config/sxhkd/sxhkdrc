@@ -70,6 +70,7 @@ mode_switch + super + f
 
 mode_switch + super + space
 	launcher
+    # ~/bin/launcher
 
 # edi[t]
 mode_switch + super + t
