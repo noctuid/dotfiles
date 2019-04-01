@@ -83,6 +83,8 @@ nvidia-utils
 # for linux-ck
 # nvidia-ck-ivybridge
 nvidia-ck-skylake
+# needed for steam
+lib32-nvidia-utils
 
 # * Security
 wireguard-tools
