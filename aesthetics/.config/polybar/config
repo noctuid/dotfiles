@@ -47,16 +47,18 @@ network = #81a2be
 time = #a84d95
 
 [bar/mine]
-width = 100%
-height = 2%
-offset-x = 0
-offset-y = 0
+width = ${env:BAR_WIDTH:100%}
+height = ${env:BAR_HEIGHT:2%}
+offset-x = ${env:BAR_X_OFFSET:0}
+offset-y = ${env:BAR_Y_OFFSET:0}
+
 padding-left = 1
 padding-right = 1
 radius = 0
 ; fixed-center = false
-border-size = 0
-; border-color = #00000000
+border-size = ${env:BAR_BORDER:0}
+; TODO better color
+border-color = #555753
 
 line-size = 2
 line-color = #f00

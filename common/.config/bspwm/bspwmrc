@@ -5,6 +5,11 @@ bspc config focused_border_color "#d0d293"
 bspc config normal_border_color "#708090"
 bspc config active_border_color "#555753"
 
+# * Environment Variables
+# update environment variables when reloading bspwm
+# shellcheck disable=SC1090
+source ~/bin/helpers/env.sh
+
 # * Settings
 # open second window on right
 # bspc config initial_polarity second_child
@@ -15,6 +20,7 @@ bspc config external_rules_command ~/bin/bspwm/external_rules.sh
 bspc config split_ratio 0.60
 
 bspc config gapless_monocle true
+bspc config top_monocle_padding "$BSPWM_GAP"
 
 bspc config click_to_focus button1
 bspc config focus_follows_pointer false
@@ -22,14 +28,10 @@ bspc config focus_follows_pointer false
 # interesting but not useful for me
 # bspc config pointer_follows_focus  true
 
-# shellcheck disable=SC1090
-source ~/bin/helpers/monitor.sh
-# 3 pixels on FHD; 6 on 4k
-bspc config border_width "$(monitor_percent_of_width 0.0015625)"
+bspc config border_width "$BSPWM_BORDER"
 # a small gap looks nice without taking up too much space
 # it also makes the layout (monocle or tiled) immediately obvious
-# 15 pixels on FHD; 30 on 4k
-bspc config window_gap "$(monitor_percent_of_width 0.0078125)"
+bspc config window_gap "$BSPWM_GAP"
 
 # * Destktops
 bspc monitor -d I II III IV V VI VII VIII IX
@@ -39,7 +41,8 @@ bspc desktop -f ^2 &
 rldbspc
 
 # * Panel
-polybar mine
+xrestart polybar \
+		 polybar mine
 
 # Local Variables:
 # eval: (rainbow-mode 1)

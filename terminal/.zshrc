@@ -878,6 +878,8 @@ alias fixhwclock='rldtime && sudo hwclock --systohc'
 
 alias rldsxhkd='pkill -USR1 -x sxhkd'
 
+alias rldpolybar='pkill -USR1 -x polybar'
+
 alias rldconky='conky_switcher'
 
 # battery saving; kill panel, conky, and compton

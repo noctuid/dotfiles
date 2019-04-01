@@ -13,12 +13,12 @@ monitor_get_dimensions() { # monitor
 		| awk -F '+| ' "/^$monitor/ {gsub(\"primary \",\"\"); print \$3}"
 }
 
-monitor_percent_of_width() { # percentage
-	percentage=$1
+monitor_fraction_of_width() { # percentage
+	fraction=$1
 	monitor_get_dimensions "$(monitor_get_primary)" \
-		| awk -F 'x' "{printf \"%.0f\n\", \$1*$percentage}"
+		| awk -F 'x' "{printf \"%.0f\n\", \$1*$fraction}"
 }
 
 # Local Variables:
-# sh-shell: bash
+# sh-shell: sh
 # End:

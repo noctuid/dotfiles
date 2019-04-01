@@ -15,6 +15,10 @@ fi
 # replacing instead of default merge
 xrdb -load ~/.Xresources
 
+# * Environment Variables
+# shellcheck disable=SC1090
+source ~/bin/helpers/env.sh
+
 # * Java Fixes
 # https://wiki.archlinux.org/index.php/java#Non-reparenting_window_managers_/_Grey_window_/_Programs_not_drawing_properly
 # intellij won't work otherwise with bspwk
