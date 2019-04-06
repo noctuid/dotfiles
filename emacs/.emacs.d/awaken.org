@@ -3568,7 +3568,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (general-with-package 'debug
   (general-def 'normal debugger-mode-map
-    "q" #'quit-window)
+    "q" #'debugger-quit)
 
   (general-add-hook 'debugger-mode-hook #'evil-normalize-keymaps))
 #+end_src
