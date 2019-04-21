@@ -92,6 +92,9 @@ else
 	setroot --bg-color "#00ff00"
 fi
 
+# * Pywal
+wal -R
+
 # * Other Daemons
 # redshift; better options at this point than xflux
 redshift &

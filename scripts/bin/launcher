@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-# run on current monitor instead of monitor mouse is on
-rofi -monitor -1 -matching fuzzy -font "Fira Mono 12" -show run

@@ -30,8 +30,9 @@ urxvt.letterSpace:     -1
 xterm*faceName: Iconsolata-g:size=8
 
 ! * Term colours
-*background: #1d282c
-*foreground: #2b81a6
+! colors taken from default/non-pywal polybar colors
+*background: #222222
+*foreground: #dfdfdf
 ! Black, DarkGrey
 *color0:     #1d282c
 *color8:     #709080
@@ -39,20 +40,20 @@ xterm*faceName: Iconsolata-g:size=8
 *color1:     #705050
 *color9:     #dca3a3
 ! DarkGreen, Green
-*color2:     #a9d152
-*color10:    #90a959
+*color2:     #8c9440
+*color10:    #a9d152
 ! DarkYellow, Yellow
-*color3:     #e3b76f
+*color3:     #de925e
 *color11:    #f0dfaf
 ! DarkBlue, Blue
-*color4:     #1d6b8c
-*color12:    #4ba9d1
+*color4:     #2a3d4e
+*color12:    #2a7a9c
 ! DarkMagenta, Magenta
-*color5:     #dc8cc3
-*color13:    #ec93d3
+*color5:     #a84d95
+*color13:    #905eff
 ! DarkCyan, Cyan
-*color6:     #84d5d9
-*color14:    #93e0e3
+*color6:     #81a2be
+*color14:    #78b3cc
 ! LightGrey, White
 *color7:     #dcdccc
 *color15:    #ffffff

@@ -69,8 +69,7 @@ mode_switch + super + f
 	firejail --seccomp firefox
 
 mode_switch + super + space
-	launcher
-    # ~/bin/launcher
+	rofi -show run
 
 # edi[t]
 mode_switch + super + t

@@ -2332,7 +2332,7 @@ Smartparens' version is unfortunately too slow.
 ;; dead
 ;; (use-package gruvbox-dark-theme
 ;;   :straight (gruvbox-dark-theme :type git
-;;                                 :fetcher github
+;;                                 :host github
 ;;                                 :repo "d125q/gruvbox-dark-emacs")
 ;;   :init (load-theme 'gruvbox-dark t))
 
@@ -2366,7 +2366,66 @@ Smartparens' version is unfortunately too slow.
 (use-package kaolin-themes)
 #+end_src
 
-*** Current Theme/Circadian
+*** Pywal
+**** Ewal
+#+begin_src emacs-lisp
+;; default prevents changing `spacemacs-theme-custom-colors' later.. (currently
+;; using altered theme)
+(use-package spacemacs-theme)
+
+(use-package ewal
+  :straight (ewal :type git
+                  :host gitlab
+                  :repo "jjzmajic/ewal")
+  :init
+  (defun noct:ewal ()
+    "Set theme for the current pywal colors."
+    (interactive)
+    (ewal-get-emacs-evil-cursors-colors
+     :apply t
+     :force-reload t)
+    ;; create a theme with up-to-date colors
+    (setq spacemacs-theme-custom-colors (ewal-get-spacemacs-theme-colors :force-reload t)
+          spacemacs-theme-org-height nil)
+    (require 'spacemacs-dark-theme)
+    (create-spacemacs-theme 'dark 'spacemacs-dark)
+    ;; TODO why don't these work anymore
+    ;; (custom-theme-reset-faces
+    ;;  'spacemacs-dark
+    ;;  '(org-block nil)
+    ;;  '(org-block-begin-line nil)
+    ;;  '(org-block-end-line nil))
+    ;; (custom-theme-set-faces
+    ;;  'spacemacs-dark
+    ;;  ;; '(org-block ((t (:background nil))))
+    ;;  `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
+    ;;  `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
+    (custom-set-faces
+     `(org-block ((t (:background ,(ewal-get-color 'background)))))
+     `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
+     `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
+
+    ;; TODO again, why doesn't this work?
+    ;; (custom-theme-set-faces
+    ;;  'spacemacs-dark
+    ;;  `(internal-border ((t (:weight bold
+    ;;                         :background ,(ewal-get-color 'foreground))))))
+    (custom-set-faces
+     `(internal-border ((t (:weight bold
+                            :background ,(ewal-get-color 'foreground))))))
+
+    (load-theme 'spacemacs-dark t))
+
+  (when (ewal-load-ewal-colors)
+    (noct:ewal)))
+#+end_src
+
+**** Xresources
+#+begin_src emacs-lisp
+(use-package xresources-theme)
+#+end_src
+
+*** Circadian
 #+begin_src emacs-lisp
 (use-package circadian
   :init
@@ -2374,7 +2433,8 @@ Smartparens' version is unfortunately too slow.
                             ;; ("8:00" . twilight-bright)
                             ;; ("20:00" . nord)
                             ("20:00" . gruvbox-dark-soft)))
-  (circadian-setup))
+  (unless (bound-and-true-p ewal-extended-palette)
+    (circadian-setup)))
 #+end_src
 
 ** Visual Fill Column

@@ -4,3 +4,4 @@ whitelist ~/move
 whitelist ~/database/move
 whitelist ~/bin
 whitelist ~/src/homepage
+whitelist ~/.cache/wal

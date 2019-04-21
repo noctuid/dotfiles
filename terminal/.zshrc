@@ -125,10 +125,13 @@ compinit
 # show completion menu when number of options is at least 2
 zstyle ':completion:*' menu select=2
 
-# }}}
-#==============================
-# Appearance {{{
-#==============================
+# * Appearance
+# ** Pywal
+if [[ -f ~/.cache/wal/sequences ]]; then
+	(cat ~/.cache/wal/sequences &)
+fi
+
+# ** Less Colors
 # colored less manpages
 # similar to things like colored-man; don't remember where found this
 export LESS_TERMCAP_mb=$'\E[01;31m'             # begin blinking
@@ -139,6 +142,7 @@ export LESS_TERMCAP_so=$'\E[01;44;33m'          # begin standout-mode - info box
 export LESS_TERMCAP_ue=$'\E[0m'                 # end underline
 export LESS_TERMCAP_us=$'\E[01;32m'             # begin underline
 
+# ** Ranger Shell Prompt
 # for if have entered shell from ranger
 # https://github.com/hut/ranger/blob/bdd6bf407ab22782f7ddb3a1dd24ffd9c3361a8d/examples/bash_subshell_notice.sh
 [[ -n $RANGER_LEVEL ]] && export PS1="$PS1"'%{$fg[red]%}ranger> '
@@ -1264,7 +1268,7 @@ alias hybrid="sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf"
 
 # discrete grapics in bios or hybrid and nvidia-xrun
 nvadd() {
-	monitor_connect DP-1 true X
+	monitor_connect DP-1 true 十
 }
 
 nvmirror() {

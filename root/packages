@@ -431,6 +431,7 @@ otf-nerd-fonts-fira-code aur
 noto-fonts-cjk
 otf-ipafont
 adobe-source-han-sans-jp-fonts
+ttf-ricty aur
 
 # unicode
 # https://github.com/rolandwalker/unicode-fonts
@@ -471,6 +472,9 @@ numix-gtk-theme
 numix-icon-theme-git aur
 # for framebuffer colors
 setcolors-git aur
+# colorscheme generation/setup from wallpaper
+python-pywal
+python-wal-steam-git aur
 
 # * DNS
 # validating, recursive, caching resolver

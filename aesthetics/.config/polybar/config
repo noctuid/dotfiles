@@ -5,6 +5,9 @@
 ;   https://github.com/jaagr/polybar/issues/578#issuecomment-301122388
 ; - change underline/fg color for high cpu/ram
 ; - truncation of volume/brightness (maybe)
+; - ability to do color = $() or equivalent (could generate darker color for
+;   background of brightenss/audio)
+; - maybe add section for vpn, transmission, etc.
 ; Nice:
 ; - support for  system tray
 ; - support for percentages for padding/width
@@ -16,35 +19,28 @@
 ; - module naming and functionality inconsistencies
 
 [colors]
-background = #222
-background-alt = #444
-foreground = #dfdfdf
-foreground-alt = #555
-primary = #ffb52a
-focused-foreground = #de935f
-monitor-foreground = #8dbcdf
-state-foreground = #90a959
-secondary = #e60053
-alert = #bd2c40
-music = #a9D152
-title = #78b3cc
-; ram = #7549d6
-ram = #5e28d4
-cpu = #905eff
-temperature = #cf1020
-; battery
-charging = #cc6666
-discharging = #ac4142
-full = #8c9440
-; brightness = #de935f
-brightness = #de925e
-brightness-empty = #524236
-volume = #2a7a9c
-; volume-empty = #2d3c46
-volume-empty = #2a3d4e
-volume-mute = #ac4142
-network = #81a2be
-time = #a84d95
+custom-gray = #555
+
+; Xresources/pywal
+foreground = ${xrdb:foreground:#222}
+background = ${xrdb:background:#dfdfdf}
+
+dark-red = ${xrdb:color1:#cf1020}
+red = ${xrdb:color9:#ff6666}
+
+dark-green = ${xrdb:color2:#8c9440}
+green = ${xrdb:color10:#a9d152}
+
+yellow = ${xrdb:color3:#de925e}
+
+dark-blue = ${xrdb:color4:#2a3d4e}
+blue = ${xrdb:color12:#2a7a9c}
+
+dark-magenta = ${xrdb:color5:#a84d95}
+magenta = ${xrdb:color13:#905eff}
+
+dark-cyan = ${xrdb:color6:#81a2be}
+cyan = ${xrdb:color14:#78b3cc}
 
 [bar/mine]
 width = ${env:BAR_WIDTH:100%}
@@ -52,13 +48,13 @@ height = ${env:BAR_HEIGHT:2%}
 offset-x = ${env:BAR_X_OFFSET:0}
 offset-y = ${env:BAR_Y_OFFSET:0}
 
-padding-left = 1
-padding-right = 1
+padding = 2
+
+; no rounded borders
 radius = 0
-; fixed-center = false
+
 border-size = ${env:BAR_BORDER:0}
-; TODO better color
-border-color = #555753
+border-color = ${colors.foreground}
 
 line-size = 2
 line-color = #f00
@@ -73,9 +69,13 @@ foreground = ${colors.foreground}
 font-0 = benis uushi:pixelsize=10
 font-1 = IPAGothic:pixelsize=10:weight=bold
 font-2 = Unifont:style=Sans-Serif
-font-3 = Wuncon Siji:pixelsize=9
+font-3 = Siji:pixelsize=9
 font-4 = Symbola:pixelsize=10
 font-5 = FuraMonoForPowerline NF:pixelsize=9
+; currently only used for lock (bspwm) and lightbulb icon (redshift)
+font-6 = Font Awesome:pixelsize=9
+; TODO better font?
+font-7 = Ricty Discord:pixelsize=9
 
 modules-left = wm bspwm mpd
 modules-center = title
@@ -91,14 +91,14 @@ wm-restack = bspwm
 screenchange-reload = true
 
 [global/wm]
-; top_padding
+; set _NET_WM_STRUT_PARTIAL (see ./../../../scripts/bin/dropdown)
 margin-top = 2%
 margin-bottom = 0
 
 [module/wm]
 type = custom/text
 content =  bspwm
-content-foreground = #ff6666
+content-foreground = ${colors.red}
 
 [module/bspwm]
 type = internal/bspwm
@@ -109,79 +109,53 @@ pin-workspaces = false
 ; TODO only show monitor if more than 1
 format = "<label-monitor> <label-state> <label-mode> "
 
-label-monitor-foreground = ${colors.monitor-foreground}
-
-label-tiled-foreground = ${colors.state-foreground}
-label-monocle-foreground = ${colors.state-foreground}
+label-monitor-foreground = ${colors.cyan}
 
 label-focused = %name%
-label-focused-foreground = ${colors.focused-foreground}
-label-focused-underline= ${colors.primary}
+label-focused-foreground = ${colors.foreground}
+label-focused-underline= ${colors.yellow}
 label-focused-margin-left = 1
 
 label-occupied = %name%
 label-occupied-margin-left = 1
 
-label-empty-foreground = ${colors.foreground-alt}
+label-empty-foreground = ${colors.custom-gray}
 ; TODO why does this need to be different?
 label-empty-margin-left = 0
 
 label-urgent = %name%
-label-urgent-background = ${colors.alert}
+label-urgent-background = ${colors.dark-red}
 label-urgent-margin-left = 1
 
-label-monocle = M
-label-tiled = T
-label-fullscreen = F
-label-floating = FL
-label-pseudotiled = P
-label-locked = L
-label-locked-foreground = #bd2c40
-label-sticky = S
-label-sticky-foreground = #fba922
-label-private = P
-label-private-foreground = #bd2c40
+label-monocle = 
+label-monocle-foreground = ${colors.dark-green}
+label-tiled = 
+label-tiled-foreground = ${colors.dark-green}
+label-fullscreen = 
+label-floating = 
+label-floating-foreground = ${colors.blue}
+label-pseudotiled = 
+label-pseudotiled-foreground = ${colors.cyan}
+label-locked = 
+label-locked-foreground = ${colors.dark-red}
+label-sticky = 
+label-sticky-foreground = ${colors.yellow}
+label-private = 
+label-private-foreground = ${colors.magenta}
 
 [module/mpd]
 type = custom/script
 exec = ~/bin/song_scroll
 tail = true
 
-label-foreground = ${colors.music}
+label-foreground = ${colors.green}
 
 [module/title]
 type = custom/script
 exec = ~/bin/title_scroll
 tail = true
 
-label-foreground = ${colors.title}
-
-; [module/filesystem]
-; type = internal/fs
-; interval = 25
-
-; mount-0 = /
-; mount-1 = /home
-
-; label-mounted = %{F#0a81f5}%mountpoint%%{F-}: %percentage_used%%
-; label-unmounted = %mountpoint% not mounted
-; label-unmounted-foreground = ${colors.foreground-alt}
-
-; [module/xkeyboard]
-; type = internal/xkeyboard
-; blacklist-0 = num lock
-
-; format-prefix = " "
-; format-prefix-foreground = ${colors.foreground-alt}
-; format-prefix-underline = ${colors.secondary}
-
-; label-layout = %layout%
-; label-layout-underline = ${colors.secondary}
-
-; label-indicator-padding = 2
-; label-indicator-margin = 1
-; label-indicator-background = ${colors.secondary}
-; label-indicator-underline = ${colors.secondary}
+label-foreground = ${colors.cyan}
 
 [module/redshift]
 type = custom/script
@@ -196,8 +170,7 @@ type = internal/memory
 interval = 3
 
 format-prefix = " "
-format-prefix-foreground = ${colors.ram}
-; format-prefix-foreground = ${colors.foreground-alt}
+format-prefix-foreground = ${colors.magenta}
 
 label = %percentage_used%%
 
@@ -206,8 +179,7 @@ type = internal/cpu
 interval = 3
 
 format-prefix = " "
-format-prefix-foreground = ${colors.cpu}
-; format-prefix-foreground = ${colors.foreground-alt}
+format-prefix-foreground = ${colors.magenta}
 
 label = %percentage%%
 
@@ -223,20 +195,19 @@ format-warn = <ramp> <label-warn>
 
 label = %temperature-c%
 label-warn = %temperature-c%
-label-warn-foreground = ${colors.temperature}
-label-warn-underline = ${colors.temperature}
+label-warn-foreground = ${colors.dark-red}
+label-warn-underline = ${colors.dark-red}
 
 ramp-0 = 
 ramp-1 = 
 ramp-2 = 
-ramp-foreground = ${colors.temperature}
-; ramp-foreground = ${colors.foreground-alt}
+ramp-foreground = ${colors.dark-red}
 
 [module/battery]
 type = internal/battery
 battery = BAT0
 adapter = AC
-; full-at = 99
+full-at = 99
 
 format-charging = <animation-charging> <label-charging>
 label-charging = %percentage%%
@@ -245,20 +216,17 @@ format-discharging = <ramp-capacity> <label-discharging>
 format-discharging-underline =
 
 format-full-prefix = " "
-format-full-prefix-foreground = ${colors.full}
-; format-full-prefix-foreground = ${colors.foreground-alt}
+format-full-prefix-foreground = ${colors.dark-green}
 
 ramp-capacity-0 = 
 ramp-capacity-1 = 
 ramp-capacity-2 = 
-ramp-capacity-foreground = ${colors.discharging}
-; ramp-capacity-foreground = ${colors.foreground-alt}
+ramp-capacity-foreground = ${colors.dark-red}
 
 animation-charging-0 = 
 animation-charging-1 = 
 animation-charging-2 = 
-animation-charging-foreground = ${colors.charging}
-; animation-charging-foreground = ${colors.foreground-alt}
+animation-charging-foreground = ${colors.red}
 animation-charging-framerate = 1500
 
 [module/backlight]
@@ -268,17 +236,16 @@ card = intel_backlight
 format = <label> <bar>
 
 label = ☼
-label-foreground = ${colors.brightness}
+label-foreground = ${colors.yellow}
 label-font = 5
 
 bar-width = 10
 bar-indicator =
 bar-indicator-foreground = #ff
 bar-fill = ─
-bar-fill-foreground = ${colors.brightness}
+bar-fill-foreground = ${colors.yellow}
 bar-empty = ─
-bar-empty-foreground = ${colors.brightness-empty}
-; bar-empty-foreground = ${colors.foreground-alt}
+bar-empty-foreground = ${colors.custom-gray}
 
 ; [module/backlight-acpi]
 ; inherit = module/xbacklight
@@ -293,51 +260,41 @@ format-volume = <ramp-volume> <bar-volume>
 ramp-volume-0 = 🔈
 ramp-volume-1 = 🔉
 ramp-volume-2 = 🔊
-ramp-volume-foreground = ${colors.volume}
+ramp-volume-foreground = ${colors.blue}
 
 ; bigger?
 ramp-headphones-0 = 
-ramp-headphones-foreground = ${colors.volume}
+ramp-headphones-foreground = ${colors.blue}
 ; ramp-headphones-font = 4
 
 format-muted-prefix = " "
-format-muted-foreground = ${colors.volume-mute}
-; format-muted-foreground = ${colors.foreground-alt}
+format-muted-foreground = ${colors.dark-red}
 ; label-muted = sound muted
 
 bar-volume-width = 10
-bar-volume-foreground-0 = ${colors.volume}
-bar-volume-foreground-1 = ${colors.volume}
-bar-volume-foreground-2 = ${colors.volume}
-bar-volume-foreground-3 = ${colors.volume}
-bar-volume-foreground-4 = ${colors.volume}
-bar-volume-foreground-5 = ${colors.volume}
-bar-volume-foreground-6 = #ff5555
+bar-volume-foreground-0 = ${colors.blue}
+bar-volume-foreground-1 = ${colors.blue}
+bar-volume-foreground-2 = ${colors.blue}
+bar-volume-foreground-3 = ${colors.blue}
+bar-volume-foreground-4 = ${colors.blue}
+bar-volume-foreground-5 = ${colors.blue}
+bar-volume-foreground-6 = ${colors.dark-red}
 bar-volume-gradient = false
 bar-volume-indicator =
 bar-volume-fill = ─
 bar-volume-empty = ─
-bar-volume-empty-foreground = ${colors.volume-empty}
-; bar-volume-empty-foreground = ${colors.foreground-alt}
+bar-volume-empty-foreground = ${colors.custom-gray}
 
 [module/date]
-type = internal/date
-interval = 5
+type = custom/script
 
-format-prefix = " "
-format-prefix-foreground = ${colors.time}
-; format-prefix-foreground = ${colors.foreground-alt}
-format-underline =
+format = <label>
+format-foreground = ${colors.dark-magenta}
+format-font = 8
 
+label = " %output%"
 
-label = %date% %time%
-label-foreground = ${colors.time}
-
-date = %a %d
-date-alt = %Y-%m-%d
-
-time = %I: %M%P
-time-alt = %I: %M%P
+exec = ~/.config/polybar/date.sh
 
 [module/wlan]
 type = internal/network
@@ -347,7 +304,8 @@ interval = 5
 
 format-connected = <ramp-signal> <label-connected>
 format-connected-underline =
-format-connected-foreground = ${colors.network}
+format-connected-foreground = ${colors.dark-cyan}
+; TODO waste of space?
 label-connected =
 ; label-connected = %essid%
 
@@ -358,8 +316,6 @@ ramp-signal-1 = 
 ramp-signal-2 = 
 ramp-signal-3 = 
 ramp-signal-4 = 
-; ramp-signal-foreground = ${colors.network}
-; ramp-signal-foreground = ${colors.foreground-alt}
 
 [module/eth]
 type = internal/network
@@ -369,7 +325,10 @@ interval = 5
 
 format-connected-underline =
 format-connected-prefix = " "
-; format-connected-prefix-foreground = ${colors.foreground-alt}
 label-connected = %local_ip%
 
 format-disconnected =
+
+; Local Variables:
+; eval: (rainbow-mode 1)
+; End:

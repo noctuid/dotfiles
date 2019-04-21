@@ -8,7 +8,9 @@
 # F821 - undefined name
 # E0602 - undefined variable
 # C0103 - invalid constant name
+import os
 import re
+import sys
 from qutebrowser.config.configfiles import ConfigAPI  # noqa: F401,E501 pylint: disable=unused-import
 from qutebrowser.config.config import ConfigContainer  # noqa: F401,E501 pylint: disable=unused-import
 config = config  # type: ConfigAPI # noqa: F821 pylint: disable=E0602,C0103
@@ -21,7 +23,6 @@ c = c  # type: ConfigContainer # noqa: F821 pylint: disable=E0602,C0103
 # - content.user_stylesheets
 
 # ** TODO Add/Look Into
-# - reload configuration
 # - difference between url and url:pretty/pretty-url
 # - make sanitize command ('history-clear ;; download-clear'; TODO
 #   clear-cookies)
@@ -191,6 +192,7 @@ c.aliases['xa'] = 'quit --save'
 c.aliases['h'] = 'help'
 
 # ** Appearance
+# *** General
 c.fonts.monospace = 'Fira mono'
 
 # default but not transparent
@@ -198,11 +200,18 @@ c.colors.hints.bg = \
     'qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgba(255, 247, 133, 1), ' \
     + 'stop:1 rgba(255, 197, 66, 1))'
 
-c.scrolling.bar = True
+c.scrolling.bar = 'always'
 # keep smooth scrolling off
 
 # lower delay for keyhint dialog (comparable to which-key)
 c.keyhint.delay = 250
+
+# c.tabs.padding = {"top": 2, "bottom": 2,  "left": 0, "right": 4}
+
+# *** Pywal
+colorsfile = os.path.expanduser('~/.cache/wal/qutebrowser_colors.py')
+if os.path.isfile(colorsfile):
+    config.source(colorsfile)
 
 # ** Editor
 c.editor.command = ['emacsclient', '-c', '-a', ' ', '+{line}:{column}', '{}']
@@ -289,6 +298,9 @@ c.aliases['vgc'] = 'open http://www.google.com/search?q=cache:{url}'
 c.content.autoplay = False
 
 # * Key Bindings
+# ** Reload Configuration
+nmap('t.', 'config-source')
+
 # ** Miscellaneous Swaps
 # swap ; and :
 nmap(';', 'set-cmd-text :')

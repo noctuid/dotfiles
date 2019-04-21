@@ -7,14 +7,6 @@ sanitize() {
     sudo chown -R ${USER}.users "$@"
 }
 
-setbg() {
-	# set image to background (fit to width or height to fit the screen)
-	setroot -z "$1"
-	echo -n "setroot -z '$1'" | xsel -bi
-	killall conky
-	conky -q > /dev/null 2>&1 &
-}
-
 make_thumbnail() {
 	# http://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash
 	filename=$1

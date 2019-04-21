@@ -1,0 +1,178 @@
+@namespace url(http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul);
+/* TODO maybe don't blur cut off text at end of tab text */
+/* TODO tab sizing messed up when open/close tabs rapidly; probably can't do
+   anything about */
+/* TODO get rid of nav-bar entirely */
+/* TODO would be cool to just show addons in modeline instead and hav entire top
+   be tab bar */
+
+/* Colors */
+/* TODO can't get import working... */
+@import "colors.css";
+
+:root {
+    /* in case want to invert */
+    --fg: var(--foreground);
+    --bg: var(--background);
+}
+
+/* * One Bar */
+/* TODO changing this won't work correctly (navbar doesn't shrink correctly) */
+:root {
+    --tab-height: 33px;
+}
+
+#TabsToolbar,
+#TabsToolbar .tabbrowser-tab {
+    max-height: var(--tab-height) !important;
+}
+
+#TabsToolbar {
+    /* make room for nav bar */
+    margin-right: 15vw !important;
+}
+
+#nav-bar {
+    margin-left: 85vw !important;
+    margin-top: calc(-1 * var(--tab-height)) !important;
+    /* make same size as tab bar so not extra space above */
+    min-height: var(--tab-height) !important;
+    /* remove black line at top of nav bar */
+    box-shadow: none !important;
+}
+
+/* remove empty space after tabs */
+#TabsToolbar .titlebar-spacer {
+    display: none !important;
+}
+
+/* remove line below nav bar */
+#navigator-toolbox::after {
+    display: none !important;
+}
+
+/* TODO was this useful for anything */
+/* #navigator-toolbox {
+    border: none;
+    text-shadow: none;
+}
+*/
+/* * Nav Bar */
+/* remove stuff from navbar */
+/* just want addons and menu */
+#back-button,
+#forward-button,
+#reload-button,
+#stop-button,
+#stop-reload-button,
+#home-button {
+    display: none !important;
+}
+
+#sidebar-button,
+#library-button {
+    display: none !important;
+}
+
+/* remove entire container of #urlbar so it doesn't take up space */
+#urlbar-container {
+    display: none !important;
+}
+
+/* remove container with #searchbar */
+#search-container {
+    display: none !important;
+}
+
+/* remove spring/padding before addons */
+toolbarspring {
+    display: none !important;
+}
+
+/* * Tab Bar */
+/* remove buttons for scrolling between tabs and "list all tabs" ∨ button */
+#TabsToolbar .scrollbutton-up,
+#TabsToolbar .scrollbutton-down,
+#alltabs-button {
+    display: none !important;
+}
+
+/* remove "x" button on tabs */
+#tabbrowser-tabs .tab-close-button {
+    display: none !important;
+}
+
+/* remove "+" button to add a new tab */
+/* #new-tab-button only shows up when there is tab overflow */
+#TabsToolbar .tabs-newtab-button,
+#new-tab-button {
+    display: none !important;
+}
+
+/* min/max tab width for non-pinned tabs */
+#TabsToolbar .tabbrowser-tab:not([pinned]) {
+    min-width: 10vw !important;
+    max-width: 100% !important;
+}
+
+/* * Colors */
+/* ** General */
+/* change background color of tab bar and nav bar */
+#TabsToolbar,
+#nav-bar {
+    background: var(--bg) !important;
+}
+
+/* shouldn't show but have seen it in some cases */
+#navigator-toolbox {
+    background: var(--bg) !important;
+}
+
+#TabsToolbar .tabbrowser-tab {
+    color: var(--fg) !important;
+    background: var(--bg) !important;
+    font-family: "Fira mono" !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+}
+
+/* if want to remove icons */
+#TabsToolbar .tabbrowser-tab:not([pinned]) .tab-icon-image {
+    /*     display: none !important; */
+}
+
+/* make divider between tabs fully opaque */
+#TabsToolbar .tabbrowser-tab::before,
+#TabsToolbar .tabbrowser-tab::after {
+    /*     opacity: 1 !important; */
+}
+
+/* don't show divider at all on selected tabs */
+#TabsToolbar .tabbrowser-tab[selected]::before,
+#TabsToolbar .tabbrowser-tab[selected]::after {
+    display: none !important;
+}
+
+/* ** Selected Tab Styling */
+/* alternatively #tabbrowser-tabs tab[selected] */
+#TabsToolbar .tabbrowser-tab[selected] {
+    /* opposite of other tabs */
+    color: var(--bg) !important;
+    background: var(--fg) !important;
+}
+
+/* change or remove tab line highlight color */
+#TabsToolbar .tabbrowser-tab[selected] .tab-line[selected="true"] {
+    display: none !important;
+    /* background-color: red !important; */
+}
+
+/* this is required for changing the background color of the selected tab to work */
+#TabsToolbar .tab-background {
+    background: transparent !important;
+    /* otherwise gray line shown at top of selected tab */
+    border-top: none !important;
+}
+
+/* TODO Fix for white flash on new tab -----*/
+/* tabbrowser tabpanels, #appcontent > #content { background: transparent !important; } */
