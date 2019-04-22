@@ -153,6 +153,8 @@ ffmpegthumbnailer
 mediainfo
 # for kitty image preview
 python-pillow-simd aur
+# alternate to w3m image preview
+python-ueberzug-git aur
 
 trash-cli
 
