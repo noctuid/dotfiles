@@ -35,12 +35,10 @@ nm-connection-editor
 # linux (already installed)
 # for dkms
 linux-headers
-# linux-ck-ivybridge
-# linux-ck-ivybridge-headers
-# broadcom-wl-ck-ivybridge
-linux-ck-skylake
-linux-ck-skylake-headers
-broadcom-wl-ck-skylake
+linux-ck
+linux-ck-headers
+broadcom-wl-ck
+nvidia-ck
 # virtualbox-ck-host-modules-ivybridge
 # removed from repo-ck
 # virtualbox-ck-host-modules-skylake
@@ -80,9 +78,7 @@ bbswitch-dkms
 xf86-video-intel
 nvidia-dkms
 nvidia-utils
-# for linux-ck
-# nvidia-ck-ivybridge
-nvidia-ck-skylake
+# see linux-ck heading
 # needed for steam
 lib32-nvidia-utils
 

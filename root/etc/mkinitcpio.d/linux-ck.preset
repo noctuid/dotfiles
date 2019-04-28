@@ -1,3 +1,5 @@
+# NOTE: this needs to be named correctly so initramfs is regenerated when
+# updating linux-ck; see the pkgbuild
 # custom mkinitcpio file
 # https://wiki.archlinux.org/index.php/Dm-crypt/System_configuration
 # have added keymap/sd-vconsole, (sd-)encrypt, (sd-)lvm2, and resume
@@ -9,26 +11,30 @@
 # sd-encrypt can unlock multiple devices (so lvm can span multiple disks) but
 # currently requires specifying a UUID
 
-ALL_config="/etc/mkinitcpio-custom.conf"
-ALL_kver="/boot/vmlinuz-linux-ck-skylake"
+ALL_config="/etc/mkinitcpio.conf"
+ALL_kver="/boot/vmlinuz-linux-ck"
 
 PRESETS=('default' 'fallback' 'systemd' 'systemd_fallback' 'vanilla' 'vanilla_fallback')
 
-default_image="/boot/initramfs-linux-ck-skylake-custom.img"
+default_image="/boot/initramfs-linux-ck-custom.img"
 
-fallback_image="/boot/initramfs-linux-ck-skylake-custom-fallback.img"
+fallback_image="/boot/initramfs-linux-ck-custom-fallback.img"
 fallback_options="-S autodetect"
 
 systemd_config="/etc/mkinitcpio-custom-systemd.conf"
-systemd_image="/boot/initramfs-linux-ck-skylake-custom-systemd.img"
+systemd_image="/boot/initramfs-linux-ck-custom-systemd.img"
 
 systemd_config="/etc/mkinitcpio-custom-systemd.conf"
-systemd_fallback_image="/boot/initramfs-linux-ck-skylake-custom-systemd-fallback.img"
+systemd_fallback_image="/boot/initramfs-linux-ck-custom-systemd-fallback.img"
 systemd_fallback_options="-S autodetect"
 
 vanilla_kver="/boot/vmlinuz-linux"
-vanilla_image="/boot/initramfs-linux-ck-skylake-custom-vanilla.img"
+vanilla_image="/boot/initramfs-linux-ck-custom-vanilla.img"
 
 vanilla_fallback_kver="/boot/vmlinuz-linux"
-vanilla_fallback_image="/boot/initramfs-linux-ck-skylake-custom-vanilla-fallback.img"
+vanilla_fallback_image="/boot/initramfs-linux-ck-custom-vanilla-fallback.img"
 vanilla_fallback_options="-S autodetect"
+
+# Local Variables:
+# mode: conf
+# End:
