@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# confirm these before running
+# https://wiki.archlinux.org/index.php/Unofficial_user_repositories/Repo-ck
+pacman-key -r 5EE46C4C && pacman-key --lsign-key 5EE46C4C

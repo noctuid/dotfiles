@@ -1,153 +1,33 @@
 #!/usr/bin/env bash
 # for program configuration/setup
-# all commands should be able to be run multiple times
-# and should fail harmlessly if required software isn't installed
-
-# TODO consider this (though may just be unnecessarily complicated):
-# - adding checks for use with salt's unless
-# - requiring corresponding packages in salt file
-
-set -euo pipefail
+# all commands should be able to be run multiple times and should fail
+# harmlessly if required software isn't installed
 
 mkdir -p /tmp/build
 
-# * User Systemd Services
-# user
-user_services_setup() {
-	# systemctl --user start udiskie
-	systemctl --user enable udiskie
-	# TODO emacs, mpd, and mpd-notification block login for a long time
-	# starting in ~/.profile instead
-	# mpd-notification service fails quickly
-	# systemctl --user start mpd-notification
-	# systemctl --user enable mpd-notification
-	# systemctl --user start psd
-	# systemctl --user enable psd
+# only necessary if not using salt to more easily see which failed
+basedir="$(dirname "$(realpath "$0")")"
+failure_log="$basedir"/failure_log.txt
+
+fail_configure() {
+	echo "$1" | tee --append "$failure_log"
 }
 
-# * rEFInd
-# root
-refind_setup() {
-	if [[ -z "$(ls -A /boot/efi)" ]]; then
-		mount LABEL=SYSTEM /boot/efi
-	fi
-	# install or update refind
-	refind-install
-}
-
-# * initramfs
-# root
-initramfs_setup() {
-	mkinitcpio --preset custom
-}
-
-# * Console Colors
-# root; $HOME set in setup.sls (not /root)
-vt_colors_setup() {
-	setcolors ~/dotfiles/aesthetics/vt_colors/solarized
-}
-
-# * Font
-# root
-freetype_setup() {
-	# https://gist.github.com/cryzed/e002e7057435f02cc7894b9e748c5671
-	# https://wiki.archlinux.org/index.php/font_configuration
-	# just uncomment export line
-	cd /etc/fonts/conf.d
-	# enable sub-pixel rgb rendering globally
-	ln -sf ../conf.avail/10-sub-pixel-rgb.conf .
-	ln -sf ../conf.avail/11-lcdfilter-default.conf .
-	# 10-hinting-slight.conf already linked
-	# requires fonts-meta-extended-lt
-	ln -sf ../conf.avail/30-infinality-aliases.conf .
-}
-
-# * Lambda Fortunes
-# root
-lambda_txt_setup() {
-	# again, $HOME set by setup.sls when running
-	cp ~/dotfiles/.data/lambda /usr/share/fortune/lambda
-	strfile /usr/share/fortune/lambda
-}
-
-# * Fcron
-# root
-fcron_setup() {
-	# $HOME changed by setup.sls
-	fcrontab ~/dotfiles/common/sudo_fcrontab
-}
-
-# user
-fcron_user_setup() {
-	fcrontab ~/dotfiles/common/fcrontab
-}
-
-# * UFW
-# root
-ufw_setup() {
-	# https://wiki.archlinux.org/index.php/Uncomplicated_Firewall#Basic_configuration
-	ufw --force reset
-	ufw default deny
-	ufw allow from 192.168.0.0/24
-	ufw enable
-}
-
-# * Transmission
-# root; $USER changed when run by setup.sls
-transmission_setup() {
-	# make download directory and watch directory
-	mkdir -p /home/transmission/{Downloads,torrents}
-	# may chown as "$USER":transmission in future (first suggestion on archwiki)
-	# but this setup works fine currently
-	chown -R transmission:transmission /home/transmission
-	# give transmission user and group rwx permissions
-	chmod -R 775 /home/transmission
-	# add user to transmission group
-	gpasswd -a "$USER" transmission
-}
-
-# * DNS
-# root
-dns_setup() {
-	# unbound; also see ./users.sls
-	chattr -i /etc/resolv.conf
-	echo -e "nameserver 127.0.0.1\noptions edns0 single-request-reopen" \
-		 > /etc/resolv.conf
-	chattr +i /etc/resolv.conf
-	curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
-	# needed for auto-trust-anchor-file
-	chown root:unbound /etc/unbound
-	chmod 775 /etc/unbound
-	systemctl restart unbound
-	# https://wiki.archlinux.org/index.php/unbound#Testing_validation
-	# https://wiki.archlinux.org/index.php/Resolv.conf#Testing
-	# to test if dnscrypt is working, need to stop all proxies
-}
-
-# * Ranger Devicons
-# root
-# no AUR package
-ranger_devicons_setup() {
-	mkdir -p /tmp/build
-	if [[ ! -d /tmp/build/ranger_devicons ]]; then
-		git clone https://github.com/alexanderjeurissen/ranger_devicons \
-			/tmp/build/ranger_devicons
-	fi
-	cd /tmp/build/ranger_devicons
-	make install
+is_chroot() {
+	[[ $(stat -c %d:%i /) != $(stat -c %d:%i /proc/1/root/.) ]]
 }
 
 # * Services
-# root; USER changed
+# ** Normal Services
 service_setup() {
+	user=$1
+	echo "Configuring systemd services."
 	systemctl enable rngd
 	systemctl enable fstrim.timer
 	systemctl disable netctl
 	systemctl disable NetworkManager
 	systemctl mask NetworkManager
 	systemctl enable connman
-	# slow; necessary for dnscrypt-proxy?
-	# systemctl enable systemd-networkd-wait-online
 	systemctl enable kwakd
 	systemctl enable ntpd
 	systemctl enable tzupdate
@@ -156,14 +36,234 @@ service_setup() {
 	# enabled in fcron_setup
 	# systemctl enable fcron
 	systemctl enable ufw
-	systemctl enable slimlock@"$USER"
-	systemctl enable resume@"$USER"
+	systemctl enable slimlock@"$user"
+	systemctl enable resume@"$user"
 	# don't need immediately or frequently
 	# systemctl enable org.cups.cupsd
 	systemctl enable preload
 	systemctl enable systemd-modules-load
-	systemctl enable dnscrypt-proxy
+}
+
+# ** User Services
+user_services_setup() {
+	user=$1
+	if ! is_chroot; then
+		echo "Configuring user systemd services."
+		# systemctl --user start udiskie
+		sudo -u "$user" systemctl --user enable udiskie
+		# TODO emacs, mpd, and mpd-notification block login for a long time
+		# starting in ~/.profile instead
+		# mpd-notification service fails quickly
+		# systemctl --user start mpd-notification
+		# systemctl --user enable mpd-notification
+		# systemctl --user start psd
+		# systemctl --user enable psd
+	else
+		echo "In chroot. Not enabling user services."
+	fi
+}
+
+# ** All Services
+all_service_setup() {
+	user=$1
+	service_setup "$user"
+	user_services_setup "$user"
+}
+
+# * rEFInd
+refind_setup() {
+	if ! mountpoint -q /boot/efi; then
+		mount LABEL=SYSTEM /boot/efi
+	fi
+	if mountpoint -q /boot/efi; then
+		echo "Configuring refind."
+		# install or update refind
+		refind-install
+	else
+		echo "ESP Partition must be mounted to run refind-install!"
+		return 1
+	fi
+}
+
+# * initramfs
+initramfs_setup() {
+	echo "Generating initramfs."
+	mkinitcpio --allpresets
+}
+
+# * Console Colors
+vt_colors_setup() {
+	echo "Configuring vt colors."
+	uhome=$1
+	setcolors "$uhome"/dotfiles/aesthetics/vt_colors/solarized
+}
+
+# * Font
+freetype_setup() {
+	echo "Configuring font setup."
+	# https://gist.github.com/cryzed/e002e7057435f02cc7894b9e748c5671
+	# https://wiki.archlinux.org/index.php/font_configuration
+	# just uncomment export line
+	# enable sub-pixel rgb rendering globally
+	# 10-hinting-slight.conf already linked
+	# 30-infinality-aliases requires fonts-meta-extended-lt
+	cd /etc/fonts/conf.d \
+		&& ln -sf ../conf.avail/10-sub-pixel-rgb.conf . \
+		&& ln -sf ../conf.avail/11-lcdfilter-default.conf . \
+		&& ln -sf ../conf.avail/30-infinality-aliases.conf .
+}
+
+# * Lambda Fortunes
+lambda_txt_setup() {
+	echo "Configuring fortune."
+	uhome=$1
+	cp "$uhome"/dotfiles/.data/lambda /usr/share/fortune/lambda
+	strfile /usr/share/fortune/lambda
+}
+
+# * Fcron
+fcron_setup() {
+	echo "Configuring fcron globally."
+	uhome=$1
+	fcrontab "$uhome"/dotfiles/common/sudo_fcrontab
+}
+
+fcron_user_setup() {
+	echo "Configuring fcron for user."
+	user=$1
+	sudo -u "$user" fcrontab /home/"$user"/dotfiles/common/fcrontab
+}
+
+# * UFW
+ufw_setup() {
+	force=$1
+	if ! is_chroot; then
+		# only do this once; don't want to alter current configuration if already
+		# enabled
+		if [[ -n "$force" ]] || ! ufw status | grep -q "Status: active"; then
+			echo "Configuring UFW."
+			# https://wiki.archlinux.org/index.php/Uncomplicated_Firewall#Basic_configuration
+			ufw --force reset
+			ufw default deny
+			ufw allow from 192.168.0.0/24
+			ufw enable
+		fi
+	else
+		echo "In chroot. Not enabling UFW."
+	fi
+}
+
+# * Transmission
+# transmission user created when installing packae
+transmission_setup() {
+	echo "Configuring transmission."
+	user=$1
+	# make download directory and watch directory
+	mkdir -p /home/transmission/{Downloads,torrents}
+	# may chown as "$USER":transmission in future (first suggestion on archwiki)
+	# but this setup works fine currently
+	chown -R transmission:transmission /home/transmission
+	# give transmission user and group rwx permissions
+	chmod -R 775 /home/transmission
+	# add user to transmission group
+	gpasswd -a "$user" transmission
+	chown transmission:transmission \
+		  /var/lib/transmission/.config/transmission-daemon/settings.json
+}
+
+# * DNS
+# not doing this until after reboot because will break DNS resolution unless can
+# start unbound and dnscrypt-proxy
+dns_setup() {
+	echo "Configuring DNS."
+	# unbound
+	# don't need to manually create unbound user
+	curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
+	# needed for auto-trust-anchor-file
+	chown root:unbound /etc/unbound
+	chmod 775 /etc/unbound
+	# only do this once; hence chattr +i; don't want to alter resolv.conf if has
+	# changed
+	echo -e "nameserver ::1
+nameserver 127.0.0.1
+noptions edns0 single-request-reopen" \
+		 > /etc/resolv.conf
+	chattr +i /etc/resolv.conf
 	systemctl enable unbound
+	systemctl restart unbound
+
+	# https://wiki.archlinux.org/index.php/unbound#Testing_validation
+	# https://wiki.archlinux.org/index.php/Resolv.conf#Testing
+	# to test if dnscrypt is working, need to stop all proxies
+	# https://wiki.archlinux.org/index.php/DNSCrypt#dnscrypt_runs_with_root_privileges
+	if ! id -u dnscrypt-user &>/dev/null; then
+		useradd --system --home-dir /var/dnscrypt --create-home \
+				--shell /sbin/nologin dnscrypt-user
+	fi
+	systemctl enable dnscrypt-proxy.socket
+	systemctl restart dnscrypt-proxy.socket
+}
+
+# * Ranger Devicons
+# no AUR package
+ranger_devicons_setup() {
+	echo "Configuring ranger devicons."
+	uhome=$1
+	mkdir -p /tmp/build
+	if [[ ! -d /tmp/build/ranger_devicons ]]; then
+		git clone https://github.com/alexanderjeurissen/ranger_devicons \
+			/tmp/build/ranger_devicons
+	fi
+	cd /tmp/build/ranger_devicons && HOME="$uhome" make install
+}
+
+# * All
+all() {
+	user=$1
+	uhome=/home/"$user"
+
+	if ! is_chroot; then
+		systemctl daemon-reload
+	else
+		echo "In chroot. Not calling systemctl daemon-reload."
+	fi
+
+	service_setup "$user" \
+		|| fail_configure "Systemd service setup failed."
+	user_services_setup "$user" \
+		|| fail_configure "Systemd user service setup failed."
+	refind_setup \
+		|| fail_configure "Refind setup failed."
+	initramfs_setup \
+		|| fail_configure "Mkinitcpio/Initramfs setup failed."
+	vt_colors_setup "$uhome" \
+		|| fail_configure "Setting vt colors failed."
+	freetype_setup \
+		|| fail_configure "Font configuration setup failed."
+	lambda_txt_setup "$uhome" \
+		|| fail_configure "Lambda.txt fortune setup failed."
+	fcron_setup "$uhome" \
+		|| fail_configure "Fcron setup failed."
+	fcron_user_setup "$user" \
+		|| fail_configure "Fcron user setup failed."
+	ufw_setup \
+		|| fail_configure "UFW setup failed."
+	transmission_setup "$user" \
+		|| fail_configure "Transmission setup failed."
+	# dns_setup \
+		# 	|| fail_configure "DNS setup failed."
+	ranger_devicons_setup "$uhome" \
+		|| fail_configure "Ranger devicons setup failed."
+}
+
+# * Non-chroot
+non_chroot() {
+	user=$1
+	systemctl daemon-reload
+	# all_service_setup "$user"
+	user_services_setup "$user"
+	ufw_setup
+	dns_setup
 }
 
 # * Main

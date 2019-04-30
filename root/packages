@@ -203,9 +203,9 @@ w3m
 
 # * Video/Images
 mpv
-pqiv-git aur
+pqiv aur
 # mpv-git aur
-gallery-dl
+gallery-dl aur
 # color picker
 gpick
 
@@ -228,7 +228,8 @@ odt2txt
 
 # * Markdown Preview
 livedown npm
-vmd npm
+# vmd npm
+nodejs-vmd aur
 
 # * Image Editing
 gimp
@@ -291,7 +292,7 @@ rng-tools
 # * Keyboard Remapping
 xcape
 # klfc cabal
-klfc aur
+klfc-bin aur
 arduino
 
 # * Cron
@@ -434,7 +435,7 @@ ttf-ricty aur
 # unicode
 # https://github.com/rolandwalker/unicode-fonts
 # bdf-unifont
-ttf-symbola
+ttf-symbola aur
 noto-fonts-emoji
 
 # additional symbols

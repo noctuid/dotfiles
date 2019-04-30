@@ -1417,8 +1417,10 @@ backupresolv() {
 
 fixresolv() {
 	sudo chattr -i /etc/resolv.conf
-	echo -e "nameserver 127.0.0.1\noptions edns0 single-request-reopen" \
-		 | sudo tee /etc/resolv.conf
+	echo -e "nameserver ::1
+nameserver 127.0.0.1
+options edns0 single-request-reopen" \
+		| sudo tee /etc/resolv.conf
 	sudo chattr +i /etc/resolv.conf
 }
 

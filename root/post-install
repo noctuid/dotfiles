@@ -10,9 +10,10 @@
 #   - package installation
 #   - package configuration/setup (e.g. font setup)
 #   - service activation
-# - this script does not work perfectly, mainly because aura consistently hangs
-#   for certain packages and incorrectly claims others are not aur packages (I
-#   had to fiddle with the package list to prevent the script from hanging)
+# - this script does not work perfectly; may need to rerun (e.g. network issues,
+#   potentially changes to packages/package names, potential problems with aur
+#   helper, etc.; example: installing siji-git current calls xset, so it has to
+#   be installed with X running)
 # - this script is meant to be usable after running arch-chroot, so that the
 #   system can be fully set up before the first boot (the reasoning is that it's
 #   easier to set up a new system from an existing system; testing can be done
@@ -24,32 +25,136 @@
 #   - runs as root since sudo does not work with a password in arch-chroot
 #     (would either need to have NOPASSWD for user or potentially use an askpass
 #     program if that is possible)
-#   - starting services fails from chroot of course, but so does enabling with
-#     salt; not using salt for services currently
+#   - can't start services from chroot of course, but can enable (not user
+#     services though) salt; user services must be enabled by running this
+#     script again on the new installation with the --non-chroot flag (also does
+#     some other extra configuration)
 
-# Using salt mainly for nice messaging
+# Using salt mainly for nice messaging (shows which sections failed, how many,
+# etc.); have made optional because of problems with salt (once had difficultly
+# installing it; once had other issues that were difficult to debug), so not
+# using by default
+
 # potential salt alternatives
 # https://github.com/shawndellysse/farch
 # https://github.com/rycee/home-manager/
 # https://github.com/NixOS/nixpkgs/pull/9250
 # aconfmgr (not for me but potentially useful)
 
+# Rules:
+# - any function meant to be used with "|| fail_echo" should return non-zero if
+#   any part of it fails (not using set -e; see
+#   http://mywiki.wooledge.org/BashFAQ/105; main annoyance was behavior where
+#   failed function will continue if do func ||)
+
 # TODO
-# - add flag to use current user instead of requiring it to be $user (checking
-#   $user makes sense for a new install but not for an existing one)
-# - install evm with a package manager
 # - tlp config (charging rates)
-# - maybe don't update mirrorlist every time (takes a while)
-# - aura problems
+# - aur problems (aur helper issues, slowness, etc.)
+# - evm doesn't work
+# - just fall back to pacman if powerpill installation fails; duplication
+#   between pac_install and install_package
+# - https://stackoverflow.com/questions/30421986/why-does-npm-list-g-lead-to-npm-err-missing-error
 
-# absolutely don't change this; caught so many errors during testing
-set -euo pipefail
+# * Constants
+basedir="$(dirname "$(realpath "$0")")"
+log="$basedir"/log.txt
+failure_log="$basedir"/failure_log.txt
 
+builduser=noctuidbuilder
+
+# * Argument Parsing
 # can use tzselect to find
 timezone=America/New_York
 hostname=bahamut
 user=noctuid
 uhome=/home/"$user"
+log_level=info
+use_salt=false
+non_chroot=false
+force_reflector=false
+
+print_option_help() {
+	echo "
+usage: post-install [options]
+
+options:
+	-t or --timezone <timezone>
+	   Timezone to set. For example: --timezone \"America/New_York\"
+	   You can use tzselect to find your timezone.
+	   Current value: $timezone
+
+	-H or --hostname <hostname>
+	   Hostname to set. For example: --hostname \"myhostname\"
+	   Current value: $hostname
+
+	-u or --username <username>
+	   Username of user whose ~/dotfiles are to be used. This user is also used
+	   for building/installing packages.
+	   Current value: $user
+
+	-l or --log-level <level>
+	   Log level to pass to salt-call's --log-level. Keep in mind that setting a
+	   lower log level than the default may make debugginging difficult or
+	   impossible.
+	   Current value: $log_level
+
+	-n or --non-chroot
+	   Do configuration that can't be done in a chroot and nothing else (e.g.
+	   enabling systemd services and ufw). Meant to be run once after first boot
+	   of system be done in a chroot. If this flag is not specified, this
+	   configuration will still be done if it is necessary and if not in a
+	   chroot.
+	   Current value: $non-chroot
+
+	-s or --use-salt
+	   If specified, use salt for configuration/setup.
+	   Current value: $use_salt
+
+	-f or --force-reflector
+	   If specified, force updating mirror list with reflector even if it has
+	   been updated before.
+	   Currrent value: $force_reflector
+
+	-h or --help
+	   Print this help text."
+}
+
+while getopts t:H:u:l:nsfh-: opt
+do
+	case $opt in
+		t) timezone=$OPTARG;;
+		H) hostname=$OPTARG;;
+		u) user=$OPTARG;;
+		l) log_level=$OPTARG;;
+		n) non_chroot=true;;
+		s) use_salt=true;;
+		f) force_reflector=true;;
+		-)
+			if [[ $OPTARG =~ ^(use-salt|non-chroot)$ ]] || \
+				   [[ $OPTARG == *=* ]]; then
+				OPTION=${OPTARG%%=*}
+				OPTARG=${OPTARG#*=}
+			else
+				OPTION=$OPTARG
+				# shellcheck disable=SC2124
+				OPTARG=${@:$OPTIND:1}
+				((OPTIND++))
+			fi
+			case $OPTION in
+				timezone) timezone=$OPTARG;;
+				hostname) hostname=$OPTARG;;
+				username) username=$OPTARG;;
+				log-level) log_level=$OPTARG;;
+				non-chroot) enable_services_only=true;;
+				use-salt) use_salt=true;;
+				force-reflector) force_reflector=true;;
+				help) print_option_help && exit 0;;
+				*) print_option_help && exit 1;;
+			esac;;
+		h) print_option_help && exit 0;;
+		*) print_option_help && exit 1;;
+	esac
+done
 
 # * Helpers
 prompt_continue() {
@@ -60,16 +165,38 @@ prompt_continue() {
 	fi
 }
 
+# for more easily readable log when not using salt
+fail_echo() {
+	echo "$1" | tee --append "$failure_log"
+}
+
+is_chroot() {
+	[[ $(stat -c %d:%i /) != $(stat -c %d:%i /proc/1/root/.) ]]
+}
+
+# TODO maybe check if group before installing in install_package; fcitx-im is
+# only group in ./packages currently
+group_installed() {
+	pacman --sync --groups "$1" | while read -r line; do
+		pacman --query "$(echo "$line" | awk '{print $2}')" || return 1
+	done
+}
+
 # * Basic Setup
-# * Sudo
+# ** Sudo
 sudo_setup() {
 	echo "Updating sudo configuration."
-	sleep 1
 	# set up /etc/sudoers
 	# - allow root to execute any command
 	# - allow users in wheel group to use sudo
-	echo 'root ALL=(ALL) ALL
-%wheel ALL=(ALL) ALL' | EDITOR='tee' visudo
+	# - allow $builduser to execute pacman without password
+	if ! id -u "$builduser" &> /dev/null; then
+		useradd --system --create-home \
+				--shell /sbin/nologin "$builduser" || return 1
+	fi
+	echo "root ALL=(ALL) ALL
+%wheel ALL=(ALL) ALL
+$builduser ALL= NOPASSWD: /usr/bin/pacman" | EDITOR='tee' visudo
 	# potentially dangerous without sudo and proper setup; risky
 	# sudo passwd -l root
 }
@@ -77,36 +204,32 @@ sudo_setup() {
 # ** Time
 time_setup() {
 	echo "Updating timezone and clock."
-	sleep 1
-	ln -sf /usr/share/zoneinfo/"$timezone" /etc/localtime
-	hwclock --systohc --utc
+	ln -sf /usr/share/zoneinfo/"$timezone" /etc/localtime \
+		&& hwclock --systohc --utc
+	# using ntpd instead
+	# timedatectl set-ntp true
 }
 
 # ** Locale
 locale_setup() {
 	echo "Performing locale configuration."
-	sleep 1
-	echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+	echo "en_US.UTF-8 UTF-8" > /etc/locale.gen | return 1
 	# necessary because of Emacs bug
-	echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen
-	locale-gen
-	echo "LANG=en_US.UTF-8" > /etc/locale.conf
+	echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen \
+		&& locale-gen \
+		&& echo "LANG=en_US.UTF-8" > /etc/locale.conf
 }
 
 # ** Hostname
 hostname_setup() {
 	echo "Updating hostname."
-	sleep 1
-	echo "$hostname" > /etc/hostname
-	sed -i "/127.0.0.1/ s/$/ $hostname/" /etc/hosts
-	sed -i "/::1/ s/$/ $hostname/" /etc/hosts
+	hostnamectl set-hostname "$hostname"
 }
 
 # * Pacman/AUR
 pac_install() {
 	if ! pacman -Q "$1" &> /dev/null; then
 		echo "Installing $1."
-		sleep 1
 		if pacman -Q powerpill &> /dev/null; then
 			powerpill -S --noconfirm "$1"
 		else
@@ -116,54 +239,70 @@ pac_install() {
 }
 
 update_mirror_list() {
-	pac_install reflector
+	pac_install reflector || return 1
 	echo "Updating mirrorlist with reflector."
-	sleep 1
-	# update server list by speed
-	reflector --verbose -l 200 --sort rate --save /etc/pacman.d/mirrorlist
-}
-
-update_pac_config() {
-	cp "$uhome"/dotfiles/root/etc/pacman.conf /etc/
-}
-
-install_aura() {
-	if ! pacman -Q aura-bin &> /dev/null; then
-		echo "Installing aura."
-		sleep 1
-		powerpill -S --noconfirm --needed base-devel
-		pac_install git
-		if [[ ! -d "$uhome"/build/aura-bin ]]; then
-			mkdir -p "$uhome"/build
-			git clone https://aur.archlinux.org/aura-bin.git "$uhome"/build/aura-bin
+	cd /etc/pacman.d || return 1
+	if $force_reflector || [[ ! -f mirrorlist.reflector ]]; then
+		# update server list by speed
+		reflector --verbose -l 200 --sort rate \
+				  --save mirrorlist.reflector || return 1
+		if [[ ! -f mirrorlist.backup ]]; then
+			cp mirrorlist mirrorlist.backup
 		fi
-		cd "$uhome"/build/aura-bin
-		# can't be run as root
-		sudo -u "$user" makepkg --noconfirm -fsr
-		pacman -U *.pkg.tar.xz
+		cp mirrorlist.reflector mirrorlist || return 1
+	fi
+}
+
+install_powerpill() {
+	if ! pacman -Q powerpill &> /dev/null; then
+		# necessary to call pacman -Syu for xyne repo to be available
+		# don't want to do partial upgrade with -Sy
+		cp "$uhome"/dotfiles/root/etc/pacman.conf /etc/ \
+			&& pacman --noconfirm -Syu \
+			&& pac_install powerpill
+	fi
+}
+
+install_yay() {
+	if ! pacman -Q yay-bin &> /dev/null; then
+		echo "Installing yay."
+		if ! group_installed base_devel; then
+			powerpill -S --noconfirm --needed base-devel
+		fi
+		pac_install git
+		build_dir="$uhome"/build/yay-bin
+		if [[ -d "$build_dir" ]]; then
+			rm -rf "$build_dir"
+		fi
+		mkdir -p "$build_dir"
+		git clone https://aur.archlinux.org/yay-bin.git "$build_dir"
+		chown "$user":"$user" "$build_dir" \
+			&& cd "$build_dir" \
+			&& sudo -u "$user" makepkg --noconfirm -fsr \
+			&& pacman --noconfirm -U *.pkg.tar.xz
 	fi
 }
 
 # * Home Config Setup
 home_config_setup() {
 	echo "Symlinking user config files."
-	sleep 1
-	pac_install stow
-	source "$uhome"/dotfiles/terminal/.zsh/stow_functions.sh
-	HOME="$uhome" restow
+	pac_install stow \
+		&& source "$uhome"/dotfiles/terminal/.zsh/stow_functions.sh \
+		&& HOME="$uhome" restow
 }
 
-# * TODO Nix
+# * Install Package Managers
+# ** TODO Nix
 # TODO fix; do extra necessary setup
 install_nix() {
 	# use nix install script
 	pacman -Q nix || aura -A nix
 	# TODO don't use aur; use install script and either need to delete /nix (maybe) or chown to user
 	# add unstable channell
-	nix-channel --update
+	# nix-channel --update
 }
 
-# * EVM
+# ** EVM
 # have had problems installing evm with gem
 install_evm() {
 	if [[ ! -d "$uhome"/.evm ]]; then
@@ -171,16 +310,27 @@ install_evm() {
 	fi
 }
 
+# ** All
+install_installers() {
+	# TODO install_nix
+	install_evm
+	install_package python-pip
+	install_package ruby
+	install_package go
+	install_package npm
+	install_package "roswell aur" "$user"
+}
+
 # * Salt
 setup_salt() {
 	pac_install salt
-	# clear previous files (don't exit on rm failure)
-	rm -r /srv/salt &> /dev/null || true
+	# clear previous files; fine if fails
+	rm -r /srv/salt &> /dev/null
 	mkdir -p /srv/salt
 	# cd to the directory of this script
-	cd "$(dirname "$0")"
+	cd "$basedir"
 	cp ./top.sls /srv/salt
-	cp ./users.sls /srv/salt
+	cp ./user_groups.sls /srv/salt
 	cp ./root_config.sls /srv/salt
 	cp ./packages.sls /srv/salt
 	cp ./pre_service_setup.sls /srv/salt
@@ -212,7 +362,7 @@ generate_packages_sls() {
 	# TODO alternatively could use templating for each package type:
 	# https://docs.saltstack.com/en/latest/topics/tutorials/states_pt3.html
 	# shellcheck disable=SC2188
-	> "$uhome"/dotfiles/root/packages.sls
+	> "$basedir"/packages.sls
 	while read -r line; do
 		if [[ -z $line ]] || [[ $line =~ \# ]]; then
 			continue
@@ -223,47 +373,45 @@ generate_packages_sls() {
 		method=${method:-pac}
 		nix_path=$(echo $line | awk '{print $3}')
 
-		echo "$package-pkg:" >> "$uhome"/dotfiles/root/packages.sls
+		echo "$package-pkg:" >> "$basedir"/packages.sls
 		# 		if [[ $method == pac ]]; then
 		# 			# TODO powerpill instead?
 		# 			echo "  pkg.installed:
 		#     - pkgs:
 		#         - $package
-		# " >> "$uhome"/dotfiles/root/packages.sls
+		# " >> "$basedir"/packages.sls
 		if [[ $method == pac ]]; then
 			echo "  cmd.run:
-    - name: powerpill -S --noconfirm $package
+    - name: powerpill --noconfirm -S $package
     - unless: pacman -Q $package
-" >> "$uhome"/dotfiles/root/packages.sls
+" >> "$basedir"/packages.sls
 		elif [[ $method == aur ]]; then
-			# I've had a lot of problems with aura, but it's one of the only aur
-			# helpers I'm aware of that can run as sudo and has a --noconfirm
-			# option
 			echo "  cmd.run:
-    - name: aura -A --noconfirm $package
+    - name: yay --pacman powerpill --noconfirm -S $package
     - unless: pacman -Q $package
-" >> "$uhome"/dotfiles/root/packages.sls
+    - runas: $builduser
+" >> "$basedir"/packages.sls
 		elif [[ $method == nix ]]; then
 			# TODO -require? install nix where?
 			echo "  cmd.run:
 	- runas: $user
     - name: nix-env -iA $nix_path
     - unless: nix-env -q $package
-" >> "$uhome"/dotfiles/root/packages.sls
+" >> "$basedir"/packages.sls
 		elif [[ $method == ros ]]; then
 			echo "  cmd.run:
     - name: ros install $package
     - unless: ros list installed | grep $package
     - require:
         - roswell-pkg
-" >> "$uhome"/dotfiles/root/packages.sls
+" >> "$basedir"/packages.sls
 		elif [[ $method == pip ]]; then
 			echo "  cmd.run:
     - name: pip install $package
     - unless: pip list | grep ^$package
     - require:
         - python-pip-pkg
-" >> "$uhome"/dotfiles/root/packages.sls
+" >> "$basedir"/packages.sls
 		elif [[ $method == gem ]]; then
 			echo "  cmd.run:
     - runas: $user
@@ -271,7 +419,7 @@ generate_packages_sls() {
     - unless: gem list -i \"^$package\$\"
     - require:
         - ruby-pkg
-" >> "$uhome"/dotfiles/root/packages.sls
+" >> "$basedir"/packages.sls
 		elif [[ $method == go ]]; then
 			echo "  cmd.run:
     - runas: $user
@@ -279,27 +427,123 @@ generate_packages_sls() {
     - unless: go list '...' | grep $package
     - require:
         - go-pkg
-" >> "$uhome"/dotfiles/root/packages.sls
+" >> "$basedir"/packages.sls
 		elif [[ $method == evm ]]; then
 			# - require:
 			# - $method-pkg
 			# - runas: $user
 			echo "  cmd.run:
-    - name: $method install $package
-    - unless: evm list | grep \"$package \[I\]\"
-" >> "$uhome"/dotfiles/root/packages.sls
+    - name: $uhome/.evm/bin/evm install $package
+    - unless: $uhome/.evm/bin/evm list | grep \"$package \[I\]\"
+" >> "$basedir"/packages.sls
 		elif [[ $method == npm ]]; then
 			# currently only using for commands and npm list is weird
 			echo "  cmd.run:
     - name: npm install -g $package
-    - unless: command -v $package
+    - unless: npm --global --depth 0 list | grep --quiet $package
     - require:
         - $method-pkg
-" >> "$uhome"/dotfiles/root/packages.sls
+" >> "$basedir"/packages.sls
 		fi
-	done < "$uhome"/dotfiles/root/packages
+	done < "$basedir"/packages
 }
 
+# * No Salt
+# ** User Groups
+update_user_groups() {
+	echo "Updating ${user}'s groups."
+	# https://wiki.archlinux.org/index.php/users_and_groups#Group_list
+	usermod --append --groups wheel,uucp,games,lock "$user"
+}
+
+# ** Copy Root Config files
+copy_root_config_files() {
+	echo "Copying root config files from dotfiles to /."
+	cp -R "$basedir"/boot "$basedir"/etc "$basedir"/usr "$basedir"/var /
+}
+
+# ** Package Installation
+install_package() {
+	line=$1
+	package=$(echo $line | awk '{print $1}')
+	method=$(echo $line | awk '{print $2}')
+	method=${method:-pac}
+	nix_path=$(echo $line | awk '{print $3}')
+
+	if [[ $method == pac ]]; then
+		if ! pacman --query "$package" &> /dev/null; then
+			echo "Installing $package."
+			powerpill -S --noconfirm "$package" \
+				|| fail_echo "Failed: powerpill  --noconfirm -S $package"
+		fi
+	elif [[ $method == aur ]]; then
+		if ! pacman --query "$package" &> /dev/null; then
+			echo "Installing $package."
+			sudo -u "$builduser" yay --noconfirm -S "$package" \
+				|| fail_echo "Failed: sudo -u \"$builduser\" yay --noconfirm -S $package"
+		fi
+	elif [[ $method == nix ]]; then
+		if ! nix-env --query "$package"; then
+			echo "Installing $package."
+			nix-env -iA "$nix_path" \
+				|| fail_echo "Failed: nix-env -iA $nix_path"
+		fi
+	elif [[ $method == ros ]]; then
+		if ! ros list installed | grep --quiet "$package"; then
+			echo "Installing $package."
+			ros install "$package" \
+				|| fail_echo "Failed: ros install $package"
+		fi
+	elif [[ $method == pip ]]; then
+		if ! pip list | grep --quiet "^$package"; then
+			echo "Installing $package."
+			pip install "$package" \
+				|| fail_echo "Failed: pip install $package"
+		fi
+	elif [[ $method == gem ]]; then
+		if ! gem list --installed "^$package$" &> /dev/null; then
+			echo "Installing $package."
+			gem install "$package" \
+				|| fail_echo "Failed: gem install $package"
+		fi
+	elif [[ $method == go ]]; then
+		if ! go list '...' | grep --quiet "$package"; then
+			echo "Installing $package."
+			go get "$package" \
+				|| fail_echo "Failed: go get $package"
+		fi
+	elif [[ $method == evm ]]; then
+		if ! evm list | grep --quiet "$package [I]"; then
+			echo "Installing $package."
+			PATH="$uhome/.evm/bin:$PATH" evm install "$package" \
+				|| fail_echo "Failed: evm install $package"
+		fi
+	elif [[ $method == npm ]]; then
+		if ! npm --global --depth 0 list | grep --quiet "$package"; then
+			echo "Installing $package."
+			npm install --global "$package" \
+				|| fail_echo "Failed: npm install --global $package"
+		fi
+	fi
+}
+
+install_packages() {
+	echo "Installing packages."
+	while read -r line; do
+		if [[ -z $line ]] || [[ $line =~ \# ]]; then
+			continue
+		fi
+		install_package "$line"
+	done < "$basedir"/packages
+}
+
+# ** Program Configuration
+configure_packages() {
+	echo "Configuring packages."
+	"$basedir"/extra-setup all "$user"
+}
+
+# ** Enable Services
 # * Main
 main() {
 	if [[ $EUID -ne 0 ]]; then
@@ -326,44 +570,71 @@ Note that this script will take care of adding the user to groups."
 - Base system has already been installed (system-install)
 - $user has been created (give the user a password before rebooting)
 - /home/\$user/dotfiles is in place and up to date
+- Extra keys have been signed (check these are up to date) (see ./pacman-keys)
 
 Current variables:
 - Timezone: $timezone
 - Hostname: $hostname
 - Username: $user
+- Log level: $log_level
+- Timeout: $timeout
+- Using salt?: $use_salt
+- Non chroot config only?: $non_chroot
+- Force reflector update?: $force_reflector
 
 Please make sure that the ESP is already mounted under /boot/efi if installing a
-new system."
+new system.
+
+See $log and $failure_log for info after run."
 	prompt_continue
 
 	# must be mounted before try to copy refind.conf over
-	if [[ -z "$(ls -A /boot/efi)" ]]; then
+	if ! mountpoint -q /boot/efi; then
 		mount LABEL=SYSTEM /boot/efi
 	fi
 
 	echo "Performing basic setup..."
-	sudo_setup
-	time_setup
-	locale_setup
-	hostname_setup
+	sudo_setup || fail_echo "Failed to update sudo configuration."
+	time_setup || fail_echo "Failed to update timezone/clock."
+	locale_setup || fail_echo "Failed to update locale configuration."
+	hostname_setup || fail_echo "Failed to set hostname."
 
-	home_config_setup
+	home_config_setup || fail_echo "Failed to setup dotfiles with stow."
 
-	update_mirror_list
-	# need for xyne repo for powerpill
-	update_pac_config
-	pac_install powerpill
-	export PACMAN=powerpill
-	install_aura
+	update_mirror_list || fail_echo "Failed to update pacman mirror list."
+	if ! install_powerpill; then
+		fail_echo "Failed to install powerpill. Aborting."
+		exit 1
+	fi
+	if ! install_yay; then
+		fail_echo "Failed to install yay. Aborting."
+		exit 1
+	fi
+	install_installers
 
-	install_evm
+	if $use_salt; then
+		echo "Installing and running salt."
+		generate_packages_sls
+		setup_salt
+		salt-call --log-level "$log_level" --local state.apply
+	else
+		update_user_groups || fail_echo "Failed to update user groups."
+		copy_root_config_files || fail_echo "Failed to copy root config files."
+		install_packages
+		configure_packages
+	fi
 
-	echo "Installing and running salt."
-	sleep 1
-	generate_packages_sls
-	setup_salt
-	# keep log level at info, otherwise don't know where aura frezes
-	salt-call --log-level info --local state.apply
+	if is_chroot; then
+		echo "Chroot detected. To finish installation, reboot and run this
+script again with --enable-services."
+	fi
 }
 
-main
+# shellcheck disable=SC2188
+> "$failure_log"
+
+if $non_chroot; then
+	"$basedir"/extra-setup non_chroot "$user"
+else
+	main 2>&1 | tee "$log"
+fi
