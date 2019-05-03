@@ -7,7 +7,10 @@ User=%I
 Type=simple
 Environment=DISPLAY=:0
 # Fix button mapping after sleeping
-ExecStart=/usr/bin/env xinput --set-button-map "TPPS/2 IBM TrackPoint" 50 1 51
+ExecStartPre=/usr/bin/env xinput --set-button-map "TPPS/2 IBM TrackPoint" 50 1 51
+ExecStart=/usr/bin/env xinput --set-button-map "ETPS/2 Elantech TrackPoint" 50 1 51
+Restart=always
+RestartSec=3
 
 [Install]
 WantedBy=suspend.target
