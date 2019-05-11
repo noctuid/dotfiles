@@ -1234,21 +1234,6 @@ monitor_disconnect() ( # output_name
 	# ponymix set-profile output:analog-stereo
 )
 
-# **** HDMI (old)
-# connecting to tv/monitor with hmdi
-hdmiin() {
-	monitor_connect HDMI1
-	# ponymix set-profile output:hdmi-stereo
-}
-
-hdmiadd() {
-	monitor_connect HDM1 true X
-}
-
-hdmiout() {
-	monitor_diconnect HDMI1 true
-}
-
 # **** VGA (old)
 vgain() {
 	monitor_connect VGA1
@@ -1260,7 +1245,7 @@ vgaadd() {
 
 alias vgaout='monitor_disconnect VGA1'
 
-# **** Thinkpad p50 and p52
+# **** Thinkpad p50
 # discrete is wonkier (e.g. compton doesn't work) and there doesn't seem to be a
 # real advantage to using it (can just run X with graphics card on demand)
 alias discrete="sudo cp ~/dotfiles/20-nvidia.conf /etc/X11/xorg.conf.d/"
@@ -1277,6 +1262,19 @@ nvmirror() {
 
 nvout() {
 	monitor_disconnect DP-1 true
+}
+
+# **** Thinkpad p52
+hdmiadd() {
+	monitor_connect HDMI-0 true 十
+	if [[ -n $1 ]]; then
+		ponymix set-profile output:hdmi-stereo
+	fi
+}
+
+hdmiout() {
+	monitor_disconnect HDMI-0 true
+	ponymix set-profile output:analog-stereo
 }
 
 # *** play clipboard (url)
