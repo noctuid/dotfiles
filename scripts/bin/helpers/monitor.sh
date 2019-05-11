@@ -19,6 +19,17 @@ monitor_fraction_of_width() { # percentage
 		| awk -F 'x' "{printf \"%.0f\n\", \$1*$fraction}"
 }
 
+monitor_is_hidpi() { # monitor
+	monitor=$1
+	if test -z "$monitor"; then
+		monitor=$(monitor_get_primary)
+	fi
+	width=$(monitor_get_dimensions "$monitor" \
+				| awk -F 'x' '{print $1}')
+	# not perfect but sufficient
+	test "$width" -gt 3000
+}
+
 # Local Variables:
 # sh-shell: sh
 # End:

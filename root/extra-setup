@@ -113,6 +113,21 @@ freetype_setup() {
 		&& ln -sf ../conf.avail/30-infinality-aliases.conf .
 }
 
+siji_ttf_setup() {
+	echo "Installing siji ttf."
+	uhome=$1
+	build_dir=/tmp/build/siji
+	mkdir -p /tmp/build
+	if [[ ! -d "$build_dir" ]]; then
+		git clone https://github.com/fauno/siji "$build_dir"
+	fi
+	cd "$build_dir" \
+		&& cp "$build_dir"/ttf/siji.ttf "$uhome"/.fonts
+	# requires X running; done automatically in ~/.bxinitrc
+	# xset +fp ~/.fonts \
+		# 	&& xset fp rehash
+}
+
 # * Lambda Fortunes
 lambda_txt_setup() {
 	echo "Configuring fortune."
@@ -240,6 +255,8 @@ all() {
 		|| fail_configure "Setting vt colors failed."
 	freetype_setup \
 		|| fail_configure "Font configuration setup failed."
+	siji_ttf_setup "$uhome" \
+		|| fail_configure "Installing siji.ttf failed."
 	lambda_txt_setup "$uhome" \
 		|| fail_configure "Lambda.txt fortune setup failed."
 	fcron_setup "$uhome" \

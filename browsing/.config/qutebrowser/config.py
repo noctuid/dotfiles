@@ -23,6 +23,9 @@ c = c  # type: ConfigContainer # noqa: F821 pylint: disable=E0602,C0103
 # - content.user_stylesheets
 
 # ** TODO Add/Look Into
+# HiDPI:
+#   - scrollbar is massive with QT_AUTO_SCREEN_SCALE_FACTOR=1
+#   - the default zoom is often delayed for a bit
 # - difference between url and url:pretty/pretty-url
 # - make sanitize command ('history-clear ;; download-clear'; TODO
 #   clear-cookies)
@@ -185,7 +188,7 @@ c.tabs.select_on_remove = 'prev'
 c.tabs.new_position.unrelated = 'next'
 c.tabs.min_width = 200
 
-c.tabs.title.format = '{index}{private}{title_sep}{title}'
+c.tabs.title.format = '{index}{private}{title_sep}{current_title}'
 
 # ** Command Aliases
 c.aliases['xa'] = 'quit --save'
@@ -296,6 +299,11 @@ c.aliases['vgc'] = 'open http://www.google.com/search?q=cache:{url}'
 
 # ** Media
 c.content.autoplay = False
+
+# ** Zoom
+# decrease for HiDPI (necessary with QT_AUTO_SCREEN_SCALE_FACTOR=1)
+if os.getenv('MONITOR_IS_HIDPI'):
+    c.zoom.default = 67
 
 # * Key Bindings
 # ** Reload Configuration

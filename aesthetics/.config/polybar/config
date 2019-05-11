@@ -47,6 +47,10 @@ width = ${env:BAR_WIDTH:100%}
 height = ${env:BAR_HEIGHT:2%}
 offset-x = ${env:BAR_X_OFFSET:0}
 offset-y = ${env:BAR_Y_OFFSET:0}
+; use system dpi (only affects fonts that can be scaled)
+dpi = 0
+; allow tray icons to scale to be larger
+tray-maxsize = ${env:TRAY_HEIGHT:100%}
 
 padding = 2
 
@@ -66,14 +70,14 @@ background = ${colors.background}
 foreground = ${colors.foreground}
 
 ; order matters (first have priority)
-font-0 = benis uushi:pixelsize=10
-font-1 = IPAGothic:pixelsize=10:weight=bold
+font-0 = Office Code Pro:pixelsize=8
+font-1 = IPAGothic:pixelsize=9:weight=bold
 font-2 = Unifont:style=Sans-Serif
 font-3 = Siji:pixelsize=9
-font-4 = Symbola:pixelsize=10
+font-4 = Symbola:pixelsize=9
 font-5 = FuraMonoForPowerline NF:pixelsize=9
 ; currently only used for lock (bspwm) and lightbulb icon (redshift)
-font-6 = Font Awesome:pixelsize=9
+font-6 = Font Awesome:pixelsize=8
 ; TODO better font?
 font-7 = Ricty Discord:pixelsize=9
 
@@ -298,8 +302,7 @@ exec = ~/.config/polybar/date.sh
 
 [module/wlan]
 type = internal/network
-; TODO command for
-interface = wlp4s0
+interface = ${env:WIRELESS_INTERFACE:wlp0s20f3}
 interval = 5
 
 format-connected = <ramp-signal> <label-connected>
@@ -319,8 +322,7 @@ ramp-signal-4 = 
 
 [module/eth]
 type = internal/network
-; TODO command for
-interface = enp0s31f6
+interface = ${env:ETHERNET_INTERFACE:enp0s31f6}
 interval = 5
 
 format-connected-underline =

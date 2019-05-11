@@ -19,6 +19,28 @@ xrdb -load ~/.Xresources
 # shellcheck disable=SC1090
 source ~/bin/helpers/env.sh
 
+# * HiDPI
+# honor screen DPI
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
+
+# shellcheck disable=SC1090
+source ~/bin/helpers/monitor.sh
+if monitor_is_hidpi; then
+	xrandr --dpi 192
+
+	export MONITOR_IS_HIDPI=true
+
+	# scale UI lements 2x
+	export GDK_SCALE=2
+	# TODO this just messes things up for chromium and makes emacs tooltips too
+	# small; is there (stil?) a case where this actually prevents some issue
+	# prevents double scaling of of text according to archwiki
+	# export GDK_DPI_SCALE=0.5
+else
+	# necessary with nvidia-xrun
+	xrandr --dpi 96
+fi
+
 # * Java Fixes
 # https://wiki.archlinux.org/index.php/java#Non-reparenting_window_managers_/_Grey_window_/_Programs_not_drawing_properly
 # intellij won't work otherwise with bspwk

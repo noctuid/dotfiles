@@ -43,6 +43,11 @@ freetype setup:
     - name: extra-setup freetype_setup
     - source: salt://extra-setup
 
+siji setup:
+  cmd.script:
+    - name: extra-setup siji_ttf_setup "/home/{{ user }}"
+    - source: salt://extra-setup
+
 lambda txt setup:
   cmd.script:
     - name: extra-setup lambda_txt_setup "/home/{{ user }}"

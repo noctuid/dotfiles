@@ -1,5 +1,3 @@
-xrandr --dpi 96
-
 # shellcheck disable=SC1090
 . ~/bin/helpers/monitor.sh
 

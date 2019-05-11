@@ -16,6 +16,14 @@ BAR_X_OFFSET=$BSPWM_GAP
 BAR_Y_OFFSET=$BSPWM_GAP
 # 2 pixels on FHD
 BAR_BORDER=$(monitor_fraction_of_width 0.00104166666)
+TRAY_HEIGHT=$BSPWM_GAP
 
 export BSPWM_GAP BSPWM_BORDER
-export BAR_WIDTH BAR_HEIGHT BAR_X_OFFSET BAR_Y_OFFSET BAR_BORDER
+export BAR_WIDTH BAR_HEIGHT BAR_X_OFFSET BAR_Y_OFFSET BAR_BORDER TRAY_HEIGHT
+
+# * Network Interface
+# not perfect but will generally work
+WIRELESS_INTERFACE=$(ip link | awk -F ":" '/^[0-9]: wl/ {sub(" ",""); print $2}')
+ETHERNET_INTERFACE=$(ip link | awk -F ":" '/^[0-9]: en/ {sub(" ",""); print $2}')
+
+export WIRELESS_INTERFACE ETHERNET_INTERFACE

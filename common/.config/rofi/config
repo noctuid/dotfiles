@@ -5,6 +5,9 @@
 # run on current monitor instead of monitor mouse is on
 rofi.m: -1
 
+# honor X11 dpi; too large if use 1 which checks monitor size
+rofi.dpi: 0
+
 rofi.matching: fuzzy
 
 # center selected instead of paging
