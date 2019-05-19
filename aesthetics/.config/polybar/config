@@ -1,12 +1,9 @@
 ; TODO:
 ; - add mail
 ; - add gpu on/off indicator
-; - fix headphone indicator; switch to script
-;   https://github.com/jaagr/polybar/issues/578#issuecomment-301122388
 ; - change underline/fg color for high cpu/ram
-; - truncation of volume/brightness (maybe)
 ; - ability to do color = $() or equivalent (could generate darker color for
-;   background of brightenss/audio)
+;   background of brightness/audio)
 ; - maybe add section for vpn, transmission, etc.
 ; Nice:
 ; - support for  system tray
@@ -80,10 +77,11 @@ font-5 = FuraMonoForPowerline NF:pixelsize=9
 font-6 = Font Awesome:pixelsize=8
 ; TODO better font?
 font-7 = Ricty Discord:pixelsize=9
+font-8 = Siji:pixelsize=12
 
 modules-left = wm bspwm mpd
 modules-center = title
-modules-right = redshift memory cpu temperature battery backlight volume date wlan eth
+modules-right = redshift memory cpu temperature battery backlight volume wlan eth date
 
 tray-position = right
 tray-padding = 2
@@ -101,6 +99,7 @@ margin-bottom = 0
 
 [module/wm]
 type = custom/text
+; content =  bspwm
 content =  bspwm
 content-foreground = ${colors.red}
 
@@ -237,19 +236,10 @@ animation-charging-framerate = 1500
 type = internal/backlight
 card = intel_backlight
 
-format = <label> <bar>
-
-label = ☼
-label-foreground = ${colors.yellow}
-label-font = 5
-
-bar-width = 10
-bar-indicator =
-bar-indicator-foreground = #ff
-bar-fill = ─
-bar-fill-foreground = ${colors.yellow}
-bar-empty = ─
-bar-empty-foreground = ${colors.custom-gray}
+; TODO too high/not centered
+format-prefix = "☼ "
+format-prefix-foreground = ${colors.yellow}
+format-prefix-font = 5
 
 ; [module/backlight-acpi]
 ; inherit = module/xbacklight
@@ -257,68 +247,37 @@ bar-empty-foreground = ${colors.custom-gray}
 ; card = intel_backlight
 
 [module/volume]
-type = internal/alsa
-
-format-volume = <ramp-volume> <bar-volume>
-
-ramp-volume-0 = 🔈
-ramp-volume-1 = 🔉
-ramp-volume-2 = 🔊
-ramp-volume-foreground = ${colors.blue}
-
-; bigger?
-ramp-headphones-0 = 
-ramp-headphones-foreground = ${colors.blue}
-; ramp-headphones-font = 4
-
-format-muted-prefix = " "
-format-muted-foreground = ${colors.dark-red}
-; label-muted = sound muted
-
-bar-volume-width = 10
-bar-volume-foreground-0 = ${colors.blue}
-bar-volume-foreground-1 = ${colors.blue}
-bar-volume-foreground-2 = ${colors.blue}
-bar-volume-foreground-3 = ${colors.blue}
-bar-volume-foreground-4 = ${colors.blue}
-bar-volume-foreground-5 = ${colors.blue}
-bar-volume-foreground-6 = ${colors.dark-red}
-bar-volume-gradient = false
-bar-volume-indicator =
-bar-volume-fill = ─
-bar-volume-empty = ─
-bar-volume-empty-foreground = ${colors.custom-gray}
+type = custom/script
+tail = true
+exec = ~/.config/polybar/volume.sh
 
 [module/date]
 type = custom/script
 
-format = <label>
 format-foreground = ${colors.dark-magenta}
 format-font = 8
 
-label = " %output%"
+format-prefix = " "
+
+label-font = 8
 
 exec = ~/.config/polybar/date.sh
 
 [module/wlan]
 type = internal/network
 interface = ${env:WIRELESS_INTERFACE:wlp0s20f3}
-interval = 5
+interval = 3
 
-format-connected = <ramp-signal> <label-connected>
-format-connected-underline =
+format-connected = <ramp-signal>
 format-connected-foreground = ${colors.dark-cyan}
-; TODO waste of space?
-label-connected =
-; label-connected = %essid%
 
-format-disconnected =
+format-disconnected = 
+format-disconnected-foreground = ${colors.dark-cyan}
 
-ramp-signal-0 = 
-ramp-signal-1 = 
-ramp-signal-2 = 
-ramp-signal-3 = 
-ramp-signal-4 = 
+ramp-signal-0 = 
+ramp-signal-1 = 
+ramp-signal-2 = 
+ramp-signal-font = 9
 
 [module/eth]
 type = internal/network
