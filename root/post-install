@@ -26,8 +26,8 @@
 #     (would either need to have NOPASSWD for user or potentially use an askpass
 #     program if that is possible)
 #   - can't start services from chroot of course, but can enable (not user
-#     services though) salt; user services must be enabled by running this
-#     script again on the new installation with the --non-chroot flag (also does
+#     services though); user services must be enabled by running this script
+#     again on the new installation with the non-chroot operation (also does
 #     some other extra configuration)
 
 # Using salt mainly for nice messaging (shows which sections failed, how many,
@@ -70,12 +70,11 @@ user=noctuid
 uhome=/home/"$user"
 log_level=info
 use_salt=false
-non_chroot=false
 force_reflector=false
 
 print_option_help() {
 	echo "
-usage: post-install [options]
+usage: post-install [options] [operation]
 
 options:
 	-t or --timezone <timezone>
@@ -98,14 +97,6 @@ options:
 	   impossible.
 	   Current value: $log_level
 
-	-n or --non-chroot
-	   Do configuration that can't be done in a chroot and nothing else (e.g.
-	   enabling systemd services and ufw). Meant to be run once after first boot
-	   of system be done in a chroot. If this flag is not specified, this
-	   configuration will still be done if it is necessary and if not in a
-	   chroot.
-	   Current value: $non-chroot
-
 	-s or --use-salt
 	   If specified, use salt for configuration/setup.
 	   Current value: $use_salt
@@ -116,7 +107,24 @@ options:
 	   Currrent value: $force_reflector
 
 	-h or --help
-	   Print this help text."
+	   Print this help text.
+
+operations:
+	non-chroot
+	   Do configuration that can't be done in a chroot and nothing else (e.g.
+	   enabling systemd services and ufw). Meant to be run once after first boot
+	   of system be done in a chroot. If this action is not specified, this
+	   configuration will still be done if it is necessary and if not in a
+	   chroot.
+
+	fix
+	   Generate initramfs and (re)install bootloader.
+
+	root-config
+	   Just copy root config files from $uhome/dotfiles to /
+
+	<no option/ default>
+	   Do all setup."
 }
 
 while getopts t:H:u:l:nsfh-: opt
@@ -126,11 +134,10 @@ do
 		H) hostname=$OPTARG;;
 		u) user=$OPTARG;;
 		l) log_level=$OPTARG;;
-		n) non_chroot=true;;
 		s) use_salt=true;;
 		f) force_reflector=true;;
 		-)
-			if [[ $OPTARG =~ ^(use-salt|non-chroot)$ ]] || \
+			if [[ $OPTARG =~ ^(use-salt)$ ]] || \
 				   [[ $OPTARG == *=* ]]; then
 				OPTION=${OPTARG%%=*}
 				OPTARG=${OPTARG#*=}
@@ -145,7 +152,6 @@ do
 				hostname) hostname=$OPTARG;;
 				username) username=$OPTARG;;
 				log-level) log_level=$OPTARG;;
-				non-chroot) enable_services_only=true;;
 				use-salt) use_salt=true;;
 				force-reflector) force_reflector=true;;
 				help) print_option_help && exit 0;;
@@ -460,6 +466,9 @@ update_user_groups() {
 copy_root_config_files() {
 	echo "Copying root config files from dotfiles to /."
 	cp -R "$basedir"/boot "$basedir"/etc "$basedir"/usr "$basedir"/var /
+	# remove comments
+	sed -i "/^ *\//d" \
+		/var/lib/transmission/.config/transmission-daemon/settings.json
 }
 
 # ** Package Installation
@@ -579,11 +588,14 @@ Current variables:
 - Log level: $log_level
 - Timeout: $timeout
 - Using salt?: $use_salt
-- Non chroot config only?: $non_chroot
 - Force reflector update?: $force_reflector
+
+Operation: ${1:-everything}
 
 Please make sure that the ESP is already mounted under /boot/efi if installing a
 new system.
+
+For more information, rerun with --help flag.
 
 See $log and $failure_log for info after run."
 	prompt_continue
@@ -633,8 +645,10 @@ script again with --enable-services."
 # shellcheck disable=SC2188
 > "$failure_log"
 
-if $non_chroot; then
-	"$basedir"/extra-setup non_chroot "$user"
-else
-	main 2>&1 | tee "$log"
-fi
+case $1 in
+	non-chroot) "$basedir"/extra-setup non_chroot "$user";;
+	fix) "$basedir"/extra-setup refind_install \
+		 ; "$basedir"/extra-setup initramfs_setup;;
+	root-config) copy_root_config_files;;
+	*) main 2>&1 | tee "$log";;
+esac

@@ -49,8 +49,9 @@ user_services_setup() {
 	user=$1
 	if ! is_chroot; then
 		echo "Configuring user systemd services."
-		# systemctl --user start udiskie
-		sudo -u "$user" systemctl --user enable udiskie
+		# --preserve-env to avoid dbus error
+		sudo --preserve-env -u "$user" systemctl --user start udiskie
+		sudo --preserve-env -u "$user" systemctl --user enable udiskie
 		# TODO emacs, mpd, and mpd-notification block login for a long time
 		# starting in ~/.profile instead
 		# mpd-notification service fails quickly
@@ -150,6 +151,7 @@ fcron_user_setup() {
 }
 
 # * UFW
+# shellcheck disable=SC2120
 ufw_setup() {
 	force=$1
 	if ! is_chroot; then
@@ -178,17 +180,17 @@ transmission_setup() {
 	# may chown as "$USER":transmission in future (first suggestion on archwiki)
 	# but this setup works fine currently
 	chown -R transmission:transmission /home/transmission
+	# for config file and other directories (e.g. resume)
+	chown -R transmission:transmission /var/lib/transmission
 	# give transmission user and group rwx permissions
 	chmod -R 775 /home/transmission
 	# add user to transmission group
 	gpasswd -a "$user" transmission
-	chown transmission:transmission \
-		  /var/lib/transmission/.config/transmission-daemon/settings.json
 }
 
 # * DNS
 # not doing this until after reboot because will break DNS resolution unless can
-# start unbound and dnscrypt-proxy
+# start unbound and dnscrypt-proxy successfully
 dns_setup() {
 	echo "Configuring DNS."
 	# unbound
@@ -224,12 +226,24 @@ noptions edns0 single-request-reopen" \
 ranger_devicons_setup() {
 	echo "Configuring ranger devicons."
 	uhome=$1
+	build_dir=/tmp/build/ranger_devicons
 	mkdir -p /tmp/build
-	if [[ ! -d /tmp/build/ranger_devicons ]]; then
+	if [[ ! -d "$build_dir" ]]; then
 		git clone https://github.com/alexanderjeurissen/ranger_devicons \
-			/tmp/build/ranger_devicons
+			"$build_dir"
 	fi
-	cd /tmp/build/ranger_devicons && HOME="$uhome" make install
+	cd "$build_dir" && HOME="$uhome" make install
+}
+
+# * Udiskie
+udiskie_setup() {
+	# does not exist by default; udiskies uses for mounting
+	mkdir -p /media
+}
+
+# * Connman
+connman_setup() {
+	connmanctl enable wifi
 }
 
 # * All
@@ -263,6 +277,7 @@ all() {
 		|| fail_configure "Fcron setup failed."
 	fcron_user_setup "$user" \
 		|| fail_configure "Fcron user setup failed."
+	# shellcheck disable=SC2119
 	ufw_setup \
 		|| fail_configure "UFW setup failed."
 	transmission_setup "$user" \
@@ -271,14 +286,16 @@ all() {
 		# 	|| fail_configure "DNS setup failed."
 	ranger_devicons_setup "$uhome" \
 		|| fail_configure "Ranger devicons setup failed."
+	udiskie_setup || fail_configure "Udiskie setup failed."
+	connman_setup || fail_configure "Connman setup failed."
 }
 
 # * Non-chroot
 non_chroot() {
 	user=$1
 	systemctl daemon-reload
-	# all_service_setup "$user"
 	user_services_setup "$user"
+	# shellcheck disable=SC2119
 	ufw_setup
 	dns_setup
 }

@@ -125,16 +125,15 @@ splix
 # gutenprint
 
 # * Terminals
-# favorite terminals
 kitty
-# TODO both of these fail with aura
-# termite-ranger-fix-git aur
-# termite-ranger-fix-terminfo-git aur
-# xst-git aur
+
 # backup
 xterm
 rxvt-unicode
 urxvt-perls
+termite
+termite-terminfo
+xst-git aur
 
 # * Shell/TUI/CLI
 # zplug installed in zshrc
@@ -182,8 +181,7 @@ gvim
 neovim
 vim-dein-git aur
 vimpager-git aur
-# TODO aura fails
-emacs-git aur
+emacs-git-shallow aur
 # evm gem
 cask aur
 emacs-25.1 evm
@@ -250,9 +248,9 @@ zathura
 # mupdf will keep the rows on the same line
 zathura-pdf-mupdf
 zathura-djvu
+
 # another backup
-# TODO aura failure
-# apvlv aur
+apvlv aur
 
 # * Emulators
 ppsspp
@@ -279,6 +277,7 @@ chrony
 tzupdate aur
 
 # * Disk Utilities
+gparted
 # automatic mounting
 udiskie
 # disk health monitoring
@@ -391,8 +390,7 @@ sxhkd
 
 # * Screen locker
 xautolock
-# TODO aura can't install
-# slimlock-git aur
+slimlock-git aur
 
 # * Compositing/Redshift
 redshift
@@ -445,8 +443,7 @@ siji-git aur
 # ttf-ms-win-10 aur
 
 ttfautohint aur
-# TODO freezes aura
-# otfcc aur
+otfcc aur
 yargs npm
 pad npm
 patel npm
@@ -460,12 +457,10 @@ otfcc-c2q npm
 unorm npm
 
 # * Appearance/Theming
-# TODO aura hangs here
-# polybar-git aur
+polybar-git aur
 setroot aur
 xtitle-git aur
-# TODO aura hangs building this
-# conky-lua-nv aur
+conky-lua-nv aur
 numix-gtk-theme
 # for icons
 numix-icon-theme-git aur
@@ -597,8 +592,7 @@ ruby
 roswell aur
 sbcl-bin ros
 # for cl minispec
-# TODO freezes aura
-# phantomjs aur
+phantomjs-bin aur
 
 # ** Racket
 racket
