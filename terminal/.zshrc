@@ -1494,55 +1494,119 @@ function toss() {
 	done
 }
 
-# }}}
+# ** Android Music Syncing
+# *** mtpfs and adbfs
+export ANDROID_MOUNT_DIR="$HOME/mnt/android"
 
-# }}}
-#===============
-# Gaming {{{
-#===============
-# alias xbox='sudo xboxdrv --silent --detach-kernel-driver'
-# alias controller='xbox'
-# experimenting:
-# sudo xboxdrv --deadzone 4000 --dpad-as-button --trigger-as-button --ui-axismap "x2=REL_X:10,y2=REL_Y:10,x1=KEY_A:KEY_D,y1=KEY_W:KEY_S" --ui-buttonmap "tl=KEY_LEFTSHIFT,tr=KEY_LEFTCTRL" --ui-buttonmap "a=KEY_SPACE,b=KEY_C,x=KEY_1,y=KEY_R" --ui-buttonmap "lb=KEY_Q,rb=KEY_E" --ui-buttonmap "lt=BTN_LEFT,rt=BTN_RIGHT" --ui-buttonmap "dl=KEY_4,dr=KEY_B,du=BTN_MIDDLE,dd=KEY_TAB" --ui-buttonmap "back=KEY_ESC,start=KEY_ENTER"
-
-# }}}
-#===============
-# Android Music Syncing {{{
-#===============
-# alias -g mountand='jmtpfs -o allow_other ~/samsung'
-# restart adb
 alias adbrestart='adb kill-server ; adb start-server'
 
-export MTP_MOUNT_DIR="$HOME/mtp"
+# mountand() {
+# 	mkdir -p "$ANDROID_MOUNT_DIR" && jmtpfs "$MTP_MOUNT_DIR"
+# }
 
-function mountand() {
-	mkdir -p "$MTP_MOUNT_DIR" && jmtpfs "$MTP_MOUNT_DIR"
+# umountand() {
+# 	fusermount -u "$ANDROID_MOUNT_DIR"
+# }
+
+mountand() {
+	mkdir -p "$ANDROID_MOUNT_DIR" && adbfs "$ANDROID_MOUNT_DIR"
 }
-function umountand() {
-	fusermount -u "$MTP_MOUNT_DIR"
+
+umountand() {
+	fusermount -u "$ANDROID_MOUNT_DIR"
 }
 
 # http://www.arachnoid.com/android/SSHelper/index.html
 # with ssh: I tried but it was much slower :( even with fast internets
 # (sshdroid, sshelper, zshaolin, etc.)
-#  rsync -azvr --no-perms --no-times --size-only --progress --delete --rsh="ssh -p 2222" /path root@hostip:/path
+# rsync -azvr --no-perms --no-times --size-only --progress --delete \
+	# 	  --rsh="ssh -p 2222" /path root@hostip:/path
 
-# MTP is an abomination
-alias android_rsync='rsync -azvP --no-perms --no-times --size-only'
-
-function syncandmus() {
-	# add auto-mounting and checking
-	android_rsync --delete --include-from="$HOME/.zsh/rsync_bandlist.txt" \
-		"${XDG_MUSIC_DIR:-$HOME/music}/" "$MTP_MOUNT_DIR/Card/Music"
-	android_rsync ~/.mpd/playlists/ "$MTP_MOUNT_DIR/Card/Music"
+# see backup_rsync; --no-perms line is difference
+android_rsync() {
+	rsync --verbose --info=progress2 --human-readable --ignore-errors \
+		  --recursive --links --hard-links \
+		  --no-perms --no-times --no-group --no-owner --size-only \
+		  --update --prune-empty-dirs \
+		  --partial --whole-file --sparse "$@"
 }
 
-# tophone
-function tophone() {
-	android_rsync --delete ~/wallpaper/phone/ "$MTP_MOUNT_DIR"/Card/wallpaper
-	if [[ -d ~/database/ringtones ]]; then
-		android_rsync --delete ~/database/ringtones/ "$MTP_MOUNT_DIR"/Card/ringtones
+# seems beter with adbfs but still slow
+syncandmus() {
+	if ! mountpoint -q "$ANDROID_MOUNT_DIR"; then
+		echo "Please mountand."
+		return 1
 	fi
+
+	and_music_dir="$ANDROID_MOUNT_DIR$(adb_get_sd_card_dir)/Music"
+	android_rsync --delete --copy-links ~/music-android/ "$and_music_dir"
+	android_rsync ~/.mpd/playlists/ "$and_music_dir"
+}
+
+# *** adb-sync
+adb_get_sd_card_dir() {
+	# changing file system label (e.g. with exfatlabel) does not change the
+	# android mountpoint; using this meh workaround to mark the sd card dir
+	adb shell <<EOF
+for i in /storage/*; do
+	if [ -f "\$i"/is_external_sd ]; then
+		echo "\$i"
+		break
+	fi
+done
+EOF
+}
+
+# remember: trailing slashes are important on src dir
+# TODO adb-sync doesn't work with certain characters in filename:
+# https://github.com/google/adb-sync/issues/34
+syncphone() {
+	if ! mountpoint -q ~/database; then
+		echo "Please mountdatab."
+		return 1
+	fi
+
+	mkdir -p ~/ag-sys/backup/{tachiyomi,to-clean} || return 1
+	mkdir -p ~/database/move/phone/{DCIM,Download} || return 1
+
+	local internal external
+	# /storage/emulated/0
+	internal=/sdcard
+	external=$(adb_get_sd_card_dir)
+
+	if [[ -z "$external" ]]; then
+		echo "Please ensure the sd card is mounted and has an 'is_external_sd'
+file in it."
+		return 1
+	fi
+
+	adb-sync --two-way ~/wallpaper/phone/ "$internal"/Wallpaper/
+	adb-sync --two-way ~/database/ringtones/ "$internal"/Ringtones/
+
+	# music
+	adb-sync --copy-links ~/music-android/* "$external"/Music/
+	# TODO check if this is actually used
+	adb-sync ~/.mpd/playlists/ "$internal"/Playlists/
+
+	adb-sync ~/ag-sys/life/back.pdf "$internal"/
+
+	# sync back notes
+	adb-sync --reverse "$internal"/notes.txt ~/ag-sys/backup/to-clean/
+	adb-sync --reverse "$internal"/pots.txt ~/ag-sys/backup/to-clean/
+
+	# TODO exclude .thumbnails
+	# photos
+	adb-sync --reverse "$internal"/DCIM ~/database/move/phone/
+	adb-sync --reverse "$external"/DCIM ~/database/move/phone/
+
+	# videos
+	adb-sync --reverse "$internal"/Movies ~/database/move/phone/
+
+	# other downloads
+	adb-sync --reverse "$internal"/Download ~/database/move/phone/
+
+	adb-sync --reverse "$internal"/Tachiyomi/backup/ ~/ag-sys/backup/tachiyomi/
+	# adb-sync --reverse /sdcard/Android/data/eu.kanade.tachiyomi/files/ ~/manga/
 }
 
 # }}}

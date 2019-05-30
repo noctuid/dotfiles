@@ -627,6 +627,7 @@ xclip
 # * Android
 # for adb
 android-tools
+adb-sync-git aur
 
 # /* Local Variables:
 # /* mode: conf-unix
