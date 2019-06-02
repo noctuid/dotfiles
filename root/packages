@@ -21,6 +21,9 @@ pacman-contrib
 yay aur
 pacnanny aur
 
+# * Nix
+nix aur
+
 # * Booatloader
 refind-efi
 

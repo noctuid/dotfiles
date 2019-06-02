@@ -117,11 +117,14 @@ operations:
 	   configuration will still be done if it is necessary and if not in a
 	   chroot.
 
-	fix
-	   Generate initramfs and (re)install bootloader.
-
 	root-config
 	   Just copy root config files from $uhome/dotfiles to /
+
+	boot
+	   Generate initramfs and (re)install bootloader.
+
+	fix
+	   Same as calling with root-config and then boot.
 
 	<no option/ default>
 	   Do all setup."
@@ -554,11 +557,7 @@ configure_packages() {
 
 # ** Enable Services
 # * Main
-main() {
-	if [[ $EUID -ne 0 ]]; then
-		echo "Please run as root."
-		exit 1
-	fi
+default() {
 	if ! id -u "$user"; then
 		echo "Please create $user:
 - useradd $user
@@ -600,11 +599,6 @@ For more information, rerun with --help flag.
 See $log and $failure_log for info after run."
 	prompt_continue
 
-	# must be mounted before try to copy refind.conf over
-	if ! mountpoint -q /boot/efi; then
-		mount LABEL=SYSTEM /boot/efi
-	fi
-
 	echo "Performing basic setup..."
 	sudo_setup || fail_echo "Failed to update sudo configuration."
 	time_setup || fail_echo "Failed to update timezone/clock."
@@ -642,13 +636,30 @@ script again with --enable-services."
 	fi
 }
 
+if [[ $EUID -ne 0 ]]; then
+	echo "Please run this script as root."
+	exit 1
+fi
+
+# must be mounted before try to copy refind.conf over
+if ! mountpoint -q /boot/efi; then
+	mount LABEL=SYSTEM /boot/efi
+fi
+if ! mountpoint -q /boot/efi; then
+	echo "Please mount ESP partition before running this script."
+	return 1
+fi
+
 # shellcheck disable=SC2188
 > "$failure_log"
 
 case $1 in
 	non-chroot) "$basedir"/extra-setup non_chroot "$user";;
-	fix) "$basedir"/extra-setup refind_install \
-		 ; "$basedir"/extra-setup initramfs_setup;;
 	root-config) copy_root_config_files;;
-	*) main 2>&1 | tee "$log";;
+	boot) "$basedir"/extra-setup refind_setup \
+				&& "$basedir"/extra-setup initramfs_setup;;
+	fix) copy_root_config_files \
+			   && "$basedir"/extra-setup refind_setup \
+			   && "$basedir"/extra-setup initramfs_setup;;
+	*) default 2>&1 | tee "$log";;
 esac

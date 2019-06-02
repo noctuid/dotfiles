@@ -89,11 +89,6 @@ while read -r dir; do
 	fi
 done <<< "$pathdirs"
 
-# nix
-if [[ -f ~/.nix-profile/etc/profile.d/nix.sh ]]; then
-	cd ~/ && source .nix-profile/etc/profile.d/nix.sh
-fi
-
 # import environment variables for use with user units
 # NOTE: will give failure message "Invalid environment assigments"
 # all my important env variables show up in show-environment though

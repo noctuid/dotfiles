@@ -246,6 +246,18 @@ connman_setup() {
 	connmanctl enable wifi
 }
 
+# * Nix
+nix_setup() {
+	user=$1
+	# archlinx-nix now does pretty much all setup automatically when installing
+	# nix from aur
+	# note that reboot is required for everything to work without changes
+	# (daemon must be running; must manually source /etc/profile.d/nix.sh if
+	# haven't rebooted)
+	sudo -u "$user" nix-channel --add http://nixos.org/channels/nixpkgs-unstable
+	sudo -u "$user" nix-channel --update
+}
+
 # * All
 all() {
 	user=$1
@@ -288,6 +300,7 @@ all() {
 		|| fail_configure "Ranger devicons setup failed."
 	udiskie_setup || fail_configure "Udiskie setup failed."
 	connman_setup || fail_configure "Connman setup failed."
+	nix_setup "$user" || fail_configure "Nix setup failed."
 }
 
 # * Non-chroot
