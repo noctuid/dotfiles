@@ -14,15 +14,29 @@ P sh
 # ! .Trash
 
 + .gnupg
-+ .local/share/buku/bookmarks.db
+# bookmarks
++ .local/share/buku
 # memory card and game settings
 + .local/share/dolphin-emu
 + .password-store
 + .ssh
 
+# qutebrowser history and sessions
++ .local/share/qutebrowser/cmd-history
++ .local/share/qutebrowser/history.sqlite
++ .local/share/qutebrowser/sessions
+
+# firefox browser and download history and bookmarks
++ .mozilla/firefox/noctuid.normal/places.sqlite
+# firefox sessions
++ .mozilla/firefox/noctuid.normal/sessionstore-backups
++ .mozilla/firefox/noctuid.normal/sessionstore.jsonlz4
+
 # repl history
 + .ipython/profile_default/history.sqlite
 + .lein/repl-history
++ .local/share/nix
++ .local/share/zathura
 + .python_history
 + .ros_history
 + .sbcl_history

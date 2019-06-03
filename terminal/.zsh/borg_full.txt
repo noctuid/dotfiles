@@ -19,10 +19,13 @@ P sh
 + .gnupg
 + .ipython/profile_default/history.sqlite
 + .lein/repl-history
-+ .local/share/buku/bookmarks.db
++ .local/share/buku
 # memory card and game settings
 + .local/share/dolphin-emu
++ .local/share/nix
++ .local/share/qutebrowser/cmd-history
 + .local/share/qutebrowser/greasemonkey
++ .local/share/qutebrowser/history.sqlite
 + .local/share/qutebrowser/sessions
 # bookmarks and history
 + .local/share/zathura
