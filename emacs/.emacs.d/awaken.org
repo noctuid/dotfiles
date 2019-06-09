@@ -191,6 +191,11 @@ BODY (even on failure)."
 (defconst noct:personal-computer-p
   (and (string= (user-login-name) "noctuid")
        (file-directory-p "~/ag-sys")))
+
+(defmacro noct:with-q-to-exit (&rest body)
+  `(progn ,@body
+          (general-def 'normal 'local "q" #'delete-frame)))
+
 #+end_src
 
 *** TODO Popup Handling
@@ -1658,6 +1663,27 @@ Select candidate as soon as there is only one (like the headlong package but for
   :diminish ""
   :config
   (gsetq counsel-yank-pop-height ivy-height))
+#+end_src
+
+*** Counsel Buku
+This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I may use rofi in the future or may stick with this (see sxhkdrc for binding).
+#+begin_src emacs-lisp
+(defun counsel-buku-action (cand)
+  "Run \"buku --open\" on CAND."
+  (let ((db-index (car (split-string cand "\t"))))
+    (counsel--run "buku" "--open" db-index)))
+
+(defun counsel-buku ()
+  "Open a buku bookmark."
+  (interactive)
+  (counsel-require-program "buku")
+  (let ((cands
+         (split-string
+          (shell-command-to-string "buku --print --format 5")
+          "\n" t)))
+    (ivy-read "open bookmark: " cands
+              :action #'counsel-buku-action
+              :caller 'counsel-buku)))
 #+end_src
 
 ** Manual Completion

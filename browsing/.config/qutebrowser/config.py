@@ -438,6 +438,11 @@ nmap('"', 'enter-mode jump_mark')
 nmap('tl', 'jump-mark "\'"')
 
 # ** Spawn/Shell
+# *** Bookarking with Buku
+# can add tags after
+nmap('m', 'set-cmd-text -s :spawn --detach buku --add "{url}"')
+
+# *** Playing Videos with MPV
 # "y" for youtube-dl
 nmap('ty', 'spawn --detach mpv "{url}"')
 

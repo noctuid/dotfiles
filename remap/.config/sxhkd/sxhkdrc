@@ -88,7 +88,10 @@ mode_switch + super + V
 	LC_CTYPE=ja_JP.UTF-8 emacs --with-demoted-errors
 
 mode_switch + super + p
-	emacsclient -ce "(progn (proced) (delete-other-windows) (general-def 'normal 'local \"q\" #'delete-frame))"
+	emacsclient -ce "(noct:with-q-to-exit (proced) (delete-other-windows))"
+
+mode_switch + super + b
+	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
 
 # ** Clicks
 # TODO clicks don't work when modifier held

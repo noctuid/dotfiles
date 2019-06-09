@@ -610,6 +610,9 @@ maim
 # selection
 slop
 
+# * Bookmarking
+buku-git aur
+
 # * X Related
 xdotool
 xorg-server
