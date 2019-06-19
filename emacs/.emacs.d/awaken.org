@@ -196,6 +196,18 @@ BODY (even on failure)."
   `(progn ,@body
           (general-def 'normal 'local "q" #'delete-frame)))
 
+(defmacro noct:disable-global-mode (mode)
+  "Return a function that disables a global minor mode for the current buffer.
+This works by adding to `after-change-major-mode-hook' locally to disable the
+mode. Doing something like (add-hook 'major-mode-hook (lambda () (mode -1)))
+will not work because global minor modes enable minor modes after major mode
+hooks run."
+  `(lambda ()
+     (general-add-hook 'after-change-major-mode-hook
+                       (lambda () (,mode -1))
+                       t
+                       t)))
+
 #+end_src
 
 *** TODO Popup Handling
@@ -4938,6 +4950,37 @@ For making certain files read-only automatically.
   (defvar ert--running-tests nil)
   (global-hardhat-mode)
   :diminish global-hardhat-mode)
+#+end_src
+
+* Applications
+** Vterm
+#+begin_src emacs-lisp
+(use-package vterm
+  ;; :general
+  ;; ('normal 'override "T" #'vterm)
+  :init
+  ;; not defined, vterm checks boundp for some reason
+  (defvar vterm-install t)
+  :config
+  (gsetq vterm-shell "zsh"
+         ;; increase scrollback
+         vterm-max-scrollback 10000)
+  :gfhook
+  (nil (noct:disable-global-mode whitespace-mode)))
+
+(use-package vterm-toggle
+  :straight (vterm-toggle
+             :type git
+             :host github
+             :repo "jixiuf/vterm-toggle")
+  :general
+  ('normal 'override "T" #'vterm-toggle-cd)
+  :init
+  (noct:handle-popup vterm-mode)
+  :config
+  (gsetq vterm-toggle-fullscreen-p nil
+         vterm-toggle-evil-state-when-enter nil
+         vterm-toggle-evil-state-when-leave nil))
 #+end_src
 
 * Blog
