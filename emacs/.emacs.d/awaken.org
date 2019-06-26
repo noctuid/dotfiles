@@ -726,6 +726,13 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
          hydra-lv t))
 #+end_src
 
+** Computer Local Setup
+#+begin_src emacs-lisp
+(let ((local-file "~/.emacs.d/lisp/local.el"))
+  (when (file-exists-p local-file)
+    (load-file local-file)))
+#+end_src
+
 * Basic and Builtin Functionality
 ** General Settings
 #+begin_src emacs-lisp
