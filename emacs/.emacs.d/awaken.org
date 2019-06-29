@@ -1338,16 +1338,8 @@ Looks nice and replaces =company-quickhelp= as well.
   :ghook 'company-mode-hook
   :diminish ""
   :config
-  ;; https://github.com/sebastiencs/company-box/pull/42
-  ;; (require 'all-the-icons)
-  ;; (setq company-box-icons-elisp
-  ;;       (list
-  ;;        (all-the-icons-octicon "file-binary")
-  ;;        (all-the-icons-faicon  "cogs")
-  ;;        (all-the-icons-wicon   "tornado")
-  ;;        (all-the-icons-wicon   "tornado")))
   (gsetq company-box-show-single-candidate t
-         company-box-icons-elisp (list "f" "v" "ft" "fc")))
+         company-box-icons-alist 'company-box-icons-all-the-icons))
 #+end_src
 
 *** Company Childframe (child frame frontend)
