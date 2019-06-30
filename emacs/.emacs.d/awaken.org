@@ -509,7 +509,15 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
              :host github
              :repo "emacs-evil/evil-collection"
              :local-repo "~/src/forks/evil-collection"
-             :fork (:host github :repo "noctuid/evil-collection")))
+             :fork (:host github :repo "noctuid/evil-collection"))
+  :config
+  (defun noct:make-evil-collection-translations (_mode mode-keymaps &rest _rest)
+    (general-translate-key 'normal mode-keymaps
+      "C-n" "C-j"
+      "C-e" "C-k"))
+
+  (general-add-hook 'evil-collection-setup-hook
+                    #'noct:make-evil-collection-translations))
 #+end_src
 
 *** Settings
@@ -2168,6 +2176,15 @@ TODO: This should be in counsel (variable to jump to match end and evil integrat
                                                     #'noct:match-beginning
                                                     #'noct:add-ivy-text-to-history
                                                     #'noct:evil-search-action)))
+#+end_src
+
+** Deadgrep
+#+begin_src emacs-lisp
+(use-package deadgrep
+  :general (general-t "/" #'deadgrep)
+  :config
+  ;; ~/src/forks/evil-collection/evil-collection-deadgrep.el
+  (evil-collection-init 'deadgrep))
 #+end_src
 
 ** Projectile
