@@ -1175,8 +1175,8 @@ I've switched away from putting this function in a hook because it can be jarrin
                    (and (file-exists-p parent)
                         (not (file-writable-p parent))))
                ;; don't want to edit Emacs source files as root
-               (not (string-match "/usr/share/emacs/.*" (buffer-file-name))))
-      (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name)))))
+               (not (string-match "/usr/share/emacs/.*" file)))
+      (find-file (concat "/sudo:root@localhost:" file)))))
 
 ;; [S]u[d]o or [S]udo e[d]it
 (general-s "d" #'noct:maybe-sudo-edit)
@@ -2869,7 +2869,7 @@ TODO Use things.el instead.
   (general-def 'motion
     "rn" #'evilem-next-line
     "re" #'evilem-prev-line
-    "rw" #'evilem-forward-begin
+    "rw" #'evilem-forward-word-begin
     "rW" #'evilem-forward-WORD-begin
     "rb" #'evilem-backward-word-begin
     "rB" #'evilem-backward-WORD-begin
@@ -3432,7 +3432,7 @@ Restore previous settings after disabling `vdiff-mode'."
 
   ;; bind dp and do
   ;; ~/src/forks/evil-collection/evil-collection-vdiff.el
-  (evil-collection-init 'evil-collection-vdiff)
+  (evil-collection-init 'vdiff)
 
   (general-def 'visual (vdiff-mode vdiff-32ay-mode)
     :definer 'minor-mode
@@ -3517,6 +3517,7 @@ For typographical editing (not fixing typos).
 [[https://github.com/errata-ai/vale][Value]] supports proselint and write-good styles with configuration.
 #+begin_src emacs-lisp
 (use-package flycheck-vale
+  :disabled t
   :after flycheck
   :demand t
   :config (flycheck-vale-setup))
