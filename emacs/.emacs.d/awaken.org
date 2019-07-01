@@ -4969,6 +4969,298 @@ For making certain files read-only automatically.
 #+end_src
 
 * Applications
+** Dired
+*** Setup
+Notable packages not currently using:
+- dired-du
+- dired-xattr
+
+TODO: Don't create a bunch of dired buffers (e.g. dired-single-up-directory).
+
+TODO: Async copy/paste with rsync
+
+TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-opening)
+#+begin_src emacs-lisp
+(use-package dired
+  :straight nil
+  :general ('normal "-" #'dired-jump)
+  :gfhook
+  ;; automatically refresh
+  (nil #'auto-revert-mode)
+  ;; by default only show filename
+  ('dired-initial-position-hook #'dired-hide-details-mode)
+  :config
+  (if (eq system-type 'darwin)
+      (when (executable-find "gls")
+        (gsetq insert-directory-program "gls"
+               dired-listing-switches "-lha --group-directories-first"))
+    ;; use human readable sizes and put directories first
+    (gsetq dired-listing-switches "-lha --group-directories-first")))
+#+end_src
+
+*** Basic Keybindings
+#+begin_src emacs-lisp
+(general-with-package 'dired
+  (put 'dired-find-alternate-file 'disabled nil)
+  (general-def 'normal dired-mode-map
+    "q" #'noct:kill-this-buffer
+    "gr" #'revert-buffer
+
+    ;; navigation
+    "h" #'dired-up-directory
+    "n" #'dired-next-line
+    "e" #'dired-previous-line
+    "i" #'dired-find-alternate-file
+    "f" #'counsel-find-file
+
+    ;; marking
+    "TAB" #'dired-mark
+    "," #'dired-mark
+    "\"" #'dired-mark-files-regexp
+    "v" #'dired-toggle-marks
+    "um" #'dired-unmark
+    "uv" #'dired-unmark-all-marks
+
+    ;; renaming/changing
+    "cc" #'dired-do-rename
+    "cm" #'dired-do-chmod
+    "co" #'dired-do-chown
+    "cg" #'dired-do-chgrp
+
+    ;; TODO ranger u and c shell bindings (e.g. convert to pdf)
+
+    "di" #'dired-do-delete
+    ;; TODO "ud" trash-restore
+
+    ;; encryption and decryption (epa-dired)
+    ":d" #'epa-dired-do-decrypt
+    ":v" #'epa-dired-do-verify
+    ":s" #'epa-dired-do-sign
+    ":e" #'epa-dired-do-encrypt
+
+    "o" #'dired-do-shell-command
+
+    ;; toggle details
+    "zd" #'dired-hide-details-mode)
+
+  (general-def 'visual dired-mode-map
+    "TAB" #'dired-mark
+    "um" #'dired-unmark))
+#+end_src
+
+*** Quickmarks
+#+begin_src emacs-lisp
+(general-with-package 'dired
+  (defmacro noct:find-alternate-file (filename)
+    `(defun ,(intern (concat "noct:quickmark-find-" filename)) ()
+       ,(concat "Call `find-alternate-file' on " filename ".")
+       (interactive)
+       (find-alternate-file ,filename)))
+
+  (general-def 'normal dired-mode-map
+    :prefix "g"
+    "/" (noct:find-alternate-file "/")
+    "b" (noct:find-alternate-file "/bin/")
+    "e" (noct:find-alternate-file "/etc/")
+    "h" (noct:find-alternate-file "~/")
+    "m" (noct:find-alternate-file "/media/")
+    "t" (noct:find-alternate-file "/tmp/")
+    "u" (noct:find-alternate-file "/usr/")
+    "v" (noct:find-alternate-file "/var/")
+    "V" (noct:find-alternate-file "/Volumes/"))
+
+  (general-def 'normal dired-mode-map
+    :prefix "'"
+    "b" (noct:find-alternate-file "~/dotfiles/scripts/bin/")
+    "B" (noct:find-alternate-file "~/src/noctuid.github.io/")
+    "c" (noct:find-alternate-file "~/src/")
+    "d" (noct:find-alternate-file "~/database/")
+    "e" (noct:find-alternate-file "~/.emacs.d/")
+    "E" (noct:find-alternate-file "~/ag-sys/else/")
+    "f" (noct:find-alternate-file "~/dotfiles/")
+    "l" (noct:find-alternate-file "~/ag-sys/library/")
+    "m" (noct:find-alternate-file "~/move/")
+    "p" (noct:find-alternate-file "~/ag-sys/else/scrawl/prose/pots/")
+    "P" (noct:find-alternate-file "~/ag-sys/prog/")
+    "s" (noct:find-alternate-file "~/school/")
+    "S" (noct:find-alternate-file "~/move/Screenshots/")))
+#+end_src
+
+*** All the Icons Dired
+#+begin_src emacs-lisp
+(use-package all-the-icons-dired
+  :ghook 'dired-mode-hook)
+#+end_src
+
+*** Dired Atool
+#+begin_src emacs-lisp
+(use-package dired-atool
+  :general
+  ('normal
+   dired-mode-map
+   "ux" #'dired-atool-do-unpack-with-subdirectory
+   "uX" #'dired-atool-do-unpack
+   "ca" #'dired-atool-do-pack))
+#+end_src
+
+*** TODO Diredfl
+Find a theme that customizes these faces.
+#+begin_src emacs-lisp
+(use-package diredfl
+  :disabled t
+  :ghook 'dired-mode-hook)
+#+end_src
+
+*** Dired K
+#+begin_src emacs-lisp
+(use-package dired-k
+  :ghook
+  ('dired-initial-position-hook #'dired-k)
+  ('dired-after-readin-hook #'dired-k-no-revert))
+#+end_src
+
+*** TODO Dired Toggle Sudo
+Change current user to root.
+#+begin_src emacs-lisp
+(use-package dired-toggle-sudo
+  :after dired
+  ;; TODO broken?
+  :general ('normal dired-mode-map "zs" #'dired-toggle-sudo))
+#+end_src
+
+*** Wdired
+#+begin_src emacs-lisp
+(use-package wdired
+  :after dired
+  :general ('normal dired-mode-map "w" #'wdired-change-to-dired-mode)
+  :config
+  (gsetq wdired-create-parent-directories t
+         wdired-allow-to-change-permissions t)
+
+  (general-def 'normal wdired-mode-map
+    "x" #'wdired-toggle-bit
+    "RET" #'wdired-finish-edit))
+#+end_src
+
+*** Ranger.el
+This package needs some work (and refactoring) and isn't actively updated, but it has a lot of good functionality from ranger that other packages don't.
+
+It also has overlapping functionality with a lot of packages. For example, I'm using ~ranger-show-history~ instead of ivy-dired-history or dired-recent.
+#+begin_src emacs-lisp
+(use-package ranger
+  :init
+  (general-add-advice 'ranger-define-additional-maps :override #'ignore)
+  :general
+  ('normal "-" #'deer)
+  (general-s "r" #'deer)
+  :config
+  ;; default
+  ;; (gsetq ranger-override-dired nil)
+  ;; (gsetq ranger-show-dotfiles t)
+
+  (gsetq ranger-deer-show-details nil)
+
+  (setq ranger-mode-map (make-sparse-keymap))
+  (general-def 'normal ranger-mode-map
+    "q" #'ranger-close
+    "Q" #'ranger-disable
+    "gr" #'ranger-refresh
+
+    ;; navigation
+    "gg" #'ranger-goto-top
+    "G" #'ranger-goto-bottom
+    "h" #'ranger-up-directory
+    "n" #'ranger-next-file
+    "e" #'ranger-prev-file
+    "i" #'ranger-find-file
+    "RET" #'ranger-find-file
+    "<next>" #'ranger-page-down
+    "<prior>" #'ranger-page-up
+    "F" #'ranger-travel
+
+    ;; sorting
+    "co" #'ranger-sort-criteria
+
+    ;; marking
+    "TAB" #'ranger-toggle-mark
+    "," #'ranger-toggle-mark
+
+    ;; copying, deleting, and pasting
+    "y" nil
+    "yy" #'ranger-copy
+    "ya" #'ranger-copy-append
+    "yp" #'ranger-copy-absolute-file-paths
+    "yd" #'ranger-copy-current-dir-path
+    "yn" #'ranger-copy-filename
+
+    "d" nil
+    "dd" #'ranger-cut
+    "da" #'ranger-cut-append
+
+    "p" nil
+    "pp" #'ranger-paste
+    "po" #'ranger-paste-over
+    "p/" #'ranger-show-copy-contents
+
+    "du" #'ranger-show-size
+
+    ;; history
+    "l" #'ranger-prev-history
+    "L" #'ranger-next-history
+    "zz" #'ranger-show-history
+
+    ;; tabs
+    "mm" #'ranger-new-tab
+    "mq" #'ranger-close-tab
+    "ma" (lambda () (interactive) (ranger-goto-tab 1))
+    "mr" (lambda () (interactive) (ranger-goto-tab 2))
+    "ms" (lambda () (interactive) (ranger-goto-tab 3))
+    "mt" (lambda () (interactive) (ranger-goto-tab 4))
+    "md" (lambda () (interactive) (ranger-goto-tab 5))
+    "mh" (lambda () (interactive) (ranger-goto-tab 6))
+    "mn" (lambda () (interactive) (ranger-goto-tab 7))
+    "me" (lambda () (interactive) (ranger-goto-tab 8))
+    "mi" (lambda () (interactive) (ranger-goto-tab 9))
+    "mo" (lambda () (interactive) (ranger-goto-tab 0))
+    "uq" #'ranger-restore-tab
+
+    ;; toggles/settings
+    "zm" #'ranger-minimal-toggle
+    "zh" #'ranger-toggle-dotfiles
+    ;; "zi" #'ranger-toggle-literal
+    ;; "zf" #'ranger-toggle-scale-images
+    "zo" #'ranger-sort-criteria
+    "zp" #'ranger-toggle-details
+    "zd" #'ranger-toggle-dir-first
+    "zh" #'ranger-toggle-dotfiles)
+
+  (general-def 'visual ranger-mode-map
+    "TAB" #'ranger-toggle-mark
+    "," #'ranger-toggle-mark)
+
+  ;; move down after toggling mark too
+  (advice-add 'ranger-toggle-mark :after #'ranger-next-file))
+#+end_src
+
+*** Dired Hacks
+**** Dired AVFS
+Allows browsing archives.
+#+begin_src emacs-lisp
+(use-package dired-avfs
+  :when (executable-find "avfs")
+  :after 'dired
+  :demand t)
+#+end_src
+
+**** Dired Collapse Mode
+Show entire path for a directory (or chain of directories) that only contains a single file/directory (like on GitHub).
+#+begin_src emacs-lisp
+(use-package dired-collapse
+  :ghook 'dired-mode-hook)
+#+end_src
+
+**** TODO Dired Filter
+**** TODO Dired Narrow
 ** Vterm
 #+begin_src emacs-lisp
 (use-package vterm
