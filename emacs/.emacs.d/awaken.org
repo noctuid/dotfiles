@@ -208,6 +208,23 @@ hooks run."
                        t
                        t)))
 
+
+(defmacro noct:run-at-active-interval (interval idle-interval &rest body)
+  "Every INTERVAL seconds, unless idle for > IDLE-INTERVAL seconds, run BODY.
+Also, after IDLE-INTERVAL seconds of idle time, run BODY. This allows using an
+idle timer to quickly run BODY when Emacs becomes idle but also ensures that
+BODY is run periodically even if Emacs is actively being used."
+  (declare (indent 2))
+  `(progn
+     (run-at-time (current-time) ,interval
+                  (lambda ()
+                    (let* ((idle-time (current-idle-time))
+                           (idle-secs (when idle-time
+                                        (float-time idle-time))))
+                      (unless (and idle-secs
+                                   (> idle-secs ,idle-interval))
+                        ,@body))))
+     (run-with-idle-timer ,idle-interval t (lambda () ,@body))))
 #+end_src
 
 *** TODO Popup Handling
@@ -1098,8 +1115,10 @@ Obvious ones:
 
   (recentf-load-list)
 
-  ;; save recentf every 5 minutes
-  (run-at-time (current-time) 300 #'recentf-save-list))
+  ;; save recent after 10 seconds of idle time
+  ;; if not idle, save every 5 minutes
+  (noct:run-at-active-interval (* 5 60) 10
+    (recentf-save-list)))
 #+end_src
 
 ** Save Place
