@@ -4191,6 +4191,8 @@ TODO
     "[" nil
     ;; "[" #'lispy-brackets-auto-wrap
     ":" nil
+    ;; exit quotes with "
+    "\"" #'lispy-doublequote
     "(" #'lispy-parens-auto-wrap
     ;; "{" #'lispy-braces-auto-wrap
     "TAB" #'noct:lispy-tab
