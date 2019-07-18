@@ -3180,8 +3180,9 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
       (magit-rev-insert-format format rev args)
       (split-string (buffer-string) "\0")))
 
-  (defun magit-insert-revision-gpg (rev)
-    (let* ((res (magit-rev-format-items "%G?%x00%GS%x00%GK%x00%GG" rev))
+  (defun magit-insert-revision-gpg ()
+    (let* ((rev (car magit-refresh-args))
+           (res (magit-rev-format-items "%G?%x00%GS%x00%GK%x00%GG" rev))
            (type (aref (car res) 0)))
       (unless (eq type ?N)
         (let* ((signer (cl-second res))
