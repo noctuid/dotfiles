@@ -9,15 +9,16 @@
 # pamixer --get-mute
 # pamixer --list-sinks | grep --quiet hdmi
 
+# shellcheck disable=SC1090
+source ~/.cache/wal/colors.sh
+
 print_volume() {
 	headphones=$(amixer -c 0 contents | grep "Headphone Jack'" -A 2 \
 					 | awk -F "=" 'NR==3 { print $2 }')
 
 	percent=$(ponymix get-volume)
 
-	if [[ -f ~/.cache/wal/colors.sh ]]; then
-		# shellcheck disable=SC1090
-		source ~/.cache/wal/colors.sh
+	if [[ -v color1 ]] && [[ -v color12 ]]; then
 		# dark red
 		# shellcheck disable=SC2154
 		dark_red=$color1
@@ -52,8 +53,8 @@ print_volume() {
 
 print_volume
 
-pactl subscribe | while read -r event; do
-    if echo "$event" | grep --quiet --invert-match --ignore-case "client"; then
-        print_volume
-    fi
-done
+while read -r event; do
+	if echo "$event" | grep --quiet --invert-match --ignore-case "client"; then
+		print_volume
+	fi
+done < <(pactl subscribe)
