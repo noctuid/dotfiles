@@ -162,7 +162,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | terminal multiplexor      | tmux                                                       |
 | network manager           | connman (NetworkManager as backup)                         |
 | old terminal emulators    | gnome-terminal->xfce4-terminal->guake->URxvt->termite      |
-| terminal emulator         | (termite and xst->kitty)+tdrop+tmux (also ansi-term)      |
+| terminal emulator         | (termite and xst->kitty)+tdrop+tmux (also emacs libvterm)       |
 | launcher                  | dmenu->bemenu->rofi                                        |
 | wallpaper setter          | everything->setroot                                        |
 | panel                     | lemonbar(-xft)->polybar                                    |
@@ -255,7 +255,15 @@ As for mass renaming, there are a ton of solutions (e.g. vidir, wdired, vim-rena
 I mentioned my reasons for liking pdf-tools above. Zathura is also a nice vim-like pdf viewer, but I dislike the lack of tab support (which apvlv does support), especially when I have related pdfs open. Using suckless' tabbed is awful; it's not aware of the context of programs and just compare pressing a single key to creating a new tab with some global key like =alt+shift+t=.
 
 ** Terminal Emulator
-I don't need much functionality from a terminal emulator. Editors will always do selection/search better than terminal emulators, and tmux does it better or just as well than most terminal emulators. Tmux also does splits/tabs better or just as well as most terminal emulators (see [[https://news.ycombinator.com/item?id=13342516][here]] for an alternate opinion on multiplexors from the author of kitty). The main thing I want from a terminal emulator is image capability (for ranger image previews), correct/out-of-the-box handling of fonts/icons, and correct handling of input. Currently, termite and xst are my favorite terminals that meet these requirements, but kitty is the terminal I'm the most excited about (it has what seems to me the best method for image display among any terminal emulator and speed, truecolor support, ligature support, and extensibility are all nice bonuses). I plan on switching once the input issues are fixed.
+I don't need much functionality from a terminal emulator. Editors will always do navigation, searching, and selection of text better than terminal emulators, and tmux does it better or just as well than most terminal emulators. Tmux also does splits/tabs better or just as well as most terminal emulators (see [[https://news.ycombinator.com/item?id=13342516][here]] for an alternate opinion on multiplexors from the author of kitty).
+
+Emacs libvterm is good for project work for me. My primary use for a dedicated terminal emulator right now is ranger and just running commands (see my zshrc and scripts). The main thing I want from a terminal emulator is image capability (for ranger image previews), correct/out-of-the-box handling of fonts/icons (unicode support), and correct handling of input (my keyboard layout is supported, copy/paste are builtin, etc.).
+
+Previously, termite and xst were my favorite terminals that meet these requirements, but I've since switched to kitty. It has what seems to me the best method for image display among any terminal emulator. Speed, truecolor support, ligature support, and extensibility are all nice bonuses.
+
+That all said, I'd still be mostly fine using another terminal emulator. Kitty ranger image preview doesn't work in tmux. I've been using ueberzug, which works a lot better for me than w3mimgdisplay.
+
+The [[https://github.com/kovidgoyal/kitty/issues/171][input issues have been mostly fixed]]. If you want to use an IME in the terminal, kitty only supports ibus at the time of writing though.
 
 * Working On
 Major TODO items:
