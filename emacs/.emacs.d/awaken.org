@@ -5044,6 +5044,9 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
     "um" #'dired-unmark
     "uv" #'dired-unmark-all-marks
 
+    ;; make directory
+    "cd" #'dired-create-directory
+
     ;; renaming/changing
     "cc" #'dired-do-rename
     "cm" #'dired-do-chmod
@@ -5155,7 +5158,7 @@ Change current user to root.
 #+begin_src emacs-lisp
 (use-package wdired
   :after dired
-  :general ('normal dired-mode-map "w" #'wdired-change-to-dired-mode)
+  :general ('normal dired-mode-map "w" #'wdired-change-to-wdired-mode)
   :config
   (gsetq wdired-create-parent-directories t
          wdired-allow-to-change-permissions t)
@@ -5279,7 +5282,10 @@ Allows browsing archives.
 Show entire path for a directory (or chain of directories) that only contains a single file/directory (like on GitHub).
 #+begin_src emacs-lisp
 (use-package dired-collapse
-  :ghook 'dired-mode-hook)
+  :general
+  ('normal
+   dired-mode-map
+   "zc" #'dired-collapse-mode))
 #+end_src
 
 **** TODO Dired Filter
