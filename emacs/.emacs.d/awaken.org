@@ -700,15 +700,6 @@ Escape should be bound to ~keyboard-quit~ or ~keyboard-escape-quit~ in various m
   "<escape>" #'keyboard-escape-quit)
 #+end_src
 
-**** Insert State Timeout Keybindings
-Have pretty much switched to using =C-y=, but I'm keeping this around for now.
-#+begin_src emacs-lisp
-(general-def '(insert minibuffer-local-map ivy-minibuffer-map)
-  "." (general-key-dispatch #'self-insert-command
-        :timeout 0.3
-        "yp" #'yank))
-#+end_src
-
 *** Repeat in Visual State
 https://github.com/emacs-evil/evil/issues/742
 #+begin_src emacs-lisp
