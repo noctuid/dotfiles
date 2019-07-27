@@ -174,12 +174,15 @@ BODY (even on failure)."
 ;; Otherwise run ELSE. If ONCE is non-nil, only run THEN or ELSE the first time a
 ;; frame is created."
 ;;   (declare (indent 1)))
+;; NOTE it seems the best way to handle this is for the minor mode itself to
+;; take care of it by dynamically checking `display-graphic-p' like ivy-posframe
+;; now does
 
 (defmacro noct:after-gui (&rest body)
   "Run BODY once after the first GUI frame is created."
   (declare (indent 0) (debug t))
   `(if (display-graphic-p)
-       ,@body
+       (progn ,@body)
      (general-add-hook 'server-after-make-frame-hook
                        (lambda () ,@body)
                        nil
