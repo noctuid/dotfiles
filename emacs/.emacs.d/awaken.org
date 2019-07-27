@@ -164,31 +164,6 @@ BODY (even on failure)."
                                          #'equal)))
                    env-binds)))))
 
-;; TODO handling minor modes that should only be enabled for GUI frames is
-;; difficult; previously, I was toggling modes using `focus-in-hook' (now
-;; obsolete), and it didn't work well
-;; TODO for daemon, probably would be better to run once and add to
-;; `server-after-make-frame-hook'
-;; (defmacro noct:if-gui-p (then else &optional once)
-;;   "Every time a frame is created, run THEN if it is a GUI frame.
-;; Otherwise run ELSE. If ONCE is non-nil, only run THEN or ELSE the first time a
-;; frame is created."
-;;   (declare (indent 1)))
-;; NOTE it seems the best way to handle this is for the minor mode itself to
-;; take care of it by dynamically checking `display-graphic-p' like ivy-posframe
-;; now does
-
-(defmacro noct:after-gui (&rest body)
-  "Run BODY once after the first GUI frame is created."
-  (declare (indent 0) (debug t))
-  `(if (display-graphic-p)
-       (progn ,@body)
-     (general-add-hook 'server-after-make-frame-hook
-                       (lambda () ,@body)
-                       nil
-                       nil
-                       t)))
-
 ;; TODO use something more sophisticated?
 ;; alternatively, username check alone should be enough
 (defconst noct:personal-computer-p
@@ -228,6 +203,48 @@ BODY is run periodically even if Emacs is actively being used."
                                    (> idle-secs ,idle-interval))
                         ,@body))))
      (run-with-idle-timer ,idle-interval t (lambda () ,@body))))
+#+end_src
+
+*** GUI Related
+#+begin_src emacs-lisp
+;; TODO handling minor modes that should only be enabled for GUI frames is
+;; difficult; previously, I was toggling modes using `focus-in-hook' (now
+;; obsolete), and it didn't work well
+;; TODO for daemon, probably would be better to run once and add to
+;; `server-after-make-frame-hook'
+;; (defmacro noct:if-gui-p (then else &optional once)
+;;   "Every time a frame is created, run THEN if it is a GUI frame.
+;; Otherwise run ELSE. If ONCE is non-nil, only run THEN or ELSE the first time a
+;; frame is created."
+;;   (declare (indent 1)))
+;; NOTE it seems the best way to handle this is for the minor mode itself to
+;; take care of it by dynamically checking `display-graphic-p' like ivy-posframe
+;; now does
+
+(defmacro noct:after-gui (&rest body)
+  "Run BODY once after the first GUI frame is created."
+  (declare (indent 0) (debug t))
+  `(if (display-graphic-p)
+       (progn ,@body)
+     (general-add-hook 'server-after-make-frame-hook
+                       (lambda () ,@body)
+                       nil
+                       nil
+                       t)))
+
+
+(defun noct:default-monitor-geometry ()
+  "Return geometry for the first monitor in `display-monitor-attributes-list'."
+  (let* ((first-monitor (car (display-monitor-attributes-list))))
+    (alist-get 'geometry first-monitor)))
+
+(defun noct:default-monitor-width ()
+  "Return the width of the first monitor in `display-monitor-attributes-list'."
+  (nth 2 (noct:default-monitor-geometry)))
+
+(defun noct:default-monitor-height ()
+  "Return the height of the first monitor in `display-monitor-attributes-list'."
+  (nth 3 (noct:default-monitor-geometry)))
 #+end_src
 
 *** TODO Popup Handling
@@ -1554,34 +1571,33 @@ TODO evil bindings stop working after wgrep finish edit
 *** Ivy Posframe
 #+begin_src emacs-lisp
 (use-package ivy-posframe
-  ;; NOTE doesn't work in terminal but enabling mode won't cause issues
-  ;; just always enabling instead of adding to hooks to deal with daemon
-  ;; :when (display-graphic-p)
+  ;; NOTE won't function in terminal but can still always enable mode
   :demand t
   :config
   ;; this is in columns (i.e. character width) not pixels
   (gsetq ivy-posframe-width 120)
 
   (noct:after-gui
-    ;; pixels
-    (gsetq ivy-posframe-border-width (round (* 0.001 (x-display-pixel-width)))))
+    ;; 3 pixels on FHD
+    (gsetq ivy-posframe-border-width
+           (round (* 0.0015625 (noct:default-monitor-width)))))
 
   (defun noct:posframe-poshandler-frame-top-center (info)
     (cons (/ (- (plist-get info :parent-frame-width)
                 (plist-get info :posframe-width))
              2)
-          (round (* 0.02 (x-display-pixel-height)))))
+          (round (* 0.02 (noct:default-monitor-height)))))
 
   ;; TODO posframe currently requires this naming
   (defun ivy-posframe-display-at-frame-top-center (str)
     (ivy-posframe--display str #'noct:posframe-poshandler-frame-top-center))
 
-  (gsetq ivy-display-function #'ivy-posframe-display-at-frame-top-center)
-
   (custom-set-faces '(internal-border ((t :weight bold
                                           :background "slate gray"))))
 
-  (ivy-posframe-enable))
+  (gsetq ivy-posframe-display-functions-alist
+         '((t . ivy-posframe-display-at-frame-top-center)))
+  (ivy-posframe-mode))
 #+end_src
 
 *** Ivy All the Icons
@@ -1701,9 +1717,7 @@ Select candidate as soon as there is only one (like the headlong package but for
     "s" #'counsel-git-stash)
 
   :init (counsel-mode)
-  :diminish ""
-  :config
-  (gsetq counsel-yank-pop-height ivy-height))
+  :diminish "")
 #+end_src
 
 *** Counsel Buku
