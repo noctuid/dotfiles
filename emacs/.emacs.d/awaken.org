@@ -5067,10 +5067,10 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
     ;; TODO "ud" trash-restore
 
     ;; encryption and decryption (epa-dired)
-    ":d" #'epa-dired-do-decrypt
-    ":v" #'epa-dired-do-verify
-    ":s" #'epa-dired-do-sign
-    ":e" #'epa-dired-do-encrypt
+    "Ed" #'epa-dired-do-decrypt
+    "Ev" #'epa-dired-do-verify
+    "Es" #'epa-dired-do-sign
+    "Ee" #'epa-dired-do-encrypt
 
     "o" #'dired-do-shell-command
 
@@ -5273,7 +5273,8 @@ It also has overlapping functionality with a lot of packages. For example, I'm u
     "," #'ranger-toggle-mark)
 
   ;; move down after toggling mark too
-  (advice-add 'ranger-toggle-mark :after #'ranger-next-file))
+  (general-add-advice 'ranger-toggle-mark :after
+                      (lambda () (call-interactively #'ranger-next-file))))
 #+end_src
 
 *** Dired Hacks
