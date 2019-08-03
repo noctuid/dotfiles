@@ -3748,7 +3748,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (use-package info
   :config
-  (general-pushnew (list "/home/noctuid/.emacs.d/info/")
+  (general-pushnew "/home/noctuid/.emacs.d/info/"
                    Info-additional-directory-list)
 
   (general-def 'normal Info-mode-map
