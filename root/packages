@@ -175,6 +175,9 @@ fortune-mod
 
 # backup
 borg
+# needed for borg mounting
+python-llfuse
+restic
 
 # sanitizing filenames
 detox

@@ -40,6 +40,7 @@ P sh
 + .python_history
 + .ros_history
 + .sbcl_history
++ .zsh_history
 
 + ag-sys
 # currently not using Anki on laptop (and anki has backup mechanism)
