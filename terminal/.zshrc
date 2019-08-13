@@ -1557,7 +1557,9 @@ done
 EOF
 }
 
+# intentionally not using --delete (do it manually)
 # remember: trailing slashes are important on src dir
+# trailing slash on dest dir results in dir// (but this doesn't matter)
 # TODO adb-sync doesn't work with certain characters in filename:
 # https://github.com/google/adb-sync/issues/34
 syncphone() {
@@ -1566,8 +1568,9 @@ syncphone() {
 		return 1
 	fi
 
+	mkdir -p ~/ag-sys/library/android || return 1
 	mkdir -p ~/ag-sys/backup/{tachiyomi,to-clean} || return 1
-	mkdir -p ~/database/move/phone/{DCIM,Download} || return 1
+	mkdir -p ~/database/move/phone/internal || return 1
 
 	local internal external
 	# /storage/emulated/0
@@ -1579,10 +1582,13 @@ syncphone() {
 file in it."
 		return 1
 	fi
-
+	# Two Way
 	adb-sync --two-way ~/wallpaper/phone/ "$internal"/Wallpaper/
 	adb-sync --two-way ~/database/ringtones/ "$internal"/Ringtones/
+	adb-sync --two-way ~/ag-sys/library/android/ "$external"/books
 
+
+	# One Way - To Phone
 	# music
 	adb-sync --copy-links ~/music-android/* "$external"/Music/
 	# TODO check if this is actually used
@@ -1590,23 +1596,49 @@ file in it."
 
 	adb-sync ~/ag-sys/life/back.pdf "$internal"/
 
-	# sync back notes
-	adb-sync --reverse "$internal"/notes.txt ~/ag-sys/backup/to-clean/
-	adb-sync --reverse "$internal"/pots.txt ~/ag-sys/backup/to-clean/
 
+	# One Way - To Computer
 	# TODO exclude .thumbnails
 	# photos
-	adb-sync --reverse "$internal"/DCIM ~/database/move/phone/
-	adb-sync --reverse "$external"/DCIM ~/database/move/phone/
+	adb-sync --reverse "$internal"/DCIM ~/database/move/phone/internal/
+	adb-sync --reverse "$external"/DCIM ~/database/move/phone/internal/
 
-	# videos
-	adb-sync --reverse "$internal"/Movies ~/database/move/phone/
+	# videos (e.g. NewPipe)
+	adb-sync --reverse "$internal"/Movies ~/database/move/phone/internal/
+	adb-sync --reverse "$internal"/Pictures ~/database/move/phone/internal/
+	adb-sync --reverse "$internal"/CamScanner ~/database/move/phone/internal/
+	adb-sync --reverse "$internal"/OpenNoteScanner \
+			 ~/database/move/phone/internal/
 
 	# other downloads
-	adb-sync --reverse "$internal"/Download ~/database/move/phone/
+	adb-sync --reverse "$internal"/Download ~/database/move/phone/internal/
+	# downloaded photos
+	adb-sync --reverse "$internal"/Clover ~/database/move/phone/internal/
+
+	adb-sync --reverse "$internal"/Cytoid ~/database/move/phone/internal/
+
+	adb-sync --reverse "$internal"/Signal ~/database/move/phone/internal/
 
 	adb-sync --reverse "$internal"/Tachiyomi/backup/ ~/ag-sys/backup/tachiyomi/
-	# adb-sync --reverse /sdcard/Android/data/eu.kanade.tachiyomi/files/ ~/manga/
+	adb-sync --reverse "$internal"/Tachiyomi ~/database/move/phone/internal/
+
+	# general location for other manual backups (e.g. k9, loop, dashchan, slide,
+	# and moonreader)
+	adb-sync --reverse "$internal"/backup ~/database/move/phone/internal/
+
+	# orgzly notes
+	adb-sync --reverse "$external"/orgzly ~/ag-sys/backup/to-clean/
+
+	# sync back notes (now on sd card so restore for new phone is unnecessary)
+	# can't use glob
+	adb-sync --reverse "$external"/notes.txt ~/ag-sys/backup/to-clean/
+	adb-sync --reverse "$external"/pots.txt ~/ag-sys/backup/to-clean/
+}
+
+# just for copying over all internal things
+newphonerestore() {
+	internal=/sdcard
+	adb-sync ~/database/move/phone/internal/ "$internal"/
 }
 
 # }}}
