@@ -530,31 +530,24 @@ npm
 # ** Python
 python-pip
 
-# completions, definitions, references, etc.
+# lsp implementation
+python-language-server
+
+# completions, definitions, references, etc. (used by palantir server)
 python-jedi
-# completions and renaming
+# completions and renaming (used by palantir server)
 python-rope
-
-# repl
-ipython
-ptpython aur
-
-# debugger
-python-ipdb
-
-# virtual environments
-python-virtualenv
-python-virtualenvwrapper
-
-# testing
-python-pytest
 
 # for importmagic.el; resolve unimported symbols
 python-epc aur
 python-importmagic aur
 
-# lsp implementation
-python-language-server
+# *** Repl
+ipython
+ptpython aur
+
+# *** Debugger
+python-ipdb
 
 # *** Linting
 # error linter
@@ -569,6 +562,8 @@ python-pydocstyle
 flake8
 # more warnings
 python-pylint
+# type hint linting
+mypy
 
 # *** Formatting
 # sort imports
@@ -580,12 +575,19 @@ python-autoflake aur
 
 # formatting
 # yapf
-# less configurable; deterministic
+# less configurable; deterministic (used by palantir server with plugin)
 python-black
 python-language-server-black aur
 
 # pre-commit hook configuration
 python-pre-commit aur
+
+# *** Testing
+python-pytest
+
+# *** Virtual Environments
+python-virtualenv
+python-virtualenvwrapper
 
 # ** Ruby
 # for gem

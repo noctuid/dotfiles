@@ -4832,8 +4832,9 @@ Currently requires running =make= for setup and is not on MELPA.
 *** Linting
 #+begin_src emacs-lisp
 (with-eval-after-load 'flycheck
-  ;; also use pylint
-  (flycheck-add-next-checker 'python-flake8 'python-pylint))
+  ;; also use pylint and mypy
+  (flycheck-add-next-checker 'python-flake8 'python-pylint)
+  (flycheck-add-next-checker 'python-flake8 'python-mypy))
 #+end_src
 
 *** Docstrings
