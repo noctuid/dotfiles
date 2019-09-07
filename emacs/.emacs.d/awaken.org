@@ -2106,7 +2106,9 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
   (gsetq ivy-use-virtual-buffers t))
 
 (use-package swiper
-  :general (general-spc "b" #'swiper-all)
+  :general
+  (general-spc "b" #'swiper-all)
+  (general-def "C-s" #'swiper-isearch)
   :config
   (gsetq swiper-goto-start-of-match t))
 
