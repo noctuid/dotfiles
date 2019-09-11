@@ -1586,6 +1586,7 @@ file in it."
 	adb-sync --two-way ~/wallpaper/phone/ "$internal"/Wallpaper/
 	adb-sync --two-way ~/database/ringtones/ "$internal"/Ringtones/
 	adb-sync --two-way ~/ag-sys/library/android/ "$external"/books
+	adb-sync --copy-links --two-way ~/ag-sys/orgzly/ "$external"/orgzly/
 
 
 	# One Way - To Phone
@@ -1625,9 +1626,6 @@ file in it."
 	# general location for other manual backups (e.g. k9, loop, dashchan, slide,
 	# and moonreader)
 	adb-sync --reverse "$internal"/backup ~/database/move/phone/internal/
-
-	# orgzly notes
-	adb-sync --reverse "$external"/orgzly ~/ag-sys/backup/to-clean/
 
 	# sync back notes (now on sd card so restore for new phone is unnecessary)
 	# can't use glob
