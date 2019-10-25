@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+cd ~/build/unnamed-sdvx-clone/bin || exit 1
+./Main

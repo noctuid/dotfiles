@@ -1,27 +1,22 @@
-# for testing startup time
-# zmodload zsh/zprof
 # also see ./.profile
-# TODO:
-# switch to aura or pacaur
-# if start using other package managers frequently, make generalized functions (e.g. 'install','search')
-# consider removing stuff don't use or putting in another file
-# (never use pushd/popd/dir stack stuff or really fzf or fasd)
-# clean guix and nix aliases
 
-# interesting:
-# expanding global aliases; http://blog.patshead.com/2011/07/automatically-expanding-zsh-global-aliases-as-you-type.html?r=related
+# * Todos
+# TODO look at python plugins
+# - https://github.com/davidparsson/zsh-pyenv-lazy or just --no-rehash
+# - https://github.com/darvid/zsh-poetry
+# - https://github.com/iboyperson/zsh-pipenv
+# - https://github.com/shosca/zsh-pew
+# - https://github.com/AnonGuy/yapipenv.zsh
+# - https://github.com/MichaelAquilina/zsh-autoswitch-virtualenv
+# TODO nix plugins: https://github.com/chisui/zsh-nix-shell
+# TODO just use https://github.com/softmoth/zsh-vim-mode ?
+# TODO other init performance improvements
+# TODO shellcheck; zsh-lint; can remove a lot of quoting of parameter expansions
+# TODO ranger or deer keybinding
+# TODO recentf as C-f; locate keybinding
 
-# progress bars:
-# https://github.com/DeeNewcum/dotfiles/blob/master/bin/eta
-# http://www.theiling.de/projects/bar.html
-# https://github.com/Xfennec/cv
-# e.g. dd if=$source | pv | dd of=$target
-
-# which, whence, type -a, whereis, whatis
-#==============================
 # * Sources
-#==============================
-# Some settings or stuff got/find out about from here:
+# Some settings or stuff got/found out about from here:
 # https://wiki.archlinux.org/index.php/Zsh
 # http://zsh.sourceforge.net/Doc/Release/Zsh-Modules.html
 # https://github.com/Adalan/dotfiles/blob/master/zsh/setopt.zsh#L33
@@ -31,99 +26,121 @@
 # https://wiki.gentoo.org/wiki/Zsh/HOWTO#
 # https://github.com/phallus/arch-files/blob/master/config/.zshrc
 
-#==============================
-# * Plugins
-#==============================
-if [[ ! -f ~/.zplug/init.zsh ]]; then
-	git clone https://github.com/b4b4r07/zplug ~/.zplug
+# * Begin Profiling
+if [[ -n $NOCT_PROFILE_ZSH ]]; then
+	zmodload zsh/zprof
+elif [[ -n $NOCT_TIME_ZSH ]]; then
+	# https://github.com/zdharma/pm-perf-test
+	typeset -F4 SECONDS=0
 fi
 
-# in case clone fails
-if [[ -f ~/.zplug/init.zsh ]] ; then
-	source ~/.zplug/init.zsh
+# * Plugins
+if [[ ! -f ~/.zplugin/bin/zplugin.zsh ]]; then
+	echo "Installing zplugin..."
+	git clone https://github.com/zdharma/zplugin.git ~/.zplugin/bin
+fi
 
-	# theme
-	zplug "denysdovhan/spaceship-zsh-theme", use:spaceship.zsh, as:theme, \
-		hook-load:spaceship_vi_mode_enable
+# NOTE zplugin load isn't apparently much of an issue when using wait/turbo
+# mode, but I haven't needed reporting so far
+# NOTE currently doing compinit at 0c; nothing seems to need to be loaded after
+# compinit (even autopair)
+if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
+	source ~/.zplugin/bin/zplugin.zsh
+
+	# ** Theme/Appearance
+	maybe_spaceship_vi_mode_enable() {
+		if [[ -z "$INSIDE_EMACS" ]]; then
+			# NOTE if remove or comment this, need to enable vi mode elsewhere
+			spaceship_vi_mode_enable
+		fi
+	}
+
+	# zplugin ice wait"!" lucid atload"maybe_spaceship_vi_mode_enable"
+	zplugin ice atload"maybe_spaceship_vi_mode_enable"
+	zplugin light "denysdovhan/spaceship-prompt"
 	# above has to be run before loading zsh-autopair
-	export SPACESHIP_DIR_TRUNC=5
+	SPACESHIP_DIR_TRUNC=5
 
-	# syntax highlighting
-	# zplug "jimmijj/chromatic-zsh"
-	# load after compinit and sourcing other plugins
-	# (should be loaded after autosuggestions)
-	# zplug "zsh-users/zsh-syntax-highlighting", defer:2
-	zplug "zdharma/fast-syntax-highlighting", defer:3
-	# color parens and highlight matching paren
-	export ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+	# load after history-substring-search
+	zplugin ice wait"0b" lucid atload'_zsh_autosuggest_start'
+	zplugin light "zsh-users/zsh-autosuggestions"
+	ZSH_AUTOSUGGEST_USE_ASYNC=true
 
-	# autosuggestions
-	zplug "tarruda/zsh-autosuggestions", use:"zsh-autosuggestions.zsh"
+	# compinit before loading; load after autosuggestions
+	zplugin ice wait"0c" lucid \
+			atinit"ZPLGM[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay"
+	zplugin light "zdharma/fast-syntax-highlighting"
 
-	# history substring search (should be loaded after syntax highlighting)
-	# TODO https://github.com/zplug/zplug/issues/314
-	zplug "zsh-users/zsh-history-substring-search", defer:3
+	# ** Zle Enhancements
+	# needs to start before fast syntax highlighting and autosuggestions
+	zplugin ice wait lucid
+	zplugin light "zsh-users/zsh-history-substring-search"
 
-	# completion stuff
-	zplug "lib/completion", from:oh-my-zsh, ignore:oh-my-zsh.sh
-	zplug "zsh-users/zsh-completions"
-	zplug "aramboi/zsh-ipfs"
-	# provides ** tab completion for various commands:
-	zplug "junegunn/fzf", use:"shell/completion.zsh"
+	# says it needs to be loaded after compinit but works fine with this config
+	zplugin ice wait lucid
+	zplugin load "hlissner/zsh-autopair"
 
-	# prettier ls
-	zplug "supercrabtree/k"
+	# clipboard
+	zplugin ice wait lucid
+	zplugin light "kutsan/zsh-system-clipboard"
 
-	# good interactive (by default when more than 1 match) alternative to fasd
-	zplug "b4b4r07/enhancd", use:enhancd.sh
+	# ** Completion
+	# oh-my-zsh's completion setup (e.g. colors, case sensitivity, etc.)
+	zplugin ice wait lucid
+	zplugin snippet "OMZ::lib/completion.zsh"
 
-	zplug "hlissner/zsh-autopair", defer:2
+	zplugin ice wait lucid
+	zplugin light "zsh-users/zsh-completions"
 
-	# notifications when long running commands complete
-	# https://gist.github.com/jpouellet/5278239
-	# also see https://gist.github.com/oknowton/8346801
-	zbell_ignore=(man less vimpager vim emacs rn ranger mutt nm ncmpcpp vimus weechat)
-	zplug "jpouellet/5278239", from:gist, use:zbell.sh
+	# completions for yarn run (mainly)
+	zplugin ice wait lucid atclone"./zplug.zsh"
+	zplugin light "g-plane/zsh-yarn-autocompletions"
 
-	# interesting but not useful for me at the moment
+	zplugin light "spwhitt/nix-zsh-completions"
+
+	# provides tab completion for various commands and keybindings
+	zplugin ice wait lucid multisrc"shell/*.zsh"
+	zplugin light "junegunn/fzf"
+
+	zplugin ice wait lucid
+	zplugin light "wookayin/fzf-fasd"
+
+	# directory selection with fuzzy search; nice complement to fasd
+	zplugin ice wait lucid
+	zplugin light "b4b4r07/enhancd"
+	ENHANCD_FILTER=fzf
+	# fzf selection with cd <Tab>
+	ENHANCD_COMPLETION_BEHAVIOR=list
+
+	# ** Commands/Other
+	# prettier ls; nice if only had zshrc and no ranger or exa
+	# zplugin ice wait lucid
+	# zplugin light "supercrabtree/k"
+
+	if ! hash exa 2> /dev/null; then
+		zplugin ice wait lucid from"gh-r" as"program" mv"exa* -> exa"
+		zplugin light "ogham/exa"
+	fi
+
+	zplugin ice wait lucid \
+			atload"AUTO_NOTIFY_IGNORE+=(emacs mpgo mpv ranger rn vim vimus)"
+	zplugin light "MichaelAquilina/zsh-auto-notify"
+
+	# let you know you could have used an alias
+	zplugin ice wait lucid
+	zplugin light "MichaelAquilina/zsh-you-should-use"
+
+	# ** Interesting but not useful for me at the moment
 	# Tarrasch/zsh-autoenv
+	# https://github.com/zpm-zsh/autoenv
 	# hchbaw/auto-fu.zsh
 	# https://github.com/joepvd/zsh-hints
 	# https://github.com/hchbaw/zce.zsh
 	# https://github.com/willghatch/zsh-snippets
 	# maybe use at some point
 	# https://github.com/bric3/nice-exit-code
-	# I think doing these in emacs would be preferable
-	# https://github.com/voronkovich/gitignore.plugin.zsh
-	# https://github.com/peterhurford/git-it-on.zsh
-	# https://github.com/adolfoabegg/browse-commit
 	# https://github.com/Tarrasch/zsh-functional
-
-	# install plugins if not all are installed
-	if ! zplug check; then
-		zplug install
-	fi
-
-	# source plugins and add commands to $PATH
-	zplug load
-	# prevents up/down on empty line from causing crash when using history substring search
-	ZSH_AUTOSUGGEST_CLEAR_WIDGETS=("${(@)ZSH_AUTOSUGGEST_CLEAR_WIDGETS:#(up|down)-line-or-history}")
-	ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(history-substring-search-up history-substring-search-down)
 fi
-
-#==============================
-# Completion Settings {{{
-#==============================
-# http://askql.wordpress.com/2011/01/11/zsh-writing-own-completion/
-# add custom completion scripts
-fpath=(~/.zsh/completion $fpath)
-
-# compsys initialization
-autoload -U compinit
-compinit
-
-# show completion menu when number of options is at least 2
-zstyle ':completion:*' menu select=2
 
 # * Appearance
 # ** Pywal
@@ -147,20 +164,38 @@ export LESS_TERMCAP_us=$'\E[01;32m'             # begin underline
 # https://github.com/hut/ranger/blob/bdd6bf407ab22782f7ddb3a1dd24ffd9c3361a8d/examples/bash_subshell_notice.sh
 [[ -n $RANGER_LEVEL ]] && export PS1="$PS1"'%{$fg[red]%}ranger> '
 
-# }}}
-#==============================
-# Options {{{
-#==============================
+# ** Cursor
+if [[ -z $INSIDE_EMACS ]] ;then
+	# use block cursor for normal mode only
+	# using wincent/terminus in init.vim for switching
+	zle-keymap-select() {
+		if [[ $KEYMAP == vicmd ]]; then
+			echo -ne '\e[1 q'
+		else
+			echo -ne '\e[5 q'
+		fi
+	}
+	zle -N zle-keymap-select
+
+	# start with line cursor
+	zle-line-init() {
+		echo -ne '\e[5 q'
+	}
+	zle -N zle-line-init
+fi
+
+# * Options
 # http://linux.die.net/man/1/zshoptions ($ man zshoptions)
 # rc_expand_param is interesting
-#===============
-# General {{{
-#===============
+
+# ** General
 # 10 second wait then prompt if use rm with *
 setopt RM_STAR_WAIT
 # prompt if removing more than 3 files; don't delete anything from ~/.config/safe-rm
-# trying to almost always use trash-cli instead of rm
-alias rm='safe-rm -I'
+# I generally use trash-cli instead of rm
+if hash safe-rm 2> /dev/null; then
+	alias rm='safe-rm -I'
+fi
 
 # show nonzero exit codes
 setopt print_exit_value
@@ -175,34 +210,25 @@ setopt no_beep
 # http://zsh.sourceforge.net/Doc/Release/Redirection.html#Multios
 # setopt multios
 
-# }}}
-#===============
-# Prompt {{{
-#===============
-# enable parameter expansion, command substitution, and arithmetic expansion in the prompt
-# without, theme doesn't work.. just get $fg.. crap
-setopt prompt_subst
-# only show the rprompt on the current prompt
-# unsetting will keep showing "insert" on each line as the rprompt for mode
-setopt transient_rprompt
-
-# }}}
-#===============
-# Correction {{{
-#===============
+# ** Correction
 # spell check commands and offer correction (pdw > pwd)
 setopt correct
-# spell check arguments
-setopt correct_all
+# don't spell check arguments
+unsetopt correct_all
 
-# }}}
-#===============
-# Completion {{{
-#===============
-# if on, tab completion will just show files/dirs instead of completion would do if typed out alias contents
+# ** Completion
+# http://askql.wordpress.com/2011/01/11/zsh-writing-own-completion/
+# add custom completion scripts
+fpath=(~/.zsh/completion $fpath)
+
+# show completion menu when number of options is at least 2
+zstyle ':completion:*' menu select=2
+
+# by unsetting, substitute alias before completion (so as if typed it out)
 unsetopt complete_aliases
 
-# when completing from the middle of a word, move the cursor to the end of the word; haven't noticed staying in middle of word even when unset; confusion
+# when completing from the middle of a word, move the cursor to the end of the
+# word; haven't noticed staying in middle of word even when unset; confusion
 unsetopt always_to_end
 
 # do not autoselect the first completion entry
@@ -211,24 +237,26 @@ unsetopt menu_complete
 # show completion menu on successive tab press (menu_complete overrides)
 setopt auto_menu
 
-# default; lists choiches on ambiguous completion; won't go to first item (except with wildcard and glob_complete)
+# default; lists choiches on ambiguous completion; won't go to first item
+# (except with wildcard and glob_complete)
 setopt auto_list
 
-# will show name for directory if you have it set; ex if have DS=~/Desktop (ex with '%~' in prompt sequence), it will show DS instead of desktop if you cd into it; see CDable Vars section
+# will show name for directory if you have it set; ex if have DS=~/Desktop (ex
+# with '%~' in prompt sequence), it will show DS instead of desktop if you cd
+# into it
 setopt auto_name_dirs
 
-# default; will put / instead of space when autocomplete for param (ex ~D(tab) puts ~D/)
+# default; will put / instead of space when autocomplete for param (ex ~D(tab)
+# puts ~D/)
 setopt auto_param_slash
 
 # allow completion from within a word/phrase
 # ex: completes to Desktop/ from Dktop with cursor before k)
 setopt complete_in_word
 
-# }}}
-#===============
-# Globbing {{{
-#===============
-# treat #, ~, and ^ as part of patterns for filename generation; ex ^ negates following pattern (ls -d ^*.c)
+# ** Globbing
+# treat #, ~, and ^ as part of patterns for filename generation; ex ^ negates
+# following pattern (ls -d ^*.c)
 # ls *.png~Selection_005.png now will exclude that file frome results
 # http://www.refining-linux.org/archives/37/ZSH-Gem-2-Extended-globbing-and-expansion/
 # http://zsh.sourceforge.net/Doc/Release/Expansion.html
@@ -236,14 +264,12 @@ setopt complete_in_word
 # probably will never use
 setopt extended_glob
 
-# if unset and do something like ls D* it will add anything that matches that to the line (ex ls Desktop/ Downloads/); with it set, will act like menu_complete; uses pattern matching; can use wih complete_in_word
+# if unset and do something like ls D* it will add anything that matches that to
+# the line (ex ls Desktop/ Downloads/); with it set, will act like
+# menu_complete; uses pattern matching; can use wih complete_in_word
 setopt glob_complete
 
-# }}}
-#===============
-# Pushd Stuff and Dir Stack {{{
-#===============
-# see dh alias
+# ** Cd/Pushd Options
 # http://zsh.sourceforge.net/Intro/intro_6.html
 DIRSTACKSIZE=8
 
@@ -260,7 +286,8 @@ setopt auto_pushd
 # blank pushd goes to home; default already I think
 setopt pushd_to_home
 
-# swap meaning of cd -num and cd +; dirs -v then cd -num of directory you want to switch to
+# swap meaning of cd -num and cd +; dirs -v then cd -num of directory you want
+# to switch to
 setopt pushd_minus
 
 # don't push multiple copies of the same directory onto the directory stack
@@ -269,379 +296,202 @@ setopt pushd_ignore_dups
 # no pushd messages
 setopt pushd_silent
 
-# }}}
-#===============
-# History {{{
-#===============
+# ** History
 # lots of it
 HISTSIZE=100000
 SAVEHIST=100000
 HISTFILE=~/.zsh_history
 
-# remove command from history list when first character on the line is a space
+# don't add to history when first character on the line is a space
+# good for dangerous commands don't want to accidentally run (e.g. dd)
 setopt hist_ignore_space
 
-# remove extra blanks from each command line being added to history
+# remove extra blanks from each command added to history
 setopt hist_reduce_blanks
 
-# don't execute, just expand history
+# don't execute, just expand history and reload line
 setopt hist_verify
 
-# allow multiple terminal sessions to all append to one zsh command history instead of replacing file; default
+# allow multiple terminal sessions to all append to one zsh command history
+# instead of replacing the file; default
 setopt append_history
 
 # save timestamp of command and duration; begginingtime:elapsedseconds
 setopt extended_history
 
-# add comamnds as they are typed, don't wait until shell exit
+# don't wait until shell exits to add commands to history
 setopt inc_append_history
+
+# imports new commands from history file (i.e. commands run in other zsh
+# intsances) and appends typed commands to history (no need to set
+# inc_append_history with this on)
+setopt share_history
+
+# don't store consecutive duplicates
+setopt hist_ignore_dups
 
 # when trimming history, lose oldest duplicates first
 setopt hist_expire_dups_first
 
-# do not write events to history that are duplicates of previous command
-setopt hist_ignore_dups
+# * Keybindings
+# for "leader" keybindings
+bindkey -a -r t
 
-# imports new commands and appends typed commands to history
-setopt share_history
-
-# }}}
-#===============
-# }}}
-#==============================
-# Key Bindings {{{
-#==============================
+# ** Normal (vicmd)/Visual Mode
+# -a is short for -M vicmd
+# http://zshwiki.org/home/zle/vi-mode
 # enable vi mode on commmand line; no visual
 # http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html
-# link viins to main.. no option to link vicmd to main?
 # for bash there is https://github.com/ardagnir/athame
 # alternatively run shell in neovim or emacs
-bindkey -v
 
-# bind UP and DOWN arrow keys (on caps or thumbkey)
-bindkey -M viins '^[[A' history-substring-search-up
-bindkey -M viins '^[[B' history-substring-search-down
-# fix home, end, etc. keys (with vim mode)
-bindkey -M viins "^[[1~" beginning-of-line
-bindkey -M viins "^[[4~" end-of-line
-bindkey -M viins "^[[5~" beginning-of-history
-bindkey -M viins "^[[6~" end-of-history
-bindkey -M viins "^[[3~" delete-char
-bindkey -M viins "^[[2~" quoted-insert
-# can also do with zkbd and "${key[Home]}" stuff
+# enable surround
+autoload -Uz surround
+zle -N delete-surround surround
+zle -N add-surround surround
+zle -N change-surround surround
+bindkey -a cs change-surround
+bindkey -a ds delete-surround
+bindkey -a ys add-surround
+bindkey -M visual S add-surround
+#  quote text objects
+autoload -U select-quoted
 
-# no delay entering normal mode
+# bracket text objects
+autoload -U select-bracketed
+zle -N select-bracketed
+for m in visual viopp; do
+	for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+		bindkey -M $m $c select-bracketed
+	done
+done
+
+# delay to enter normal mode normal mode
 # https://coderwall.com/p/h63etq
 # https://github.com/pda/dotzsh/blob/master/keyboard.zsh#L10
-# 10ms for key sequences
-KEYTIMEOUT=1
+# unfortunately needs to be higher for surround keybindings to work
+# https://github.com/softmoth/zsh-vim-mode/issues/13
+KEYTIMEOUT=30
 
 # add missing vim hotkeys
-# fixes backspace deletion issues
-# http://zshwiki.org/home/zle/vi-mode
-# -a is same as -M vicmd
 bindkey -a u undo
 bindkey -a U redo
-bindkey '^?' backward-delete-char
-bindkey '^H' backward-delete-char
 # swap
 bindkey -a a vi-add-eol
 bindkey -a A vi-add-next
 
-# colemak
+# Colemak
 # https://github.com/bunnyfly/dotfiles/blob/master/zshrc
-bindkey -M vicmd "h" backward-char
-# bindkey -M vicmd "i" forward-char
-bindkey -M vicmd "n" history-substring-search-down
-bindkey -M vicmd "e" history-substring-search-up
-# bindkey -M vicmd "s" vi-insert
-# bindkey -M vicmd "S" vi-insert-bol
-bindkey -M vicmd "k" vi-repeat-search
-bindkey -M vicmd "K" vi-rev-repeat-search
-bindkey -M vicmd "l" beginning-of-line
-bindkey -M vicmd "L" end-of-line
-bindkey -M vicmd "j" vi-forward-word-end
-bindkey -M vicmd "J" vi-forward-blank-word-end
+bindkey -a h backward-char
+# bindkey -a i forward-char
+bindkey -a n history-substring-search-down
+bindkey -a e history-substring-search-up
+# bindkey -a "s" vi-insert
+# bindkey -a "S" vi-insert-bol
+bindkey -a k vi-repeat-search
+bindkey -a K vi-rev-repeat-search
+bindkey -a j vi-forward-word-end
+bindkey -a E vi-forward-blank-word-end
 
-# control backspace
-bindkey -M viins "¸" backward-kill-word
+# home and end
+bindkey -a "^[[1~" beginning-of-line
+bindkey -a "^[[4~" end-of-line
+
 # http://zshwiki.org./home/zle/bindkeys#why_isn_t_control-r_working_anymore
 bindkey -M vicmd 't?' history-incremental-pattern-search-backward
 
-# clipboard {{{
-# http://unix.stackexchange.com/questions/25765/pasting-from-clipboard-to-vi-enabled-zsh-or-bash-shell
-# paste from the system clipboard with p
-function vi-append-x-selection() {
-	RBUFFER=$(xsel -ob </dev/null)$RBUFFER
-}
-zle -N vi-append-x-selection
-bindkey -M vicmd p vi-append-x-selection
+# ** Insert Mode
+# bind UP and DOWN arrow keys (on caps or thumbkey)
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+# fix home, end, etc. keys (with vim mode)
+bindkey "^[[1~" beginning-of-line
+bindkey "^[[4~" end-of-line
+bindkey "^[[5~" beginning-of-history
+bindkey "^[[6~" end-of-history
+bindkey "^[[3~" delete-char
+bindkey "^[[2~" quoted-insert
+# can also do with zkbd and "${key[Home]}" stuff
 
-# ecaped paste
-function escape-paste-clipboard() {
+# https://superuser.com/questions/476532/how-can-i-make-zshs-vi-mode-behave-more-like-bashs-vi-mode/533685#533685
+# allow deleting before insertion
+bindkey '^?' backward-delete-char
+bindkey "^W" backward-kill-word
+bindkey "¸" backward-kill-word
+
+# ** Clipboard
+# using https://github.com/kutsan/zsh-system-clipboard
+bindkey '^y' zsh-system-clipboard-vicmd-vi-put-before
+
+# escaped paste
+escape-paste-clipboard() {
 	RBUFFER=$(printf '%q' "$(xsel -ob </dev/null)")$RBUFFER
 }
 zle -N escape-paste-clipboard
-bindkey -M vicmd P escape-paste-clipboard
+bindkey -a tp escape-paste-clipboard
 
-# change yank to yank to clipboard. {{{
-# http://zshwiki.org/home/zle/vi-mode
-[[ -n $DISPLAY ]] && (( $+commands[xsel] )) && {
-
-  function cutbuffer() {
-    zle .$WIDGET
-    echo $CUTBUFFER | xsel -ib
-  }
-
-  zle_cut_widgets=(
-    vi-backward-delete-char
-    vi-change
-    vi-change-eol
-    vi-change-whole-line
-    vi-delete
-    vi-delete-char
-    vi-kill-eol
-    vi-substitute
-    vi-yank
-    vi-yank-eol
-  )
-  for widget in $zle_cut_widgets
-  do
-    zle -N $widget cutbuffer
-  done
-
-  function putbuffer() {
-    zle copy-region-as-kill "$(xsel -ob)"
-    zle .$WIDGET
-  }
-
-  zle_put_widgets=(
-    vi-put-after
-    vi-put-before
-  )
-  for widget in $zle_put_widgets
-  do
-    zle -N $widget putbuffer
-  done
-}
-
-# }}}
-
-# }}}
-
-# general additional bindings
-# for termite link mode from vi cmd mode..
-function enter-url-hint() {
-	xdotool key --window Termite control+shift+x
-}
-zle -N enter-url-hint
-bindkey -a f enter-url-hint
-
+# ** External Interaction
 # for tmux copy mode
-function enter-copy-mode() {
+enter-copy-mode() {
 	tmux copy-mode
 }
 zle -N enter-copy-mode
 bindkey -a v enter-copy-mode
 
-# 'leader' bindings
-bindkey -a -r t
-
-# run man page of current command on cli and keep there when exit manpage
-bindkey -a tm run-help
-
-# for re-entering ranger {{{
-function enter-ranger() {
+# enter ranger
+ctrl-d() {
 	xdotool key control+d
 }
-zle -N enter-ranger
-bindkey -a tr enter-ranger
+zle -N ctrl-d
+bindkey -a tr ctrl-d
 
-# }}}
-
-# re-enter vim {{{
-# may never use..
-# http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
-function fancy-ctrl-z () {
-	if [[ $#BUFFER == 0 ]]; then
-		fg
-		zle redisplay
-	else
-		zle push-input
-		zle clear-screen
+# ** Automatically Expand Global Aliases
+# automatically expanding global aliases
+# http://blog.patshead.com/2011/07/automatically-expanding-zsh-global-aliases-as-you-type.html?r=related
+globalias() {
+	if [[ $LBUFFER =~ ' [a-Z0-9]+$' ]]; then
+		zle _expand_alias
+		zle expand-word
 	fi
+	zle self-insert
 }
-zle -N fancy-ctrl-z
-# v to re-enter vim
-bindkey -a tv fancy-ctrl-z
 
-# }}}
+zle -N globalias
 
-# tmux experimentation {{{
-# TODO: if keep this, see if can setup keybindings with loop
+# bindkey " " globalias
+# bindkey "^ " magic-space           # control-space to bypass completion
+# bindkey -M isearch " " magic-space # normal space during searches
 
-# key sequences won't work if the first key is bound; it won't wait long enough to see if you've pressed the first key
-# Thanks to Raphael Ahrens for explaining this to me: 
-# http://unix.stackexchange.com/questions/122078/how-to-bind-a-key-sequence-to-a-widget-in-vi-cmd-mode-zsh/122088?noredirect=1#122088
-bindkey -a -r r
-bindkey -a -r s
+# * Aliases/Functions
+# ** Private
+# aliases/functions with user info
+if [[ -f ~/.zsh/.private_zshrc ]]; then
+	source ~/.zsh/.private_zshrc
+fi
 
-# need to check if some of symbol bindings working
-# "r" is redraw {{{
-# window switching {{{
-function r-a() { wm_action inpt ra; }
-zle -N r-a
-bindkey -a ra r-a 
+# ** Navigation
+# Programs like fasd and shell fuzzy finders like FZF and percol are awesome. I
+# don't end up using them much though since they aren't as useful with a
+# editor-based inside the editor (though fzf is nice with z and in ranger, and
+# counsel-fzf is sometimes useful)
 
-function r-r() { wm_action inpt rr; }
-zle -N r-r
-bindkey -a rr r-r
-
-function r-s() { wm_action inpt rs; }
-zle -N r-s
-bindkey -a rs r-s
-
-function r-t() { wm_action inpt rt; }
-zle -N r-t
-bindkey -a rt r-t
-
-function r-d() { wm_action inpt rd; }
-zle -N r-d
-bindkey -a rd r-d
-
-function r-h() { wm_action inpt rh; }
-zle -N r-h
-bindkey -a rh r-h
-
-function r-n() { wm_action inpt rn; }
-zle -N r-n
-bindkey -a rn r-n
-
-function r-e() { wm_action inpt re; }
-zle -N r-e
-bindkey -a re r-e
-
-function r-i() { wm_action inpt ri; }
-zle -N r-i
-bindkey -a ri r-i
-
-function r-o() { wm_action inpt ro; }
-zle -N r-o
-bindkey -a ro r-o
-
-# }}}
-
-# resize panes {{{
-function r-m-h() { wm_action inpt rmh; }
-zle -N r-m-h
-bindkey -a rmh r-m-h
-
-function r-m-n() { wm_action inpt rmn; }
-zle -N r-m-n
-bindkey -a rmn r-m-n
-
-function r-m-e() { wm_action inpt rme; }
-zle -N r-m-e
-bindkey -a rme r-m-e
-
-function r-m-i() { wm_action inpt rmi; }
-zle -N r-m-i
-bindkey -a rmi r-m-i
-
-# }}}
-
-# circulate {{{
-# previous
-function r-.() { wm_action inpt r.; }
-zle -N r-.
-bindkey -a 'r.' r-.
-
-# next
-function r-comma() { wm_action inpt r,; }
-zle -N r-comma
-bindkey -a 'r,' r-comma
-
-# }}}
-
-# new window
-function r-c() { wm_action inpt rc; }
-zle -N r-c
-bindkey -a rc r-c
-
-# kill pane
-function r-x() { wm_action inpt rx; }
-zle -N r-x
-bindkey -a rx r-x
-
-# last window 
-function r-l() { wm_action inpt rl; }
-zle -N r-l
-bindkey -a rl r-l
-
-# split windows
-function r-slash() { wm_action inpt r/; }
-zle -N r-slash
-bindkey -a 'r/' r-slash
-
-function r--() { wm_action inpt r-; }
-zle -N r--
-bindkey -a 'r-' r--
-
-# break pane
-function r-bang() { wm_action inpt rbang; }
-zle -N r-bang
-bindkey -a 'r!' r-bang
-
-# from old "s" {{{
-# last pane
-function r-u() { wm_action inpt ru; }
-zle -N r-u
-bindkey -a ru r-u
-
-# zoomed pane toggle
-function r-k() { wm_action inpt rk; }
-zle -N r-k
-bindkey -a rk r-k
-
-# fullscreen
-function r-f() { wm_action inpt rf; }
-zle -N r-f
-bindkey -a rf r-f
-
-# sticky
-function r-y() { wm_action inpt ry; }
-zle -N r-y
-bindkey -a ry r-y
-
-# main-vertical layout
-function r-v() { wm_action inpt rv; }
-zle -N r-v
-bindkey -a rv r-v
-
-# }}}
-# }}}
-# }}}
-# }}}
-#==============================
-# FASD and FZF / Navigation {{{
-#==============================
-# Programs like fasd and shell fuzzy finders like FZF and percol are awesome.
-# I don't end up using them much though since they aren't very useful
-# with a workflow based inside the editor (e.g. magit/fugitive over cli git,
-# helm/unite instead of fzf).
-# Note: there are fzf and fasd plugins for ranger; helm can be used with dired
 # order of preference:
 # 1. quickmark for dir/file if exists (fastest but requires memorization)
 # 2. (maybe fuzzy) search for recent/most visited/locate/find
-# manual navigation is hardly ever necessary-
 # 3. f<keys> auto-enter navigation in file manager (e.g. deer and blscd) or tab
 #    completion
 
+# *** FASD
 # have a (any), s (show), z (cd), etc.
 eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
+alias z='fasd_cd -d'
 
-# use ag by default instead of find:
-export FZF_DEFAULT_COMMAND='ag -l -g ""'
+# *** FZF
+# http://owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
+FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
+# not using FZF_TMUX, but fzf and enhancd completions uses this variable
+FZF_TMUX_HEIGHT="90%"
+
 # using git ls-tree can be faster in large repos according to fzf README
 # only shows tracked files though
 # export FZF_DEFAULT_COMMAND='
@@ -650,34 +500,16 @@ export FZF_DEFAULT_COMMAND='ag -l -g ""'
 
 # using FZF completion script (see plugins section) for the following:
 # $ cd ** # dirs
-# $ kill -9 ** # processes
+# $ kill -9 # processes
 # $ other_command ** # files
 # etc.
-
-function fzf-fasd-dir() {
-	# otherwise will end up as a cdable var
-	local dir
-	dir="$(fasd -ds | fzf --tac | awk '{print $2}')" && \
-	cd "$dir"
-}
-zle -N fzf-fasd-dir
-bindkey -M viins "^[w" fzf-fasd-dir
-
-# possibility if zsh-history-substring-search doesn't cut it
-# https://github.com/junegunn/fzf/wiki/examples#command-history
-# fh - repeat history
-function fh() {
-	eval "$( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | \
-		sed 's/ *[0-9]* *//')"
-}
-# fhe - repeat history edit
-function fhe() {
-	print -z "$( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | \
-		sed 's/ *[0-9]* *//')"
-}
+# keybindings:
+# - C-t for files/directories
+# - C-r for history
+# - M-c to cd into directory
 
 # idea suggested by gotbletu
-function fzf-locate() {
+fzf-locate() {
 	local selected
 	selected=$(locate "${1:-*}" | fzf -e)
 	if [[ -d $selected ]]; then
@@ -687,51 +519,26 @@ function fzf-locate() {
 	fi
 }
 
-function fl() {
+fl() {
 	fzf-locate "$PWD"/*
 }
 
-# https://github.com/b4b4r07/enhancd
-# cd ..<TAB> could potentially be useful
-
-# }}}
-#==============================
-# CDable Vars {{{
-#==============================
-# benefit over alias is will show up as new name and fact that can use in aliases and functions
-# can tab complete from any directory
-books=~/ag-sys/Large/Library/Books
-alias books='nocorrect books'
-
-# }}}
-#==============================
-# Aliases/Functions {{{
-#==============================
-source ~/.zsh/.private_zshrc
-
-function alias_value() {
-	alias "$1" | sed "s/^$1='\(.*\)'$/\1/"
-}
-alias showa='alias_value'
-alias countalias='alias | wc -l'
-
-#===============
-# Backup & Mounting {{{
-#===============
-source ~/.zsh/backup_functions.zsh
+# ** Backup & Mounting
+if [[ -f ~/.zsh/borg_backup.zsh ]]; then
+	source ~/.zsh/borg_backup.zsh
+fi
 
 alias mountefi='sudo mount /dev/disk/by-label/SYSTEM /boot/efi'
+alias mountesp='mountefi'
 alias umountefi='sudo umount /dev/disk/by-label/SYSTEM'
+alias umountesp='umountefi'
 
-# }}}
-#===============
-# Startup and Shutdown {{{
-#===============
-# if ever start using another init: cat /proc/1/comm
-function poweroff() {
+# ** Startup and Shutdown
+# TODO is this overkill or at all necessary?
+poweroff() {
 	pkill -x mpd
-	emacsclient --eval "(let (kill-emacs-hook) (kill-emacs))"
-	# never had corruption with tc volumes
+	pkill emacs
+	# emacsclient -t --eval "(let (kill-emacs-hook) (kill-emacs))"
 	# maybe this is overly paranoid, but it seems like a good idea
 	udiskie-umount --all || return 1
 	if command -v tmsu &> /dev/null; then
@@ -746,389 +553,201 @@ function poweroff() {
 
 alias reboot='poweroff reboot'
 
-# }}}
-#===============
-# Symlink All Dotfiles With Stow {{{
-#===============
-source ~/.zsh/stow_functions.sh
+# ** Symlinking Dotfiles With Stow
+if [[ -f ~/.zsh/stow_functions.sh ]]; then
+	source ~/.zsh/stow_functions.sh
+fi
 
-# }}}
-#===============
-# Git {{{
-#===============
-# general
-alias g='git'
-alias gin='git init'
-alias gs='git status'
-alias gl='git log'
-alias glast='git log -1 HEAD'
-alias gln='git log --name-status'
-# http://fredkschott.com/post/2014/02/git-log-is-so-2005/
-alias glg='git log --color --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset" --abbrev-commit'
-alias gd='git diff'
-alias gcl='git clone' # url
-alias gconf='git config --list'
-# remove file from index but don't touch disk
-alias gr='git rm --cached' # file
-# count commits; from alias.sh
-alias gcn='git rev-list --count HEAD'
-function gsearch() {
-	git log --grep="$1"
-}
-
-# commiting
-alias gc='git commit'
-alias gcm='git commit -m' # "<commit message>"
-alias gcam='git commit --amend'
-alias gsoft='git reset --soft HEAD~1'
-# squashing (may need to stash first)
-alias grebase='git rebase -i'
-
-# pushing and pulling
-# (with default set to simple, will push current branch to corresponding remote branch for pulling)
-alias gp='git push'
-alias gpom='git push origin master'
-alias gpomf='git push origin +master'
-alias gpoc='git push -u origin $(current_branch)'
-alias gpocf='git push -u origin +$(current_branch)'
-alias gpall='git push origin --all'
-alias gpot='git push origin --tags'
-alias gpos='git push origin source'
-alias grv='git remote -v'
-# e.g. for forked repo, pull or in steps:
-# git fetch upstream
-# git merge upstream/master
-alias grau='git remote add upstream' # url
-# manually add origin url (if didn't clone)
-alias grao='git remote add origin' # url
-alias gr='git remote rename' # oldname newname
-alias grs'git remote show' # remotename
-
-# branching
-function current_branch() {
-	git branch | awk '{print $2}'
-}
-alias gh='git checkout'
-# create branch and checkout
-alias gcnb='git checkout -b'
-# create an empty branch
-alias gce='git checkout --orphan'
-# delete local branch
-# git branch -d
-# delete remote branch
-# git push origin --delete <branchName>
-# save changes
-alias gstash='git stash'
-alias gstashl='git stash list'
-# revert to most recent (or stash@{num}) in stash (apply then drop)
-alias gpop='git stash pop'
-
-# }}}
-#===============
-# Pacman/AUR {{{
-#===============
+# ** Package Management
+# *** Pacman/AUR
 # make new mirror list
-alias rldmirrors='sudo reflector --verbose -l 200 --sort rate --save /etc/pacman.d/mirrorlist'
+rldmirrors() {
+	sudo reflector --verbose -l 200 --sort rate --save /etc/pacman.d/mirrorlist
+}
 
-# find out what package contains a command
-alias pkgfile='nocorrect pkgfile'
-alias pacss='nocorrect pacman -Ss'
-alias -g pacs='nocorrect sudo powerpill -S'
+# view packages:
+# pacgraph -f /tmp/pacgraph
+# inkscape /tmp/pacgraph
+
+sysupd() {
+	mountesp
+	PACMAN=yay pacnanny -Syu
+	mkinitcpio --allpresets
+	# distro=$(lsb_release -is)
+	# if [[ $distro == Arch ]]; then
+	# fi
+	# # else if nix
+	# # sudo nixos-rebuild switch --upgrade
+}
+
+alias pacss='pacman -Ss'
+alias pacs='sudo powerpill -S'
 alias pacq='pacman -Q'
 alias pacqm='pacman -Qm'
-alias pacupd='sudo pacnanny -Syu'
-alias pacrns='sudo pacman -Rns'
-alias -g rldpac='pacman -Syy'
+
 # will keep 3 most recent versions and remove all versions of uninstalled
-alias cleanpaccache='paccache -r && paccache -ruk0'
+# e.g. -rk2 to keep 2 most recent
+alias cleanpaccache='paccache -rk2 && paccache -ruk0'
+# remove packages installed as dependencies but not needed anymore
+# pacman -Rs $(pacman -Qqdt)
 
-alias yass='nocorrect yaourt -Ss'
-alias yas='nocorrect yaourt -S'
-alias yapd='yaourt -Syu --aur'
-alias yaqm='yaourt -Qm'
+alias aur='yay -S'
+alias yays='yay -S'
+alias aurs='yay -Ss'
+alias yayss='yay -Ss'
 
-alias aur='sudo aura --hotedit -A'
-alias aurh='sudo aur'
-alias aurs='aura -As'
-alias auri='aura -Ai'
-alias aurupd='sudo aura -Au'
-
-# remove orphans yaourt -Qtd; aura -Oj
-
-# }}}
-#===============
-# Reloading things {{{
-#===============
-# zshrc
-alias rld='echo "The Matrix has been reloaded" && source ~/.zshrc'
+# ** Reloading things
+alias rld='echo "Reloading .zshrc" && source ~/.zshrc'
 
 # xrdb -query -all
 alias rldxres='xrdb -load ~/.Xresources'
 
 alias rldless='lesskey ~/.lesskey'
 
-# recreate grub config file; after editing /etc/default/grub
-alias -g regrub='grub-mkconfig -o /boot/grub/grub.cfg'
-
 # update font caches
 alias rldfonts='fc-cache -vf'
 # add pretty much any font in ~/.fonts; don't remember where stole from
-alias fonts='mkfontdir ~/.fonts ; mkfontscale ~/.fonts ; xset +fp ~/.fonts ; xset fp rehash ; fc-cache ; fc-cache -fv'
+fonts() {
+	mkfontdir ~/.fonts
+	mkfontscale ~/.fonts
+	xset +fp ~/.fonts
+	xset fp rehash
+	fc-cache
+	fc-cache -fv
+}
+# xfontsel to find long -*-* font names
+# xft names; fc-list (-vv)
 
-# reload time
-alias rldtime='sudo ntpdate us.pool.ntp.org'
 # set hardware clock to system time
-alias fixhwclock='rldtime && sudo hwclock --systohc'
+alias fixhwclock='sudo hwclock --systohc'
 
 alias rldsxhkd='pkill -USR1 -x sxhkd'
 
 alias rldpolybar='pkill -USR1 -x polybar'
 
-alias rldconky='conky_switcher'
-
-# battery saving; kill panel, conky, and compton
-alias nopanel='rldbspc nopanel'
-
 # manually reload udev rules
 alias -g rldudev='udevadm control --reload-rules'
 
-# }}}
-#===============
-# System Information {{{
-#===============
-function cpuinfo() {
-	${PAGER:-less} /proc/cpuinfo
-}
+# TODO potential problem when sxhkd freezes
+alias keyupall='DISPLAY=:0 xdotool keyup control shift alt super'
+
+# ** System Information
+alias cpuinfo='less /proc/cpuinfo'
 
 # check drive mount options
-function mountopts() {
+mountopts() {
 	grep -i "$1" /proc/mounts
 }
 # e.g.
 # $ mountopts sdb1
 # $ mountopts discard
 
-# http://catonmat.net/blog/another-ten-one-liners-from-commandlingfu-explained
-function nicemount() {
-	(echo "DEVICE PATH TYPE FLAGS" && mount | awk '$2="";1') | column -t
-}
+alias lsb='lsblk -o name,size,label'
 
-# }}}
-#===============
-# Group Stuff {{{
-#===============
+# ** Group Stuff
 # add current user to group
-function gadd() {
-	sudo gpasswd -a "$USER" "$1"
-}
+alias gadd="sudo gpasswd -a $USER"
 
 # list what groups current user is in
-function grouplist() {
-	groups "$USER"
-}
+alias groupslist="groups $USER"
 
-# }}}
-#===============
-# General/Random {{{
-#===============
-# function so that will work even if EDITOR happens to be changed
-function ed() {
-	"$EDITOR" "$@"
-}
+# ** General/Random
+alias e="$EDITOR"
 
-function take() {
-	mkdir -p "$1"
-	cd "$1"
-}
+alias stop_emacs='emacsclient --eval "(let (kill-emacs-hook) (kill-emacs))"'
 
 # b is for bang!
-function b() {
+b() {
 	sudo "$(fc -ln -1)"
 }
 
-function def(){
+def(){
 	echo "$1" | festival --tts &
 	sdcv "$1"
 	sdcv "$1" | ${PAGER:-less}
 }
 
-# switch conky theme
-alias conkywhite='conky_switcher white'
-alias conkyblack='conky_switcher black'
+# generate gpl3 license
+alias gpl3='harvey gpl-3.0 > LICENSE'
+
+# blank screen
+alias screenoff='xset dpms force off'
 
 # for opening in already open gvim session
-function gvir() {
-	gvim --remote "$1"
-}
-
-# vim as password manager (switched to gpg file with emacs)
-# alias vpass='mountacct && vim -u ~/.encrypted_vimrc -x ~/blemish/accts.vault'
-# edit without backups, undo, history, etc.
-alias vimsens='vim -u ~/.encrypted_vimrc'
+alias gvir='gvim --remote'
 
 # telnet/fun
 alias starwars='telnet towel.blinkenlights.nl'
 alias fun='telnet sdf.org'
-alias fort='fortune -a'
-alias forto='fortune -o'
 alias hack='hexdump -c /dev/urandom'
 
 # other program aliases
-alias -g pkill='nocorrect pkill'
-alias pgrep='nocorrect pgrep'
 alias pg='pgrep -l'
-alias man='nocorrect man'
-alias sfh='screenfetch'
-alias wee='weechat'
-alias bitl='sudo bitlbee -D'
-alias mutt='cd ~/move && mutt'
-alias ppss='PPSSPPSDL &'
 alias stl='sudo systemctl'
 # use spacemacs config (not symlinking to home with stow)
-# alias spacemacs='env HOME=/home/angelic_sedition/dotfiles/spacemacs emacs'
-alias enw='emacs -nw'
-
-# change hostname
-alias -g chhost='hostnamectl set-hostname'
+alias spacemacs="env HOME=$HOME/spacemacs emacs"
+alias testemacs="env HOME=$HOME/test-emacs emacs"
 
 alias checkclass='xprop | grep WM_CLASS'
 
-# empty trash
-alias rmtrash='trash-empty'
-alias emptytrash='trash-empty'
-alias lstrash='trash-list'
+# ** Directory Stuff
+# have cut down on the number of aliases here since I don't use most of them
+# (just use actual file manager instead)
 
-# http://alias.sh/strip-comments-and-blank-lines-file
-# strip comments and blanks lines from file
-function confcat() {
-	sed -e 's/[#;].*//;/^\s*$/d' "$@"
+take() {
+	mkdir -p "$1" && cd "$1"
 }
-# show lines that are not blank or commented out
-alias active='grep -v -e "^$" -e"^ *#"'
-
-# }}}
-#===============
-# Tmux {{{
-#===============
-# new session but don't attach
-alias tmnew='TMUX= tmux new-session -d -s' # <session name>
-alias tmnest='unset TMUX ; tmux new-session -s' # <session name>
-# can tab complete
-alias tmkill='tmux kill-session -t'
-alias ta='tmux attach -t'
-alias tl='tmux list-sessions'
-alias tswitch='tmux switch -t'
-
-# }}}
-#===============
-# Directory Stuff {{{
-#===============
-# copy jump paste instead of cp ./.. /fullpath
-# http://youtu.be/qTl7vzL_vDU?list=UUkf4VIqu3Acnfzuk3kRIFwA
-# I had no idea this existed; haven't ever used though
-alias c='xclip-copyfile'
-alias y='xclip-copyfile'
-alias p='xclip-pastefile'
-alias d='xclip-cutfile'
 
 # copy working directory to clipboard
 alias cpwd='pwd | tr -d "\n" | xsel -ib'
 
-# ls stuff {{{
-# alternatives/improved:
-# https://github.com/ogham/exa
+# *** ls Stuff
 # https://github.com/supercrabtree/k
-# k is beautiful
-alias kh='k -h'
-alias ka='k -ah'
-# can actually just list dirs
-alias kd='k -dh'
+# nice if don't have exa installed but much slower
+alias kls='k -ah'
+
+# https://github.com/ogham/exa
+alias els='exa --all --long --group'
 
 alias l='ls -alh'
-alias lsa='ls -a'
-alias lsl='ls -lh'
+
 # http://jeff.robbins.ws/reference/my-zshrc-file
 # these require zsh
-alias ltd='ls *(m0)' # files & directories modified in last day
-alias lt='ls *(.m0)' # files (no directories) modified in last day
-alias lnew='ls *(.om[1,3])' # list three newest
+# files & directories modified in last day
+alias ltd='ls *(m0)'
+# files (no directories) modified in last day
+alias lt='ls *(.m0)'
+# list three newest
+alias lnew='ls *(.om[1,3])'
 # most recent subdir
 alias lsrdir='ls -d *(/om[1])'
- # show hidden files/directories only
-alias lh='ls -d .*'
 
-# }}}
-
-# cd stuff {{{
+# *** cd Stuff
 # custom cds
 alias home='cd ~/'
 alias cdot='cd ~/dotfiles'
-# view dir stack
-alias dv='dirs -v'
 # exit symlinks; http://alias.sh/exit-symlinks
-function xs() {
+xs() {
 	cd "$(pwd -P)"
 }
 
-# not needed due to ZSH autocd opt
-# alias ..='cd ..'
-alias ...='cd ../..'
-alias .3='cd ../../..'
-alias .4='cd ../../../..'
-alias .5='cd ../../../../..'
-alias .6='cd ../../../../../..'
-alias .7='cd ../../../../../../..'
-alias .8='cd ../../../../../../../..'
-
-alias -- -='cd -'
-alias 1='cd -'
-alias 2='cd -2'
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
-
-# push and pop directories on directory stack
-alias pu='pushd'
-alias po='popd'
-
-# }}}
-
-# size management {{{
-# baobab or something graphical is preferable, but these are nice in simple cases
-# check free space
+# *** Size Management
+# baobab or something graphical is preferable, but these are nice in simple
+# cases to check free space
 alias fspace='df -h'
 # colored disk usage; colour intelligently; sort; human readable sizes
 alias diskspace='cdu -isdh'
-alias dis='diskspace'
-# there's also ncdu.. but it doesn't support key rebinding I believe, so fuck it
+# there's also ncdu.. but it doesn't support key rebinding
 # dfc is also nice for whole filesystem
 # number of files (not directories)
 alias filecount='find . -type f | wc -l'
 
-# }}}
-
-# searching {{{
-# use silver (or plat) searcher for contents
-alias ags='ag -S'
-
-function rs(){
-	find . -name "*$1*"
-}
-alias -g rf='rs'
-
+# *** Searching
+alias rgs='rg --no-ignore --hidden --follow'
 alias rsl='find . -name'
 
-# }}}
-
-# }}}
-#===============
-# Ranger {{{
-#===============
-function ranger-cd {
+# ** Ranger
+ranger-cd() {
 	# from https://github.com/hut/ranger/blob/bdd6bf407ab22782f7ddb3a1dd24ffd9c3361a8d/examples/bash_automatic_cd.sh
 	# with minor modifications
 	# change the directory to the last visited one after ranger quits.
@@ -1138,13 +757,14 @@ function ranger-cd {
 	mkdir -p /tmp/ranger
 	ranger --choosedir="$tempfile" "${@:-$(pwd)}"
 	if [[ -f $tempfile ]] && \
-		[[ $(< $tempfile) != $(pwd | tr -d '\n') ]]; then
+		   [[ $(< $tempfile) != $(pwd | tr -d '\n') ]]; then
+		# ranger will put full path in tempfile  (-- not needed)
 		cd "$(< $tempfile)"
 	fi
 	rm -f "$tempfile"
 }
 
-function rn() {
+rn() {
 	if [[ ! -z $RANGER_LEVEL ]]; then
 		# https://wiki.archlinux.org/index.php/Ranger
 		# if a ranger session exists, restore it
@@ -1157,33 +777,19 @@ function rn() {
 	esac
 }
 
-# }}}
-#===============
-# Music, Video/Images, Sound, Etc. {{{
-#===============
-# program aliases
-alias als='alsamixer'
-alias nm='ncmpcpp'
+# ** Media
+# *** Music
 # cd ripping
-alias -g rip='abcde'
+alias rip='abcde'
 
 # could potentially use this instead of mpdcron
 alias mpdstats='beet mpdstats'
 
-# get image dimensions with the imagemagick
-alias dim='identify -format "%wx%h"'
-# image rotation
-alias imrotate='mogrify -rotate 90'
-# to create an image that will work as grub background
-function grubify() {
-	local extension
-	extension=${1##*.}
-	convert "$1" -colorspace rgb "${1%.*}_rgb.$extension"
-}
-
 # *** Connecting to External Displays
 # **** Helpers
-source ~/bin/helpers/monitor.sh
+if [[ -f ~/bin/helpers/monitor.sh ]]; then
+	source ~/bin/helpers/monitor.sh
+fi
 
 monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
 	# exit if any command or any part of a pipe fails
@@ -1217,10 +823,6 @@ monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
 	if [[ -n $add_bspwm_desktop ]]; then
 		bspc monitor "$name" --reset-desktops "$add_bspwm_desktop"
 	fi
-
-	# update audio output
-	# audio through hdmi doesn't work on current laptop...
-	# ponymix set-profile output:hdmi-stereo
 )
 
 monitor_disconnect() ( # output_name
@@ -1231,18 +833,11 @@ monitor_disconnect() ( # output_name
 	if bspc query --monitors --names | grep --quiet "^${name}$"; then
 		bspc monitor "$name" --remove
 	fi
-	# ponymix set-profile output:analog-stereo
 )
 
 # **** VGA (old)
-vgain() {
-	monitor_connect VGA1
-}
-
-vgaadd() {
-	monitor_connect VGA1 true X
-}
-
+alias vgain='monitor_connect VGA1'
+alias vgaout='monitor_connect VGA1 true X'
 alias vgaout='monitor_disconnect VGA1'
 
 # **** Thinkpad p50
@@ -1252,17 +847,9 @@ alias discrete="sudo cp ~/dotfiles/20-nvidia.conf /etc/X11/xorg.conf.d/"
 alias hybrid="sudo rm /etc/X11/xorg.conf.d/20-nvidia.conf"
 
 # discrete grapics in bios or hybrid and nvidia-xrun
-nvadd() {
-	monitor_connect DP-1 true 十
-}
-
-nvmirror() {
-	monitor_connect DP-1
-}
-
-nvout() {
-	monitor_disconnect DP-1 true
-}
+alias nvadd='monitor_connect DP-1 true 十'
+alias nvmirror='monitor_connect DP-1'
+alias nvout='monitor_disconnect DP-1 true'
 
 # **** Thinkpad p52
 hdmiadd() {
@@ -1277,7 +864,7 @@ hdmiout() {
 	ponymix set-profile output:analog-stereo
 }
 
-# *** play clipboard (url)
+# *** Play Video from Clipboard
 mpgo() {
 	mkdir -p /tmp/mpv
 	if [[ -n $1 ]]; then
@@ -1285,97 +872,61 @@ mpgo() {
 	else
 		clipboard=$(xsel -b)
 	fi
-	if [[ $clipboard =~ ^http ]] || [[ -f $clipboard ]]; then
+	if [[ $clipboard == *youtube.com* ]]; then
+		mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$clipboard"
+	elif [[ $clipboard =~ ^http ]] || [[ -f $clipboard ]]; then
 		echo "$clipboard" > /tmp/mpv/last_link
 		# ytdl messes up direct links for some reason (slow)
 		mpv --no-ytdl --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$clipboard"
 	elif [[ $clipboard =~ ^magnet ]]; then
 		echo "$clipboard" > /tmp/mpv/last_link
-		 peerflix  "$clipboard" --mpv -- --no-ytdl \
-			--screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
+		# --remove is broken
+		peerflix --remove --mpv "$clipboard" -- --no-ytdl \
+				 --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" \
+			; rm -rf /tmp/torrent-stream
 	fi
 }
 
-function mplast() {
+mplast() {
 	mpgo "$(< /tmp/mpv/last_link)"
 }
 
-# youtube downloading
-alias ytvid='youtube-dl --restrict-filenames -o "~/move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s"'
-alias ytaudio='youtube-dl --restrict-filenames --extract-audio -o "~/move/%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s"'
-
-# record audio
-function arec() { # filename
-	if [[ $# -ne 1 ]]; then
-		return 1
-	fi
-	arecord -vv -f wav "$1"
+# *** Record Audio
+arec() { # filename
+	# TODO move into own script
+	# ffmpeg \
+		# -f alsa -ac 2 -i hw:"$audio_card" -acodec libopus \
+		# out.opus
+	audio_card="0,0"
+	ffmpeg -f alsa -ac 2 -i hw:"$audio_card" output.wav
 }
 # see ~/bin/srec for ffmpeg video recording
 
-# }}}
-#===============
-# Octopress Blog {{{
-#===============
-# work without publishing:
-function genbl() {
-	cd "$BLOG" && bundle exec rake generate
-}
-
-function prevbl() {
-	cd "$BLOG" && bundle exec rake preview
-}
-
-# update site on github pages
-function pushblog() {
-	cd "$BLOG" && bundle exec rake gen_deploy
-}
-
-# update at posts and push to source
-function pushposts() {
-	cd "$BLOG"/source/_posts && git add . && gpos
-}
-
-function newbpost() {
-	cd "$BLOG" && bundle exec rake new_post\["$1"\]
-}
-
-# }}}
-#===============
-# Internet, VPN, Firewall, and Torrenting {{{
-#===============
+# ** Internet, VPN, Firewall, and Torrenting
+# *** General
 alias dl='aria2c -x 4'
 # check ip; default gateway / router
 alias gateip='ip route show'
 # check what DNS servers have in conf and which one using
-alias showdns='cat /etc/resolv.conf && echo "\n--DIG OUTPUT:" && dig fsf.org | grep SERVER'
+showdns() {
+	cat /etc/resolv.conf \
+		&& echo "\n--DIG OUTPUT:" \
+		&& dig fsf.org | grep SERVER
+}
 alias checkdns='showdns'
-# identify active network connections; http://alias.sh/identify-and-search-active-network-connections
+# identify active network connections
+# http://alias.sh/identify-and-search-active-network-connections
 alias spy='lsof -i -P +c 0 +M'
-alias netlist='lsof -i -P | grep LISTEN'
-
-# block unproductive sites
-alias focus="sudo block_sites block"
+# alias netlist='lsof -i -P | grep LISTEN'
 
 # clean firefox profile
 alias cleanff='profile-cleaner f'
 
 # firewall
-alias ufws='sudo ufw status'
+alias ufws='sudo ufw status verbose'
 alias ufwd='sudo ufw delete'
 
-# pastebin
-# https://unix.stackexchange.com/questions/108493/easy-way-to-paste-command-line-output-to-paste-bin-services
-# "You can send to an enhanced URL if you would like syntax highlighting for your code paste. For ix, you append either /ID/ to the URL (http://ix.io/ID/) for default syntax based on auto-detection, or /ID/<language>/ to explicitly set the language for pygments highlighting."
-function ix() {
-	local url
-	url=$(curl -F 'f:1=<-' ix.io <"$1")
-	# copy url to clipboard
-	echo "${url}/" | xsel -ib
-	echo "$url"
-}
-
-# connecting {{{
+# *** Network Management
 # netctl (if no connman)
 alias wifi='sudo wifi-menu'
 alias nts='sudo netctl switch-to'
@@ -1384,13 +935,17 @@ alias startnetctl='sudo systemctl start netctl'
 # connman
 alias stopcon='sudo systemctl stop connman'
 alias startcon='sudo systemctl start connman'
-# sometimes necessary for reconnecting with spotty connection; doesn't always work
+
+# sometimes
+# necessary for reconnecting with spotty connection; doesn't always work
 # https://bbs.archlinux.org/viewtopic.php?id=188825
 # systemctl restart connman
-alias rldcon='sudo systemctl stop connman && sleep 3 && sudo systemctl start connman'
+rldcon() {
+	sudo systemctl stop connman && sleep 3 && sudo systemctl start connman
+}
 alias conenwifi='connmanctl enable wifi'
 alias conlist='connmanctl scan wifi && connmanctl services'
-function con() { # name
+con() { # name
 	local long_name
 	long_name=$(conlist | awk "/$1/ {print \$3}")
 	echo "$long_name"
@@ -1398,14 +953,20 @@ function con() { # name
 }
 
 # mask to prevent from starting with tlp (still an issue?)
-alias swcon='sudo systemctl stop NetworkManager && sudo systemctl mask NetworkManager && sudo systemctl start connman && fixresolv'
-alias swnm='sudo systemctl stop connman && sudo systemctl unmask NetworkManager && sudo systemctl start NetworkManager && fixresolv'
-
-# show active device
-function ipup() {
-	ip link show up | awk -F ":" '/state UP/ {print $2}'
+swcon() {
+	sudo systemctl stop NetworkManager && sudo systemctl mask NetworkManager \
+		&& sudo systemctl start connman && fixresolv
 }
 
+swnm() {
+	sudo systemctl stop connman && sudo systemctl unmask NetworkManager \
+		&& sudo systemctl start NetworkManager && fixresolv
+}
+
+# show active device
+alias ipup="ip link show up | awk -F ':' '/state UP/ {print $2}'"
+
+# *** DNS
 # in case something goes wrong
 backupresolv() {
 	sudo chattr -i /etc/resolv.conf
@@ -1422,32 +983,17 @@ options edns0 single-request-reopen" \
 	sudo chattr +i /etc/resolv.conf
 }
 
-# }}}
-
-# vpn {{{
-# https://github.com/pschmitt/pia-tools
-# list vpn connections
-alias vl='systemctl list-units | grep pia@'
-# vpn connect; pia-tools will start transmission service
-# see my pia-up and pia-down files (deny by default and stop transmission after)
-# see completion file (for tab completion)
-function vc() {
-	sudo systemctl stop transmission && sudo systemctl start pia@"$1"
+# if need to access captive portal for public wifi
+# TODO what actually is default?
+defaultresolv() {
+	default_route=$(ip route | awk '/default/ {print $3}')
+	sudo chattr -i /etc/resolv.conf
+	echo -e "nameserver $default_route" \
+		| sudo tee /etc/resolv.conf
+	sudo chattr +i /etc/resolv.conf
 }
-alias vcs='vc Sweden'
-alias vcc='vc CA_Toronto'
-# stop any pia service
-alias stopv='sudo systemctl stop pia@\*'
-alias voff='stopv'
-alias piai="pia-tools --info"
-alias piac="pia-tools -c"
-alias piar="pia-tools --restore-dns"
-alias piad="pia-tools --disallow"
-alias piaa="pia-tools --allow"
 
-# }}}
-
-# torrents {{{
+# *** Torrents
 alias starttr='sudo systemctl start transmission'
 alias stoptr='sudo systemctl stop transmission'
 
@@ -1456,18 +1002,18 @@ alias stoptr='sudo systemctl stop transmission'
 alias toa='transmission-remote -a'
 
 # remove torrent; leaves data alone; give id (e.g. 1) or "all"
-function todd() {
+todd() {
 	transmission-remote -t "$1" --remove
 }
 
 # remove completed torrents (but without a bunch of greps and xargs)
-function tord() {
+tord() {
 	transmission-remote -l | \
 		awk '/100%.*Done/ {system("transmission-remote -t "$1" -r")}'
 }
 
 # pause torrent
-function topp() {
+topp() {
 	transmission-remote -t "$1" --stop
 }
 
@@ -1475,7 +1021,7 @@ function topp() {
 alias stopto='transmission-remote -t all --stop'
 
 # unpause
-function toup() {
+toup() {
 	transmission-remote -t "$1" --start
 }
 
@@ -1486,7 +1032,7 @@ alias -g tons='transmission-show --scrape' # <torrent file>
 alias tocs='tons'
 
 # continuously show speed
-function toss() {
+toss() {
 	while true; do
 		clear
 		transmission-remote -t "$1" -i | grep Speed
@@ -1494,9 +1040,9 @@ function toss() {
 	done
 }
 
-# ** Android Music Syncing
-# *** mtpfs and adbfs
-export ANDROID_MOUNT_DIR="$HOME/mnt/android"
+# ** Phone Syncing
+# *** mtpfs and adbfs (currently unused)
+ANDROID_MOUNT_DIR="$HOME/mnt/android"
 
 alias adbrestart='adb kill-server ; adb start-server'
 
@@ -1586,6 +1132,7 @@ file in it."
 	adb-sync --two-way ~/wallpaper/phone/ "$internal"/Wallpaper/
 	adb-sync --two-way ~/database/ringtones/ "$internal"/Ringtones/
 	adb-sync --two-way ~/ag-sys/library/android/ "$external"/books
+	adb-sync --two-way ~/database/meditations/ "$external"/meditations/
 	adb-sync --copy-links --two-way ~/ag-sys/orgzly/ "$external"/orgzly/
 
 
@@ -1623,6 +1170,9 @@ file in it."
 	adb-sync --reverse "$internal"/Tachiyomi/backup/ ~/ag-sys/backup/tachiyomi/
 	adb-sync --reverse "$internal"/Tachiyomi ~/database/move/phone/internal/
 
+	# stats and preferences backup
+	adb-sync --reverse "$internal"/gmmp ~/database/move/phone/internal
+
 	# general location for other manual backups (e.g. k9, loop, dashchan, slide,
 	# and moonreader)
 	adb-sync --reverse "$internal"/backup ~/database/move/phone/internal/
@@ -1639,89 +1189,61 @@ newphonerestore() {
 	adb-sync ~/database/move/phone/internal/ "$internal"/
 }
 
-# }}}
-#===============
-# GPG {{{
-#===============
-alias gencrypt="gpg -e -r"
+# ** Other Functions
+if [[ -f ~/.config/ranger/ranger_functions ]]; then
+	source ~/.config/ranger/ranger_functions
+fi
 
-# }}}
-#===============
-# Other Functions {{{
-#===============
-source ~/.config/ranger/ranger_functions
-
-# from omz I think; command usage statistics
-function zsh_stats() {
+# from omz; command usage statistics
+zsh_stats() {
 	fc -l 1 | \
 		awk '{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' | \
 		grep -v "./" | column -c3 -s " " -t | sort -nr | nl | head -n20
 }
 
 # pipe into head; optionally specify line number
-function he() {
-	# http://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash/806923#806923
+he() {
 	if [[ $1 =~ ^[0-9]+$ ]]; then
 		"${@:2}" | head -n "$1"
 	else
 		"$@" | head -n 15
 	fi
 }
-alias he="nocorrect he"
 
 # send stdout and stderr to /dev/null
-function qt() {
+qt() {
 	"$@" &> /dev/null &
 }
 
 # save errors
-function qte() {
+qte() {
 	"$@" 2> "${1}_error.log" &
 }
 
-# Random {{{
-# --------------------------------------------------------------
-# Show how much RAM application uses.
-# $ ram safari
-# # => safari uses 154.69 MBs of RAM.
-# from https://github.com/paulmillr/dotfiles
-# --------------------------------------------------------------
-function ram() {
-	local sum
-	local items
-	local app="$1"
-	if [ -z "$app" ]; then
-		echo "First argument - pattern to grep from processes"
-	else
-		sum=0
-		for i in `ps aux | grep -i "$app" | grep -v "grep" | awk '{print $6}'`; do
-		sum=$(($i + $sum))
+# print all 256 colors
+# https://wiki.archlinux.org/index.php/X_resources#Display_all_256_colors
+colors() (
+	x=$(tput op)
+	y=$(printf %76s)
+	for i in {0..256}; do
+		o=00$i
+		echo -e ${o:${#o}-3:3} $(tput setaf $i;tput setab $i)${y// /=}$x
 	done
-		sum=$(echo "scale=2; $sum / 1024.0" | bc)
-	if [[ $sum != "0" ]]; then
-		echo "${fg[blue]}${app}${reset_color} uses ${fg[green]}${sum}${reset_color} MBs of RAM."
-	else
-		echo "There are no processes with pattern '${fg[blue]}${app}${reset_color}' are running."
-	fi
-	fi
-}
+)
 
+# * Kitty Fix
+# should be able to read terminfo correctly
+bindkey '\e[H'  beginning-of-line
+bindkey '\e[F'  end-of-line
+bindkey '\e[3~' delete-char
 
-# http://alias.sh/merge-pdfs
-function pdfmerge() {
-	local tomerge
-	tomerge=""
-	for file in "$@"; do
-		tomerge="$tomerge $file"
-	done
-	pdftk "$tomerge" cat output mergd.pdf
-}
+# * End Profiling
+if [[ -n $NOCT_PROFILE_ZSH ]]; then
+	zprof
+elif [[ -n $NOCT_TIME_ZSH ]]; then
+	print "[zshrc] loaded in ${(M)$(( SECONDS * 1000 ))#*.?} ms"
+fi
 
-# }}}
-
-# }}}
-#===============
-# }}}
-#==============================
-# for testing startup time; uncomment above as well
-# zprof
+# Local Variables:
+# mode: sh
+# End:

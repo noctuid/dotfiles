@@ -148,7 +148,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | universal package manager | nix                                                        |
 | emacs package manager     | package.el->straight.el                                    |
 | vim plugin manager        | neobundle->dein or vim-plug?                               |
-| shell plugin manager      | antigen->antigen-hs->zgen->zplug                           |
+| shell plugin manager      | antigen->antigen-hs->zgen->zplug->zplugin                  |
 | tmux plugin manager       | tpm                                                        |
 | boot loader               | GRUB->rEFInd                                               |
 | display manager           | none                                                       |

@@ -1,6 +1,0 @@
-#compdef snhometoexternal
-
-_arguments \
-'-m[usb mount point]' \
-'-h[help]' \
-':usb location:_path_files -W /media'
