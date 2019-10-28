@@ -14,6 +14,7 @@
 # TODO shellcheck; zsh-lint; can remove a lot of quoting of parameter expansions
 # TODO ranger or deer keybinding
 # TODO recentf as C-f; locate keybinding
+# TODO cursor flickers with instant prompt
 
 # * Sources
 # Some settings or stuff got/found out about from here:
@@ -34,6 +35,14 @@ elif [[ -n $NOCT_TIME_ZSH ]]; then
 	typeset -F4 SECONDS=0
 fi
 
+# * Instant Prompt
+# show cached prompt while real prompt is loading
+NOCT_INSTANT_PROMPT=true
+if $NOCT_INSTANT_PROMPT && \
+		[[ -r ~/.cache/p10k-instant-prompt-${(%):-%n}.zsh ]]; then
+	source ~/.cache/p10k-instant-prompt-${(%):-%n}.zsh
+fi
+
 # * Plugins
 if [[ ! -f ~/.zplugin/bin/zplugin.zsh ]]; then
 	echo "Installing zplugin..."
@@ -48,18 +57,9 @@ if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
 	source ~/.zplugin/bin/zplugin.zsh
 
 	# ** Theme/Appearance
-	maybe_spaceship_vi_mode_enable() {
-		if [[ -z "$INSIDE_EMACS" ]]; then
-			# NOTE if remove or comment this, need to enable vi mode elsewhere
-			spaceship_vi_mode_enable
-		fi
-	}
-
-	# zplugin ice wait"!" lucid atload"maybe_spaceship_vi_mode_enable"
-	zplugin ice atload"maybe_spaceship_vi_mode_enable"
-	zplugin light "denysdovhan/spaceship-prompt"
-	# above has to be run before loading zsh-autopair
-	SPACESHIP_DIR_TRUNC=5
+	# more configuration in later section
+	zplugin ice depth=1
+	zplugin light "romkatv/powerlevel10k"
 
 	# load after history-substring-search
 	zplugin ice wait"0b" lucid atload'_zsh_autosuggest_start'
@@ -158,11 +158,6 @@ export LESS_TERMCAP_se=$'\E[0m'                 # end standout-mode
 export LESS_TERMCAP_so=$'\E[01;44;33m'          # begin standout-mode - info box
 export LESS_TERMCAP_ue=$'\E[0m'                 # end underline
 export LESS_TERMCAP_us=$'\E[01;32m'             # begin underline
-
-# ** Ranger Shell Prompt
-# for if have entered shell from ranger
-# https://github.com/hut/ranger/blob/bdd6bf407ab22782f7ddb3a1dd24ffd9c3361a8d/examples/bash_subshell_notice.sh
-[[ -n $RANGER_LEVEL ]] && export PS1="$PS1"'%{$fg[red]%}ranger> '
 
 # ** Cursor
 if [[ -z $INSIDE_EMACS ]] ;then
@@ -334,6 +329,8 @@ setopt hist_ignore_dups
 setopt hist_expire_dups_first
 
 # * Keybindings
+bindkey -v
+
 # for "leader" keybindings
 bindkey -a -r t
 
@@ -1236,6 +1233,53 @@ colors() (
 bindkey '\e[H'  beginning-of-line
 bindkey '\e[F'  end-of-line
 bindkey '\e[3~' delete-char
+
+# * P10k Initialization
+# based off Pure
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+POWERLEVEL9K_MODE='nerdfont-complete'
+
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
+	os_icon
+	background_jobs
+	dir                       # current directory
+	vcs                       # git status
+	anaconda
+	context                   # user@host
+	command_execution_time    # previous command duration
+	newline                   # \n
+	virtualenv                # python virtual environment
+	prompt_char               # prompt symbol
+)
+POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(ranger)
+
+# enable icons (e.g. for dir_writable)
+unset POWERLEVEL9K_VISUAL_IDENTIFIER_EXPANSION
+
+# show number of jobs if >1
+POWERLEVEL9K_BACKGROUND_JOBS_VERBOSE=true
+# get rid of extra space after background jobs icon
+POWERLEVEL9K_BACKGROUND_JOBS_ICON=
+
+# show lock for dir section if not writable
+POWERLEVEL9K_DIR_SHOW_WRITABLE=true
+
+# enable default branch icon (based on POWERLEVEL9K_MODE)
+unset POWERLEVEL9K_VCS_BRANCH_ICON
+
+# typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='➜'
+# typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='%%'
+typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='»'
+typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VICMD_CONTENT_EXPANSION=''
+
+# Finalize Powerlevel10k instant prompt. Should stay at the bottom of ~/.zshrc.
+if $NOCT_INSTANT_PROMPT \
+		&& (( ! ${+functions[p10k-instant-prompt-finalize]} )); then
+	p10k-instant-prompt-finalize
+fi
 
 # * End Profiling
 if [[ -n $NOCT_PROFILE_ZSH ]]; then
