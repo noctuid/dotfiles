@@ -1234,6 +1234,11 @@ bindkey '\e[H'  beginning-of-line
 bindkey '\e[F'  end-of-line
 bindkey '\e[3~' delete-char
 
+# * Local Config
+if [[ -f ~/.zsh/local.zsh ]];then
+	source ~/.zsh/local.zsh
+fi
+
 # * P10k Initialization
 # based off Pure
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
