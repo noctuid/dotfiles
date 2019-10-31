@@ -45,7 +45,6 @@ linux-headers
 linux-ck
 linux-ck-headers
 broadcom-wl-ck
-nvidia-ck
 # virtualbox-ck-host-modules-ivybridge
 # removed from repo-ck
 # virtualbox-ck-host-modules-skylake
