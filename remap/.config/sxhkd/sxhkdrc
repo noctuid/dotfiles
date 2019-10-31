@@ -55,8 +55,8 @@ Print
 	screenshot
 	# ~/bin/screenshot
 
-# mode_switch + super + p
-# 	screenshot select
+mode_switch + super + P
+	screenshot select
 
 mode_switch + super + w
 	screenshot current_window
