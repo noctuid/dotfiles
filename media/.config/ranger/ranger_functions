@@ -4,7 +4,7 @@
 # Usage: sanitize <file>
 sanitize() {
     sudo chmod -R u=rwX,go=rX "$@"
-    sudo chown -R ${USER}.users "$@"
+    sudo chown -R "$USER".users "$@"
 }
 
 make_thumbnail() {
@@ -40,10 +40,11 @@ imp() {
 	while getopts t:c:a opt
 	do
 		case $opt in
-			t) title=$optarg;;
-			c) caption=$optarg;;
-			# n) name=$optarg;;
+			t) title=$OPTARG;;
+			c) caption=$OPTARG;;
+			# n) name=$OPTARG;;
 			a) anon=true;;
+			*) return 1;;
 		esac
 	done
 	if $anon; then
