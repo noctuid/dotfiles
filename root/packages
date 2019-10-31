@@ -19,6 +19,10 @@ pkgfile
 pacman-contrib
 # aur helper
 yay aur
+# backup
+trizen aur
+aurutils aur
+
 pacnanny aur
 
 # * Nix
@@ -185,7 +189,8 @@ detox
 # * Editors
 gvim
 neovim
-vim-dein-git aur
+pynvim pip
+nvimpager-git aur
 vimpager-git aur
 emacs-git-shallow aur
 # evm gem
@@ -284,6 +289,7 @@ tzupdate aur
 
 # * Disk Utilities
 gparted
+gnome-disk-utility
 # automatic mounting
 udiskie
 # disk health monitoring
@@ -382,6 +388,7 @@ youtube-dl
 # youtube-dl-git aur
 # installed already for powerpill
 aria2
+megasync
 
 # * Typesetting
 texlive-bin
@@ -634,6 +641,11 @@ light
 # clipboard
 xsel
 xclip
+
+# hiding mouse
+# use after next release
+# unclutter
+# unclutter-xfixes-git aur
 
 # * Android
 # for adb
