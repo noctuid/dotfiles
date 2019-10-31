@@ -100,8 +100,7 @@ done <<< "$pathdirs"
 # systemctl --user --no-block start emacs
 # systemctl --user --no-block start mpd
 
-# TODO seems to make polybar take forever to startup
-# [[ ! -s ~/.mpd/pid ]] && mpd &
+[[ ! -s ~/.mpd/pid ]] && mpd &
 
 # start emacs daemon if it isn't running (ALTERNATE_EDITOR empty)
 # LC_CTYPE=ja_JP.UTF-8 emacsclient -e 0 &> /dev/null &
