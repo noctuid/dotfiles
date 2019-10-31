@@ -13,7 +13,7 @@ monitor_get_dimensions() { # monitor
 		| awk -F '+| ' "/^$monitor/ {gsub(\"primary \",\"\"); print \$3}"
 }
 
-monitor_fraction_of_width() { # percentage
+monitor_fraction_of_width() { # <decimal number>
 	fraction=$1
 	monitor_get_dimensions "$(monitor_get_primary)" \
 		| awk -F 'x' "{printf \"%.0f\n\", \$1*$fraction}"

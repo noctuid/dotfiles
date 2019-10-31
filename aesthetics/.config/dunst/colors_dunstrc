@@ -1,0 +1,21 @@
+# colors taken from http://twily.info/.config/dunst/dunstrc#view
+# IMPORTANT: colors have to be defined in quotation marks.
+# Otherwise the "#" and following would be interpreted as a comment.
+[frame]
+    width = 2
+    color = "#d0d293"
+
+[urgency_low]
+    background = "#26282B"
+    foreground = "#cecfd1"
+    timeout = 5
+
+[urgency_normal]
+    background = "#26282B"
+    foreground = "#cecfd1"
+    timeout = 5
+
+[urgency_critical]
+    background = "#26282B"
+    foreground = "#cecfd1"
+    timeout = 0

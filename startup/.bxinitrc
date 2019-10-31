@@ -122,7 +122,7 @@ wal -R
 redshift &
 
 # notifications
-dunst &
+dunstrun &
 
 # notifications when mpd song changes
 # https://github.com/vehk/mpdnotify works well with mpdcron also

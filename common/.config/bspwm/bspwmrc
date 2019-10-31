@@ -47,8 +47,7 @@ bspc desktop -f ^2 &
 rldbspc
 
 # * Panel
-xrestart polybar \
-		 polybar mine
+xrestart polybar mine
 
 # Local Variables:
 # eval: (rainbow-mode 1)

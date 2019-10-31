@@ -1,12 +1,53 @@
 #!/usr/bin/env bash
 # kill and (re)run a program for the current X session only
 
-identifier="$1"
-pidfile=/tmp/"$identifier"_"$DISPLAY".pid
+command=
+name=
+eval=false
+while getopts :c:en:N:-: opt
+do
+	case $opt in
+		c) command=$OPTARG;;
+		e) eval=true;;
+		n) name=$OPTARG;;
+		N) command=$OPTARG
+		   name=$OPTARG;;
+		*) echo "Illegal opt" ; exit 1;;
+	esac
+done
+shift "$((OPTIND-1))"
 
-if [[ -f "$pidfile" ]]; then
-	pkill --pidfile "$pidfile"
+if [[ -z $command ]]; then
+	command=$1
 fi
 
-"${@:2}" &
-echo $! > "$pidfile"
+if [[ -z $name ]]; then
+	name=$1
+fi
+
+pidfile=/tmp/"$name"_"$DISPLAY".pid
+
+if [[ -f "$pidfile" ]]; then
+	pkill --pidfile "$pidfile" 2> /dev/null
+fi
+
+
+blacklist=$(pgrep "$command")
+
+if $eval; then
+	eval "$@" &
+else
+	"$@" &
+fi
+
+final_pid=$!
+
+# $! is not right for xcape and dunst for example
+while read -r pid; do
+	if [[ ! $blacklist =~ (^|$'\n')"$pid"($|$'\n') ]]; then
+		final_pid=$pid
+		break
+	fi
+done < <(pgrep "$command")
+
+echo "$final_pid" > "$pidfile"

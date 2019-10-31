@@ -18,11 +18,7 @@ bspwm_set_wal_colors
 # requires steam restart
 wal_steam -w &
 
-# so don't overwrite default config in ~/dotfiles
-rm ~/.config/dunst/dunstrc
-ln -s ~/.cache/wal/dunstrc ~/.config/dunst/dunstrc
-xrestart dunst \
-		 dunst &
+dunstrun &
 
 # reload emacs color scheme
 emacsclient -a false -e t && emacsclient --eval '(noct:ewal)'

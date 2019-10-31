@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=SC1090
+source ~/bin/helpers/env.sh
+source ~/bin/helpers/padding.sh
+
+padding=$(padding_top)
+right_offset=$(padding_side)
+width=$(monitor_fraction_of_width 0.2)
+geometry="${width}x3-$right_offset+$padding"
+
+if [[ -f ~/.cache/wal/dunstrc ]]; then
+	cat ~/.config/dunst/dunstrc ~/.cache/wal/dunstrc > /tmp/dunstrc
+else
+	cat ~/.config/dunst/dunstrc ~/.config/dunst/colors_dunstrc > /tmp/dunstrc
+fi
+
+# dunst doesn't allow duplicate headings; use sed to replace placeholder width
+sed -i -e "s/width =.*/width= $BSPWM_BORDER/g" /tmp/dunstrc
+xrestart dunst -geometry "$geometry" -config /tmp/dunstrc

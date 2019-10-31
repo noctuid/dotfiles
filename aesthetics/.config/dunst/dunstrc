@@ -1,6 +1,7 @@
 # TODO clean this up
 # TODO make issue for conditional import so don't need entire file as template
 # https://github.com/dunst-project/dunst/commit/ce8fe45cbf81b351b6802c25563b60e418d271cf
+# see /usr/share/dunst/dunstrc for documentation
 [global]
     font = Fira Mono 8
     # Allow a small subset of html markup in notifications and formats:
@@ -122,10 +123,6 @@
     # Paths to default icons.
     icon_path = /usr/share/icons/Numix/16/status/:/usr/share/icons/Numix/16/devices/:/usr/share/icons/Numix/16/emotes/:/usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
 
-[frame]
-    width = 2
-    color = "#d0d293"
-
 [shortcuts]
     # Shortcuts are specified as [modifier+][modifier+]...key
     # Available modifiers are "ctrl", "mod1" (the alt-key), "mod2",
@@ -141,24 +138,6 @@
     history = ctrl+grave
     # Context menu.
     context = ctrl+period
-
-# colors taken from http://twily.info/.config/dunst/dunstrc#view
-[urgency_low]
-    # IMPORTANT: colors have to be defined in quotation marks.
-    # Otherwise the "#" and following would be interpreted as a comment.
-    background = "#26282B"
-    foreground = "#CECFD1"
-    timeout = 5
-
-[urgency_normal]
-    background = "#26282B"
-    foreground = "#CECFD1"
-    timeout = 5
-
-[urgency_critical]
-    background = "#26282B"
-    foreground = "#CECFD1"
-    timeout = 0
 
 # Every section that isn't one of the above is interpreted as a rules to
 # override settings for certain messages.
