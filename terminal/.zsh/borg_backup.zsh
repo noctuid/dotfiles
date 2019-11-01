@@ -26,6 +26,7 @@ confirm_do() {
 		return 1
 	fi
 	# NOTE read is different for zsh
+	# shellcheck disable=SC2162
 	if read -q REPLY; then
 		"$@"
 	else
@@ -43,6 +44,8 @@ convert_slashes() {
 
 # ** LUKS
 luks_backup_dir=~/ag-sys/backup/luks
+
+alias luks_defaults='cryptsetup --help'
 
 luks_header_backup_file() {
 	echo "$luks_backup_dir/$1_$(date +%Y.%m.%d)"_header.img
@@ -64,7 +67,9 @@ luks_create() {
 
 	# https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#2-setup
 	# eventually wiping will be implemented in cryptsetup directly
-	if ! sudo wipefs "$partition"; then
+	if sudo wipefs "$partition"; then
+		echo "Successfully wiped $partition."
+	else
 		echo "Failed to wipe $partition."
 		return 1
 	fi
@@ -109,14 +114,18 @@ luks_create() {
 
 	echo "Create an lvm volume group on $partition? (y/n)"
 	confirm_do echo || return 0
-	# deactivate current volume group so not created as part of
-	sudo vgchange -a n || return 1
 	if sudo cryptsetup open "$partition" luks_"$label" \
 			&& sudo vgcreate "$label"_group /dev/mapper/luks_"$label"
 	then
 		echo "New LUKS partition is mounted at /dev/mapper/luks_$label."
 		echo "New volume group is named ${label}_group."
 		echo 'Use lvcreate to create volumes.'
+		echo 'Example:'
+		echo '# lvcreate -l 100%FREE eightseagate_group -n backup'
+		echo '# mkfs.ext4 /dev/eightseagate_group/backup'
+		echo '# mount /dev/eightseagate_group/backup /path/to/mountpoint'
+		# shellcheck disable=SC2016
+		echo '# chown -R "$USER" /path/to/mountpoint'
 	else
 		echo 'Failed to create volume group.'
 	fi
@@ -137,7 +146,7 @@ mount_luks_lvm() {
 	fi
 	# TODO unfortunately neither of these block until the symlinks are created
 	sudo vgchange --activate y
-	# sudo lvchange --activate y "$label"_group 
+	# sudo lvchange --activate y "$label"_group
 	# horrible workaround for now
 	sleep 2
 	if mountpoint -q "$dir"; then
@@ -164,9 +173,18 @@ umount_luks_lvm() {
 alias mountbigseagate='mount_luks_lvm_backup bigseagate'
 alias umountbigseagate='umount_luks_lvm bigseagate'
 
-alias mountdatab="mount_luks_lvm cryptother database ~/database"
-# jus tunmount lvm only
-alias umountdatab='sudo umount /dev/cryptother_group/*'
+alias mounteightseagate='mount_luks_lvm_backup eightseagate'
+alias umounteightseagate='umount_luks_lvm eightseagate'
+
+# alias mountdatab="mount_luks_lvm cryptother database ~/database"
+mountdatab() {
+	if ! mountpoint -q ~/database; then
+		sudo mount /dev/cryptlinux_group/database ~/database
+	else
+		echo "$HOME/database is already a mountpoint. Not mounting again."
+	fi
+}
+alias umountdatab='sudo umount /dev/cryptlinux_group/database'
 
 # ** Borg
 # lz4 is the default
@@ -174,16 +192,21 @@ alias borg_bk='borg create -v --stats --progress --compression lz4'
 
 borg_prune() {
 	# - only delete archives made by the current host (probably will never be an
-	#	issue)
-	# - backups selected by rules for shorter time periods do not counts towards
-	#	those for larger time periods
-	# - keep everything within past 7 days; the last 4 weekly (latest each week)
-	#	backups (one could be more than 4 weeks old, for example, if there was a
-	#	week without backups), etc.
-	# TODO if size becomes an issue, lower monthly
+	#   issue)
+	# - backups selected by prior rules do not counts towards those for later
+	#   rules (e.g. if a backup is kept because of the 7d rule, it won't be
+	#   considered for the weekly rule; the weekly rule will start keeping
+	#   backups before the oldest backup kept by the 7d rule)
+	# - keep everything within 7 days before most recent snapshot; keep the last
+	#   4 weekly (latest each week with a backup) backups (one could be more
+	#   than 4 weeks old, for example, if there was a week without backups),
+	#   etc.
+	# - negative argument means to keep a backup for every time duration (here,
+	#   keep a backup from the end of every year)
+	# TODO if size becomes an issue, lower monthly and maybe yearly
 	local repo
 	repo="$1"
-	borg prune -v --list --prefix '{hostname}-' --keep-within 7d \
+	borg prune -v --list --prefix '{hostname}-' --keep-within=7d \
 		 --keep-weekly=4 --keep-monthly=24 --keep-yearly=-1 "$repo"
 }
 
@@ -211,6 +234,14 @@ backup_rsync() {
 		  --perms --times --group --owner --acls --xattrs \
 		  --update --prune-empty-dirs \
 		  --partial --whole-file --sparse "$@"
+}
+
+sudo_backup_rsync() {
+	sudo rsync --verbose --info=progress2 --human-readable --ignore-errors \
+		 --recursive --links --hard-links \
+		 --perms --times --group --owner --acls --xattrs \
+		 --update --prune-empty-dirs \
+		 --partial --whole-file --sparse "$@"
 }
 
 # can't pass options
@@ -288,10 +319,11 @@ borg_home() {
 	borg init --encryption=none "$backup_dir" 2> /dev/null \
 		&& cp "$backup_dir"/config "$(borg_config_backup_file "$backup_dir")"
 
-	if ! borg check -v "$backup_dir"; then
-		echo 'Repository corrupted or initialization failed.'
-		return 1
-	fi
+	# TODO takes forever
+	# if ! borg check -v "$backup_dir"; then
+	# 	echo 'Repository corrupted or initialization failed.'
+	# 	return 1
+	# fi
 
 	cd ~/ || return 1
 	if borg_bk --patterns-from=".zsh/borg_full.txt" \
@@ -302,6 +334,12 @@ borg_home() {
 		notify-send --icon=face-angry 'Home backup failed.'
 	fi
 }
+
+# * Online
+# TODO just use restic after compression and patterns merged
+# https://github.com/restic/restic/pull/2441
+# https://github.com/restic/restic/pull/2311
+# rclone -v sync ${REPO} b2:${BUCKET}
 
 # * PSP
 # vita
@@ -328,6 +366,12 @@ bigseagate() {
 	mountdatab || return 1
 	mountbigseagate || return 1
 	borg_home ~/backup_mount/bigseagate
+}
+
+eightseagate() {
+	mountdatab || return 1
+	mounteightseagate || return 1
+	borg_home ~/backup_mount/eightseagate
 }
 
 # * Remote Backup
