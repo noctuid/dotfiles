@@ -649,6 +649,10 @@ alias gadd="sudo gpasswd -a $USER"
 alias groupslist="groups $USER"
 
 # ** General/Random
+unalias run-help
+autoload -Uz run-help
+alias help='run-help'
+
 alias e="$EDITOR"
 
 alias stop_emacs='emacsclient --eval "(let (kill-emacs-hook) (kill-emacs))"'
