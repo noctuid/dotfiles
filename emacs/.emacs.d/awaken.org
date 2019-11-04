@@ -866,8 +866,10 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 #+end_src
 
 *** Mode Line
-I've been using my own modeline for a while but I'll probably switch to doom-modeline (still fast and looks much better).
+Default modeline if doom-modeline is not installed.
 #+begin_src emacs-lisp
+(column-number-mode)
+
 ;; http://emacs-fu.blogspot.com/2011/08/customizing-mode-line.html
 (gsetq-default mode-line-format
                (list
@@ -2351,6 +2353,45 @@ A helper library for inserting icons (used by other packages in my config).
 
 (general-add-hook 'evil-insert-state-entry-hook #'noct:absolute)
 (general-add-hook 'evil-insert-state-exit-hook #'noct:relative)
+#+end_src
+
+** Doom Modeline
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :init
+  (noct:after-gui
+    (doom-modeline-mode))
+  :config
+  (doom-modeline-def-segment iconic-emacs-modeline-starter
+    (list
+     ;; space on left (or - if term)
+     mode-line-front-space
+     ;; report multilingual input; e.g. U: for utf-8
+     mode-line-mule-info
+     ;; for emacsclient frame identification
+     mode-line-client
+     ;; ** if modified, -- if not, %% if RO, %- if RO and modified
+     mode-line-modified
+     ;; indicates a remote buffer
+     mode-line-remote
+     mode-line-frame-identification))
+
+  ;; replace modals section; not really a good alternative without defining a
+  ;; completely new modeline
+  (doom-modeline-def-segment modals
+    (doom-modeline-segment--iconic-emacs-modeline-starter))
+
+  (setq global-mode-string
+        (list
+         ;; current group
+         '(:eval (when (fboundp 'fg-mode-line-string)
+                   (fg-mode-line-string)))
+         ;; show if clocked in to a heading
+         '(:eval (when (and (bound-and-true-p org-mode-line-string)
+                            (not (string= org-mode-line-string "")))
+                   (concat "Clock: <"
+                           (string-trim-left org-mode-line-string)
+                           "> "))))))
 #+end_src
 
 ** Evil Visual Mark Mode
