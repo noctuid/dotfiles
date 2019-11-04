@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # TODO different border color for monocle?
 
+bspwm_is_restarting=false
+if [[ -f /tmp/bspwm-is-restarting ]]; then
+	bspwm_is_restarting=true
+	rm /tmp/bspwm-is-restarting
+fi
+
 # * Colors
 # ** Default
 bspc config presel_feedback_color "#b0fff2"
@@ -12,9 +18,13 @@ bspc config active_border_color "#555753"
 bspwm_set_wal_colors
 
 # * Environment Variables
-# update environment variables when reloading bspwm
-# shellcheck disable=SC1090
-source ~/bin/helpers/env.sh
+if $bspwm_is_restarting; then
+	# update environment variables when reloading bspwm (so can change things
+	# without restarting X); the new values will be in effect for polybar and
+	# sxhkd
+	# shellcheck disable=SC1090
+	source ~/bin/helpers/xenv.sh
+fi
 
 # * Settings
 # open second window on right
@@ -41,7 +51,10 @@ bspc config window_gap "$BSPWM_GAP"
 
 # * Destktops
 bspc monitor -d "一" "二" "三" "四" "五" "六" "七" "八" "九"
-bspc desktop -f ^2 &
+
+if ! $bspwm_is_restarting; then
+	bspc desktop -f ^2 &
+fi
 
 # * Window Rules and Hooks
 rldbspc

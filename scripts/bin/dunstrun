@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC1090
-source ~/bin/helpers/env.sh
-source ~/bin/helpers/padding.sh
+source ~/bin/helpers/monitor.sh
 
-padding=$(padding_top)
-right_offset=$(padding_side)
-width=$(monitor_fraction_of_width 0.2)
+padding=$TOP_PADDING
+right_offset=$BSPWM_GAP
+monitor_width=$(monitor_get_width)
+width=$(monitor_fraction_of 0.2 "$monitor_width")
 geometry="${width}x3-$right_offset+$padding"
 
 if [[ -f ~/.cache/wal/dunstrc ]]; then

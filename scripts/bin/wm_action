@@ -173,6 +173,7 @@ case $1 in
 		bspc node @/ -g hidden
 		;;
 	reload)
+		touch /tmp/bspwm-is-restarting
 		bspc wm --restart
 		;;
 	quit)

@@ -1,35 +1,47 @@
 monitor_get_primary() {
-	xrandr --listmonitors | awk '/0:/ {print $NF}'
+	xrandr --current | awk '/primary/ {print $1}'
 }
 
-monitor_get_geometry() { # monitor
-	xrandr --query \
-		| awk "/^$1/ {gsub(\"primary \",\"\"); print \$3}"
+monitor_get_geometry() { # [monitor]
+	if [[ -n $1 ]]; then
+		xrandr --current \
+			| awk "/^$1/ {gsub(\"primary \",\"\"); print \$3}"
+	else
+		xrandr --current \
+			| awk '/primary/ {print $4}'
+	fi
 }
 
-monitor_get_dimensions() { # monitor
-	monitor=$1
-	xrandr --query \
-		| awk -F '+| ' "/^$monitor/ {gsub(\"primary \",\"\"); print \$3}"
+monitor_get_dimensions() { # [monitor]
+	if [[ -n $1 ]]; then
+		xrandr --current \
+			| awk -F '+| ' "/^$1/ {gsub(\"primary \",\"\"); print \$3}"
+	else
+		xrandr --current \
+			| awk -F '+| ' '/primary/ {print $4}'
+	fi
 }
 
-monitor_fraction_of_width() { # <decimal number>
-	fraction=$1
-	monitor_get_dimensions "$(monitor_get_primary)" \
-		| awk -F 'x' "{printf \"%.0f\n\", \$1*$fraction}"
+monitor_get_width() { # [monitor]
+	local geometry
+	geometry=$(monitor_get_geometry "$1")
+	echo "${geometry%x*}"
+}
+
+monitor_fraction_of() { # <decimal number> <total>
+	# awk "BEGIN {printf(\"%.0f\", $1 * $2)}"
+	# slightly faster
+	echo "($1 * $2) / 1" | bc
 }
 
 monitor_is_hidpi() { # monitor
-	monitor=$1
-	if test -z "$monitor"; then
-		monitor=$(monitor_get_primary)
-	fi
-	width=$(monitor_get_dimensions "$monitor" \
-				| awk -F 'x' '{print $1}')
+	local geometry width
+	geometry=$(monitor_get_geometry "$1")
+	width=${geometry%x*}
 	# not perfect but sufficient
-	test "$width" -gt 3000
+	[[ $width -gt 3000 ]]
 }
 
 # Local Variables:
-# sh-shell: sh
+# sh-shell: bash
 # End:

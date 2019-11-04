@@ -3,9 +3,6 @@
 export XDG_MUSIC_DIR=$HOME/music
 export XDG_DOWNLOAD_DIR=$HOME/move
 
-# for bspwm reloading
-export BSPWM_STATE=/tmp/bspwm-state.json
-
 # many programs allow EDITOR to contain options, but some expect a path
 # e.g. with zsh '$EDITOR file' will fail (though 'eval $EDITOR file' will work)
 # a workaround for zsh is to put emacsclient -t "$@" in a script and use that
