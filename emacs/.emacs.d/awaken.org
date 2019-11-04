@@ -174,6 +174,10 @@ BODY (even on failure)."
   `(progn ,@body
           (general-def 'normal 'local "q" #'delete-frame)))
 
+(defun noct:bind-q-to-quit ()
+  "Bind q to `quit-window' in the current buffer."
+  (general-def 'normal 'local "q" #'quit-window))
+
 (defmacro noct:disable-global-mode (mode)
   "Return a function that disables a global minor mode for the current buffer.
 This works by adding to `after-change-major-mode-hook' locally to disable the
@@ -452,7 +456,10 @@ Principles:
              :host github
              :repo "noctuid/annalist.el"
              :local-repo "~/src/emacs/annalist")
-  :demand t)
+  :demand t
+  :config
+  (with-eval-after-load 'general
+    (general-add-hook 'annalist-describe-hook #'noct:bind-q-to-quit)))
 
 (use-package general
   :straight (general
@@ -515,7 +522,7 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
 (use-package evil
   :init
   (gsetq evil-overriding-maps nil
-         ;; evil-intercept-maps nil
+         evil-intercept-maps nil
          evil-insert-state-bindings nil
          ;; must be set before loading evil no matter what
          evil-want-keybinding nil
@@ -674,7 +681,7 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 
 ;; add back lost keys
 (general-def 'motion
-  "j" #'evil-forward-WORD-end
+  "j" #'evil-forward-word-end
   "gj" #'evil-backward-WORD-end
   "k" #'evil-ex-search-next
   "K" #'evil-ex-search-previous
@@ -816,6 +823,8 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 ;; bidirectional text)
 (gsetq-default bidi-display-reordering nil)
 
+;; NOTE it is pretty much never necessary to set these; Emacs sets them
+;; correctly based on platform already
 ;; (terminal-coding-system) already defaults to utf-8-unix (linux)
 ;; (set-terminal-coding-system 'utf-8)
 ;; (keyboard-coding-system) already defaults to utf-8-unix (linux)
@@ -1562,7 +1571,6 @@ TODO evil bindings stop working after wgrep finish edit
 *** Ivy Posframe
 #+begin_src emacs-lisp
 (use-package ivy-posframe
-  ;; NOTE won't function in terminal but can still always enable mode
   :demand t
   :config
   ;; this is in columns (i.e. character width) not pixels
@@ -1583,12 +1591,11 @@ TODO evil bindings stop working after wgrep finish edit
   (defun ivy-posframe-display-at-frame-top-center (str)
     (ivy-posframe--display str #'noct:posframe-poshandler-frame-top-center))
 
-  (custom-set-faces '(internal-border ((t :weight bold
-                                          :background "slate gray"))))
-
   (gsetq ivy-posframe-display-functions-alist
          '((t . ivy-posframe-display-at-frame-top-center)))
-  (ivy-posframe-mode))
+
+  (noct:after-gui
+    (ivy-posframe-mode)))
 #+end_src
 
 *** Ivy All the Icons
@@ -1909,6 +1916,7 @@ Globbing is used to find a matching file."
     "e" (noct:f "~/.emacs.d/awaken.org")
     "E" (noct:f "~/.emacs.d/lisp/.private.el.gpg")
     "g" (noct:f "~/ag-sys/else/gaming/games.org")
+    "h" (noct:f "~/ag-sys/else/medical_history.org")
     "i" (noct:f "~/ag-sys/else/interaction.org")
     "I" (noct:f "~/ag-sys/else/scrawl/ideas.org")
     "j" (noct:f "~/ag-sys/else/japanese/japanese.org")
@@ -1929,6 +1937,7 @@ Globbing is used to find a matching file."
     "w" (noct:f "~/ag-sys/else/workflow.org")
     "x" (noct:f "~/.bxinitrc")
     "X" (noct:f "/var/log/Xorg.0.log")
+    "X" (noct:f "~/.local/share/xorg/Xorg.0.log")
     "y" (noct:f "~/ag-sys/else/other/skill_toys/skill_toys.org")
     "z" (noct:f "~/.zshrc")
     "Z" (noct:f "~/.zsh_history")
@@ -1948,7 +1957,8 @@ Globbing is used to find a matching file."
        "," (noct:f "~/.emacs.d/init.el")
        "f" (noct:f "~/.emacs.d/awaken.org")
        "s" (noct:f "~/.emacs.d/unclean.org")
-       "t" (noct:f "~/.emacs.d/todo.org")))
+       "t" (noct:f "~/.emacs.d/todo.org")
+       "T" (noct:f "~/test-emacs/.emacs.d/init.el")))
     ;; "log"
     ("notes"
      (general-comma
@@ -2452,55 +2462,60 @@ Smartparens' version is unfortunately too slow.
 *** Pywal
 **** Ewal
 #+begin_src emacs-lisp
-;; default prevents changing `spacemacs-theme-custom-colors' later.. (currently
-;; using altered theme)
-(use-package spacemacs-theme)
+(use-package ewal)
 
-(use-package ewal
-  :straight (ewal :type git
-                  :host gitlab
-                  :repo "jjzmajic/ewal")
-  :init
-  (defun noct:ewal ()
-    "Set theme for the current pywal colors."
-    (interactive)
-    (ewal-get-emacs-evil-cursors-colors
-     :apply t
-     :force-reload t)
-    ;; create a theme with up-to-date colors
-    (setq spacemacs-theme-custom-colors (ewal-get-spacemacs-theme-colors :force-reload t)
-          spacemacs-theme-org-height nil)
-    (require 'spacemacs-dark-theme)
-    (create-spacemacs-theme 'dark 'spacemacs-dark)
-    ;; TODO why don't these work anymore
-    ;; (custom-theme-reset-faces
-    ;;  'spacemacs-dark
-    ;;  '(org-block nil)
-    ;;  '(org-block-begin-line nil)
-    ;;  '(org-block-end-line nil))
-    ;; (custom-theme-set-faces
-    ;;  'spacemacs-dark
-    ;;  ;; '(org-block ((t (:background nil))))
-    ;;  `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
-    ;;  `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
-    (custom-set-faces
-     `(org-block ((t (:background ,(ewal-get-color 'background)))))
-     `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
-     `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
+(use-package ewal-evil-cursors)
 
-    ;; TODO again, why doesn't this work?
-    ;; (custom-theme-set-faces
-    ;;  'spacemacs-dark
-    ;;  `(internal-border ((t (:weight bold
-    ;;                         :background ,(ewal-get-color 'foreground))))))
-    (custom-set-faces
-     `(internal-border ((t (:weight bold
-                            :background ,(ewal-get-color 'foreground))))))
+(use-package ewal-spacemacs-themes)
 
-    (load-theme 'spacemacs-dark t))
+(use-package ewal-doom-themes
+  :straight (ewal-doom-themes
+             :type git
+             :host gitlab
+             :repo "jjzmajic/ewal"
+             :files ("doom-themes/*.el")))
 
-  (when (ewal-load-ewal-colors)
-    (noct:ewal)))
+(defun noct:ewal-load-spacemacs-theme ()
+  "Load ewal's spacemacs theme with some adjustments."
+  (setq spacemacs-theme-org-height nil)
+  ;; TODO why don't these work anymore
+  ;; (custom-theme-reset-faces
+  ;;  'spacemacs-dark
+  ;;  '(org-block nil)
+  ;;  '(org-block-begin-line nil)
+  ;;  '(org-block-end-line nil))
+  ;; (custom-theme-set-faces
+  ;;  'spacemacs-dark
+  ;;  ;; '(org-block ((t (:background nil))))
+  ;;  `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
+  ;;  `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
+
+  (custom-set-faces
+   `(org-block ((t (:background ,(ewal-get-color 'background)))))
+   `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
+   `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
+
+  ;; TODO again, why doesn't this work?
+  ;; (custom-theme-set-faces
+  ;;  'spacemacs-dark
+  ;;  `(internal-border ((t (:weight bold
+  ;;                         :background ,(ewal-get-color 'foreground))))))
+
+  (load-theme 'ewal-spacemacs-modern t))
+
+(defun noct:ewal ()
+  "Set theme for the current pywal colors."
+  (interactive)
+  (ewal-evil-cursors-get-colors
+   :apply t)
+  ;; (noct:ewal-load-spacemacs-theme)
+  (custom-set-faces
+   `(internal-border ((t (:weight bold
+                          :background ,(ewal-get-color 'foreground))))))
+  (load-theme 'ewal-doom-one t))
+
+(when (ignore-errors (ewal-load-colors))
+  (noct:ewal))
 #+end_src
 
 **** Xresources
@@ -2516,7 +2531,7 @@ Smartparens' version is unfortunately too slow.
                             ;; ("8:00" . twilight-bright)
                             ;; ("20:00" . nord)
                             ("20:00" . gruvbox-dark-soft)))
-  (unless (bound-and-true-p ewal-extended-palette)
+  (unless (bound-and-true-p ewal-base-palette)
     (circadian-setup)))
 #+end_src
 
@@ -3654,6 +3669,22 @@ pressing \".\" before selecting the word. Otherwise, correct it."
         (ace-flyspell-correct-word)))))
 #+end_src
 
+** Flycheck Hunspell
+#+begin_src emacs-lisp
+(use-package flycheck-hunspell
+  :disabled t
+  :straight (flycheck-hunspell
+             :type git
+             :host github
+             :repo "leotaku/flycheck-hunspell")
+  :after flycheck
+  :demand t
+  :config
+  (cl-pushnew 'plain-hunspell-dynamic flycheck-checkers)
+  (gsetq ispell-really-hunspell t
+         ispell-dictionary "en_US"))
+#+end_src
+
 * Other Major Mode Configuration
 ** Alda
 #+begin_src emacs-lisp
@@ -4538,6 +4569,7 @@ Lisp function does not specify a special indentation."
   "Make indentation settings compliant with lispy's."
   (interactive)
   (setq-local lisp-indent-function #'common-lisp-indent-function)
+  ;; TODO this is bad for actual common lisp (and not buffer-local)
   (put 'if 'common-lisp-indent-function 2)
   (put 'defface 'common-lisp-indent-function 1)
   (put 'define-minor-mode 'common-lisp-indent-function 1)
@@ -4749,6 +4781,7 @@ https://frostming.com/2019/01-04/pipenv-poetry
 (use-package function-args)
 
 (use-package lpy
+  :disabled t
   :straight (lpy :type git :host github :repo "abo-abo/lpy")
   :ghook 'python-mode-hook
   :config
