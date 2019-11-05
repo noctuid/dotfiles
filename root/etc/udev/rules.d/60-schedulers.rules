@@ -1,0 +1,4 @@
+# use BFQ for everything
+# elevator=bfq no longer works after bfq was merged into linux
+# scsi_mod.use_blk_mq=1 is required in kernel parameters
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/scheduler}="bfq"
