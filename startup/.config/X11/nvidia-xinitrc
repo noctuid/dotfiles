@@ -10,7 +10,7 @@
 # this assumes no outputs are plugged in when starting X
 xrandr --output "$(xrandr --listmonitors | awk '/0:/ {print $NF}')" --primary
 
-./.xinitrc
+~/.xinitrc
 
 # vim: set ft=sh:
 # Local Variables:
