@@ -28,6 +28,9 @@ service_setup() {
 	systemctl disable NetworkManager
 	systemctl mask NetworkManager
 	systemctl enable connman
+	systemctl disable wpa_supplicant
+	systemctl mask wpa_supplicant
+	systemctl enable iwd
 	systemctl enable kwakd
 	systemctl enable ntpd
 	systemctl enable tzupdate

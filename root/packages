@@ -32,6 +32,7 @@ nix aur
 refind-efi
 
 # * Internet
+iwd
 connman
 # backup
 networkmanager
