@@ -2,7 +2,7 @@
 These are my dotfiles. If you are interested in keyboard-based programs (tui, cli, vim-inspired programs, emacs, etc.), keyboard ergonomics, Colemak, etc., this repo may be of some use. Most newer config files are consistently formatted (org-style headings/outline) and well-commented. However, the state of this repository is generally not up-to-date with my actual configuration, older config files may be a mess, and my actual configuration may have bugs, organization issues, or only work with a specific version of the relevant program (e.g. I've had alter my bspwm configuration for most updates), so I'd advise against copying anything without first testing it. I move any scripts that become significant/generally useful from my dotfiles into their own repos (e.g. [[https://github.com/noctuid/general.el][general.el]] and [[https://github.com/noctuid/tdrop][tdrop]]). That said, if you have any comments, questions, or suggestions regarding this repo, feel free to make an issue.
 
 ** Other Notes
-I have some notes on software related to aesthetics (e.g. compton and conky) [[./aesthetics/][here]]. [[./browsing/][Here]] are some notes on browser-related software (e.g. pentadactyl and vimperator). I'll eventually add my notes on vim, emacs, and text editing [[./emacs/.emacs.d/][here]] and my notes on keyboards, keyboard layouts, and keybindings/remappings [[./remap/][here]].
+I have some notes on software related to aesthetics (e.g. picom and conky) [[./aesthetics/][here]]. [[./browsing/][Here]] are some notes on browser-related software (e.g. pentadactyl and vimperator). I'll eventually add my notes on vim, emacs, and text editing [[./emacs/.emacs.d/][here]] and my notes on keyboards, keyboard layouts, and keybindings/remappings [[./remap/][here]].
 
 Also see [[http://noctuid.github.io/][my blog]] if you're interested.
 
@@ -166,7 +166,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | launcher                  | dmenu->bemenu->rofi                                        |
 | wallpaper setter          | everything->setroot                                        |
 | panel                     | lemonbar(-xft)->polybar                                    |
-| compositor                | compton                                                    |
+| compositor                | picom                                                      |
 | notifications             | dunst                                                      |
 | file manager              | ranger->(maybe eventually) dired/ranger.el                 |
 | mass renaming             | ranger's :bulkrename (and wdired)                          |

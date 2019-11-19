@@ -407,7 +407,7 @@ slimlock-git aur
 
 # * Compositing/Redshift
 redshift
-compton
+picom
 
 # * Notifications
 libnotify

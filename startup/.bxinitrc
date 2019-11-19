@@ -118,7 +118,7 @@ mpd-notification -m "${XDG_MUSIC_DIR:-$HOME/music}" &
 if [[ -z $IS_DE ]]; then
 	# will mess things up if run with a DE like gnome or cinnamon that already
 	# has a compositor
-	compton --daemon
+	picom --daemon
 fi
 
 # * Start WM/DE
