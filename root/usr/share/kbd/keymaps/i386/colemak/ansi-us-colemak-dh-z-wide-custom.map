@@ -25,15 +25,15 @@ keycode  12  =  minus         underscore   asciitilde       asciitilde     Contr
 keycode  13  =  equal         plus         multiply         division
 
 keycode  16  =  q             Q            adiaeresis       Adiaeresis     Control_q
-keycode  17  =  w             W            aring            Aring          Control_w
+keycode  17  =  w             W            Control_w        Aring          Control_w
 keycode  18  =  f             F            atilde           Atilde         Control_f
 keycode  19  =  p             P            oslash           Ooblique       Control_p
 keycode  20  =  b             B            asciitilde       asciitilde     Control_b
-keycode  21  =  bracketleft   braceleft    asciitilde       0x1002039      Escape
+keycode  21  =  bracketleft   braceleft    asciitilde       asciitilde     Escape
 keycode  22  =  j             J            asciitilde       asciitilde     Control_j
-keycode  23  =  l             L            asciitilde       asciitilde     Control_l
-keycode  24  =  u             U            uacute           Uacute         Control_u
-keycode  25  =  y             Y            udiaeresis       Udiaeresis     Control_y
+keycode  23  =  l             L            BackSpace        asciitilde     Control_l
+keycode  24  =  u             U            Home             Uacute         Control_u
+keycode  25  =  y             Y            End              Udiaeresis     Control_y
 keycode  26  =  semicolon     colon        odiaeresis       Odiaeresis
 keycode  27  =  apostrophe    quotedbl     otilde           Otilde
 keycode  43  =  backslash     bar          asciitilde       asciitilde     Control_backslash
@@ -43,12 +43,12 @@ keycode  31  =  r             R            dead_grave       asciitilde     Contr
 keycode  32  =  s             S            ssharp           asciitilde     Control_s
 keycode  33  =  t             T            asciitilde       asciitilde     Control_t
 keycode  34  =  g             G            asciitilde       asciitilde     Control_g
-keycode  35  =  Return        braceright   asciitilde       0x100203a      Control_bracketright
+keycode  35  =  Return        braceright   asciitilde       asciitilde      Control_bracketright
 keycode  36  =  k             K            asciitilde       asciitilde     Control_k
-keycode  37  =  n             N            ntilde           Ntilde         Control_n
-keycode  38  =  e             E            eacute           Eacute         Control_e
-keycode  39  =  i             I            iacute           Iacute         Control_i
-keycode  40  =  o             O            oacute           Oacute         Control_o
+keycode  37  =  n             N            Down             Ntilde         Control_n
+keycode  38  =  e             E            Up               Eacute         Control_e
+keycode  39  =  i             I            Right            Iacute         Control_i
+keycode  40  =  o             O            PageUp           Oacute         Control_o
 # replace enter with '
 keycode  28  =  apostrophe    quotedbl     otilde           Otilde
 
@@ -59,8 +59,8 @@ keycode  46  =  d             D            dead_diaeresis   asciitilde     Contr
 keycode  47  =  v             V            oe               OE             Control_v
 keycode  48  =  z             Z            ae               AE             Control_z
 keycode  49  =  slash         question     questiondown     asciitilde     Delete
-keycode  50  =  m             M            asciitilde       asciitilde     Control_m
-keycode  51  =  h             H            asciitilde       asciitilde     Control_h
+keycode  50  =  m             M            PageDown         asciitilde     Control_m
+keycode  51  =  h             H            Left             asciitilde     Control_h
 keycode  52  =  comma         less         dead_cedilla     asciitilde
 keycode  53  =  period        greater      asciitilde       asciitilde
 # make right shift /
@@ -68,8 +68,8 @@ keycode  54  =  slash         question     questiondown     asciitilde     Delet
 
 keycode  57  =  space         space        space            nobreakspace   nul
 
-! Remove this line if you want caps lock unmodified
-keycode  58 =    BackSpace     BackSpace        BackSpace         BackSpace
+! caps layer
+keycode  58 = AltGr
 
 keycode   1 = Escape
 keycode  14 = Delete
