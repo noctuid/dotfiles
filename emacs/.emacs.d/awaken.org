@@ -2391,7 +2391,14 @@ A helper library for inserting icons (used by other packages in my config).
                             (not (string= org-mode-line-string "")))
                    (concat "Clock: <"
                            (string-trim-left org-mode-line-string)
-                           "> "))))))
+                           "> ")))))
+
+  ;; https://github.com/seagle0128/doom-modeline/issues/271
+  (when (string-match "--with-x-toolkit=lucid" system-configuration-options)
+    (defun noct:doom-modeline--font-height (orig-fun &rest args)
+      (round (* 0.5 (apply orig-fun args))))
+    (general-add-advice 'doom-modeline--font-height
+                        :around #'noct:doom-modeline--font-height)))
 #+end_src
 
 ** Evil Visual Mark Mode
