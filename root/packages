@@ -482,6 +482,11 @@ setcolors-git aur
 # colorscheme generation/setup from wallpaper
 python-pywal
 python-wal-steam-git aur
+wpgtk-git aur
+# gtk theme used by wpgtk; icon theme isn't in aur (use wpg-install.sh)
+gtk-theme-flat-color-git aur
+# live reload gtk theme
+xsettingsd
 
 # * DNS
 # validating, recursive, caching resolver

@@ -2,7 +2,11 @@
 # wrapper script for setting wallpaper and updating pywal colors
 # this requires that the last argument be the file
 
+# TODO optionally auto adjust (-A); doesn't always look great and current config
+#      files don't all take advantage of different colors
+# TODO optionally shuffle colors
 # TODO some way to do light theme instead (may not use)
+#      -l pywal, -L wpg
 
 # * Set Wallpaper
 bgset "$@"
@@ -10,7 +14,12 @@ bgset "$@"
 # * Update Pywal Colors
 # handles terminals, polybar, xrdb
 # rofi reads its config when starting, so don't need to do anything extra
-wal -n -i "${@: -1}"
+
+# wal -n -i "${@: -1}"
+
+wallpaper=$(realpath "${@: -1}")
+wpg -a "$wallpaper"
+wpg -n -s "$wallpaper"
 
 # * Update Colors for Applications Pywal Doesn't
 bspwm_set_wal_colors
@@ -27,8 +36,6 @@ emacsclient -a false -e t && emacsclient --eval '(noct:ewal)'
 if pgrep -x qutebrowser; then
 	qutebrowser ':config-source ~/.cache/wal/qutebrowser_colors.py'
 fi
-
-# TODO firefox
 
 # TODO would be nice to change cursor color
 # https://github.com/dylanaraps/pywal/issues/197

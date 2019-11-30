@@ -7,16 +7,21 @@ xrestart -e -c bspc -n bspc_empty_desktop_subscribe \
 		 	   | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd"
 
 bspc rule -r '*'
+
 bspc rule -a Steam follow=false state=floating
 bspc rule -a Steam.exe follow=false state=floating
+
+bspc rule -a Wpg state=floating
+
 # https://github.com/baskerville/bspwm/issues/551
 bspc rule -a Emacs state=tiled
 bspc rule -a Pqiv state=tiled
 bspc rule -a Zathura state=tiled
+
 # https://github.com/baskerville/bspwm/issues/655
-bspc rule -a "LibreOffice" state=tiled
-bspc rule -a "libreoffice" state=tiled
-bspc rule -a "Soffice" state=tiled
+bspc rule -a LibreOffice state=tiled
+bspc rule -a libreoffice state=tiled
+bspc rule -a Soffice state=tiled
 
 # change border color depending on layout
 # previous_focused=$(bspc config focused_border_color)
