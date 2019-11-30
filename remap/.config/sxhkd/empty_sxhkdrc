@@ -5,7 +5,7 @@
 
 # launcher
 space
-	launcher
+	rofi -show run
 
 u
 	urxvt
