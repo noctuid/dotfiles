@@ -87,9 +87,6 @@ mode_switch + super + v
 mode_switch + super + V
 	LC_CTYPE=ja_JP.UTF-8 emacs --with-demoted-errors
 
-mode_switch + super + p
-	emacsclient -ce "(noct:with-q-to-exit (proced) (delete-other-windows))"
-
 mode_switch + super + b
 	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
 
@@ -103,12 +100,19 @@ mode_switch + super + k
 mode_switch + super + a
 	click left
 
-# ** Dropdowns
+# ** Terminals and Dropdowns
+mode_switch + super + Return
+	kitty
+
 mode_switch + super + s
 	dropdown -s dropdown kitty
 
 mode_switch + super + r
-	dropdown -n ranger -h 97% -f "zsh -c \"ranger --cmd='set preview_images_method kitty'; zsh -i\"" kitty
+	dropdown -n ranger -h 90% kitty \
+	         zsh -c "ranger --cmd='set preview_images_method kitty'; zsh -i"
+
+mode_switch + super + p
+	dropdown emacsclient -ce "(noct:with-q-to-exit (proced) (delete-other-windows))"
 
 # * Mouse
 button9
