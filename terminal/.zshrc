@@ -875,7 +875,7 @@ mpgo() {
 	fi
 	if [[ $clipboard == *youtube.com* ]]; then
 		mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$clipboard"
-	elif [[ $clipboard =~ ^http ]] || [[ -f $clipboard ]]; then
+	elif [[ $clipboard =~ ^http ]] || [[ -e $clipboard ]]; then
 		echo "$clipboard" > /tmp/mpv/last_link
 		# ytdl messes up direct links for some reason (slow)
 		mpv --no-ytdl --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$clipboard"
