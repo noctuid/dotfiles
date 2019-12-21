@@ -402,8 +402,9 @@ sxhkd
 # xchainkeys nix
 
 # * Screen locker
-xautolock
-slimlock-git aur
+xss-lock
+# wrapper around i3lock-color
+multilockscreen-git aur
 
 # * Compositing/Redshift
 redshift

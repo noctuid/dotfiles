@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# multilockscreen (i3lock-color) with pywal colors
+
+# shellcheck disable=SC1090
+source ~/.cache/wal/colors.sh
+# shellcheck disable=SC2154
+red=${color1#\#}ff
+# shellcheck disable=SC2154
+yellow=${color3#\#}ff
+# shellcheck disable=SC2154
+blue=${color4#\#}ff
+
+# --composite so it doesn't kill picom
+multilockscreen \
+	--lock dimblur -- \
+	--composite \
+	--keyhlcolor="$blue" \
+	--bshlcolor="$yellow" \
+	--insidewrongcolor="$red"

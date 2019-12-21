@@ -9,7 +9,12 @@
 #      -l pywal, -L wpg
 
 # * Set Wallpaper
-bgset "$@"
+bgset "$@" &
+
+wallpaper=$(realpath "${@: -1}")
+
+# cache for i3lock-color
+multilockscreen --update "$wallpaper" &
 
 # * Update Pywal Colors
 # handles terminals, polybar, xrdb
@@ -17,7 +22,6 @@ bgset "$@"
 
 # wal -n -i "${@: -1}"
 
-wallpaper=$(realpath "${@: -1}")
 wpg -a "$wallpaper"
 wpg -n -s "$wallpaper"
 

@@ -81,10 +81,6 @@ super + equal
 	wm_action gapc -4
 
 # ** Misc
-# lock
-super + L
-	slimlock
-
 # hide all windows
 KP_Add
 	wm_action hide_all

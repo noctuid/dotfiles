@@ -80,11 +80,11 @@ xsetroot -cursor_name left_ptr &
 # unclutter -idle 1 -b
 
 # * Screen
-# blank after 20 minutes of inactivity
+# blank/screen saver after 15 minutes of inactivity
 # see ../root/etc/X11/xorg.conf.d/my-xorg.conf
 
-# sleep after 25
-xautolock -time 25 -locker "pm-suspend" -detectsleep &
+# use lockscreen script as screen saver
+xss-lock lockscreen &
 
 # * Fonts
 # TODO remove all custom fonts or switch to ~/.local/share/fonts

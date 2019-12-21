@@ -156,7 +156,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | window manager            | everything->bspwm                                          |
 | hotkey daemon             | sxhkd and xchainkeys                                       |
 | remapping                 | xmodmap->klfc (to generate mainly XKB configs)             |
-| screen locker             | slimlock                                                   |
+| screen locker             | slimlock->i3lock-color+multilock                           |
 | text editor               | notepad++->gedit->sublime->vim->emacs (tried all vim alts) |
 | shell                     | bash->zsh (fish is fine too; eshell occasionally)          |
 | terminal multiplexor      | tmux                                                       |

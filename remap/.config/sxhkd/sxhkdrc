@@ -90,6 +90,9 @@ mode_switch + super + V
 mode_switch + super + b
 	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
 
+mode_switch + super + l
+	lockscreen
+
 # ** Clicks
 # TODO clicks don't work when modifier held
 mode_switch + super + k

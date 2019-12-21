@@ -39,7 +39,6 @@ service_setup() {
 	# enabled in fcron_setup
 	# systemctl enable fcron
 	systemctl enable ufw
-	systemctl enable slimlock@"$user"
 	systemctl enable resume@"$user"
 	# don't need immediately or frequently
 	# systemctl enable org.cups.cupsd

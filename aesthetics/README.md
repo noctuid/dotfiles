@@ -7,8 +7,6 @@ The conky theme is [charley166's lsd theme](http://charley166.deviantart.com/art
 
 My terminal colors can be found in my [termite config](../terminal/.config/termite/config) and in my [.Xresources](../terminal/.Xresources).
 
-See [.slimlock](./.slimlock) for my `slimlock` theme. I'm using slimlock without slim.
-
 ### Setting Wallpaper
 After having tried pretty much every wallpaper setter, I've settled with using [`setroot`](https://github.com/ttzhou/setroot). It has the equivalent of feh's `--bg-fill` option (fits an image to either the height or width in order to completely cover the screen without stretching) which `xsetroot`, `hsetroot`, and `imlibsetroot` all don't have (though you could write a wrapper for imlibsetroot if you wanted to). It's also not a full image viewer.
 
