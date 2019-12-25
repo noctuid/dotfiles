@@ -27,7 +27,10 @@ base_install() {
 	# with the base group, the first initramfs will be generated and installed
 	# to the new system's boot path
 	# use host's package cache
-	pacstrap -c -i "$mount" base base-devel
+	# include some packages from old base group including linux kernel
+	pacstrap -c -i "$mount" base base-devel \
+			 cryptsetup diffutils e2fsprogs less linux linux-firmware \
+			 logrotate lvm2 man-db man-pages texinfo vi which
 }
 
 # * Chroot
