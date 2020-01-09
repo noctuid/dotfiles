@@ -10,8 +10,10 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
 if monitor_is_hidpi; then
 	export MONITOR_IS_HIDPI=true
 
+	# NOTE not setting since now using Xft.dpi
 	# scale UI lements 2x
-	export GDK_SCALE=2
+	# export GDK_SCALE=2
+
 	# TODO this just messes things up for chromium and makes emacs tooltips too
 	# small; is there (stil?) a case where this actually prevents some issue
 	# prevents double scaling of of text according to archwiki

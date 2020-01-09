@@ -2,6 +2,8 @@
 # using separate file so can guarantee it's run with bash (normally is anyway
 # but it should work even if .xinitrc is initially run with dash)
 
+basedir="$(dirname "$(realpath "$0")")"
+
 # * Defaults
 # from default /etc/X11/xinit/xinitrc
 if [[ -d /etc/X11/xinit/xinitrc.d ]]; then
@@ -22,6 +24,10 @@ source ~/bin/helpers/xenv.sh
 # * HiDPI
 if [[ -n $MONITOR_IS_HIDPI ]]; then
 	xrandr --dpi 192
+	# "All of this is terrible please send help."
+	# https://github.com/glfw/glfw/commit/75294462b354d147aa5914c30e3005551cc04e4a
+	# https://github.com/kovidgoyal/kitty/issues/2181
+	xrdb -merge "$basedir"/.Xresources-highdpi
 else
 	# necessary with nvidia-xrun
 	xrandr --dpi 96
