@@ -3961,7 +3961,9 @@ Used for =*Warnings*= buffer, for example.
 ** Woman
 #+begin_src emacs-lisp
 (use-package woman
-  :general (general-s "w" #'woman))
+  :general (general-s "w" #'woman)
+  :init
+  (noct:handle-popup woman-mode))
 #+end_src
 
 ** Xmodmap
