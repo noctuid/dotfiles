@@ -4794,6 +4794,11 @@ TODO
 *** TODO HaRe
 *** TODO SHM
 *** TODO Hasktags
+** Lua
+#+begin_src emacs-lisp
+(use-package lua-mode)
+#+end_src
+
 ** Nix
 #+begin_src emacs-lisp
 (use-package nix-mode)

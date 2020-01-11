@@ -1,5 +1,5 @@
-# TODO:
-# - maybe don't show screenshot messages unless failure
+# - TODO try SSP https://wp.me/pbmz2r-21
+# - TODO put under .config
 
 # * Default Profile
 [default]
@@ -16,15 +16,22 @@ save-position-on-quit
 # the few users who cannot run them."
 # I have keybindings to switch between this and low-latency
 profile=gpu-hq
-# gpu-api=
-# see if this causes any issues with speed; default scaling for gpu-hq seems
-# fine though
-# scale=ewa_lanczossharp
-# cscale=ewa_lanczossharp
+
+# TODO vulkan (not working)
+# gpu-api=vulkan
+
+# https://github.com/mpv-player/mpv/wiki/Display-synchronization
 # prefer changing audio speed to dropping frames ("a slight change in audio
 # pitch is often less noticeable than dropped frames")
 video-sync=display-resample
+# also see xrandr.lua
 
+# *** Debanding
+# TODO ideal debanding values?
+# https://wp.me/P8JFE1-6r
+# https://wp.me/pbmz2r-1u
+
+# *** Hardware Decoding
 # "Hardware decoding is known to sometimes cause problems and as such it is
 # considered "usually a bad idea unless absolutely needed" by the developers.
 # For that reason and because it typically offers very similar performance to
@@ -39,19 +46,26 @@ video-sync=display-resample
 # first and then decompressed. In either case, video playback will still be
 # hardware accelerated via the video card."
 
+# from manpage:
+# In general, it's very strongly advised to avoid hardware decoding unless
+# absolutely necessary, i.e. if your CPU is insufficient to decode the file in
+# questions. If you run into any weird decoding issues, frame glitches or
+# discoloration, and you have --hwdec turned on, the first thing you should try
+# is disabling it.
+
 # hwdec=no # default
 
 # ** Screenshots
-# F is title with removed extension; if include some filenames cause errors
-# saving the screenshot
+# %F is title with removed extension; if include it, some filenames cause errors
+# when saving the screenshot
 screenshot-template=~/move/Screenshots/%tY.%tm.%td_%tH:%tM:%tS
 # jpeg is default
 screenshot-format=png
 
 # ** Subtitles
 # prefered audio/subtitle languages
-alang=jpn,jp,eng,en
-slang=eng,en
+alang=ja,jpn,jp,eng,en
+slang=eng,en,enUS
 # generally fixes subtitles not showing up at first after seeking
 demuxer-mkv-subtitle-preroll=yes
 # subtitle file will be loaded if contains media file name
@@ -59,21 +73,33 @@ sub-auto=fuzzy
 # scale the subtitles to the 3% of the window size with sub-scale-by-window=yes
 # sub-scale=3
 
-# ** Cache
-# enable cache for network streams only (default)
-cache=auto
-# don't pause when the cache is running low
-no-cache-pause
-# increase cache size to 100MB
-cache-default=100000
-# prefetch about 30 seconds audio/video
-# cache-secs=30
+# https://github.com/dya-tel/mpv-scripts
+# search all subdirectories for subtitles
+sub-file-paths=**
+
+# "Adjust subtitle timing is to remove minor gaps or overlaps
+# between subtitles (if the difference is smaller than 210
+# ms, the gap or overlap is removed)."
+sub-fix-timing=yes
+
+# "Apply Gaussian blur to image subtitles (default: 0). This can help to make
+# pixelated DVD/Vobsubs look nicer. A value other than 0 also switches to
+# software subtitle scaling. Might be slow."
+sub-gauss=1.0
+
+# "Convert image subtitles to grayscale. Can help to make yellow DVD/Vobsubs
+# look nicer."
+sub-gray=yes
 
 # ** OSD/OSC
+# to use thumbnail preview osc
+# osc=no
 script-opts=osc-layout=bottombar
 # smaller OSD border size
 osd-border-size=1
 # osd-font="Fira Sans"
+# decrease font size (especially import for scripts that display menu)
+osd-font-size=30
 
 # hidetimeout=
 # disable osd messages
@@ -83,6 +109,36 @@ osd-border-size=1
 
 # custom terminal seek bar
 term-osd-bar-chars = "──╼ ·"
+
+# * Best Quality
+# https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/#internal-scalers
+# can look at FPS and dropped frames with I; seems fine with current GPU
+[best]
+scale=ewa_lanczossharp
+dscale=mitchell
+cscale=spline36
+
+# * External Shaders
+# https://artoriuz.github.io/mpv_upscaling.html
+# https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/#external-shaders
+# can't really tell a difference for video
+# generally using fsrcnnx; like it the best for images
+
+[anime-4k]
+glsl-shaders="~~/shaders/Anime4K_Adaptive_v1.0RC2.glsl"
+cscale=mitchell
+dscale=mitchell
+
+[nnedi3]
+glsl-shaders="~~/shaders/nnedi3-nns64-win8x4.hook"
+dscale=mitchell
+cscale=spline64
+
+[fsrcnnx]
+# glsl-shaders="~~/shaders/FSRCNNX_x2_8-0-4-1.glsl"
+glsl-shaders="~~/shaders/FSRCNNX_x2_16-0-4-1.glsl"
+dscale=mitchell
+cscale=spline64
 
 # * Webm/Gif Settings
 [extension.webm]

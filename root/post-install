@@ -330,6 +330,127 @@ install_installers() {
 	install_package "roswell aur" "$user"
 }
 
+# * MPV Scripts
+# MEH
+
+# NOTE only works with official mpv, not mpv-git
+install_internal_mpv_script() { # name script_dir
+	name=$1
+	script_dir=$2
+	mkdir -p "$script_dir"
+	ln -sf /usr/share/mpv/scripts/"$name" "$script_dir"/
+}
+
+install_raw_mpv_script() { # url script_dir
+	url=$1
+	script_dir=$2
+	mkdir -p "$script_dir"
+	(cd "$script_dir" && curl -O -L -C - "$url")
+}
+
+install_mpv_script_from_release() { # url script_dir
+	url=$1
+	script_dir=$2
+	mkdir -p "$script_dir"
+	curl --silent "$url" | jq --raw-output '.assets[].browser_download_url' \
+		| while read -r asset; do
+		(cd "$script_dir" && curl -s -O -L -C - "$asset")
+	done
+}
+
+install_mpv_script() { # url clone_dir script_dir names
+	url=$1
+	clone_dir=$2
+	script_dir=$3
+	names=$4
+	if [[ -z $names ]]; then
+		names='.*\.lua'
+	fi
+	mkdir -p "$script_dir"
+	if [[ -z $clone_dir ]]; then
+		clone_dir=$(basename "$url" .git)
+	fi
+	clone_dir=$script_dir/$clone_dir
+	if [[ ! -d $clone_dir ]]; then
+		git -C "$script_dir" clone "$url" "$clone_dir"
+	fi
+	find "$clone_dir" -mindepth 1 -type f -regextype posix-extended \
+		 -regex "$names" \
+		 -exec ln -sf {} "$script_dir"/ \;
+	# if have scripts dir
+	# find "$clone_dir" -mindepth 2 -type d -iname 'scripts' \
+		# 	 -exec bash -c 'ln -sf $1/* $2' _ {} "$script_dir" \;
+}
+
+install_mpv_scripts() {
+	echo "Installing mpv scripts and shaders."
+	# Git repos
+	install_mpv_script \
+		https://github.com/rossy/mpv-repl \
+		"" \
+		"$uhome"/.config/mpv/scripts
+	install_mpv_script \
+		https://github.com/jgreco/mpv-youtube-quality \
+		"" \
+		"$uhome"/.config/mpv/scripts \
+		".*youtube-quality\.lua"
+	install_mpv_script \
+		https://github.com/Eisa01/mpv-scripts \
+		eisa-mpv-scripts \
+		"$uhome"/.config/mpv/scripts \
+		".*(SmartCopyPaste-[0-9.]*\.lua|UndoRedo.*\.lua)"
+	install_mpv_script \
+		https://github.com/jonniek/mpv-playlistmanager \
+		"" \
+		"$uhome"/.config/mpv/scripts \
+		".*(playlistmanager|titleresolver)\.lua"
+	install_mpv_script \
+		https://github.com/dya-tel/mpv-scripts dya-tel-mpv-scripts \
+		"$uhome"/.config/mpv/scripts \
+		".*(reload|fuzzydir)\.lua"
+
+	# From Releases
+	# not making multiple copies; already CPU intensive enough
+	# not really using
+	install_mpv_script_from_release \
+		https://api.github.com/repos/TheAMM/mpv_thumbnail_script/releases/latest \
+		"$uhome"/.config/mpv/scripts
+
+	# Gists
+	install_raw_mpv_script \
+		https://gist.githubusercontent.com/Hakkin/4f978a5c87c31f7fe3ae/raw/1d1daf22f0ec5f0219e4e72216e772828f5c8e4c/betterchapters.lua \
+		"$uhome"/.config/mpv/scripts
+	# script doesn't work (anymore?)
+	install_raw_mpv_script \
+		https://raw.githubusercontent.com/wiiaboo/mpv-scripts/master/audio-balance.lua \
+		"$uhome"/.config/mpv/scripts
+
+	# conditionally loading
+	nightedt_dir="$uhome"/.config/mpv/scripts/nightedt-mpv-scripts
+	if [[ ! -d $nightedt_dir ]]; then
+		git clone https://github.com/nightedt/mpv-scripts \
+			"$nightedt_dir"
+	fi
+
+	# Shaders
+	install_mpv_script_from_release \
+		https://api.github.com/repos/igv/FSRCNN-TensorFlow/releases/latest \
+		"$uhome"/.config/mpv/shaders
+	install_mpv_script \
+		https://github.com/bjin/mpv-prescalers \
+		"" \
+		"$uhome"/.config/mpv/shaders \
+		".*nnedi3-nns64-win8x4\.hook"
+	install_mpv_script \
+		https://github.com/bloc97/Anime4K \
+		"" \
+		"$uhome"/.config/mpv/shaders \
+		".*Anime4K_Adaptive_v1\.0RC2\.glsl"
+
+	# fix permissions
+	chown -R "$user":"$user" "$uhome"/.config/mpv/{scripts,shaders}
+}
+
 # * Salt
 setup_salt() {
 	pac_install salt
@@ -627,6 +748,7 @@ See $log and $failure_log for info after run."
 		update_user_groups || fail_echo "Failed to update user groups."
 		copy_root_config_files || fail_echo "Failed to copy root config files."
 		install_packages
+		install_mpv_scripts
 		configure_packages
 	fi
 
