@@ -1302,8 +1302,6 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   (company-tng-configure-default)
 
   (general-def company-active-map
-    "TAB" #'company-complete-common-or-cycle
-    [tab] #'company-complete-common-or-cycle
     ;; don't take over these keys
     "C-h" nil
     "C-w" nil))
