@@ -1382,6 +1382,7 @@ I haven't run into a case yet where I would need this but am leaving this placeh
 Looks nice and replaces =company-quickhelp= as well.
 #+begin_src emacs-lisp
 (use-package company-box
+  :disabled t
   :ghook 'company-mode-hook
   :diminish ""
   :config
