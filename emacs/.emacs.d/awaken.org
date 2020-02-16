@@ -531,6 +531,8 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
          evil-ex-search-persistent-highlight nil
          ;; Y like D
          evil-want-Y-yank-to-eol t)
+  ;; kill undo-tree (not yet a variable to disable)
+  (general-add-advice 'global-undo-tree-mode :override #'ignore)
   (evil-mode)
   :config
   ;; use `general-key-dispatch' for "c" (e.g. to bind cx to `evil-exchange')
@@ -2812,11 +2814,25 @@ Evilnc also has comment text objects, but they were fairly broken last time I tr
 
 ** Undo
 *** Undohist
-Make Emacs undo persistent
+Make Emacs undo persistent.
 #+begin_src emacs-lisp
 (use-package undohist
   :disabled t
   :init (undohist-initialize))
+#+end_src
+
+*** Undo Fu
+Linear undo while maintaining all history. Not as nice as being able to navigate a tree of undo history (which is sometimes useful), but it works.
+#+begin_src emacs-lisp
+(use-package undo-fu
+  :general
+  ('normal
+   "u" #'undo-fu-only-undo
+   "U" #'undo-fu-only-redo
+   "C-r" #'undo-fu-only-redo))
+
+(use-package undo-fu-session
+  :init (global-undo-fu-session-mode))
 #+end_src
 
 *** Undo Tree
@@ -2830,6 +2846,7 @@ Undo tree is a great package but is unmaintained and extremely buggy.
 ;; http://ergoemacs.org/emacs/emacs_undo_cult_problem.html
 ;; "Goddamn motherf�cking emacs undo."
 (use-package undo-tree
+  :disabled t
   :diminish " 🌴"
   :init (global-undo-tree-mode)
   :config
