@@ -2101,6 +2101,13 @@ I still need to work on my configuration for this. See [[https://github.com/cyru
 #+end_src
 
 * Buffer Management/Navigation
+** Ibuffer
+*** All the Icons Ibuffer
+#+begin_src emacs-lisp
+(use-package all-the-icons-ibuffer
+  :ghook ('ibuffer-mode-hook nil nil nil t))
+#+end_src
+
 ** Counsel/Swiper/Ivy
 It's a bit hard to decide how to organize counsel, ivy, and swiper since they're all intertwined. I previously had all counsel and ivy configuration together, but I've split them into multiple use-package expression and put the buffer/file related configuration here.
 
