@@ -619,6 +619,7 @@ phantomjs-bin aur
 racket
 
 # ** Bash/Shell Scripting
+bash-language-server
 shellcheck
 jq
 

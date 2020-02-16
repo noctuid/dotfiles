@@ -5054,6 +5054,11 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
 
 ** Shell Mode (Bash, Zsh)
 #+begin_src emacs-lisp
+(general-add-hook 'sh-mode-hook
+                  (lambda ()
+                    (when (eq sh-shell 'bash)
+                      (lsp))))
+
 (defun noct:sh-mode-setup ()
   (setq indent-tabs-mode t))
 
