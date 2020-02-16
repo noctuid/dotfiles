@@ -3591,20 +3591,13 @@ Meant to be called after `vdiff-buffers' with its args."
 * Writing/Prose/Input
 There is also artbollocks, which highlight certain weasel words like "very" and can give a readability score, but it's not nearly as sophisticated as other software like languagetool. I'm currently using vale over write-good and proselint, but I haven't tried anything extensively. I need to try proselint more (flycheck has integration with by default). Some of the warnings/errors these packages give can be annoying.
 
-** General
+** Clipetty
+Clipetty gives clipboard integration in terminal frames. Unlike xclip, it works fine even if enabled for a server that has both graphical and terminal frames. Currently only copying is supported (see [[https://github.com/spudlyo/clipetty/issues/10][issue 10]]).
 #+begin_src emacs-lisp
-(defun noct:insert-space ()
-  (interactive)
-  (insert " "))
-
-(defun noct:insert-sentence-end ()
-  (interactive)
-  (insert ".  "))
-
-(general-def 'insert text-mode-map
-  "SPC" (general-key-dispatch #'noct:insert-space
-          :timeout 0.2
-          "SPC" #'noct:insert-sentence-end))
+(use-package clipetty
+  :init
+  (general-after-tty
+    (global-clipetty-mode)))
 #+end_src
 
 ** Langtool
