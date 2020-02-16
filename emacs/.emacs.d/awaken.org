@@ -1572,17 +1572,17 @@ TODO evil bindings stop working after wgrep finish edit
 *** Ivy Posframe
 #+begin_src emacs-lisp
 (use-package ivy-posframe
-  :demand t
+  :after ivy
+  :init
+  (general-after-gui
+    (ivy-posframe-mode))
   :config
-  ;; this is in columns (i.e. character width) not pixels
-  (gsetq ivy-posframe-width 120)
-
-  (noct:after-gui
-    ;; 3 pixels on FHD
-    (gsetq ivy-posframe-border-width
-           (round (* 0.0015625 (noct:default-monitor-width)))))
+  ;; 3 pixels on FHD
+  (gsetq ivy-posframe-border-width
+         (round (* 0.0015625 (noct:default-monitor-width))))
 
   (defun noct:posframe-poshandler-frame-top-center (info)
+    "Handler to display posframe centered near the top."
     (cons (/ (- (plist-get info :parent-frame-width)
                 (plist-get info :posframe-width))
              2)
@@ -1593,10 +1593,7 @@ TODO evil bindings stop working after wgrep finish edit
     (ivy-posframe--display str #'noct:posframe-poshandler-frame-top-center))
 
   (gsetq ivy-posframe-display-functions-alist
-         '((t . ivy-posframe-display-at-frame-top-center)))
-
-  (noct:after-gui
-    (ivy-posframe-mode)))
+         '((t . ivy-posframe-display-at-frame-top-center))))
 #+end_src
 
 *** Ivy All the Icons
@@ -2314,18 +2311,38 @@ A helper library for inserting icons (used by other packages in my config).
     "Install fonts for all the icons if they have not been installed."
     ;; workaround for this functionality not being included by default
     ;; https://github.com/domtronn/all-the-icons.el/issues/120
-    (when (display-graphic-p)
-      (let ((font-dest (cl-case window-system
-                         (x  (concat (or (getenv "XDG_DATA_HOME")
-                                         (concat (getenv "HOME") "/.local/share"))
-                                     "/fonts/"))
-                         (mac (concat (getenv "HOME") "/Library/Fonts/" ))
-                         (ns (concat (getenv "HOME") "/Library/Fonts/" )))))
-        (unless (file-exists-p (concat font-dest "all-the-icons.ttf"))
-          (all-the-icons-install-fonts t)))))
-
-  (noct:after-gui
-    (all-the-icons-maybe-install-fonts)))
+    (when (and (display-graphic-p)
+               (not (find-font (font-spec :name "all-the-icons"))))
+      (all-the-icons-install-fonts t)))
+  (general-after-gui
+    (all-the-icons-maybe-install-fonts))
+  :config
+  ;; prevent breakage in tty
+  ;; https://github.com/hlissner/doom-emacs/blob/29e4719a7d3c9991445be63e755e0cb31fd4fd00/core/core-ui.el#L479
+  (cond
+   ((daemonp)
+    (defun doom--conditionally-disable-all-the-icons-in-tty-a
+        (orig-fn &rest args)
+      "Return a blank string in tty Emacs which doesn't support multiple fonts."
+      (if (or (not after-init-time) (display-multi-font-p))
+          (apply orig-fn args)
+        ""))
+    (general-add-advice
+     '(all-the-icons-octicon
+       all-the-icons-material
+       all-the-icons-faicon all-the-icons-fileicon
+       all-the-icons-wicon all-the-icons-alltheicon)
+     :around #'doom--conditionally-disable-all-the-icons-in-tty-a))
+   ((not (display-graphic-p))
+    (defun doom--disable-all-the-icons-in-tty-a (&rest _)
+      "Return a blank string for tty users."
+      "")
+    (general-add-advice
+     '(all-the-icons-octicon
+       all-the-icons-material
+       all-the-icons-faicon all-the-icons-fileicon
+       all-the-icons-wicon all-the-icons-alltheicon)
+     :override #'doom--disable-all-the-icons-in-tty-a))))
 #+end_src
 
 ** Builtin Line Numbers
@@ -2557,8 +2574,8 @@ Smartparens' version is unfortunately too slow.
    :apply t)
   ;; (noct:ewal-load-spacemacs-theme)
   (custom-set-faces
-   `(internal-border ((t (:weight bold
-                          :background ,(ewal-get-color 'foreground))))))
+   `(ivy-posframe-border ((t (:weight bold
+                              :background ,(ewal-get-color 'foreground))))))
   (load-theme 'ewal-doom-one t))
 
 (when (ignore-errors (ewal-load-colors))
