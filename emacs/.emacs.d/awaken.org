@@ -5082,6 +5082,15 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
 (use-package shen-mode)
 #+end_src
 
+** TXR
+#+begin_src emacs-lisp
+(use-package txr-mode
+  :straight (txr-mode
+             :type git
+             :host github
+             :repo "piotrklibert/txr-mode"))
+#+end_src
+
 * Miscellaneous
 ** Backup Each Save
 Backup files on every save to prevent ever losing work.
