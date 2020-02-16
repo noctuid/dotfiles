@@ -2637,13 +2637,12 @@ Soft wrap lines at =fill-column=.
   :diminish global-whitespace-mode
   :config
   (gsetq whitespace-style
-         (list 'face 'trailing 'space-before-tab::tab 'tab-mark 'newline-mark)
-         whitespace-display-mappings
-         '((newline-mark ?\n [?\¬ ?\n])
-           (tab-mark ?\t [?\! ?\t] [?\! ?\t])))
-  (general-add-hook 'prog-mode-hook (lambda ()
-                                      (setq-local whitespace-style
-                                                  (cons 'lines-tail whitespace-style)))))
+         (list 'face 'trailing 'space-before-tab::tab 'tabs))
+  (defun noct:add-lines-tail ()
+    "Add lines-tail to `whitespace-style' and refresh `whitespace-mode'."
+    (setq-local whitespace-style (cons 'lines-tail whitespace-style))
+    (whitespace-mode))
+  (general-add-hook 'prog-mode-hook #'noct:add-lines-tail))
 #+end_src
 
 * Text Editing/Interaction
