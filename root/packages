@@ -524,6 +524,9 @@ fzf
 fd-rs-git aur
 
 # * Programming
+# ** General
+editorconfig-core-c
+
 # ** Licensing
 harvey pip
 

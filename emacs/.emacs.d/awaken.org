@@ -509,6 +509,98 @@ Principles:
   :prefix ",")
 #+end_src
 
+** Doom Helpers
+*** Switch Buffer Hook
+#+begin_src emacs-lisp
+(defvar doom-switch-buffer-hook nil
+  "A list of hooks run after changing the current buffer.")
+
+(defvar doom-inhibit-switch-buffer-hooks nil
+  "Letvar for inhibiting `doom-switch-buffer-hook'. Do not set this directly.")
+
+(defun doom-run-switch-buffer-hooks-a (orig-fn buffer-or-name &rest args)
+  "Run hooks from `doom-switch-buffer-hook' in buffer if it has changed."
+  (let ((gc-cons-threshold most-positive-fixnum))
+    (if (or doom-inhibit-switch-buffer-hooks
+            (eq (current-buffer) (get-buffer buffer-or-name))
+            ;; norecord
+            (and (eq orig-fn #'switch-to-buffer) (car args)))
+        (apply orig-fn buffer-or-name args)
+      (let ((doom-inhibit-switch-buffer-hooks t))
+        (when-let (buffer (apply orig-fn buffer-or-name args))
+          (with-current-buffer (if (windowp buffer)
+                                   (window-buffer buffer)
+                                 buffer)
+            (run-hooks 'doom-switch-buffer-hook))
+          buffer)))))
+
+(defun doom-run-switch-to-next-prev-buffer-hooks-a (orig-fn &rest args)
+  "Run hooks from `doom-switch-buffer-hook' in new buffer."
+  (let ((gc-cons-threshold most-positive-fixnum))
+    (if doom-inhibit-switch-buffer-hooks
+        (apply orig-fn args)
+      (let ((doom-inhibit-switch-buffer-hooks t))
+        (when-let (buffer (apply orig-fn args))
+          (with-current-buffer buffer
+            (run-hooks 'doom-switch-buffer-hook))
+          buffer)))))
+
+(general-add-advice '(switch-to-buffer display-buffer)
+                    :around #'doom-run-switch-buffer-hooks-a)
+
+(general-add-advice '(switch-to-next-buffer switch-to-prev-buffer)
+                    :around #'doom-run-switch-to-next-prev-buffer-hooks-a)
+#+end_src
+
+*** Large File Handling
+#+begin_src emacs-lisp
+(defvar-local doom-large-file-p nil)
+(put 'doom-large-file-p 'permanent-local t)
+
+(defvar doom-large-file-size-alist '(("." . 1.0))
+  "An alist mapping regexps (like `auto-mode-alist') to filesize thresholds.
+
+If a file is opened and discovered to be larger than the threshold, Doom
+performs emergency optimizations to prevent Emacs from hanging, crashing or
+becoming unusably slow.
+
+These thresholds are in MB, and is used by `doom--optimize-for-large-files-a'.")
+
+(defvar doom-large-file-excluded-modes
+  '(so-long-mode
+    special-mode archive-mode tar-mode jka-compr
+    git-commit-mode image-mode doc-view-mode doc-view-mode-maybe
+    ebrowse-tree-mode pdf-view-mode tags-table-mode)
+  "Major modes that `doom-check-large-file-h' will ignore.")
+
+(defun doom--optimize-for-large-files-a (orig-fn &rest args)
+  "Set `doom-large-file-p' if the file is too large.
+
+Uses `doom-large-file-size-alist' to determine when a file is too large. When
+`doom-large-file-p' is set, other plugins can detect this and reduce their
+runtime costs (or disable themselves) to ensure the buffer is as fast as
+possible."
+  (if (setq doom-large-file-p
+            (and buffer-file-name
+                 (not doom-large-file-p)
+                 (file-exists-p buffer-file-name)
+                 (ignore-errors
+                   (> (nth 7 (file-attributes buffer-file-name))
+                      (* 1024 1024
+                         (assoc-default buffer-file-name
+                                        doom-large-file-size-alist
+                                        #'string-match-p))))))
+      (prog1 (apply orig-fn args)
+        (if (memq major-mode doom-large-file-excluded-modes)
+            (setq doom-large-file-p nil)
+          (when (fboundp 'so-long-minor-mode) ; in case the user disabled it
+            (so-long-minor-mode))
+          (message "Large file! Cutting corners to improve performance")))
+    (apply orig-fn args)))
+
+(general-add-advice 'after-find-file :around #'doom--optimize-for-large-files-a)
+#+end_src
+
 ** No Littering
 Consistently sets the paths for various configuration, history, temporary, etc. files created by Emacs packages (e.g. =savehist-file=).
 #+begin_src emacs-lisp
@@ -3793,14 +3885,10 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 
 ** Conf Mode
 #+begin_src emacs-lisp
-(defun noct:conf-unix-setup ()
-  (setq-local indent-tabs-mode t))
-
 (use-package conf-mode
   :straight nil
   :mode ("rc\\'" . conf-unix-mode)
   :gfhook
-  ('conf-unix-mode #'noct:conf-unix-setup)
   ('(conf-unix-mode-hook conf-xdefaults-mode-hook) #'outline-minor-mode))
 #+end_src
 
@@ -4017,6 +4105,120 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 
 * Programming
 ** General and Prog Mode
+*** Dtrt Indent
+#+begin_src emacs-lisp
+;; https://github.com/hlissner/doom-emacs/blob/01aadd8900be45f912124d9d815d8790f540d38c/core/core-editor.el#L339
+(defvar doom-detect-indentation-excluded-modes '(fundamental-mode so-long-mode)
+  "Major modes for which indentation should not be automatically detected.")
+
+(defvar-local doom-inhibit-indent-detection nil
+  "A buffer-local flag that indicates whether `dtrt-indent' should be used.
+This should be set by editorconfig if it successfully sets
+indent_style/indent_size.")
+
+(defun doom-detect-indentation-h ()
+  (unless (or (not after-init-time)
+              doom-inhibit-indent-detection
+              doom-large-file-p
+              (memq major-mode doom-detect-indentation-excluded-modes)
+              (member (substring (buffer-name) 0 1) '(" " "*")))
+    (dtrt-indent-mode +1)))
+
+(use-package dtrt-indent
+  :ghook ('(change-major-mode-after-body-hook read-only-mode-hook)
+          'doom-detect-indentation-h)
+  :config
+  ;; Enable dtrt-indent even in smie modes so that it can update `tab-width',
+  ;; `standard-indent' and `evil-shift-width' there as well.
+  (gsetq dtrt-indent-run-after-smie t)
+  ;; Reduced from the default of 5000 for slightly faster analysis
+  (gsetq dtrt-indent-max-lines 2000)
+
+  ;; always keep tab-width up-to-date
+  (push '(t tab-width) dtrt-indent-hook-generic-mapping-list)
+
+  (defvar dtrt-indent-run-after-smie)
+  (defun doom--fix-broken-smie-modes-a (orig-fn arg)
+    "Some smie modes throw errors when trying to guess their indentation.
+One example is `nim-mode'. This prevents them from leaving Emacs in a broken
+state."
+    (let ((dtrt-indent-run-after-smie dtrt-indent-run-after-smie))
+      (cl-letf* ((old-smie-config-guess (symbol-function 'smie-config-guess))
+                 (old-smie-config--guess
+                  (symbol-function 'symbol-config--guess))
+                 ((symbol-function 'symbol-config--guess)
+                  (lambda (beg end)
+                    (funcall old-smie-config--guess beg (min end 10000))))
+                 ((symbol-function 'smie-config-guess)
+                  (lambda ()
+                    (condition-case e (funcall old-smie-config-guess)
+                      (error (setq dtrt-indent-run-after-smie t)
+                             (message "[WARNING] Indent detection: %s"
+                                      (error-message-string e))
+                             (message "")))))) ; warn silently
+        (funcall orig-fn arg))))
+
+  (general-add-advice 'dtrt-indent-mode :around #'doom--fix-broken-smie-modes-a))
+#+end_src
+
+*** Editorconfig
+#+begin_src emacs-lisp
+;; https://github.com/hlissner/doom-emacs/blob/bb702acfd06bd55f7726678f0a24d7242fff1c2d/modules/tools/editorconfig/config.el#L55
+(defvar doom-+editorconfig-mode-alist
+  '((emacs-lisp-mode . "el")
+    (enh-ruby-mode   . "rb")
+    (js2-mode        . "js")
+    (perl-mode       . "pl")
+    (php-mode        . "php")
+    (python-mode     . "py")
+    (ruby-mode       . "rb")
+    (sh-mode         . "sh"))
+  "An alist mapping major modes to extensions.
+Used by `doom--editorconfig-smart-detection-a' to give editorconfig filetype
+hints.")
+
+(use-package editorconfig
+  :init
+  ;; won't work first time if use `find-file-hook'; advise `after-find-file'
+  ;; instead like doom does
+  (general-add-advice 'after-find-file
+                      :before (lambda (&rest _) (editorconfig-mode)) nil t)
+  :config
+  (defun doom--editorconfig--smart-detection-a (orig-fn)
+    "Retrieve the properties for the current file.
+If it doesn't have an extension, try to guess one."
+    (let ((buffer-file-name
+           (if (and (not (bound-and-true-p org-src-mode))
+                    (file-name-extension buffer-file-name))
+               buffer-file-name
+             (format "%s%s" (buffer-file-name (buffer-base-buffer))
+                     (if-let* ((ext (cdr (assq major-mode
+                                               doom-+editorconfig-mode-alist))))
+                         (concat "." ext)
+                       "")))))
+      (funcall orig-fn)))
+  ;; extend doom's configuration to also work for org src blocks
+  (general-add-advice 'editorconfig-apply
+                      :around #'doom--editorconfig--smart-detection-a)
+  (general-add-hook 'org-src-mode-hook #'editorconfig-apply)
+
+  (defun doom-+editorconfig-disable-ws-butler-maybe-h (props)
+    "Disable `ws-butler-mode' if trim_trailing_whitespace is true."
+    (when (and (equal (gethash 'trim_trailing_whitespace props) "true")
+               (bound-and-true-p ws-butler-mode))
+      (ws-butler-mode -1)))
+  (general-add-hook 'editorconfig-after-apply-functions
+                    #'doom-+editorconfig-disable-ws-butler-maybe-h)
+
+  (defun doom-+editorconfig-disable-indent-detection-h (props)
+    "Inhibit `dtrt-indent' if indent_style or indent_size is configured."
+    (when (or (gethash 'indent_style props)
+              (gethash 'indent_size props))
+      (setq doom-inhibit-indent-detection 'editorconfig)))
+  (general-add-hook 'editorconfig-after-apply-functions
+                    #'doom-+editorconfig-disable-indent-detection-h))
+#+end_src
+
 *** Prog Mode Setup
 #+begin_src emacs-lisp
 (general-add-hook 'after-save-hook
@@ -4986,9 +5188,6 @@ Currently requires running =make= for setup and is not on MELPA.
 ;; (use-package py-autopep8)
 
 (general-with-package 'python
-  ;; TODO consider ignoring this convention
-  (general-add-hook 'python-mode-hook (lambda () (setq-local fill-column 79)))
-
   ;;  https://gist.github.com/kracekumar/77d29c7410199fd2cda4
   (defun python-remove-unused-imports ()
     "Use Autoflake to remove unused function.
@@ -5071,16 +5270,11 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
 
 ** Shell Mode (Bash, Zsh)
 #+begin_src emacs-lisp
-(general-add-hook 'sh-mode-hook
-                  (lambda ()
-                    (when (eq sh-shell 'bash)
-                      (lsp))))
-
 (defun noct:sh-mode-setup ()
-  (setq indent-tabs-mode t))
+  (when (eq sh-shell 'bash)
+    (lsp)))
 
 (use-package sh-script
-  ;; TODO switch scripts to just spaces
   :gfhook ('sh-mode-hook #'noct:sh-mode-setup)
   :config
   (with-eval-after-load 'flycheck
