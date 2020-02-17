@@ -3925,7 +3925,9 @@ pressing \".\" before selecting the word. Otherwise, correct it."
     (when (eq major-mode 'compilation-mode)
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
 
-  (general-add-hook 'compilation-filter-hook #'my-colorize-compilation-buffer))
+  (general-add-hook 'compilation-filter-hook #'my-colorize-compilation-buffer)
+
+  (noct:handle-popup compilation-mode))
 #+end_src
 
 ** Crontab
@@ -4246,12 +4248,7 @@ If it doesn't have an extension, try to guess one."
 (general-with-package 'prog-mode
   (general-m prog-mode-map
     "c" #'compile
-    "g" #'first-error
-    ;; "n" #'next-error
-    ;; "e" #'previous-error
-    "n" #'flycheck-next-error
-    "e" #'flycheck-previous-error
-    "E" #'flycheck-list-errors))
+    "g" #'first-error))
 #+end_src
 
 *** Makefile Executor
@@ -4423,11 +4420,14 @@ This is a maintained fork of =electric-spacing=.
 
   (general-m
     "f" #'flycheck-list-errors
+    "E" #'flycheck-list-errors
     "n" #'flycheck-next-error
     "e" #'flycheck-previous-error)
 
   (general-def 'normal flycheck-error-list-mode
-    "q" #'quit-window))
+    "q" #'quit-window)
+
+  (noct:handle-popup flycheck-error-list-mode))
 #+end_src
 
 **** Flycheck Pos Tip
