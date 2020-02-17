@@ -2983,6 +2983,11 @@ Still experimental.
   (general-def '(inner outer) "p" nil)
   ;; temporary
   (general-def '(visual operator) "I" nil "A" nil)
+  ;; keep I and A with visual block selection
+  (general-def 'visual 'override
+    :predicate '(eq (evil-visual-type) 'block)
+    "I" #'evil-insert
+    "A" #'evil-append)
 
   (things-evil-define aggregated-comment things-aggregated-comment :last-key "p" :keys "c")
 
