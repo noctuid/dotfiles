@@ -4259,6 +4259,18 @@ If it doesn't have an extension, try to guess one."
     "m" #'makefile-executor-execute-project-target))
 #+end_src
 
+*** TODO Taskrunner
+=helm-make= doesn't work projectwide. Makefile-executor does but is slow. This seems promising, but it doesn't work at all for me.
+#+begin_src emacs-lisp
+;; https://github.com/emacs-taskrunner/ivy-taskrunner/issues/2
+(use-package taskrunner)
+(use-package ivy-taskrunner
+  :straight (ivy-taskrunner
+             :type git
+             :host github
+             :repo "emacs-taskrunner/ivy-taskrunner"))
+#+end_src
+
 *** Semantic
 Lispy, for example, relies on semantic.
 **** Bug Workaround
