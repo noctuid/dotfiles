@@ -4484,6 +4484,14 @@ Don't immediately jump to the symbol at the point."
 (use-package company-lsp)
 #+end_src
 
+*** Docker
+#+begin_src emacs-lisp
+(use-package docker
+  :config
+  (noct:handle-popup "*docker")
+  (noct:handle-popup "* docker"))
+#+end_src
+
 ** Lisps (General)
 *** Lispy
 TODO
