@@ -3650,7 +3650,7 @@ Restore previous settings after disabling `vdiff-mode'."
   ;; ~/src/forks/evil-collection/evil-collection-vdiff.el
   (evil-collection-init 'vdiff)
 
-  (general-def 'visual (vdiff-mode vdiff-32ay-mode)
+  (general-def 'visual (vdiff-mode vdiff-3way-mode)
     :definer 'minor-mode
     "p" #'vdiff-send-changes
     "o" #'vdiff-receive-changes)
