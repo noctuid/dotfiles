@@ -580,6 +580,7 @@ flake8
 python-pylint
 # type hint linting
 mypy
+pyls-mypy aur
 
 # *** Formatting
 # sort imports

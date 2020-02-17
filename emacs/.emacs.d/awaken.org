@@ -4465,6 +4465,7 @@ Don't immediately jump to the symbol at the point."
     )
 
   (general-m lsp-mode-map
+    "a" #'lsp-execute-code-action
     "i" #'lsp-goto-implementation
     "D" #'lsp-find-declaration
     ;; cross (x) references
@@ -4472,7 +4473,9 @@ Don't immediately jump to the symbol at the point."
     "r" #'lsp-rename
     "=" #'lsp-format-buffer))
 
-(use-package lsp-ui)
+(use-package lsp-ui
+  :config
+  (gsetq lsp-ui-sideline-ignore-duplicate t))
 
 (use-package company-lsp)
 #+end_src
@@ -5060,11 +5063,19 @@ https://frostming.com/2019/01-04/pipenv-poetry
 #+begin_src emacs-lisp
 (use-package python
   :init
-  (with-eval-after-load 'lsp-clients
-    (setq lsp-clients-python-settings
-          (plist-put lsp-clients-python-settings
-                     :plugins.pydocstyle.enabled t)))
-  :gfhook #'lsp)
+  ;; use flake8 instead of calling pyflakes, pycodestyle, and mccabe directly
+  (gsetq lsp-pyls-plugins-flake8-enabled t
+         ;; TODO does this do anyting with flake8 plugin enabled?
+         lsp-pyls-configuration-sources ["flake8"]
+         lsp-pyls-plugins-pyflakes-enabled nil
+         lsp-pyls-plugins-pydocstyle-enabled nil
+         lsp-pyls-plugins-mccabe-enabled nil)
+
+  (noct:handle-popup inferior-python-mode)
+  :gfhook #'lsp
+  :config
+  ;; enable mypy plugin (no existing setting)
+  (lsp-register-custom-settings '(("pyls.plugins.pyls_mypy.enabled" t t))))
 #+end_src
 
 *** LPY
@@ -5105,9 +5116,11 @@ https://frostming.com/2019/01-04/pipenv-poetry
 *** REPL
 #+begin_src emacs-lisp
 (general-with-package 'python
-  ;; use ipython
   (gsetq python-shell-interpreter "ipython"
-         python-shell-interpreter-args "-i")
+         python-shell-interpreter-args "-i --simple-prompt --no-color-info")
+  (when (eq system-type 'darwin)
+    ;; breaks things on OSX
+    (gsetq python-shell-completion-native-enable nil))
   ;; doesn't work
   ;; (gsetq python-shell-interpreter "ptpython"
   ;;        python-shell-interpreter-args "")
