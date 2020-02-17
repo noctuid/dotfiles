@@ -1304,9 +1304,16 @@ I've switched away from putting this function in a hook because it can be jarrin
 
 ** Text Scaling Keybindings
 #+begin_src emacs-lisp
-(general-def 'normal
-  "C-=" #'text-scale-increase
-  "C--" #'text-scale-decrease)
+;; (general-def 'normal
+;;   "C-=" #'text-scale-increase
+;;   "C--" #'text-scale-decrease)
+
+;; change text scale everywhere
+(use-package default-text-scale
+  :general
+  ('normal
+   "C-=" #'default-text-scale-increase
+   "C--" #'default-text-scale-decrease))
 #+end_src
 
 ** Toggle Settings Keybindings
