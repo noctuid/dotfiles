@@ -4422,7 +4422,9 @@ This is a maintained fork of =electric-spacing=.
 **** Flycheck Pos Tip
 #+begin_src emacs-lisp
 (use-package flycheck-pos-tip
-  :ghook 'flycheck-mode-hook)
+  :ghook 'flycheck-mode-hook
+  :config
+  (general-add-hook 'lsp-after-open-hook (lambda () (flycheck-pos-tip-mode -1))))
 #+end_src
 
 **** TODO Flycheck Posframe
