@@ -5700,12 +5700,22 @@ Show entire path for a directory (or chain of directories) that only contains a 
   :init
   ;; not defined, vterm checks boundp for some reason
   (defvar vterm-install t)
+  :gfhook
+  (nil (noct:disable-global-mode whitespace-mode))
   :config
   (gsetq vterm-shell "zsh"
          ;; increase scrollback
          vterm-max-scrollback 10000)
-  :gfhook
-  (nil (noct:disable-global-mode whitespace-mode)))
+
+  (general-def vterm-mode-map
+    "<prior>" nil
+    "<next>" nil))
+
+(defun noct-vterm-toggle-cd-create ()
+  "Run `vterm-toggle-cd' with `vterm-toggle-cd-auto-create-buffer' true."
+  (interactive)
+  (let ((vterm-toggle-cd-auto-create-buffer t))
+    (call-interactively #'vterm-toggle-cd)))
 
 (use-package vterm-toggle
   :straight (vterm-toggle
@@ -5713,13 +5723,59 @@ Show entire path for a directory (or chain of directories) that only contains a 
              :host github
              :repo "jixiuf/vterm-toggle")
   :general
-  ('normal 'override "T" #'vterm-toggle-cd)
+  ('normal 'override "T" #'noct-vterm-toggle-cd-create)
   :init
   (noct:handle-popup vterm-mode)
   :config
   (gsetq vterm-toggle-fullscreen-p nil
          vterm-toggle-evil-state-when-enter nil
-         vterm-toggle-evil-state-when-leave nil))
+         vterm-toggle-evil-state-when-leave nil
+         ;; don't create a new buffer if the prompt is not available
+         vterm-toggle-cd-auto-create-buffer nil)
+
+  (general-def 'visual vterm-mode-map
+    "<home>" #'evil-beginning-of-visual-line
+    "<end>" #'evil-end-of-visual-line)
+
+  (general-def 'insert vterm-mode-map
+    "C-r" #'vterm--self-insert
+    "C-c" #'vterm--self-insert)
+
+  ;; (cl-defun noct-tmux-select-or-create (number &optional (session "emacs"))
+  ;;     "Select the tmux window with NUMBER, cerating it if it does not exist.
+  ;; If SESSION is specified, act on that session instead of \"emacs\"."
+  ;;     (shell-command
+  ;;      (format "tmux select-window -t %1$s:%2$s || tmux new-window -t %1$s:%2$s"
+  ;;              session number)))
+
+  (defun noct-vterm-select-or-create (&optional number)
+    "Switch to a vterm buffer, cerating it if it does not exist.
+NUMBER specifies which vterm buffer to switch to. If nil, switch to the
+  \"vterm\" buffer."
+    (let ((name (if number
+                    (format "vterm<%s>" number)
+                  "vterm")))
+      (switch-to-buffer name)
+      ;; TODO
+      ;; (unless (eq major-mode 'vterm-mode)
+      ;;   (vterm name))
+      ))
+
+  (general-def 'normal vterm-mode-map
+    "ma" (general-l (noct-vterm-select-or-create))
+    "mr" (general-l (noct-vterm-select-or-create 2))
+    "ms" (general-l (noct-vterm-select-or-create 3))
+    "mt" (general-l (noct-vterm-select-or-create 4))
+    "md" (general-l (noct-vterm-select-or-create 5))
+    "mh" (general-l (noct-vterm-select-or-create 6))
+    "mn" (general-l (noct-vterm-select-or-create 7))
+    "me" (general-l (noct-vterm-select-or-create 8))
+    "mi" (general-l (noct-vterm-select-or-create 9))
+    "mo" (general-l (noct-vterm-select-or-create 10)))
+
+  (defun noct-vterm-setup ()
+    (toggle-truncate-lines 1))
+  (general-add-hook 'vterm-mode-hook #'noct-vterm-setup))
 #+end_src
 
 * Blog
