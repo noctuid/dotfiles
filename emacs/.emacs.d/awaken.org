@@ -5307,6 +5307,11 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
   :ghook 'python-mode-hook)
 #+end_src
 
+*** Requirements Mode
+#+begin_src emacs-lisp
+(use-package pip-requirements)
+#+end_src
+
 ** R (ESS)
 #+begin_src emacs-lisp
 ;; TODO having issues with this
