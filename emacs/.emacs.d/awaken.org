@@ -123,6 +123,12 @@ See https://www.reddit.com/r/emacs/comments/64xb3q/killthisbuffer_sometimes_just
   (let ((inhibit-message t))
     (apply oldfun args)))
 
+(defmacro noct-silently (&rest body)
+  (declare (indent 0) (debug t))
+  `(let ((inhibit-message t)
+         (save-silently t))
+     ,@body))
+
 (defun noct:inhibit-error-advice (oldfunc &rest args)
   "Run OLDFUN with ARGS, demoting errors to warnings.
 Unlike with `with-demoted-errors', do this regardless of the value of
@@ -1244,7 +1250,8 @@ Obvious ones:
   ;; save recent after 10 seconds of idle time
   ;; if not idle, save every 5 minutes
   (noct:run-at-active-interval (* 5 60) 10
-    (recentf-save-list)))
+    (noct-silently
+      (recentf-save-list))))
 #+end_src
 
 ** Save Place
