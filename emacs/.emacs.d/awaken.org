@@ -1188,6 +1188,12 @@ Obvious ones:
 
 (minibuffer-depth-indicate-mode)
 
+;; don't allow moving the cursor left into the minibuffer promt
+;; https://github.com/hlissner/doom-emacs/blob/01aadd8900be45f912124d9d815d8790f540d38c/core/core-ui.el#L368
+(gsetq minibuffer-prompt-properties
+       '(read-only t face minibuffer-prompt intangible t cursor-intangible t))
+(general-add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
 ;; https://www.reddit.com/r/emacs/comments/4d8gvt/how_do_i_automatically_close_the_minibuffer_after/
 (defun helper:kill-minibuffer ()
   "Exit the minibuffer if it is active."
