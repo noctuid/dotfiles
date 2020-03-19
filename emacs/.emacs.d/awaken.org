@@ -558,6 +558,49 @@ Principles:
                     :around #'doom-run-switch-to-next-prev-buffer-hooks-a)
 #+end_src
 
+*** Switch Window Hook
+#+begin_src emacs-lisp
+(defvar doom-switch-window-hook nil
+  "A list of hooks run after changing the focused windows.")
+
+(defvar doom-inhibit-switch-window-hooks nil
+  "Letvar for inhibiting `doom-switch-window-hook'. Do not set this directly.")
+
+(defvar doom--last-window nil)
+
+(defun doom-run-switch-window-hooks-h ()
+  (let ((gc-cons-threshold most-positive-fixnum))
+    (unless (or doom-inhibit-switch-window-hooks
+                (eq doom--last-window (selected-window))
+                (minibufferp))
+      (let ((doom-inhibit-switch-window-hooks t))
+        (run-hooks 'doom-switch-window-hook)
+        (setq doom--last-window (selected-window))))))
+
+(general-add-hook 'buffer-list-update-hook #'doom-run-switch-window-hooks-h)
+#+end_src
+
+*** Switch Frame Hook
+#+begin_src emacs-lisp
+(defvar doom-switch-frame-hook nil
+  "A list of hooks run after changing the focused frame.")
+
+(defvar doom-inhibit-switch-frame-hooks nil
+  "Letvar for inhibiting `doom-switch-frame-hook'. Do not set this directly.")
+
+(defvar doom--last-frame nil)
+
+(defun doom-run-switch-frame-hooks-h (&rest _)
+  (unless (or doom-inhibit-switch-frame-hooks
+              (eq doom--last-frame (selected-frame))
+              (frame-parameter nil 'parent-frame))
+    (let ((doom-inhibit-switch-frame-hooks t))
+      (run-hooks 'doom-switch-frame-hook)
+      (setq doom--last-frame (selected-frame)))))
+
+(general-add-hook 'focus-in-hook #'doom-run-switch-frame-hooks-h)
+#+end_src
+
 *** Large File Handling
 #+begin_src emacs-lisp
 (defvar-local doom-large-file-p nil)
@@ -921,7 +964,8 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 
 ;; I don't use bidirectional text; improves speed for long lines (even when no
 ;; bidirectional text)
-(gsetq-default bidi-display-reordering nil)
+(gsetq-default bidi-display-reordering 'left-to-right
+               bidi-paragraph-direction 'left-to-right)
 
 ;; NOTE it is pretty much never necessary to set these; Emacs sets them
 ;; correctly based on platform already
@@ -2107,7 +2151,7 @@ Globbing is used to find a matching file."
      (general-comma
        "," (noct:f "~/ag-sys/else/scrawl/prose/standards+procedure.org")
        "f" (noct:f "plot.org")
-       "s" (noct:f "draft_a.org")
+       "s" (noct:f "~/ag-sys/else/scrawl/prose/sat/misc.org")
        "t" (noct:f "~/ag-sys/else/scrawl/prose/pots/misc.org")
        "w" (noct:f "world.org")
        "m" (noct:f "misc.org")
@@ -2200,7 +2244,9 @@ See [[https://github.com/rnkn/olivetti/issues/12][here]].
 ** Winner
 #+begin_src emacs-lisp
 (use-package winner
-  :init (winner-mode)
+  :ghook 'doom-switch-window-hook
+  :init
+  (general-add-advice 'after-find-file :before (lambda (&rest _) #'winner-mode))
   :config
   (general-t
     "l" #'winner-undo
@@ -2360,7 +2406,8 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
     "p" #'projectile-find-file
     "P" #'projectile-find-file-in-known-projects
     "c" #'projectile-switch-project
-    "D" #'projectile-dired)
+    "D" #'projectile-dired
+    "RET" #'projectile-find-tag)
   (general-t
     "s" #'projectile-replace
     "t" #'projectile-test-project)
@@ -2581,8 +2628,11 @@ This will colorize something like #F3A111. I am enabling this locally in files w
 Smartparens' version is unfortunately too slow.
 #+begin_src emacs-lisp
 (use-package paren
-  :init (show-paren-mode)
-  :config (gsetq show-paren-delay 0))
+  :ghook ('doom-switch-buffer-hook #'show-paren-mode)
+  :init
+  (general-add-advice 'after-find-file
+                      :before (lambda (&rest _) (show-paren-mode)))
+  :config (gsetq show-paren-delay 0)) 
 #+end_src
 
 ** Stripe Buffer
@@ -3936,9 +3986,12 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 
 ** Compilation mode
 #+begin_src emacs-lisp
-(use-package compile
-  :straight nil
-  :config
+(general-with-package 'compile
+  (gsetq compilation-always-kill t
+         ;; save modified buffers without asking
+         compilation-ask-about-save nil
+         compilation-scroll-output 'first-error)
+
   ;; http://stackoverflow.com/a/20788581/2744245
   (defun my-colorize-compilation-buffer ()
     (require 'ansi-color)
@@ -4085,7 +4138,8 @@ Used for =*Warnings*= buffer, for example.
   :config
   (gsetq which-key-idle-delay 0.5
          which-key-side-window-location 'top
-         which-key-sort-order 'which-key-key-order-alpha
+         which-key-sort-order 'which-key-prefix-then-key-order
+         which-key-sort-uppercase-first nil
          which-key-max-display-columns 5)
 
   (general-def noct:toggle-map "w" #'which-key-mode)
@@ -4275,8 +4329,7 @@ If it doesn't have an extension, try to guess one."
 #+begin_src emacs-lisp
 (use-package makefile-executor
   :general
-  (general-m prog-mode-map
-    "m" #'makefile-executor-execute-project-target))
+  (general-t "m" #'makefile-executor-execute-project-target))
 #+end_src
 
 *** TODO Taskrunner
@@ -5653,6 +5706,8 @@ It also has overlapping functionality with a lot of packages. For example, I'm u
     "pp" #'ranger-paste
     "po" #'ranger-paste-over
     "p/" #'ranger-show-copy-contents
+    "pl" #'ranger-paste-as-symlink
+    "pL" #'ranger-paste-as-relative-symlink
 
     "du" #'ranger-show-size
 
