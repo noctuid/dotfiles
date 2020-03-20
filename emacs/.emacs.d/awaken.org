@@ -1221,7 +1221,10 @@ Obvious ones:
     "c" #'describe-coding-system
     "C" #'describe-key-briefly
     ;; [p]ackage
-    "p" #'apropos-library)
+    "p" #'apropos-library
+    ;; very useful (binding over `view-lossage')
+    "l" #'find-library
+    "h" #'find-function)
 
   (general-def 'normal help-mode-map
     "q" #'quit-window
@@ -3350,7 +3353,9 @@ This package is unfortunately unmaintained.
   (general-t
     "f" #'link-hint-open-link
     "F" #'link-hint-open-multiple-links)
-  ('normal "gf" #'link-hint-open-link-at-point)
+  ('normal "gf" #'link-hint-open-link-at-point))
+
+(use-package browse-url
   :config
   (gsetq browse-url-generic-program (getenv "BROWSER")
          browse-url-browser-function #'browse-url-generic))
@@ -3442,12 +3447,17 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
 (use-package magit
   :general
   ('normal 'override "S" #'magit-status)
+  ('normal dired-mode-map "C" #'magit-clone)
+  (general-spc
+    "g" #'magit-find-git-config-file
+    "G" #'magit-find-file)
   (general-t
     "ga" #'magit-stage-file
     "gr" #'magit-rebase-interactive
     "gl" #'magit-log-all
-    "gL" #'magit-log-buffer-file'
+    "gL" #'magit-log-buffer-file
     "gc" #'magit-commit
+    "gg" #'magit-clone
     "gp" #'magit-push
     ;; "gf" #'magit-file-dispatch
     "gf" #'magit-pull
@@ -3653,11 +3663,26 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
 *** Forge
 #+begin_src emacs-lisp
 (use-package forge
-  :after magit
-  :demand t
+  :general
+  (general-spc "'" #'forge-dispatch)
+  ;; TODO would be nice to replace git-link and browse-at-remote entirely
+  (general-t "g RET" #'forge-browse-remote)
+  :init
+  (general-with 'magit
+    (require 'forge))
   :config
   (general-def 'normal magit-mode-map
-    "'" #'forge-dispatch))
+    "'" #'forge-dispatch)
+  (general-def 'normal forge-topic-mode-map
+    "i" #'forge-create-post
+    "c" #'forge-edit-post)
+  (general-def 'normal forge-post-mode-map
+    "q" #'forge-post-cancel)
+
+  (general-with 'hardhat
+    (general-pushnew
+     (cons 'forge-post-mode (lambda (&rest _) t))
+     hardhat-buffer-editable-functions)))
 #+end_src
 
 ** TODO Git Commit Insert Issue
@@ -4049,8 +4074,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 (use-package helpful
   :general
   (general-def help-map
-    "h" #'helpful-at-point
-    "RET" #'helpful-visit-reference)
+    "RET" #'helpful-at-point)
   :init
   ;; using this instead of binding them directly allows taking an alternate action
   ;; without also opening the helpful buffer
@@ -5529,6 +5553,7 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
     "e" #'dired-previous-line
     "i" #'dired-find-alternate-file
     "f" #'counsel-find-file
+    "F" #'find-file
 
     ;; marking
     "TAB" #'dired-mark
