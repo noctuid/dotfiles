@@ -2433,10 +2433,21 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
 
 *** Counsel Projectile
 #+begin_src emacs-lisp
-;; TODO won't make remaps before first projectile command run
-;; either have to make the remaps manually or load this before
 (use-package counsel-projectile
-  :general (general-spc "/" #'noct:counsel-projectile-rg)
+  :general
+  (general-spc "/" #'noct:counsel-projectile-rg)
+  (general-spc "v" (general-l
+                     (cl-letf (((symbol-function 'projectile-prepend-project-name)
+                                (lambda (_)
+                                  (format "[%s] %s" (projectile-project-name)
+                                          "Magit status in project: "))))
+                       (counsel-projectile-switch-project
+                        #'counsel-projectile-switch-project-action-vc))))
+  :init
+  ;; TODO won't make remaps before first projectile command run
+  ;; either have to make the remaps manually or load this before
+  (general-with 'projectile
+    (require 'counsel-projectile))
   :config
   (gsetq counsel-projectile-sort-files t)
 
