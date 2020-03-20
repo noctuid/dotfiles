@@ -438,8 +438,13 @@ Install =use-package.el= with optional dependencies and configure:
 
 ;; diminish works fine with '(:eval); I don't think there are any advantages of
 ;; delight that I'm making use of
-;; TODO Consider removing entirely
+;; TODO remove entirely
 (use-package delight
+  :demand t)
+
+;; TODO switch entirely to blackout
+(use-package blackout
+  :straight (blackout :host github :repo "raxod502/blackout")
   :demand t)
 #+end_src
 
@@ -1471,6 +1476,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
 *** Company in Minibuffer
 #+begin_src emacs-lisp :tangle no
+;; https://github.com/company-mode/company-mode/issues/42
 ;; modified from https://gist.github.com/Bad-ptr/7787596
 ;; TODO needs work
 ;; also would be nice to setup `eval-expression' in childframe
@@ -1552,15 +1558,11 @@ Looks nice and replaces =company-quickhelp= as well.
          company-box-icons-alist 'company-box-icons-all-the-icons))
 #+end_src
 
-*** Company Childframe (child frame frontend)
+*** Company Posframe (child frame frontend)
 #+begin_src emacs-lisp
-(use-package company-childframe
-  :disabled t
+(use-package company-posframe
   :ghook 'company-mode-hook
-  :init
-  ;; prevent startup warning/message
-  (gsetq company-childframe-notification nil)
-  :diminish "")
+  :blackout t)
 #+end_src
 
 ** FLX
@@ -2545,10 +2547,14 @@ A helper library for inserting icons (used by other packages in my config).
 ;; (general-add-hook 'find-file-hook #'noct:maybe-disable-absolute-current)
 
 (defun noct:relative ()
-  (setq-local display-line-numbers 'visual))
+  "If `display-line-numbers' is non-nil, switch to relative numbering"
+  (when display-line-numbers
+    (setq-local display-line-numbers 'visual)))
 
 (defun noct:absolute ()
-  (setq-local display-line-numbers t))
+  "If `display-line-numbers' is non-nil, switch to absolute numbering"
+  (when display-line-numbers
+    (setq-local display-line-numbers t)))
 
 (general-add-hook 'evil-insert-state-entry-hook #'noct:absolute)
 (general-add-hook 'evil-insert-state-exit-hook #'noct:relative)
@@ -4783,9 +4789,7 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
     "(" #'lispyville-left
     ")" #'lispyville-right)
 
-  ;; unfortunately can't use functions with :diminish or :delight
-  ;; (delight 'lispyville-mode (lispyville-mode-line-string " 🍙" " 🍙") t)
-  (diminish 'lispyville-mode (lispyville-mode-line-string " 🍙" " 🍙")))
+  (blackout 'lispyville-mode (lispyville-mode-line-string " 🍙" " 🍙")))
 #+end_src
 
 *** Highlight Quoted
