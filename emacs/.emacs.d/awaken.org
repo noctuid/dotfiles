@@ -1879,6 +1879,10 @@ Select candidate as soon as there is only one (like the headlong package but for
     "g" #'counsel-git-log
     "s" #'counsel-git-stash)
 
+  ;; replace `company-search'
+  (general-def company-active-map
+    "C-s" #'counsel-company)
+
   :init (counsel-mode)
   :diminish "")
 #+end_src
