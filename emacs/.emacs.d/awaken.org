@@ -561,6 +561,27 @@ Principles:
 
 (general-add-advice '(switch-to-next-buffer switch-to-prev-buffer)
                     :around #'doom-run-switch-to-next-prev-buffer-hooks-a)
+
+;; (defun noct-call-after-buffer (fun)
+;;   (general-add-hook 'doom-switch-window-hook fun)
+;;   (general-add-advice 'after-find-file :before (lambda (&rest _) (funcall fun))))
+
+;; TODO remove after first time called
+(defmacro noct-after-buffer (&rest body)
+  "Run BODY once after switching buffers or when finding a file."
+  (declare (indent defun))
+  `(let ((fun (lambda (&rest _)
+                ,@body)))
+     (general-add-hook 'doom-switch-buffer-hook fun nil nil t)
+     (general-add-advice 'after-find-file :before fun nil t)))
+
+(defmacro noct-after-window (&rest body)
+  "Run BODY once after switching windows or when finding a file."
+  (declare (indent defun))
+  `(let ((fun (lambda (&rest _)
+                ,@body)))
+     (general-add-hook 'doom-switch-window-hook fun nil nil t)
+     (general-add-advice 'after-find-file :before fun nil t)))
 #+end_src
 
 *** Switch Window Hook
@@ -1304,6 +1325,13 @@ Obvious ones:
   (noct:run-at-active-interval (* 5 60) 10
     (noct-silently
       (recentf-save-list))))
+#+end_src
+
+** Reveal
+#+begin_src emacs-lisp
+(use-package reveal
+  :init
+  (noct-after-buffer (global-reveal-mode)))
 #+end_src
 
 ** Save Place
@@ -2253,9 +2281,8 @@ See [[https://github.com/rnkn/olivetti/issues/12][here]].
 ** Winner
 #+begin_src emacs-lisp
 (use-package winner
-  :ghook 'doom-switch-window-hook
   :init
-  (general-add-advice 'after-find-file :before (lambda (&rest _) #'winner-mode))
+  (noct-after-window (winner-mode))
   :config
   (general-t
     "l" #'winner-undo
@@ -2652,11 +2679,9 @@ This will colorize something like #F3A111. I am enabling this locally in files w
 Smartparens' version is unfortunately too slow.
 #+begin_src emacs-lisp
 (use-package paren
-  :ghook ('doom-switch-buffer-hook #'show-paren-mode)
   :init
-  (general-add-advice 'after-find-file
-                      :before (lambda (&rest _) (show-paren-mode)))
-  :config (gsetq show-paren-delay 0)) 
+  (noct-after-buffer (show-paren-mode))
+  :config (gsetq show-paren-delay 0))
 #+end_src
 
 ** Stripe Buffer
@@ -4313,8 +4338,7 @@ hints.")
   :init
   ;; won't work first time if use `find-file-hook'; advise `after-find-file'
   ;; instead like doom does
-  (general-add-advice 'after-find-file
-                      :before (lambda (&rest _) (editorconfig-mode)) nil t)
+  (noct-after-buffer (editorconfig-mode))
   :config
   (defun doom--editorconfig--smart-detection-a (orig-fn)
     "Retrieve the properties for the current file.
