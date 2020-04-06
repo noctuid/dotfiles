@@ -1416,6 +1416,7 @@ I've switched away from putting this function in a hook because it can be jarrin
   :prefix-map 'noct:toggle-map
   "d" #'toggle-debug-on-error
   "q" #'toggle-debug-on-quit
+  "R" #'toggle-read-only
   "A" #'auto-fill-mode
   "t" #'toggle-truncate-lines)
 
@@ -4446,9 +4447,7 @@ See [[https://github.com/company-mode/company-mode/issues/525][this issue]].
 (use-package rainbow-delimiters
   :ghook
   noct:lisp-mode-hooks
-  'c-mode-hook
-  :config
-  (general-def noct:toggle-map "r" #'rainbow-delimiters-mode))
+  'c-mode-hook)
 #+end_src
 
 **** Highlight Parentheses
