@@ -19,5 +19,5 @@ LABEL=boot /boot ext4 defaults,noatime,nodev,nosuid,noexec 0 2
 /dev/cryptlinux_group/home /home ext4 defaults,relatime,lazytime,nodev,nosuid 0 2
 /dev/cryptlinux_group/swap none swap defaults 0 0
 
-tmpfs /tmp tmpfs nodev,nosuid,size=4G 0 0
+tmpfs /tmp tmpfs nodev,nosuid,size=8G 0 0
 # nodev,nosuid are also defaults for /dev/shm
