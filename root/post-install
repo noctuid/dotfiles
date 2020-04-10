@@ -126,6 +126,9 @@ operations:
 	fix
 	   Same as calling with root-config and then boot.
 
+	emacs
+	   Install or update lucid Emacs master
+
 	<no option/ default>
 	   Do all setup."
 }
@@ -292,6 +295,18 @@ install_yay() {
 	fi
 }
 
+install_emacs_lucid() {
+	echo "Installing emacs-git with lucid toolkit."
+	if [[ -n $1 ]] || ! pacman -Q emacs-git &> /dev/null; then
+		cd /tmp \
+			&& yay --getpkgbuild emacs-git \
+			&& sudo chown "$user" emacs-git \
+			&& cd emacs-git \
+			&& sed --in-place --regexp-extended 's/(^LUCID=)/\1YES/' PKGBUILD \
+			&& sudo -u "$user" makepkg --noconfirm --syncdeps --install
+	fi
+}
+
 # * Home Config Setup
 home_config_setup() {
 	echo "Symlinking user config files."
@@ -412,9 +427,9 @@ install_mpv_scripts() {
 	# From Releases
 	# not making multiple copies; already CPU intensive enough
 	# not really using
-	install_mpv_script_from_release \
-		https://api.github.com/repos/TheAMM/mpv_thumbnail_script/releases/latest \
-		"$uhome"/.config/mpv/scripts
+	# install_mpv_script_from_release \
+		# 	https://api.github.com/repos/TheAMM/mpv_thumbnail_script/releases/latest \
+		# 	"$uhome"/.config/mpv/scripts
 
 	# Gists
 	install_raw_mpv_script \
@@ -668,6 +683,7 @@ install_packages() {
 		fi
 		install_package "$line"
 	done < "$basedir"/packages
+	install_emacs_lucid
 }
 
 # ** Program Configuration
@@ -783,5 +799,6 @@ case $1 in
 	fix) copy_root_config_files \
 			   && "$basedir"/extra-setup refind_setup \
 			   && "$basedir"/extra-setup initramfs_setup;;
+	emacs) install_emacs_lucid true;;
 	*) default 2>&1 | tee "$log";;
 esac

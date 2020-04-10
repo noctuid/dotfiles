@@ -192,7 +192,8 @@ neovim
 pynvim pip
 nvimpager-git aur
 vimpager-git aur
-emacs-git-shallow aur
+# see ./post-install script; using emacs lucid
+# emacs-git-shallow aur
 # evm gem
 cask aur
 emacs-25.1 evm
