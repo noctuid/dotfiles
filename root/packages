@@ -251,7 +251,7 @@ waifu2x-converter-cpp-cuda-git aur
 # * Torrents
 # includes trasmission-show (used for ranger)
 transmission-cli
-peerflix-git aur
+nodejs-webtorrent-cli aur
 
 # * PDF Viewer
 zathura

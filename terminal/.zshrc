@@ -873,18 +873,20 @@ mpgo() {
 	else
 		clipboard=$(xsel -b)
 	fi
+	local mpv_flags
+	mpv_flags=(
+		--screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
+		  --script=~/.config/mpv/scripts/nightedt-mpv-scripts/recent.lua
+		  "$@"
+	)
 	if [[ $clipboard == *youtube.com* ]]; then
-		mpv --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$clipboard"
-	elif [[ $clipboard =~ ^http ]] || [[ -e $clipboard ]]; then
+		echo "$clipboard" > /tmp/mpv/last_link
+		mpv "${mpv_flags[@]}" "$clipboard"
+	elif [[ $clipboard =~ ^http ]] || [[ -e $clipboard ]] \
+			 || [[ $clipboard =~ ^magnet ]]; then
 		echo "$clipboard" > /tmp/mpv/last_link
 		# ytdl messes up direct links for some reason (slow)
-		mpv --no-ytdl --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" "$clipboard"
-	elif [[ $clipboard =~ ^magnet ]]; then
-		echo "$clipboard" > /tmp/mpv/last_link
-		# --remove is broken
-		peerflix --remove --mpv "$clipboard" -- --no-ytdl \
-				 --screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS" \
-			; rm -rf /tmp/torrent-stream
+		mpv --no-ytdl "${mpv_flags[@]}" "$clipboard"
 	fi
 }
 

@@ -399,6 +399,10 @@ install_mpv_script() { # url clone_dir script_dir names
 
 install_mpv_scripts() {
 	echo "Installing mpv scripts and shaders."
+	# local
+	ln -sf "$uhome"/src/mpv/mpv-webtorrent-hook/webtorrent-hook.lua \
+		"$uhome"/.config/mpv/scripts/
+
 	# Git repos
 	install_mpv_script \
 		https://github.com/rossy/mpv-repl \
