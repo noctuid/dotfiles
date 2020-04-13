@@ -801,6 +801,9 @@ monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
 	add_bspwm_desktop=$3
 	primary=$(monitor_get_primary)
 
+	# do nothing if output doesn't exist
+	xrandr --current | grep --quiet "^$name"
+
 	# ensure disconnected (for when want to switch between mirroring and
 	# separate desktop)
 	monitor_disconnect "$name"
@@ -830,6 +833,10 @@ monitor_disconnect() ( # output_name
 	# exit if any command or any part of a pipe fails
 	set -e -o pipefail
 	name=$1
+
+	# do nothing if output doesn't exist
+	xrandr --current | grep --quiet "^$name"
+
 	xrandr --output "$name" --off
 	if bspc query --monitors --names | grep --quiet "^${name}$"; then
 		bspc monitor "$name" --remove
@@ -854,14 +861,24 @@ alias nvout='monitor_disconnect DP-1 true'
 
 # **** Thinkpad p52
 hdmiadd() {
-	monitor_connect HDMI-0 true 十
+	monitor_connect HDMI-1-1 true 十 \
+		|| monitor_connect HDMI-0 true 十
+	if [[ -n $1 ]]; then
+		ponymix set-profile output:hdmi-stereo
+	fi
+}
+
+hdmimirror() {
+	monitor_connect HDMI-1-1 \
+		|| monitor_connect HDMI-0
 	if [[ -n $1 ]]; then
 		ponymix set-profile output:hdmi-stereo
 	fi
 }
 
 hdmiout() {
-	monitor_disconnect HDMI-0 true
+	monitor_disconnect HDMI-1-1 true \
+		|| monitor_disconnect HDMI-0 true
 	ponymix set-profile output:analog-stereo
 }
 

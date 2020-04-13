@@ -29,7 +29,7 @@ if [[ -n $MONITOR_IS_HIDPI ]]; then
 	# https://github.com/kovidgoyal/kitty/issues/2181
 	xrdb -merge "$basedir"/.Xresources-highdpi
 else
-	# necessary with nvidia-xrun
+	# necessary with nvidia-xrun; TODO what about optimus-manager?
 	xrandr --dpi 96
 fi
 
@@ -126,6 +126,10 @@ if [[ -z $IS_DE ]]; then
 	# has a compositor
 	picom --daemon
 fi
+
+ # * Optimus Manager
+prime-offload
+xrandr --auto
 
 # * Start WM/DE
 session=${1:-bspwm}

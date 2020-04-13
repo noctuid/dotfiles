@@ -104,7 +104,7 @@ done <<< "$pathdirs"
 
 # * Startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then
-	nvidia-xrun
+	startx
 elif [[ $- == *i* ]]; then
 	# check if interactive
 	zsh

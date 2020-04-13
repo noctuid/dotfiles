@@ -79,7 +79,9 @@ steam-native-runtime
 intel-ucode
 
 # ** Nvidia
-nvidia-xrun aur
+optimus-manager-git aur
+# allows connecting to monitors without using GPU for everything
+xf86-video-nouveau
 bbswitch-dkms
 # intel-virtual-output
 xf86-video-intel
