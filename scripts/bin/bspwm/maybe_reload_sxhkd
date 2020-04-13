@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # switch bindings when changing from empty to occupied desktop and vice versa
 
-touch /tmp/bspwm-last-desktop-empty
-previously_empty=$(< /tmp/bspwm-last-desktop-empty)
+previously_empty_file=/tmp/bspwm-last-desktop-empty-"$DISPLAY"
+touch "$previously_empty_file"
+previously_empty=$(< "$previously_empty_file")
 # helps when rapid close then open (e.g. tdrop's auto_hide):
 sleep 0.2
 
@@ -12,16 +13,17 @@ if [[ -n "$nodes" ]]; then
 else
 	empty=true
 fi
-echo "$empty" > /tmp/bspwm-last-desktop-empty
+echo "$empty" > "$previously_empty_file"
 
 if [[ $previously_empty != "$empty" ]]; then
 	# since using mouse buttons as modifiers; see .sxhkdrc
 	xdotool keyup control shift alt super
 	# this is still hackish but probably less so than before
+    extra_config=~/.config/sxhkd/"$DISPLAY"_extra_sxhkdrc
 	if $empty; then
-		ln -f -s ~/.config/sxhkd/empty_sxhkdrc ~/.config/sxhkd/extra_sxhkdrc
+		ln -sf ~/.config/sxhkd/empty_sxhkdrc "$extra_config"
 	else
-		ln -f -s /dev/null ~/.config/sxhkd/extra_sxhkdrc
+		ln -sf /dev/null "$extra_config"
 	fi
 	# tell sxhkd to reload its config
 	pkill -USR1 -x sxhkd

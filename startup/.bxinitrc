@@ -61,7 +61,9 @@ fcitx -r
 # hotkey daemon
 # set SXHKD_EXTRA_CONFIGS to empty for DE/WMs with their own keybinding config
 if [[ ! -v $SXHKD_EXTRA_CONFIGS ]]; then
-	SXHKD_EXTRA_CONFIGS=(~/.config/sxhkd/wm_sxhkdrc ~/.config/sxhkd/extra_sxhkdrc)
+	extra_config=~/.config/sxhkd/"$DISPLAY"_extra_sxhkdrc
+	ln -sf ~/.config/sxhkd/empty_sxhkdrc "$extra_config"
+	SXHKD_EXTRA_CONFIGS=(~/.config/sxhkd/wm_sxhkdrc "$extra_config")
 fi
 sxhkd "${SXHKD_EXTRA_CONFIGS[@]}" &>> /tmp/sxhkd_"$DISPLAY".log &
 
