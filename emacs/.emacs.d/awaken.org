@@ -3166,6 +3166,8 @@ Still experimental.
 
   (things-evil-define line things-line :last-key "p" :keys "l")
 
+  (things-evil-define paragraph paragraph :last-key "p" :keys "g")
+
   (things-evil-define function things-function :last-key "p" :keys "f")
 
   (things-define-pair 'things-paren "(" ")")
