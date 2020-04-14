@@ -1802,7 +1802,11 @@ TODO evil bindings stop working after wgrep finish edit
     (ivy-posframe-mode))
   :config
   (gsetq ivy-posframe-border-width (noct-border-width)
-         )
+         ;; prevent resizing as type (may need to adjust these)
+         ivy-posframe-min-width 150
+         ivy-posframe-width 150
+         ivy-posframe-height 30
+         ivy-posframe-min-height 30)
 
   ;; TODO posframe currently requires this naming
   (defun ivy-posframe-display-at-frame-top-center (str)
