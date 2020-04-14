@@ -243,6 +243,7 @@ BODY is run periodically even if Emacs is actively being used."
                        t)))
 
 
+;; NOTE these only work for GUI
 (defun noct:default-monitor-geometry ()
   "Return geometry for the first monitor in `display-monitor-attributes-list'."
   (let* ((first-monitor (car (display-monitor-attributes-list))))
@@ -255,6 +256,18 @@ BODY is run periodically even if Emacs is actively being used."
 (defun noct:default-monitor-height ()
   "Return the height of the first monitor in `display-monitor-attributes-list'."
   (nth 3 (noct:default-monitor-geometry)))
+
+(defun noct-border-width ()
+  "Return the width to use for borders.
+Uses 3 pixels FHD and 6 on 4k."
+  (round (* 0.0015625 (noct:default-monitor-width))))
+
+(defun noct-posframe-poshandler-frame-near-top-center (info)
+  "Handler to display posframe centered near the top."
+  (cons (/ (- (plist-get info :parent-frame-width)
+              (plist-get info :posframe-width))
+           2)
+        (round (* 0.02 (noct:default-monitor-height)))))
 #+end_src
 
 *** TODO Popup Handling
@@ -356,7 +369,7 @@ Note that using =:after= will put the rest of the non-installation configuration
 As a workaround, I'm setting a default value for =:when= in ~use-package-defaults~ (that is used even when =:when= is explicitly specified) to prevent package configuration if package installation fails. See [[https://github.com/jwiegley/use-package/issues/693][issue 693]] and [[https://github.com/jwiegley/use-package/issues/739][issue 739]].
 
 Package configuration:
-- =:diminish= (or =:delight=) for diminishing minor mode names
+- =:blackout= (or =:diminish= or =:delight=) for diminishing minor mode names
 - =:gfhook= for any setup configuration for a mode (e.g. set local variables or enable/disable minor modes)
 - =:config= for any basic package setup; more complicated setup should go in specific subheadings
 
@@ -1594,13 +1607,28 @@ Looks nice and replaces =company-quickhelp= as well.
 #+begin_src emacs-lisp
 (use-package company-posframe
   :ghook 'company-mode-hook
-  :blackout t)
+  :blackout t
+  :config
+  (general-def noct:toggle-map "C" #'company-posframe-mode))
 #+end_src
 
 ** FLX
 Helper library for fuzzy matching/finding (used by ivy, for example).
 #+begin_src emacs-lisp
 (use-package flx)
+#+end_src
+
+** Frog Menu
+#+begin_src emacs-lisp
+(use-package frog-menu
+  :straight (:host github :repo "clemera/frog-menu"
+             :fork (:repo "noctuid/frog-menu"))
+  :config
+  (gsetq frog-menu-avy-keys avy-keys)
+  (general-after-gui
+    (gsetq frog-menu-posframe-border-width (noct-border-width)))
+  (setf (alist-get 'avy-posframe frog-menu-display-option-alist)
+        #'noct-posframe-poshandler-frame-near-top-center))
 #+end_src
 
 ** Helm
@@ -1773,20 +1801,14 @@ TODO evil bindings stop working after wgrep finish edit
   (general-after-gui
     (ivy-posframe-mode))
   :config
-  ;; 3 pixels on FHD
-  (gsetq ivy-posframe-border-width
-         (round (* 0.0015625 (noct:default-monitor-width))))
-
-  (defun noct:posframe-poshandler-frame-top-center (info)
-    "Handler to display posframe centered near the top."
-    (cons (/ (- (plist-get info :parent-frame-width)
-                (plist-get info :posframe-width))
-             2)
-          (round (* 0.02 (noct:default-monitor-height)))))
+  (gsetq ivy-posframe-border-width (noct-border-width)
+         )
 
   ;; TODO posframe currently requires this naming
   (defun ivy-posframe-display-at-frame-top-center (str)
-    (ivy-posframe--display str #'noct:posframe-poshandler-frame-top-center))
+    (ivy-posframe--display
+     str
+     #'noct-posframe-poshandler-frame-near-top-center))
 
   (gsetq ivy-posframe-display-functions-alist
          '((t . ivy-posframe-display-at-frame-top-center))))
@@ -2302,13 +2324,6 @@ I still need to work on my configuration for this. See [[https://github.com/cyru
 #+end_src
 
 * Buffer Management/Navigation
-** Ibuffer
-*** All the Icons Ibuffer
-#+begin_src emacs-lisp
-(use-package all-the-icons-ibuffer
-  :ghook ('ibuffer-mode-hook nil nil nil t))
-#+end_src
-
 ** Counsel/Swiper/Ivy
 It's a bit hard to decide how to organize counsel, ivy, and swiper since they're all intertwined. I previously had all counsel and ivy configuration together, but I've split them into multiple use-package expression and put the buffer/file related configuration here.
 
@@ -2432,6 +2447,38 @@ TODO: This should be in counsel (variable to jump to match end and evil integrat
   (evil-collection-init 'deadgrep))
 #+end_src
 
+** Frog Jump Buffer
+Useful if constantly switching between only a few files in a project. I don't normally don't keep more than 2 file-visiting buffers open in a frame, so this is useful if I'm working in a project where I'm switching between 5 or so buffers (more than that and it becomes less useful). It can be slightly faster (and definitely less keystrokes) than projectile.
+#+begin_src emacs-lisp
+(use-package frog-jump-buffer
+  :general (general-spc "g" #'frog-jump-buffer)
+  :config
+  (gsetq frog-jump-buffer-include-current-buffer nil
+         frog-jump-buffer-posframe-handler
+         #'noct-posframe-poshandler-frame-near-top-center))
+#+end_src
+** Ibuffer
+*** All the Icons Ibuffer
+#+begin_src emacs-lisp
+(use-package all-the-icons-ibuffer
+  :ghook ('ibuffer-mode-hook nil nil nil t))
+#+end_src
+
+** Outline/Outshine
+#+begin_src emacs-lisp
+(use-package outline
+  :ghook ('prog-mode-hook #'outline-minor-mode)
+  :diminish outline-minor-mode
+  :config
+  (general-def 'normal outline-minor-mode-map
+    "H" (general-l (outline-back-to-heading))
+    "SPC u" #'counsel-outline
+    "TAB" #'outline-toggle-children))
+
+(use-package outshine
+  :ghook 'outline-minor-mode-hook)
+#+end_src
+
 ** Projectile
 Alternatively, there is the builtin ~project-find-file~, [[https://github.com/technomancy/find-file-in-project][find-file-in-project]], and [[https://github.com/h/find-file-in-repository][find-file-in-repository]]. Projectile has a lot of other useful commands though.
 
@@ -2473,13 +2520,7 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
 (use-package counsel-projectile
   :general
   (general-spc "/" #'noct:counsel-projectile-rg)
-  (general-spc "v" (general-l
-                     (cl-letf (((symbol-function 'projectile-prepend-project-name)
-                                (lambda (_)
-                                  (format "[%s] %s" (projectile-project-name)
-                                          "Magit status in project: "))))
-                       (counsel-projectile-switch-project
-                        #'counsel-projectile-switch-project-action-vc))))
+  (general-spc "v" #'noct-counsel-projectile-vc)
   :init
   ;; TODO won't make remaps before first projectile command run
   ;; either have to make the remaps manually or load this before
@@ -2497,21 +2538,15 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
     (interactive)
     (if (projectile-project-p)
         (counsel-projectile-rg)
-      (counsel-rg))))
-#+end_src
+      (counsel-rg)))
 
-** Outline/Outshine
-#+begin_src emacs-lisp
-(use-package outline
-  :ghook ('prog-mode-hook #'outline-minor-mode)
-  :diminish outline-minor-mode
-  :config
-  (general-def 'normal outline-minor-mode-map
-    "SPC u" #'counsel-outline
-    "TAB" #'outline-toggle-children))
-
-(use-package outshine
-  :ghook 'outline-minor-mode-hook)
+  (defun noct-counsel-projectile-vc ()
+    (cl-letf (((symbol-function 'projectile-prepend-project-name)
+               (lambda (_)
+                 (format "[%s] %s" (projectile-project-name)
+                         "Magit status in project: "))))
+      (counsel-projectile-switch-project
+       #'counsel-projectile-switch-project-action-vc))))
 #+end_src
 
 * UI/Appearance/Visual/Formatting
@@ -3479,7 +3514,7 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
   ('normal 'override "S" #'magit-status)
   ('normal dired-mode-map "C" #'magit-clone)
   (general-spc
-    "g" #'magit-find-git-config-file
+    "." #'magit-find-git-config-file
     "G" #'magit-find-file)
   (general-t
     "ga" #'magit-stage-file
@@ -3899,39 +3934,23 @@ For typographical editing (not fixing typos).
   (fcitx-aggressive-setup))
 #+end_src
 
-** TODO Flyspell
-*** Setup
+** Spelling
+*** Flyspell
+**** Setup
 #+begin_src emacs-lisp
+;; it's way too slow; not using for highlighting
 (use-package flyspell
-  ;; TODO need to disable for large files and debug errors
-  :disabled t
-  :ghook
-  ('text-mode-hook #'turn-on-flyspell)
-  ;; will check just comments and strings
-  ('prog-mode-hook #'flyspell-prog-mode)
-  :diminish ""
+  ;; :ghook
+  ;; ('text-mode-hook #'turn-on-flyspell)
+  ;; ;; will check just comments and strings
+  ;; ('prog-mode-hook #'flyspell-prog-mode)
+  :general
+  ;; NOTE just use ace-flyspell unless already on word
+  ;; TODO needs ispell process (just remove once spell-fu gets mark correct
+  ;; function)
+  ('normal "zg" #'anon:flyspell-save-word)
+  :blackout t
   :config
-  ;; TODO try enchant
-  ;; http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
-  ;; TODO not using gsetq because `ispell-program-name' has a :set function that
-  ;; errors; `ispell-find-hunspell-dictionaries' is not working correctly
-  (setq ispell-program-name "hunspell"
-        ispell-local-dictionary "en_US"
-        ispell-local-dictionary-alist
-        '(("en_US"
-           "[[:alpha:]]"
-           "[^[:alpha:]]"
-           "[']"
-           nil
-           ("-d" "en_US")
-           nil
-           utf-8)))
-
-  ;; (gsetq ispell-program-name "aspell"
-  ;;        ispell-extra-args '("--sug-mode=ultra" "--lang=en_US"))
-
-  (general-def noct:toggle-map "s" #'flyspell-mode)
-
   ;; https://stackoverflow.com/questions/22107182/in-emacs-flyspell-mode-how-to-add-new-word-to-dictionary
   ;; slightly altered to accept a position
   (defun anon:flyspell-save-word (&optional pt)
@@ -3942,35 +3961,52 @@ For typographical editing (not fixing typos).
       (let ((word (flyspell-get-word)))
         (when (consp word)
           (flyspell-do-correct 'save nil (car word) pt
-                               (cadr word) (caddr word) pt)))))
-
-  (general-def 'normal
-    "z=" nil
-    ;; Note: just use ace-flyspell unless already on word
-    "zg" #'anon:flyspell-save-word))
-
+                               (cadr word) (caddr word) pt))))))
 #+end_src
 
-*** Flyspell Lazy
-This makes things less convenient (some cases where errors that aren't detected), but flyspell is usually the issue when I'm having input lag and profile. It would be awesome if flycheck got spellchecking support ([[https://github.com/flycheck/flycheck/issues/382][relevant issue]]) because flyspell is awful in comparison.
+**** Flyspell Lazy
+This makes things less convenient (there are some cases where mispellings aren't detected), but flyspell is usually the issue when I'm having input lag and profile.
 #+begin_src emacs-lisp
 (use-package flyspell-lazy
+  :disabled t
   :after flyspell
   :init (flyspell-lazy-mode 1))
 #+end_src
 
-*** Flyspell Correct
+**** Flyspell Visible Mode
+=flyspell-visible-mode= seems like it might be a better alternative to =flyspell-lazy=, but =spell-fu= is working well enough for me at the moment.
+
+**** Flyspell Correct
 #+begin_src emacs-lisp
 (use-package flyspell-correct
   :config
-  (gsetq flyspell-correct-interface #'flyspell-correct-ivy))
+  ;; https://github.com/clemera/frog-menu#example
+  (defun frog-menu-flyspell-correct (candidates word)
+    "Run `frog-menu-read' for the given CANDIDATES.
 
-;; TODO since not many completions and often use `ivy-avy' anyway, consider
-;; using https://github.com/clemera/frog-menu
-(use-package flyspell-correct-ivy)
+List of CANDIDATES is given by flyspell for the WORD.
+
+Return selected word to use as a replacement or a tuple
+of (command . word) to be used by `flyspell-do-correct'."
+    (let* ((corrects (if flyspell-sort-corrections
+                         (sort candidates 'string<)
+                       candidates))
+           (actions `(("."   "Save word"         (save    . ,word))
+                      ("C-a" "Accept (session)"  (session . ,word))
+                      ("C-b" "Accept (buffer)"   (buffer  . ,word))
+                      ("C-c" "Skip"              (skip    . ,word))))
+           (prompt   (format "Dictionary: [%s]"  (or ispell-local-dictionary
+                                                     ispell-dictionary
+                                                     "default")))
+           (res      (frog-menu-read prompt corrects actions)))
+      (unless res
+        (error "Quit"))
+      res))
+
+  (gsetq flyspell-correct-interface #'frog-menu-flyspell-correct))
 #+end_src
 
-*** Ace Flyspell
+**** Ace Flyspell
 #+begin_src emacs-lisp
 (use-package ace-flyspell
   :general (general-r "s" #'noct:flyspell-dwim)
@@ -3979,8 +4015,8 @@ This makes things less convenient (some cases where errors that aren't detected)
 
   (defun noct:flyspell-dwim (arg)
     "Correct or save a word.
-If there is a mispelled word at point, correct it. With a prefix ARG, save the
-word in the dictionary. Otherise, select a mispelled word using avy. Save when
+If there is a misspelled word at point, correct it. With a prefix ARG, save the
+word in the dictionary. Otherwise, select a misspelled word using avy. Save when
 pressing \".\" before selecting the word. Otherwise, correct it."
     (interactive "P")
     (let ((avy-dispatch-alist '((?\. . anon:flyspell-save-word))))
@@ -3990,11 +4026,12 @@ pressing \".\" before selecting the word. Otherwise, correct it."
           (if arg
               (anon:flyspell-save-word)
             (funcall ace-flyspell-handler))
-        ;; doesn't have an autolaod
+        ;; doesn't have an autoload
         (ace-flyspell-correct-word)))))
 #+end_src
 
-** Flycheck Hunspell
+*** Flycheck Aspell
+*** Flycheck Hunspell
 #+begin_src emacs-lisp
 (use-package flycheck-hunspell
   :disabled t
@@ -4008,6 +4045,83 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   (cl-pushnew 'plain-hunspell-dynamic flycheck-checkers)
   (gsetq ispell-really-hunspell t
          ispell-dictionary "en_US"))
+#+end_src
+
+*** Ispell
+#+begin_src emacs-lisp
+(use-package ispell
+  :config
+  ;; TODO try enchant
+
+  ;; http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
+  ;; https://blog.binchen.org/posts/how-to-spell-check-functionvariable-in-emacs.html
+  ;; https://blog.binchen.org/posts/aspell-0-60-8-will-have-direct-support-for-camelcase-words.html
+  ;; https://battlepenguin.com/tech/aspell-and-hunspell-a-tale-of-two-spell-checkers/
+  ;; Y
+
+  ;; TODO not using gsetq because `ispell-program-name' has a :set function that
+  ;; errors; `ispell-find-hunspell-dictionaries' is not working correctly
+  (setq ispell-program-name "aspell"
+        ispell-local-dictionary "en_US"
+        ispell-local-dictionary-alist
+        '(("en_US"
+           "[[:alpha:]]"
+           "[^[:alpha:]]"
+           "[']"
+           nil
+           ("-d" "en_US")
+           nil
+           utf-8)))
+
+  ;; https://old.reddit.com/r/emacs/comments/fxs92h/spell_checkers_in_emacs_in_2020/
+  ;; aspell works with contractions, camelCase, kebab-case, etc.
+  (gsetq ispell-program-name "aspell"
+         ispell-extra-args
+         '("--sug-mode=ultra" "--lang=en_US" "--camel-case")))
+#+end_src
+
+*** Spell Fu
+#+begin_src emacs-lisp
+(use-package spell-fu
+  :init
+  (noct-after-buffer (global-spell-fu-mode))
+  :config
+  ;; repurpose ace-flyspell for spell-fu
+  (defun spell-fu-overlay-p (o)
+    "Return true if O is an overlay used by spell-fu."
+    (and (overlayp o) (overlay-get o 'spell-fu-mode)))
+
+  (defun ace-flyspell--has-spell-fu-overlay-p (ovs)
+    (let ((r nil))
+      (while (and (not r) (consp ovs))
+        (if (spell-fu-overlay-p (car ovs))
+            (setq r t)
+          (setq ovs (cdr ovs))))
+      r))
+
+  (defun ace-flyspell--collect-spell-fu-candidates ()
+    (save-excursion
+      (save-restriction
+        (narrow-to-region (window-start) (window-end (selected-window) t))
+        (let ((pos (point-min))
+              (pos-max (point-max))
+              (pos-list nil)
+              (word t))
+          (goto-char pos)
+          (while (and word (< pos pos-max))
+            (setq word (flyspell-get-word t))
+            (when word
+              (setq pos (nth 1 word))
+              (let* ((ovs (overlays-at pos))
+                     (r (ace-flyspell--has-spell-fu-overlay-p ovs)))
+                (when r
+                  (push pos pos-list)))
+              (setq pos (1+ (nth 2 word)))
+              (goto-char pos)))
+          (nreverse pos-list)))))
+
+  (advice-add 'ace-flyspell--collect-candidates
+              :override #'ace-flyspell--collect-spell-fu-candidates))
 #+end_src
 
 * Other Major Mode Configuration
