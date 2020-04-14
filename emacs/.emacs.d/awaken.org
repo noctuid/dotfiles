@@ -1352,6 +1352,12 @@ Obvious ones:
 (save-place-mode)
 #+end_src
 
+** So Long
+#+begin_src emacs-lisp
+(use-package so-long
+  :general (noct:toggle-map "s" #'so-long-mode))
+#+end_src
+
 ** Scratch Buffer
 Suggested [[https://www.reddit.com/r/emacs/comments/4agorq/got_bored_of_the_initial_scratch_message_so/][here]].
 #+begin_src emacs-lisp
