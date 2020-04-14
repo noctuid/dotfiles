@@ -262,40 +262,41 @@ c.url.start_pages = ['/home/noctuid/src/homepage/home.html']
 
 # ** Search Keywords
 c.url.searchengines = \
-    {'DEFAULT': 'https://www.startpage.com/do/search?query={}&?prf=7de10a290cc3cee4fa552d4b43dc3f48',  # noqa: E501
-     'aff': 'http://www.anime4fun.com/search?keyword={}',
-     'bt': 'http://bato.to/search?name_cond=c&name={}',
+    {'DEFAULT': 'https://duckduckgo.com/?kam=google-maps&kp=-2&q={}',
      'am': 'https://smile.amazon.com/s?k={}',
-     'aw': 'http://wiki.archlinux.org/index.php?search={}',
-     'az': 'http://search.azlyrics.com/search.php?q={}',
-     'd': 'http://duckduckgo.com/?q={}',
-     'dv': 'http://www.deviantart.com/?q={}',
-     'fl': 'http://fluffy.is/search.php?folders=&name={}',
-     'gh': 'http://github.com/search?q={}',
-     'hg': 'http://www.haskell.org/hoogle/?hoogle={}',
-     'j': 'http://jisho.org/search/{}',
+     'aw': 'https://wiki.archlinux.org/index.php?search={}',
+     'az': 'https://search.azlyrics.com/search.php?q={}',
+     'camel': 'https://camelcamelcamel.com/search?sq={}',
+     'd': 'https://duckduckgo.com/?kam=google-maps&kp=-2&q={}',
+     'dv': 'https://www.deviantart.com/?q={}',
+     'fake': 'https://fakespot.com/analyze?url={}',
+     'gh': 'https://github.com/search?q={}',
+     'hg': 'https://www.haskell.org/hoogle/?hoogle={}',
+     'j': 'https://jisho.org/search/{}',
      'mal': 'https://myanimelist.net/search/all?q={}',
-     'mus': 'http://www.allmusic.com/search/all/{}',
-     'r': 'http://www.reddit.com/r/{}/',
-     'rt': 'http://www.rottentomatoes.com/search/?search={}',
-     's': 'https://searx.me/?q={}',
-     't': 'http://www.tumblr.com/search/{}',
+     'mus': 'https://www.allmusic.com/search/all/{}',
+     'q': 'https://www.qwant.com/?q=%s{}=web',
+     'r': 'https://www.reddit.com/r/{}/',
+     'rt': 'https://www.rottentomatoes.com/search/?search={}',
+     's': 'https://searx.be/?q={}',
+     'sp': 'https://www.startpage.com/do/search?query={}&prfe=36c84513558a2d34bf0d89ea505333ad25eaad7546bb0b480adc2e9be9271a9b54b2adb3b1f304d3530bea21aa54bdf5',  # noqa: E501
+     't': 'https://www.tumblr.com/search/{}',
      # other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
      # useful mostly for stuff that combines things like mash, split, weird
      # piping stuff, etc.
-     'yub': 'http://yubnub.org/parser/parse?command={}',
-     'y': 'http://www.youtube.com/results?search_query={}',
-     'wayback':  'http://web.archive.org/web/*/{}',
-     'zerochan':  'http://www.zerochan.net/{}',
+     'yub': 'https://yubnub.org/parser/parse?command={}',
+     'y': 'https://www.youtube.com/results?search_query={}',
+     'wayback':  'https://web.archive.org/web/*/{}',
+     'zerochan':  'https://www.zerochan.net/{}',
     }
 
 # ** Bookmarklets/Custom Commands
-c.aliases['archive'] = 'open --tab http://web.archive.org/save/{url}'
-c.aliases['view-archive'] = 'open --tab http://web.archive.org/web/*/{url}'
-c.aliases['va'] = 'open --tab http://web.archive.org/web/*/{url}'
+c.aliases['archive'] = 'open --tab https://web.archive.org/save/{url}'
+c.aliases['view-archive'] = 'open --tab https://web.archive.org/web/*/{url}'
+c.aliases['va'] = 'open --tab https://web.archive.org/web/*/{url}'
 c.aliases['view-google-cache'] = \
-    'open http://www.google.com/search?q=cache:{url}'
-c.aliases['vgc'] = 'open http://www.google.com/search?q=cache:{url}'
+    'open https://www.google.com/search?q=cache:{url}'
+c.aliases['vgc'] = 'open https://www.google.com/search?q=cache:{url}'
 
 # ** Media
 c.content.autoplay = False
@@ -429,9 +430,43 @@ pmap('<Escape>', 'leave-mode')
 # nmap('U', 'set-cmd-text --space :undo')
 
 # ** Quickmarks and Marks
-nmap("'", 'set-cmd-text -s :quickmark-load --tab')
-# nmap('B', 'set-cmd-text -s :bookmark-load --tab')
-nmap("t'", 'set-cmd-text -s :bookmark-load --tab')
+nunmap("'")
+# real quickmarks
+nmap("'4", ':open --tab https://boards.4chan.org/g/')
+nmap("'8", ':open --tab https://8ch.net/tech/')
+nmap("'a", ':open --tab https://bbs.archlinux.org/')
+nmap("'A", ':open --tab https://github.com/bayandin/awesome-awesomeness')
+nmap("'b", ':open --tab https://www.dustloop.com/forums/index.php?/forum/63-blazblue/')
+nmap("'B", ':open --tab https://lispcookbook.github.io/cl-cookbook/')
+nmap("'c", ':open --tab https://camelcamelcamel.com/search?sq={url}')
+nmap("'C", ':open --tab https://forum.colemak.com/')
+nmap("'e", ':open --tab https://www.reddit.com/r/emacs/')
+nmap("'f", ':open --tab https://fakespot.com/analyze?url={url}')
+nmap("'g", ':open --tab https://www.github.com/')
+nmap("'G", ':open --tab https://www.geekhack.org/')
+nmap("'h", ':open --tab https://news.ycombinator.com/news')
+nmap("'i", ':open --tab https://imgur.com/')
+nmap("'l", ':open --tab https://lainchan.org/%CE%BB/index.html')
+nmap("'L", ':open --tab https://www.last.fm/')
+nmap("'m", ':open --tab https://myanimelist.net')
+nmap("'n", ':open --tab https://www.reddit.com/r/neovim')
+nmap("'p", ':open --tab https://privacytools.io')
+nmap("'P", ':open --tab https://prism-break.org')
+nmap("'q", ':open --tab https://quora.com/')
+nmap("'r", ':open --tab https://reddit.com/')
+nmap("'R", ':open --tab https://redditbooru.com/')
+nmap("'s", ':open --tab https://myanimelist.net/anime/season')
+nmap("'S", ':open --tab https://myanimelist.net/clubs.php?cid=27907')
+nmap("'t", ':open --tab https://www.tumblr.com/dashboard/')
+nmap("'T", ':open --tab https://twitter.com/home/')
+nmap("'v", ':open --tab https://www.reddit.com/r/vim/')
+nmap("'w", ':open --tab https://web.archive.org/web/*/{url}')
+nmap("'W", ':open --tab https://github.com/bayandin/awesome-awesomeness')
+nmap("'y", ':open --tab https://youtube.com/')
+
+# to get to login page (e.g. airport/hotel)
+# ../../.local/share/qutebrowser/userscripts/open-default-gateway
+nmap("'z", ':spawn --userscript open-default-gateway')
 
 # add back mark jumping
 nmap('"', 'enter-mode jump_mark')

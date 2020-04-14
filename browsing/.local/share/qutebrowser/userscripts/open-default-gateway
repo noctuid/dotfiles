@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+echo "open --tab $(ip route | awk '/default/ {print $3}')" >> "$QUTE_FIFO"

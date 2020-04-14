@@ -194,76 +194,15 @@ set! extensions.agentSpoof.uaChosen=random_desktop
 
 " }}}
 " #==============================
-" # QuickMarks {{{
+" * QuickMarks {{{
 " #==============================
-silent qmark 4 https://boards.4chan.org/g/
-silent qmark 8 https://8ch.net/tech/
-silent qmark a https://bbs.archlinux.org/
-silent qmark A https://animeonlinetv.tv/
-silent qmark b https://bato.to/
-silent qmark B http://www.dustloop.com/forums/index.php?/forum/63-blazblue/
-silent qmark c http://forum.colemak.com/
-silent qmark e https://www.reddit.com/r/emacs/
-silent qmark g https://www.github.com/
-silent qmark G https://www.geekhack.org/
-silent qmark h https://news.ycombinator.com/news
-silent qmark H http://book.realworldhaskell.org/read/
-silent qmark i https://imgur.com/
-silent qmark I https://www.ign.com/games/vita?sortBy=score&sortOrder=desc
-silent qmark k http://kissanime.com/Search/Anime
-silent qmark l https://lainchan.org/%CE%BB/index.html
-silent qmark L http://www.last.fm/
-silent qmark m http://myanimelist.net
-silent qmark p http://planet.lisp.org/
-silent qmark P http://pixiv.net/
-silent qmark q https://quora.com/
-silent qmark r https://reddit.com/
-silent qmark R http://redditbooru.com/
-silent qmark s http://myanimelist.net/clubs.php?cid=27907
-silent qmark S http//stumbleupon.com/
-silent qmark t https://www.tumblr.com/dashboard/
-silent qmark T https://twitter.com/home/
-silent qmark v https://www.reddit.com/r/vim/
-silent qmark w http://www.wololo.net
-silent qmark x https://www.exitpath-levelmakers.forumotion.com/
-silent qmark X https://ep-sys.appspot.com/login.jsp
-silent qmark y https://youtube.com/
+" (transferred)
 
 " }}}
 " #==============================
-" # Bookmark Searches {{{
+" * Bookmark Searches {{{
 " #==============================
-silent bmark -keyword aff -title 'Search Anime4fun' http://www.anime4fun.com/search?keyword=%s
-silent bmark -keyword am -title 'Amazon' http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s
-silent bmark -keyword aw -title 'Arch Wiki' http://wiki.archlinux.org/index.php?search=%s
-silent bmark -keyword az -title 'Search Azlyrics' http://search.azlyrics.com/search.php?q=%s
-silent bmark -keyword bt -title 'Search Batoto' http://bato.to/search?name_cond=c&name=%s
-silent bmark -keyword bkr -title 'Search Baka Renders' http://bakarenders.com/renders/thumbnails.php?search=%s&submit=search&album=search&title=on&newer_than=&caption=on&older_than=&keywords=on&type=AND
-silent bmark -keyword d -title 'Duck Duck Go' http://duckduckgo.com/?q=%s
-silent bmark -keyword dv -title 'Search Deviantart' http://www.deviantart.com/?q=%s
-silent bmark -keyword fl -title 'Search Fluffy.is' http://fluffy.is/search.php?folders=&name=%s
-silent bmark -keyword full -title 'Search Full Fights' http://anime.fullfights.org/?s=%s
-silent bmark -keyword g -title 'Google' https://www.google.com/search?q=%s&ie=utf-8&oe=utf-8
-silent bmark -keyword gh -title 'Search Github' http://github.com/search?q=%s
-silent bmark -keyword hg -title 'Search with Hoogle' http://www.haskell.org/hoogle/?hoogle=%s
-silent bmark -keyword j -title 'Search with Jisho' http://jisho.org/search/%s
-silent bmark -keyword mal -title 'Search MAL' http://myanimelist.net/anime.php?q=%s
-silent bmark -keyword mmal -title 'Search MAL for manga' http://myanimelist.net/manga.php?q=%s
-silent bmark -keyword mus -title 'Search Albums' http://www.allmusic.com/search/all/%s
-silent bmark -keyword r -title 'Quickly Get to Subreddit' http://www.reddit.com/r/%s/
-silent bmark -keyword rt -title 'Rotten Tomatoes Search' http://www.rottentomatoes.com/search/?search=%s
-silent bmark -keyword s -title 'Searx' https://searx.me/?q=%s
-silent bmark -keyword sp -title 'Startpage' https://startpage.com/do/metasearch.pl?q=%s
-silent bmark -keyword t -title 'Search Tumblr' http://www.tumblr.com/search/%s
-" other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
-" useful mostly for stuff that combines things like mash, split, weird piping stuff, etc.
-silent bmark -keyword yub -title 'YubNub' http://yubnub.org/parser/parse?command=%s
-silent bmark -keyword y -title 'Search Youtube' http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query=%s&search=Search
-silent bmark -keyword wayback -title 'Search Wayback Machine' http://web.archive.org/web/*/%s
-silent bmark -keyword zerochan -title 'Search ZeroChan' http://www.zerochan.net/%s
-
-" Set the default motor search (see bookmark)
-set defsearch=sp
+" (transferred)
 
 " }}}
 " #==============================
