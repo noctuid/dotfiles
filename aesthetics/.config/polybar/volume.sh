@@ -4,11 +4,6 @@
 # status=$(amixer get Master | awk 'END { gsub(/[\[\]]/, ""); print $6 }')
 # percent=$(amixer get Master | awk 'END { gsub(/[%\[\]]/, ""); print $5 }')
 
-# if switch to pamixer (is ponymix maintained?):
-# percent=$(pamixer --get-volume)
-# pamixer --get-mute
-# pamixer --list-sinks | grep --quiet hdmi
-
 # shellcheck disable=SC1090
 source ~/.cache/wal/colors.sh
 
@@ -16,7 +11,7 @@ print_volume() {
 	headphones=$(amixer -c 0 contents | grep "Headphone Jack'" -A 2 \
 					 | awk -F "=" 'NR==3 { print $2 }')
 
-	percent=$(ponymix get-volume)
+	percent=$(pamixer --get-volume)
 
 	if [[ -v color1 ]] && [[ -v color12 ]]; then
 		# dark red
@@ -31,10 +26,10 @@ print_volume() {
 
 	color=$blue
 
-	if ponymix is-muted; then
+	if pamixer --get-mute > /dev/null; then
 		color=$dark_red
 		icon=""
-	elif ponymix defaults | grep --quiet "sink.*hdmi"; then
+	elif pacctl info | grep --quiet "Default Sink:.*hdmi"; then
 		icon=""
 	elif [[ $headphones == on ]]; then
 		icon=""

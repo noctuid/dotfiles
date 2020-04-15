@@ -361,7 +361,7 @@ alsa-utils
 # required for amixer to work without sudo (even when in audio group)
 pulseaudio-alsa
 pavucontrol
-ponymix
+pamixer
 mpd
 mpd-notification aur
 mpc

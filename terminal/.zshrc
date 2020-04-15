@@ -843,6 +843,11 @@ monitor_disconnect() ( # output_name
 	fi
 )
 
+# 1 is for nvidia card on p52
+# media needs to start playing after switch to hdmi
+alias hdmi_audio='pactl set-card-profile 1 output:hdmi-stereo'
+alias analog_audio='pactl set-card-profile 1 output:analog-stereo'
+
 # **** VGA (old)
 alias vgain='monitor_connect VGA1'
 alias vgaout='monitor_connect VGA1 true X'
@@ -860,11 +865,13 @@ alias nvmirror='monitor_connect DP-1'
 alias nvout='monitor_disconnect DP-1 true'
 
 # **** Thinkpad p52
+# HDMI-1-1 if on intel using nouveau
+# HDMI-0 if on nvidia
 hdmiadd() {
 	monitor_connect HDMI-1-1 true 十 \
 		|| monitor_connect HDMI-0 true 十
 	if [[ -n $1 ]]; then
-		ponymix set-profile output:hdmi-stereo
+		hdmi_audio
 	fi
 }
 
@@ -872,14 +879,14 @@ hdmimirror() {
 	monitor_connect HDMI-1-1 \
 		|| monitor_connect HDMI-0
 	if [[ -n $1 ]]; then
-		ponymix set-profile output:hdmi-stereo
+		analog_audio
 	fi
 }
 
 hdmiout() {
 	monitor_disconnect HDMI-1-1 true \
 		|| monitor_disconnect HDMI-0 true
-	ponymix set-profile output:analog-stereo
+	analog_audio
 }
 
 # *** Play Video from Clipboard

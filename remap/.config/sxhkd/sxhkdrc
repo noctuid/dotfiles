@@ -30,14 +30,17 @@ mode_switch + super + n
 
 # ** Volume
 mode_switch + super + i
-	amixer -qD pulse sset Master 5%+
+	pactl set-sink-volume @DEFAULT_SINK@ +5%
+	# amixer -qD pulse sset Master 5%+
 
 mode_switch + super + h
-	amixer -qD pulse sset Master 5%-
+	pactl set-sink-volume @DEFAULT_SINK@ -5%
+	# amixer -qD pulse sset Master 5%-
 
 # mute
 mode_switch + super + m
-	amixer -qD pulse sset Master toggle
+	pactl set-sink-mute @DEFAULT_SINK@ toggle
+	# amixer -qD pulse sset Master toggle
 
 # play/pause
 mode_switch + super + o
