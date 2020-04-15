@@ -195,6 +195,7 @@ pynvim pip
 nvimpager-git aur
 vimpager-git aur
 # see ./post-install script; using emacs lucid
+jansson
 # emacs-git-shallow aur
 # evm gem
 cask aur
