@@ -46,9 +46,6 @@ export CLASSPATH=$CLASSPATH:/usr/share/java/junit.jar:/usr/share/java/hamcrest-c
 # for python
 export WORKON_HOME=~/.virtualenvs
 
-# for keyboardio
-export ARDUINO_PATH=/usr/share/arduino
-
 # temporary for testing
 export PATH="$HOME/.tmuxifier/bin:$PATH"
 

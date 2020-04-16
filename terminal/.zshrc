@@ -1216,6 +1216,33 @@ newphonerestore() {
 	adb-sync ~/database/move/phone/internal/ "$internal"/
 }
 
+# ** Keyboard
+flash_keyboard() {
+	export ARDUINO_PATH=/usr/local/arduino
+	if [[ ! -d ~/Arduino ]]; then
+		mkdir -p ~/Arduino/hardware
+		git clone --recursive \
+			https://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio.git \
+			~/Arduino/hardware/keyboardio
+		ln -sf ~/src/forks/Model01-Firmware ~/Arduino/
+	fi
+	libraries=~/Arduino/hardware/keyboardio/avr/libraries
+	# install plugins
+	wavepool="$libraries"/Kaleidoscope-LED-Wavepool
+	if [[ ! -d "$wavepool" ]]; then
+		git clone \
+			https://github.com/ToyKeeper/Kaleidoscope-LED-Wavepool \
+			"$wavepool"
+	fi
+	if [[ ! -d $ARDUINO_PATH ]]; then
+		wget https://www.arduino.cc/download_handler.php?f=/arduino-1.8.12-linuxaarch64.tar.xz \
+			 -o /tmp/arduino.tar.xz
+		sudo atool -x /tmp/arduino.tar.xz "$ARDUINO_PATH"
+	fi
+	cd ~/Arduino/Model01-Firmware/ || return 1
+	make && make flash
+}
+
 # ** Other Functions
 if [[ -f ~/.config/ranger/ranger_functions ]]; then
 	source ~/.config/ranger/ranger_functions

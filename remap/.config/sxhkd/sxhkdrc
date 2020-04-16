@@ -9,48 +9,47 @@ super + control + {_,shift + }Escape
 	wm_action {reload,quit}
 
 # reload keyboad layout (if screw it up and can't type)
-F11
+any + F11
 	rldkbd
 
 # make sxhkd reload its configuration files:
-{mode_switch + super + period, super + period}
+{alt + super + period, super + period}
 	pkill -USR1 -x sxhkd
 
 # * General Global Hotkeys
-# Actually one key bound to Shift+Control+Alt
-# Would use hyper if could get working a mod# instead of Num_Lock but can't
+# actually one key bound to alt + super
 # ** Brightness
-mode_switch + super + e
+alt + super + e
 	light -A 10
 	# xbacklight -inc 10
 
-mode_switch + super + n
+alt + super + n
 	light -U 10
 	# xbacklight -dec 10
 
 # ** Volume
-mode_switch + super + i
+alt + super + i
 	pactl set-sink-volume @DEFAULT_SINK@ +5%
 	# amixer -qD pulse sset Master 5%+
 
-mode_switch + super + h
+alt + super + h
 	pactl set-sink-volume @DEFAULT_SINK@ -5%
 	# amixer -qD pulse sset Master 5%-
 
 # mute
-mode_switch + super + m
+alt + super + m
 	pactl set-sink-mute @DEFAULT_SINK@ toggle
 	# amixer -qD pulse sset Master toggle
 
 # play/pause
-mode_switch + super + o
+alt + super + o
 	mpc toggle
 
 # next/prev
-mode_switch + super + u
+alt + super + u
 	mpc prev
 
-mode_switch + super + y
+alt + super + y
 	mpc next
 
 # ** Screenshots
@@ -58,66 +57,66 @@ Print
 	screenshot
 	# ~/bin/screenshot
 
-mode_switch + super + P
+alt + super + P
 	screenshot select
 
-mode_switch + super + w
+alt + super + w
 	screenshot current_window
 
-# mode_switch + super+ v
+# alt + super+ v
 # 	mkdir ~/move/srec && cd ~/move/srec && srec -s
 
 # ** Program hotkeys
-mode_switch + super + f
+alt + super + f
 	firejail --seccomp firefox
 
-mode_switch + super + space
+alt + super + space
 	rofi -show run
 
 # edi[t]
-mode_switch + super + t
+alt + super + t
 	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
 
 # v because was previously bound to vim...
 # use latest good emacs configuration
 # bug in Emacs prevents using IMEs (e.g. fcitx) without changing LC_TYPE
-mode_switch + super + v
+alt + super + v
 	LC_CTYPE=ja_JP.UTF-8 emacs --stable
 
 # demote errors for each org source block; for debugging errors that are
 # localized to a single section without losing all configuration from following
 # sections or needing to run Emacs with a stable configuration
-mode_switch + super + V
+alt + super + V
 	LC_CTYPE=ja_JP.UTF-8 emacs --with-demoted-errors
 
-mode_switch + super + b
+alt + super + b
 	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
 
-mode_switch + super + l
+alt + super + l
 	lockscreen
 
 # ** Clicks
 # TODO clicks don't work when modifier held
-mode_switch + super + k
+alt + super + k
 	click middle
 	# ~/bin/click
 
 # regain focus from flash
-mode_switch + super + a
+alt + super + a
 	click left
 
 # ** Terminals and Dropdowns
-mode_switch + super + Return
+alt + super + Return
 	kitty
 
-mode_switch + super + s
+alt + super + s
 	dropdown -s dropdown kitty
 
-mode_switch + super + r
+alt + super + r
 	dropdown -n ranger -h 90% kitty \
 	         zsh -c "ranger --cmd='set preview_images_method kitty'; zsh -i"
 
-mode_switch + super + p
+alt + super + p
 	dropdown emacsclient -ce "(noct:with-q-to-exit (proced) (delete-other-windows))"
 
 # * Mouse
@@ -134,8 +133,8 @@ button9
 {_,super +, super + shift + } @button51
 	xdotool keyup super
 
-{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +} button50
-	xdotool keydown super Mode_switch
+{_,shift +, super +, alt +}{_,shift +, super +, alt +}{_,shift +, super +, alt +} button50
+	xdotool keydown super alt
 
-{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +}{_,shift +, super +, mode_switch +} @button50
-	xdotool keyup super Mode_switch
+{_,shift +, super +, alt +}{_,shift +, super +, alt +}{_,shift +, super +, alt +} @button50
+	xdotool keyup super alt
