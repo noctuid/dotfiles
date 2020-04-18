@@ -79,9 +79,12 @@ steam-native-runtime
 intel-ucode
 
 # ** Nvidia
+# having both installed has not caused me issues
+nvidia-xrun-git aur
 optimus-manager-git aur
-# allows connecting to monitors without using GPU for everything
+# nouveau is builtin to the kernel, so I don't think this is necessary
 xf86-video-nouveau
+# not currently using
 bbswitch-dkms
 # intel-virtual-output
 xf86-video-intel

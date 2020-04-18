@@ -260,6 +260,13 @@ nix_setup() {
 	sudo -u "$user" nix-channel --update
 }
 
+# * Optimus Manager
+optimus_setup() {
+	echo "Setting startup mode for optimus-manager to nvidia."
+	optimus-manager --set-startup nvidia
+	systemctl disable --now optimus-manager
+}
+
 # * All
 all() {
 	user=$1
@@ -303,6 +310,7 @@ all() {
 	udiskie_setup || fail_configure "Udiskie setup failed."
 	connman_setup || fail_configure "Connman setup failed."
 	nix_setup "$user" || fail_configure "Nix setup failed."
+	optimus_setup || fail_configure "Optimus manager setup failed."
 }
 
 # * Non-chroot

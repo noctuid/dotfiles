@@ -101,7 +101,11 @@ done <<< "$pathdirs"
 
 # * Startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then
-	startx
+	# optimus-manager's prime-offload needs to be run as sudo but can't prompt
+	# for password in .xinitrc
+	# sudo true && startx
+	# sticking with nvidia-xrun for now
+	nvidia-xrun
 elif [[ $- == *i* ]]; then
 	# check if interactive
 	zsh

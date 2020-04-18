@@ -793,16 +793,14 @@ if [[ -f ~/bin/helpers/monitor.sh ]]; then
 fi
 
 monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
-	# exit if any command or any part of a pipe fails
-	# using subshell so this only lasts for this function
+	# exit if any command or any part of a pipe fails; using a subshell so this
+	# only lasts for this function
 	set -e -o pipefail
+
 	name=$1
 	right_of_primary=$2
 	add_bspwm_desktop=$3
 	primary=$(monitor_get_primary)
-
-	# do nothing if output doesn't exist
-	xrandr --current | grep --quiet "^$name"
 
 	# ensure disconnected (for when want to switch between mirroring and
 	# separate desktop)
@@ -833,20 +831,45 @@ monitor_disconnect() ( # output_name
 	# exit if any command or any part of a pipe fails
 	set -e -o pipefail
 	name=$1
-
-	# do nothing if output doesn't exist
-	xrandr --current | grep --quiet "^$name"
-
 	xrandr --output "$name" --off
 	if bspc query --monitors --names | grep --quiet "^${name}$"; then
 		bspc monitor "$name" --remove
 	fi
 )
 
-# 1 is for nvidia card on p52
-# media needs to start playing after switch to hdmi
-alias hdmi_audio='pactl set-card-profile 1 output:hdmi-stereo'
-alias analog_audio='pactl set-card-profile 1 output:analog-stereo'
+# 0 is for nvidia card on p52; 1 for intel
+# media needs to start playing after add hdmi monitor (but can switch to analog
+# audio without restarting media)
+set_audio_profile() { # hdmi?
+	hdmi=${1:-false}
+	# intel_card=$(pactl list cards \
+		# 				 | grep --ignore-case --before-context 1 \
+		# 						'alsa.card_name.*intel' \
+		# 				 | awk '/alsa.card =/ {gsub(/"/,""); print $3}')
+	# nvidia_card=$(pactl list cards \
+		# 				  | grep --ignore-case --before-context 1 \
+		# 						 'alsa.card_name.*nvidia' \
+		# 				  | awk '/alsa.card =/ {gsub(/"/,""); print $3}')
+	# also card name is actually opposite of what set-card-profile uses
+	intel_card=$(pactl list cards \
+					 | grep --ignore-case --before-context 10 \
+							'alsa.card_name.*intel' \
+					 | awk '/Card #/ {gsub(/#/,""); print $2}')
+	nvidia_card=$(pactl list cards \
+					  | grep --ignore-case --before-context 10 \
+							 'alsa.card_name.*nvidia' \
+					  | awk '/Card #/ {gsub(/#/,""); print $2}')
+	if "$hdmi"; then
+		pactl set-card-profile "$nvidia_card" output:hdmi-stereo
+		# can't be output:analog-stereo
+		pactl set-card-profile "$intel_card" off
+	else
+		# nvidia card is turned off by default
+		pactl set-card-profile "$intel_card" output:analog-stereo
+	fi
+}
+alias hdmi_audio='set_audio_profile true'
+alias analog_audio='set_audio_profile'
 
 # **** VGA (old)
 alias vgain='monitor_connect VGA1'
@@ -868,8 +891,11 @@ alias nvout='monitor_disconnect DP-1 true'
 # HDMI-1-1 if on intel using nouveau
 # HDMI-0 if on nvidia
 hdmiadd() {
-	monitor_connect HDMI-1-1 true 十 \
-		|| monitor_connect HDMI-0 true 十
+	if xrandr --current | grep --quiet '^HDMI-1-1'; then
+		monitor_connect HDMI-1-1 true 十
+	else
+		monitor_connect HDMI-0 true 十
+	fi
 	if [[ -n $1 ]]; then
 		hdmi_audio
 	fi
@@ -884,8 +910,11 @@ hdmimirror() {
 }
 
 hdmiout() {
-	monitor_disconnect HDMI-1-1 true \
-		|| monitor_disconnect HDMI-0 true
+	if xrandr --current | grep --quiet '^HDMI-1-1'; then
+		monitor_disconnect HDMI-1-1 true
+	else
+		monitor_disconnect HDMI-0 true
+	fi
 	analog_audio
 }
 
@@ -900,8 +929,8 @@ mpgo() {
 	local mpv_flags
 	mpv_flags=(
 		--screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
-		  --script=~/.config/mpv/scripts/nightedt-mpv-scripts/recent.lua
-		  "$@"
+		--script=~/.config/mpv/scripts/nightedt-mpv-scripts/recent.lua
+		"$@"
 	)
 	if [[ $clipboard == *youtube.com* ]]; then
 		echo "$clipboard" > /tmp/mpv/last_link
