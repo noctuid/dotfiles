@@ -20,7 +20,7 @@ export PACMAN=powerpill
 export SOURCE=$HOME/src
 export NIXPKGS=$SOURCE/nixpkgs
 # blog dir
-export BLOG=$SOURCE/noctuid.github.io
+export BLOG=$SOURCE/blog/pir-hana
 
 # so pinentry knows the current tty
 export GPG_TTY=$(tty)

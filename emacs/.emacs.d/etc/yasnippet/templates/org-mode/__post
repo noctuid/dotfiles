@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# group: file templates
+# --
+#+title: $1
+#+author: noctuid
+#+date: `(format-time-string "%Y-%m-%d %T %z")`
+
+#+hugo_base_dir: ../
+#+hugo_categories: $2
+#+hugo_tags: $3
+#+hugo_type: post
+
+$0

@@ -432,6 +432,7 @@ pmap('<Escape>', 'leave-mode')
 # ** Quickmarks and Marks
 nunmap("'")
 # real quickmarks
+nmap("'13", ':open --tab localhost:1313')
 nmap("'4", ':open --tab https://boards.4chan.org/g/')
 nmap("'8", ':open --tab https://8ch.net/tech/')
 nmap("'a", ':open --tab https://bbs.archlinux.org/')

@@ -1,4 +1,5 @@
 unbind '
+bind '13 tabopen localhost:1313
 bind '4 tabopen https://boards.4chan.org/g/
 bind '8 tabopen https://8ch.net/tech/
 bind 'a tabopen https://bbs.archlinux.org/

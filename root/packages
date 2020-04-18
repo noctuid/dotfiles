@@ -244,6 +244,9 @@ livedown npm
 # vmd npm
 nodejs-vmd aur
 
+# * Blog
+hugo
+
 # * Image Editing
 gimp
 imagemagick
