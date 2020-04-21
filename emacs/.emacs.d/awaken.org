@@ -816,12 +816,32 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 *** Remaps
 **** General Swaps/Changes
 #+begin_src emacs-lisp
+;; make home and end act on visual lines
+;; also note `evil-respect-visual-line-mode'
+;; don't know if I like the changes to d, p, y, and it seems they need work:
+;; https://github.com/emacs-evil/evil/issues/188
+(general-def '(insert normal)
+  "<home>" #'evil-beginning-of-visual-line
+  "<end>" #'evil-end-of-visual-line)
+
+(defun noct-evil-insert-visual-line (count &optional vcount)
+  (interactive "p")
+  (let ((evil-respect-visual-line-mode t))
+    (evil-insert-line count vcount)))
+
+(general-def 'normal "I" #'noct-evil-insert-visual-line)
+
+(defun noct-evil-append-visual-line (count &optional vcount)
+  (interactive "p")
+  (let ((evil-respect-visual-line-mode t))
+    (evil-append-line count vcount)))
+
 (general-def 'normal
   "Q" "@q"
   "t." #'evil-ex-repeat
   "tv" #'evil-visual-block
   ;; swap a and A
-  "a" #'evil-append-line
+  "a" #'noct-evil-append-visual-line
   "A" #'evil-append)
 
 (general-def 'motion ";" nil)
