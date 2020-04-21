@@ -109,6 +109,9 @@ passff-host aur
 # sandboxing
 firejail
 
+keybase
+kbfs
+
 # * VCS
 git
 

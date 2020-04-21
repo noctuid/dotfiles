@@ -530,6 +530,9 @@ alias mountesp='mountefi'
 alias umountefi='sudo umount /dev/disk/by-label/SYSTEM'
 alias umountesp='umountefi'
 
+alias startkbfs='systemctl --user start kbfs'
+alias stopkbfs='systemctl --user stop kbfs'
+
 # ** Startup and Shutdown
 # TODO is this overkill or at all necessary?
 poweroff() {
