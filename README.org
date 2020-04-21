@@ -170,7 +170,7 @@ Here I've organized my thoughts from trying from trying out and choosing various
 | notifications             | dunst                                                      |
 | file manager              | ranger->(maybe eventually) dired/ranger.el                 |
 | mass renaming             | ranger's :bulkrename (and wdired)                          |
-| browser                   | firefox+pentadactyl (eventually->qutebrowser)              |
+| browser                   | firefox+pentadactyl->qutebrowser->firefox+tridactyl        |
 | password manager          | pass                                                       |
 | image viewer              | everything (mainly feh and sxiv)->pqiv                     |
 | media player              | vlc/mplayer->mpv                                           |

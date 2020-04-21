@@ -7,12 +7,13 @@ export XDG_DOWNLOAD_DIR=$HOME/move
 # e.g. with zsh '$EDITOR file' will fail (though 'eval $EDITOR file' will work)
 # a workaround for zsh is to put emacsclient -t "$@" in a script and use that
 # having options works for sudoedit
-export EDITOR="emacsclient -t"
 export ALTERNATE_EDITOR=
+# using no flags actually seems preferable; use GUI with X running and also
+# works in framebuffer (emacsclient -t doesn't work in framebuffer terminal)
+export EDITOR=emacsclient
 export PAGER=vimpager
-# temporary
-export BROWSER=qutebrowser
-# export BROWSER=firefox
+# export BROWSER=qutebrowser
+export BROWSER=firefox
 export PACMAN=powerpill
 # keep SHELL as bash (e.g. Emacs tries to execute commands with zsh otherwise)
 # export SHELL=/bin/zsh
