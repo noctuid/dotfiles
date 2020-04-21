@@ -416,6 +416,10 @@ bindkey '^?' backward-delete-char
 bindkey "^W" backward-kill-word
 bindkey "¸" backward-kill-word
 
+# used by vterm-toggle.el
+bindkey "\C-a" beginning-of-line
+bindkey "\C-k" vi-kill-eol
+
 # ** Clipboard
 # using https://github.com/kutsan/zsh-system-clipboard
 bindkey '^y' zsh-system-clipboard-vicmd-vi-put-before
