@@ -2540,8 +2540,10 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
   :general
   (general-spc
     "p" #'projectile-find-file
-    "P" #'projectile-find-file-in-known-projects
+    "P" #'projectile-find-dir
+    "F" #'projectile-find-file-in-known-projects
     "c" #'projectile-switch-project
+    "-" #'projectile-dired
     "D" #'projectile-dired
     "RET" #'projectile-find-tag)
   (general-t
