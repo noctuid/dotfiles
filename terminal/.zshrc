@@ -699,6 +699,9 @@ take() {
 	mkdir -p "$1" && cd "$1"
 }
 
+# use cd - if want completion
+alias -- -='popd'
+
 # copy working directory to clipboard
 alias cpwd='pwd | tr -d "\n" | xsel -ib'
 
