@@ -206,7 +206,8 @@ sudo_setup() {
 		useradd --system --create-home \
 				--shell /sbin/nologin "$builduser" || return 1
 	fi
-	echo "root ALL=(ALL) ALL
+	echo "Defaults passwd_timeout=0
+root ALL=(ALL) ALL
 %wheel ALL=(ALL) ALL
 $builduser ALL= NOPASSWD: /usr/bin/pacman" | EDITOR='tee' visudo
 	# potentially dangerous without sudo and proper setup; risky
