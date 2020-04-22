@@ -522,8 +522,12 @@ Principles:
   :prefix "t")
 
 (general-create-definer general-r
-  :states 'normal
+  :states 'motion
   :prefix "r")
+
+(general-create-definer general-rr
+  :states 'motion
+  :prefix "rr")
 
 (general-create-definer general-s
   :keymaps 'normal
@@ -868,6 +872,11 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 
 ;; camelCase word (not a remap but affects word keybindings)
 (global-subword-mode)
+
+;; overwriting these keys later
+(general-rr
+ "/" #'evil-ex-search-forward
+ "?" #'evil-ex-search-backward)
 #+end_src
 
 **** Colemak Swaps
@@ -1504,13 +1513,16 @@ Intelligently sorted =M-x=.
 (use-package avy
   :config
   (gsetq avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)
-         avy-all-windows nil)
+         avy-all-windows nil
+         ;; decrease timeout
+         avy-timeout-seconds 0.2)
 
   (general-def '(normal insert)
     "C-." #'avy-resume)
 
-  (general-def 'normal
-    "r ." #'avy-resume)
+  (general-r "." #'avy-resume)
+
+  (general-r "/" #'evil-avy-goto-char-timer)
 
   (general-add-advice 'avy-resume :after #'evil-normal-state))
 #+end_src
@@ -1765,7 +1777,6 @@ TODO Try more helm.
     "M-c" #'ivy-occur)
 
   (general-def 'normal "?" #'ivy-resume)
-  (general-r "?" #'evil-search-backward)
 
   (ivy-set-actions
    t
@@ -2399,10 +2410,7 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
 (use-package counsel
   :general
   ('normal "/" #'counsel-grep-or-swiper)
-  (general-spc "l" #'counsel-locate)
-  :config
-  ;; add back evil-ex-search-forward
-  (general-r "/" #'evil-ex-search-forward))
+  (general-spc "l" #'counsel-locate))
 #+end_src
 
 *** Locate/Find/FD/FZF
@@ -2995,7 +3003,7 @@ Evilnc also has comment text objects, but they were fairly broken last time I tr
 #+begin_src emacs-lisp
 (use-package evil-nerd-commenter
   :general
-  (general-t (normal visual) 'override "c" #'evilnc-comment-or-uncomment-lines)
+  (general-t 'normal 'override "c" #'evilnc-comment-or-uncomment-lines)
   ('normal "gc" #'evilnc-comment-operator))
 
 (use-package evil-commentary
@@ -3396,15 +3404,37 @@ Still experimental.
 #+end_src
 
 *** Evil Snipe and Easy Motion
+Make these bindings:
+- =f= and =F= in normal - 2-char sneak (avy)
+- =r[fFtT]= in normal/visual/operator - 2-char sneak (avy)
+- =rr[fFtT]= in normal/visual/operator - default f/t with snipe improvements (no avy)
+- =[fFtT]= in visual/operator - same as above
+- =[xXzZ]= in visual/operator - 2-char seek (no avy)
+
+The logic behind these bindings is that I already don't have =t= in normal state and use 2-char seeks much more often than I would 1-char seeks in normal state. However, when using operators, I generally am not looking far ahead (deletion, for example, is normally used with a text object for larger selections and not with a motion to some arbitrary character), so it makes sense to keep the default behavior of =[fFtT]= in the visual and operator states (but with snipe's improvements, e.g. scope increased to visible buffer). If I did want a 2-char seek, I could use =[xXzZ]= (the default snipe keys for this purpose). =r[fFtT]= keys are consistent with other =r= keys (i.e. they remotely move somewhere using avy).
+
 **** Evil Snipe
 #+begin_src emacs-lisp
 (use-package evil-snipe
+  :commands (noct-snipe-2-f noct-snipe-2-F noct-snipe-2-t noct-snipe-2-T)
   :general
-  (general-r
+  ;; if need in normal state instead of 2-letter (usually don't)
+  (general-rr
+    "f" #'evil-snipe-f
+    "F" #'evil-snipe-F
+    "t" #'evil-snipe-t
+    "T" #'evil-snipe-T)
+  ;; single letter keybindings for operator/visual
+  (general-def '(operator visual)
     "f" #'evil-snipe-f
     "F" #'evil-snipe-F
     "t" #'evil-snipe-t
     "T" #'evil-snipe-T
+    "x" #'evil-snipe-x
+    "X" #'evil-snipe-X
+    "z" #'evil-snipe-z
+    "Z" #'evil-snipe-Z)
+  (general-r
     ";" #'evil-snipe-repeat
     "," #'evil-snipe-repeat-reverse)
 
@@ -3412,6 +3442,9 @@ Still experimental.
                     (lambda () (diminish 'evil-snipe-local-mode)))
   :diminish ""
   :config
+  (diminish 'evil-snipe-override-mode)
+  (diminish 'evil-snipe-override-local-mode)
+
   (gsetq evil-snipe-smart-case t
          ;; search visible part of buffer
          evil-snipe-scope 'visible
@@ -3423,28 +3456,28 @@ Still experimental.
          evil-snipe-auto-disable-substitute nil
          ;; don't automatically bind ; and ,
          evil-snipe-override-evil-repeat-keys nil
-         ;; doesn't do right thing since binding evil-snipe-s to f not s
-         ;; overriding evil-snipe--transient-map below
-         evil-snipe-repeat-keys t
-         ;; don't scroll window
-         evil-snipe-auto-scroll nil
-         ;; don't highlight after jump
-         evil-snipe-enable-highlight nil
-         ;; don't highlight while typing chars (TODO might be nice, but it doesn't
-         ;; automatically clear, at least with my setup)
-         evil-snipe-enable-incremental-highlight nil)
+         ;; the incremental highlight is good enough
+         evil-snipe-enable-highlight nil)
 
-  (general-def evil-snipe-mode-s-map
-    "f" #'evil-snipe-repeat
-    "F" #'evil-snipe-repeat-reverse)
+  ;; define evil-snipe-(z|Z)
+  (evil-snipe-def 2 'inclusive "z" "Z")
 
-  (diminish 'evil-snipe-override-mode)
-  (diminish 'evil-snipe-override-local-mode)
+  (evil-snipe-def 2 'inclusive "f" "F"
+                  :forward-fn noct-snipe-2-f
+                  :backward-fn noct-snipe-2-F)
 
-  (defun noct:snipe-transient-map (orig &rest _)
-    (funcall orig "f" "F"))
+  (evil-snipe-def 2 'exclusive "t" "T"
+                  :forward-fn noct-snipe-2-t
+                  :backward-fn noct-snipe-2-T)
 
-  (general-add-advice 'evil-snipe--transient-map :around #'noct:snipe-transient-map))
+  ;; not using evil-snipe-mode, but highlight cleanup depends on it
+  ;; remove check
+  (defun noct-evil-snipe--cleanup ()
+    "Disables overlays and cleans up after evil-snipe."
+    (remove-overlays nil nil 'category 'evil-snipe)
+    (remove-hook 'pre-command-hook #'evil-snipe--cleanup))
+
+  (general-add-advice 'evil-snipe--cleanup :override #'noct-evil-snipe--cleanup))
 #+end_src
 
 **** Evil Easymotion
@@ -3453,21 +3486,27 @@ TODO Use things.el instead.
 (use-package evil-easymotion
   :general
   (general-def 'motion
-    "f" #'noct:snipe-forward
-    "F" #'noct:snipe-backward)
+    "f" #'noct-sneak-forward-f
+    "F" #'noct-sneak-backward-F)
+
+  (general-r
+    "f" #'noct-sneak-forward-f
+    "F" #'noct-sneak-backward-F
+    "t" #'noct-sneak-forward-exclusive-t
+    "T" #'noct-sneak-backward-exclusive-T)
 
   ;; TODO combine next two statements when general supports modifier prefixes
-  (general-def 'motion
-    "rn" #'evilem-next-line
-    "re" #'evilem-prev-line
-    "rw" #'evilem-forward-word-begin
-    "rW" #'evilem-forward-WORD-begin
-    "rb" #'evilem-backward-word-begin
-    "rB" #'evilem-backward-WORD-begin
-    "rs" #'evilem-sentence-nav-forward
-    "rS" #'evilem-sentence-nav-backward
-    "rp" #'evilem-forward-paragraph
-    "rP" #'evilem-backward-paragraph)
+  (general-r
+    "n" #'evilem-next-line
+    "e" #'evilem-prev-line
+    "w" #'evilem-forward-word-begin
+    "W" #'evilem-forward-WORD-begin
+    "b" #'evilem-backward-word-begin
+    "B" #'evilem-backward-WORD-begin
+    "s" #'evilem-sentence-nav-forward
+    "S" #'evilem-sentence-nav-backward
+    "p" #'evilem-forward-paragraph
+    "P" #'evilem-backward-paragraph)
 
   ;; can't use control since can't distinguish certain keys (can rebind in
   ;; `input-decode' map to get working, though will only work for GUI)
@@ -3484,15 +3523,23 @@ TODO Use things.el instead.
     "M-P" #'evilem-backward-paragraph)
 
   :config
-  (evilem-make-motion noct:snipe-forward #'evil-snipe-repeat
+  (evilem-make-motion noct-sneak-forward-f #'evil-snipe-repeat
                       :pre-hook (save-excursion
                                   ;; TODO :bind doesn't work anymore?
                                   (let (evil-snipe-enable-highlight)
-                                    (call-interactively #'evil-snipe-s))))
-  (evilem-make-motion noct:snipe-backward #'evil-snipe-repeat
+                                    (call-interactively #'noct-snipe-2-f))))
+  (evilem-make-motion noct-sneak-backward-F #'evil-snipe-repeat
                       :pre-hook (save-excursion
                                   (let (evil-snipe-enable-highlight)
-                                    (call-interactively #'evil-snipe-S))))
+                                    (call-interactively #'noct-snipe-2-F))))
+  (evilem-make-motion noct-sneak-forward-exclusive-t #'evil-snipe-repeat
+                      :pre-hook (save-excursion
+                                  (let (evil-snipe-enable-highlight)
+                                    (call-interactively #'noct-snipe-2-t))))
+  (evilem-make-motion noct-sneak-backward-exclusive-T #'evil-snipe-repeat
+                      :pre-hook (save-excursion
+                                  (let (evil-snipe-enable-highlight)
+                                    (call-interactively #'noct-snipe-2-T))))
 
   (defun noct:next-line ()
     (interactive)
