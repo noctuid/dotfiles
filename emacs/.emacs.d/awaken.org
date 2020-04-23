@@ -5936,6 +5936,12 @@ For making certain files read-only automatically.
 
 * Applications
 ** Dired
+Performance notes:
+- dired-k slows loading larger directories to a crawl (e.g. 0.08 -> 1 second; with all the icons -> 4 seconds; 450 items)
+- all-the-icons-dired also slows loading larger directories (e.g. 0.08 -> 0.5 seconds; 450 items)
+
+Dired-k isn't that useful, and while I really like all-the-icons-dired, I'd rather opening it be fast. I've disabled dired-k completely and for now have made all-the-icons-dired opt-in. I would try diff-hl's dired mode, but I current can't get diff-hl working at all because vc doesn't recognize my files as being under version control.
+
 *** Setup
 Notable packages not currently using:
 - dired-du
@@ -6059,7 +6065,18 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
 *** All the Icons Dired
 #+begin_src emacs-lisp
 (use-package all-the-icons-dired
-  :ghook 'dired-mode-hook)
+  :general (noct:toggle-map "i" #'noct-toggle-all-the-icons-dired)
+  :config
+  (defvar noct-dired-icons nil)
+  (defun noct-toggle-all-the-icons-dired ()
+    (interactive)
+    (cond (noct-dired-icons
+           (general-remove-hook 'dired-mode-hook #'all-the-icons-dired-mode)
+           (message "All the icons disabled for new dired buffers"))
+          (t
+           (general-add-hook 'dired-mode-hook #'all-the-icons-dired-mode)
+           (message "All the icons enabled for new dired buffers")))
+    (setq noct-dired-icons (not noct-dired-icons))))
 #+end_src
 
 *** Dired Atool
@@ -6084,6 +6101,7 @@ Find a theme that customizes these faces.
 *** Dired K
 #+begin_src emacs-lisp
 (use-package dired-k
+  :disabled t
   :ghook
   ('dired-initial-position-hook #'dired-k)
   ('dired-after-readin-hook #'dired-k-no-revert))
