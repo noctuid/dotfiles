@@ -4352,6 +4352,10 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (use-package spell-fu
   :init
+  (defun noct-maybe-enable-spell-fu (orig-fun &rest args)
+    (unless buffer-read-only
+      (apply orig-fun args)))
+  (general-add-advice 'spell-fu-mode-turn-on :around #'noct-maybe-enable-spell-fu)
   (noct-after-buffer (global-spell-fu-mode))
   :config
   ;; repurpose ace-flyspell for spell-fu
