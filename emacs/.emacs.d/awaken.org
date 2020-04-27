@@ -4212,24 +4212,7 @@ For typographical editing (not fixing typos).
   ;; ('text-mode-hook #'turn-on-flyspell)
   ;; ;; will check just comments and strings
   ;; ('prog-mode-hook #'flyspell-prog-mode)
-  :general
-  ;; NOTE just use ace-flyspell unless already on word
-  ;; TODO needs ispell process (just remove once spell-fu gets mark correct
-  ;; function)
-  ('normal "zg" #'anon:flyspell-save-word)
-  :blackout t
-  :config
-  ;; https://stackoverflow.com/questions/22107182/in-emacs-flyspell-mode-how-to-add-new-word-to-dictionary
-  ;; slightly altered to accept a position
-  (defun anon:flyspell-save-word (&optional pt)
-    (interactive)
-    (setq pt (or pt (point)))
-    (save-excursion
-      (goto-char pt)
-      (let ((word (flyspell-get-word)))
-        (when (consp word)
-          (flyspell-do-correct 'save nil (car word) pt
-                               (cadr word) (caddr word) pt))))))
+  :blackout t)
 #+end_src
 
 **** Flyspell Lazy
@@ -4269,6 +4252,9 @@ of (command . word) to be used by `flyspell-do-correct'."
            (res      (frog-menu-read prompt corrects actions)))
       (unless res
         (error "Quit"))
+      (when (eq (car res) 'save)
+        (spell-fu-word-add)
+        (error "Handled with spell-fu"))
       res))
 
   (gsetq flyspell-correct-interface #'frog-menu-flyspell-correct))
@@ -4287,12 +4273,10 @@ If there is a misspelled word at point, correct it. With a prefix ARG, save the
 word in the dictionary. Otherwise, select a misspelled word using avy. Save when
 pressing \".\" before selecting the word. Otherwise, correct it."
     (interactive "P")
-    (let ((avy-dispatch-alist '((?\. . anon:flyspell-save-word))))
-      (if (or (and (eq flyspell-auto-correct-pos (point))
-                   (consp flyspell-auto-correct-region))
-              (not (flyspell-word)))
+    (let ((avy-dispatch-alist '((?\. . spell-fu-word-add))))
+      (if (cl-some #'spell-fu-overlay-p (overlays-at (point)))
           (if arg
-              (anon:flyspell-save-word)
+              (spell-fu-word-add)
             (funcall ace-flyspell-handler))
         ;; doesn't have an autoload
         (ace-flyspell-correct-word)))))
@@ -4340,6 +4324,9 @@ pressing \".\" before selecting the word. Otherwise, correct it."
            ("-d" "en_US")
            nil
            utf-8)))
+
+  ;; TODO https://gitlab.com/ideasman42/emacs-spell-fu/-/issues/4
+  (gsetq ispell-personal-dictionary "~/.aspell.en.pws")
 
   ;; https://old.reddit.com/r/emacs/comments/fxs92h/spell_checkers_in_emacs_in_2020/
   ;; aspell works with contractions, camelCase, kebab-case, etc.
