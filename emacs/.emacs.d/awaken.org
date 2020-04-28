@@ -109,6 +109,15 @@ Used throughout configuration.
     lisp-mode-hook)
   "List of hooks for all used lisp modes.")
 
+(defconst noct-minibuffer-maps
+  '(minibuffer-local-map
+    minibuffer-local-ns-map
+    minibuffer-local-completion-map
+    minibuffer-local-must-match-map
+    minibuffer-local-isearch-map
+    evil-ex-completion-map)
+  "List of minibuffer keymaps.")
+
 (defun noct-blog-dir-p (file)
   "Return whether the current file is in my blog post directory."
   (file-in-directory-p
@@ -219,6 +228,19 @@ BODY is run periodically even if Emacs is actively being used."
                                    (> idle-secs ,idle-interval))
                         ,@body))))
      (run-with-idle-timer ,idle-interval t (lambda () ,@body))))
+
+(defmacro noct-defun (name arglist &optional docstring &rest body)
+  "`defun' but guaranteed return the created function."
+  (declare (doc-string 3) (indent 2))
+  `(progn (defun ,name ,arglist ,docstring ,@body)
+          #',name))
+
+(defmacro noct-disable (mode)
+  "Return a named function that disables MODE."
+  (let ((name (intern (format "noct-disable-%s" mode))))
+    `(noct-defun ,name (&rest _)
+       ,(format "Disable %s." mode)
+       (,mode -1))))
 #+end_src
 
 *** GUI Related
@@ -298,8 +320,8 @@ Select the window afterwards if possible. This is modified from
     (when (and window (window-live-p window))
       (select-window window t))
     ;; TODO this breaks slots
-    ;; (with-current-buffer buffer
-    ;;   (setq window-size-fixed t))
+    (with-current-buffer buffer
+      (setq window-size-fixed t))
     window))
 
 (defun noct:display-buffer-reuse-window (buffer alist)
@@ -324,9 +346,11 @@ When SLOT is non-nil, display popup buffers in that SLOT in the side window."
                   noct:display-buffer-in-side-window)
                  (side . top)
                  (slot . ,,slot)
-                 (window-height . 0.4))
+                 (window-height . 0.5))
                display-buffer-alist
                :test #'equal))
+
+(noct:handle-popup "*Warnings*")
 
 (defun noct:side-window-p ()
   "Return non-nil if the selected window is a side window."
@@ -916,11 +940,7 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 **** Escape Everywhere
 Escape should be bound to ~keyboard-quit~ or ~keyboard-escape-quit~ in various minibuffer keymaps.
 #+begin_src emacs-lisp
-(general-def '(minibuffer-local-map
-               minibuffer-local-ns-map
-               minibuffer-local-completion-map
-               minibuffer-local-must-match-map
-               minibuffer-local-isearch-map)
+(general-def :keymaps noct-minibuffer-maps
   "<escape>" #'keyboard-escape-quit)
 #+end_src
 
@@ -1522,7 +1542,17 @@ Intelligently sorted =M-x=.
 
   (general-r "." #'avy-resume)
 
-  (general-r "/" #'evil-avy-goto-char-timer)
+  (evil-define-motion noct-goto-char-timer-or-swiper-isearch (_count)
+    :type inclusive
+    :jump t
+    :repat abort
+    (evil-without-repeat
+      (evil-enclose-avy-for-motion
+        (when (eq (avy-goto-char-timer) t)
+          (let ((swiper-goto-start-of-match (not evil-this-operator)))
+            (swiper-isearch avy-text))))))
+
+  (general-r "/" #'noct-goto-char-timer-or-swiper-isearch)
 
   (general-add-advice 'avy-resume :after #'evil-normal-state))
 #+end_src
@@ -1737,7 +1767,8 @@ TODO Try more helm.
   :after helm
   :demand t
   :config
-  (gsetq helm-posframe-poshandler #'noct:posframe-poshandler-frame-top-center)
+  (gsetq helm-posframe-poshandler
+         #'noct-posframe-poshandler-frame-near-top-center)
   ;; TODO no border setting currently; make issue
   ;; (when (display-graphic-p)
   ;;   (gsetq helm-posframe-border-width (round (* 0.001 (x-display-pixel-width)))
@@ -1750,8 +1781,7 @@ TODO Try more helm.
 *** Setup
 #+begin_src emacs-lisp
 (use-package ivy
-  :init (ivy-mode)
-  :diminish ""
+  :blackout t
   :config
   (gsetq ivy-height 25
          ivy-wrap t
@@ -1759,8 +1789,7 @@ TODO Try more helm.
          ;; collections
          ivy-dynamic-exhibit-delay-ms 50
          ivy-use-selectable-prompt t
-         ivy-count-format "%d/%d "
-         ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
+         ivy-count-format "%d/%d ")
   ;; ivy-sort-functions-alist
   ;; ivy-initial-inputs-alist
 
@@ -1849,6 +1878,7 @@ TODO evil bindings stop working after wgrep finish edit
   :init
   (general-after-gui
     (ivy-posframe-mode))
+  (general-def noct:toggle-map "p" #'ivy-posframe-mode)
   :config
   (gsetq ivy-posframe-border-width (noct-border-width)
          ;; prevent resizing as type (may need to adjust these)
@@ -1863,8 +1893,14 @@ TODO evil bindings stop working after wgrep finish edit
      str
      #'noct-posframe-poshandler-frame-near-top-center))
 
-  (gsetq ivy-posframe-display-functions-alist
-         '((t . ivy-posframe-display-at-frame-top-center))))
+  (setf (alist-get t ivy-posframe-display-functions-alist)
+        #'ivy-posframe-display-at-frame-top-center)
+
+  ;; still put swiper(-isearch) in minibuffer so buffer is visible
+  (dolist (cmd '(swiper  swiper-isearch counsel-grep))
+    (general-pushnew (list cmd)
+                     ivy-posframe-display-functions-alist
+                     :test 'equal)))
 #+end_src
 
 *** Ivy All the Icons
@@ -1987,8 +2023,7 @@ Select candidate as soon as there is only one (like the headlong package but for
   (general-def company-active-map
     "C-s" #'counsel-company)
 
-  :init (counsel-mode)
-  :diminish "")
+  :blackout t)
 #+end_src
 
 *** Counsel Buku
@@ -2016,12 +2051,136 @@ This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I m
 #+begin_src emacs-lisp
 ;; used for completion in vim
 (general-def 'insert "C-n" #'complete-symbol)
+
+(general-def
+  :keymaps noct-minibuffer-maps
+  "C-n" #'complete-symbol)
+#+end_src
+
+** Orderless
+Unlike traditional fuzzy matching (e.g. flx, fzf, etc.), =orderless= does no sorting. This means you can't do something like rank initials as a better match than characters in the middle of the word for a fuzzy query. However, sorting this way takes extra time, and I've never really liked fuzzy matching. When I used to use fuzzy matching, I never used to know what to type. Instead of ranking initials as higher, why not only use initials? Matching based on initials is more precise, and for me, it's actually easier for me to construct a query for a function's or file path's initials than to try to construct a fuzzy query in some other way.
+
+With a more restrictive/specific query, ranking matches isn't necessary in my experience. Combined with frecency sorting, initialism is good enough. Initialism is incredible for completing file paths, heading names, and function/variable names (~describe-variable~, ~describe-function~, ~find-function~, ~find-library~, company, etc.). With prescient or orderless, if the initialism doesn't get the candidate you want in sight, you can just hit space and add another query (regexp, fuzzy, or whatever you want) to further refine. As soon as the candidate is visible, you can use a keybinding to select it based on its index (or with something like ~ivy-avy~).
+
+Of course, initialism isn't great for everything, but I've found it's often still possible to quickly create queries that are more specific than fuzzy queries but still short. For example, if I want to pull up a help buffer for a variable in =orderless= but don't remember the specific name, I can start by limiting the query to variables prefixed with =orderless=. Instead of typing that out exactly, I can get a good approximation by typing something like =o..s= (still undecided on best syntax; also considering =o,s=) to match words that start with =o= and end with =s=. For commands like ~describe-function~, I normally use ~orderless-strict-leading-initialism~ since I always type the first initial first. I'm relaxing this to ~orderless-strict-initialism~ for queries after the second, so I could type something like =^o..s cs= to match =orderless-component-separator=.
+
+This can work also sometimes well for other query types where initialism is fairly useless (e.g. text search), and you can always add multiple full word queries as needed.
+
+I'm keeping fuzzy out of my default styles, but I've configured things so that I can switch to it if needed by prefixing a query with =f;= or suffixing a query with =;f=.
+
+=orderless= is infinitely customizable, so you can choose better default query styles for different commands. If you wanted, you could remove initialism from ~swiper-isearch~ completely, for example. I'm still experimenting with how restrictive I can make things without harming usability (e.g. can I remove ~orderless-regexp~ entirely as a default style for the first component for commands like ~describe-function~?). So far it seems like I don't need to go this far and I don't need any sorting/ranking to get amazing matching.
+#+begin_src emacs-lisp
+(use-package orderless
+  :ghook
+  ('selectrum-prescient-mode-hook
+   (noct-defun selectrum-prescient-orderless-setup ()
+     "Override prescient's filtering and highlighting for selectrum."
+     (gsetq selectrum-refine-candidates-function
+            #'orderless-filter
+            selectrum-highlight-candidates-function
+            #'orderless-highlight-matches)))
+  :init
+  (gsetq completion-styles '(orderless))
+
+  (general-with 'ivy
+    (setf (alist-get t ivy-re-builders-alist)
+          #'orderless-ivy-re-builder)
+    ;; doesn't work with `counsel-rg'
+    (setf (alist-get 'counsel-rg ivy-re-builders-alist)
+          #'ivy--regex-plus))
+
+  :config
+  (gsetq orderless-component-matching-styles
+         '(orderless-strict-initialism orderless-regexp)
+         orderless-component-separator "[ &]")
+
+  (defun orderless--use-completions-common-part (fn &rest args)
+    (let ((orderless-match-faces [completions-common-part]))
+      (apply fn args)))
+
+  (advice-add 'company-capf--candidates
+              :around #'orderless--use-completions-common-part)
+
+  ;; style dispatchers
+  (defconst noct-regexp-to-styles-alist
+    `((,(rx (or (and bol "r;")
+                (and bol "regexp;")))
+       orderless-regexp)
+      (,(rx (or (and bol "f;")
+                (and ";f" eol)))
+       orderless-flex))
+    "Alist of regexp to list of styles to use for an orderless component.")
+
+  (cl-defun noct-orderless-specified-styles (pattern)
+    "Return a list of styles and a PATTERN without the style specifier."
+    (dolist (style-specifier noct-regexp-to-styles-alist)
+      (let ((re (car style-specifier))
+            (styles (cdr style-specifier)))
+        (when (string-match re pattern)
+          (cl-return-from noct-orderless-specified-styles
+            (cons styles
+                  (let ((start (match-beginning 0))
+                        (end (match-end 0)))
+                    (concat (substring pattern 0 start)
+                            (substring pattern end)))))))))
+
+  (defun noct-orderless-style-dispatcher (pattern &rest _)
+    "Set style for PATTERN if it matches `noct-regexp-to-styles-alist'."
+    (noct-orderless-specified-styles pattern))
+
+  (defconst noct-word-dispatch-pattern (rx ",")
+    "Pattern to mark a full word starting/ending with the surrounding letters.")
+
+  (defun noct-orderless-word-dispatcher (pattern &rest _)
+    "Replace `noct-word-dispatch-pattern' with regexp to pass a full word.)
+The character before, if there is one, is the first character in the word. The
+character after, if there is one, marks the final character in the word. For
+example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
+\"orderless\"."
+    (pcase-let ((`(,styles . ,styless-pattern)
+                 (noct-orderless-specified-styles pattern)))
+      (setq pattern (or styless-pattern pattern))
+      (when (and (or (not styles) (memq 'orderless-regexp styles))
+                 (string-match noct-word-dispatch-pattern pattern))
+        (let* ((start (match-beginning 0))
+               (end (match-end 0))
+               (left-anchor (unless (= start 0)
+                              (substring pattern (1- start) start)))
+               (right-anchor (unless (= end (length pattern))
+                               (substring pattern end (1+ end)))))
+          (concat
+           "regexp;"
+           (if left-anchor
+               (substring pattern 0 (1- start))
+             "")
+           (rx word-start)
+           (or left-anchor "")
+           (rx (0+ word))
+           (or right-anchor "")
+           (rx word-end)
+           (if right-anchor
+               (substring pattern (1+ end))
+             ""))))))
+
+  (defun noct-orderless-index-dispatcher (pattern index &rest _)
+    "Change the default styles for PATTERN based on INDEX."
+    (when (> index 0)
+      (cons '(orderless-strict-initialism orderless-regexp)
+            pattern)))
+
+  (gsetq orderless-style-dispatchers
+         (list #'noct-orderless-word-dispatcher
+               #'noct-orderless-style-dispatcher
+               #'noct-orderless-index-dispatcher)))
 #+end_src
 
 ** Prescient
 #+begin_src emacs-lisp
 (use-package prescient
   :config
+  ;; increase from 100
+  (gsetq prescient-history-length 500)
+
   ;; persist usage statistics
   (prescient-persist-mode))
 
@@ -2036,8 +2195,54 @@ This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I m
   :after ivy
   :demand t
   :config
-  ;; use prescient filtering/sorting for ivy
+  ;; use prescient only for sorting
+  (gsetq ivy-prescient-enable-filtering nil)
   (ivy-prescient-mode))
+#+end_src
+
+** Selectrum
+#+begin_src emacs-lisp
+(use-package selectrum
+  :init
+  ;; this doesn't actually load selectrum (definition is in autoload file)
+  (selectrum-mode)
+  :config
+  (general-after 'amx
+    (setq amx-backend 'selectrum))
+
+  (gsetq selectrum-show-indices t
+         selectrum-num-candidates-displayed 20
+         selectrum-count-style 'current/matches
+         selectrum-fix-minibuffer-height t)
+  (general-def 'normal "?" #'selectrum-repeat)
+  ;; all of these are useless or superseded by other keybindings except for
+  ;; maybe M-s and M-r
+  (setf (alist-get "M-a" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 1)))
+  (setf (alist-get "M-r" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 2)))
+  (setf (alist-get "M-s" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 3)))
+  (setf (alist-get "M-t" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 4)))
+  (setf (alist-get "M-d" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 5)))
+  (setf (alist-get "M-h" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 6)))
+  (setf (alist-get "M-n" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 7)))
+  (setf (alist-get "M-e" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 8)))
+  (setf (alist-get "M-i" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 9)))
+  (setf (alist-get "M-o" selectrum-minibuffer-bindings)
+        (general-l (selectrum-select-current-candidate 10))))
+
+(use-package selectrum-prescient
+  :after selectrum
+  :demand t
+  :config
+  (selectrum-prescient-mode))
 #+end_src
 
 * Group/Session Management/Navigation
@@ -2103,6 +2308,7 @@ This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I m
 #+end_src
 
 ** TODO Desktop.el
+start recentf desktop-after-read-hook
 #+begin_src emacs-lisp
 ;; TODO desktop isn't a package; this is in loaddefs
 (use-package destkop
@@ -2379,14 +2585,25 @@ See [[https://github.com/rnkn/olivetti/issues/12][here]].
 I still need to work on my configuration for this. See [[https://github.com/cyrus-and/zoom/issues/17][this issue]] for information on using fixed-sized windows with zoom (there is no perfect solution, and it looks like it would be very difficult to support).
 #+begin_src emacs-lisp
 (use-package zoom
-  :general (noct:toggle-map "z" #'zoom-mode)
-  :init (zoom-mode)
+  :general
+  (noct:toggle-map "z" #'zoom-mode)
+  (general-t
+    "t" #'zoom
+    "a" #'balance-windows)
+  ;; :init
+  ;; (zoom-mode)
   :diminish " ⊞"
   :config
   (gsetq zoom-size '(0.618 . 0.618)))
 #+end_src
 
 * Buffer Management/Navigation
+** Builtin
+#+begin_src emacs-lisp
+;; I almost never use `find-file' in a buffer (only in dired)
+(general-spc "f" #'switch-to-buffer)
+#+end_src
+
 ** Counsel/Swiper/Ivy
 It's a bit hard to decide how to organize counsel, ivy, and swiper since they're all intertwined. I previously had all counsel and ivy configuration together, but I've split them into multiple use-package expression and put the buffer/file related configuration here.
 
@@ -2556,14 +2773,12 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
     "RET" #'projectile-find-tag)
   (general-t
     "s" #'projectile-replace
-    "t" #'projectile-test-project)
+    "T" #'projectile-test-project)
   :diminish ""
   :config
   (gsetq projectile-enable-caching t
-         projectile-project-test-cmd "make test")
-  (when (featurep 'ivy)
-    ;; as fallback; using counsel-projectile comamnds instead
-    (gsetq projectile-completion-system 'ivy))
+         projectile-project-test-cmd "make test"
+         projectile-completion-system 'default)
 
   (projectile-mode)
 
@@ -2759,6 +2974,33 @@ Highlights escaped characters.
 #+begin_src emacs-lisp
 (use-package highlight-escape-sequences
   :init (hes-mode))
+#+end_src
+
+** Mini Frame and Maple Minibuffer
+#+begin_src emacs-lisp
+;; glitchy; both sometimes disappear (when messages in echo area); sometimes
+;; slow; not using for now
+(use-package mini-frame
+  :config
+  ;; TODO border color
+  (gsetq mini-frame-color-shift-step 0
+         mini-frame-show-parameters
+         `((top . ,(round (* 0.02 (noct:default-monitor-height))))
+           (width . 0.7)
+           (height . 1)
+           (left . 0.5))))
+
+(use-package maple-minibuffer
+  :straight (maple-minibuffer
+             :host github
+             :repo "honmaple/emacs-maple-minibuffer")
+  :config
+  (setq maple-minibuffer:position-type 'frame-top-center
+        maple-minibuffer:border-color
+        (or (ignore-errors (ewal-get-color 'foreground) "gray50"))
+        maple-minibuffer:height nil
+        maple-minibuffer:width 0.7
+        maple-minibuffer:cache t))
 #+end_src
 
 ** Posframe
@@ -3720,16 +3962,11 @@ This package is unfortunately unmaintained.
 #+end_src
 
 ** Git Gutter
-This is the only package that allows in-buffer hunk staging that I'm aware of. It slows Emacs to a crawl in large files with a lot of unstaged changes (like this one). I plan on eventually switching to diff-hl.
-#+begin_src emacs-lisp
-(defun noct:maybe-enable-git-gutter ()
-  "Enable git gutter except for org init file."
-  (unless (and buffer-file-name
-               (string= (file-name-nondirectory buffer-file-name) "awaken.org"))
-    (git-gutter-mode)))
+This is the only package that allows in-buffer hunk staging that I'm aware of. It slows Emacs to a crawl in large files with a lot of unstaged changes (like this one). I plan on eventually switching to diff-hl, which has saner live updating.
 
+Update: Git gutter seems to be faster than previously. Diff-hl at least allows reverting hunks now, but the main reason to prefer git gutter is that it compares with the staging area not the last commit (i.e. staged changes don't show up as changes with git gutter while staging has no effect on the diff-hl display).
+#+begin_src emacs-lisp
 (use-package git-gutter
-  :diminish ""
   :ghook ('find-file-hook #'noct:maybe-enable-git-gutter)
   :general
   (general-t
@@ -3737,16 +3974,36 @@ This is the only package that allows in-buffer hunk staging that I'm aware of. I
     "ge" (list #'git-gutter:previous-hunk :jump t)
     "gh" #'git-gutter:stage-hunk
     "gi" #'git-gutter:revert-hunk)
+  :blackout t
   :config
   (gsetq git-gutter:modified-sign "~"
          git-gutter:handled-backends '(git hg)
          ;; hide when no changes
          git-gutter:hide-gutter t
          git-gutter:update-interval 2)
+
+  (gsetq git-gutter:modified-sign " "
+         git-gutter:deleted-sign " "
+         git-gutter:added-sign " ")
+
   ;; if switch to diff-hl and only use for hunk commands
   ;; (setq git-gutter:display-p nil)
 
-  (general-def noct:toggle-map "g" #'git-gutter-mode))
+  ;; stole from orderless
+  (set-face-background 'git-gutter:modified "#72a4ff")
+  (set-face-background 'git-gutter:added "#90d800")
+  (set-face-background 'git-gutter:deleted "#ed92f8")
+  
+  (general-def noct:toggle-map "g" #'git-gutter-mode)
+
+  (defun noct:maybe-enable-git-gutter ()
+    "Enable git gutter except for in org init file."
+    (unless (and buffer-file-name
+                 (string= (file-name-nondirectory buffer-file-name)
+                          "awaken.org"))
+      (git-gutter-mode)))
+
+  (noct:handle-popup "*git-gutter:diff*"))
 #+end_src
 
 ** Diff HL
@@ -3779,7 +4036,7 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
 #+begin_src emacs-lisp
 (use-package magit
   :general
-  ('normal 'override "S" #'magit-status)
+  ('normal 'override "S" #'magit-status-here)
   ('normal dired-mode-map "C" #'magit-clone)
   (general-spc
     "." #'magit-find-git-config-file
@@ -3794,10 +4051,7 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
     "gp" #'magit-push
     ;; "gf" #'magit-file-dispatch
     "gf" #'magit-pull
-    "gb" #'magit-blame)
-  :config
-  (when (featurep 'ivy)
-    (gsetq magit-completing-read-function #'ivy-completing-read)))
+    "gb" #'magit-blame))
 #+end_src
 
 *** Section Configuration
@@ -4533,7 +4787,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 (use-package poly-org
   ;; TODO shouldn't be enabled by default
   :disabled t
-  :init (general-def noct:toggle-map "o" #'poly-org-mode)
+  :general (noct:toggle-map "o" #'poly-org-mode)
   :config
   (general-def 'normal poly-org-mode-map "SPC u" #'worf-goto)
 
@@ -4973,21 +5227,67 @@ This is a maintained fork of =electric-spacing=.
 #+end_src
 
 **** Flycheck Pos Tip
+Compared to other flycheck frontends, pos tip is pretty slow and can cause significant input lag when company mode is enabled.
 #+begin_src emacs-lisp
 (use-package flycheck-pos-tip
+  :disabled t
   :ghook 'flycheck-mode-hook
   :config
-  (general-add-hook 'lsp-after-open-hook (lambda () (flycheck-pos-tip-mode -1))))
+  (general-add-hook 'lsp-after-open-hook (noct-disable flycheck-pos-tip-mode)))
+#+end_src
+
+**** Flycheck Inline
+Seems fast but the addition of extra lines is jarring. I've updated the display function to show over the line after the error.
+#+begin_src emacs-lisp
+(use-package flycheck-inline
+  :ghook 'flycheck-mode-hook
+  :config
+  ;; NOTE: unicode prefix makes it shift the line down slightly
+  ;; (defconst noct-flycheck-prefix "➵ ")
+  (defconst noct-flycheck-prefix "~> ")
+  (defun noct-flycheck-inline-phantom-display (msg &optional pos)
+    "Display MSG in a phantom starting at the beginning of the next line.
+
+MSG is a string that will be put in a line-long overlay (phantom) at the line
+after POS.  If POS is nil, current point is used instead.
+
+Return the displayed phantom."
+    (pcase-let* ((p (or pos (point)))
+                 (`(,pos-bol . ,pos-eol)
+                  (save-excursion
+                    (goto-char p)
+                    (forward-line)
+                    (cons (point-at-bol) (point-at-eol))))
+                 ;; NOTE doesn't work without final newline
+                 (ov (make-overlay (if (= pos-eol (point-max))
+                                       pos-eol
+                                     pos-bol)
+                                   pos-eol))
+                 (str (concat noct-flycheck-prefix msg)))
+      (overlay-put ov 'phantom t)
+      (overlay-put ov (if (or (= pos-eol (point-max))
+                              (= pos-bol pos-eol))
+                          'after-string
+                        'display)
+                   str)
+      (push ov flycheck-inline--phantoms)
+      ov))
+
+  (gsetq flycheck-inline-display-function
+         #'noct-flycheck-inline-phantom-display))
 #+end_src
 
 **** TODO Flycheck Posframe
-TODO Way to distable line numbers; posframe doesn't go away immediately when moving beteen errors (also happens with flycheck-pos-tip-mode); tooltip is also more obvious (border around childframe probably necessary)
+Looks very nice but has various bugs (last character in message sometimes doesn't show, posframe often appears as empty, etc.).
 #+begin_src emacs-lisp
 (use-package flycheck-posframe
   :disabled t
   :ghook 'flycheck-mode-hook
   :config (flycheck-posframe-configure-pretty-defaults))
 #+end_src
+
+**** TODO LSP Sideline
+https://github.com/emacs-lsp/lsp-ui/issues/437
 
 *** Xref
 #+begin_src emacs-lisp
@@ -6056,6 +6356,7 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
 *** All the Icons Dired
 #+begin_src emacs-lisp
 (use-package all-the-icons-dired
+  ;; https://github.com/jtbm37/all-the-icons-dired/issues/41
   :general (noct:toggle-map "i" #'noct-toggle-all-the-icons-dired)
   :config
   (defvar noct-dired-icons nil)
