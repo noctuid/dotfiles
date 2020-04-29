@@ -298,8 +298,10 @@ Uses 3 pixels FHD and 6 on 4k."
         (round (* 0.02 (noct:default-monitor-height)))))
 #+end_src
 
-*** TODO Popup Handling
+*** TODO Popup Handling and =display-buffer-alist=
 Generally, I have one or two "main" windows open at a time (split horizontally). I like to display "popups" at the top (e.g. help mode windows, magit buffers, etc.). Previously, I used shackle, but for such a simple setup, it's easy enough to use =display-buffer-alist= directly.
+
+**** Popup Helpers
 #+begin_src emacs-lisp
 ;; https://web.archive.org/web/20160409014815/https://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
 (defmacro noct:match-major-mode (mode)
@@ -337,24 +339,32 @@ Select the window afterwards if possible."
 (defmacro noct:handle-popup (condition &optional slot)
   "Display popups matching CONDITION in a side window at the top.
 When SLOT is non-nil, display popup buffers in that SLOT in the side window."
-  `(cl-pushnew `(,(if (and (symbolp ',condition)
-                           (string-match "-mode$" (symbol-name ',condition)))
-                      (noct:match-major-mode ,condition)
-                    ,condition)
-                 (noct:display-buffer-reuse-window
-                  ;; won't keep popping up new windows at the top
-                  noct:display-buffer-in-side-window)
-                 (side . top)
-                 (slot . ,,slot)
-                 (window-height . 0.5))
-               display-buffer-alist
-               :test #'equal))
-
-(noct:handle-popup "*Warnings*")
+  `(cl-pushnew
+    `(,(if (and (symbolp ',condition)
+                (string-match "-mode$" (symbol-name ',condition)))
+           (noct:match-major-mode ,condition)
+         ,condition)
+      (noct:display-buffer-reuse-window
+       ;; won't keep popping up new windows at the top
+       noct:display-buffer-in-side-window)
+      (side . top)
+      (slot . ,,slot)
+      (window-height . 0.5))
+    display-buffer-alist
+    :test 'equal))
 
 (defun noct:side-window-p ()
   "Return non-nil if the selected window is a side window."
   (window-parameter (selected-window) 'window-side))
+#+end_src
+
+**** Basic =display-buffer-alist= setup
+#+begin_src emacs-lisp
+(noct:handle-popup (rx "*Warnings*"))
+
+(cl-pushnew
+ (list (rx "*Async Shell Command*" (0+ any)) #'display-buffer-no-window)
+ display-buffer-alist)
 #+end_src
 
 *** Email Info and Variables
@@ -1897,7 +1907,8 @@ TODO evil bindings stop working after wgrep finish edit
         #'ivy-posframe-display-at-frame-top-center)
 
   ;; still put swiper(-isearch) in minibuffer so buffer is visible
-  (dolist (cmd '(swiper  swiper-isearch counsel-grep))
+  ;; `counsel-fzf' because there is a ton of input if use posfame
+  (dolist (cmd '(swiper swiper-isearch counsel-grep counsel-fzf))
     (general-pushnew (list cmd)
                      ivy-posframe-display-functions-alist
                      :test 'equal)))
@@ -2326,9 +2337,13 @@ start recentf desktop-after-read-hook
 ** Navigation Quickmarks
 *** Quickmark Helpers
 #+begin_src emacs-lisp
-(defmacro noct:f (file)
-  "Wrapper for creating `find-file' commands."
-  `(lambda () (interactive) (find-file ,file)))
+(defmacro noct-find-file (filename)
+  "Create and return named function to visit FILENAME."
+  `(noct-defun ,(intern (concat "noct-quickmark-find-" filename)) ()
+     ,(concat "Call `find-file' on " filename ".")
+     (interactive)
+     (find-file ,filename)))
+
 
 (defun noct:goto-fuzzy (name)
   "Goto the shortest filename in the root of the project that starts with NAME.
@@ -2388,42 +2403,43 @@ Globbing is used to find a matching file."
 #+begin_src emacs-lisp
 (defun noct:bind-general-quickmarks (&rest _)
   (general-comma
-    "a" (noct:f "~/ag-sys/else/arch_and_program_info.org")
-    "A" (noct:f "~/ag-sys/else/accts.org.gpg")
-    "b" (noct:f "~/ag-sys/else/browse.org")
-    "B" (noct:f "~/.config/bspwm/bspwmrc")
-    "c" (noct:f "~/.config/ranger/rc.conf")
+    "a" (noct-find-file "~/ag-sys/else/arch_and_program_info.org")
+    "A" (noct-find-file "~/ag-sys/else/accts.org.gpg")
+    "b" (noct-find-file "~/ag-sys/else/browse.org")
+    "B" (noct-find-file "~/.config/bspwm/bspwmrc")
+    "c" (noct-find-file "~/.config/ranger/rc.conf")
     "C" #'noct:goto-backtrace
     "d" #'projectile-edit-dir-locals
-    "e" (noct:f "~/.emacs.d/awaken.org")
-    "E" (noct:f "~/.emacs.d/lisp/.private.el.gpg")
-    "g" (noct:f "~/ag-sys/else/gaming/games.org")
-    "h" (noct:f "~/ag-sys/else/medical_history.org")
-    "i" (noct:f "~/ag-sys/else/interaction.org")
-    "I" (noct:f "~/ag-sys/else/scrawl/ideas.org")
-    "j" (noct:f "~/ag-sys/else/japanese/japanese.org")
-    "J" (noct:f "~/ag-sys/else/journal.org")
+    "e" (noct-find-file "~/.emacs.d/awaken.org")
+    "E" (noct-find-file "~/.emacs.d/lisp/.private.el.gpg")
+    "g" (noct-find-file "~/ag-sys/else/gaming/games.org")
+    "h" (noct-find-file "~/ag-sys/else/medical_history.org")
+    "i" (noct-find-file "~/ag-sys/else/interaction.org")
+    "I" (noct-find-file "~/ag-sys/else/scrawl/ideas.org")
+    "j" (noct-find-file "~/ag-sys/else/japanese/japanese.org")
+    "J" (noct-find-file "~/ag-sys/else/journal.org")
     ;; pretty useful log file since most programs are started from sxhkd
-    "K" (noct:f (format "/tmp/sxhkd_%s.log" (getenv "DISPLAY")))
-    "l" (noct:f "~/ag-sys/else/log.org")
-    "L" (noct:f "~/ag-sys/else/life.org")
-    "m" (noct:f "~/ag-sys/else/mind.org")
+    "K" (noct-defun noct-find-sxhkd-log ()
+          (find-file (format "/tmp/sxhkd_%s.log" (getenv "DISPLAY"))))
+    "l" (noct-find-file "~/ag-sys/else/log.org")
+    "L" (noct-find-file "~/ag-sys/else/life.org")
+    "m" (noct-find-file "~/ag-sys/else/mind.org")
     "M" #'noct:goto-messages
     "o" #'ff-find-other-file
-    "p" (noct:f "~/.pentadactylrc")
-    "q" (noct:f "~/.config/qutebrowser/config.py")
-    "r" (noct:f "~/ag-sys/else/remapping.org")
+    "p" (noct-find-file "~/.pentadactylrc")
+    "q" (noct-find-file "~/.config/qutebrowser/config.py")
+    "r" (noct-find-file "~/ag-sys/else/remapping.org")
     "S" #'noct:goto-scratch
-    "t" (noct:f "~/.tmux.conf")
-    "v" (noct:f "~/.vimrc")
-    "w" (noct:f "~/ag-sys/else/workflow.org")
-    "x" (noct:f "~/.bxinitrc")
-    "X" (noct:f "/var/log/Xorg.0.log")
-    "X" (noct:f "~/.local/share/xorg/Xorg.0.log")
-    "y" (noct:f "~/ag-sys/else/other/skill_toys/skill_toys.org")
-    "z" (noct:f "~/.zshrc")
-    "Z" (noct:f "~/.zsh_history")
-    "2" (noct:f "~/ag-sys/else/20xx.org")))
+    "t" (noct-find-file "~/.tmux.conf")
+    "v" (noct-find-file "~/.vimrc")
+    "w" (noct-find-file "~/ag-sys/else/workflow.org")
+    "x" (noct-find-file "~/.bxinitrc")
+    "X" (noct-find-file "/var/log/Xorg.0.log")
+    "X" (noct-find-file "~/.local/share/xorg/Xorg.0.log")
+    "y" (noct-find-file "~/ag-sys/else/other/skill_toys/skill_toys.org")
+    "z" (noct-find-file "~/.zshrc")
+    "Z" (noct-find-file "~/.zsh_history")
+    "2" (noct-find-file "~/ag-sys/else/20xx.org")))
 
 (noct:bind-general-quickmarks)
 #+end_src
@@ -2436,18 +2452,18 @@ Globbing is used to find a matching file."
   (pcase name
     ("emacs"
      (general-comma
-       "," (noct:f "~/.emacs.d/init.el")
-       "f" (noct:f "~/.emacs.d/awaken.org")
-       "s" (noct:f "~/.emacs.d/unclean.org")
-       "t" (noct:f "~/.emacs.d/todo.org")
-       "T" (noct:f "~/test-emacs/.emacs.d/init.el")))
+       "," (noct-find-file "~/.emacs.d/init.el")
+       "f" (noct-find-file "~/.emacs.d/awaken.org")
+       "s" (noct-find-file "~/.emacs.d/unclean.org")
+       "t" (noct-find-file "~/.emacs.d/todo.org")
+       "T" (noct-find-file "~/test-emacs/.emacs.d/init.el")))
     ;; "log"
     ("notes"
      (general-comma
-       "," (noct:f "~/ag-sys/else/20xx.org")
-       "f" (noct:f "~/ag-sys/else/20xx.org")
-       "s" (noct:f "~/ag-sys/else/interaction.org")
-       "t" (noct:f "~/ag-sys/else/workflow.org")))
+       "," (noct-find-file "~/ag-sys/else/20xx.org")
+       "f" (noct-find-file "~/ag-sys/else/20xx.org")
+       "s" (noct-find-file "~/ag-sys/else/interaction.org")
+       "t" (noct-find-file "~/ag-sys/else/workflow.org")))
     ("prog"
      (general-comma
        "," #'noct:goto-main
@@ -2464,36 +2480,39 @@ Globbing is used to find a matching file."
           "~/ag-sys/library/programming/common_lisp/minispec/html/index.html"))))
     ("config"
      (general-comma
-       "," (noct:f "~/dotfiles/README.org")
-       "r" (noct:f "~/dotfiles/remap/README.org")
+       "," (noct-find-file "~/dotfiles/README.org")
+       "r" (noct-find-file "~/dotfiles/remap/README.org")
        ;; TODO
-       ;; "e" (noct:f "~/dotfiles/editing.org")
-       "b" (noct:f "~/dotfiles/browsing/README.org")))
+       ;; "e" (noct-find-file "~/dotfiles/editing.org")
+       "b" (noct-find-file "~/dotfiles/browsing/README.org")))
     ("blog"
      (general-comma
        ;; create post
-       "," (noct:f (expand-file-name
-                    (format "content-org/%s"
-                            (read-from-minibuffer "Post file name: "))
-                    (getenv "BLOG")))))
+       "," (noct-defun noct-create-blog-post ()
+             (interactive)
+             (find-file
+              (expand-file-name
+               (format "content-org/%s"
+                       (read-from-minibuffer "Post file name: "))
+               (getenv "BLOG"))))))
     ("wr"
      (general-comma
-       "," (noct:f "~/ag-sys/else/scrawl/prose/standards+procedure.org")
-       "f" (noct:f "plot.org")
-       "s" (noct:f "~/ag-sys/else/scrawl/prose/sat/misc.org")
-       "t" (noct:f "~/ag-sys/else/scrawl/prose/pots/misc.org")
-       "w" (noct:f "world.org")
-       "m" (noct:f "misc.org")
-       "b" (noct:f "bio.org")
-       "i" (noct:f "~/ag-sys/else/scrawl/ideas.org")
-       "c" (noct:f "~/ag-sys/else/scrawl/prose/lndn/landon.org")
-       "g" (noct:f "~/ag-sys/else/scrawl/prose/gen_misc.org")))
+       "," (noct-find-file "~/ag-sys/else/scrawl/prose/standards+procedure.org")
+       "f" (noct-find-file "plot.org")
+       "s" (noct-find-file "~/ag-sys/else/scrawl/prose/sat/misc.org")
+       "t" (noct-find-file "~/ag-sys/else/scrawl/prose/pots/misc.org")
+       "w" (noct-find-file "world.org")
+       "m" (noct-find-file "misc.org")
+       "b" (noct-find-file "bio.org")
+       "i" (noct-find-file "~/ag-sys/else/scrawl/ideas.org")
+       "c" (noct-find-file "~/ag-sys/else/scrawl/prose/lndn/landon.org")
+       "g" (noct-find-file "~/ag-sys/else/scrawl/prose/gen_misc.org")))
     ("cons"
      (general-comma
-       "f" (noct:f "~/ag-sys/else/consume/books.org")
-       "s" (noct:f "~/ag-sys/else/consume/nim.org")
-       "t" (noct:f "~/ag-sys/else/consume/movies.org")
-       "m" (noct:f "~/ag-sys/else/consume/music.org")))))
+       "f" (noct-find-file "~/ag-sys/else/consume/books.org")
+       "s" (noct-find-file "~/ag-sys/else/consume/nim.org")
+       "t" (noct-find-file "~/ag-sys/else/consume/movies.org")
+       "m" (noct-find-file "~/ag-sys/else/consume/music.org")))))
 #+end_src
 
 *** Hook
@@ -2647,29 +2666,29 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
 
   ;; have heard some people say ripgrep is faster than fd for files; haven't
   ;; really tried enough to compare
-  (defun noct:ripgrep-fzf (&optional initial-input)
+  (defun noct-ripgrep-fzf (&optional initial-input)
     "Run `counsel-fzf' using ripgrep as fzf's default command."
     (interactive)
     (noct:letenv (("FZF_DEFAULT_COMMAND"
                    "rg --files --no-ignore --hidden --follow --glob '!.git'"))
       (counsel-fzf initial-input)))
 
-  (defun noct:ivy-switch-to-locate ()
+  (defun noct-ivy-switch-to-locate ()
     "Switch to using locate, preserving the current input.
 Requires lexical binding."
     (interactive)
     (let ((input (ivy--input)))
       (ivy-quit-and-run (counsel-locate input))))
 
-  (defun noct:ivy-switch-to-fzf ()
+  (defun noct-ivy-switch-to-fzf ()
     "Switch to using fzf, preserving the current input."
     (interactive)
     (let ((input (ivy--input)))
-      (ivy-quit-and-run (noct:ripgrep-fzf input))))
+      (ivy-quit-and-run (noct-ripgrep-fzf input))))
 
   (general-def ivy-switch-buffer-map
-    "C-l" #'noct:ivy-switch-to-locate
-    "C-f" #'noct:ivy-switch-to-fzf))
+    "C-l" #'noct-ivy-switch-to-locate
+    "C-f" #'noct-ivy-switch-to-fzf))
 #+end_src
 
 *** TODO Counsel Grep
@@ -6241,8 +6260,6 @@ Notable packages not currently using:
 TODO: Don't create a bunch of dired buffers (e.g. dired-single-up-directory).
 
 TODO: Async copy/paste with rsync
-
-TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-opening)
 #+begin_src emacs-lisp
 (use-package dired
   :straight nil
@@ -6253,6 +6270,8 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
   ;; by default only show filename
   ('dired-initial-position-hook #'dired-hide-details-mode)
   :config
+  (gsetq dired-recursive-copies 'always)
+
   (if (eq system-type 'darwin)
       (when (executable-find "gls")
         (gsetq insert-directory-program "gls"
@@ -6263,7 +6282,7 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
 
 *** Basic Keybindings
 #+begin_src emacs-lisp
-(general-with-package 'dired
+(general-with 'dired
   (put 'dired-find-alternate-file 'disabled nil)
   (general-def 'normal dired-mode-map
     "q" #'noct:kill-this-buffer
@@ -6291,13 +6310,13 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
     ;; renaming/changing
     "cc" #'dired-do-rename
     "cm" #'dired-do-chmod
-    "co" #'dired-do-chown
+    "ch" #'dired-do-chown
     "cg" #'dired-do-chgrp
 
     ;; TODO ranger u and c shell bindings (e.g. convert to pdf)
 
     "di" #'dired-do-delete
-    ;; TODO "ud" trash-restore
+    "ud" #'trashed
 
     ;; encryption and decryption (epa-dired)
     "Ed" #'epa-dired-do-decrypt
@@ -6317,40 +6336,45 @@ TODO: File opening widh dired (see dired-rifle, dired-open, runner, and unify-op
 
 *** Quickmarks
 #+begin_src emacs-lisp
-(general-with-package 'dired
-  (defmacro noct:find-alternate-file (filename)
-    `(defun ,(intern (concat "noct:quickmark-find-" filename)) ()
-       ,(concat "Call `find-alternate-file' on " filename ".")
-       (interactive)
-       (find-alternate-file ,filename)))
+(general-with 'dired
+  ;; TODO can't use this with ranger
+  ;; (defmacro noct-dired-alt-file (filename)
+  ;;     "Create a named function to visit FILENAME.
+  ;; The created function will act like `dired-find-alternate-file'."
+  ;;     `(noct-defun ,(intern (concat "noct-dired-alt-find-" filename)) ()
+  ;;        ,(concat "Call `find-alternate-file' on " filename ".")
+  ;;        (interactive)
+  ;;        (set-buffer-modified-p nil)
+  ;;        (find-alternate-file ,filename)))
 
   (general-def 'normal dired-mode-map
     :prefix "g"
-    "/" (noct:find-alternate-file "/")
-    "b" (noct:find-alternate-file "/bin/")
-    "e" (noct:find-alternate-file "/etc/")
-    "h" (noct:find-alternate-file "~/")
-    "m" (noct:find-alternate-file "/media/")
-    "t" (noct:find-alternate-file "/tmp/")
-    "u" (noct:find-alternate-file "/usr/")
-    "v" (noct:find-alternate-file "/var/")
-    "V" (noct:find-alternate-file "/Volumes/"))
+    "/" (noct-find-file "/")
+    "b" (noct-find-file "/bin/")
+    "e" (noct-find-file "/etc/")
+    "h" (noct-find-file "~/")
+    "m" (noct-find-file "/media/")
+    "t" (noct-find-file "/tmp/")
+    "u" (noct-find-file "/usr/")
+    "v" (noct-find-file "/var/")
+    "V" (noct-find-file "/Volumes/"))
 
   (general-def 'normal dired-mode-map
     :prefix "'"
-    "b" (noct:find-alternate-file "~/dotfiles/scripts/bin/")
-    "B" (noct:find-alternate-file "~/src/blog/pir-hana/")
-    "c" (noct:find-alternate-file "~/src/")
-    "d" (noct:find-alternate-file "~/database/")
-    "e" (noct:find-alternate-file "~/.emacs.d/")
-    "E" (noct:find-alternate-file "~/ag-sys/else/")
-    "f" (noct:find-alternate-file "~/dotfiles/")
-    "l" (noct:find-alternate-file "~/ag-sys/library/")
-    "m" (noct:find-alternate-file "~/move/")
-    "p" (noct:find-alternate-file "~/ag-sys/else/scrawl/prose/pots/")
-    "P" (noct:find-alternate-file "~/ag-sys/prog/")
-    "s" (noct:find-alternate-file "~/school/")
-    "S" (noct:find-alternate-file "~/move/Screenshots/")))
+    "b" (noct-find-file "~/dotfiles/scripts/bin/")
+    "B" (noct-find-file "~/src/blog/pir-hana/")
+    "c" (noct-find-file "~/src/")
+    "d" (noct-find-file "~/database/")
+    "e" (noct-find-file "~/.emacs.d/")
+    "E" (noct-find-file "~/ag-sys/else/")
+    "f" (noct-find-file "~/dotfiles/")
+    "l" (noct-find-file "~/ag-sys/library/")
+    "m" (noct-find-file "~/move/")
+    "p" (noct-find-file "~/ag-sys/else/scrawl/prose/pots/")
+    "P" (noct-find-file "~/ag-sys/prog/")
+    "s" (noct-find-file "~/school/")
+    "S" (noct-find-file "~/move/Screenshots/")
+    "w" (noct-find-file "~/wallpaper/")))
 #+end_src
 
 *** All the Icons Dired
@@ -6390,6 +6414,12 @@ Find a theme that customizes these faces.
   :ghook 'dired-mode-hook)
 #+end_src
 
+*** Dired Git Info
+#+begin_src emacs-lisp
+(use-package dired-git-info
+  :general ('normal dired-mode-map ")" #'dired-git-info-mode))
+#+end_src
+
 *** Dired K
 #+begin_src emacs-lisp
 (use-package dired-k
@@ -6408,6 +6438,46 @@ Change current user to root.
   :general ('normal dired-mode-map "zs" #'dired-toggle-sudo))
 #+end_src
 
+*** FASD
+Pretty much just using fasd in terminal at the moment, but maybe this package will be useful in the future.
+
+*** File Opening (External)
+https://github.com/Vifon/dired-rifle.el
+- Only supports rifle
+https://github.com/thomp/dired-launch
+- Allows setting a default launcher (e.g. xdg-open, open, rifle, etc.; has sane default based on system)
+- Allows using custom commands for specific extensions
+https://github.com/garberw/openwith
+- Can match full filename (unlike dired-launch I think)
+- Disowns process so closing Emacs doesn't affect it
+- Affects all file finding
+https://github.com/thamer/runner/
+- Weird (provides commands for configuring its runner-alist but there's no harm in that; redefines dired commands without using override advice)
+https://github.com/DamienCassou/unify-opening
+- Uses dired-guess-shell-command for opening with other packages (e.g. org and mu4e)
+https://github.com/sfllaw/emacs-launch/blob/master/launch.el
+- Uses system launcher
+https://github.com/Fuco1/dired-hacks/blob/master/dired-open.el
+- Uses nohup (optionally)
+- Modifies ~~dired-find-file~ directly instead of adding a new opening command
+
+For now instead of modifying ~dired-find-file~ for specific extensions, I'm just using my own command.
+#+begin_src emacs-lisp
+(general-with 'dired
+  (defun noct-dired-open-external ()
+    "Open selected path(s) with external opener."
+    (interactive)
+    (let ((opener (cond ((executable-find "rifle")
+                         "rifle")
+                        ((executable-find "open")
+                         "open"))))
+      (when opener
+        (dolist (file (dired-get-marked-files))
+          (start-process "noct-dired-open" nil
+                         opener (file-truename file))))))
+
+  (general-def 'normal dired-mode-map "I" #'noct-dired-open-external))
+#+end_src
 *** Wdired
 #+begin_src emacs-lisp
 (use-package wdired
@@ -6458,7 +6528,7 @@ It also has overlapping functionality with a lot of packages. For example, I'm u
     "<prior>" #'ranger-page-up
     "F" #'ranger-travel
 
-    ;; sorting
+    ;; sorting ([c]hange [o]rder)
     "co" #'ranger-sort-criteria
 
     ;; marking
@@ -6494,16 +6564,16 @@ It also has overlapping functionality with a lot of packages. For example, I'm u
     ;; tabs
     "mm" #'ranger-new-tab
     "mq" #'ranger-close-tab
-    "ma" (lambda () (interactive) (ranger-goto-tab 1))
-    "mr" (lambda () (interactive) (ranger-goto-tab 2))
-    "ms" (lambda () (interactive) (ranger-goto-tab 3))
-    "mt" (lambda () (interactive) (ranger-goto-tab 4))
-    "md" (lambda () (interactive) (ranger-goto-tab 5))
-    "mh" (lambda () (interactive) (ranger-goto-tab 6))
-    "mn" (lambda () (interactive) (ranger-goto-tab 7))
-    "me" (lambda () (interactive) (ranger-goto-tab 8))
-    "mi" (lambda () (interactive) (ranger-goto-tab 9))
-    "mo" (lambda () (interactive) (ranger-goto-tab 0))
+    "ma" (general-l (ranger-goto-tab 1))
+    "mr" (general-l (ranger-goto-tab 2))
+    "ms" (general-l (ranger-goto-tab 3))
+    "mt" (general-l (ranger-goto-tab 4))
+    "md" (general-l (ranger-goto-tab 5))
+    "mh" (general-l (ranger-goto-tab 6))
+    "mn" (general-l (ranger-goto-tab 7))
+    "me" (general-l (ranger-goto-tab 8))
+    "mi" (general-l (ranger-goto-tab 9))
+    "mo" (general-l (ranger-goto-tab 0))
     "uq" #'ranger-restore-tab
 
     ;; toggles/settings
@@ -6547,6 +6617,111 @@ Show entire path for a directory (or chain of directories) that only contains a 
 
 **** TODO Dired Filter
 **** TODO Dired Narrow
+*** Image Handling
+Image display (and resizing) is too slow to be worth it. Assuming that ever changes, do the following:
+- Bind =cb= to change wallpaper (see rc.conf; same for below)
+- Bind =cw= to change wallpaper and theme with pywal
+- Bind =cr=, =cR=, and =cm= to rotate and mirror images
+- Bind =cu=  and =cU= to create an upscaled version
+- Bind =cj= to tesseract
+- Bind =ui= and =uI= to imgur upload
+- Bind tmsu keys
+
+*** Trashed
+#+begin_src emacs-lisp
+;; bound in dired
+(use-package trashed
+  :config
+  (evil-collection-init 'trashed)
+
+  (general-def 'normal trashed-mode-map
+    ;; "RET" #'trashed-view-file
+    ;; "RET" #'trashed-display-file
+    ;; "RET" #'trashed-find-file
+    "n" #'trashed-next-line
+    "e" #'trashed-previous-line
+    "TAB" #'trashed-mark
+    "," #'trashed-mark
+    "u" #'trashed-do-restore)
+
+  (noct:handle-popup "Trash Can"))
+#+end_src
+
+*** Shell Commands
+#+begin_src emacs-lisp
+(general-with 'dired
+  (defun noct-dired-async-run (command)
+    "Run `dired-do-async-shell-command' with COMMAND and the marked files."
+    (dired-do-async-shell-command command nil (dired-get-marked-files)))
+
+  (defun noct-dired-unoconv-to-txt ()
+    "Convert selected file(s) to txt with unoconv."
+    (interactive)
+    (noct-dired-async-run "unoconv -f txt"))
+
+  (defun noct-dired-unoconv-to-pdf ()
+    "Convert selected file(s) to pdf with unoconv."
+    (interactive)
+    (noct-dired-async-run "unoconv -f pdf"))
+
+  (defun noct-dired-pandoc (extension)
+    "Convert selected file(s) to end in EXTENSION."
+    (interactive "sConvert to extension: ")
+    (dolist (file (dired-get-marked-files))
+      (let ((basename (noct:basename file)))
+        (dired-do-async-shell-command
+         (format "pandoc -o %s.%s" basename extension)
+         nil
+         (list file)))))
+
+  (general-def 'normal dired-mode-map
+    "ct" #'noct-dired-unoconv-to-txt
+    "cP" #'noct-dired-unoconv-to-pdf
+    "cp" #'noct-dired-pandoc)
+
+  (defun noct-dired-udiskie-umount ()
+    "Unmount selected drive(s) with udiskie."
+    (interactive)
+    (noct-dired-async-run "udiskie-umount"))
+
+  (defun noct-udiskie-umount-all ()
+    "Unmount all drives with udiskie."
+    (interactive)
+    (call-process-shell-command "udiskie-umount --all &"))
+
+  ;; TODO don't have a tray anymore; does this work with external cd reader?
+  (defun noct-eject-tray ()
+    "Eject tray."
+    (interactive)
+    (let ((default-directory "/sudo::")
+          ;; don't try to get root password from auth sources
+          auth-sources)
+      (shell-command "eject /dev/sr0")))
+
+  (general-def 'normal dired-mode-map
+    "un" #'noct-dired-udiskie-umount
+    "uN" #'noct-udiskie-umount-all
+    "ue" #'noct-eject-tray)
+
+  (defun noct-dired-sanitize ()
+    "Sanitize permission of selected path(s)."
+    (interactive)
+    (noct-dired-async-run (format "sudo chmod -R u=rwX,go=rX"))
+    (noct-dired-async-run (format "sudo chown -R \"%s\" " (getenv "USER"))))
+
+  (general-def 'normal dired-mode-map
+    "cs" #'noct-dired-sanitize)
+
+  ;; TODO untested
+  (defun noct-dired-beet-import ()
+    "Call beet import on the selected path(s)."
+    (interactive)
+    (dired-do-shell-command "beet import"))
+
+  (general-def 'normal dired-mode-map
+    "bi" #'noct-dired-beet-import))
+#+end_src
+
 ** Vterm
 #+begin_src emacs-lisp
 (defun noct-vterm-setup ()
