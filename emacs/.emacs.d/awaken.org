@@ -63,10 +63,11 @@ The more "controversial" keys I use as prefixes are =m=, =h=, =t=, and =T=. I us
 ** Configuration Principles
 My configuration may not meet these requirements at this point in time, but these are the goals.
 
-- Speed
-  - Aggressively use autoloads and ~with-eval-after-load~ to cut down on startup time when it makes sense. Don't do this for functionality that should be available immediately. Previously I had a lot of ~use-package~ statments =:defer <time>=. I avoid this now unless I think it's unlikely I need to use a package immediately and there's no better way to autoload it.
-  - Configuration should work when using the daemon (e.g. some functionality that relies on GUI Emacs needs to be run later). When using the daemon, startup time isn't as important, but it should still be fast. I try to keep ~emacs-init-time~ at around 1 second (when I started using Emacs, I was requiring everything during initialization, and startup could take 20-60 seconds on my old laptop).
+- Speed (nice but not a primary goal)
+  - Aggressively use autoloads and ~with-eval-after-load~ for configuration to cut down on startup time when it makes sense. Previously I had a lot of ~use-package~ statements with =:defer <time>=. I avoid this now unless I think it's unlikely I need to use a package immediately and there's no better way to autoload it. For packages that don't make sense to load with keybindings I have often copied what doom does with some minor modifications. Example differences: I am using the =evil-(operator|visual)-state-entry-hook= hooks for loading packages that just provide text objects, I'm using =evil-insert-state-entry-hook= with read-only/major mode type checks for loading some packages, I'm using a hook for when I run a keybinding to switch the scratch buffer to Emacs lisp mode, etc.). I'm also using doom's :defer-incrementally for larger packages (org, lispy, magit, etc.). :defer-incrementally helps prevent large pauses especially if you start the daemon before creating a client.
+  - Configuration should work when using the daemon (e.g. some functionality that relies on GUI Emacs needs to be run later). When using the daemon, startup time isn't as important, but it should still be fast. I try to keep ~emacs-init-time~ at <0.6 seconds (when I started using Emacs, I was requiring everything during initialization, and startup could take 20-60 seconds on my old laptop). Probably I could get things to look faster if I load after init (though that will require some changes).
   - Use profiling to diagnose performance issues during and after startup.
+  - Benchmark with a combination of benchmark-init, profile-dotemacs, and tracking where packages are required for debugging (see custom init.el flags)
 - Intelligent handling of errors in init file
   - Localize recoverable errors and convert them to warnings whenever possible (e.g. if a package fails to install, warn and don't run its configuration). This means wrapping anything that requires a package to be loaded in a ~with-eval-after-load~ (usually via ~use-package~ or ~general-with-package~).
   - Isolate sections (source blocks) where possible, so that one section failing will not affect other sections. When there is some non-recoverable error somewhere in my init (e.g. ~(call-to-misspelled-function)~), I can start Emacs with =--with-demoted-errors= (flag I'm handling in =./init.el=) to demote errors for every source block. This means that I can still use Emacs with most of my configuration to fix my init file without needing to switch to a stable configuration or a different editor.
@@ -137,6 +138,11 @@ See https://www.reddit.com/r/emacs/comments/64xb3q/killthisbuffer_sometimes_just
   "Apply OLDFUN to ARGS with `inhibit-message' non-nil."
   (let ((inhibit-message t))
     (apply oldfun args)))
+
+(defun noct-no-message (orig-fun &rest args)
+  "Apply ORIG-FUN to ARGS with `message' overriden as `ignore'."
+  (cl-letf (((symbol-function 'message) #'ignore))
+    (apply orig-fun args)))
 
 (defmacro noct-silently (&rest body)
   (declare (indent 0) (debug t))
@@ -235,12 +241,39 @@ BODY is run periodically even if Emacs is actively being used."
   `(progn (defun ,name ,arglist ,docstring ,@body)
           #',name))
 
+(defmacro noct-c (&rest body)
+  "Like `general-lambda' but create named function based on BODY.
+Strip out parens and replace spaces/newlines with - to make the name more
+readable."
+  (declare (indent defun))
+  ;; generally don't like overuse threading macros, but this seems like the
+  ;; place to use
+  ;; makes flycheck unhappy though
+  (let ((name (thread-last body
+                (format "%s")
+                (replace-regexp-in-string "[()]" "")
+                (replace-regexp-in-string (rx (or space "\n")) "-")
+                (intern))))
+    `(noct-defun ,name ()
+       (interactive)
+       ,@body)))
+
 (defmacro noct-disable (mode)
   "Return a named function that disables MODE."
   (let ((name (intern (format "noct-disable-%s" mode))))
     `(noct-defun ,name (&rest _)
        ,(format "Disable %s." mode)
        (,mode -1))))
+
+(defun noct-undo-a (orig-fun &rest args)
+  "Wrap a call to ORIG-FUN with ARGS in `evil-with-undo'."
+  (evil-with-undo
+    (apply orig-fun args)))
+
+(defun noct-add-undo-bounds (command)
+  "Advise COMMAND to be wrapped in `evil-with-undo'."
+  (general-after 'evil
+    (general-add-advice command :around #'noct-undo-a)))
 #+end_src
 
 *** GUI Related
@@ -269,7 +302,6 @@ BODY is run periodically even if Emacs is actively being used."
                        nil
                        nil
                        t)))
-
 
 ;; NOTE these only work for GUI
 (defun noct:default-monitor-geometry ()
@@ -336,22 +368,28 @@ Select the window afterwards if possible."
 Select the window afterwards if possible."
   (noct:display-and-select-buffer #'display-buffer-in-side-window buffer alist))
 
+(defmacro noct-handle-window (condition &rest body)
+  "Display windows matching CONDITION with the settings in BODY."
+  (declare (indent 1) (debug t))
+  (let ((condition (if (and (symbolp condition)
+                            (string-match "-mode$" (symbol-name condition)))
+                       `(noct:match-major-mode ,condition)
+                     condition)))
+    `(cl-pushnew
+      (list ,condition ,@body)
+      display-buffer-alist
+      :test 'equal)))
+
 (defmacro noct:handle-popup (condition &optional slot)
   "Display popups matching CONDITION in a side window at the top.
 When SLOT is non-nil, display popup buffers in that SLOT in the side window."
-  `(cl-pushnew
-    `(,(if (and (symbolp ',condition)
-                (string-match "-mode$" (symbol-name ',condition)))
-           (noct:match-major-mode ,condition)
-         ,condition)
-      (noct:display-buffer-reuse-window
+  `(noct-handle-window ,condition
+     '(noct:display-buffer-reuse-window
        ;; won't keep popping up new windows at the top
        noct:display-buffer-in-side-window)
-      (side . top)
-      (slot . ,,slot)
-      (window-height . 0.5))
-    display-buffer-alist
-    :test 'equal))
+     '(side . top)
+     '(slot . ,slot)
+     '(window-height . 0.5)))
 
 (defun noct:side-window-p ()
   "Return non-nil if the selected window is a side window."
@@ -371,6 +409,19 @@ When SLOT is non-nil, display popup buffers in that SLOT in the side window."
 #+begin_src emacs-lisp
 (when (locate-library "noct-info")
   (require 'noct-info))
+#+end_src
+
+*** Debugging
+Useful for debugging selectrum or ivy.
+#+begin_src emacs-lisp
+;; https://github.com/raxod502/prescient.el/issues/56#issuecomment-614094583
+(defun raxod502-force-debug (func &rest args)
+  (condition-case e
+      (apply func args)
+    ((debug error) (signal (car e) (cdr e)))))
+
+;; for example
+;; (general-add-advice 'ivy--exhibit :around #'raxod502-force-debug)
 #+end_src
 
 ** =package.el=
@@ -398,6 +449,7 @@ Package loading:
 - =:after= when it only makes sense to load one package after another (not used for "core" packages like =evil= that are loaded immediately) (usually not necessary)
 - =:demand t= for packages that should be loaded immediately (e.g. =evil=)
 - =:defer number= for packages whose functionality should be quickly available but is not necessary immediately (use sparingly)
+- =:defer-incrementally= for packages with lots of dependencies (functionality from doom)
 - =:ghook= to add to hooks that will later run and load the package
 - =:mode= as a temporary solution for major modes that don't add to =auto-mode-alist=
 - =:commands= as a temporary solution for packages that don't have autoload cookies
@@ -418,7 +470,7 @@ In the =:config= section, I generally put settings (~setq~ then any face configu
 *** Straight
 Install, load, and configure =straight.el=:
 #+begin_src emacs-lisp
-(setq straight-repository-branch 'develop
+(setq straight-repository-branch "develop"
       ;; default
       straight-enable-use-package-integration t
       ;; check for modifications (to determine whether a package needs to be
@@ -450,6 +502,18 @@ Install, load, and configure =straight.el=:
   ;; (benchmark 1 `(load ,bootstrap-file nil 'nomessage))
   (load bootstrap-file nil 'nomessage))
 
+(defvar noct-straight-packages nil
+  "List of packages `straight-use-package' is successful for.")
+
+(defun noct-straight-use-package (orig-fun &rest args)
+  "Store a package in `noct-straight-packages' on success."
+  (when (apply orig-fun args)
+    (push (if (listp (car args))
+              (caar args)
+            (car args))
+          noct-straight-packages)))
+(advice-add 'straight-use-package :around #'noct-straight-use-package)
+
 ;; straight now fixes `org-version' by default (see `straight-fix-org'); this
 ;; has to be earlier in the config file for it to work correctly
 (straight-use-package 'org-plus-contrib)
@@ -461,14 +525,26 @@ Install =use-package.el= with optional dependencies and configure:
 ;; install use-package
 (straight-use-package 'use-package)
 
-;; requiring use package is still necessary when loading a compiled file to be
-;; able to alter `use-package-defaults' below; not requiring when loading a
-;; compiled file doesn't seem to really affect startup time
-;; (eval-when-compile
-;;   (require 'use-package))
-(require 'use-package)
+;; don't require `use-package' when loading compiled file; saves a millisecond
+;; or 2; compiling now saves ~0.1s overall (maybe another 0.1s after general
+;; rewrite)
+(eval-when-compile
+  (require 'use-package)
 
-(setq use-package-always-defer t)
+  ;; don't actually need `eval-when-compile' for rest since currently loading
+  ;; entire init file before compiling already
+  (setq use-package-always-defer t)
+
+  ;; don't do anything if installation fails; like
+  ;; `use-package-check-before-init' but works for :config and other keywords;
+  ;; recording `straight-use-package' return values instead of using
+  ;; `locate-library' since it was adding an extra 0.15 seconds to init
+  (cl-pushnew '(:when
+                (lambda (package &rest _)
+                  `(memq ',package noct-straight-packages))
+                t)
+              use-package-defaults
+              :test #'equal))
 
 ;; demote installation errors to messages
 ;; this variable is no longer changed by straight
@@ -477,25 +553,6 @@ Install =use-package.el= with optional dependencies and configure:
 ;; can test with something like this:
 ;; (use-package does-not-exist)
 
-;; don't do anything if installation fails
-;; like `use-package-check-before-init' but works for :config and other keywords
-(cl-pushnew '(:when
-              (lambda (package &rest _)
-                `(locate-library (symbol-name ',package)))
-              t)
-            use-package-defaults
-            :test #'equal)
-
-(use-package diminish
-  :demand t)
-
-;; diminish works fine with '(:eval); I don't think there are any advantages of
-;; delight that I'm making use of
-;; TODO remove entirely
-(use-package delight
-  :demand t)
-
-;; TODO switch entirely to blackout
 (use-package blackout
   :straight (blackout :host github :repo "raxod502/blackout")
   :demand t)
@@ -623,13 +680,20 @@ Principles:
 ;;   (general-add-hook 'doom-switch-window-hook fun)
 ;;   (general-add-advice 'after-find-file :before (lambda (&rest _) (funcall fun))))
 
-;; TODO remove after first time called
+(defvar noct-elisp-scratch-hook nil
+  "Hook run when scratch buffer switches from fundamental to emacs-lisp mode.
+Can't use `after-change-major-mode-hook' hook since that triggers during init.")
+
+;; TODO remove other after one is called
 (defmacro noct-after-buffer (&rest body)
-  "Run BODY once after switching buffers or when finding a file."
+  "Run BODY once after switching buffers or when finding a file.
+Doom uses a lot. Additionally run once in `noct-elisp-scratch-hook', so
+BODY run if I switch the scratch buffer to elisp."
   (declare (indent defun))
   `(let ((fun (lambda (&rest _)
                 ,@body)))
-     (general-add-hook 'doom-switch-buffer-hook fun nil nil t)
+     (general-add-hook '(doom-switch-buffer-hook
+                         noct-elisp-scratch-hook) fun nil nil t)
      (general-add-advice 'after-find-file :before fun nil t)))
 
 (defmacro noct-after-window (&rest body)
@@ -639,6 +703,27 @@ Principles:
                 ,@body)))
      (general-add-hook 'doom-switch-window-hook fun nil nil t)
      (general-add-advice 'after-find-file :before fun nil t)))
+
+(defmacro noct-pre-command-or-post-file (&rest body)
+  "Run BODY once in `pre-command-hook' or when finding a file."
+  (declare (indent defun))
+  `(let ((fun (lambda (&rest _)
+                ,@body)))
+     (general-add-hook 'pre-command-hook fun nil nil t)
+     (general-add-advice 'after-find-file :before fun nil t)))
+
+(defmacro noct-post-insert-and-writable (&rest body)
+  "Run BODY in `evil-insert-state-entry-hook' for the first writable buffer."
+  (declare (indent defun))
+  `(progn
+     (general-add-hook 'evil-insert-state-entry-hook
+                       (lambda ()
+                         (unless buffer-read-only
+                           ,@body
+                           t))
+                       nil
+                       nil
+                       #'identity)))
 #+end_src
 
 *** Switch Window Hook
@@ -689,7 +774,7 @@ Principles:
 (defvar-local doom-large-file-p nil)
 (put 'doom-large-file-p 'permanent-local t)
 
-(defvar doom-large-file-size-alist '(("." . 1.0))
+(defvar doom-large-file-size-alist '(("." . 3.0))
   "An alist mapping regexps (like `auto-mode-alist') to filesize thresholds.
 
 If a file is opened and discovered to be larger than the threshold, Doom
@@ -733,11 +818,114 @@ possible."
 (general-add-advice 'after-find-file :around #'doom--optimize-for-large-files-a)
 #+end_src
 
+
+*** Defer Incrementally
+TODO Put this in a package.
+#+begin_src emacs-lisp
+;; https://github.com/hlissner/doom-emacs/blob/42a21dffddeee57d84e82a9f0b65d1b0cba2b2af/core/core.el#L353
+(defvar doom-incremental-packages '(t)
+  "A list of packages to load incrementally after startup. Any large packages
+here may cause noticeable pauses, so it's recommended you break them up into
+sub-packages. For example, `org' is comprised of many packages, and can be
+broken up into:
+  (doom-load-packages-incrementally
+   '(calendar find-func format-spec org-macs org-compat
+     org-faces org-entities org-list org-pcomplete org-src
+     org-footnote org-macro ob org org-clock org-agenda
+     org-capture))
+This is already done by the lang/org module, however.
+If you want to disable incremental loading altogether, either remove
+`doom-load-packages-incrementally-h' from `emacs-startup-hook' or set
+`doom-incremental-first-idle-timer' to nil.")
+
+(defvar doom-incremental-first-idle-timer 2.0
+  "How long (in idle seconds) until incremental loading starts.
+Set this to nil to disable incremental loading.")
+
+(defvar doom-incremental-idle-timer 0.75
+  "How long (in idle seconds) in between incrementally loading packages.")
+
+(defvar doom-incremental-load-immediately nil
+  ;; (daemonp)
+  "If non-nil, load all incrementally deferred packages immediately at startup.")
+
+(defmacro appendq! (sym &rest lists)
+  "Append LISTS to SYM in place."
+  `(setq ,sym (append ,sym ,@lists)))
+
+(defun doom-load-packages-incrementally (packages &optional now)
+  "Registers PACKAGES to be loaded incrementally.
+If NOW is non-nil, load PACKAGES incrementally, in `doom-incremental-idle-timer'
+intervals."
+  (if (not now)
+      (appendq! doom-incremental-packages packages)
+    (while packages
+      (let ((req (pop packages)))
+        (unless (featurep req)
+          (message "Incrementally loading %s" req)
+          (condition-case e
+              (or (while-no-input
+                    ;; If `default-directory' is a directory that doesn't exist
+                    ;; or is unreadable, Emacs throws up file-missing errors, so
+                    ;; we set it to a directory we know exists and is readable.
+                    (let ((default-directory user-emacs-directory)
+                          (gc-cons-threshold most-positive-fixnum)
+                          file-name-handler-alist)
+                      (require req nil t))
+                    t)
+                  (push req packages))
+            ((error debug)
+             (message "Failed to load '%s' package incrementally, because: %s"
+                      req e)))
+          (if (not packages)
+              (message "Finished incremental loading")
+            (run-with-idle-timer doom-incremental-idle-timer
+                                 nil #'doom-load-packages-incrementally
+                                 packages t)
+            (setq packages nil)))))))
+
+(defun doom-load-packages-incrementally-h ()
+  "Begin incrementally loading packages in `doom-incremental-packages'.
+If this is a daemon session, load them all immediately instead."
+  (if doom-incremental-load-immediately
+      (mapc #'require (cdr doom-incremental-packages))
+    (when (numberp doom-incremental-first-idle-timer)
+      (run-with-idle-timer doom-incremental-first-idle-timer
+                           nil #'doom-load-packages-incrementally
+                           (cdr doom-incremental-packages) t))))
+
+(add-hook 'emacs-startup-hook #'doom-load-packages-incrementally-h)
+
+;; Adds two keywords to `use-package' to expand its lazy-loading capabilities:
+;;
+;;   :after-call SYMBOL|LIST
+;;   :defer-incrementally SYMBOL|LIST|t
+;;
+;; Check out `use-package!'s documentation for more about these two.
+(eval-when-compile
+  (dolist (keyword '(:defer-incrementally :after-call))
+    (push keyword use-package-deferring-keywords)
+    (setq use-package-keywords
+          (use-package-list-insert keyword use-package-keywords :after)))
+
+  (defalias 'use-package-normalize/:defer-incrementally #'use-package-normalize-symlist)
+  (defun use-package-handler/:defer-incrementally (name _keyword targets rest state)
+    (use-package-concat
+     `((doom-load-packages-incrementally
+        ',(if (equal targets '(t))
+              (list name)
+            (append targets (list name)))))
+     (use-package-process-keywords name rest state))))
+#+end_src
+
 ** No Littering
 Consistently sets the paths for various configuration, history, temporary, etc. files created by Emacs packages (e.g. =savehist-file=).
 #+begin_src emacs-lisp
 (use-package no-littering
-  :demand t)
+  :demand t
+  :config
+  ;; don't make auto save files
+  (gsetq tramp-auto-save-directory nil))
 #+end_src
 
 ** Evil and Evil Collection
@@ -755,9 +943,15 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
          evil-ex-search-persistent-highlight nil
          ;; Y like D
          evil-want-Y-yank-to-eol t)
-  ;; kill undo-tree (not yet a variable to disable)
-  (general-add-advice 'global-undo-tree-mode :override #'ignore)
+  ;; prevent undo-tree from loading (not yet a variable to disable)
+  ;; also flyspell (don't need immediately)
+  (general-add-advice
+   'require :around
+   (noct-defun noct-prevent-evil-requires (orig-fun &rest args)
+     (unless (memq (car args) '(undo-tree flyspell shell))
+       (apply orig-fun args))))
   (evil-mode)
+  (general-remove-advice 'require #'noct-prevent-evil-requires)
   :config
   ;; use `general-key-dispatch' for "c" (e.g. to bind cx to `evil-exchange')
   (general-def :prefix-map 'noct:c-map
@@ -771,6 +965,8 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
     "C-o" #'evil-execute-in-normal-state
     "C-r" #'evil-paste-from-register
     "C-w" #'evil-delete-backward-word
+    "¸" #'evil-delete-backward-word)
+  (general-def :keymaps noct-minibuffer-maps
     "¸" #'evil-delete-backward-word))
 
 (use-package evil-collection
@@ -781,26 +977,29 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
              :local-repo "~/src/forks/evil-collection"
              :fork (:host github :repo "noctuid/evil-collection"))
   :config
-  (defun noct:make-evil-collection-translations (_mode mode-keymaps &rest _rest)
-    (general-translate-key 'normal mode-keymaps
-      "C-n" "C-j"
-      "C-e" "C-k"))
+  (defun noct-make-evil-collection-translations (mode mode-keymaps &rest _rest)
+    (when mode-keymaps
+      (general-with mode
+        (general-translate-key 'normal mode-keymaps
+          "C-n" "C-j"
+          "C-e" "C-k"))))
 
   (general-add-hook 'evil-collection-setup-hook
-                    #'noct:make-evil-collection-translations))
+                    #'noct-make-evil-collection-translations))
 #+end_src
 
 *** Settings
 **** Improvements from Vim
 #+begin_src emacs-lisp
-;; I always disliked this behavior in vim
-(gsetq evil-move-cursor-back nil
-       ;; this doesn't matter as much with above setting
-       evil-move-beyond-eol t
-       ;; default to inserting `<,`> when run `evil-ex' in visual char state;
-       ;; unlike vim, ex commands will only apply to the selected region instead
-       ;; of the selected lines when `<,`> is used
-       evil-ex-visual-char-range t)
+(general-with 'evil
+  ;; I always disliked this behavior in vim
+  (gsetq evil-move-cursor-back nil
+         ;; this doesn't matter as much with above setting
+         evil-move-beyond-eol t
+         ;; default to inserting `<,`> when run `evil-ex' in visual char state;
+         ;; unlike vim, ex commands will only apply to the selected region instead
+         ;; of the selected lines when `<,`> is used
+         evil-ex-visual-char-range t))
 #+end_src
 
 **** Normal State Everywhere
@@ -808,22 +1007,24 @@ Use normal state as the default state for all modes.
 #+begin_src emacs-lisp
 ;; not necessary to set `evil-normal-state-modes' (since normal is the default
 ;; state) but it's more explicit
-(gsetq evil-normal-state-modes (append evil-emacs-state-modes
-                                       evil-normal-state-modes)
-       evil-emacs-state-modes nil
-       evil-motion-state-modes nil)
+(general-with 'evil
+  (gsetq evil-normal-state-modes (append evil-emacs-state-modes
+                                         evil-normal-state-modes)
+         evil-emacs-state-modes nil
+         evil-motion-state-modes nil))
 #+end_src
 
 **** Appearance
 I prefer to distinguish mode by cursor color/shape instead of having to look at some indicator on the mode line.
 #+begin_src emacs-lisp
-(gsetq evil-mode-line-format nil
-       evil-normal-state-cursor '(box "orchid")
-       evil-normal-state-cursor '(box "dark gray")
-       evil-motion-state-cursor '(box "YellowGreen")
-       evil-insert-state-cursor '(bar "Blue")
-       evil-emacs-state-cursor '(bar "Red")
-       evil-visual-state-cursor '(box "#F86155"))
+(general-with 'evil
+  (gsetq evil-mode-line-format nil
+         evil-normal-state-cursor '(box "orchid")
+         evil-normal-state-cursor '(box "dark gray")
+         evil-motion-state-cursor '(box "YellowGreen")
+         evil-insert-state-cursor '(bar "Blue")
+         evil-emacs-state-cursor '(bar "Red")
+         evil-visual-state-cursor '(box "#F86155")))
 #+end_src
 
 **** Undo Granularity
@@ -837,114 +1038,118 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 
 *** Advice
 #+begin_src emacs-lisp
-;; TODO move this stuff to some dedicated non-package-specific heading
-(defun noct:nop-kill-new (orig-func &rest args)
-  "Run ORIG-FUNC with ARGS preventing any `kill-new's from running."
-  ;; http://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
-  (cl-letf (((symbol-function 'kill-new) #'ignore))
-    (apply orig-func args)))
+(general-with 'evil
+  ;; TODO move this stuff to some dedicated non-package-specific heading
+  (defun noct:nop-kill-new (orig-func &rest args)
+    "Run ORIG-FUNC with ARGS preventing any `kill-new's from running."
+    ;; http://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
+    (cl-letf (((symbol-function 'kill-new) #'ignore))
+      (apply orig-func args)))
 
-;; don't copy for C-w or visually selected text
-(general-add-advice '(evil-visual-paste
-                      evil-delete-backward-word
-                      lispyville-delete-backward-word)
-                    :around #'noct:nop-kill-new)
+  ;; don't copy for C-w or visually selected text
+  (general-add-advice '(evil-visual-paste
+                        evil-delete-backward-word
+                        lispyville-delete-backward-word)
+                      :around #'noct:nop-kill-new))
 #+end_src
 
 *** Remaps
 **** General Swaps/Changes
 #+begin_src emacs-lisp
-;; make home and end act on visual lines
-;; also note `evil-respect-visual-line-mode'
-;; don't know if I like the changes to d, p, y, and it seems they need work:
-;; https://github.com/emacs-evil/evil/issues/188
-(general-def '(insert normal)
-  "<home>" #'evil-beginning-of-visual-line
-  "<end>" #'evil-end-of-visual-line)
+(general-with 'evil
+  ;; make home and end act on visual lines
+  ;; also note `evil-respect-visual-line-mode'
+  ;; don't know if I like the changes to d, p, y, and it seems they need work:
+  ;; https://github.com/emacs-evil/evil/issues/188
+  (general-def '(insert normal)
+    "<home>" #'evil-beginning-of-visual-line
+    "<end>" #'evil-end-of-visual-line)
 
-(defun noct-evil-insert-visual-line (count &optional vcount)
-  (interactive "p")
-  (let ((evil-respect-visual-line-mode t))
-    (evil-insert-line count vcount)))
+  (defun noct-evil-insert-visual-line (count &optional vcount)
+    (interactive "p")
+    (let ((evil-respect-visual-line-mode t))
+      (evil-insert-line count vcount)))
 
-(general-def 'normal "I" #'noct-evil-insert-visual-line)
+  (general-def 'normal "I" #'noct-evil-insert-visual-line)
 
-(defun noct-evil-append-visual-line (count &optional vcount)
-  (interactive "p")
-  (let ((evil-respect-visual-line-mode t))
-    (evil-append-line count vcount)))
+  (defun noct-evil-append-visual-line (count &optional vcount)
+    (interactive "p")
+    (let ((evil-respect-visual-line-mode t))
+      (evil-append-line count vcount)))
 
-(general-def 'normal
-  "Q" "@q"
-  "t." #'evil-ex-repeat
-  "tv" #'evil-visual-block
-  ;; swap a and A
-  "a" #'noct-evil-append-visual-line
-  "A" #'evil-append)
+  (general-def 'normal
+    "Q" "@q"
+    "t." #'evil-ex-repeat
+    "tv" #'evil-visual-block
+    ;; swap a and A
+    "a" #'noct-evil-append-visual-line
+    "A" #'evil-append)
 
-(general-def 'motion ";" nil)
-(general-def 'normal
-  ";" #'evil-ex)
-(general-r ";" #'evil-repeat-find-char)
+  (general-def 'motion ";" nil)
+  (general-def 'normal
+    ";" #'evil-ex)
+  (general-r ";" #'evil-repeat-find-char)
 
-(defun noct:norm@q ()
-  "Apply macro in q register on selected lines."
-  (interactive)
-  (evil-ex-normal (region-beginning) (region-end) "@q"))
+  (defun noct:norm@q ()
+    "Apply macro in q register on selected lines."
+    (interactive)
+    (evil-ex-normal (region-beginning) (region-end) "@q"))
 
-;; comparable to "xnoremap Q :norm @q<cr>" in vim
-(general-def 'visual "Q" #'noct:norm@q)
+  ;; comparable to "xnoremap Q :norm @q<cr>" in vim
+  (general-def 'visual "Q" #'noct:norm@q)
 
-;; since using m as prefix
-(general-def 'normal "M" #'evil-set-marker)
+  ;; since using m as prefix
+  (general-def 'normal "M" #'evil-set-marker)
 
-;; exit emacs state with ESC (in GUI emacs)
-(general-def 'emacs "<escape>" #'evil-normal-state)
+  ;; exit emacs state with ESC (in GUI emacs)
+  (general-def 'emacs "<escape>" #'evil-normal-state)
 
-;; change xall
-(evil-ex-define-cmd "xa[ll]" #'save-buffers-kill-terminal)
+  ;; change xall
+  (evil-ex-define-cmd "xa[ll]" #'save-buffers-kill-terminal)
+
+  ;; overwriting these keys later
+  (general-rr
+    "/" #'evil-ex-search-forward
+    "?" #'evil-ex-search-backward))
 
 ;; camelCase word (not a remap but affects word keybindings)
 (global-subword-mode)
-
-;; overwriting these keys later
-(general-rr
- "/" #'evil-ex-search-forward
- "?" #'evil-ex-search-backward)
+(blackout 'subword-mode)
 #+end_src
 
 **** Colemak Swaps
 #+begin_src emacs-lisp
-(evil-redirect-digit-argument evil-motion-state-map
-                              "0" #'evil-beginning-of-visual-line)
+(general-with 'evil
+  (evil-redirect-digit-argument evil-motion-state-map
+                                "0" #'evil-beginning-of-visual-line)
 
-;; swap visual and real line movement commands
-(general-def 'motion
-  "n" #'evil-next-visual-line
-  "e" #'evil-previous-visual-line
-  "^" #'evil-first-non-blank-of-visual-line
-  "$" #'evil-end-of-visual-line
-  "gn" #'evil-next-line
-  "ge" #'evil-previous-line
-  "g0" #'evil-beginning-of-line
-  "g$" #'evil-end-of-line
-  "g^" #'evil-first-non-black)
+  ;; swap visual and real line movement commands
+  (general-def 'motion
+    "n" #'evil-next-visual-line
+    "e" #'evil-previous-visual-line
+    "^" #'evil-first-non-blank-of-visual-line
+    "$" #'evil-end-of-visual-line
+    "gn" #'evil-next-line
+    "ge" #'evil-previous-line
+    "g0" #'evil-beginning-of-line
+    "g$" #'evil-end-of-line
+    "g^" #'evil-first-non-black)
 
-;; add back lost keys
-(general-def 'motion
-  "j" #'evil-forward-word-end
-  "gj" #'evil-backward-WORD-end
-  "k" #'evil-ex-search-next
-  "K" #'evil-ex-search-previous
-  "gk" #'evil-next-match)
+  ;; add back lost keys
+  (general-def 'motion
+    "j" #'evil-forward-word-end
+    "gj" #'evil-backward-WORD-end
+    "k" #'evil-ex-search-next
+    "K" #'evil-ex-search-previous
+    "gk" #'evil-next-match)
 
-;; l for "[l]ast"
-(general-def 'motion
-  "l" #'evil-jump-backward
-  "L" #'evil-jump-forward)
+  ;; l for "[l]ast"
+  (general-def 'motion
+    "l" #'evil-jump-backward
+    "L" #'evil-jump-forward)
 
-(general-def '(normal insert)
-  "C-l" #'evil-switch-to-windows-last-buffer)
+  (general-def '(normal insert)
+    "C-l" #'evil-switch-to-windows-last-buffer))
 #+end_src
 
 **** Escape Everywhere
@@ -957,40 +1162,42 @@ Escape should be bound to ~keyboard-quit~ or ~keyboard-escape-quit~ in various m
 *** Repeat in Visual State
 https://github.com/emacs-evil/evil/issues/742
 #+begin_src emacs-lisp
-;; make v, V, and C-v start recording
-(evil-set-command-property 'evil-visual-char :repeat t)
-(evil-set-command-property 'evil-visual-line :repeat t)
-(evil-set-command-property 'evil-visual-block :repeat t)
+(general-with 'evil
+  ;; make v, V, and C-v start recording
+  (evil-set-command-property 'evil-visual-char :repeat t)
+  (evil-set-command-property 'evil-visual-line :repeat t)
+  (evil-set-command-property 'evil-visual-block :repeat t)
 
-(defun noct:evil-repeat-motion (flag)
-  "Repeation for motions. Motions are recorded by keystroke but only in insert state."
-  ;; also record motions in visual state
-  (when (memq evil-state '(insert replace visual))
-    (evil-repeat-keystrokes flag)))
-(general-add-advice 'evil-repeat-motion :override #'noct:evil-repeat-motion)
+  (defun noct:evil-repeat-motion (flag)
+    "Repeation for motions. Motions are recorded by keystroke but only in insert state."
+    ;; also record motions in visual state
+    (when (memq evil-state '(insert replace visual))
+      (evil-repeat-keystrokes flag)))
+  (general-add-advice 'evil-repeat-motion :override #'noct:evil-repeat-motion)
 
-(defun noct:evil-repeat-start ()
-  "Start recording a new repeat into `evil-repeat-info'."
-  ;; don't stop recording in visual state
-  (unless (evil-visual-state-p)
-    (evil-repeat-reset t)
-    (evil-repeat-record-buffer)))
-(general-add-advice 'evil-repeat-start :override #'noct:evil-repeat-start)
+  (defun noct:evil-repeat-start ()
+    "Start recording a new repeat into `evil-repeat-info'."
+    ;; don't stop recording in visual state
+    (unless (evil-visual-state-p)
+      (evil-repeat-reset t)
+      (evil-repeat-record-buffer)))
+  (general-add-advice 'evil-repeat-start :override #'noct:evil-repeat-start)
 
-(defun noct:evil-repeat-stop ()
-  "Stop recording a repeat.
+  (defun noct:evil-repeat-stop ()
+    "Stop recording a repeat.
 Update `evil-repeat-ring' with the accumulated changes
 in `evil-repeat-info' and clear variables."
-  ;; don't stop recording in visual state
-  (unless (evil-visual-state-p)
-    (unwind-protect
-        (when (and (evil-repeat-recording-p))
-          (setq evil-repeat-info
-                (evil-normalize-repeat-info evil-repeat-info))
-          (when (and evil-repeat-info evil-repeat-ring)
-            (ring-insert evil-repeat-ring evil-repeat-info)))
-      (evil-repeat-reset nil))))
-(general-add-advice 'evil-repeat-stop :override #'noct:evil-repeat-stop)
+    ;; don't stop recording in visual state
+    (unless (evil-visual-state-p)
+      (unwind-protect
+          (when (and (evil-repeat-recording-p))
+            (setq evil-repeat-info
+                  (evil-normalize-repeat-info evil-repeat-info))
+            (when (and evil-repeat-info evil-repeat-ring)
+              (ring-insert evil-repeat-ring evil-repeat-info)))
+        (evil-repeat-reset nil))))
+
+  (general-add-advice 'evil-repeat-stop :override #'noct:evil-repeat-stop))
 #+end_src
 
 ** =straight.el= Keybindings
@@ -1018,7 +1225,7 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 
 ** Computer Local Setup
 #+begin_src emacs-lisp
-(let ((local-file "~/.emacs.d/lisp/local.el"))
+(let ((local-file (expand-file-name "lisp/local.el" user-emacs-directory)))
   (when (file-exists-p local-file)
     (load-file local-file)))
 #+end_src
@@ -1084,9 +1291,52 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 
 ;; defaults to "English"
 ;; (set-language-environment 'utf-8)
+
+;; increase number of messages
+(gsetq message-log-max 10000)
+
+(gsetq kill-do-not-save-duplicates t)
 #+end_src
 
-** Appearance
+** General Keybindings
+#+begin_src emacs-lisp
+;; worse keybinding but sometimes I use on OSX
+(general-def "C-v" #'yank)
+
+(general-def '(normal visual)
+  ":" #'eval-expression)
+
+(general-def '(insert normal)
+  "C-;" #'eval-expression)
+#+end_src
+
+** Appearance/GUI
+*** Settings
+#+begin_src emacs-lisp
+(gsetq x-gtk-use-system-tooltips nil
+       pos-tip-internal-border-width (noct-border-width))
+
+;; looks better
+(gsetq x-underline-at-descent-line t)
+
+;; https://github.com/baskerville/bspwm/issues/551#issuecomment-574975395
+(gsetq window-resize-pixelwise t
+       frame-resize-pixelwise t)
+
+;; https://github.com/hlissner/doom-emacs/blob/01aadd8900be45f912124d9d815d8790f540d38c/core/core.el#L177
+(setq idle-update-delay 1)
+
+;; https://github.com/hlissner/doom-emacs/blob/01aadd8900be45f912124d9d815d8790f540d38c/core/core.el#L228
+;; "Reduce rendering/line scan work for Emacs by not rendering cursors or
+;; regions in non-focused windows."
+(gsetq-default cursor-in-non-selected-windows nil)
+(gsetq highlight-nonselected-windows nil)
+
+;; "More performant rapid scrolling over unfontified regions. May cause brief
+;; spells of inaccurate fontification immediately after scrolling."
+(gsetq fast-but-imprecise-scrolling t)
+#+end_src
+
 *** Font
 #+begin_src emacs-lisp
 (defun noct:set-font (&rest _)
@@ -1113,69 +1363,6 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
     (unicode-fonts-setup)))
 #+end_src
 
-*** Mode Line
-Default modeline if doom-modeline is not installed.
-#+begin_src emacs-lisp
-(column-number-mode)
-
-;; http://emacs-fu.blogspot.com/2011/08/customizing-mode-line.html
-(gsetq-default mode-line-format
-               (list
-                ;; error message about full memory
-                "%e"
-                ;; space on left (or - if term)
-                mode-line-front-space
-                ;; report multilingual input; e.g. U: for utf-8
-                mode-line-mule-info
-                ;; for emacsclient frame identification
-                mode-line-client
-                ;; ** if modified, -- if not, %% if RO, %- if RO and modified
-                mode-line-modified
-                ;; indicates a remote buffer
-                mode-line-remote
-                mode-line-frame-identification
-                mode-line-buffer-identification
-                "   "
-                ;; current group
-                '(:eval (when (fboundp 'fg-mode-line-string)
-                          (fg-mode-line-string)))
-                ;; line and column
-                "(" ;; '%02' to set to 2 chars at least; prevents flickering
-                (propertize "%02l" 'face 'font-lock-type-face) ","
-                (propertize "%02c" 'face 'font-lock-type-face)
-                ") "
-
-                ;; relative position, size of file
-                "["
-                (propertize "%p" 'face 'font-lock-constant-face)
-                "/"
-                (propertize "%I" 'face 'font-lock-constant-face)
-                "] "
-
-                ;; the current major mode for the buffer.
-                "["
-                '(:eval (propertize "%m" 'face 'font-lock-string-face
-                                    'help-echo buffer-file-coding-system))
-                "] "
-
-                '(:eval (when (bound-and-true-p org-mode-line-string)
-                          (concat "Clock: <"
-                                  (string-trim-left org-mode-line-string)
-                                  "> ")))
-
-                '(:eval (when (bound-and-true-p auto-compile-mode)
-                          (mode-line-auto-compile-control)))
-
-                ;; instead of mode-line-modes; eval is necessary for it to be
-                ;; up-to-date
-                '(:eval minor-mode-alist)
-
-                ;; fill with ' '
-                "% "))
-
-(force-mode-line-update)
-#+end_src
-
 ** Auth Source
 #+begin_src emacs-lisp
 (general-with-package 'auth-source
@@ -1193,6 +1380,11 @@ Automatically uncompress (for editing) and recompress (when saving) compressed f
   :init (auto-compression-mode))
 #+end_src
 
+** Auto Revert
+#+begin_src emacs-lisp
+(blackout 'auto-revert-mode)
+#+end_src
+
 ** Auto Saving
 #+begin_src emacs-lisp
 (gsetq auto-save-interval 30
@@ -1202,14 +1394,27 @@ Automatically uncompress (for editing) and recompress (when saving) compressed f
 
 (auto-save-visited-mode)
 
-(defun noct:save ()
+(defun noct-save ()
   "If in a file buffer and not executing/recording a macro, save."
-  (when (and (buffer-file-name)
+  (when (and (or (buffer-file-name)
+                 (bound-and-true-p org-src-source-file-name))
              (not (or executing-kbd-macro defining-kbd-macro)))
-    (let ((inhibit-message t))
+    (noct-silently
       (save-buffer))))
 
-(add-hook 'evil-insert-state-exit-hook #'noct:save)
+(defun noct-toggle-save-on-insert-exit ()
+  "Enable or disable saving on insert state exit."
+  (interactive)
+  (if (and (boundp 'evil-insert-state-exit-hook)
+           (memq #'noct-save evil-insert-state-exit-hook ))
+      (general-remove-hook 'evil-insert-state-exit-hook #'noct-save)
+    (general-add-hook 'evil-insert-state-exit-hook #'noct-save)))
+
+(noct-toggle-save-on-insert-exit)
+
+(general-def noct:toggle-map "S" #'noct-toggle-save-on-insert-exit)
+
+(general-t "s" #'evil-save)
 #+end_src
 
 ** Backup
@@ -1232,8 +1437,8 @@ Automatically uncompress (for editing) and recompress (when saving) compressed f
 ** Bookmarks
 #+begin_src emacs-lisp
 (general-s
-  "b" #'bookmark-set
-  "j" #'bookmark-jump)
+  "m" #'bookmark-set
+  "'" #'bookmark-jump)
 #+end_src
 
 ** Disabling Defaults
@@ -1278,6 +1483,10 @@ Also see [[#whitespace][Whitespace Mode]].
 (gsetq-default fill-column 80)
 #+end_src
 
+** Garbage Collection
+TODO try gcmh
+https://github.com/hlissner/doom-emacs/blob/01aadd8900be45f912124d9d815d8790f540d38c/core/core.el#L275
+
 ** History/Savehist
 Persist minibuffer and search history.
 #+begin_src emacs-lisp
@@ -1287,7 +1496,16 @@ Persist minibuffer and search history.
        history-delete-duplicates t)
 
 (use-package savehist
-  :ghook 'after-init-hook
+  ;; doesn't actually seem to be necessary for savehist?
+  :straight (:type built-in)
+  :defer-incrementally custom
+  :init
+  ;; this and :defer-incrementally is how doom loads it
+  ;; using `post-command-hook' is enough to trigger for `evil-ex',
+  ;; `eval-expression', etc.
+  (general-add-hook 'post-command-hook
+                    (lambda () (require 'savehist))
+                    nil nil t)
   :config
   ;; default
   ;; savehist-save-minibuffer-history t
@@ -1296,7 +1514,9 @@ Persist minibuffer and search history.
                                          search-ring
                                          regexp-search-ring
                                          extended-command-history)
-         savehist-autosave-interval 60))
+         savehist-autosave-interval 60)
+
+  (savehist-mode))
 #+end_src
 
 ** H Prefix/Help Mode
@@ -1329,7 +1549,9 @@ Obvious ones:
     "p" #'apropos-library
     ;; very useful (binding over `view-lossage')
     "l" #'find-library
-    "h" #'find-function)
+    "h" #'find-function
+    "V" #'find-variable
+    "e" #'elisp-index-search)
 
   (general-def 'normal help-mode-map
     "q" #'quit-window
@@ -1394,7 +1616,14 @@ Obvious ones:
 #+begin_src emacs-lisp
 ;; ivy also automatically enables recentf-mode
 (use-package recentf
-  :defer 3
+  :defer-incrementally (easymenu tree-widget timer)
+  :init
+  (general-add-advice 'after-find-file
+                      :before
+                      (lambda (&rest _)
+                        (require 'recentf))
+                      nil
+                      t)
   :config
   (gsetq recentf-max-saved-items 1000)
 
@@ -1433,28 +1662,41 @@ Obvious ones:
 Suggested [[https://www.reddit.com/r/emacs/comments/4agorq/got_bored_of_the_initial_scratch_message_so/][here]].
 #+begin_src emacs-lisp
 ;; put fortune in scratch buffer
-(gsetq initial-scratch-message
-       (format
-        ";; %s\n\n"
-        (replace-regexp-in-string
-         "\n" "\n;; " ; comment each line
-         (replace-regexp-in-string
-          "\n$" ""                       ; remove trailing linebreak
-          ;; TODO use gnusay
-          (shell-command-to-string "cowsay -W 80 $(fortune lambda)")))))
+(defun noct-cached-fortune ()
+  "Return a cached fortune message."
+  (prog1 (when (file-exists-p "~/.cache/fortune")
+           (with-temp-buffer
+             (insert-file-contents "~/.cache/fortune")
+             (delete-trailing-whitespace)
+             (buffer-string)))
+    ;; generate a new message for next time
+    (start-process-shell-command
+     "new-fortune"
+     nil
+     (concat "cowthink -b -W 77 \"$(fortune lambda)\""
+             " | sed 's/^/;; /'"
+             "  > ~/.cache/fortune"))))
 
-;; potentially improve startup time (packages enabled for emacs-lisp-mode not
+(gsetq initial-scratch-message (noct-cached-fortune))
+
+;; improve startup time (packages enabled for emacs-lisp-mode not
 ;; loaded immediately)
 (gsetq initial-major-mode 'fundamental-mode)
 
 (use-package persistent-scratch
-  :init
+  :general (general-comma "S" #'noct-goto-scratch)
+  :config
   (gsetq persistent-scratch-autosave-interval 60)
-  (run-with-idle-timer 3 nil
-                       (lambda ()
-                         (persistent-scratch-setup-default)
-                         (with-current-buffer "*scratch*"
-                           (emacs-lisp-mode)))))
+
+  (defun noct-goto-scratch ()
+    "Open the scratch buffer and set it up if it hasn't been set up.
+Enable `persistent-scratch-auto-save-mode' and `emacs-lisp-mode'."
+    (interactive)
+    (switch-to-buffer "*scratch*")
+    (unless persistent-scratch-autosave-mode
+      (persistent-scratch-setup-default)
+      (emacs-lisp-mode)
+      (run-hooks 'noct-elisp-scratch-hook))))
 #+end_src
 
 ** Sudo Editing
@@ -1464,10 +1706,17 @@ I've switched away from putting this function in a hook because it can be jarrin
 #+begin_src emacs-lisp
 ;; function modified from comment here:
 ;; http://emacsredux.com/blog/2013/04/21/edit-files-as-root/
-(defun noct:maybe-sudo-edit ()
+;; Additionally:
+;; - Support file creation
+;; - Support TRAMP
+;; - Support dired
+;; TODO test with remote files again (lost some changes)
+(defun noct-maybe-sudo-edit ()
   "If the current file is exists and is unwritable, edit it as root with sudo."
   (interactive)
-  (let* ((file buffer-file-name)
+  (let* ((file (or buffer-file-name
+                   (when (derived-mode-p 'dired-mode 'wdired-mode)
+                     default-directory)))
          (parent (file-name-directory file))
          ;; don't try to lookup password with auth-source
          auth-sources)
@@ -1479,10 +1728,17 @@ I've switched away from putting this function in a hook because it can be jarrin
                         (not (file-writable-p parent))))
                ;; don't want to edit Emacs source files as root
                (not (string-match "/usr/share/emacs/.*" file)))
-      (find-file (concat "/sudo:root@localhost:" file)))))
+      (let ((method (file-remote-p default-directory 'method))
+            (user (file-remote-p default-directory 'user))
+            (host (file-remote-p default-directory 'host))
+            (localname (file-remote-p default-directory 'localname)))
+        (find-file (if method
+                       (concat "/" method ":" user "@" host
+                               "|sudo:" host ":" localname)
+                     (concat "/sudo:root@localhost:" file)))))))
 
 ;; [S]u[d]o or [S]udo e[d]it
-(general-s "d" #'noct:maybe-sudo-edit)
+(general-s "d" #'noct-maybe-sudo-edit)
 #+end_src
 
 ** Text Scaling Keybindings
@@ -1515,18 +1771,16 @@ I've switched away from putting this function in a hook because it can be jarrin
 
 ** TRAMP
 #+begin_src emacs-lisp
-;; backup files locally when using tramp
-(gsetq tramp-backup-directory-alist backup-directory-alist)
+(general-with 'tramp
+  ;; disable TRAMP remote backups
+  ;; backing up locally instead with `backup-each-save'
+  (gsetq tramp-backup-directory-alist '(("."))))
+#+end_src
 
-;; https://www.gnu.org/software/emacs/manual/html_node/tramp/Auto_002dsave-and-Backup.html
-;; disable backup when using su/sudo
-(gsetq backup-enable-predicate
-       (lambda (name)
-         (and (normal-backup-enable-predicate name)
-              (not
-               (let ((method (file-remote-p name 'method)))
-                 (when (stringp method)
-                   (member method '("su" "sudo"))))))))
+** Undo Granularity
+#+begin_src emacs-lisp
+(noct-add-undo-bounds 'yank)
+(noct-add-undo-bounds 'fill-paragraph)
 #+end_src
 
 * Completion, Selection, and Matching/Sorting
@@ -1552,32 +1806,37 @@ Intelligently sorted =M-x=.
 
   (general-r "." #'avy-resume)
 
-  (evil-define-motion noct-goto-char-timer-or-swiper-isearch (_count)
-    :type inclusive
-    :jump t
-    :repat abort
-    (evil-without-repeat
-      (evil-enclose-avy-for-motion
-        (when (eq (avy-goto-char-timer) t)
-          (let ((swiper-goto-start-of-match (not evil-this-operator)))
-            (swiper-isearch avy-text))))))
+  (general-after 'evil
+    (evil-define-motion noct-goto-char-timer-or-swiper-isearch (_count)
+      :type inclusive
+      :jump t
+      :repat abort
+      (evil-without-repeat
+        (evil-enclose-avy-for-motion
+          (when (eq (avy-goto-char-timer) t)
+            (let ((swiper-goto-start-of-match (not evil-this-operator)))
+              (swiper-isearch avy-text))))))
 
-  (general-r "/" #'noct-goto-char-timer-or-swiper-isearch)
+    (general-r "/" #'noct-goto-char-timer-or-swiper-isearch)
 
-  (general-add-advice 'avy-resume :after #'evil-normal-state))
+    (general-add-advice 'avy-resume :after #'evil-normal-state)))
 #+end_src
 
 ** Company
 *** Setup
 #+begin_src emacs-lisp
 (use-package company
-  :init (global-company-mode)
-  :diminish ""
+  :init
+  ;; (noct-pre-command-or-post-file
+  ;;   (global-company-mode))
+  (noct-post-insert-and-writable
+    (global-company-mode))
+  :blackout t
   :config
   ;; setting idle delay too low can cause a lot of lag depending on the backend
-  (gsetq company-idle-delay 0.2
+  (gsetq company-idle-delay 0.15
+         company-minimum-prefix-length 1
          company-tooltip-limit 15
-         company-minimum-prefix-length 2
          ;; e.g.for yasnippet annotations
          ;; company-tooltip-align-annotations t
          company-show-numbers t)
@@ -1598,6 +1857,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
   (general-def noct:toggle-map "c" #'company-mode)
 
+  (general-def 'insert "C-t" #'company-yasnippet)
+
   ;; tab more similar to vim (tab tabs through completions)
   (require 'company-tng)
 
@@ -1606,7 +1867,35 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   (general-def company-active-map
     ;; don't take over these keys
     "C-h" nil
-    "C-w" nil))
+    "C-w" nil)
+
+  ;; NOTE doing this instead of `company-active-map' because all evil keymaps
+  ;; have precedence over it
+  (general-def 'insert company-mode-map
+    :predicate 'company-candidates
+    ;; colemak letters instead of numbers
+    "M-a" (noct-c (company-complete-number 1))
+    "M-r" (noct-c (company-complete-number 2))
+    "M-s" (noct-c (company-complete-number 3))
+    "M-t" (noct-c (company-complete-number 4))
+    "M-d" (noct-c (company-complete-number 5))
+    "M-h" (noct-c (company-complete-number 6))
+    "M-n" (noct-c (company-complete-number 7))
+    "M-e" (noct-c (company-complete-number 8))
+    "M-i" (noct-c (company-complete-number 9))
+    "M-o" (noct-c (company-complete-number 10)))
+
+  ;; can use for snippet expansion (if take too long to hit tab; shouldn't
+  ;; happen normally)
+  (general-def company-active-map
+    :predicate '(company-explicit-action-p)
+    "RET" #'company-complete)
+
+  ;; TODO messes up company-posframe
+  ;; (popup will dissappear when quickhelp pops up.. presumably because evil is
+  ;; enabled in it?)
+  ;; (general-add-hook 'evil-normal-state-entry-hook #'company-abort)
+  )
 #+end_src
 
 *** Company in Minibuffer
@@ -1670,24 +1959,13 @@ https://github.com/company-mode/company-mode/issues/50
 *** Company Try Hard
 I haven't run into a case yet where I would need this but am leaving this placeholder for now.
 
-*** Company LSP (completion backend)
-#+begin_src emacs-lisp
-(use-package company-lsp
-  :after company
-  :init
-  (general-pushnew '(company-lsp :with company-yasnippet) company-backends)
-  :config
-  ;; TODO fix; company-lsp is not causing this issue
-  (general-def [company-dummy-event] #'company-ignore))
-#+end_src
-
 *** Company Box (child frame frontend)
 Looks nice and replaces =company-quickhelp= as well.
 #+begin_src emacs-lisp
 (use-package company-box
   :disabled t
   :ghook 'company-mode-hook
-  :diminish ""
+  :blackout t
   :config
   (gsetq company-box-show-single-candidate t
          company-box-icons-alist 'company-box-icons-all-the-icons))
@@ -1699,13 +1977,57 @@ Looks nice and replaces =company-quickhelp= as well.
   :ghook 'company-mode-hook
   :blackout t
   :config
+  ;; decrease from default 1
+  (gsetq company-posframe-quickhelp-delay 0.5)
+
   (general-def noct:toggle-map "C" #'company-posframe-mode))
 #+end_src
+
+** Completing Read
+TODO Would nice to have these in a package.
+#+begin_src emacs-lisp
+;; https://github.com/raxod502/selectrum/wiki/Useful-Commands
+;; Ref: https://www.gnu.org/software/emacs/manual/html_node/eintr/yank.html
+(defun amai-kinono-yank-pop (&optional arg)
+  "Paste a previously killed string.
+With just \\[universal-argument] as ARG, put point at beginning,
+and mark at end.  Otherwise, put point at the end, and mark at
+the beginning without activating it.
+
+This is like `yank-pop'.  The differences are:
+
+- This let you manually choose a candidate to paste.
+
+- This doesn't delete the text just pasted if the previous
+  command is `yank'."
+  (interactive "P")
+  (let* ((selectrum-should-sort-p nil)
+         (text nil))
+    (setq text
+          (completing-read "Yank: "
+                           (cl-remove-duplicates
+                            kill-ring :test #'equal :from-end t)
+                           nil 'require-match))
+    (unless (eq last-command 'yank)
+      (push-mark))
+    (setq last-command 'yank)
+    (setq yank-window-start (window-start))
+    (when (and delete-selection-mode (use-region-p))
+      (delete-region (region-beginning) (region-end)))
+    (insert-for-yank text)
+    (if (consp arg)
+        (goto-char (prog1 (mark t)
+                     (set-marker (mark-marker) (point) (current-buffer)))))))
+
+;; (general-t "p" #'amai-kinono-yank-pop)
+#+end_src
+
 
 ** FLX
 Helper library for fuzzy matching/finding (used by ivy, for example).
 #+begin_src emacs-lisp
-(use-package flx)
+(use-package flx
+  :disabled t)
 #+end_src
 
 ** Frog Menu
@@ -1851,7 +2173,10 @@ TODO evil bindings stop working after wgrep finish edit
     "a" #'ivy-occur-read-action
     "o" #'ivy-occur-dispatch
     "c" #'ivy-occur-toggle-calling
-    "d" #'ivy-occur-delete-candidate))
+    "d" #'ivy-occur-delete-candidate)
+
+  (noct-handle-window ivy-occur-grep-mode
+    '(display-buffer-same-window)))
 #+end_src
 
 *** Ivy Hydra
@@ -1889,6 +2214,7 @@ TODO evil bindings stop working after wgrep finish edit
   (general-after-gui
     (ivy-posframe-mode))
   (general-def noct:toggle-map "p" #'ivy-posframe-mode)
+  :blackout t
   :config
   (gsetq ivy-posframe-border-width (noct-border-width)
          ;; prevent resizing as type (may need to adjust these)
@@ -1896,6 +2222,11 @@ TODO evil bindings stop working after wgrep finish edit
          ivy-posframe-width 150
          ivy-posframe-height 30
          ivy-posframe-min-height 30)
+
+  ;; default border color
+  (custom-set-faces
+   '(internal-border ((t (:weight bold
+                          :background "#FFFFFF")))))
 
   ;; TODO posframe currently requires this naming
   (defun ivy-posframe-display-at-frame-top-center (str)
@@ -1908,7 +2239,12 @@ TODO evil bindings stop working after wgrep finish edit
 
   ;; still put swiper(-isearch) in minibuffer so buffer is visible
   ;; `counsel-fzf' because there is a ton of input if use posfame
-  (dolist (cmd '(swiper swiper-isearch counsel-grep counsel-fzf))
+  (dolist (cmd '(counsel-fzf
+                 counsel-grep
+                 lsp-find-references
+                 swiper
+                 swiper-isearch
+                 ivy-xref-show-xrefs))
     (general-pushnew (list cmd)
                      ivy-posframe-display-functions-alist
                      :test 'equal)))
@@ -1918,10 +2254,17 @@ TODO evil bindings stop working after wgrep finish edit
 Add icons to ivy/counsel commands.
 #+begin_src emacs-lisp
 (use-package all-the-icons-ivy
-  ;; :when (display-graphic-p)
-  :demand t
+  :init
+  (general-after-gui
+    (general-after 'ivy
+      (all-the-icons-ivy-setup)))
   :config
-  (all-the-icons-ivy-setup))
+  (general-after 'counsel-projectile
+    (let ((all-the-icons-ivy-file-commands
+           '(counsel-projectile
+             counsel-projectile-find-file
+             counsel-projectile-find-dir)))
+      (all-the-icons-ivy-setup))))
 #+end_src
 
 *** Dynamically Switch Between Matching Methods
@@ -2101,7 +2444,7 @@ I'm keeping fuzzy out of my default styles, but I've configured things so that I
           #'ivy--regex-plus))
 
   :config
-  (gsetq orderless-component-matching-styles
+  (gsetq orderless-matching-styles
          '(orderless-strict-initialism orderless-regexp)
          orderless-component-separator "[ &]")
 
@@ -2173,8 +2516,25 @@ example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
                (substring pattern (1+ end))
              ""))))))
 
+  ;; https://github.com/oantolin/emacs-config/blob/da6b98a3343d68c02af7c05153f50cc194d46888/disabled.el#L46
+  (defun oantolin-not-containing-dispatcher (literal _index &rest _)
+    (when (string-prefix-p "!" literal)
+      (cons
+       'orderless-regexp
+       (rx-to-string
+        `(seq
+          (group string-start)
+          (zero-or-more
+           (or ,@(cl-loop for i from 1 below (length literal)
+                          collect `(seq ,(substring literal 1 i)
+                                        (or (not ,(aref literal i))
+                                            string-end)))))
+          string-end)))))
+
   (defun noct-orderless-index-dispatcher (pattern index &rest _)
-    "Change the default styles for PATTERN based on INDEX."
+    "Change the default styles for PATTERN based on INDEX.
+Relax strictness from `orderless-strict-leading-initialism'. to
+`orderless-strict-initialism' for elements after the first."
     (when (> index 0)
       (cons '(orderless-strict-initialism orderless-regexp)
             pattern)))
@@ -2182,6 +2542,7 @@ example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
   (gsetq orderless-style-dispatchers
          (list #'noct-orderless-word-dispatcher
                #'noct-orderless-style-dispatcher
+               #'oantolin-not-containing-dispatcher
                #'noct-orderless-index-dispatcher)))
 #+end_src
 
@@ -2207,11 +2568,24 @@ example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
   :demand t
   :config
   ;; use prescient only for sorting
-  (gsetq ivy-prescient-enable-filtering nil)
+  (gsetq ivy-prescient-enable-filtering nil
+         ivy-prescient-sort-commands
+         ;; add `counsel-grep', `counsel-yank-pop', etc.
+         '(:not swiper swiper-isearch ivy-switch-buffer counsel-yank-pop
+           counsel-grep counsel-outline worf-goto counsel-org-goto
+           counsel-semantic-or-imenu counsel-rg))
   (ivy-prescient-mode))
 #+end_src
 
+** Restricto
+#+begin_src emacs-lisp
+(use-package restricto
+  :straight (restricto :host github :repo "oantolin/restricto")
+  :general ('insert minibuffer-completion-map "S-SPC" #'restricto-narrow))
+#+end_src
+
 ** Selectrum
+*** Setup
 #+begin_src emacs-lisp
 (use-package selectrum
   :init
@@ -2225,7 +2599,9 @@ example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
          selectrum-num-candidates-displayed 20
          selectrum-count-style 'current/matches
          selectrum-fix-minibuffer-height t)
-  (general-def 'normal "?" #'selectrum-repeat)
+
+  (general-s "." #'selectrum-repeat)
+
   ;; all of these are useless or superseded by other keybindings except for
   ;; maybe M-s and M-r
   (setf (alist-get "M-a" selectrum-minibuffer-bindings)
@@ -2260,20 +2636,34 @@ example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
 ** Framegroups
 #+begin_src emacs-lisp
 (use-package framegroups
-  :demand t
   :straight (framegroups
              :type git
              :host github
              :repo "noctuid/framegroups.el"
              :local-repo "~/src/emacs/framegroups")
+  :general
+  ;; TODO bind globally on middle mouse on primary computer
+  (general-spc
+    "," #'noct-framegroup-setup
+    "l" #'fg-switch-to-last-frame
+    "a" (noct-c (fg-switch-to-frame "emacs"))
+    "r" (noct-c (fg-switch-to-frame "log"))
+    "s" (noct-c (fg-switch-to-frame "notes"))
+    "t" (noct-c (fg-switch-to-frame "prog"))
+    "d" (noct-c (fg-switch-to-frame "config"))
+    "h" (noct-c (fg-switch-to-frame "blog"))
+    "n" (noct-c (fg-switch-to-frame "wr"))
+    "e" (noct-c (fg-switch-to-frame "cons"))
+    "i" (noct-c (fg-switch-to-frame "mail"))
+    "o" (noct-c (fg-switch-to-frame "music")))
   :config
-  (defun noct:framegroup-setup (name &rest _)
+  (defun noct-framegroup-setup (name &rest _)
     "Set up main framegroups."
     (interactive)
     (pcase name
       ;; emacs configuration
       ("emacs"
-       (find-file "~/.emacs.d/awaken.org"))
+       (find-file (expand-file-name "awaken.org"  user-emacs-directory)))
       ;; org agenda/todo
       ("log"
        (find-file "~/ag-sys/else/log.org"))
@@ -2300,22 +2690,7 @@ example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
       ("music"
        (mingus))))
 
-  ;; TODO bind globally on middle mouse on primary computer
-  (general-spc
-    "," #'noct:framegroup-setup
-    "l" #'fg-switch-to-last-frame
-    "a" (fg-switch "emacs")
-    "r" (fg-switch "log")
-    "s" (fg-switch "notes")
-    "t" (fg-switch "prog")
-    "d" (fg-switch "config")
-    "h" (fg-switch "blog")
-    "n" (fg-switch "wr")
-    "e" (fg-switch "cons")
-    "i" (fg-switch "mail")
-    "o" (fg-switch "music"))
-
-  (general-add-hook 'fg-create-hook #'noct:framegroup-setup))
+  (general-add-hook 'fg-create-hook #'noct-framegroup-setup))
 #+end_src
 
 ** TODO Desktop.el
@@ -2324,7 +2699,7 @@ start recentf desktop-after-read-hook
 ;; TODO desktop isn't a package; this is in loaddefs
 (use-package destkop
   :disabled t
-  :straight nil
+  :straight (:type built-in)
   :init (desktop-save-mode)
   :config
   (gsetq desktop-restore-frames nil)
@@ -2339,8 +2714,11 @@ start recentf desktop-after-read-hook
 #+begin_src emacs-lisp
 (defmacro noct-find-file (filename)
   "Create and return named function to visit FILENAME."
-  `(noct-defun ,(intern (concat "noct-quickmark-find-" filename)) ()
-     ,(concat "Call `find-file' on " filename ".")
+  `(noct-defun ,(intern (format "noct-quickmark-find-%s"
+                                (if (stringp filename)
+                                    filename
+                                  (cl-gensym)))) ()
+     ,(format "Call `find-file' on %s." filename)
      (interactive)
      (find-file ,filename)))
 
@@ -2372,13 +2750,10 @@ NAME should be lowercase as the uppercase version will also be checked."
   (interactive)
   (noct:goto-fuzzy "readme"))
 
+;; `view-echo-area-messages' but in current buffer
 (defun noct:goto-messages ()
   (interactive)
   (switch-to-buffer "*Messages*"))
-
-(defun noct:goto-scratch ()
-  (interactive)
-  (switch-to-buffer "*scratch*"))
 
 (defun noct:goto-backtrace ()
   (interactive)
@@ -2410,8 +2785,9 @@ Globbing is used to find a matching file."
     "c" (noct-find-file "~/.config/ranger/rc.conf")
     "C" #'noct:goto-backtrace
     "d" #'projectile-edit-dir-locals
-    "e" (noct-find-file "~/.emacs.d/awaken.org")
-    "E" (noct-find-file "~/.emacs.d/lisp/.private.el.gpg")
+    "e" (noct-find-file (expand-file-name "awaken.org" user-emacs-directory))
+    "E" (noct-find-file (expand-file-name "lisp/.private.el.gpg"
+                                          user-emacs-directory))
     "g" (noct-find-file "~/ag-sys/else/gaming/games.org")
     "h" (noct-find-file "~/ag-sys/else/medical_history.org")
     "i" (noct-find-file "~/ag-sys/else/interaction.org")
@@ -2429,8 +2805,7 @@ Globbing is used to find a matching file."
     "p" (noct-find-file "~/.pentadactylrc")
     "q" (noct-find-file "~/.config/qutebrowser/config.py")
     "r" (noct-find-file "~/ag-sys/else/remapping.org")
-    "S" #'noct:goto-scratch
-    "t" (noct-find-file "~/.tmux.conf")
+    "t" (noct-find-file "~/.config/tmux/tmux.conf")
     "v" (noct-find-file "~/.vimrc")
     "w" (noct-find-file "~/ag-sys/else/workflow.org")
     "x" (noct-find-file "~/.bxinitrc")
@@ -2452,10 +2827,10 @@ Globbing is used to find a matching file."
   (pcase name
     ("emacs"
      (general-comma
-       "," (noct-find-file "~/.emacs.d/init.el")
-       "f" (noct-find-file "~/.emacs.d/awaken.org")
-       "s" (noct-find-file "~/.emacs.d/unclean.org")
-       "t" (noct-find-file "~/.emacs.d/todo.org")
+       "," (noct-find-file (expand-file-name "init.el" user-emacs-directory))
+       "f" (noct-find-file (expand-file-name "awaken.org" user-emacs-directory))
+       "s" (noct-find-file (expand-file-name "unclean.org" user-emacs-directory))
+       "t" (noct-find-file (expand-file-name "todo.org" user-emacs-directory))
        "T" (noct-find-file "~/test-emacs/.emacs.d/init.el")))
     ;; "log"
     ("notes"
@@ -2611,7 +2986,7 @@ I still need to work on my configuration for this. See [[https://github.com/cyru
     "a" #'balance-windows)
   ;; :init
   ;; (zoom-mode)
-  :diminish " ⊞"
+  :blackout " ⊞"
   :config
   (gsetq zoom-size '(0.618 . 0.618)))
 #+end_src
@@ -2654,10 +3029,10 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
 (use-package counsel
   :general
   (general-spc
-    "z" #'noct:ripgrep-fzf
-    "Z" #'noct:fd-fzf)
+    "z" #'noct-ripgrep-fzf
+    "Z" #'noct-fd-fzf)
   :config
-  (defun noct:fd-fzf (&optional initial-input)
+  (defun noct-fd-fzf (&optional initial-input)
     "Run `counsel-fzf' using fd as fzf's default command."
     (interactive)
     (noct:letenv (("FZF_DEFAULT_COMMAND"
@@ -2697,8 +3072,14 @@ Configure ~counsel-grep~ to go to the end of matches and integrate with evil.
 TODO: This should be in counsel (variable to jump to match end and evil integration that's already done for swiper).
 #+begin_src emacs-lisp
 (general-with-package 'counsel
-  (let ((rg-flags (concat "--max-columns 200 --hidden --smart-case "
-                          "--line-number --color never --no-heading ")))
+  (let ((rg-flags (concat
+                   "--max-columns 200 "
+                   "--max-columns-preview "
+                   "--hidden "
+                   "--no-heading "
+                   "--smart-case "
+                   "--line-number "
+                   "--color never ")))
     (gsetq counsel-grep-base-command (concat "rg " rg-flags "%s %s")
            ;; TODO it would be way better if ripgrep supported trimming the line
            ;; don't quote %s (breaks regex)
@@ -2738,7 +3119,20 @@ TODO: This should be in counsel (variable to jump to match end and evil integrat
 #+begin_src emacs-lisp
 (use-package deadgrep
   :general (general-t "/" #'deadgrep)
+  :init
+  (gsetq smart-jump-find-references-fallback-function
+         #'noct-deadgrep-current)
   :config
+  (defun noct-deadgrep-current ()
+    "Run `deadgrep' with the current selection or symbol at point."
+    (interactive)
+    (deadgrep (cond ((use-region-p)
+                     (buffer-substring-no-properties (region-beginning)
+                                                     (region-end)))
+                    ((symbol-at-point)
+                     (substring-no-properties
+                      (symbol-name (symbol-at-point)))))))
+
   ;; ~/src/forks/evil-collection/evil-collection-deadgrep.el
   (evil-collection-init 'deadgrep))
 #+end_src
@@ -2754,6 +3148,13 @@ Useful if constantly switching between only a few files in a project. I don't no
          #'noct-posframe-poshandler-frame-near-top-center))
 #+end_src
 ** Ibuffer
+*** Setup
+#+begin_src emacs-lisp
+(use-package ibuffer
+  :general
+  (general-s "b" #'ibuffer))
+#+end_src
+
 *** All the Icons Ibuffer
 #+begin_src emacs-lisp
 (use-package all-the-icons-ibuffer
@@ -2764,7 +3165,7 @@ Useful if constantly switching between only a few files in a project. I don't no
 #+begin_src emacs-lisp
 (use-package outline
   :ghook ('(prog-mode-hook conf-mode-hook) #'outline-minor-mode)
-  :diminish outline-minor-mode
+  :blackout outline-minor-mode
   :config
   (general-def 'normal outline-minor-mode-map
     "H" (general-l (outline-back-to-heading))
@@ -2772,6 +3173,7 @@ Useful if constantly switching between only a few files in a project. I don't no
     "TAB" #'outline-toggle-children))
 
 (use-package outshine
+  :blackout t
   :ghook 'outline-minor-mode-hook)
 #+end_src
 
@@ -2791,9 +3193,19 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
     "D" #'projectile-dired
     "RET" #'projectile-find-tag)
   (general-t
-    "s" #'projectile-replace
+    "S" #'projectile-replace
     "T" #'projectile-test-project)
-  :diminish ""
+  :init
+  ;; this allows using `xref-find-references' without typing directory
+  (defun noct-projectile-try (dir)
+    "Function for `project-find-functions' using projectile."
+    (when (require 'projectile nil t)
+      (when-let ((root (projectile-project-root dir)))
+        (cons 'transient root))))
+
+  (general-with 'project
+    (general-pushnew #'noct-projectile-try project-find-functions))
+  :blackout t
   :config
   (gsetq projectile-enable-caching t
          projectile-project-test-cmd "make test"
@@ -2815,7 +3227,7 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
 #+begin_src emacs-lisp
 (use-package counsel-projectile
   :general
-  (general-spc "/" #'noct:counsel-projectile-rg)
+  (general-spc "/" #'noct-counsel-projectile-rg)
   (general-spc "v" #'noct-counsel-projectile-vc)
   :init
   ;; TODO won't make remaps before first projectile command run
@@ -2829,7 +3241,7 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
 
   ;; rg is faster than git grep
   ;; `counsel-projectile-rg' doesn't work outside of a project
-  (defun noct:counsel-projectile-rg ()
+  (defun noct-counsel-projectile-rg ()
     "Call `counsel-projectile-rg' if in a project or `counsel-rg' if not."
     (interactive)
     (if (projectile-project-p)
@@ -2837,6 +3249,8 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
       (counsel-rg)))
 
   (defun noct-counsel-projectile-vc ()
+    "Open magit status in a project."
+    (interactive)
     (cl-letf (((symbol-function 'projectile-prepend-project-name)
                (lambda (_)
                  (format "[%s] %s" (projectile-project-name)
@@ -2900,12 +3314,10 @@ A helper library for inserting icons (used by other packages in my config).
 #+begin_src emacs-lisp
 (gsetq-default display-line-numbers 'visual
                display-line-numbers-widen t
+               ;; this is the minimum
+               display-line-numbers-width 3
                ;; default
                display-line-numbers-current-absolute t)
-
-(custom-set-faces '(line-number-current-line ((t :weight bold
-                                                 :foreground "goldenrod"
-                                                 :background "slate gray"))))
 
 ;; (defun noct:maybe-disable-absolute-current ()
 ;;   (when (> (count-lines (point-min) (point-max)) 9999)
@@ -2926,13 +3338,35 @@ A helper library for inserting icons (used by other packages in my config).
 (general-add-hook 'evil-insert-state-exit-hook #'noct:relative)
 #+end_src
 
-** Doom Modeline
+** Mode Line
+*** Any Mode Line
+#+begin_src emacs-lisp
+(general-after-init
+  (column-number-mode)
+  (size-indication-mode))
+#+end_src
+
+*** Doom Modeline
 #+begin_src emacs-lisp
 (use-package doom-modeline
   :init
-  (noct:after-gui
+  (general-after-init
     (doom-modeline-mode))
   :config
+  (general-after-gui
+    (unless (or doom-modeline-icon
+                (not (display-graphic-p)))
+      (gsetq doom-modeline-icon t))
+    ;; TODO why does the `buffer-live-p' check fail for Messages?
+    (dolist (bname '(
+                     ;; "*scratch*"
+                     "*Messages*"))
+      (with-current-buffer bname
+        (doom-modeline-set-main-modeline))))
+
+  ;; TODO pushes things off to the side (even if plenty of space)
+  ;; (gsetq doom-modeline-minor-modes t)
+
   (doom-modeline-def-segment iconic-emacs-modeline-starter
     (list
      ;; space on left (or - if term)
@@ -2972,12 +3406,75 @@ A helper library for inserting icons (used by other packages in my config).
                         :around #'noct:doom-modeline--font-height)))
 #+end_src
 
+*** Fallback Mode Line
+Default modeline if doom-modeline is not installed.
+#+begin_src emacs-lisp
+(unless (memq 'doom-modeline noct-straight-packages)
+  ;; http://emacs-fu.blogspot.com/2011/08/customizing-mode-line.html
+  (gsetq-default mode-line-format
+                 (list
+                  ;; error message about full memory
+                  "%e"
+                  ;; space on left (or - if term)
+                  mode-line-front-space
+                  ;; report multilingual input; e.g. U: for utf-8
+                  mode-line-mule-info
+                  ;; for emacsclient frame identification
+                  mode-line-client
+                  ;; ** if modified, -- if not, %% if RO, %- if RO and modified
+                  mode-line-modified
+                  ;; indicates a remote buffer
+                  mode-line-remote
+                  mode-line-frame-identification
+                  mode-line-buffer-identification
+                  "   "
+                  ;; current group
+                  '(:eval (when (fboundp 'fg-mode-line-string)
+                            (fg-mode-line-string)))
+                  ;; line and column
+                  "(" ;; '%02' to set to 2 chars at least; prevents flickering
+                  (propertize "%02l" 'face 'font-lock-type-face) ","
+                  (propertize "%02c" 'face 'font-lock-type-face)
+                  ") "
+
+                  ;; relative position, size of file
+                  "["
+                  (propertize "%p" 'face 'font-lock-constant-face)
+                  "/"
+                  (propertize "%I" 'face 'font-lock-constant-face)
+                  "] "
+
+                  ;; the current major mode for the buffer.
+                  "["
+                  '(:eval (propertize "%m" 'face 'font-lock-string-face
+                                      'help-echo buffer-file-coding-system))
+                  "] "
+
+                  '(:eval (when (bound-and-true-p org-mode-line-string)
+                            (concat "Clock: <"
+                                    (string-trim-left org-mode-line-string)
+                                    "> ")))
+
+                  '(:eval (when (bound-and-true-p auto-compile-mode)
+                            (mode-line-auto-compile-control)))
+
+                  ;; instead of mode-line-modes; eval is necessary for it to be
+                  ;; up-to-date
+                  '(:eval minor-mode-alist)
+
+                  ;; fill with ' '
+                  "% "))
+
+  (force-mode-line-update))
+#+end_src
+
 ** Evil Visual Mark Mode
 Display an overlay for evil marks in normal state.
 #+begin_src emacs-lisp
 (use-package evil-visual-mark-mode
-  :init (evil-visual-mark-mode)
-  ;; :config
+  :defer 3
+  :config
+  (evil-visual-mark-mode)
   ;; TODO how to render after restoring marks with desktop?
   ;; this doesn't work
   ;; (general-add-hook 'desktop-after-read-hook
@@ -3096,14 +3593,18 @@ Smartparens' version is unfortunately too slow.
 
 (use-package doom-themes
   :config
-  (with-eval-after-load 'org
+  (general-with 'org
     (set-face-attribute 'org-level-1 nil :height 1.0 :weight 'semi-bold
                         :background nil)
     (set-face-attribute 'org-block nil :background nil)
     (set-face-attribute 'org-block-begin-line nil :background nil)
     (set-face-attribute 'org-ellipsis nil :background nil)))
+;; doom-spacegrey
 
 (use-package kaolin-themes)
+;; these are nice:
+;; kaolin-eclipse
+;; kaolin-valley-dark
 #+end_src
 
 *** Pywal
@@ -3122,47 +3623,43 @@ Smartparens' version is unfortunately too slow.
              :repo "jjzmajic/ewal"
              :files ("doom-themes/*.el")))
 
-(defun noct:ewal-load-spacemacs-theme ()
+(defun noct-ewal-load-spacemacs-theme ()
   "Load ewal's spacemacs theme with some adjustments."
+  (interactive)
   (setq spacemacs-theme-org-height nil)
-  ;; TODO why don't these work anymore
-  ;; (custom-theme-reset-faces
-  ;;  'spacemacs-dark
-  ;;  '(org-block nil)
-  ;;  '(org-block-begin-line nil)
-  ;;  '(org-block-end-line nil))
-  ;; (custom-theme-set-faces
-  ;;  'spacemacs-dark
-  ;;  ;; '(org-block ((t (:background nil))))
-  ;;  `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
-  ;;  `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
+  (load-theme 'ewal-spacemacs-modern t)
+  (let (custom--inhibit-theme-enable)
+    (custom-theme-set-faces
+     'spacemacs-dark
+     `(org-block ((t (:background ,(ewal-get-color 'background)))))
+     `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
+     `(org-block-end-line ((t (:background ,(ewal-get-color 'background)))))
+     `(ivy-posframe-border ((t (:weight bold
+                                :background
+                                ,(ewal-get-color 'foreground))))))))
 
-  (custom-set-faces
-   `(org-block ((t (:background ,(ewal-get-color 'background)))))
-   `(org-block-begin-line ((t (:background ,(ewal-get-color 'background)))))
-   `(org-block-end-line ((t (:background ,(ewal-get-color 'background))))))
-
-  ;; TODO again, why doesn't this work?
-  ;; (custom-theme-set-faces
-  ;;  'spacemacs-dark
-  ;;  `(internal-border ((t (:weight bold
-  ;;                         :background ,(ewal-get-color 'foreground))))))
-
-  (load-theme 'ewal-spacemacs-modern t))
-
-(defun noct:ewal ()
+(defun noct-ewal ()
   "Set theme for the current pywal colors."
   (interactive)
   (ewal-evil-cursors-get-colors
    :apply t)
-  ;; (noct:ewal-load-spacemacs-theme)
-  (custom-set-faces
-   `(ivy-posframe-border ((t (:weight bold
-                              :background ,(ewal-get-color 'foreground))))))
-  (load-theme 'ewal-doom-one t))
+  (setq evil-insert-state-cursor (list (ewal-get-color 'cursor) 'bar))
 
-(when (ignore-errors (ewal-load-colors))
-  (noct:ewal))
+  (load-theme 'ewal-doom-one t)
+
+  (let (custom--inhibit-theme-enable)
+    (custom-theme-set-faces
+     'ewal-doom-one
+     `(line-number ((t (:foreground ,(ewal-get-color 'blue)))))
+     `(ivy-posframe-border ((t (:weight bold
+                                :background
+                                ,(ewal-get-color 'foreground))))))))
+
+;; takes 0.02-0.03 seconds; not that much but only do for daemon
+;; also happens to be a good way to distinguish the two
+(when (and (daemonp)
+           (ignore-errors (ewal-load-colors)))
+  (noct-ewal))
 #+end_src
 
 **** Xresources
@@ -3173,6 +3670,7 @@ Smartparens' version is unfortunately too slow.
 *** Circadian
 #+begin_src emacs-lisp
 (use-package circadian
+  :disabled t
   :init
   (gsetq circadian-themes '(
                             ;; ("8:00" . twilight-bright)
@@ -3180,6 +3678,21 @@ Smartparens' version is unfortunately too slow.
                             ("20:00" . gruvbox-dark-soft)))
   (unless (bound-and-true-p ewal-base-palette)
     (circadian-setup)))
+;; can implement something similar enough tocircadian with just `run-at-time'
+;; https://old.reddit.com/r/emacs/comments/gdtqov/weekly_tipstricketc_thread/fq9186h/
+#+end_src
+
+*** Default Theme
+#+begin_src emacs-lisp
+(unless (or (featurep 'circadian)
+            (bound-and-true-p ewal-base-palette))
+  ;; 0.2 seconds
+  ;; (load-theme 'doom-spacegrey t)
+  (if (daemonp)
+      ;; faster even though it pulls in dash
+      (load-theme 'gruvbox-dark-soft t)
+    ;; fastest
+    (load-theme 'tao-yin t)))
 #+end_src
 
 ** Visual Fill Column
@@ -3196,7 +3709,7 @@ Soft wrap lines at =fill-column=.
 ;; (global-visual-line-mode)
 ;; soft-wrap lines
 (general-add-hook 'text-mode-hook #'visual-line-mode)
-(diminish 'visual-line-mode)
+(blackout 'visual-line-mode)
 
 ;; show right-curly arrow on right of wrapped lines
 (gsetq visual-line-fringe-indicators '(nil right-curly-arrow))
@@ -3209,18 +3722,31 @@ Soft wrap lines at =fill-column=.
 ;; http://ergoemacs.org/emacs/whitespace-mode.html
 ;; http://www.emacswiki.org/emacs/WhiteSpace
 (use-package whitespace
-  :init (global-whitespace-mode)
-  :diminish global-whitespace-mode
+  :defer-incrementally t
+  :general (noct:toggle-map "w" #'whitespace-mode)
+  :blackout t
   :config
   (gsetq whitespace-style
-         (list 'face 'trailing 'space-before-tab::tab 'tabs)
+         (list 'face 'trailing 'space-before-tab::tab 'tabs 'tab-mark)
          ;; use `fill-column' value
-         whitespace-line-column nil)
+         whitespace-line-column nil
+         whitespace-display-mappings
+         ;; would prefer not to use this, but not all themes make the tabs face
+         ;; clear
+         ;; TODO maybe pick a face
+         '((tab-mark ?\t [?› ?\t])
+           ;; (newline-mark ?\n [?¬ ?\n])
+           ;; (space-mark ?\  [?·] [?.])
+           ))
+
   (defun noct:add-lines-tail ()
     "Add lines-tail to `whitespace-style' and refresh `whitespace-mode'."
     (setq-local whitespace-style (cons 'lines-tail whitespace-style))
     (whitespace-mode))
-  (general-add-hook 'prog-mode-hook #'noct:add-lines-tail))
+
+  (general-add-hook 'prog-mode-hook #'noct:add-lines-tail)
+
+  (global-whitespace-mode))
 #+end_src
 
 * Text Editing/Interaction
@@ -3265,7 +3791,8 @@ Evilnc also has comment text objects, but they were fairly broken last time I tr
 (use-package evil-nerd-commenter
   :general
   (general-t 'normal 'override "c" #'evilnc-comment-or-uncomment-lines)
-  ('normal "gc" #'evilnc-comment-operator))
+  ('normal "gc" #'evilnc-comment-operator)
+  ('visual "/" #'evilnc-comment-operator))
 
 (use-package evil-commentary
   :disabled t
@@ -3362,8 +3889,8 @@ evil is loaded and enabled)."
     (save-match-data
       (cond ((string-match "/modules/\\(.+\\)$" path)
              (match-string 1 path))
-            ((file-in-directory-p path doom-emacs-dir)
-             (file-relative-name path doom-emacs-dir))
+            ((file-in-directory-p path user-emacs-directory)
+             (file-relative-name path user-emacs-directory))
             ((abbreviate-file-name path))))))
 
 ;;
@@ -3453,7 +3980,12 @@ must be non-read-only, empty, and there must be a rule in
 *** Templates
 #+begin_src emacs-lisp
 (gsetq doom-+file-templates-alist
-       '((org-mode :when noct-blog-dir-p :trigger "__post")))
+       `((,(rx ".org" eol)
+          :when noct-blog-dir-p
+          :trigger "__post"
+          :mode org-mode)
+         (emacs-lisp-mode :trigger "__package")
+         (python-mode)))
 #+end_src
 
 ** Smart Parens
@@ -3464,9 +3996,11 @@ must be non-read-only, empty, and there must be a rule in
 #+begin_src emacs-lisp
 (use-package smartparens
   :init
-  (require 'smartparens-config)
-  (smartparens-global-mode)
-  :diminish " ⦅⦆"
+  ;; NOTE could also do evil-insert-entry-hook, but this is okay since I'm not
+  ;; using smartparens in the scratch buffer
+  (noct-after-buffer
+    (smartparens-global-mode))
+  :blackout " ⦅⦆"
   :config
   ;; typing closing delimiter always jumps out of expression even if not right
   ;; before closing; causes Emacs to hang in this file
@@ -3475,11 +4009,12 @@ must be non-read-only, empty, and there must be a rule in
   ;; this also makes Emacs hang in this file
   ;; (show-smartparens-global-mode)
 
-  (sp-with-modes '(java-mode c-mode sh-mode)
+  (require 'smartparens-config)
+
+  (sp-with-modes '(java-mode c-mode sh-mode web-mode typescript-mode)
     (sp-local-pair "{" nil
                    ;; don't currently have any global handlers; still use :add
                    :post-handlers '(:add ("||\n[i]" "RET"))))
-
 
   (defun noct:at-end-of-shell-if-p (_id _action _context)
     (looking-back (rx "if" (1+ any) ";" (0+ space) "then")
@@ -3492,10 +4027,10 @@ must be non-read-only, empty, and there must be a rule in
                            ("RET"))))
 
   ;; TODO this won't work with `electric-slash' in c-mode
-  (sp-with-modes '(java-mode c-mode)
+  (sp-with-modes '(java-mode c-mode web-mode typescript-mode)
     (sp-local-pair "/*" "*/"
                    :post-handlers '(:add ("* ||\n[i]" "RET")
-                                         ("\n * ||\n[i]" "*")))))
+                                    ("\n * ||\n[i]" "*")))))
 #+end_src
 
 ** auto-yasnippet
@@ -3511,8 +4046,7 @@ must be non-read-only, empty, and there must be a rule in
 *** Setup
 #+begin_src emacs-lisp
 (use-package yasnippet
-  :diminish yas-minor-mode
-  :defer 3
+  :defer-incrementally (eldoc easymenu help-mode)
   :general
   ;; no mnemonic but next to C-n and default keybinding already on extend layer
   (general-def 'insert "C-e" #'yas-insert-snippet)
@@ -3520,10 +4054,15 @@ must be non-read-only, empty, and there must be a rule in
   (general-def help-map
     ;; unbound by default
     "y" #'yas-describe-tables)
+  :blackout yas-minor-mode
   :config
   ;; never expand snippets in normal state
   (general-def 'normal yas-minor-mode-map
     [remap yas-expand] #'ignore)
+
+  (general-def input-decode-map "C-i" [C-i])
+  (general-def 'insert yas-minor-mode-map
+    "<C-i>" #'yas-expand)
 
   (general-def 'normal snippet-mode-map
     "RET" #'yas-load-snippet-buffer-and-close
@@ -3588,7 +4127,7 @@ Undo tree is a great package but is unmaintained and extremely buggy.
 ;; "Goddamn motherf�cking emacs undo."
 (use-package undo-tree
   :disabled t
-  :diminish " 🌴"
+  :blackout " 🌴"
   :init (global-undo-tree-mode)
   :config
   (gsetq undo-tree-visualizer-timestamps t
@@ -3613,13 +4152,27 @@ Undo tree is a great package but is unmaintained and extremely buggy.
 *** Things
 Still experimental.
 #+begin_src emacs-lisp
-(use-package things-evil
+(use-package things
   :straight (things
              :type git
              :host github
              :repo "noctuid/things.el"
+             :local-repo "~/src/emacs/things"))
+
+(use-package things-evil
+  :straight (things-evil
+             :type git
+             :host github
+             :repo "noctuid/things.el"
              :local-repo "~/src/emacs/things")
-  :demand t
+  :ghook
+  ('(evil-operator-state-entry-hook
+     evil-visual-state-entry-hook)
+   (lambda ()
+     (require 'things-evil))
+   nil
+   nil
+   t)
   :config
   (general-def '(visual operator) "RET" #'things-evil-last-text-object)
 
@@ -3651,8 +4204,9 @@ Still experimental.
   (things-define-pair 'things-paren "(" ")")
   (things-evil-define paren things-paren :last-key "p" :keys "(")
 
-  (things-define-pair 'things-bracket "[" "]")
-  (things-evil-define bracket things-bracket :last-key "p" :keys "[")
+  ;; FIXME
+  ;; (things-define-pair 'things-bracket (regexp-quote "[") (regexp-quote "]"))
+  ;; (things-evil-define bracket things-bracket :last-key "p" :keys "[")
 
   (things-define-pair 'things-curly "{" "}")
   (things-evil-define curly things-curly :last-key "p" :keys "{")
@@ -3661,7 +4215,12 @@ Still experimental.
   (things-evil-define angle things-angle :last-key "p" :keys "<")
 
   (things-define-separator 'things-comma ",")
-  (things-evil-define comma things-comma :last-key "p" :keys ","))
+  (things-evil-define comma things-comma :last-key "p" :keys ",")
+
+  (things-evil-define anyblock (things-paren
+                                ;; things-bracket
+                                things-curly)
+                      :last-key "p" :keys "d"))
 #+end_src
 
 *** Evil Snipe and Easy Motion
@@ -3698,14 +4257,10 @@ The logic behind these bindings is that I already don't have =t= in normal state
   (general-r
     ";" #'evil-snipe-repeat
     "," #'evil-snipe-repeat-reverse)
-
-  (general-add-hook 'evil-snipe-local-mode-hook
-                    (lambda () (diminish 'evil-snipe-local-mode)))
-  :diminish ""
+  :blackout t
+  :blackout evil-snipe-override-mode
+  :blackout evil-snipe-override-local-mode
   :config
-  (diminish 'evil-snipe-override-mode)
-  (diminish 'evil-snipe-override-local-mode)
-
   (gsetq evil-snipe-smart-case t
          ;; search visible part of buffer
          evil-snipe-scope 'visible
@@ -3730,6 +4285,9 @@ The logic behind these bindings is that I already don't have =t= in normal state
   (evil-snipe-def 2 'exclusive "t" "T"
                   :forward-fn noct-snipe-2-t
                   :backward-fn noct-snipe-2-T)
+
+  (general-add-hook 'evil-snipe-local-mode-hook
+                    (lambda () (blackout 'evil-snipe-local-mode)))
 
   ;; not using evil-snipe-mode, but highlight cleanup depends on it
   ;; remove check
@@ -3852,6 +4410,7 @@ TODO Use things.el instead.
 Needs to be updated to use =things.el= and needs to have more tests.
 #+begin_src emacs-lisp
 (use-package sentence-navigation
+  :disabled t
   :straight (sentence-navigation
              :type git
              :host github
@@ -3911,7 +4470,16 @@ This package is unfortunately unmaintained.
 ** Evil Surround
 #+begin_src emacs-lisp
 (use-package evil-surround
-  :init (global-evil-surround-mode)
+  :ghook
+  ('(evil-operator-state-entry-hook
+     evil-visual-state-entry-hook)
+   ;; TODO this currently HAS to be a lambda; need to be able to remove for all
+   ;; hooks/advice at once
+   (lambda ()
+     (global-evil-surround-mode))
+   nil
+   nil
+   t)
   ;; https://github.com/timcharper/evil-surround/pull/48
   :config
   (general-def 'visual evil-surround-mode-map
@@ -3947,7 +4515,16 @@ This package is unfortunately unmaintained.
   (general-t
     "f" #'link-hint-open-link
     "F" #'link-hint-open-multiple-links)
-  ('normal "gf" #'link-hint-open-link-at-point))
+  (general-r
+    "y" #'link-hint-copy-link
+    "Y" #'link-hint-copy-multiple-links)
+  ('normal "gf" #'link-hint-open-link-at-point)
+  :config
+  (defun noct-terminal-link-hint-file (file)
+    (find-file file)
+    (unwind-protect (link-hint-open-link)
+      (kill-buffer)
+      (delete-frame))))
 
 (use-package browse-url
   :config
@@ -4012,7 +4589,7 @@ Update: Git gutter seems to be faster than previously. Diff-hl at least allows r
   (set-face-background 'git-gutter:modified "#72a4ff")
   (set-face-background 'git-gutter:added "#90d800")
   (set-face-background 'git-gutter:deleted "#ed92f8")
-  
+
   (general-def noct:toggle-map "g" #'git-gutter-mode)
 
   (defun noct:maybe-enable-git-gutter ()
@@ -4022,7 +4599,7 @@ Update: Git gutter seems to be faster than previously. Diff-hl at least allows r
                           "awaken.org"))
       (git-gutter-mode)))
 
-  (noct:handle-popup "*git-gutter:diff*"))
+  (noct:handle-popup (rx "*git-gutter:diff*")))
 #+end_src
 
 ** Diff HL
@@ -4030,7 +4607,7 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
 #+begin_src emacs-lisp
 (use-package diff-hl
   :disabled t
-  :diminish ""
+  :blackout t
   :init
   (global-diff-hl-mode)
   (diff-hl-flydiff-mode)
@@ -4054,6 +4631,8 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
 *** Setup
 #+begin_src emacs-lisp
 (use-package magit
+  :defer-incrementally
+  (dash f s with-editor git-commit package eieio lv transient)
   :general
   ('normal 'override "S" #'magit-status-here)
   ('normal dired-mode-map "C" #'magit-clone)
@@ -4070,7 +4649,9 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
     "gp" #'magit-push
     ;; "gf" #'magit-file-dispatch
     "gf" #'magit-pull
-    "gb" #'magit-blame))
+    "gb" #'magit-blame)
+  :config
+  (gsetq magit-diff-refine-hunk t))
 #+end_src
 
 *** Section Configuration
@@ -4435,7 +5016,8 @@ Clipetty gives clipboard integration in terminal frames. Unlike xclip, it works 
 (use-package clipetty
   :init
   (general-after-tty
-    (global-clipetty-mode)))
+    (global-clipetty-mode))
+  :blackout t)
 #+end_src
 
 ** Langtool
@@ -4470,7 +5052,17 @@ For typographical editing (not fixing typos).
 #+begin_src emacs-lisp
 (use-package fcitx
   :when (executable-find "fcitx")
-  :defer 5
+  :init
+  (general-add-hook
+   'evil-insert-state-entry-hook
+   (noct-defun noct-maybe-require-fcitx ()
+     "Require fcitx if the buffer is writable and not derived from prog-mode."
+     (unless (or buffer-read-only
+                 (derived-mode-p 'prog-mode))
+       (require 'fcitx)))
+   nil
+   nil
+   #'identity)
   :config
   (fcitx-aggressive-setup))
 #+end_src
@@ -4603,8 +5195,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 
   ;; https://old.reddit.com/r/emacs/comments/fxs92h/spell_checkers_in_emacs_in_2020/
   ;; aspell works with contractions, camelCase, kebab-case, etc.
-  (gsetq ispell-program-name "aspell"
-         ispell-extra-args
+  (gsetq ispell-extra-args
          '("--sug-mode=ultra" "--lang=en_US" "--camel-case")))
 #+end_src
 
@@ -4618,6 +5209,9 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   (general-add-advice 'spell-fu-mode-turn-on :around #'noct-maybe-enable-spell-fu)
   (noct-after-buffer (global-spell-fu-mode))
   :config
+  (gsetq-default spell-fu-faces-exclude
+                 (cl-union '(org-block org-block-begin-line)
+                           spell-fu-faces-exclude))
   ;; repurpose ace-flyspell for spell-fu
   (defun spell-fu-overlay-p (o)
     "Return true if O is an overlay used by spell-fu."
@@ -4668,10 +5262,13 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 ** Apropos
 #+begin_src emacs-lisp
 (use-package apropos
-  :straight nil
+  :straight (:type built-in)
   :init
+  ;; TODO can this be put in :config?
   (noct:handle-popup apropos-mode)
   :config
+  (gsetq apropos-do-all t)
+
   (general-def apropos-mode-map "q" #'quit-window))
 #+end_src
 
@@ -4685,7 +5282,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 ** Conf Mode
 #+begin_src emacs-lisp
 (use-package conf-mode
-  :straight nil
+  :straight (:type built-in)
   :mode ("rc\\'" . conf-unix-mode)
   :gfhook
   ('(conf-unix-mode-hook conf-xdefaults-mode-hook) #'outline-minor-mode))
@@ -4694,7 +5291,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 ** Comint
 #+begin_src emacs-lisp
 (use-package comint
-  :straight nil
+  :straight (:type built-in)
   :config
   (general-def 'insert comint-mode-map
     ;; history
@@ -4730,11 +5327,12 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 
 ** Debugger
 #+begin_src emacs-lisp
-(general-with-package 'debug
+(general-with 'debug
   (general-def 'normal debugger-mode-map
     "q" #'debugger-quit)
 
-  (general-add-hook 'debugger-mode-hook #'evil-normalize-keymaps))
+  (general-after 'evil
+    (general-add-hook 'debugger-mode-hook #'evil-normalize-keymaps)))
 #+end_src
 
 ** Diff Mode
@@ -4768,7 +5366,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (use-package info
   :config
-  (general-pushnew "/home/noctuid/.emacs.d/info/"
+  (general-pushnew (expand-file-name "info" user-emacs-directory)
                    Info-additional-directory-list)
 
   (general-def 'normal Info-mode-map
@@ -4778,16 +5376,16 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 ** Lilypond
 #+begin_src emacs-lisp
 (use-package lilypond-mode
-  ;; emacs mode comes with lilypond
-  :straight nil
+  ;; TODO from whence does lilypond come?
+  :disabled
   :config
-  (defun noct:lilypond-generate-midi ()
+  (defun noct-lilypond-generate-midi ()
     "Produce a MIDI for the current lilypond file."
     (interactive)
     (async-shell-command (concat "lilypond " (shell-quote-argument buffer-file-name))))
 
   (general-m LilyPond-mode-map
-    "c" #'noct:lilypond-generate-midi))
+    "c" #'noct-lilypond-generate-midi))
 #+end_src
 
 ** Markdown
@@ -4833,10 +5431,11 @@ pressing \".\" before selecting the word. Otherwise, correct it."
                       :before
                       (lambda (&rest _)
                         (when (noct-blog-dir-p buffer-file-name)
-                          (require 'ox-hugo-auto-export))))
+                          (require 'ox-hugo-auto-export)))
+                      nil
+                      #'identity)
   (general-with 'ox
-    (require 'ox-hugo))
-  :demand t)
+    (require 'ox-hugo)))
 #+end_src
 
 ** Pentadactyl
@@ -4866,18 +5465,20 @@ Used for =*Warnings*= buffer, for example.
 ** Which Key
 #+begin_src emacs-lisp
 (use-package which-key
-  :defer 5
-  :diminish ""
+  :defer 1
+  :ghook ('pre-command-hook nil nil nil t)
+  :general
+  (noct:toggle-map "W" #'which-key-mode)
+  (general-s "W" #'which-key-show-top-level)
+  :init
+  ;; should be set before loading
+  (gsetq which-key-idle-delay 0.3)
+  :blackout t
   :config
-  (gsetq which-key-idle-delay 0.5
-         which-key-side-window-location 'top
+  (gsetq which-key-side-window-location 'top
          which-key-sort-order 'which-key-prefix-then-key-order
          which-key-sort-uppercase-first nil
          which-key-max-display-columns 5)
-
-  (general-def noct:toggle-map "w" #'which-key-mode)
-
-  (general-s "W" #'which-key-show-top-level)
 
   (which-key-mode)
 
@@ -4925,6 +5526,19 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 
 * Programming
 ** General and Prog Mode
+*** Apheleia
+#+begin_src emacs-lisp
+;; really nice apart from this
+;; https://github.com/raxod502/apheleia/issues/2
+(use-package apheleia
+  :straight (apheleia :host github :repo "raxod502/apheleia")
+  :general (noct:toggle-map "h" #'apheleia-mode)
+  ;; :init
+  ;; this does not load apheleia until file save
+  ;; (apheleia-global-mode)
+  )
+#+end_src
+
 *** Dtrt Indent
 #+begin_src emacs-lisp
 ;; https://github.com/hlissner/doom-emacs/blob/01aadd8900be45f912124d9d815d8790f540d38c/core/core-editor.el#L339
@@ -4941,12 +5555,14 @@ indent_style/indent_size.")
               doom-inhibit-indent-detection
               doom-large-file-p
               (memq major-mode doom-detect-indentation-excluded-modes)
-              (member (substring (buffer-name) 0 1) '(" " "*")))
+              (member (substring (buffer-name) 0 1) '(" " "*"))
+              (not (derived-mode-p 'prog-mode)))
     (dtrt-indent-mode +1)))
 
 (use-package dtrt-indent
   :ghook ('(change-major-mode-after-body-hook read-only-mode-hook)
           'doom-detect-indentation-h)
+  :blackout " ›"
   :config
   ;; Enable dtrt-indent even in smie modes so that it can update `tab-width',
   ;; `standard-indent' and `evil-shift-width' there as well.
@@ -5002,6 +5618,7 @@ hints.")
   ;; won't work first time if use `find-file-hook'; advise `after-find-file'
   ;; instead like doom does
   (noct-after-buffer (editorconfig-mode))
+  :blackout t
   :config
   (defun doom--editorconfig--smart-detection-a (orig-fn)
     "Retrieve the properties for the current file.
@@ -5047,6 +5664,7 @@ If it doesn't have an extension, try to guess one."
   (setq-local comment-auto-fill-only-comments t))
 
 (general-add-hook 'prog-mode-hook (list #'noct:prog-mode-setup #'auto-fill-mode))
+(blackout 'auto-fill-mode)
 #+end_src
 
 *** Prog Mode Keybindings
@@ -5116,7 +5734,7 @@ See [[https://github.com/company-mode/company-mode/issues/525][this issue]].
 #+begin_src emacs-lisp
 (use-package highlight-parentheses
   :ghook 'prog-mode-hook
-  :diminish ""
+  :blackout t
   :config
   (gsetq hl-paren-colors '("firebrick1"))
 
@@ -5125,10 +5743,13 @@ See [[https://github.com/company-mode/company-mode/issues/525][this issue]].
 
 **** Eldoc
 #+begin_src emacs-lisp
+;; deferred incrementally by other packages
 (use-package eldoc
-  :init (global-eldoc-mode)
-  :diminish global-eldoc-mode
-  :config (gsetq eldoc-idle-delay 0.2))
+  :blackout t
+  :config
+  (gsetq eldoc-idle-delay 0.1)
+
+  (global-eldoc-mode))
 #+end_src
 
 **** Higlight Numbers
@@ -5177,7 +5798,7 @@ Breaks syntax highlighting.
   :init
   (electric-indent-mode -1)
   (global-aggressive-indent-mode)
-  :diminish ""
+  :blackout t
   :config
   (general-pushnew 'python-mode aggressive-indent-excluded-modes)
   (general-pushnew 'asm-mode aggressive-indent-excluded-modes)
@@ -5207,7 +5828,15 @@ Breaks syntax highlighting.
   ;;   "RET" #'smart-jump-go
   ;;   "<S-Return>" #'smart-jump-back)
   :config
-  (smart-jump-setup-default-registers))
+  (smart-jump-setup-default-registers)
+
+  (smart-jump-register :modes '(emacs-lisp-mode lisp-interaction-mode)
+                       :jump-fn #'xref-find-definitions
+                       :pop-fn #'pop-tag-mark
+                       :refs-fn #'xref-find-references
+                       :should-jump t
+                       :heuristic #'error
+                       :async nil))
 #+end_src
 
 *** Electric Operator Mode
@@ -5224,12 +5853,13 @@ This is a maintained fork of =electric-spacing=.
 **** Setup
 #+begin_src emacs-lisp
 (use-package flycheck
-  ;; TODO why is `after-init-hook' recommended?
-  :ghook ('after-init-hook #'global-flycheck-mode)
-  :diminish ""
+  :init
+  (noct-after-buffer
+    (global-flycheck-mode))
+  :blackout t
   :config
   ;; decrease delay before showing error
-  (gsetq flycheck-display-errors-delay 0.4)
+  (gsetq flycheck-display-errors-delay 0.2)
 
   (general-def noct:toggle-map "f" #'flycheck-mode)
 
@@ -5256,7 +5886,7 @@ Compared to other flycheck frontends, pos tip is pretty slow and can cause signi
 #+end_src
 
 **** Flycheck Inline
-Seems fast but the addition of extra lines is jarring. I've updated the display function to show over the line after the error.
+Seems fast but the addition of extra lines is jarring. I've updated the display function to show over the line after the error. It now handles multiple error messages (at the end of the buffer too).
 #+begin_src emacs-lisp
 (use-package flycheck-inline
   :ghook 'flycheck-mode-hook
@@ -5264,36 +5894,66 @@ Seems fast but the addition of extra lines is jarring. I've updated the display 
   ;; NOTE: unicode prefix makes it shift the line down slightly
   ;; (defconst noct-flycheck-prefix "➵ ")
   (defconst noct-flycheck-prefix "~> ")
+
+  (defvar-local noct-flycheck-inline-last-error-point nil)
+
   (defun noct-flycheck-inline-phantom-display (msg &optional pos)
     "Display MSG in a phantom starting at the beginning of the next line.
 
 MSG is a string that will be put in a line-long overlay (phantom) at the line
-after POS.  If POS is nil, current point is used instead.
+after POS. If POS is nil, current point is used instead.
 
 Return the displayed phantom."
+    ;; don't use pos;
+    (setq noct-flycheck-inline-last-error-point (point))
     (pcase-let* ((p (or pos (point)))
                  (`(,pos-bol . ,pos-eol)
                   (save-excursion
                     (goto-char p)
-                    (forward-line)
+                    (while (and (not (= (forward-line) 1))
+                                (cl-some (lambda (ov)
+                                           (= (point-at-bol)
+                                              (overlay-start ov)))
+                                         flycheck-inline--phantoms)))
                     (cons (point-at-bol) (point-at-eol))))
-                 ;; NOTE doesn't work without final newline
-                 (ov (make-overlay (if (= pos-eol (point-max))
-                                       pos-eol
-                                     pos-bol)
-                                   pos-eol))
-                 (str (concat noct-flycheck-prefix msg)))
-      (overlay-put ov 'phantom t)
-      (overlay-put ov (if (or (= pos-eol (point-max))
-                              (= pos-bol pos-eol))
-                          'after-string
-                        'display)
-                   str)
-      (push ov flycheck-inline--phantoms)
-      ov))
+                 (str (concat
+                       (when (= pos-eol (point-max))
+                         "\n")
+                       noct-flycheck-prefix
+                       msg)))
+      ;; don't create duplicate overlays
+      (when (not (cl-some (lambda (ov)
+                            (member str
+                                    (list (overlay-get ov 'after-string)
+                                          (overlay-get ov 'display))))
+                          flycheck-inline--phantoms))
+        (let ((ov (make-overlay
+                   (if (= pos-eol (point-max))
+                       pos-eol
+                     pos-bol)
+                   pos-eol)))
+          (overlay-put ov 'phantom t)
+          (overlay-put ov
+                       (if (or (= pos-eol (point-max))
+                               (= pos-bol pos-eol))
+                           'after-string
+                         'display)
+                       str)
+          (push ov flycheck-inline--phantoms)
+          ov))))
 
   (gsetq flycheck-inline-display-function
-         #'noct-flycheck-inline-phantom-display))
+         #'noct-flycheck-inline-phantom-display)
+
+  (defun general-flycheck-inline-hide-errors ()
+    "Hide all inline messages currently being shown if point has changed."
+    (when (and noct-flycheck-inline-last-error-point
+               (not (= noct-flycheck-inline-last-error-point (point))))
+      (funcall flycheck-inline-clear-function)))
+
+  ;; prevent errors from disappearing unless point moves
+  (general-add-advice 'flycheck-inline-hide-errors
+                      :override #'general-flycheck-inline-hide-errors))
 #+end_src
 
 **** TODO Flycheck Posframe
@@ -5310,46 +5970,61 @@ https://github.com/emacs-lsp/lsp-ui/issues/437
 
 *** Xref
 #+begin_src emacs-lisp
-(general-with-package 'xref
-  (defun noct:xref-find-definition ()
+(general-with 'xref
+  (defun noct-xref-find-definition ()
     "Call `xref-find-definitions' but prompt for identifier.
 Don't immediately jump to the symbol at the point."
     (interactive)
     (call-interactively #'xref-find-definitions))
 
-  (general-def help-map "x" #'noct:xref-find-definition))
+  (general-def help-map "x" #'noct-xref-find-definition))
 
 (use-package ivy-xref
   :init
   (gsetq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 #+end_src
 
-*** LSP
+*** LSP Mode
 #+begin_src emacs-lisp
 (use-package lsp-mode
   :config
-  (gsetq lsp-prefer-flymake nil)
+  (gsetq
+   ;; https://github.com/emacs-lsp/lsp-mode#performance
+   lsp-prefer-capf t
+   read-process-output-max (* 1024 1024))
 
   (general-def 'normal lsp-mode-map
     "N" #'lsp-describe-thing-at-point
-    "RET" #'lsp-find-definition
-    ;; execute code action
-    )
+    "RET" #'lsp-find-definition)
+
+  (gsetq lsp-keymap-prefix "mm")
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
 
   (general-m lsp-mode-map
+    "m" lsp-command-map
     "a" #'lsp-execute-code-action
+    "v" #'lsp-avy-lens
     "i" #'lsp-goto-implementation
     "D" #'lsp-find-declaration
+    "T" #'lsp-find-type-definition
     ;; cross (x) references
     "x" #'lsp-find-references
     "r" #'lsp-rename
-    "=" #'lsp-format-buffer))
+    "R" #'lsp-restart-workspace
+    "=" #'lsp-format-buffer
+    "l" #'lsp-workspace-show-log))
 
 (use-package lsp-ui
+  :gfhook
+  ('lsp-ui-doc-frame-mode-hook (noct-disable display-line-numbers-mode))
   :config
   (gsetq lsp-ui-sideline-ignore-duplicate t))
 
-(use-package company-lsp)
+(use-package lsp-ivy
+  :after lsp-mode
+  :general
+  (general-m lsp-mode-map
+    "y" #'lsp-ivy-workspace-symbol))
 #+end_src
 
 *** Docker
@@ -5367,6 +6042,7 @@ TODO
 - probably split this section up
 
 #+begin_src emacs-lisp
+;; TODO why is hydra/lv loaded?! (even if never load lispy)
 (use-package lispy
   :straight (lispy
              :type git
@@ -5374,12 +6050,26 @@ TODO
              :repo "abo-abo/lispy"
              :local-repo "~/src/forks/lispy"
              :fork (:host github :repo "noctuid/lispy"))
+  :defer-incrementally
+  (mode-local
+   lispy-tags
+   help-fns
+   edebug
+   etags
+   outline
+   avy
+   newcomment
+   lispy-inline
+   delsel
+   swiper
+   pcase
+   hydra)
   :ghook
   noct:lisp-mode-hooks
   ;; TODO RET doesn't work first time run `eval-expression'
   'eval-expression-minibuffer-setup-hook
   ;; use shortcake as lighter!
-  :diminish " 🍰"
+  :blackout " 🍰"
   :config
   ;; for insertion; some looking at checks too though
   ;; (gsetq-default lispy-outline-header ";; ")
@@ -5518,7 +6208,10 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
             (backward-char)))
         (set-transient-map map))))
 
-  (general-add-advice 'lispy-parens-auto-wrap :after #'noct:paren-advice))
+  (general-add-advice 'lispy-parens-auto-wrap :after #'noct:paren-advice)
+
+  (noct-add-undo-bounds 'lispy-yank)
+  (noct-add-undo-bounds 'lispy-fill))
 #+end_src
 
 *** Lispyville
@@ -5530,7 +6223,7 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
              :repo "noctuid/lispyville"
              :local-repo "~/src/emacs/lispyville/")
   :ghook 'lispy-mode-hook
-  ;; :diminish " 🍙"
+  :blackout ((lispyville-mode . (lispyville-mode-line-string " 🍙" " 🍙")))
   :config
   (gsetq lispyville-motions-put-into-special t)
 
@@ -5546,9 +6239,7 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
   (general-def 'normal lispyville-mode-map
     "H" #'lispyville-beginning-of-defun
     "(" #'lispyville-left
-    ")" #'lispyville-right)
-
-  (blackout 'lispyville-mode (lispyville-mode-line-string " 🍙" " 🍙")))
+    ")" #'lispyville-right))
 #+end_src
 
 *** Highlight Quoted
@@ -5562,7 +6253,7 @@ For quasi-quoted expressions.
 #+begin_src emacs-lisp
 (use-package highlight-stages
   :ghook noct:lisp-mode-hooks
-  :diminish ""
+  :blackout t
   :config
   (gsetq highlight-stages-highlight-real-quote nil))
 #+end_src
@@ -5621,16 +6312,10 @@ TODO read docs
 *** Setup
 #+begin_src emacs-lisp
 (use-package elisp-mode
-  :straight nil
+  :straight (:type built-in)
   :config
   ;; increase docstring fill column
   (gsetq emacs-lisp-docstring-fill-column 80)
-
-  (general-defs '(normal visual)
-    ":" #'eval-expression)
-
-  (general-def '(insert normal)
-    "C-;" #'eval-expression)
 
   (defun noctuid:byte-compile ()
     "Byte compile the current file."
@@ -5644,7 +6329,7 @@ TODO read docs
 
   (general-def 'normal emacs-lisp-mode-map
     "RET" #'xref-find-definitions
-    "<S-Return>" #'pop-tag-mark
+    "<S-return>" #'pop-tag-mark
     "N" #'helpful-at-point))
 #+end_src
 
@@ -5729,12 +6414,12 @@ Lisp function does not specify a special indentation."
               (method
                (funcall method indent-point state))))))))
 
-;; https://github.com/abo-abo/oremacs/blob/github/modes/ora-elisp-style-guide.el
-(require 'cl-indent)
 
 (defun noct:lispy-indent-setup ()
   "Make indentation settings compliant with lispy's."
   (interactive)
+  ;; https://github.com/abo-abo/oremacs/blob/github/modes/ora-elisp-style-guide.el
+  (require 'cl-indent)
   (setq-local lisp-indent-function #'common-lisp-indent-function)
   ;; TODO this is bad for actual common lisp (and not buffer-local)
   (put 'if 'common-lisp-indent-function 2)
@@ -5792,7 +6477,7 @@ Highlight defined elisp symbols.
    :definer 'lispy
    ;; don't really use `lispy-view' (I've swapped v and m)
    "m" #'macrostep-expand)
-  :diminish " 🍔"
+  :blackout " 🍔"
   :config
   ;; ~/src/forks/evil-collection/evil-collection-macrostep.el
   (evil-collection-init 'macrostep))
@@ -5834,6 +6519,7 @@ This will only run `ielm-return' when at the end of the buffer."
 *** Flycheck Package
 #+begin_src emacs-lisp
 (use-package flycheck-package
+  :after elisp-mode
   :after flycheck
   :demand t
   :config
@@ -5889,8 +6575,8 @@ TODO
 *** Company GHC
 #+begin_src emacs-lisp
 (use-package company-ghc
-  :after company
-  :init
+  :after (company haskell-mode)
+  :config
   (general-pushnew '(company-ghc :with company-yasnippet) company-backends))
 #+end_src
 
@@ -5913,6 +6599,11 @@ TODO
 *** TODO HaRe
 *** TODO SHM
 *** TODO Hasktags
+** JSON
+#+begin_src emacs-lisp
+(use-package json-mode)
+#+end_src
+
 ** Lua
 #+begin_src emacs-lisp
 (use-package lua-mode)
@@ -5945,6 +6636,9 @@ https://frostming.com/2019/01-04/pipenv-poetry
   (gsetq lsp-pyls-plugins-flake8-enabled t
          ;; TODO does this do anyting with flake8 plugin enabled?
          lsp-pyls-configuration-sources ["flake8"]
+         ;; pylintrc is completely ignored for me; workaround
+         ;; https://github.com/palantir/python-language-server/issues/616
+         lsp-pyls-plugins-pylint-args ["--disable=bad-continuation"]
          lsp-pyls-plugins-pyflakes-enabled nil
          lsp-pyls-plugins-pydocstyle-enabled nil
          lsp-pyls-plugins-mccabe-enabled nil)
@@ -5953,7 +6647,8 @@ https://frostming.com/2019/01-04/pipenv-poetry
   :gfhook #'lsp
   :config
   ;; enable mypy plugin (no existing setting)
-  (lsp-register-custom-settings '(("pyls.plugins.pyls_mypy.enabled" t t))))
+  (general-with 'lsp-mode
+    (lsp-register-custom-settings '(("pyls.plugins.pyls_mypy.enabled" t t)))))
 #+end_src
 
 *** LPY
@@ -6051,21 +6746,20 @@ Currently requires running =make= for setup and is not on MELPA.
 (with-eval-after-load 'flycheck
   ;; also use pylint and mypy
   (flycheck-add-next-checker 'python-flake8 'python-pylint)
-  (flycheck-add-next-checker 'python-flake8 'python-mypy))
+  (flycheck-add-next-checker 'python-pylint 'python-mypy))
 #+end_src
-
 *** Docstrings
 #+begin_src emacs-lisp
 ;; adds syntax highlighting for reST (and epydoc) docstrings and makes filling
 ;; work as expected.(for all multi-line strings)
 (use-package python-docstring
   :ghook 'python-mode-hook
-  :diminish "")
+  :blackout t)
 
 ;; allows inserting reST docstring skeleton
 (use-package sphinx-doc
   :ghook 'python-mode-hook
-  :diminish ""
+  :blackout t
   :config
   (general-m python-mode-map
     "s" #'sphinx-doc))
@@ -6192,10 +6886,56 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
 ** TXR
 #+begin_src emacs-lisp
 (use-package txr-mode
+  ;; it requires user local file
+  :disabled t
   :straight (txr-mode
              :type git
              :host github
              :repo "piotrklibert/txr-mode"))
+#+end_src
+
+** Web, JavaScript, TypeScript
+TODO
+- https://github.com/skeeto/skewer-mode
+- https://www.reddit.com/r/emacs/comments/9tr2vn/web_development_with_emacs_tips_and_tricks/
+- https://github.com/NateEag/skewer-reload-stylesheets
+- emmet
+
+*** Eslint
+#+begin_src emacs-lisp
+;; make use .gitignore mode
+;; https://www.reddit.com/r/emacs/comments/cem6h7/overwhelemed_js_jsjsx_rjsx_js2_js3_js2jsx_webmode/eu3zf70/
+;; potentially useful
+;; use eslint from node modules directory
+;; (defun my/use-eslint-from-node-modules ()
+;;   (let* ((root (locate-dominating-file
+;;                 (or (buffer-file-name) default-directory)
+;;                 "node_modules"))
+;;          (eslint (and root
+;;                       (expand-file-name "node_modules/eslint/bin/eslint.js"
+;;                                         root))))
+;;     (when (and eslint (file-executable-p eslint))
+;;       (setq-local flycheck-javascript-eslint-executable eslint))))
+;; (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
+#+end_src
+
+*** TypeScript
+#+begin_src emacs-lisp
+(use-package typescript-mode
+  :gfhook #'lsp)
+#+end_src
+
+*** Web
+#+begin_src emacs-lisp
+(use-package web-mode
+  ;; web-mode gives better syntax highlighting than just typescript-mode (and
+  ;; supports jsx and tsx)
+  :mode ("\\.[tj]sx\\'" . web-mode)
+  :gfhook
+  #'lsp
+  :config
+  ;; auto-close on >
+  (gsetq web-mode-auto-close-style 2))
 #+end_src
 
 * Miscellaneous
@@ -6206,13 +6946,27 @@ Backup files on every save to prevent ever losing work.
   :when noct:personal-computer-p
   :ghook ('after-save-hook #'backup-each-save)
   :config
-  (gsetq backup-each-save-mirror-location "~/.emacs-backups"))
+  (gsetq backup-each-save-mirror-location "~/.emacs-backups"
+         ;; backup TRAMP files
+         backup-each-save-remote-files t))
 #+end_src
 
 ** Benchmark Init
 This is installed here and manually (and temporarily) enabled in my =init.el=.
 #+begin_src emacs-lisp
 (use-package benchmark-init)
+
+(defun noct-end-benchmarking ()
+  (interactive)
+  (when noct-record-requires
+    (advice-remove 'require #'noct-require-advice)
+    (when (not noct-benchmark-init)
+      (describe-variable 'noct-requires)))
+  (when noct-benchmark-init
+    (benchmark-init/deactivate)
+    (benchmark-init/show-durations-tree)))
+
+(general-t "b" #'noct-end-benchmarking)
 #+end_src
 
 ** Profile Dotemacs
@@ -6237,11 +6991,14 @@ I really use this but keep it around just in case.
 For making certain files read-only automatically.
 #+begin_src emacs-lisp
 (use-package hardhat
-  ;; https://github.com/rolandwalker/hardhat/issues/13
+  ;; TODO nice idea needs some work; uses (require 'cl)
+  :disabled t
   :init
+  ;; https://github.com/rolandwalker/hardhat/issues/13
   (defvar ert--running-tests nil)
-  (global-hardhat-mode)
-  :diminish global-hardhat-mode)
+
+  (general-add-advice 'after-find-file :before #'global-hardhat-mode nil t)
+  :blackout global-hardhat-mode)
 #+end_src
 
 * Applications
@@ -6262,7 +7019,7 @@ TODO: Don't create a bunch of dired buffers (e.g. dired-single-up-directory).
 TODO: Async copy/paste with rsync
 #+begin_src emacs-lisp
 (use-package dired
-  :straight nil
+  :straight (:type built-in)
   :general ('normal "-" #'dired-jump)
   :gfhook
   ;; automatically refresh
@@ -6365,7 +7122,7 @@ TODO: Async copy/paste with rsync
     "B" (noct-find-file "~/src/blog/pir-hana/")
     "c" (noct-find-file "~/src/")
     "d" (noct-find-file "~/database/")
-    "e" (noct-find-file "~/.emacs.d/")
+    "e" (noct-find-file user-emacs-directory)
     "E" (noct-find-file "~/ag-sys/else/")
     "f" (noct-find-file "~/dotfiles/")
     "l" (noct-find-file "~/ag-sys/library/")
@@ -6403,7 +7160,11 @@ TODO: Async copy/paste with rsync
    dired-mode-map
    "ux" #'dired-atool-do-unpack-with-subdirectory
    "uX" #'dired-atool-do-unpack
-   "ca" #'dired-atool-do-pack))
+   "ca" #'dired-atool-do-pack)
+  :config
+  (cl-pushnew
+   (list (rx "*dired-atool:" (0+ any)) #'display-buffer-no-window)
+   display-buffer-alist))
 #+end_src
 
 *** TODO Diredfl
@@ -6505,12 +7266,12 @@ It also has overlapping functionality with a lot of packages. For example, I'm u
   (general-s "r" #'deer)
   :config
   ;; default
-  ;; (gsetq ranger-override-dired nil)
   ;; (gsetq ranger-show-dotfiles t)
 
   (gsetq ranger-deer-show-details nil)
 
   (setq ranger-mode-map (make-sparse-keymap))
+
   (general-def 'normal ranger-mode-map
     "q" #'ranger-close
     "Q" #'ranger-disable
@@ -6592,7 +7353,13 @@ It also has overlapping functionality with a lot of packages. For example, I'm u
 
   ;; move down after toggling mark too
   (general-add-advice 'ranger-toggle-mark :after
-                      (lambda () (call-interactively #'ranger-next-file))))
+                      (lambda () (call-interactively #'ranger-next-file)))
+
+  ;; stfu
+  (general-add-advice '(ranger-window-check ranger-revert)
+                      :around #'noct-no-message)
+
+  (ranger-override-dired-mode))
 #+end_src
 
 *** Dired Hacks
@@ -6616,7 +7383,25 @@ Show entire path for a directory (or chain of directories) that only contains a 
 #+end_src
 
 **** TODO Dired Filter
-**** TODO Dired Narrow
+**** Dired Narrow
+#+begin_src emacs-lisp
+(use-package dired-narrow
+  :general ('normal dired-mode-map "cf" #'dired-narrow-completion-styles)
+  :config
+  (general-def dired-narrow-map "ESC" #'keyboard-escape-quit)
+
+  ;; https://github.com/Fuco1/dired-hacks/pull/169
+  (defun dired-narrow--completion-styles-filter (filter)
+    "Return whether `completion-styles' FILTER matches the current dired file."
+    (completion-all-completions filter (list (dired-utils-get-filename 'no-dir))
+                                nil nil))
+
+  (defun dired-narrow-completion-styles ()
+    "Narrow a dired buffer to the files matching a `completion-styles' query."
+    (interactive)
+    (dired-narrow--internal #'dired-narrow--completion-styles-filter)))
+#+end_src
+
 *** Image Handling
 Image display (and resizing) is too slow to be worth it. Assuming that ever changes, do the following:
 - Bind =cb= to change wallpaper (see rc.conf; same for below)
@@ -6745,7 +7530,14 @@ Image display (and resizing) is too slow to be worth it. Assuming that ever chan
 
   (general-def vterm-mode-map
     "<prior>" nil
-    "<next>" nil))
+    "<next>" nil)
+
+  (general-def 'normal vterm-mode-map
+    "<escape>"
+    (noct-defun noct-vterm-send-escape ()
+      "Send <escape> key."
+      (interactive)
+      (vterm-send-key "<escape>"))))
 
 (use-package vterm-toggle
   :straight (vterm-toggle
@@ -6768,8 +7560,12 @@ Image display (and resizing) is too slow to be worth it. Assuming that ever chan
     "<end>" #'evil-end-of-visual-line)
 
   (general-def 'insert vterm-mode-map
+    "<home>" #'vterm--self-insert
+    "<end>" #'vterm--self-insert
     "C-r" #'vterm--self-insert
-    "C-c" #'vterm--self-insert)
+    "C-c" #'vterm--self-insert
+    "C-w" #'vterm--self-insert
+    "¸" #'vterm--self-insert)
 
   ;; (cl-defun noct-tmux-select-or-create (number &optional (session "emacs"))
   ;;     "Select the tmux window with NUMBER, cerating it if it does not exist.
@@ -6802,14 +7598,6 @@ NUMBER specifies which vterm buffer to switch to. If nil, switch to the
     "me" (general-l (noct-vterm-select-or-create 8))
     "mi" (general-l (noct-vterm-select-or-create 9))
     "mo" (general-l (noct-vterm-select-or-create 10))))
-#+end_src
-
-* Blog
-** Ox Hugo
-Haven't set up yet.
-#+begin_src emacs-lisp
-(use-package ox-hugo
-  :after ox)
 #+end_src
 
 * Fun/Games

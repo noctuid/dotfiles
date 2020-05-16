@@ -24,9 +24,12 @@ multilockscreen --update "$wallpaper" &
 
 wpg -a "$wallpaper"
 wpg -n -s "$wallpaper"
+# wpg merges user .Xresources afterwards (and mine contains default colors)
+# redo colors
+xrdb -merge ~/.cache/wal/colors.Xresources &
 
 # * Update Colors for Applications Pywal Doesn't
-bspwm_set_wal_colors
+bspwm_set_wal_colors &
 
 # requires steam restart
 wal_steam -w &
@@ -34,11 +37,11 @@ wal_steam -w &
 dunstrun &
 
 # reload emacs color scheme
-emacsclient -a false -e t && emacsclient --eval '(noct:ewal)'
+emacsclient -a false -e t && emacsclient --eval '(noct-ewal)' &
 
 # reload qutebrowser config.py
 if pgrep -x qutebrowser; then
-	qutebrowser ':config-source ~/.cache/wal/qutebrowser_colors.py'
+	qutebrowser ':config-source ~/.cache/wal/qutebrowser_colors.py' &
 fi
 
 # TODO would be nice to change cursor color

@@ -13,3 +13,6 @@ indent_style = tab
 
 [**.py]
 max_line_length = 79
+
+[**.{json,ts,tsx,js,jsx}]
+indent_size = 2

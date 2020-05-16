@@ -18,10 +18,25 @@
 (push '(vertical-scroll-bars) default-frame-alist)
 
 ;; ** Set Font
+;; https://github.com/hlissner/doom-emacs/blob/develop/early-init.el
+;; "Resizing the Emacs frame can be a terribly expensive part of changing the
+;; font. By inhibiting this, we easily halve startup times with fonts that are
+;; larger than the system default."
+;; I haven't actually noticed any difference for fonts I've tried
+(setq frame-inhibit-implied-resize t)
+
 (push '(font . "Office Code Pro-10") default-frame-alist)
 
 ;; ** Don't Load Site Startup File or Default Init File
-;; I don't use these, but not trying to load them has no noticeable impact on
-;; startup time
-;; (setq site-run-file nil
-;;       inhibit-default-init t)
+;; not loading default.el actually does have an impact (sometimes? it seems like
+;; it's loaded after init and not always?)
+(setq site-run-file nil
+      inhibit-default-init t)
+
+;; * Prevent Default Mode Line from Showing
+;; https://github.com/hlissner/doom-emacs/blob/7460e9e7989c9b219879073690e6f43ac535d274/modules/ui/modeline/config.el#L16
+;; doesn't actually need to be set this early but it still makes sense to put it
+;; here
+(unless after-init-time
+  ;; prevent flash of unstyled modeline at startup
+  (setq-default mode-line-format nil))

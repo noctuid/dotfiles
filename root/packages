@@ -552,10 +552,6 @@ gdb
 # ** Go
 go
 
-# ** Javascript
-nodejs
-npm
-
 # ** Python
 python-pip
 
@@ -639,6 +635,12 @@ racket
 bash-language-server
 shellcheck
 jq
+
+# ** Web - JavaScript, TypeScript, etc.
+nodejs
+npm
+typescript
+typescript-language-server npm
 
 # * Screenshots
 # screenshots

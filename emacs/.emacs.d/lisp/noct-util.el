@@ -2,6 +2,13 @@
 ;;; Commentary:
 ;;; Code:
 ;; * Faster Untangling
+(defconst noct-init-file (expand-file-name "awaken.org" user-emacs-directory)
+  "Main init file.")
+
+(defconst noct-unclean-init-file
+  (expand-file-name "unclean.org" user-emacs-directory)
+  "Not yet tracked init file.")
+
 ;; http://www.holgerschurig.de/en/emacs-efficiently-untangling-elisp/
 
 ;; This is GPLv2. If you still don't know the details, read
@@ -67,22 +74,29 @@ Only source blocks that meet these requirements will be tangled:
       (apply #'insert (reverse body-list)))
     (message "Wrote %s ..." elfile)))
 
-(defun noct:tangle-org-init (file &optional load compile retangle demote-errors)
+(defun noct-tangle-org-init (file &optional load compile retangle demote-errors)
   "Tangle org init FILE if it has not already been tangled.
-If LOAD is non-nil, load it as well (the newest between the compiled and
-non-compiled). If RETANGLE is non-nil, tangle FILE even if it is not newer than
-the current tangled file. If COMPILE is non-nil and the uncompiled file is
-newer, compile it afterwards. If DEMOTE-ERRORS is non-nil, wrap each source
-block with `with-demoted-errors'.
+If LOAD is non-nil, load it as well. If RETANGLE is non-nil,
+tangle FILE even if it is not newer than the current tangled
+file. If COMPILE is non-nil, and the uncompiled file is newer,
+compile it. If DEMOTE-ERRORS is non-nil, wrap each source block
+with `with-demoted-errors'.
 
-When there are no errors loading the tangled file, save it with a \"-stable.el\"
-or \"-stable.elc\" suffix (depending on which was loaded).
+If both LOAD and COMPILE are specified, load the compiled version
+of FILE if it is newer than the tangled version. Otherwise load
+the tangled version (since this is much faster than compiling and
+then loading).
 
-Compiling after loading ensures that all required functionality is available. A
-nil LOAD and non-nil COMPILE will not work for my personal config (have to add
+Only compile if COMPILE is non-nil and LOAD is nil. In this case,
+load the tangled init FILE first. Compiling after loading ensures
+that all required functionality is available (have to add
 everything under ~/.emacs.d/straight/build to `load-path' in an
-`eval-when-compile', run `straight-use-package-mode' so :straight is recognized,
-etc., etc.; it's easier to compile afterwards)."
+`eval-when-compile', run `straight-use-package-mode' so :straight
+is recognized, etc., etc.; it's easier to just compile afterwards).
+
+When there are no errors loading the tangled file, save it with a
+\"-stable.el\" or \"-stable.elc\" suffix (depending on which was
+loaded)."
   (let* ((base-file (file-name-sans-extension file))
          (org-init file)
          (init-tangled (if demote-errors
@@ -95,41 +109,31 @@ etc., etc.; it's easier to compile afterwards)."
               (not (file-exists-p init-tangled))
               (file-newer-than-file-p org-init init-tangled))
       (schurig-tangle-config-org org-init init-tangled demote-errors))
-    (when load
-      (let ((load-prefer-newer t))
-        (load-file init-tangled)
-        (unless demote-errors
-          ;; successfully loaded without errors; save stable configuration
-          (if (file-newer-than-file-p init-tangled init-compiled)
-              (copy-file init-tangled init-tangled-stable t)
-            (when (file-exists-p init-compiled)
-              (copy-file init-compiled init-compiled-stable t))))))
-    (when (and compile
-               (file-newer-than-file-p init-tangled init-compiled))
-      (byte-compile-file init-tangled))))
 
-(defun noct:tangle-awaken (&optional load compile retangle demote-errors)
+    (cond ((and load compile (file-newer-than-file-p init-compiled init-tangled))
+           (load-file init-compiled)
+           ;; successfully loaded without errors; save stable configuration
+           (copy-file init-compiled init-compiled-stable t))
+          (load
+           (load-file init-tangled)
+           (unless demote-errors
+             ;; successfully loaded without errors; save stable configuration
+             (copy-file init-tangled init-tangled-stable t)))
+          ((and compile (file-newer-than-file-p init-tangled init-compiled))
+           (load-file init-tangled)
+           (byte-compile-file init-tangled)))))
+
+(defun noct-tangle-awaken (&optional load compile retangle demote-errors)
   "Tangle awaken.org.
 LOAD, COMPILE, RETANGLE, and DEMOTE-ERRORS are passed to
-`noct:tangle-org-init'."
+`noct-tangle-org-init'."
   (interactive)
-  (cond
-   ((and (featurep 'straight) load)
-    (straight-transaction
-      (straight-mark-transaction-as-init)
-      (noct:tangle-org-init "~/.emacs.d/awaken.org" load compile retangle
-                            demote-errors)
-      ;; TODO clean and move everything to awaken.org
-      (when (file-exists-p "~/.emacs.d/unclean.org")
-        (noct:tangle-org-init "~/.emacs.d/unclean.org" load compile retangle
-                              demote-errors))))
-   (t
-    (noct:tangle-org-init "~/.emacs.d/awaken.org" load compile retangle
-                          demote-errors)
-    ;; TODO clean and move everything to awaken.org
-    (when (file-exists-p "~/.emacs.d/unclean.org")
-      (noct:tangle-org-init "~/.emacs.d/unclean.org" load compile retangle
-                            demote-errors)))))
+  (noct-tangle-org-init noct-init-file load compile retangle
+                        demote-errors)
+  ;; TODO clean and move everything to awaken.org
+  (when (file-exists-p noct-unclean-init-file)
+    (noct-tangle-org-init noct-unclean-init-file load compile retangle
+                          demote-errors)))
 
 (provide 'noct-util)
 ;;; noct-util.el ends here
