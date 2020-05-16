@@ -43,7 +43,6 @@ P sh
 + .ssh
 # + .stack/**
 + .tmsu
-+ .tmux/plugins
 
 + ag-sys
 + anime
