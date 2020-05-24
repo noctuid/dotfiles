@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# pipe stdin to completing-read (e.g. selectrum)
+
+# add -s esel to everything if want dedicated daemon
+# start daemon if it isn't running
+# emacsclient -s esel -e 0 &> /dev/null &
+
+# create the frame the first time and reuse afterwards
+dropdown emacsclient -c
+
+epipe -e "(noct-file-filter)"

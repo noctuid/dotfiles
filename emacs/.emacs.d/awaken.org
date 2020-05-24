@@ -1984,6 +1984,7 @@ Looks nice and replaces =company-quickhelp= as well.
 #+end_src
 
 ** Completing Read
+*** Completing Read Commands
 TODO Would nice to have these in a package.
 #+begin_src emacs-lisp
 ;; https://github.com/raxod502/selectrum/wiki/Useful-Commands
@@ -2022,6 +2023,37 @@ This is like `yank-pop'.  The differences are:
 ;; (general-t "p" #'amai-kinono-yank-pop)
 #+end_src
 
+*** Shell Integration
+#+begin_src emacs-lisp
+;; TODO allow `completing-read-multiple'
+(defun noct-file-filter (&optional file)
+  "Use `completing-read' to select a line in the current buffer.
+If FILE is specified, first visit FILE. After selection, replace the buffer
+contents with the selected line, kill the buffer, and close the frame. This s
+meant to be used from the command line (specifically with my esel script)."
+  (interactive)
+  (when file
+    (find-file file))
+  (unwind-protect
+      ;; TODO show only the selectrum minibuffer
+      (let ((selectrum-num-candidates-displayed 1000)
+            (selectrum-should-sort-p)
+            (selection (completing-read
+                        "> "
+                        (thread-first (buffer-substring-no-properties
+                                       (point-min)
+                                       (point-max))
+                          (split-string (rx (1+ "\n")) t)
+                          (delete-dups)))))
+        (when selection
+          (delete-region (point-min) (point-max))
+          (insert selection)
+          (save-buffer)))
+    (kill-buffer)
+    (call-process-shell-command "xdotool getactivewindow windowunmap")
+    ;; makes flicker much better
+    (switch-to-buffer "*blank*")))
+#+end_src
 
 ** FLX
 Helper library for fuzzy matching/finding (used by ivy, for example).

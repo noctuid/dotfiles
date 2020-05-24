@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# based off https://github.com/cute-jumper/epipe/blob/master/epipe
+
+# examples:
+# command | epipe -t to open in terminal
+# see ./esel
+
+tty="/dev/$(ps -o tty= -p $$)"
+
+export temp_file=$(mktemp)
+
+[[ ! -t 0 ]] && cat > $temp_file
+
+# using find-file so that it visits the file even if -e used
+"$EDITOR" -e "(let (large-file-warning-threshold) (find-file \"$temp_file\"))" \
+		  "$@" <$tty >$tty && cat $temp_file
+
+rm $temp_file
