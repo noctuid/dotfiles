@@ -16,6 +16,37 @@
 # TODO recentf as C-f; locate keybinding
 # TODO cursor flickers with instant prompt
 
+# TODO alternate completion:
+# TODO https://github.com/marlonrichert/zsh-autocomplete
+# TODO https://github.com/relastle/pmy
+# TODO https://github.com/lincheney/fzf-tab-completion
+# TODO https://github.com/Valodim/zsh-capture-completion
+
+# TODO look at zsh for humans
+# man zshbuiltins zinit-configs/psprint/functions/zman
+# TODO look at zoxide
+# TODO look at zdharma/zinitc-configs/psprint/zshrc.zsh
+# TODO look at crivotz/dot_files
+# TODO https://old.reddit.com/r/zsh/comments/f5ak4d/rfc_zsh_for_humans/fhzvc7k/
+# TODO look at raxod's zshrc
+# TODO https://github.com/zdharma/zshelldoc
+# TODO https://github.com/b4b4r07/zsh-vimode-visual
+# TODO https://github.com/zsh-vi-more/evil-registers
+
+# TODO https://gitlab.com/yramagicman/stow-dotfiles/-/blob/master/zshenv#L67
+
+# TODO prezto speedups (not really necessary since everything is already so
+# fast):
+# - fasd caching: https://github.com/sorin-ionescu/prezto/blob/13c61bae30c3a8cf610623c094f2aa0a95fbf035/modules/fasd/init.zsh#L22
+# - compile completion dump: https://github.com/sorin-ionescu/prezto/blob/master/runcoms/zlogin#L9
+
+# https://github.com/sorin-ionescu/prezto/tree/master/modules/command-not-found
+
+# TODO also see zimfw https://github.com/zimfw/zimfw
+
+# TODO do this instead of always compinit -C
+# https://gist.github.com/ctechols/ca1035271ad134841284
+
 # * Sources
 # Some settings or stuff got/found out about from here:
 # https://wiki.archlinux.org/index.php/Zsh
@@ -44,91 +75,92 @@ if $NOCT_INSTANT_PROMPT && \
 fi
 
 # * Plugins
-if [[ ! -f ~/.zplugin/bin/zplugin.zsh ]]; then
-	echo "Installing zplugin..."
-	git clone https://github.com/zdharma/zplugin.git ~/.zplugin/bin
+if [[ ! -f ~/.zinit/bin/zinit.zsh ]]; then
+	echo "Installing zinit..."
+	git clone https://github.com/zdharma/zinit.git ~/.zinit/bin
 fi
 
-# NOTE zplugin load isn't apparently much of an issue when using wait/turbo
+# NOTE zinit load isn't apparently much of an issue when using wait/turbo
 # mode, but I haven't needed reporting so far
 # NOTE currently doing compinit at 0c; nothing seems to need to be loaded after
 # compinit (even autopair)
-if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
-	source ~/.zplugin/bin/zplugin.zsh
+if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
+	source ~/.zinit/bin/zinit.zsh
 
 	# ** Theme/Appearance
 	# more configuration in later section
-	zplugin ice depth=1
-	zplugin light "romkatv/powerlevel10k"
+	zinit ice depth=1
+	zinit light "romkatv/powerlevel10k"
 
 	# load after history-substring-search
-	zplugin ice wait"0b" lucid atload'_zsh_autosuggest_start'
-	zplugin light "zsh-users/zsh-autosuggestions"
+	zinit ice wait"0b" lucid atload'_zsh_autosuggest_start'
+	zinit light "zsh-users/zsh-autosuggestions"
 	ZSH_AUTOSUGGEST_USE_ASYNC=true
 
 	# compinit before loading; load after autosuggestions
-	zplugin ice wait"0c" lucid \
-			atinit"ZPLGM[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay"
-	zplugin light "zdharma/fast-syntax-highlighting"
+	zinit ice wait"0c" lucid \
+		  atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay"
+	zinit light "zdharma/fast-syntax-highlighting"
 
 	# ** Zle Enhancements
 	# needs to start before fast syntax highlighting and autosuggestions
-	zplugin ice wait lucid
-	zplugin light "zsh-users/zsh-history-substring-search"
+	zinit ice wait lucid
+	zinit light "zsh-users/zsh-history-substring-search"
 
 	# says it needs to be loaded after compinit but works fine with this config
-	zplugin ice wait lucid
-	zplugin load "hlissner/zsh-autopair"
+	zinit ice wait lucid
+	zinit load "hlissner/zsh-autopair"
 
 	# clipboard
-	zplugin ice wait lucid
-	zplugin light "kutsan/zsh-system-clipboard"
+	zinit ice wait lucid
+	zinit light "kutsan/zsh-system-clipboard"
 
 	# ** Completion
 	# oh-my-zsh's completion setup (e.g. colors, case sensitivity, etc.)
-	zplugin ice wait lucid
-	zplugin snippet "OMZ::lib/completion.zsh"
+	zinit ice wait lucid
+	zinit snippet "OMZ::lib/completion.zsh"
 
-	zplugin ice wait lucid
-	zplugin light "zsh-users/zsh-completions"
+	zinit ice wait lucid
+	zinit light "zsh-users/zsh-completions"
 
 	# completions for yarn run (mainly)
-	zplugin ice wait lucid atclone"./zplug.zsh"
-	zplugin light "g-plane/zsh-yarn-autocompletions"
+	zinit ice wait lucid atclone"./zplug.zsh"
+	zinit light "g-plane/zsh-yarn-autocompletions"
 
-	zplugin light "spwhitt/nix-zsh-completions"
+	zinit light "spwhitt/nix-zsh-completions"
 
 	# provides tab completion for various commands and keybindings
-	zplugin ice wait lucid multisrc"shell/*.zsh"
-	zplugin light "junegunn/fzf"
+	zinit ice wait lucid multisrc"shell/*.zsh"
+	zinit light "junegunn/fzf"
 
-	zplugin ice wait lucid
-	zplugin light "wookayin/fzf-fasd"
+	zinit ice wait lucid
+	zinit light "wookayin/fzf-fasd"
 
 	# directory selection with fuzzy search; nice complement to fasd
-	zplugin ice wait lucid
-	zplugin light "b4b4r07/enhancd"
+	zinit ice wait lucid
+	zinit light "b4b4r07/enhancd"
 	ENHANCD_FILTER=fzf
-	# fzf selection with cd <Tab>
+	# fzf selection with cd <return> or cd [..|-] <return>
 	ENHANCD_COMPLETION_BEHAVIOR=list
 
 	# ** Commands/Other
 	# prettier ls; nice if only had zshrc and no ranger or exa
-	# zplugin ice wait lucid
-	# zplugin light "supercrabtree/k"
+	# zinit ice wait lucid
+	# zinit light "supercrabtree/k"
 
 	if ! hash exa 2> /dev/null; then
-		zplugin ice wait lucid from"gh-r" as"program" mv"exa* -> exa"
-		zplugin light "ogham/exa"
+		zinit ice wait lucid from"gh-r" as"program" mv"exa* -> exa"
+		zinit light "ogham/exa"
 	fi
+	# there's also lsd
 
-	zplugin ice wait lucid \
-			atload"AUTO_NOTIFY_IGNORE+=(emacs mpgo mpv ranger rn vim vimus)"
-	zplugin light "MichaelAquilina/zsh-auto-notify"
+	zinit ice wait lucid \
+		  atload"AUTO_NOTIFY_IGNORE+=(emacs mpgo mpv ranger rn vim vimus)"
+	zinit light "MichaelAquilina/zsh-auto-notify"
 
 	# let you know you could have used an alias
-	zplugin ice wait lucid
-	zplugin light "MichaelAquilina/zsh-you-should-use"
+	zinit ice wait lucid
+	zinit light "MichaelAquilina/zsh-you-should-use"
 
 	# ** Interesting but not useful for me at the moment
 	# Tarrasch/zsh-autoenv
@@ -1423,6 +1455,9 @@ unset POWERLEVEL9K_VCS_BRANCH_ICON
 # typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='%%'
 typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='»'
 typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VICMD_CONTENT_EXPANSION=''
+
+# don't print full prompt in scrollback; only display directory once
+typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=same-dir
 
 # Finalize Powerlevel10k instant prompt. Should stay at the bottom of ~/.zshrc.
 if $NOCT_INSTANT_PROMPT \
