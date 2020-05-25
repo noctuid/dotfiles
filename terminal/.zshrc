@@ -473,7 +473,7 @@ fi
 # ** Navigation
 # Programs like fasd and shell fuzzy finders like FZF and percol are awesome. I
 # don't end up using them much though since they aren't as useful with a
-# editor-based inside the editor (though fzf is nice with z and in ranger, and
+# editor-based workflow (though fzf is nice with z and in ranger, and
 # counsel-fzf is sometimes useful)
 
 # order of preference:
@@ -489,9 +489,42 @@ alias z='fasd_cd -d'
 
 # *** FZF
 # http://owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
-FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
+# FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git"'
+FZF_DEFAULT_COMMAND='fd --no-ignore --hidden --follow --exclude ".git"'
 # not using FZF_TMUX, but fzf and enhancd completions uses this variable
 FZF_TMUX_HEIGHT="90%"
+
+# advised against, but only downside with -f guard is that there is always a
+# preview window; hopefully we'll get support for this:
+# https://github.com/junegunn/fzf/issues/1928
+export FZF_DEFAULT_OPTS='--preview "fzf_preview {}"'
+
+# https://github.com/junegunn/fzf#settings
+# Use fd (https://github.com/sharkdp/fd) instead of the default find
+# command for listing path candidates.
+# - The first argument to the function ($1) is the base path to start traversal
+# - See the source code (completion.{bash,zsh}) for the details.
+_fzf_compgen_path() {
+	fd --hidden --follow --exclude ".git" . "$1"
+}
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+	fd --type d --hidden --follow --exclude ".git" . "$1"
+}
+
+# (EXPERIMENTAL) Advanced customization of fzf options via _fzf_comprun function
+# - The first argument to the function is the name of the command.
+# - You should make sure to pass the rest of the arguments to fzf.
+_fzf_comprun() {
+	local command=$1
+	shift
+	case "$command" in
+		export|unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
+		ssh)          fzf "$@" --preview 'dig {}' ;;
+		*)            fzf "$@" ;;
+	esac
+}
 
 # using git ls-tree can be faster in large repos according to fzf README
 # only shows tracked files though
@@ -500,9 +533,12 @@ FZF_TMUX_HEIGHT="90%"
 # ag -l -g "") 2> /dev/null'
 
 # using FZF completion script (see plugins section) for the following:
-# $ cd ** # dirs
-# $ kill -9 # processes
-# $ other_command ** # files
+# $ cd ** <tab> # dirs
+# $ kill -9 <tab> # processes
+# $ export ** <tab> # env vars
+# $ ssh ** <tab> # hosts
+# $ other_command ** <tab> # files
+# $ z <tab> # fzf-fasd plugin
 # etc.
 # keybindings:
 # - C-t for files/directories
@@ -599,6 +635,18 @@ alias aur='yay -S'
 alias yays='yay -S'
 alias aurs='yay -Ss'
 alias yayss='yay -Ss'
+
+# select package to install with fzf (with preview)
+# https://wiki.archlinux.org/index.php/Fzf#Arch_specific_fzf_uses
+pacz() {
+	pacman -Slq | fzf -m --preview 'cat <(pacman -Si {1}) <(pacman -Fl {1} \
+		   | awk "{print \$2}")' | xargs -ro sudo pacman -S
+}
+
+aurz() {
+	yay -Slq | fzf -m --preview 'cat <(yay -Si {1}) <(yay -Fl {1} \
+		| awk "{print \$2}")' | xargs -ro  yay -S
+}
 
 # ** Reloading things
 alias rld='echo "Reloading .zshrc" && source ~/.zshrc'

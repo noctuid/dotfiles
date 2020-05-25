@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# script for fzf's --preview
+
+# https://github.com/junegunn/fzf/issues/1928
+
+# also can use _fzf_comprun to change --preview based on command:
+# https://github.com/junegunn/fzf#settings
+
+if [[ -f $1 ]]; then
+	bat --style=numbers --color=always --line-range :"$LINES" "$1"
+elif [[ -d $1 ]]; then
+	tree -C "$1" | head -n "$LINES"
+fi

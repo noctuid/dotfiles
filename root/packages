@@ -194,6 +194,9 @@ restic
 # sanitizing filenames
 detox
 
+bat
+bat-extras-git
+
 # * Editors
 gvim
 neovim
