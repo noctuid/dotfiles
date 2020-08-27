@@ -424,6 +424,9 @@ Useful for debugging selectrum or ivy.
 ;; (general-add-advice 'ivy--exhibit :around #'raxod502-force-debug)
 #+end_src
 
+*** Custom Declares
+See [[https://old.reddit.com/r/emacs/comments/gi70ye/weekly_tipstricketc_thread/fqg7qys/][here]]. Can't currently think of a good use case but will probably use at some point. 
+
 ** =package.el=
 Currently, I only use =package.el= if I want to use the package list buffer. I generally don't use it for installing anything.
 #+begin_src emacs-lisp
@@ -965,9 +968,10 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
     "C-o" #'evil-execute-in-normal-state
     "C-r" #'evil-paste-from-register
     "C-w" #'evil-delete-backward-word
-    "¸" #'evil-delete-backward-word)
-  (general-def :keymaps noct-minibuffer-maps
     "¸" #'evil-delete-backward-word))
+
+(general-def :keymaps noct-minibuffer-maps
+  "¸" #'evil-delete-backward-word)
 
 (use-package evil-collection
   :straight (evil-collection
@@ -1078,6 +1082,8 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
       (evil-append-line count vcount)))
 
   (general-def 'normal
+    ;; just "@q" won't work in insert state (if recorded in insert state), but
+    ;; that doesn't seem efficient
     "Q" "@q"
     "t." #'evil-ex-repeat
     "tv" #'evil-visual-block
@@ -1484,8 +1490,17 @@ Also see [[#whitespace][Whitespace Mode]].
 #+end_src
 
 ** Garbage Collection
-TODO try gcmh
-https://github.com/hlissner/doom-emacs/blob/01aadd8900be45f912124d9d815d8790f540d38c/core/core.el#L275
+Testing.
+#+begin_src emacs-lisp
+(use-package gcmh
+  :ghook ('pre-command-hook nil nil nil t)
+  :config
+  ;; settings used by doom; default infinite threshold causes Emacs to
+  ;; completely freeze after working for a while; maybe this will be better
+  (gsetq gcmh-idle-delay 10
+         gcmh-high-cons-threshold 16777216)
+  (general-add-hook 'focus-out-hook #'gcmh-idle-garbage-collect))
+#+end_src
 
 ** History/Savehist
 Persist minibuffer and search history.
@@ -1610,6 +1625,17 @@ Obvious ones:
   (general-def
     "<home>" #'evil-beginning-of-visual-line
     "<end>" #'evil-end-of-visual-line))
+#+end_src
+
+** Profiling
+#+begin_src emacs-lisp
+(use-package profiler
+  :straight (:type built-in)
+  :general (general-s
+             :infix "p"
+             "p" #'profiler-start
+             "r" #'profiler-report
+             "s" #'profiler-stop))
 #+end_src
 
 ** Recentf
@@ -2050,9 +2076,14 @@ meant to be used from the command line (specifically with my esel script)."
           (insert selection)
           (save-buffer)))
     (kill-buffer)
-    (call-process-shell-command "xdotool getactivewindow windowunmap")
     ;; makes flicker much better
-    (switch-to-buffer "*blank*")))
+    (switch-to-buffer "*blank*")
+    (call-process-shell-command "xdotool getactivewindow windowunmap")))
+#+end_src
+
+** Completion
+#+begin_src emacs-lisp
+(gsetq completion-ignore-case t)
 #+end_src
 
 ** FLX
@@ -2128,6 +2159,7 @@ TODO Try more helm.
 *** Helm Posframe
 #+begin_src emacs-lisp
 (use-package helm-posframe
+  :disabled t
   :after helm
   :demand t
   :config
@@ -2725,6 +2757,10 @@ Relax strictness from `orderless-strict-leading-initialism'. to
   (general-add-hook 'fg-create-hook #'noct-framegroup-setup))
 #+end_src
 
+** TODO Tab Bar Mode
+- ~tab-bar-history-mode~ as replacement for ~winner~?
+- need to add helpers for naming; not very usable out of the box
+
 ** TODO Desktop.el
 start recentf desktop-after-read-hook
 #+begin_src emacs-lisp
@@ -2905,12 +2941,13 @@ Globbing is used to find a matching file."
     ("wr"
      (general-comma
        "," (noct-find-file "~/ag-sys/else/scrawl/prose/standards+procedure.org")
-       "f" (noct-find-file "plot.org")
+       "p" (noct-find-file "plot.org")
        "s" (noct-find-file "~/ag-sys/else/scrawl/prose/sat/misc.org")
        "t" (noct-find-file "~/ag-sys/else/scrawl/prose/pots/misc.org")
        "w" (noct-find-file "world.org")
        "m" (noct-find-file "misc.org")
        "b" (noct-find-file "bio.org")
+       "d" (noct-find-file "draft.org")
        "i" (noct-find-file "~/ag-sys/else/scrawl/ideas.org")
        "c" (noct-find-file "~/ag-sys/else/scrawl/prose/lndn/landon.org")
        "g" (noct-find-file "~/ag-sys/else/scrawl/prose/gen_misc.org")))
@@ -3040,7 +3077,8 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
   :general (general-spc "f" #'ivy-switch-buffer)
   :config
   ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’
-  (gsetq ivy-use-virtual-buffers t))
+  (gsetq ivy-use-virtual-buffers t
+         ivy-virtual-abbreviate 'full))
 
 (use-package swiper
   :general
@@ -3841,6 +3879,8 @@ Evilnc also has comment text objects, but they were fairly broken last time I tr
 #+end_src
 
 ** File Templates
+TODO look into replacing with https://github.com/mineo/yatemplate
+
 *** Doom Helpers
 Would be nice if this was a package. Nice over autoinsert.
 #+begin_src emacs-lisp
@@ -4066,12 +4106,18 @@ must be non-read-only, empty, and there must be a rule in
 #+end_src
 
 ** auto-yasnippet
+TODO broken basically
+TODO fix tab
+TODO bind both in insert only
+TODO number incrementing
 #+begin_src emacs-lisp
 (use-package auto-yasnippet
   :general
   (general-s
     "c" #'aya-create
-    "x" #'aya-expand))
+    "x" #'aya-expand)
+  (general-def 'insert
+    "<C-tab>" #'aya-expand))
 #+end_src
 
 ** Yasnippet
@@ -4556,7 +4602,9 @@ This package is unfortunately unmaintained.
     (find-file file)
     (unwind-protect (link-hint-open-link)
       (kill-buffer)
-      (delete-frame))))
+      (start-process-shell-command "xdotool getactivewindow windowunmap")
+      ;; (delete-frame)
+      )))
 
 (use-package browse-url
   :config
@@ -5234,6 +5282,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 *** Spell Fu
 #+begin_src emacs-lisp
 (use-package spell-fu
+  :when (executable-find "aspell")
   :init
   (defun noct-maybe-enable-spell-fu (orig-fun &rest args)
     (unless buffer-read-only
@@ -5435,12 +5484,11 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (use-package poly-org
   ;; TODO shouldn't be enabled by default
-  :disabled t
   :general (noct:toggle-map "o" #'poly-org-mode)
   :config
   (general-def 'normal poly-org-mode-map "SPC u" #'worf-goto)
 
-  (with-eval-after-load 'lispy
+  (general-with 'lispy
     (mapc (lambda (x)
             (advice-add x :around #'pm-execute-narrowed-to-span))
           (append (apropos-internal "^lispy-" #'commandp)
@@ -5568,6 +5616,22 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
   ;; :init
   ;; this does not load apheleia until file save
   ;; (apheleia-global-mode)
+  )
+#+end_src
+
+*** Docker
+#+begin_src emacs-lisp
+(use-package docker
+  :config
+  (noct:handle-popup "*docker")
+  (noct:handle-popup "* docker"))
+
+(use-package dockerfile-mode)
+
+;; /docker:user@container:/path/to/file
+(use-package docker-tramp
+  :config
+  ;; (gsetq docker-tramp-use-names t)
   )
 #+end_src
 
@@ -6003,6 +6067,9 @@ https://github.com/emacs-lsp/lsp-ui/issues/437
 *** Xref
 #+begin_src emacs-lisp
 (general-with 'xref
+  ;; window for selecting between definition and variable
+  (noct:handle-popup "*xref*")
+
   (defun noct-xref-find-definition ()
     "Call `xref-find-definitions' but prompt for identifier.
 Don't immediately jump to the symbol at the point."
@@ -6057,14 +6124,6 @@ Don't immediately jump to the symbol at the point."
   :general
   (general-m lsp-mode-map
     "y" #'lsp-ivy-workspace-symbol))
-#+end_src
-
-*** Docker
-#+begin_src emacs-lisp
-(use-package docker
-  :config
-  (noct:handle-popup "*docker")
-  (noct:handle-popup "* docker"))
 #+end_src
 
 ** Lisps (General)
@@ -6570,6 +6629,11 @@ This will only run `ielm-return' when at the end of the buffer."
   (general-add-hook 'find-file-hook #'noct:maybe-disable-flycheck-emacs-lisp-checkdoc))
 #+end_src
 
+** Fennel
+#+begin_src emacs-lisp
+(use-package fennel-mode)
+#+end_src
+
 ** Groovy/Gradle
 #+begin_src emacs-lisp
 (use-package groovy-mode)
@@ -6681,6 +6745,8 @@ https://frostming.com/2019/01-04/pipenv-poetry
   ;; enable mypy plugin (no existing setting)
   (general-with 'lsp-mode
     (lsp-register-custom-settings '(("pyls.plugins.pyls_mypy.enabled" t t)))))
+
+(use-package lsp-python-ms)
 #+end_src
 
 *** LPY
@@ -7150,6 +7216,7 @@ TODO: Async copy/paste with rsync
 
   (general-def 'normal dired-mode-map
     :prefix "'"
+    "a" (noct-find-file "~/ag-sys")
     "b" (noct-find-file "~/dotfiles/scripts/bin/")
     "B" (noct-find-file "~/src/blog/pir-hana/")
     "c" (noct-find-file "~/src/")
@@ -7636,6 +7703,23 @@ NUMBER specifies which vterm buffer to switch to. If nil, switch to the
 ** Fireplace
 #+begin_src emacs-lisp
 (use-package fireplace)
+#+end_src
+
+** Screenshots
+[[https://www.reddit.com/r/emacs/comments/idz35e/emacs_27_can_take_svg_screenshots_of_itself/][Emacs 27 supports svg screenshots of itself.]]
+#+begin_src emacs-lisp
+(defun screenshot-svg ()
+  "Save a screenshot of the current frame as an SVG image.
+Saves to a temp file and puts the filename in the kill ring."
+  (interactive)
+  (let* ((filename (make-temp-file "Emacs" nil ".svg"))
+         (data (x-export-frames nil 'svg)))
+    (with-temp-file filename
+      (insert data))
+    (kill-new filename)
+    (message filename)))
+
+(general-s "S" #'screenshot-svg)
 #+end_src
 
 * Removed
