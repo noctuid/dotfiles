@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# disable internet in way that takes multiple commands to undo
+systemctl stop connman
+systemctl mask connman
+
+# other possibilities
+# - kill firefox
+# - kill sxhkd with desktop 2 focused

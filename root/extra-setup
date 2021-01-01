@@ -143,12 +143,14 @@ lambda_txt_setup() {
 fcron_setup() {
 	echo "Configuring fcron globally."
 	uhome=$1
-	fcrontab "$uhome"/dotfiles/common/sudo_fcrontab
+	sed "s:uhome:$uhome:g" "$uhome"/dotfiles/common/sudo_fcrontab | fcrontab -
+	systemctl enable fcron
 }
 
 fcron_user_setup() {
 	echo "Configuring fcron for user."
 	user=$1
+	# could also use fcrontab -u "$user"
 	sudo -u "$user" fcrontab /home/"$user"/dotfiles/common/fcrontab
 }
 

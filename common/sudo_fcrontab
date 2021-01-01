@@ -1,7 +1,10 @@
 # check disk health every day as soon as computer is on
 # send an email if checks don't pass
 !erroronlymail,mailto(me)
+# TODO actually need to run test
 %daily * * smartctl -a /dev/sda
 %daily * * smartctl -a /dev/sdb
 # may be better as systemd service since can run after network is up
 %monthly * * * curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
+# run lock_down on weekdays at 5; replace uhome before installing
+& 0 17 * * 1-5 uhome/bin/lock_down

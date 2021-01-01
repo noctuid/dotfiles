@@ -2,4 +2,5 @@
 pkill -x conky
 pkill -x picom
 pkill -x polybar
+# pkill -x firefox
 bspc config top_padding 0
