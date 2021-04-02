@@ -67,6 +67,9 @@ fcitx-mozc
 # latex input
 fcitx-table-other
 
+# * Games
+unnamed-sdvx-clone-git aur
+
 # * Graphics/Drivers/Steam
 steam
 lib32-curl
