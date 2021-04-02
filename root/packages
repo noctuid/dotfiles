@@ -500,6 +500,8 @@ setcolors-git aur
 python-pywal
 python-wal-steam-git aur
 wpgtk-git aur
+# pywal support for fixefox
+pywalfox pip
 # gtk theme used by wpgtk; icon theme isn't in aur (use wpg-install.sh)
 gtk-theme-flat-color-git aur
 # live reload gtk theme

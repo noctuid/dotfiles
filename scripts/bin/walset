@@ -39,6 +39,9 @@ dunstrun &
 # reload emacs color scheme
 emacsclient -a false -e t && emacsclient --eval '(noct-ewal)' &
 
+# reload colors for pywalfox/firefox
+pywalfox update
+
 # reload qutebrowser config.py
 if pgrep -x qutebrowser; then
 	qutebrowser ':config-source ~/.cache/wal/qutebrowser_colors.py' &
