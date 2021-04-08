@@ -1,0 +1,11 @@
+# * Key Bindings
+# ** Basic Swaps
+# map global normal \; :
+# map global normal : \;
+
+# ** Colemak Swaps
+map global normal n j
+map global normal e k
+map global normal j e
+map global normal k n
+map global normal <a-k> <a-n>
