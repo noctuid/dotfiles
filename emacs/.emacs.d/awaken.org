@@ -6726,27 +6726,17 @@ https://frostming.com/2019/01-04/pipenv-poetry
 
 *** Setup/LSP
 #+begin_src emacs-lisp
+(use-package lsp-pyright)
+
+(noct-defun noct-lsp-pyright ()
+  "Require lsp-pyright and run `lsp'."
+  (require 'lsp-pyright)
+  (lsp))
+
 (use-package python
   :init
-  ;; use flake8 instead of calling pyflakes, pycodestyle, and mccabe directly
-  (gsetq lsp-pyls-plugins-flake8-enabled t
-         ;; TODO does this do anyting with flake8 plugin enabled?
-         lsp-pyls-configuration-sources ["flake8"]
-         ;; pylintrc is completely ignored for me; workaround
-         ;; https://github.com/palantir/python-language-server/issues/616
-         lsp-pyls-plugins-pylint-args ["--disable=bad-continuation"]
-         lsp-pyls-plugins-pyflakes-enabled nil
-         lsp-pyls-plugins-pydocstyle-enabled nil
-         lsp-pyls-plugins-mccabe-enabled nil)
-
   (noct:handle-popup inferior-python-mode)
-  :gfhook #'lsp
-  :config
-  ;; enable mypy plugin (no existing setting)
-  (general-with 'lsp-mode
-    (lsp-register-custom-settings '(("pyls.plugins.pyls_mypy.enabled" t t)))))
-
-(use-package lsp-python-ms)
+  :gfhook #'noct-lsp-pyright)
 #+end_src
 
 *** LPY
