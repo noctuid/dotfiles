@@ -71,9 +71,10 @@ My configuration may not meet these requirements at this point in time, but thes
 - Intelligent handling of errors in init file
   - Localize recoverable errors and convert them to warnings whenever possible (e.g. if a package fails to install, warn and don't run its configuration). This means wrapping anything that requires a package to be loaded in a ~with-eval-after-load~ (usually via ~use-package~ or ~general-with-package~).
   - Isolate sections (source blocks) where possible, so that one section failing will not affect other sections. When there is some non-recoverable error somewhere in my init (e.g. ~(call-to-misspelled-function)~), I can start Emacs with =--with-demoted-errors= (flag I'm handling in =./init.el=) to demote errors for every source block. This means that I can still use Emacs with most of my configuration to fix my init file without needing to switch to a stable configuration or a different editor.
-  - Use a stable init file for errors that break everything (e.g. missing/extra parens). I'm automatically saving my configuration when it succesfully loads with a =-stable.el= suffix, and I can load this configuration by specifying =--stable=. As for package breakage, straight can handle locking versions/commits.
+  - Use a stable init file for errors that break everything (e.g. missing/extra parens). I'm automatically saving my configuration when it successfully loads with a =-stable.el= suffix, and I can load this configuration by specifying =--stable=. As for package breakage, straight can handle locking versions/commits (next bullet).
+  - Use ~straight-freeze-versions~ to be able to recover with ~straight-thaw-versions~ if package updates break things.
   - Don't assume that any packages besides the core packages (e.g. =straight=, =use-package=, =general=, and =evil=) have been loaded. Sections should otherwise be independent and reorderable.
-  - Conditionally load non-portable functionality to prevent errors when using on other computers. Don't rely on unpushed functionality in personal packages (I've been really bad about this).
+  - Conditionally load non-portable functionality to prevent errors when using on other computers. Don't rely on unpushed functionality in personal packages (I was really bad about this in the past).
 - Idempotency
   - Make configuration idempotent, so that any part can be run again without issues. It isn't as important to be able to reload the whole file in Emacs as it is for other software since it's more normal to just incrementally eval whatever you're working on.
 - Short/Sane/Consistent Keybindings
@@ -119,6 +120,14 @@ Used throughout configuration.
     evil-ex-completion-map)
   "List of minibuffer keymaps.")
 
+(defconst noct-self-insert-commands
+  '(self-insert-command
+    org-self-insert-command
+    LaTeX-insert-left-brace
+    outshine-self-insert-command
+    lispy-space)
+  "List of self-insert commands.")
+
 (defun noct-blog-dir-p (file)
   "Return whether the current file is in my blog post directory."
   (file-in-directory-p
@@ -149,6 +158,10 @@ See https://www.reddit.com/r/emacs/comments/64xb3q/killthisbuffer_sometimes_just
   `(let ((inhibit-message t)
          (save-silently t))
      ,@body))
+
+(defun noct-silence-advice (oldfun &rest args)
+  (noct-silently
+    (apply oldfun args)))
 
 (defun noct:inhibit-error-advice (oldfunc &rest args)
   "Run OLDFUN with ARGS, demoting errors to warnings.
@@ -425,7 +438,7 @@ Useful for debugging selectrum or ivy.
 #+end_src
 
 *** Custom Declares
-See [[https://old.reddit.com/r/emacs/comments/gi70ye/weekly_tipstricketc_thread/fqg7qys/][here]]. Can't currently think of a good use case but will probably use at some point. 
+See [[https://old.reddit.com/r/emacs/comments/gi70ye/weekly_tipstricketc_thread/fqg7qys/][here]]. Can't currently think of a good use case but will probably use at some point.
 
 ** =package.el=
 Currently, I only use =package.el= if I want to use the package list buffer. I generally don't use it for installing anything.
@@ -435,7 +448,7 @@ Currently, I only use =package.el= if I want to use the package list buffer. I g
 #+end_src
 
 ** =straight.el= and =use-package.el=
-When I first tried emacs, I thought the idea of using centralized package repositories was interesting but was annoyed when packages I wanted to use weren't (yet) in any package archive. Alternatives like =el-get= and =quelpa= weren't quite what I wanted. =straight.el= is nice in that it fully replaces =package.el= for me while still making use of recipes from elpa, melpa, and emacsmirror. This means that while you can specify your own recipe, it's usually not necessary.
+When I first tried Emacs, I thought the idea of using centralized package repositories was interesting but was annoyed when packages I wanted to use weren't (yet) in any package archive. Alternatives like =el-get= and =quelpa= weren't quite what I wanted. =straight.el= is nice in that it fully replaces =package.el= for me while still making use of recipes from elpa, melpa, and emacsmirror. This means that while you can specify your own recipe, it's usually not necessary.
 
 I use straight to compile/autoload my personal local packages (=straight.el= makes this easy since they are treated the same way as other packages). I also occasionally use it to contribute to packages (by directly working with the downloaded repo). Even if I didn't use it for development, having the git repos available locally is useful for many reasons. It's great to have READMEs and other files available locally, to be able to use git blame, and to be able to switch to or lock any commit.
 
@@ -516,10 +529,6 @@ Install, load, and configure =straight.el=:
             (car args))
           noct-straight-packages)))
 (advice-add 'straight-use-package :around #'noct-straight-use-package)
-
-;; straight now fixes `org-version' by default (see `straight-fix-org'); this
-;; has to be earlier in the config file for it to work correctly
-(straight-use-package 'org-plus-contrib)
 #+end_src
 
 *** Use-package
@@ -552,7 +561,8 @@ Install =use-package.el= with optional dependencies and configure:
 ;; demote installation errors to messages
 ;; this variable is no longer changed by straight
 ;; (advice-add use-package-ensure-function :around #'noct:use-package-ensure)
-(advice-add 'straight-use-package :around #'noct:inhibit-error-advice)
+(when (bound-and-true-p noct-with-demoted-errors)
+  (advice-add 'straight-use-package :around #'noct:inhibit-error-advice))
 ;; can test with something like this:
 ;; (use-package does-not-exist)
 
@@ -925,10 +935,7 @@ If this is a daemon session, load them all immediately instead."
 Consistently sets the paths for various configuration, history, temporary, etc. files created by Emacs packages (e.g. =savehist-file=).
 #+begin_src emacs-lisp
 (use-package no-littering
-  :demand t
-  :config
-  ;; don't make auto save files
-  (gsetq tramp-auto-save-directory nil))
+  :demand t)
 #+end_src
 
 ** Evil and Evil Collection
@@ -1210,8 +1217,9 @@ in `evil-repeat-info' and clear variables."
 Now that =general.el= and =evil= are installed, I set up some keybindings for interactive usage of =straight.el=.
 #+begin_src emacs-lisp
 (general-s :infix "s"
-  "p" #'straight-pull-package
-  "P" #'straight-pull-all
+  "p" #'straight-pull-package-and-deps
+  "P" #'straight-pull-recipe-repositories
+  "a" #'straight-pull-all
   "r" #'straight-rebuild-package
   "c" #'straight-check-all
   "f" #'straight-freeze-versions
@@ -1281,6 +1289,7 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 
 ;; I don't use bidirectional text; improves speed for long lines (even when no
 ;; bidirectional text)
+(gsetq bidi-inhibit-bpa t)
 (gsetq-default bidi-display-reordering 'left-to-right
                bidi-paragraph-direction 'left-to-right)
 
@@ -1302,6 +1311,8 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 (gsetq message-log-max 10000)
 
 (gsetq kill-do-not-save-duplicates t)
+
+(gsetq adaptive-fill-mode t)
 #+end_src
 
 ** General Keybindings
@@ -1314,6 +1325,10 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 
 (general-def '(insert normal)
   "C-;" #'eval-expression)
+
+(general-t ";" #'execute-extended-command)
+
+(general-spc "F" #'find-file)
 #+end_src
 
 ** Appearance/GUI
@@ -1420,14 +1435,18 @@ Automatically uncompress (for editing) and recompress (when saving) compressed f
 
 (general-def noct:toggle-map "S" #'noct-toggle-save-on-insert-exit)
 
-(general-t "s" #'evil-save)
+(general-t "s" #'evil-write)
 #+end_src
 
 ** Backup
 #+begin_src emacs-lisp
-(gsetq backup-directory-alist
-       ;; TODO disable backup/undo history for gpg files entirely?
-       '(("." . "~/ag-sys/.emacs_backup/"))
+(defun noct-backup-predicate (file)
+  "Return whether to backup FILE.
+Don't backup remote directories or encrypted files."
+  (not (or (file-remote-p file)
+           (string-match-p (car epa-file-handler) file))))
+
+(gsetq backup-enable-predicate #'noct-backup-predicate
        ;; don't delink hardlinks
        backup-by-copying t
        ;; add version numbers to backups
@@ -1616,6 +1635,12 @@ Obvious ones:
 ;; (add-hook 'window-configuration-change-hook #'noct:kill-minibuffer)
 #+end_src
 
+** Native Compilation
+#+begin_src emacs-lisp
+;; don't continuously popup warning buffer
+(gsetq native-comp-async-report-warnings-errors nil)
+#+end_src
+
 ** OSX
 #+begin_src emacs-lisp
 (when (eq system-type 'darwin)
@@ -1644,26 +1669,56 @@ Obvious ones:
 (use-package recentf
   :defer-incrementally (easymenu tree-widget timer)
   :init
-  (general-add-advice 'after-find-file
+  (general-add-advice '(after-find-file consult-buffer)
                       :before
                       (lambda (&rest _)
-                        (require 'recentf))
+                        (recentf-mode))
                       nil
                       t)
   :config
   (gsetq recentf-max-saved-items 1000)
 
+  (defun doom--recent-file-truename (file)
+    (if (or (file-remote-p file nil t)
+            (not (file-remote-p file)))
+        (file-truename file)
+      file))
+
+  ;; settings from doom
+  (setq recentf-filename-handlers
+        '(;; Text properties inflate the size of recentf's files, and there is
+          ;; no purpose in persisting them, so we strip them out.
+          substring-no-properties
+          ;; Resolve symlinks of local files. Otherwise we get duplicate
+          ;; entries opening symlinks.
+          doom--recent-file-truename
+          ;; Replace $HOME with ~, which is more portable, and reduces how much
+          ;; horizontal space the recentf listing uses to list recent files.
+          abbreviate-file-name)
+        recentf-auto-cleanup 'never)
+  (general-add-hook 'kill-emacs-hook #'recentf-cleanup)
+  (general-add-hook
+   '(doom-switch-window-hook write-file-functions)
+   (progn (defun doom--recentf-touch-buffer-h ()
+            "Bump file in recent file list when it is switched or written to."
+            (when buffer-file-name
+              (recentf-add-file buffer-file-name))
+            ;; Return nil for `write-file-functions'
+            nil)
+          #'doom--recentf-touch-buffer-h))
+
+  (general-add-advice 'recentf-load-list :around #'noct-silence-advice)
+
   ;; I haven't had many issues with unwanted files getting in the way
   ;; https://www.reddit.com/r/emacs/comments/3g468d/stop_recent_files_showing_elpa_packages/
   ;; (gsetq recentf-exclude '("^/var/folders\\.*" "COMMIT_EDITMSG\\'" ".*-autoloads\\.el\\'" "[/\\]\\.elpa/" ))
-
-  (recentf-load-list)
 
   ;; save recent after 10 seconds of idle time
   ;; if not idle, save every 5 minutes
   (noct:run-at-active-interval (* 5 60) 10
     (noct-silently
-      (recentf-save-list))))
+      (when recentf-mode
+        (recentf-save-list)))))
 #+end_src
 
 ** Reveal
@@ -1675,7 +1730,8 @@ Obvious ones:
 
 ** Save Place
 #+begin_src emacs-lisp
-(save-place-mode)
+(noct-after-buffer
+  (save-place-mode))
 #+end_src
 
 ** So Long
@@ -1734,7 +1790,7 @@ I've switched away from putting this function in a hook because it can be jarrin
 ;; http://emacsredux.com/blog/2013/04/21/edit-files-as-root/
 ;; Additionally:
 ;; - Support file creation
-;; - Support TRAMP
+;; - Support remote connection
 ;; - Support dired
 ;; TODO test with remote files again (lost some changes)
 (defun noct-maybe-sudo-edit ()
@@ -1757,7 +1813,7 @@ I've switched away from putting this function in a hook because it can be jarrin
       (let ((method (file-remote-p default-directory 'method))
             (user (file-remote-p default-directory 'user))
             (host (file-remote-p default-directory 'host))
-            (localname (file-remote-p default-directory 'localname)))
+            (localname (file-remote-p file 'localname)))
         (find-file (if method
                        (concat "/" method ":" user "@" host
                                "|sudo:" host ":" localname)
@@ -1797,10 +1853,12 @@ I've switched away from putting this function in a hook because it can be jarrin
 
 ** TRAMP
 #+begin_src emacs-lisp
-(general-with 'tramp
-  ;; disable TRAMP remote backups
-  ;; backing up locally instead with `backup-each-save'
-  (gsetq tramp-backup-directory-alist '(("."))))
+;; NOTE remote backups disabled in backup section
+;; backing up locally instead with `backup-each-save'
+;; https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html
+(gsetq vc-ignore-dir-regexp (format "\\(%s\\)\\|\\(%s\\)"
+                                    vc-ignore-dir-regexp
+                                    tramp-file-name-regexp))
 #+end_src
 
 ** Undo Granularity
@@ -1810,12 +1868,27 @@ I've switched away from putting this function in a hook because it can be jarrin
 #+end_src
 
 * Completion, Selection, and Matching/Sorting
-** AMX
-Intelligently sorted =M-x=.
+** Affe
 #+begin_src emacs-lisp
-(use-package amx
-  :general (general-t  ";" #'amx)
-  :config (amx-mode))
+(use-package affe
+  :general
+  (general-spc "?" #'affe-grep)
+  :config
+  (require 'orderless)
+  (gsetq affe-regexp-function #'orderless-pattern-compiler
+         affe-highlight-function #'orderless--highlight
+         affe-grep-command (concat "rg "
+                                   "--null "
+                                   "--color=never "
+                                   "--max-columns=1000 "
+                                   "--no-heading "
+                                   "--line-number "
+                                   "-v ^$ "
+                                   ;; adding these to default
+                                   "--hidden "
+                                   "--max-columns-preview "
+                                   ;; defaults
+                                   ".")))
 #+end_src
 
 ** Avy
@@ -1859,13 +1932,22 @@ Intelligently sorted =M-x=.
     (global-company-mode))
   :blackout t
   :config
+  (general-def '(company-active-map company-search-map)
+    "M-n" nil)
   ;; setting idle delay too low can cause a lot of lag depending on the backend
   (gsetq company-idle-delay 0.15
          company-minimum-prefix-length 1
-         company-tooltip-limit 15
+         ;; company-tooltip-limit 15
          ;; e.g.for yasnippet annotations
          ;; company-tooltip-align-annotations t
-         company-show-numbers t)
+         company-show-quick-access t
+         company-quick-access-keys '("a" "r" "s" "t" "d" "h" "n" "e" "i" "o")
+         company-abort-on-unique-match nil)
+
+  (general-add-hook 'evil-normal-state-entry-hook
+                    (noct-defun doom-company-abort-h ()
+                      (when company-candidates
+                        (company-abort))))
 
   (defun trishume:company-backend-with-yas (backends)
     "Add :with company-yasnippet to company BACKENDS.
@@ -1894,22 +1976,6 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     ;; don't take over these keys
     "C-h" nil
     "C-w" nil)
-
-  ;; NOTE doing this instead of `company-active-map' because all evil keymaps
-  ;; have precedence over it
-  (general-def 'insert company-mode-map
-    :predicate 'company-candidates
-    ;; colemak letters instead of numbers
-    "M-a" (noct-c (company-complete-number 1))
-    "M-r" (noct-c (company-complete-number 2))
-    "M-s" (noct-c (company-complete-number 3))
-    "M-t" (noct-c (company-complete-number 4))
-    "M-d" (noct-c (company-complete-number 5))
-    "M-h" (noct-c (company-complete-number 6))
-    "M-n" (noct-c (company-complete-number 7))
-    "M-e" (noct-c (company-complete-number 8))
-    "M-i" (noct-c (company-complete-number 9))
-    "M-o" (noct-c (company-complete-number 10)))
 
   ;; can use for snippet expansion (if take too long to hit tab; shouldn't
   ;; happen normally)
@@ -1986,20 +2052,21 @@ https://github.com/company-mode/company-mode/issues/50
 I haven't run into a case yet where I would need this but am leaving this placeholder for now.
 
 *** Company Box (child frame frontend)
-Looks nice and replaces =company-quickhelp= as well.
+Looks nice and replaces =company-quickhelp= as well. The default company frontend is faster though.
 #+begin_src emacs-lisp
 (use-package company-box
-  :disabled t
-  :ghook 'company-mode-hook
+  ;; :ghook 'company-mode-hook
+  :general
+  (general-def noct:toggle-map "b" #'company-box-mode)
   :blackout t
   :config
-  (gsetq company-box-show-single-candidate t
-         company-box-icons-alist 'company-box-icons-all-the-icons))
+  (gsetq company-box-icons-alist 'company-box-icons-all-the-icons))
 #+end_src
 
 *** Company Posframe (child frame frontend)
 #+begin_src emacs-lisp
 (use-package company-posframe
+  :disabled t
   :ghook 'company-mode-hook
   :blackout t
   :config
@@ -2007,6 +2074,20 @@ Looks nice and replaces =company-quickhelp= as well.
   (gsetq company-posframe-quickhelp-delay 0.5)
 
   (general-def noct:toggle-map "C" #'company-posframe-mode))
+#+end_src
+
+** Corfu
+#+begin_src emacs-lisp
+(use-package corfu
+  :disabled t
+  :ghook 'minibuffer-setup-hook
+  :config
+  (gsetq corfu-auto t
+         corfu-auto-delay 0.15
+         corfu-auto-prefix 1)
+
+  (general-def corfu-map
+    [tab] #'corfu-next))
 #+end_src
 
 ** Completing Read
@@ -2099,11 +2180,16 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
   :straight (:host github :repo "clemera/frog-menu"
              :fork (:repo "noctuid/frog-menu"))
   :config
-  (gsetq frog-menu-avy-keys avy-keys)
+  (general-after 'avy
+    (gsetq frog-menu-avy-keys avy-keys))
   (general-after-gui
     (gsetq frog-menu-posframe-border-width (noct-border-width)))
   (setf (alist-get 'avy-posframe frog-menu-display-option-alist)
-        #'noct-posframe-poshandler-frame-near-top-center))
+        #'noct-posframe-poshandler-frame-near-top-center)
+  ;; readable background color
+  (set-face-background 'frog-menu-posframe-background-face "black")
+  ;; for now don't use posframe
+  (gsetq frog-menu-type-function (lambda () 'avy-side-window)))
 #+end_src
 
 ** Helm
@@ -2173,6 +2259,67 @@ TODO Try more helm.
   (helm-posframe-enable))
 #+end_src
 
+** Headlong
+Select candidate as soon as there is only one (like the headlong package but for ivy and selectrum). This is used for cases where you know there is a correct match in the candidates and there aren't too many candidates. Right now, I'm using it mainly for dired (like ranger's =f=), but this could be used elsewhere.
+#+begin_src emacs-lisp
+;; TODO consider making a PR with a better implementation
+(defvar noct:ivy-command nil)
+(defvar noct:ivy-major-mode nil)
+
+(defun noct:set-ivy-info (&rest _)
+  (setq noct:ivy-command this-command
+        noct:ivy-major-mode major-mode))
+
+(general-add-advice 'ivy-read :before #'noct:set-ivy-info)
+
+(defun noct:wait-for-user (seconds)
+  "Wait for user to stop typing for SECONDS."
+  (while (not (sit-for seconds t))
+    (discard-input)))
+
+(defun noct:premature-select ()
+  (cond ((or (and (memq noct:ivy-command '(counsel-find-file dired-goto-file))
+                  (memq noct:ivy-major-mode '(ranger-mode dired-mode)))
+             (eq noct:ivy-command #'projectile-find-test-file))
+         (cond ((= ivy--length 0)
+                (backward-delete-char-untabify 1))
+               ((= ivy--length 1)
+                (noct:wait-for-user 0.2)
+                (ignore-errors (ivy-done)))))))
+
+(general-add-advice 'ivy--exhibit :after #'noct:premature-select)
+
+;; (defvar noct:block-input nil)
+;; (defun noct:maybe-block-input ()
+;;   (when noct:block-input
+;;     (setq noct:block-input nil)
+;;     (sleep-for 2)
+;;     (discard-input)))
+
+;; (general-add-hook 'post-command-hook #'noct:maybe-block-input)
+
+
+(defvar noct-selectrum-command nil)
+(defvar noct-selectrum-major-mode nil)
+(defun noct-set-selectrum-info (&rest _)
+  (setq noct-selectrum-command this-command
+        noct-selectrum-major-mode major-mode))
+(general-add-advice 'selectrum--read :before #'noct-set-selectrum-info)
+
+(defun noct-selectrum-premature-select (&rest _)
+  (cond ((or (and (memq noct-selectrum-command '(find-file
+                                                 dired-goto-file))
+                  (memq noct-selectrum-major-mode '(ranger-mode dired-mode)))
+             (eq noct-selectrum-command #'projectile-find-test-file))
+         (cond ((= selectrum--actual-num-candidates-displayed 0)
+                (backward-delete-char-untabify 1))
+               ((= selectrum--actual-num-candidates-displayed 1)
+                (noct:wait-for-user 0.2)
+                (ignore-errors (selectrum-select-current-candidate)))))))
+
+(general-add-advice 'selectrum--update :after #'noct-selectrum-premature-select)
+#+end_src
+
 ** Ivy
 *** Setup
 #+begin_src emacs-lisp
@@ -2218,14 +2365,9 @@ TODO Try more helm.
 ;; ivy-dispatching-call
 #+end_src
 
-*** Ivy Occur/ Wgrep
+*** Ivy Occur
 TODO evil bindings stop working after wgrep finish edit
 #+begin_src emacs-lisp
-(use-package wgrep
-  :config
-  (general-def 'normal wgrep-mode-map
-    "RET" #'wgrep-finish-edit))
-
 (general-with-package 'ivy
   (general-def 'normal '(ivy-occur-mode-map ivy-occur-grep-mode-map)
     "n" #'ivy-occur-next-line
@@ -2273,6 +2415,7 @@ TODO evil bindings stop working after wgrep finish edit
 *** Ivy Posframe
 #+begin_src emacs-lisp
 (use-package ivy-posframe
+  :disabled t
   :after ivy
   :init
   (general-after-gui
@@ -2369,57 +2512,19 @@ Unlike helm, ivy can't automatically do fuzzy and space as =.*= matching at the 
                       :after #'noct:ivy-maybe-reset-regex-function))
 #+end_src
 
-*** Headlong
-Select candidate as soon as there is only one (like the headlong package but for ivy). This is used for cases where you know there is a correct match in the candidates and there aren't too many candidates. Right now, I'm using it mainly for dired (like ranger's =f=), but this could be used elsewhere.
-#+begin_src emacs-lisp
-;; TODO consider making a PR with a better implementation
-(defvar noct:ivy-command nil)
-(defvar noct:ivy-major-mode nil)
-
-(defun noct:set-ivy-info (&rest _)
-  (setq noct:ivy-command this-command
-        noct:ivy-major-mode major-mode))
-
-(general-add-advice 'ivy-read :before #'noct:set-ivy-info)
-
-(defun noct:wait-for-user (seconds)
-  "Wait for user to stop typing for SECONDS."
-  (while (not (sit-for seconds t))
-    (discard-input)))
-
-(defun noct:premature-select ()
-  (cond ((or (and (memq noct:ivy-command '(counsel-find-file dired-goto-file))
-                  (memq noct:ivy-major-mode '(ranger-mode dired-mode)))
-             (eq noct:ivy-command #'projectile-find-test-file))
-         (cond ((= ivy--length 0)
-                (backward-delete-char-untabify 1))
-               ((= ivy--length 1)
-                (noct:wait-for-user 0.2)
-                (ignore-errors (ivy-done)))))))
-
-(general-add-advice 'ivy--exhibit :after #'noct:premature-select)
-
-;; (defvar noct:block-input nil)
-;; (defun noct:maybe-block-input ()
-;;   (when noct:block-input
-;;     (setq noct:block-input nil)
-;;     (sleep-for 2)
-;;     (discard-input)))
-
-;; (general-add-hook 'post-command-hook #'noct:maybe-block-input)
-#+end_src
-
 *** Counsel
 #+begin_src emacs-lisp
 (use-package counsel
   :general
-  (general-t
-    ;; looks nicer than helm-show-kill-ring to me
-    "p" #'counsel-yank-pop)
+  ;; (general-t
+  ;;   ;; looks nicer than helm-show-kill-ring to me
+  ;;   ;; sticking with over `consult-yank' since it supports showing multi-line
+  ;;   ;; text
+  ;;   "p" #'counsel-yank-pop)
 
-  (general-def help-map "a" #'counsel-apropos)
+  ;; (general-def help-map "a" #'counsel-apropos)
 
-  (general-spc "y" #'counsel-semantic-or-imenu)
+  ;; (general-spc "y" #'counsel-semantic-or-imenu)
 
   ((insert normal) "C-:" #'counsel-minibuffer-history)
 
@@ -2432,7 +2537,7 @@ Select candidate as soon as there is only one (like the headlong package but for
     "p" #'counsel-list-processes
     "b" #'counsel-descbinds
     "d" #'counsel-dash
-    "l" #'counsel-load-theme
+    ;; "l" #'counsel-load-theme
     "u" #'counsel-unicode-char
     "g" #'counsel-git-log
     "s" #'counsel-git-stash)
@@ -2441,7 +2546,13 @@ Select candidate as soon as there is only one (like the headlong package but for
   (general-def company-active-map
     "C-s" #'counsel-company)
 
-  :blackout t)
+  :blackout t
+  :config
+  (general-after 'helpful
+    ;; using this instead of binding them directly allows taking an alternate
+    ;; action without also opening the helpful buffer
+    (gsetq counsel-describe-function-function #'helpful-callable
+           counsel-describe-variable-function #'helpful-variable)))
 #+end_src
 
 *** Counsel Buku
@@ -2476,29 +2587,26 @@ This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I m
 #+end_src
 
 ** Orderless
-Unlike traditional fuzzy matching (e.g. flx, fzf, etc.), =orderless= does no sorting. This means you can't do something like rank initials as a better match than characters in the middle of the word for a fuzzy query. However, sorting this way takes extra time, and I've never really liked fuzzy matching. When I used to use fuzzy matching, I never used to know what to type. Instead of ranking initials as higher, why not only use initials? Matching based on initials is more precise, and for me, it's actually easier for me to construct a query for a function's or file path's initials than to try to construct a fuzzy query in some other way.
+One notable difference between using orderless (or prescient) and some older fuzzy matchers/plugins is that space does not act as =.*=. Spaces (by default) separate components, all of which must match. You can still use space the same way as before (type different parts of a file path separated by space, for example), but now order does not matter. This allows you to refine your query as needed without having to delete and re-enter a more specific query.
 
-With a more restrictive/specific query, ranking matches isn't necessary in my experience. Combined with frecency sorting, initialism is good enough. Initialism is incredible for completing file paths, heading names, and function/variable names (~describe-variable~, ~describe-function~, ~find-function~, ~find-library~, company, etc.). With prescient or orderless, if the initialism doesn't get the candidate you want in sight, you can just hit space and add another query (regexp, fuzzy, or whatever you want) to further refine. As soon as the candidate is visible, you can use a keybinding to select it based on its index (or with something like ~ivy-avy~).
+Unlike traditional fuzzy matchers (e.g. flx, fzf, etc.), =orderless= does no sorting. This means you can't do something like rank initials as a better match than characters in the middle of the word for a fuzzy query. However, sorting this way takes extra time, and I've never really liked fuzzy matching. When I used to use fuzzy matching, I never used to know what to type. Instead of ranking initials as higher, why not only use initials? Matching based on initials is more precise, and for me, it's actually easier for me to construct a query for a function's initials or file path's initials than to try to construct a fuzzy query in some other way.
 
-Of course, initialism isn't great for everything, but I've found it's often still possible to quickly create queries that are more specific than fuzzy queries but still short. For example, if I want to pull up a help buffer for a variable in =orderless= but don't remember the specific name, I can start by limiting the query to variables prefixed with =orderless=. Instead of typing that out exactly, I can get a good approximation by typing something like =o..s= (still undecided on best syntax; also considering =o,s=) to match words that start with =o= and end with =s=. For commands like ~describe-function~, I normally use ~orderless-strict-leading-initialism~ since I always type the first initial first. I'm relaxing this to ~orderless-strict-initialism~ for queries after the second, so I could type something like =^o..s cs= to match =orderless-component-separator=.
+With a more restrictive/specific query, ranking matches surprisingly isn't necessary in my experience. Combined with frecency sorting, initialism is good enough. Initialism is incredible for completing file paths, heading names, and function/variable names (~describe-variable~, ~describe-function~, ~find-function~, ~find-library~, company, etc.). With prescient or orderless, if the initialism doesn't get the candidate you want in sight, you can just hit space and add another query (regexp, fuzzy, or whatever you want) to further refine. As soon as the candidate is visible, you can use a keybinding to select it based on its index (or with something like ~ivy-avy~ or ~selectrum-quick-select~).
+
+Of course, initialism isn't great for everything, but I've found it's often still possible to quickly create queries that are more specific than fuzzy queries but still short. For example, if I want to pull up a help buffer for a variable in =orderless= but don't remember the specific name, I can start by limiting the query to variables prefixed with =orderless=. Instead of typing that out exactly, I can get a good approximation by typing something like =o,s= (still undecided on best syntax; might use =o..s=) to match words that start with =o= and end with =s=. For commands like ~describe-function~, I normally use ~orderless-strict-leading-initialism~ since I always type the first initial first. I'm relaxing this to ~orderless-strict-initialism~ for queries after the second, so I could type something like =o..s cs= to match =orderless-component-separator=.
 
 This can work also sometimes well for other query types where initialism is fairly useless (e.g. text search), and you can always add multiple full word queries as needed.
 
-I'm keeping fuzzy out of my default styles, but I've configured things so that I can switch to it if needed by prefixing a query with =f;= or suffixing a query with =;f=.
+Even simpler is to just mash out words or partial words separated by spaces (more precise than fuzzy) in cases where initialism or orderless-prefixes can't be used. Again, if you can't quickly construct a query, then it doesn't matter how great the matching is. Dumb queries can often get you the result you want faster.
+
+I'm keeping fuzzy out of my default styles, but I've configured things so that I can switch to it if needed by prefixing a query with =f;= or suffixing a query with =;f=. If you want fuzzy matching, orderless may not be the best choice though. I've found it can get slow quickly once queries get longer.
 
 =orderless= is infinitely customizable, so you can choose better default query styles for different commands. If you wanted, you could remove initialism from ~swiper-isearch~ completely, for example. I'm still experimenting with how restrictive I can make things without harming usability (e.g. can I remove ~orderless-regexp~ entirely as a default style for the first component for commands like ~describe-function~?). So far it seems like I don't need to go this far and I don't need any sorting/ranking to get amazing matching.
 #+begin_src emacs-lisp
 (use-package orderless
-  :ghook
-  ('selectrum-prescient-mode-hook
-   (noct-defun selectrum-prescient-orderless-setup ()
-     "Override prescient's filtering and highlighting for selectrum."
-     (gsetq selectrum-refine-candidates-function
-            #'orderless-filter
-            selectrum-highlight-candidates-function
-            #'orderless-highlight-matches)))
   :init
-  (gsetq completion-styles '(orderless))
+  (gsetq completion-styles '(orderless)
+         completion-category-defaults nil)
 
   (general-with 'ivy
     (setf (alist-get t ivy-re-builders-alist)
@@ -2508,9 +2616,17 @@ I'm keeping fuzzy out of my default styles, but I've configured things so that I
           #'ivy--regex-plus))
 
   :config
+  ;; necessary at the time of writing for index-based rules to work
+  (defun noct-split-orderless-component (str)
+    (let ((components (split-string str "[ &]")))
+      (when (remove "" components)
+        components)))
+
   (gsetq orderless-matching-styles
-         '(orderless-strict-initialism orderless-regexp)
-         orderless-component-separator "[ &]")
+         '(orderless-strict-leading-initialism orderless-regexp)
+         ;; & for company-capf
+         ;; orderless-component-separator "[ &]"
+         orderless-component-separator #'noct-split-orderless-component)
 
   (defun orderless--use-completions-common-part (fn &rest args)
     (let ((orderless-match-faces [completions-common-part]))
@@ -2595,6 +2711,7 @@ example, if `noct-dispatch-pattern' is \"..\" then \"o..s\" would match
                                             string-end)))))
           string-end)))))
 
+ ;; TODO re-evaluate what index-based rules would be useful
   (defun noct-orderless-index-dispatcher (pattern index &rest _)
     "Change the default styles for PATTERN based on INDEX.
 Relax strictness from `orderless-strict-leading-initialism'. to
@@ -2649,7 +2766,6 @@ Relax strictness from `orderless-strict-leading-initialism'. to
 #+end_src
 
 ** Selectrum
-*** Setup
 #+begin_src emacs-lisp
 (use-package selectrum
   :init
@@ -2661,39 +2777,314 @@ Relax strictness from `orderless-strict-leading-initialism'. to
 
   (gsetq selectrum-show-indices t
          selectrum-num-candidates-displayed 20
+         ;; TODO async consult commands don't show full candidates without
+         selectrum-max-window-height 20
          selectrum-count-style 'current/matches
-         selectrum-fix-minibuffer-height t)
+         ;; selectrum-fix-vertical-window-height nil
+         )
+
+  ;; only highlight visible candidates; performance improvemnt
+  (gsetq orderless-skip-highlighting (lambda () selectrum-is-active))
 
   (general-s "." #'selectrum-repeat)
 
-  ;; all of these are useless or superseded by other keybindings except for
-  ;; maybe M-s and M-r
-  (setf (alist-get "M-a" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 1)))
-  (setf (alist-get "M-r" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 2)))
-  (setf (alist-get "M-s" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 3)))
-  (setf (alist-get "M-t" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 4)))
-  (setf (alist-get "M-d" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 5)))
-  (setf (alist-get "M-h" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 6)))
-  (setf (alist-get "M-n" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 7)))
-  (setf (alist-get "M-e" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 8)))
-  (setf (alist-get "M-i" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 9)))
-  (setf (alist-get "M-o" selectrum-minibuffer-bindings)
-        (general-l (selectrum-select-current-candidate 10))))
+  (general-def selectrum-minibuffer-map
+    "<prior>" #'selectrum-previous-page
+    "<next>" #'selectrum-next-page
+    "C-s" #'selectrum-select-from-history
+    ;; all of these are useless or superseded by other keybindings except for
+    ;; maybe M-s and M-r
+    "M-a" (general-l (selectrum-select-current-candidate 1))
+    "M-r" (general-l (selectrum-select-current-candidate 2))
+    "M-s" (general-l (selectrum-select-current-candidate 3))
+    "M-t" (general-l (selectrum-select-current-candidate 4))
+    "M-d" (general-l (selectrum-select-current-candidate 5))
+    "M-h" (general-l (selectrum-select-current-candidate 6))
+    "M-n" (general-l (selectrum-select-current-candidate 7))
+    "M-e" (general-l (selectrum-select-current-candidate 8))
+    "M-i" (general-l (selectrum-select-current-candidate 9))
+    "M-o" (general-l (selectrum-select-current-candidate 10)))
+
+  (defun clemera--selectrum-selectable-prompt-p ()
+    (not (and (selectrum--match-strictly-required-p)
+              (cond (minibuffer-completing-file-name
+                     (not (selectrum--at-existing-prompt-path-p))
+                     (t
+                      (not (string-empty-p selectrum--virtual-input))))))))
+
+  (defun clemera-selectrum-next-candidate (&optional arg)
+    "`selectrum-next-candidate' but with wrapping.
+https://github.com/raxod502/selectrum/issues/131#issuecomment-817191700"
+    (interactive "p")
+    (when selectrum--current-candidate-index
+      (let ((selectable-prompt
+             (clemera--selectrum-selectable-prompt-p))
+            (index (+ selectrum--current-candidate-index (or arg 1)))
+            (max (1- (length selectrum--refined-candidates))))
+        (setq selectrum--current-candidate-index
+              (cond ((< index (if selectable-prompt -1 0))
+                     max)
+                    ((> index max)
+                     (if selectable-prompt -1 0))
+                    (t
+                     index))))))
+
+  (general-add-advice 'selectrum-next-candidate
+                      :override #'clemera-selectrum-next-candidate)
+
+  ;; TODO some way to not use for specific commands (e.g. `consult-line') or use
+  ;; `mini-frame' if it becomes less glitchy
+  ;; would be better to keep everything in minibuffer but have it at top instead
+  ;; of bottom
+  ;; (gsetq selectrum-display-action '(display-buffer-show-in-posframe))
+
+  ;; (defun display-buffer-show-in-posframe (buffer _alist)
+  ;;   (frame-root-window
+  ;;    (posframe-show buffer
+  ;;                   :min-height selectrum-num-candidates-displayed
+  ;;                   :min-width (round (* 0.6 (frame-width)))
+  ;;                   :internal-border-width 1
+  ;;                   :left-fringe 8
+  ;;                   :right-fringe 8
+  ;;                   :poshandler 'noct-posframe-poshandler-frame-near-top-center)))
+
+  ;; (general-add-hook 'minibuffer-exit-hook #'posframe-delete-all)
+  )
 
 (use-package selectrum-prescient
   :after selectrum
   :demand t
   :config
+  (gsetq selectrum-prescient-enable-filtering nil)
   (selectrum-prescient-mode))
+#+end_src
+
+** Consult
+#+begin_src emacs-lisp
+(use-package consult
+  :general
+  (general-spc
+    "f" #'consult-buffer
+    ;; generally `projectile-find-file' is a better option
+    "k" #'noct-consult-find-fd
+    "l" #'consult-locate
+    "u" #'consult-outline
+    "y" (general-predicate-dispatch #'consult-imenu
+          (eq major-mode 'org-mode) #'consult-org-heading)
+    ;; works inside or outside project already
+    "/" #'consult-ripgrep)
+  (general-t "p" #'consult-yank-from-kill-ring)
+  (general-s :infix "i" "l" #'consult-theme)
+  (general-m "C" #'consult-compile-error)
+  (help-map "a" #'consult-apropos)
+  ('normal "/" (if (or (not (boundp no-native-compile))
+                       (not no-native-compile))
+                   #'consult-line
+                 #'noct-consult-ripgrep-or-line))
+  :config
+  ;; TODO move this somewhere else
+  (gsetq org-imenu-depth 10)
+
+  (gsetq consult-buffer-sources
+         (remove 'consult--source-bookmark consult-buffer-sources))
+
+  (general-after 'projectile
+    ;; will cause `consult-ripgrep' and similar to use project root
+    (gsetq consult-project-root-function #'projectile-project-root))
+
+  (gsetq xref-show-xrefs-function #'consult-xref
+         xref-show-definitions-function #'consult-xref)
+
+  (gsetq consult-ripgrep-command
+         (concat "rg "
+                 "--null "
+                 "--line-buffered "
+                 "--color=ansi "
+                 "--max-columns=1000 "
+                 "--no-heading "
+                 "--line-number "
+                 ;; adding these to default
+                 "--smart-case "
+                 "--hidden "
+                 "--max-columns-preview "
+                 ;; defaults
+                 ". -e ARG OPTS"))
+
+  (defun noct-consult-find-fd (&optional dir initial)
+    "Run `consult-find' using fd."
+    (interactive "P")
+    (let ((consult-find-command
+           (concat "fd --hidden --no-ignore --exclude .git --color=never "
+                   "--full-path ARG OPTS")))
+      (consult-find dir initial)))
+
+  (defcustom noct-consult-ripgrep-or-line-limit 1000000
+    "Buffer size threshold for `noct-consult-ripgrep-or-line'.
+When the number of characters in a buffer exceeds this threshold,
+`consult-ripgrep' will be used instead of `consult-line'."
+    :type 'integer)
+
+  (defun noct-consult-ripgrep-or-line ()
+    "Call `consult-line' for small buffers or `consult-ripgrep' for large files."
+    (interactive)
+    (if (or (not buffer-file-name)
+            (buffer-narrowed-p)
+            (ignore-errors
+              (file-remote-p buffer-file-name))
+            (jka-compr-get-compression-info buffer-file-name)
+            (<= (buffer-size)
+                (/ noct-consult-ripgrep-or-line-limit
+                   (if (eq major-mode 'org-mode) 4 1))))
+        (consult-line)
+      (when (file-writable-p buffer-file-name)
+        (save-buffer))
+      (let ((consult-ripgrep-command
+             (concat "rg "
+                     "--null "
+                     "--line-buffered "
+                     "--color=ansi "
+                     "--max-columns=250 "
+                     "--no-heading "
+                     "--line-number "
+                     ;; adding these to default
+                     "--smart-case "
+                     "--hidden "
+                     "--max-columns-preview "
+                     ;; add back filename to get parsing to work
+                     "--with-filename "
+                     ;; defaults
+                     "-e ARG OPTS "
+                     (shell-quote-argument buffer-file-name))))
+        (consult-ripgrep))))
+
+  (defun noct-consult-line-evil-history (&rest _)
+    "Add latest `consult-line' search pattern to the evil search history ring.
+This only works with orderless and for the first component of the search."
+    (when (and (bound-and-true-p evil-mode)
+               (eq evil-search-module 'evil-search))
+      (let ((pattern (car (orderless-pattern-compiler
+                           (car consult--line-history)))))
+        (add-to-history 'evil-ex-search-history pattern)
+        (setq evil-ex-search-pattern (list pattern t t))
+        (setq evil-ex-search-direction 'forward)
+        (when evil-ex-search-persistent-highlight
+          (evil-ex-search-activate-highlight evil-ex-search-pattern)))))
+
+  (general-add-advice #'consult-line :after #'noct-consult-line-evil-history))
+
+(use-package consult-flycheck
+  :general
+  (general-m "f" #'consult-flycheck))
+#+end_src
+
+** Embark
+#+begin_src emacs-lisp
+(use-package embark
+  :general
+  (:keymaps noct-minibuffer-maps
+   "M-x" #'embark-export
+   "M-c" #'embark-act
+   "C-l" #'embark-become)
+  :config
+  ;; after prefix, press `C-h' to get completing read interface for keybindings
+  ;; for that prefix
+  (gsetq prefix-help-command #'embark-prefix-help-command)
+
+  (gsetq embark-cycle-key (kbd "C-n"))
+
+  (general-after 'selectrum
+    ;; refresh candidate list after action
+    (defun embark-wiki-refresh-selectrum ()
+      (setq selectrum--previous-input-string nil))
+
+    (general-add-hook 'embark-pre-action-hook #'embark-wiki-refresh-selectrum))
+
+  (general-def embark-general-map "y" #'kill-new)
+
+  (general-def embark-identifier-map "f" #'xref-find-definitions)
+
+  (general-def embark-symbol-map "h" #'helpful-symbol)
+
+  (general-def embark-command-map "h" #'helpful-command)
+
+  (general-def embark-variable-map "h" #'helpful-variable)
+
+  (general-def 'normal embark-collect-mode-map
+    "w" #'wgrep-change-to-wgrep-mode
+    "RET" #'embark-act)
+
+  (general-def embark-become-file+buffer-map
+    "c" #'projectile-switch-project
+    "l" #'consult-locate
+    "f" #'noct-consult-find-fd
+    "p" #'projectile-find-file-in-known-projects
+    ;; probably would have used first so giving worse keybinding
+    "P" #'projectile-find-file
+    ;; so detected
+    "b" #'consult-buffer)
+
+  (noct:handle-popup (rx "*Embark Actions*"))
+  ;; automatically show available actions with which-key
+  ;; (general-after 'which-key
+  ;;   (gsetq embark-action-indicator
+  ;;          (lambda (map &rest _)
+  ;;            (which-key--show-keymap "Embark" map nil nil 'no-paging)
+  ;;            #'which-key--hide-popup-ignore-command)
+  ;;          embark-become-indicator embark-action-indicator))
+
+  (noct-handle-window (rx "*Embark Collect" (0+ any))
+    '(display-buffer-same-window)))
+
+;; (use-package embark-consult
+;;   :after (embark consult)
+;;   :demand t
+;;   ;; if you want to have consult previews as you move around an
+;;   ;; auto-updating embark collect buffer
+;;   :ghook
+;;   ('embark-collect-mode-hook #'embark-consult-preview-minor-mode))
+#+end_src
+
+** Marginalia
+Sets missing metadata for completions (pairs well with embark even if not using ~marginalia-mode~).
+
+#+begin_src emacs-lisp
+(use-package all-the-icons-completion
+  :straight (all-the-icons-completion
+             :type git
+             :host github
+             :repo "iyefrat/all-the-icons-completion")
+  :ghook
+  ('marginalia-mode-hook #'all-the-icons-completion-marginalia-setup))
+
+(use-package marginalia
+  :after selectrum
+  :demand t
+  :config
+  (marginalia-mode)
+  (general-pushnew '(projectile-find-file . project-file)
+                   marginalia-command-categories)
+  (general-pushnew '(projectile-find-file-in-known-projects . file)
+                   marginalia-command-categories)
+  (general-pushnew '(projectile-find-dir . file)
+                   marginalia-command-categories)
+  (general-pushnew '(projectile-switch-project . file)
+                   marginalia-command-categories)
+  (general-pushnew '(noct-projectile-switch-and-vc . file)
+                   marginalia-command-categories)
+  ;; needed for `projectile-find-file' after `projectile-switch-project' to work
+  (general-pushnew '("Find file:" . file)
+                   marginalia-prompt-categories))
+#+end_src
+
+** Wgrep
+#+begin_src emacs-lisp
+(use-package wgrep
+  ;; necessary to create autoload
+  :general
+  (general-def grep-mode-map "w" #'wgrep-change-to-wgrep-mode)
+  :config
+  (general-def 'normal wgrep-mode-map
+    "RET" #'wgrep-finish-edit))
 #+end_src
 
 * Group/Session Management/Navigation
@@ -2709,7 +3100,7 @@ Relax strictness from `orderless-strict-leading-initialism'. to
   ;; TODO bind globally on middle mouse on primary computer
   (general-spc
     "," #'noct-framegroup-setup
-    "l" #'fg-switch-to-last-frame
+    ;; "l" #'fg-switch-to-last-frame
     "a" (noct-c (fg-switch-to-frame "emacs"))
     "r" (noct-c (fg-switch-to-frame "log"))
     "s" (noct-c (fg-switch-to-frame "notes"))
@@ -2730,10 +3121,10 @@ Relax strictness from `orderless-strict-leading-initialism'. to
        (find-file (expand-file-name "awaken.org"  user-emacs-directory)))
       ;; org agenda/todo
       ("log"
-       (find-file "~/ag-sys/else/log.org"))
+       (find-file "~/ag-sys/notes/log.org"))
       ;; programming and personal notes
       ("notes"
-       (find-file "~/ag-sys/else/arch_and_program_info.org"))
+       (find-file "~/ag-sys/notes/life.org"))
       ;; programming projects
       ("prog"
        (find-file "~/src"))
@@ -2745,7 +3136,7 @@ Relax strictness from `orderless-strict-leading-initialism'. to
        (find-file (getenv "BLOG")))
       ;; writing
       ("wr"
-       (find-file "~/ag-sys/else/scrawl/prose/pots/plot.org"))
+       (find-file "~/ag-sys/else/scrawl/prose/tr/"))
       ;; ebooks and more notes
       ("cons"
        (find-file "~/ag-sys/else/consume/books.org"))
@@ -2850,31 +3241,32 @@ Globbing is used to find a matching file."
     "A" (noct-find-file "~/ag-sys/else/accts.org.gpg")
     "b" (noct-find-file "~/ag-sys/else/browse.org")
     "B" (noct-find-file "~/.config/bspwm/bspwmrc")
-    "c" (noct-find-file "~/.config/ranger/rc.conf")
-    "C" #'noct:goto-backtrace
+    "c" #'noct:goto-backtrace
     "d" #'projectile-edit-dir-locals
     "e" (noct-find-file (expand-file-name "awaken.org" user-emacs-directory))
     "E" (noct-find-file (expand-file-name "lisp/.private.el.gpg"
                                           user-emacs-directory))
     "g" (noct-find-file "~/ag-sys/else/gaming/games.org")
-    "h" (noct-find-file "~/ag-sys/else/medical_history.org")
+    "h" (noct-find-file "~/ag-sys/notes/health.org")
+    "h" (noct-find-file "~/ag-sys/notes/medical_history.org")
     "i" (noct-find-file "~/ag-sys/else/interaction.org")
-    "I" (noct-find-file "~/ag-sys/else/scrawl/ideas.org")
+    "I" (noct-find-file "~/ag-sys/else/scrawl/prose/general/ideas.org")
     "j" (noct-find-file "~/ag-sys/else/japanese/japanese.org")
-    "J" (noct-find-file "~/ag-sys/else/journal.org")
+    "J" (noct-find-file "~/ag-sys/notes/journal.org")
     ;; pretty useful log file since most programs are started from sxhkd
     "K" (noct-defun noct-find-sxhkd-log ()
           (find-file (format "/tmp/sxhkd_%s.log" (getenv "DISPLAY"))))
-    "l" (noct-find-file "~/ag-sys/else/log.org")
-    "L" (noct-find-file "~/ag-sys/else/life.org")
-    "m" (noct-find-file "~/ag-sys/else/mind.org")
+    "l" (noct-find-file "~/ag-sys/notes/log.org")
+    "L" (noct-find-file "~/ag-sys/notes/life.org")
+    "m" (noct-find-file "~/ag-sys/notes/mind.org")
     "M" #'noct:goto-messages
     "o" #'ff-find-other-file
-    "p" (noct-find-file "~/.pentadactylrc")
     "q" (noct-find-file "~/.config/qutebrowser/config.py")
-    "r" (noct-find-file "~/ag-sys/else/remapping.org")
-    "t" (noct-find-file "~/.config/tmux/tmux.conf")
-    "v" (noct-find-file "~/.vimrc")
+    "r" (noct-find-file "README.org")
+    "R" (noct-find-file "~/.config/ranger/rc.conf")
+    "t" (noct-find-file "~/.config/tridactyl/tridactylrc")
+    "T" (noct-find-file "~/.config/tmux/tmux.conf")
+    "v" (noct-find-file "~/.config/nvim/init.vim")
     "w" (noct-find-file "~/ag-sys/else/workflow.org")
     "x" (noct-find-file "~/.bxinitrc")
     "X" (noct-find-file "/var/log/Xorg.0.log")
@@ -2882,7 +3274,7 @@ Globbing is used to find a matching file."
     "y" (noct-find-file "~/ag-sys/else/other/skill_toys/skill_toys.org")
     "z" (noct-find-file "~/.zshrc")
     "Z" (noct-find-file "~/.zsh_history")
-    "2" (noct-find-file "~/ag-sys/else/20xx.org")))
+    "2" (noct-find-file "~/ag-sys/notes/20xx.org")))
 
 (noct:bind-general-quickmarks)
 #+end_src
@@ -2903,8 +3295,8 @@ Globbing is used to find a matching file."
     ;; "log"
     ("notes"
      (general-comma
-       "," (noct-find-file "~/ag-sys/else/20xx.org")
-       "f" (noct-find-file "~/ag-sys/else/20xx.org")
+       "," (noct-find-file "~/ag-sys/notes/20xx.org")
+       "f" (noct-find-file "~/ag-sys/notes/20xx.org")
        "s" (noct-find-file "~/ag-sys/else/interaction.org")
        "t" (noct-find-file "~/ag-sys/else/workflow.org")))
     ("prog"
@@ -2916,11 +3308,11 @@ Globbing is used to find a matching file."
        "m" #'noct:goto-makefile
        "p" (general-l
              (eww-open-file
-              "~/ag-sys/library/programming/common_lisp/pcl_html/index.html"))
+              "~/database/library/programming/common_lisp/pcl_html/index.html"))
        "l"
        (general-l
          (eww-open-file
-          "~/ag-sys/library/programming/common_lisp/minispec/html/index.html"))))
+          "~/database/library/programming/common_lisp/minispec/html/index.html"))))
     ("config"
      (general-comma
        "," (noct-find-file "~/dotfiles/README.org")
@@ -2940,9 +3332,9 @@ Globbing is used to find a matching file."
                (getenv "BLOG"))))))
     ("wr"
      (general-comma
-       "," (noct-find-file "~/ag-sys/else/scrawl/prose/standards+procedure.org")
+       "," (noct-find-file "~/ag-sys/else/scrawl/prose/notes/standards+procedure.org")
        "p" (noct-find-file "plot.org")
-       "s" (noct-find-file "~/ag-sys/else/scrawl/prose/sat/misc.org")
+       "f" (noct-find-file "~/ag-sys/else/scrawl/prose/tr/")
        "t" (noct-find-file "~/ag-sys/else/scrawl/prose/pots/misc.org")
        "w" (noct-find-file "world.org")
        "m" (noct-find-file "misc.org")
@@ -2976,7 +3368,7 @@ I generally only use two windows in a frame, but once I start pulling up help bu
 (use-package ace-window
   :general (general-t "w" #'ace-window)
   :config
-  (gsetq aw-keys '(?a ?r ?s ?t ?d ?g ?h ?e)
+  (gsetq aw-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o)
          aw-scope 'frame))
 #+end_src
 
@@ -3061,12 +3453,6 @@ I still need to work on my configuration for this. See [[https://github.com/cyru
 #+end_src
 
 * Buffer Management/Navigation
-** Builtin
-#+begin_src emacs-lisp
-;; I almost never use `find-file' in a buffer (only in dired)
-(general-spc "f" #'switch-to-buffer)
-#+end_src
-
 ** Counsel/Swiper/Ivy
 It's a bit hard to decide how to organize counsel, ivy, and swiper since they're all intertwined. I previously had all counsel and ivy configuration together, but I've split them into multiple use-package expression and put the buffer/file related configuration here.
 
@@ -3074,7 +3460,7 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
 #+begin_src emacs-lisp
 (use-package ivy
   ;; it would make more sense for this to be in counsel
-  :general (general-spc "f" #'ivy-switch-buffer)
+  ;; :general (general-spc "f" #'ivy-switch-buffer)
   :config
   ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’
   (gsetq ivy-use-virtual-buffers t
@@ -3082,16 +3468,15 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
 
 (use-package swiper
   :general
-  (general-spc "b" #'swiper-all)
   (general-def "C-s" #'swiper-isearch)
   :config
   (gsetq swiper-goto-start-of-match t))
 
 ;; `counsel-mode' is enabled in previous counsel use-package expression
-(use-package counsel
-  :general
-  ('normal "/" #'counsel-grep-or-swiper)
-  (general-spc "l" #'counsel-locate))
+;; (use-package counsel
+;;   :general
+;;   ('normal "/" #'counsel-grep-or-swiper)
+;;   (general-spc "l" #'counsel-locate))
 #+end_src
 
 *** Locate/Find/FD/FZF
@@ -3239,7 +3624,6 @@ Useful if constantly switching between only a few files in a project. I don't no
   :config
   (general-def 'normal outline-minor-mode-map
     "H" (general-l (outline-back-to-heading))
-    "SPC u" #'counsel-outline
     "TAB" #'outline-toggle-children))
 
 (use-package outshine
@@ -3250,17 +3634,16 @@ Useful if constantly switching between only a few files in a project. I don't no
 ** Projectile
 Alternatively, there is the builtin ~project-find-file~, [[https://github.com/technomancy/find-file-in-project][find-file-in-project]], and [[https://github.com/h/find-file-in-repository][find-file-in-repository]]. Projectile has a lot of other useful commands though.
 
-*** Setup
 #+begin_src emacs-lisp
 (use-package projectile
   :general
   (general-spc
     "p" #'projectile-find-file
-    "P" #'projectile-find-dir
-    "F" #'projectile-find-file-in-known-projects
+    "P" #'projectile-find-file-in-known-projects
     "c" #'projectile-switch-project
+    "v" #'noct-projectile-switch-and-vc
     "-" #'projectile-dired
-    "D" #'projectile-dired
+    "D" #'projectile-find-dir
     "RET" #'projectile-find-tag)
   (general-t
     "S" #'projectile-replace
@@ -3279,7 +3662,14 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
   :config
   (gsetq projectile-enable-caching t
          projectile-project-test-cmd "make test"
-         projectile-completion-system 'default)
+         projectile-completion-system 'default
+         projectile-project-search-path '("~/src"))
+
+  (defun noct-projectile-switch-and-vc ()
+    "Switch project and run `projectile-vc'"
+    (interactive)
+    (let ((projectile-switch-project-action 'projectile-vc))
+      (call-interactively #'projectile-switch-project)))
 
   (projectile-mode)
 
@@ -3293,48 +3683,13 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
    :test-suffix ".el"))
 #+end_src
 
-*** Counsel Projectile
-#+begin_src emacs-lisp
-(use-package counsel-projectile
-  :general
-  (general-spc "/" #'noct-counsel-projectile-rg)
-  (general-spc "v" #'noct-counsel-projectile-vc)
-  :init
-  ;; TODO won't make remaps before first projectile command run
-  ;; either have to make the remaps manually or load this before
-  (general-with 'projectile
-    (require 'counsel-projectile))
-  :config
-  (gsetq counsel-projectile-sort-files t)
-
-  (counsel-projectile-mode)
-
-  ;; rg is faster than git grep
-  ;; `counsel-projectile-rg' doesn't work outside of a project
-  (defun noct-counsel-projectile-rg ()
-    "Call `counsel-projectile-rg' if in a project or `counsel-rg' if not."
-    (interactive)
-    (if (projectile-project-p)
-        (counsel-projectile-rg)
-      (counsel-rg)))
-
-  (defun noct-counsel-projectile-vc ()
-    "Open magit status in a project."
-    (interactive)
-    (cl-letf (((symbol-function 'projectile-prepend-project-name)
-               (lambda (_)
-                 (format "[%s] %s" (projectile-project-name)
-                         "Magit status in project: "))))
-      (counsel-projectile-switch-project
-       #'counsel-projectile-switch-project-action-vc))))
-#+end_src
-
 * UI/Appearance/Visual/Formatting
 ** Adaptive Wrap
 This package, for example, will visually indent soft-wrapped lines that are bullet points.
 #+begin_src emacs-lisp
 (use-package adaptive-wrap
-  :ghook ('text-mode-hook #'adaptive-wrap-prefix-mode))
+  :ghook ('text-mode-hook #'adaptive-wrap-prefix-mode)
+  :general (general-def noct:toggle-map "A" #'adaptive-wrap-prefix-mode))
 #+end_src
 
 ** All the Icons
@@ -3461,6 +3816,7 @@ A helper library for inserting icons (used by other packages in my config).
          ;; current group
          '(:eval (when (fboundp 'fg-mode-line-string)
                    (fg-mode-line-string)))
+         '(:eval (bound-and-true-p noct-heading-day-word-count))
          ;; show if clocked in to a heading
          '(:eval (when (and (bound-and-true-p org-mode-line-string)
                             (not (string= org-mode-line-string "")))
@@ -3634,7 +3990,10 @@ Smartparens' version is unfortunately too slow.
 
 (use-package nord-theme)
 
-(use-package gruvbox-theme)
+(use-package gruvbox-theme
+  :config
+  (general-after 'ace-window
+    (set-face-attribute 'aw-leading-char-face nil :height 1.0)))
 
 ;; dead
 ;; (use-package gruvbox-dark-theme
@@ -3675,6 +4034,10 @@ Smartparens' version is unfortunately too slow.
 ;; these are nice:
 ;; kaolin-eclipse
 ;; kaolin-valley-dark
+
+(use-package timu-spacegrey-theme)
+
+(use-package shades-of-purple-theme)
 #+end_src
 
 *** Pywal
@@ -3686,12 +4049,7 @@ Smartparens' version is unfortunately too slow.
 
 (use-package ewal-spacemacs-themes)
 
-(use-package ewal-doom-themes
-  :straight (ewal-doom-themes
-             :type git
-             :host gitlab
-             :repo "jjzmajic/ewal"
-             :files ("doom-themes/*.el")))
+(use-package ewal-doom-themes)
 
 (defun noct-ewal-load-spacemacs-theme ()
   "Load ewal's spacemacs theme with some adjustments."
@@ -3706,7 +4064,9 @@ Smartparens' version is unfortunately too slow.
      `(org-block-end-line ((t (:background ,(ewal-get-color 'background)))))
      `(ivy-posframe-border ((t (:weight bold
                                 :background
-                                ,(ewal-get-color 'foreground))))))))
+                                ,(ewal-get-color 'foreground)))))
+     `(frog-menu-posframe-background-face
+       ((t (:background ,(ewal-get-color 'background))))))))
 
 (defun noct-ewal ()
   "Set theme for the current pywal colors."
@@ -3723,7 +4083,9 @@ Smartparens' version is unfortunately too slow.
      `(line-number ((t (:foreground ,(ewal-get-color 'blue)))))
      `(ivy-posframe-border ((t (:weight bold
                                 :background
-                                ,(ewal-get-color 'foreground))))))))
+                                ,(ewal-get-color 'foreground)))))
+     `(frog-menu-posframe-background-face
+       ((t (:background ,(ewal-get-color 'background))))))))
 
 ;; takes 0.02-0.03 seconds; not that much but only do for daemon
 ;; also happens to be a good way to distinguish the two
@@ -3824,6 +4186,7 @@ Soft wrap lines at =fill-column=.
 #+begin_src emacs-lisp
 ;; TODO eventualy switch to more generic narrowing solution
 (use-package rect-ext
+  :disabled t
   :straight (rect-ext
              :type git
              :host github
@@ -4088,16 +4451,6 @@ must be non-read-only, empty, and there must be a rule in
                    ;; don't currently have any global handlers; still use :add
                    :post-handlers '(:add ("||\n[i]" "RET"))))
 
-  (defun noct:at-end-of-shell-if-p (_id _action _context)
-    (looking-back (rx "if" (1+ any) ";" (0+ space) "then")
-                  (line-beginning-position)))
-
-  ;; like endwise.vim; probably better to just use snippet
-  (sp-with-modes '(sh-mode)
-    (sp-local-pair "then" "\nfi"
-                   :when '(noct:at-end-of-shell-if-p
-                           ("RET"))))
-
   ;; TODO this won't work with `electric-slash' in c-mode
   (sp-with-modes '(java-mode c-mode web-mode typescript-mode)
     (sp-local-pair "/*" "*/"
@@ -4141,6 +4494,17 @@ TODO number incrementing
   (general-def input-decode-map "C-i" [C-i])
   (general-def 'insert yas-minor-mode-map
     "<C-i>" #'yas-expand)
+
+  ;; TODO extra checks may be necessary to prevent re-expanding the snippet in
+  ;; undesirable situations
+  (defun noct-space-should-expand-snippet-p ()
+    "Check if a snippet whose condition returns 'space-expand is at the point."
+    (let ((yas-buffer-local-condition
+           ''(require-snippet-condition . space-expand)))
+      (yas--templates-for-key-at-point)))
+
+  (general-def 'insert yas-minor-mode-map
+    "SPC" (list #'yas-expand :predicate '(noct-space-should-expand-snippet-p)))
 
   (general-def 'normal snippet-mode-map
     "RET" #'yas-load-snippet-buffer-and-close
@@ -4189,6 +4553,7 @@ Linear undo while maintaining all history. Not as nice as being able to navigate
    "U" #'undo-fu-only-redo
    "C-r" #'undo-fu-only-redo))
 
+;; ignores encrypted files by default
 (use-package undo-fu-session
   :init (global-undo-fu-session-mode))
 #+end_src
@@ -4532,6 +4897,7 @@ Needs to be updated to use =things.el= and needs to have more tests.
 #+end_src
 
 ** Evil Numbers
+TODO now default on melpa
 This package is unfortunately unmaintained.
 #+begin_src emacs-lisp
 (use-package evil-numbers
@@ -4640,7 +5006,7 @@ This package is unfortunately unmaintained.
 ** Git Gutter
 This is the only package that allows in-buffer hunk staging that I'm aware of. It slows Emacs to a crawl in large files with a lot of unstaged changes (like this one). I plan on eventually switching to diff-hl, which has saner live updating.
 
-Update: Git gutter seems to be faster than previously. Diff-hl at least allows reverting hunks now, but the main reason to prefer git gutter is that it compares with the staging area not the last commit (i.e. staged changes don't show up as changes with git gutter while staging has no effect on the diff-hl display).
+Update: Git gutter seems to be faster than previously.
 #+begin_src emacs-lisp
 (use-package git-gutter
   :ghook ('find-file-hook #'noct:maybe-enable-git-gutter)
@@ -4665,7 +5031,7 @@ Update: Git gutter seems to be faster than previously. Diff-hl at least allows r
   ;; if switch to diff-hl and only use for hunk commands
   ;; (setq git-gutter:display-p nil)
 
-  ;; stole from orderless
+  ;; stole colors from orderless
   (set-face-background 'git-gutter:modified "#72a4ff")
   (set-face-background 'git-gutter:added "#90d800")
   (set-face-background 'git-gutter:deleted "#ed92f8")
@@ -4683,17 +5049,32 @@ Update: Git gutter seems to be faster than previously. Diff-hl at least allows r
 #+end_src
 
 ** Diff HL
-Diff-hl is nice but currently doesn't support staging hunks or detecting/showing staged changes. Diff-hl also has a dired mode, but I think that I prefer dired-k.
+Diff-hl is nice but currently doesn't support staging hunks. Diff-hl also has a dired mode, but I think that I prefer dired-k.
 #+begin_src emacs-lisp
 (use-package diff-hl
   :disabled t
   :blackout t
+  ;; TODO defer, e.g. `find-file-hook'
   :init
   (global-diff-hl-mode)
   (diff-hl-flydiff-mode)
   :config
+  (gsetq diff-hl-show-staged-changes nil)
+
+  (general-def noct:toggle-map "D" #'diff-hl)
+
+  (general-t
+    "gn" (list #'diff-hl-next-hunk :jump t)
+    "ge" (list #'diff-hl-previous-hunk :jump t))
+
   (with-eval-after-load 'magit
+    (general-add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
     (general-add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
+
+  ;; stole colors from orderless
+  (set-face-background 'diff-hl-change "#72a4ff")
+  (set-face-background 'diff-hl-insert "#90d800")
+  (set-face-background 'diff-hl-delete "#ed92f8")
 
   ;; TODO need a better solution than this
   ;; (defun noct:change-diff-location ()
@@ -4712,7 +5093,7 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
 #+begin_src emacs-lisp
 (use-package magit
   :defer-incrementally
-  (dash f s with-editor git-commit package eieio lv transient)
+  (dash f s with-editor git-commit package eieio transient)
   :general
   ('normal 'override "S" #'magit-status-here)
   ('normal dired-mode-map "C" #'magit-clone)
@@ -4731,7 +5112,9 @@ Diff-hl is nice but currently doesn't support staging hunks or detecting/showing
     "gf" #'magit-pull
     "gb" #'magit-blame)
   :config
-  (gsetq magit-diff-refine-hunk t))
+  (gsetq magit-diff-refine-hunk t
+         ;; required for prescient to be used
+         magit-completing-read-function #'selectrum-completing-read))
 #+end_src
 
 *** Section Configuration
@@ -4938,6 +5321,11 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
   (general-with 'magit
     (require 'forge))
   :config
+  (gsetq forge-owned-accounts '(("noctuid")))
+
+  (general-t
+    :infix "g"
+    "'" #'forge-dispatch)
   (general-def 'normal magit-mode-map
     "'" #'forge-dispatch)
   (general-def 'normal forge-topic-mode-map
@@ -5131,7 +5519,9 @@ For typographical editing (not fixing typos).
 ** Fcitx
 #+begin_src emacs-lisp
 (use-package fcitx
-  :when (executable-find "fcitx")
+  ;; doesn't work with fcitx5
+  :disabled t
+  ;; :when (executable-find "fcitx")
   :init
   (general-add-hook
    'evil-insert-state-entry-hook
@@ -5256,19 +5646,17 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   ;; https://battlepenguin.com/tech/aspell-and-hunspell-a-tale-of-two-spell-checkers/
   ;; Y
 
-  ;; TODO not using gsetq because `ispell-program-name' has a :set function that
-  ;; errors; `ispell-find-hunspell-dictionaries' is not working correctly
-  (setq ispell-program-name "aspell"
-        ispell-local-dictionary "en_US"
-        ispell-local-dictionary-alist
-        '(("en_US"
-           "[[:alpha:]]"
-           "[^[:alpha:]]"
-           "[']"
-           nil
-           ("-d" "en_US")
-           nil
-           utf-8)))
+  (gsetq ispell-program-name "aspell"
+         ispell-local-dictionary "en_US"
+         ispell-local-dictionary-alist
+         '(("en_US"
+            "[[:alpha:]]"
+            "[^[:alpha:]]"
+            "[']"
+            nil
+            ("-d" "en_US")
+            nil
+            utf-8)))
 
   ;; TODO https://gitlab.com/ideasman42/emacs-spell-fu/-/issues/4
   (gsetq ispell-personal-dictionary "~/.aspell.en.pws")
@@ -5429,7 +5817,11 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 (use-package helpful
   :general
   (general-def help-map
-    "RET" #'helpful-at-point)
+    "RET" #'helpful-at-point
+    "f" #'helpful-callable
+    "v" #'helpful-variable
+    "k" #'helpful-key
+    "o" #'helpful-symbol)
   :init
   ;; using this instead of binding them directly allows taking an alternate action
   ;; without also opening the helpful buffer
@@ -5480,9 +5872,17 @@ pressing \".\" before selecting the word. Otherwise, correct it."
     "p" #'vmd-mode))
 #+end_src
 
+** Message
+#+begin_src emacs-lisp
+(general-with 'evil
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (general-add-hook 'messages-buffer-mode-hook #'evil-normalize-keymaps))
+#+end_src
+
 ** Multiple Major Modes/Polymode
 #+begin_src emacs-lisp
 (use-package poly-org
+  :disabled t
   ;; TODO shouldn't be enabled by default
   :general (noct:toggle-map "o" #'poly-org-mode)
   :config
@@ -5612,7 +6012,9 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 ;; https://github.com/raxod502/apheleia/issues/2
 (use-package apheleia
   :straight (apheleia :host github :repo "raxod502/apheleia")
-  :general (noct:toggle-map "h" #'apheleia-mode)
+  :general
+  (noct:toggle-map "h" #'apheleia-mode)
+  (general-t "=" #'apheleia-format-buffer)
   ;; :init
   ;; this does not load apheleia until file save
   ;; (apheleia-global-mode)
@@ -5960,8 +6362,7 @@ This is a maintained fork of =electric-spacing=.
   (general-def noct:toggle-map "f" #'flycheck-mode)
 
   (general-m
-    "f" #'flycheck-list-errors
-    "E" #'flycheck-list-errors
+    "F" #'flycheck-list-errors
     "n" #'flycheck-next-error
     "e" #'flycheck-previous-error)
 
@@ -5993,11 +6394,13 @@ Seems fast but the addition of extra lines is jarring. I've updated the display 
 
   (defvar-local noct-flycheck-inline-last-error-point nil)
 
-  (defun noct-flycheck-inline-phantom-display (msg &optional pos)
+  (defun noct-flycheck-inline-phantom-display (msg &optional pos err)
     "Display MSG in a phantom starting at the beginning of the next line.
 
 MSG is a string that will be put in a line-long overlay (phantom) at the line
 after POS. If POS is nil, current point is used instead.
+
+ERR is the flycheck error
 
 Return the displayed phantom."
     ;; don't use pos;
@@ -6029,6 +6432,7 @@ Return the displayed phantom."
                      pos-bol)
                    pos-eol)))
           (overlay-put ov 'phantom t)
+          (overlay-put ov 'error err)
           (overlay-put ov
                        (if (or (= pos-eol (point-max))
                                (= pos-bol pos-eol))
@@ -6078,12 +6482,14 @@ Don't immediately jump to the symbol at the point."
 
   (general-def help-map "x" #'noct-xref-find-definition))
 
-(use-package ivy-xref
-  :init
-  (gsetq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+;; now using consult
+;; (use-package ivy-xref
+;;   :init
+;;   (gsetq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 #+end_src
 
 *** LSP Mode
+TODO lsp-use-plists (https://github.com/emacs-lsp/lsp-mode/issues/1807 now fixed)
 #+begin_src emacs-lisp
 (use-package lsp-mode
   :config
@@ -6097,7 +6503,7 @@ Don't immediately jump to the symbol at the point."
     "RET" #'lsp-find-definition)
 
   (gsetq lsp-keymap-prefix "mm")
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+  (general-add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
 
   (general-m lsp-mode-map
     "m" lsp-command-map
@@ -6120,10 +6526,18 @@ Don't immediately jump to the symbol at the point."
   (gsetq lsp-ui-sideline-ignore-duplicate t))
 
 (use-package lsp-ivy
+  :disabled t
   :after lsp-mode
   :general
   (general-m lsp-mode-map
     "y" #'lsp-ivy-workspace-symbol))
+
+(use-package consult-lsp
+  :after lsp-mode
+  :general
+  (general-m lsp-mode-map
+    "y" #'consult-lsp-symbols
+    "E" #'consult-lsp-diagnostics))
 #+end_src
 
 ** Lisps (General)
@@ -6206,8 +6620,11 @@ TODO
     "TAB" #'noct:lispy-tab
     "<backtab>" #'lispy-dedent-adjust-parens
     "M-h" #'lispy-beginning-of-defun
-    "<C-return>" #'lispy-alt-line
+    ;; "<C-return>" #'lispy-alt-line
+    "<C-return>" #'lispy-parens-down
+    ;; TODO maybe also bind key to do ret then ()
     "M-d" #'lispy-kill-at-point)
+  ;; 'lispy-close-round-and-newline
 
   ;; override lh-knight for colemak keys
   (defhydra lh-knight ()
@@ -6679,6 +7096,7 @@ TODO
 *** Flycheck Haskell
 #+begin_src emacs-lisp
 (use-package flycheck-haskell
+  :disabled t
   :ghook ('flycheck-mode-hook #'flycheck-haskell-setup))
 #+end_src
 
@@ -6854,6 +7272,7 @@ Currently requires running =make= for setup and is not on MELPA.
 #+end_src
 
 *** Formatting
+TODO see python-isort
 #+begin_src emacs-lisp
 (use-package py-isort)
 ;; (general-add-hook 'before-save-hook 'py-isort-before-save)
@@ -7115,7 +7534,8 @@ TODO: Async copy/paste with rsync
   ;; by default only show filename
   ('dired-initial-position-hook #'dired-hide-details-mode)
   :config
-  (gsetq dired-recursive-copies 'always)
+  (gsetq dired-recursive-copies 'always
+         dired-clean-confirm-killing-deleted-buffers nil)
 
   (if (eq system-type 'darwin)
       (when (executable-find "gls")
@@ -7138,8 +7558,7 @@ TODO: Async copy/paste with rsync
     "n" #'dired-next-line
     "e" #'dired-previous-line
     "i" #'dired-find-alternate-file
-    "f" #'counsel-find-file
-    "F" #'find-file
+    "f" #'find-file
 
     ;; marking
     "TAB" #'dired-mark
@@ -7214,7 +7633,7 @@ TODO: Async copy/paste with rsync
     "e" (noct-find-file user-emacs-directory)
     "E" (noct-find-file "~/ag-sys/else/")
     "f" (noct-find-file "~/dotfiles/")
-    "l" (noct-find-file "~/ag-sys/library/")
+    "l" (noct-find-file "~/database/library/")
     "m" (noct-find-file "~/move/")
     "p" (noct-find-file "~/ag-sys/else/scrawl/prose/pots/")
     "P" (noct-find-file "~/ag-sys/prog/")
@@ -7741,3 +8160,4 @@ Saves to a temp file and puts the filename in the kill ring."
 - slime (using sly)
 - elisp-slime-nav-mode (using xref and helpful)
 - historian and company-statistics (replaced with prescient)
+- counsel-projectile (just projectile is good enough for my use cases)

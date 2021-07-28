@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: case
+# condition: 'space-expand
+# key: case
+# --
+case ${1:cond} in
+    ${2:pattern}) ${3:command} ;;
+    $0
+esac

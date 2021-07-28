@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: until loop
+# condition: 'space-expand
+# key: until
+# --
+until ${1:cond}; do
+    $0
+done

@@ -48,7 +48,8 @@
       ;; I don't use vc
       ;; https://www.reddit.com/r/emacs/comments/4c0mi3/the_biggest_performance_improvement_to_emacs_ive/
       ;; https://magit.vc/manual/magit/Performance.html
-      vc-handled-backends nil
+      ;; required for `diff-hl'
+      ;; vc-handled-backends nil
       ;; don't want emacs touching this file
       custom-file (expand-file-name "custom.el" user-emacs-directory)
       ;; no GUI prompts
@@ -69,6 +70,10 @@ Also tell Emacs to ignore FLAG when processing command line arguments."
 
 ;; ** Faster Untangling
 (require 'noct-util)
+
+(defconst noct-tangle-lock-file
+  (expand-file-name "tangle.lock" user-emacs-directory)
+  "File to signal that async tangle is in progress.")
 
 (defun noct-emacs-id-file ()
   "Return the file containing the unique id for the newest Emacs instance."
@@ -98,37 +103,51 @@ Also tell Emacs to ignore FLAG when processing command line arguments."
 (defvar noct-async-tangle-in-progress nil
   "Whether currently asynchronously tangling init.")
 
+;; FIXME
 (defun noct-async-init-tangle ()
   "Tangle org init file asynchronously.
 Only tangle when the current Emacs instance is the newest one."
   (interactive)
-  (when (and (noct-newest-emacs-instance-p)
-             ;; don't try to tangle if already tangling; possible for overlap to
-             ;; happen if something goes wrong and the process hangs; can end up
-             ;; killing cpu
-             (not noct-async-tangle-in-progress)
-             (require 'async nil t))
-    (let ((inhibit-message t))
-      (setq noct-async-tangle-in-progress t)
-      (message "Asynchronously tangling org init file...")
-      (async-start (lambda ()
-                     (push (expand-file-name "lisp" user-emacs-directory)
-                           load-path)
-                     (require 'noct-util)
-                     ;; with current config compiling does save some time: ~0.1s
-                     (noct-tangle-awaken nil t))
-                   (lambda (_)
-                     (setq noct-async-tangle-in-progress nil)
-                     (message "Finished tangling org init file."))))))
+  ;; TODO this could possibly check as another instance was creating
+  ;; TODO create lock file /once/ that delete when exit emacs instead?
+  ;; TODO do with-temp-file noct-tangle-lockfile around noct-tangle awaken
+  ;; instead?
+  (unless (file-exists-p noct-tangle-lock-file)
+    (with-temp-buffer (write-file noct-tangle-lock-file))
+    (condition-case e
+        (progn
+          (require 'async)
+          (let ((inhibit-message t))
+            (setq noct-async-tangle-in-progress t)
+            (message "Asynchronously tangling org init file...")
+            (async-start (lambda ()
+                           (condition-case e
+                               (progn
+                                 (push (expand-file-name "lisp" user-emacs-directory)
+                                       load-path)
+                                 (require 'noct-util)
+                                 ;; with current config compiling does save some time: ~0.1s
+                                 (noct-tangle-awaken nil t))
+                             ((error debug)
+                              (delete-file noct-tangle-lock-file))))
+                         (lambda (_)
+                           (setq noct-async-tangle-in-progress nil)
+                           (delete-file noct-tangle-lock-file)
+                           (message "Finished tangling org init file.")))))
+      ((error debug)
+       (delete-file noct-tangle-lock-file)))))
 
 (defvar noct-async-tangle-timer (run-with-timer 120 120 #'noct-async-init-tangle)
   "Holds the timer to asynchronously tangle so it can be easily canceled.")
 
+;; TODO high CPU usage? selectrum being called; reprofile
+(cancel-timer noct-async-tangle-timer)
+
 ;; * Start Benchmarking
 (defconst noct-benchmark-init-files
-  (list (expand-file-name "straight/build/benchmark-init/benchmark-init.elc"
+  (list (expand-file-name "straight/build/benchmark-init/benchmark-init.el"
                           user-emacs-directory)
-        (expand-file-name "straight/build/benchmark-init/benchmark-init-modes.elc"
+        (expand-file-name "straight/build/benchmark-init/benchmark-init-modes.el"
                           user-emacs-directory)))
 
 (defconst noct-benchmark-init
@@ -136,6 +155,15 @@ Only tangle when the current Emacs instance is the newest one."
        (cl-every (lambda (x) (file-exists-p x))
                  noct-benchmark-init-files) )
   "Whether to benchmark initialization.")
+
+;; temporary until this is merged:
+;; https://github.com/dholm/benchmark-init-el/pull/16
+(define-advice define-obsolete-function-alias (:filter-args (ll) fix-obsolete)
+  (let ((obsolete-name (pop ll))
+        (current-name (pop ll))
+        (when (if ll (pop ll) "1"))
+        (docstring (if ll (pop ll) nil)))
+    (list obsolete-name current-name when docstring)))
 
 (when noct-benchmark-init
   (dolist (file noct-benchmark-init-files)
@@ -174,6 +202,8 @@ Start Emacs with --record-requires to populate. This still needs work.")
   (not (noct-command-line-flag-specified-p "--no-compile"))
   "Whether to load compiled init files if they exist and are newer.")
 
+(defvar noct-with-demoted-errors nil)
+
 (defconst noct-retangle (noct-command-line-flag-specified-p "--retangle")
   "Whether to retangle init even if tangled init is newer than init.")
 
@@ -181,6 +211,7 @@ Start Emacs with --record-requires to populate. This still needs work.")
        ;; this prevents errors in one source block from preventing other source
        ;; blocks from running
        ;; don't use compiled file for this
+       (setq noct-with-demoted-errors t)
        (noct-tangle-awaken t nil noct-retangle t))
       ((noct-command-line-flag-specified-p "--stable")
        ;; NOTE for now ignoring stable elc files

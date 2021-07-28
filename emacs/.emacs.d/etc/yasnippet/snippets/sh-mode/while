@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: while loop
+# condition: 'space-expand
+# key: while
+# --
+while ${1:cond}; do
+    $0
+done

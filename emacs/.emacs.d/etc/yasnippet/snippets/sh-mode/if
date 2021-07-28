@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: if
+# condition: 'space-expand
+# key: if
+# --
+if ${1:}; then
+	${2:}
+fi
+$0
