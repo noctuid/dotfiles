@@ -1,0 +1,15 @@
+{
+	"buildDir": "/tmp/yaytmp-1000/",
+	"editor": "emacsclient",
+	"makepkgbin": "/usr/bin/makepkg",
+	"pacmanbin": "/usr/bin/pacman",
+	"pacmanconf": "/etc/pacman.conf",
+	"tarbin": "/usr/bin/bsdtar",
+	"requestsplitn": 150,
+	"sortmode": 0,
+	"noconfirm": false,
+	"editmenu": true,
+	"timeupdate": true,
+	"devel": true,
+	"cleanAfter": true
+}
