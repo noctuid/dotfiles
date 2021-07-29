@@ -173,7 +173,7 @@ type = internal/memory
 interval = 3
 
 format-prefix = " "
-format-prefix-foreground = ${colors.magenta}
+format-foreground = ${colors.magenta}
 
 label = %percentage_used%%
 
@@ -182,7 +182,7 @@ type = internal/cpu
 interval = 3
 
 format-prefix = " "
-format-prefix-foreground = ${colors.magenta}
+format-foreground = ${colors.magenta}
 
 label = %percentage%%
 
@@ -197,6 +197,8 @@ format-underline =
 format-warn = <ramp> <label-warn>
 
 label = %temperature-c%
+label-foreground = ${colors.red}
+
 label-warn = %temperature-c%
 label-warn-foreground = ${colors.dark-red}
 label-warn-underline = ${colors.dark-red}
@@ -214,12 +216,14 @@ full-at = 99
 
 format-charging = <animation-charging> <label-charging>
 label-charging = %percentage%%
+label-charging-foreground = ${colors.red}
 
 format-discharging = <ramp-capacity> <label-discharging>
 format-discharging-underline =
+label-discharging-foreground = ${colors.dark-red}
 
 format-full-prefix = " "
-format-full-prefix-foreground = ${colors.dark-green}
+format-full-foreground = ${colors.dark-green}
 
 ramp-capacity-0 = 
 ramp-capacity-1 = 
@@ -238,7 +242,7 @@ card = intel_backlight
 
 ; TODO too high/not centered
 format-prefix = "☼ "
-format-prefix-foreground = ${colors.yellow}
+format-foreground = ${colors.yellow}
 format-prefix-font = 5
 
 ; [module/backlight-acpi]

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# TODO only allow one of these to run at a time
+# keeps running if X crashes for example
+# update: is that really a big deal? doesn't happen if quit X normally at least
 
 # old amixer commands:
 # status=$(amixer get Master | awk 'END { gsub(/[\[\]]/, ""); print $6 }')
@@ -43,7 +46,7 @@ print_volume() {
 		fi
 	fi
 
-	echo "%{F$color}$icon %{F-}$percent%"
+	echo "%{F$color}$icon $percent%%{F-}"
 }
 
 print_volume
