@@ -153,5 +153,7 @@ c.colors.tabs.indicator.error = red
 c.colors.tabs.indicator.start = blue
 c.colors.tabs.indicator.stop = green
 
-# **** Wepage
-c.colors.webpage.bg = bg
+# * Wepage
+# leave white; makes too many sites (and qutebrowser documentation) unreadable
+# in some cases
+# c.colors.webpage.bg = bg
