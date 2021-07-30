@@ -5,10 +5,13 @@ source ~/bin/helpers/monitor.sh
 
 # * HiDPI
 # honor screen DPI
-export QT_AUTO_SCREEN_SCALE_FACTOR=1
+# deprecated
+# export QT_AUTO_SCREEN_SCALE_FACTOR=1
 
 if monitor_is_hidpi; then
 	export MONITOR_IS_HIDPI=true
+
+	export QT_ENABLE_HIGHDPI_SCALING=1
 
 	# NOTE not setting since now using Xft.dpi
 	# scale UI lements 2x
