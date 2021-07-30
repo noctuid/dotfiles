@@ -5360,6 +5360,20 @@ Currently broken for github.
     "q" #'git-timemachine-quit))
 #+end_src
 
+** Smerge
+#+begin_src emacs-lisp
+(general-with-package 'smerge
+  (general-def 'normal smerge-mode-map "RET" #'smerge-keep-current)
+  ;; can temporarily override m bindings until conflicts resolved
+  (general-m smerge-mode-map
+    "k" #'smerge-vc-next-conflict
+    "n" #'smerge-next
+    "e" #'smerge-prev
+    "u" #'smerge-keep-upper
+    "l" #'smerge-keep-lower
+    "a" #'smerge-keep-all))
+#+end_src
+
 ** Vdiff
 *** Setup
 TODO
