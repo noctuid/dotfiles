@@ -4,7 +4,7 @@
 # remove punctuation (e.g. "/") and replace whitespace with underscores
 title=$(xtitle | \
 	awk -F "-" '{gsub(/[[:punct:]]/, "") gsub(/\s/, "_"); print $1}')
-date=$(date +%Y.%m.%d_%H:%M:%S)
+date=$(date +%FT%T)
 outfile="$HOME/move/screenshots/${date}_-_${title}.png"
 
 if [[ $1 == select ]]; then
