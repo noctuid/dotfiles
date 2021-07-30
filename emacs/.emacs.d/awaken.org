@@ -101,7 +101,7 @@ Used throughout configuration.
 ** Helpers
 *** General
 #+begin_src emacs-lisp
-(defconst noct:lisp-mode-hooks
+(defconst noct-lisp-mode-hooks
   '(emacs-lisp-mode-hook
     eshell-mode-hook
     ielm-mode-hook
@@ -6224,7 +6224,7 @@ See [[https://github.com/company-mode/company-mode/issues/525][this issue]].
 #+begin_src emacs-lisp
 (use-package rainbow-delimiters
   :ghook
-  noct:lisp-mode-hooks
+  noct-lisp-mode-hooks
   'c-mode-hook)
 #+end_src
 
@@ -6293,16 +6293,17 @@ Breaks syntax highlighting.
 *** Aggressive Indent
 #+begin_src emacs-lisp
 (use-package aggressive-indent
-  :init
-  (electric-indent-mode -1)
-  (global-aggressive-indent-mode)
+  ;; works best in lisp modes; in ALGOL-style languages will get annoying shifts
+  ;; when typing if statements for example
+  ;; also not great in other people's projects
+  :ghook noct-lisp-mode-hooks
+  :general
+  (general-def noct:toggle-map "a" #'aggressive-indent-mode)
   :blackout t
   :config
   (general-pushnew 'python-mode aggressive-indent-excluded-modes)
   (general-pushnew 'asm-mode aggressive-indent-excluded-modes)
-  (general-pushnew 'nix-mode aggressive-indent-excluded-modes)
-
-  (general-def noct:toggle-map "a" #'aggressive-indent-mode))
+  (general-pushnew 'nix-mode aggressive-indent-excluded-modes))
 #+end_src
 
 *** Dumb Jump
@@ -6570,7 +6571,7 @@ TODO
    pcase
    hydra)
   :ghook
-  noct:lisp-mode-hooks
+  noct-lisp-mode-hooks
   ;; TODO RET doesn't work first time run `eval-expression'
   'eval-expression-minibuffer-setup-hook
   ;; use shortcake as lighter!
@@ -6753,14 +6754,14 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
 *** Highlight Quoted
 #+begin_src emacs-lisp
 (use-package highlight-quoted
-  :ghook noct:lisp-mode-hooks)
+  :ghook noct-lisp-mode-hooks)
 #+end_src
 
 *** Highlight Stages (Macros)
 For quasi-quoted expressions.
 #+begin_src emacs-lisp
 (use-package highlight-stages
-  :ghook noct:lisp-mode-hooks
+  :ghook noct-lisp-mode-hooks
   :blackout t
   :config
   (gsetq highlight-stages-highlight-real-quote nil))
