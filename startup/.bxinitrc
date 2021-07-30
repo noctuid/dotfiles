@@ -79,16 +79,15 @@ xset r rate 400 35
 fcitx -r
 
 # hotkey daemon
-# set SXHKD_EXTRA_CONFIGS to empty for DE/WMs with their own keybinding config
-if [[ ! -v $SXHKD_EXTRA_CONFIGS ]]; then
-	extra_config=~/.config/sxhkd/"$DISPLAY"_extra_sxhkdrc
-	ln -sf ~/.config/sxhkd/empty_sxhkdrc "$extra_config"
-	SXHKD_EXTRA_CONFIGS=(~/.config/sxhkd/wm_sxhkdrc "$extra_config")
+if [[ -z $NO_HOTKEY ]]; then
+	start-sxhkd
 fi
-sxhkd "${SXHKD_EXTRA_CONFIGS[@]}" &>> /tmp/sxhkd_"$DISPLAY".log &
 
 # backup hotkey program
-xchainkeys &
+if [[ -z $NO_HOTKEY ]]; then
+	xchainkeys &
+fi
+
 
 # * Mouse/Pointer
 # disable mouse acceleration

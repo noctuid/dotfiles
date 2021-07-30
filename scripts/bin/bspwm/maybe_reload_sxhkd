@@ -19,7 +19,7 @@ if [[ $previously_empty != "$empty" ]]; then
 	# since using mouse buttons as modifiers; see .sxhkdrc
 	xdotool keyup control shift alt super
 	# this is still hackish but probably less so than before
-    extra_config=~/.config/sxhkd/"$DISPLAY"_extra_sxhkdrc
+    extra_config=/tmp/"$DISPLAY"_extra_sxhkdrc
 	if $empty; then
 		ln -sf ~/.config/sxhkd/empty_sxhkdrc "$extra_config"
 	else

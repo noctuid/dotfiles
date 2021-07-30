@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# set SXHKD_EXTRA_CONFIGS to empty for DE/WMs with their own keybinding config
+if [[ ! -v $SXHKD_EXTRA_CONFIGS ]]; then
+	extra_config=/tmp/"$DISPLAY"_extra_sxhkdrc
+	ln -sf ~/.config/sxhkd/empty_sxhkdrc "$extra_config"
+	SXHKD_EXTRA_CONFIGS=(~/.config/sxhkd/wm_sxhkdrc "$extra_config")
+fi
+
+sxhkd "${SXHKD_EXTRA_CONFIGS[@]}" &>> /tmp/sxhkd_"$DISPLAY".log &
