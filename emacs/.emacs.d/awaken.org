@@ -499,7 +499,10 @@ Install, load, and configure =straight.el=:
       straight-use-package-by-default t
       ;; store all autoloads in one file; default t
       ;; doesn't significantly affect init time for me
-      straight-cache-autoloads t)
+      straight-cache-autoloads t
+      ;; used for :fork so don't need to specify settings
+      straight-host-usernames '((github . "noctuid")
+                                (gitlab . "noctuid")))
 
 ;; Install and load straight.el
 ;; https://github.com/raxod502/straight.el#getting-started
@@ -982,11 +985,8 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
 
 (use-package evil-collection
   :straight (evil-collection
-             :type git
-             :host github
-             :repo "emacs-evil/evil-collection"
              :local-repo "~/src/forks/evil-collection"
-             :fork (:host github :repo "noctuid/evil-collection"))
+             :fork t)
   :config
   (defun noct-make-evil-collection-translations (mode mode-keymaps &rest _rest)
     (when mode-keymaps
@@ -2177,8 +2177,7 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
 ** Frog Menu
 #+begin_src emacs-lisp
 (use-package frog-menu
-  :straight (:host github :repo "clemera/frog-menu"
-             :fork (:repo "noctuid/frog-menu"))
+  :straight (:fork t)
   :config
   (general-after 'avy
     (gsetq frog-menu-avy-keys avy-keys))
@@ -6551,11 +6550,8 @@ TODO
 ;; TODO why is hydra/lv loaded?! (even if never load lispy)
 (use-package lispy
   :straight (lispy
-             :type git
-             :host github
-             :repo "abo-abo/lispy"
              :local-repo "~/src/forks/lispy"
-             :fork (:host github :repo "noctuid/lispy"))
+             :fork t)
   :defer-incrementally
   (mode-local
    lispy-tags
