@@ -6540,6 +6540,17 @@ TODO lsp-use-plists (https://github.com/emacs-lsp/lsp-mode/issues/1807 now fixed
     "E" #'consult-lsp-diagnostics))
 #+end_src
 
+*** Tree Sitter
+Currently, tree sitter can be used for syntax highlighting. There is also the package tree-sitter-indent, but it currently only supports Rust.
+#+begin_src emacs-lisp
+(use-package tree-sitter
+  :ghook
+  ('prog-mode-hook #'global-tree-sitter-mode nil nil t)
+  ('tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs)
+#+end_src
+
 ** Lisps (General)
 *** Lispy
 TODO
