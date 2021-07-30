@@ -7449,8 +7449,13 @@ TODO
   :gfhook
   #'lsp
   :config
-  ;; auto-close on >
-  (gsetq web-mode-auto-close-style 2))
+  (gsetq
+   ;; auto-close on >
+   web-mode-auto-close-style 2
+   ;; doesn't work well for ts:
+   ;; - may want ={} OR =""
+   ;; - incorrectly affects === inside {}
+   web-mode-enable-auto-quoting nil))
 #+end_src
 
 * Miscellaneous
