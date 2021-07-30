@@ -35,8 +35,8 @@ super + g
 	wm_action wmove biggest.local
 
 # switch with last window (across desktops)
-super + apostrophe
-	wm_action wmove last
+# super + apostrophe
+# 	wm_action wmove last
 
 # TODO I don't know why this isn't working
 # navigate to biggest floating window
