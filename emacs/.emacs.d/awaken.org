@@ -206,7 +206,7 @@ BODY (even on failure)."
 
 ;; TODO use something more sophisticated?
 ;; alternatively, username check alone should be enough
-(defconst noct:personal-computer-p
+(defconst noct-personal-computer-p
   (and (string= (user-login-name) "noctuid")
        (file-directory-p "~/ag-sys")))
 
@@ -3352,7 +3352,7 @@ Globbing is used to find a matching file."
 
 *** Hook
 #+begin_src emacs-lisp
-(when noct:personal-computer-p
+(when noct-personal-computer-p
   (general-with-package 'framegroups
     (general-add-hook '(fg-create-hook fg-after-switch-hook)
                       (list #'noct:bind-general-quickmarks
@@ -7447,7 +7447,6 @@ TODO
 Backup files on every save to prevent ever losing work.
 #+begin_src emacs-lisp
 (use-package backup-each-save
-  :when noct:personal-computer-p
   :ghook ('after-save-hook #'backup-each-save)
   :config
   (gsetq backup-each-save-mirror-location "~/.emacs-backups"
