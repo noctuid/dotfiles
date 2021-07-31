@@ -61,11 +61,11 @@ exfat-utils
 # * Input
 xf86-input-synaptics
 
-# scim -> ibus -> fcitx
-fcitx-im
-fcitx-mozc
+# scim -> ibus -> fcitx -> fcitx5
+fcitx5-im
+fcitx5-mozc
 # latex input
-fcitx-table-other
+fcitx5-table-other
 
 # * Games
 unnamed-sdvx-clone-git aur
@@ -407,7 +407,7 @@ youtube-dl
 # youtube-dl-git aur
 # installed already for powerpill
 aria2
-megasync
+megatools aur
 
 # * Typesetting
 texlive-bin
@@ -509,6 +509,9 @@ pywalfox pip
 gtk-theme-flat-color-git aur
 # live reload gtk theme
 xsettingsd
+
+# display colors and system statistics
+neofetch
 
 # * DNS
 # validating, recursive, caching resolver
@@ -649,6 +652,10 @@ nodejs
 npm
 typescript
 typescript-language-server npm
+yarn
+
+# ** Lua
+lua-language-server
 
 # * Screenshots
 # screenshots
