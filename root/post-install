@@ -127,7 +127,7 @@ operations:
 	   Same as calling with root-config and then boot.
 
 	emacs
-	   Install or update lucid Emacs master
+	   Install or update lucid Emacs master with native compilation
 
 	<no option/ default>
 	   Do all setup."
@@ -197,6 +197,10 @@ group_installed() {
 # * Basic Setup
 # ** Sudo
 sudo_setup() {
+	if passwd --status root | awk '$2 == "NP" {exit 1}'; then
+		echo "Please set a password for root:"
+		passwd root || return 1
+	fi
 	echo "Updating sudo configuration."
 	# set up /etc/sudoers
 	# - allow root to execute any command
@@ -211,7 +215,7 @@ root ALL=(ALL) ALL
 %wheel ALL=(ALL) ALL
 $builduser ALL= NOPASSWD: /usr/bin/pacman" | EDITOR='tee' visudo
 	# potentially dangerous without sudo and proper setup; risky
-	# sudo passwd -l root
+	# passwd -l root
 }
 
 # ** Time
@@ -276,19 +280,19 @@ install_powerpill() {
 	fi
 }
 
-install_yay() {
-	if ! pacman -Q yay-bin &> /dev/null; then
-		echo "Installing yay."
+install_paru() {
+	if ! pacman -Q paru-bin &> /dev/null; then
+		echo "Installing paru."
 		if ! group_installed base_devel; then
 			powerpill -S --noconfirm --needed base-devel
 		fi
 		pac_install git
-		build_dir="$uhome"/build/yay-bin
+		build_dir="$uhome"/build/paru-bin
 		if [[ -d "$build_dir" ]]; then
 			rm -rf "$build_dir"
 		fi
 		mkdir -p "$build_dir"
-		git clone https://aur.archlinux.org/yay-bin.git "$build_dir"
+		git clone https://aur.archlinux.org/paru-bin.git "$build_dir"
 		chown "$user":"$user" "$build_dir" \
 			&& cd "$build_dir" \
 			&& sudo -u "$user" makepkg --noconfirm -fsr \
@@ -297,13 +301,16 @@ install_yay() {
 }
 
 install_emacs_lucid() {
-	echo "Installing emacs-git with lucid toolkit."
-	if [[ -n $1 ]] || ! pacman -Q emacs-git &> /dev/null; then
+	echo "Installing emacs-git with lucid toolkit and native comp."
+	emacs_recipe=emacs-git
+	if [[ -n $1 ]] || ! pacman -Q "$emacs_recipe" &> /dev/null; then
 		cd /tmp \
-			&& yay --getpkgbuild emacs-git \
-			&& sudo chown "$user" emacs-git \
-			&& cd emacs-git \
+			&& paru --getpkgbuild "$emacs_recipe" \
+			&& sudo chown "$user" "$emacs_recipe" \
+			&& cd "$emacs_recipe" \
 			&& sed --in-place --regexp-extended 's/(^LUCID=)/\1YES/' PKGBUILD \
+			&& sed --in-place --regexp-extended 's/(^FAST_BOOT=)/\1YES/' PKGBUILD \
+			&& sed --in-place --regexp-extended 's/(^JIT=)/\1YES/' PKGBUILD \
 			&& sudo -u "$user" makepkg --noconfirm --syncdeps --install
 	fi
 }
@@ -401,8 +408,10 @@ install_mpv_script() { # url clone_dir script_dir names
 install_mpv_scripts() {
 	echo "Installing mpv scripts and shaders."
 	# local
-	ln -sf "$uhome"/src/mpv/mpv-webtorrent-hook/webtorrent-hook.lua \
-		"$uhome"/.config/mpv/scripts/
+	ln -sf "$uhome"/src/mpv/mpv-webtorrent-hook \
+	   "$uhome"/.config/mpv/scripts/
+	ln -sf "$uhome"/src/mpv/mpv-btfs-hook \
+	   "$uhome"/.config/mpv/scripts/
 
 	# Git repos
 	install_mpv_script \
@@ -537,7 +546,7 @@ generate_packages_sls() {
 " >> "$basedir"/packages.sls
 		elif [[ $method == aur ]]; then
 			echo "  cmd.run:
-    - name: yay --pacman powerpill --noconfirm -S $package
+    - name: paru --pacman powerpill --noconfirm -S $package
     - unless: pacman -Q $package
     - runas: $builduser
 " >> "$basedir"/packages.sls
@@ -609,6 +618,15 @@ update_user_groups() {
 # ** Copy Root Config files
 copy_root_config_files() {
 	echo "Copying root config files from dotfiles to /."
+	# must be mounted before try to copy refind.conf over
+	if ! mountpoint -q /boot/efi; then
+		mount LABEL=SYSTEM /boot/efi
+	fi
+	if ! mountpoint -q /boot/efi; then
+		echo "Please mount ESP partition, so refind.conf can be copied to it."
+		exit 1
+	fi
+
 	cp -R "$basedir"/boot "$basedir"/etc "$basedir"/usr "$basedir"/var /
 	# remove comments
 	sed -i "/^ *\//d" \
@@ -632,8 +650,8 @@ install_package() {
 	elif [[ $method == aur ]]; then
 		if ! pacman --query "$package" &> /dev/null; then
 			echo "Installing $package."
-			sudo -u "$builduser" yay --noconfirm -S "$package" \
-				|| fail_echo "Failed: sudo -u \"$builduser\" yay --noconfirm -S $package"
+			sudo -u "$builduser" paru --noconfirm -S "$package" \
+				|| fail_echo "Failed: sudo -u \"$builduser\" paru --noconfirm -S $package"
 		fi
 	elif [[ $method == nix ]]; then
 		if ! nix-env --query "$package"; then
@@ -754,8 +772,8 @@ See $log and $failure_log for info after run."
 		fail_echo "Failed to install powerpill. Aborting."
 		exit 1
 	fi
-	if ! install_yay; then
-		fail_echo "Failed to install yay. Aborting."
+	if ! install_paru; then
+		fail_echo "Failed to install paru. Aborting."
 		exit 1
 	fi
 	install_installers
@@ -782,15 +800,6 @@ script again with --enable-services."
 if [[ $EUID -ne 0 ]]; then
 	echo "Please run this script as root."
 	exit 1
-fi
-
-# must be mounted before try to copy refind.conf over
-if ! mountpoint -q /boot/efi; then
-	mount LABEL=SYSTEM /boot/efi
-fi
-if ! mountpoint -q /boot/efi; then
-	echo "Please mount ESP partition before running this script."
-	return 1
 fi
 
 # shellcheck disable=SC2188

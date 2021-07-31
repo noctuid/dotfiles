@@ -643,7 +643,7 @@ rldmirrors() {
 
 sysupd() {
 	mountesp
-	PACMAN=yay pacnanny -Syu
+	PACMAN=paru pacnanny -Syu
 	mkinitcpio --allpresets
 	# distro=$(lsb_release -is)
 	# if [[ $distro == Arch ]]; then
@@ -663,10 +663,8 @@ alias cleanpaccache='paccache -rk2 && paccache -ruk0'
 # remove packages installed as dependencies but not needed anymore
 # pacman -Rs $(pacman -Qqdt)
 
-alias aur='yay -S'
-alias yays='yay -S'
-alias aurs='yay -Ss'
-alias yayss='yay -Ss'
+alias aur='paru -S'
+alias aurs='paru -Ss'
 
 # select package to install with fzf (with preview)
 # https://wiki.archlinux.org/index.php/Fzf#Arch_specific_fzf_uses
@@ -676,8 +674,8 @@ pacz() {
 }
 
 aurz() {
-	yay -Slq | fzf -m --preview 'cat <(yay -Si {1}) <(yay -Fl {1} \
-		| awk "{print \$2}")' | xargs -ro  yay -S
+	paru -Slq | fzf -m --preview 'cat <(paru -Si {1}) <(paur -Fl {1} \
+		| awk "{print \$2}")' | xargs -ro paru -S
 }
 
 # ** Reloading things
