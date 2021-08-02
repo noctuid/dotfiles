@@ -29,8 +29,8 @@ fi
 width=$(monitor_get_width)
 # 15 pixels on FHD; 30 on 4k
 BSPWM_GAP=$(monitor_fraction_of 0.0078125 "$width")
-# 3 pixels on FHD; 6 on 4k
-BSPWM_BORDER=$(monitor_fraction_of 0.0015625 "$width")
+# 4 pixels on FHD; 8 on 4k
+BSPWM_BORDER=$(monitor_fraction_of 0.00208333333 "$width")
 export BSPWM_GAP BSPWM_BORDER
 
 BAR_WIDTH=$(("$width" - 2 * BSPWM_GAP))
