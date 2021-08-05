@@ -39,7 +39,7 @@ magenta = ${xrdb:color13:#905eff}
 dark-cyan = ${xrdb:color6:#81a2be}
 cyan = ${xrdb:color14:#78b3cc}
 
-[bar/mine]
+[bar/base]
 width = ${env:BAR_WIDTH:100%}
 height = ${env:BAR_HEIGHT:2%}
 offset-x = ${env:BAR_X_OFFSET:0}
@@ -79,15 +79,30 @@ font-6 = Font Awesome:pixelsize=8
 font-7 = Ricty Discord:pixelsize=9
 font-8 = Siji:pixelsize=12
 
-modules-left = wm bspwm mpd
 modules-center = title
 modules-right = redshift memory cpu temperature battery backlight volume wlan eth date
 
 tray-position = right
 tray-padding = 2
 
+[bar/bspwm]
+inherit = bar/base
+
+; wm-text =  bspwm
+wm-text =  bapwm
+modules-left = wm-text bspwm mpd
+
 ; necessary so panel doesn't cover fullscreen windows
 wm-restack = bspwm
+
+[bar/stumpwm]
+inherit = bar/base
+
+; TODO find way to add space at top
+offset-y = 0
+
+wm-text =  stubwm
+modules-left = wm-text ewmh mpd
 
 [settings]
 screenchange-reload = true
@@ -97,10 +112,9 @@ screenchange-reload = true
 margin-top = 2%
 margin-bottom = 0
 
-[module/wm]
+[module/wm-text]
 type = custom/text
-; content =  bspwm
-content =  bspwm
+content = ${root.wm-text}
 content-foreground = ${colors.red}
 
 [module/bspwm]
@@ -145,6 +159,42 @@ label-sticky = 
 label-sticky-foreground = ${colors.yellow}
 label-private = 
 label-private-foreground = ${colors.magenta}
+
+[module/ewmh]
+type = internal/xworkspaces
+
+; Only show workspaces defined on the same output as the bar
+;
+; Useful if you want to show monitor specific workspaces
+; on different bars
+;
+; Default: false
+pin-workspaces = false
+
+; Create click handler used to focus desktop
+; Default: true
+enable-click = false
+
+; Create scroll handlers used to cycle desktops
+; Default: true
+enable-scroll = false
+
+label-active = %name%
+label-active-foreground = ${colors.foreground}
+label-active-underline = ${colors.yellow}
+label-active-margin-left = 1
+
+label-occupied = %name%
+label-occupied-foreground = ${colors.foreground}
+label-occupied-margin-left = 1
+
+label-empty = %name%
+label-empty-foreground = ${colors.custom-gray}
+label-empty-margin-left = 1
+
+label-urgent = %name%
+label-urgent-background = ${colors.dark-red}
+label-urgent-margin-left = 1
 
 [module/mpd]
 type = custom/script

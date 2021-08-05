@@ -27,11 +27,16 @@ fi
 
 # * BSPWM and Polybar
 width=$(monitor_get_width)
+# TODO fully rename WM_GAP
 # 15 pixels on FHD; 30 on 4k
 BSPWM_GAP=$(monitor_fraction_of 0.0078125 "$width")
-# 4 pixels on FHD; 8 on 4k
-BSPWM_BORDER=$(monitor_fraction_of 0.00208333333 "$width")
+WM_GAP=$BSPWM_GAP
+
+# 3 pixels on FHD; 7 on 4k
+BSPWM_BORDER=$(monitor_fraction_of 0.001822917 "$width")
+WM_BORDER=$BSPWM_BORDER
 export BSPWM_GAP BSPWM_BORDER
+export WM_GAP WM_BORDER
 
 BAR_WIDTH=$(("$width" - 2 * BSPWM_GAP))
 BAR_HEIGHT=$((2 * BSPWM_GAP))

@@ -60,7 +60,7 @@ fi
 rldbspc
 
 # * Panel
-xrestart polybar mine
+xrestart polybar bspwm
 
 # Local Variables:
 # eval: (rainbow-mode 1)

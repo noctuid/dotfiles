@@ -1,0 +1,17 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+(progn
+  (ros:ensure-asdf)
+  #+quicklisp (ql:quickload '(stumpwm) :silent t))
+
+(defpackage :ros.script.stumpwm.3837116273
+  (:use :cl))
+(in-package :ros.script.stumpwm.3837116273)
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (stumpwm:stumpwm))

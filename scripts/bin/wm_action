@@ -2,10 +2,7 @@
 # for bspwm and maybe eventually herbstluftwm, i3, etc.
 # so can setup bindings in one place for different programs and WMs
 
-#
-# Wm Detection
-#
-
+# * Wm Detection
 wm=$(< /tmp/window_manager)
 if [[ -z $wm ]] || [[ $(tty) != "$(< /tmp/last_tty)" ]]; then
 	wm=$(xprop -notype -id "$(xprop -root -notype | awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
@@ -18,13 +15,12 @@ win_action() {
 		bspc_action "$@"
 	elif [[ $wm == i3 ]]; then
 		i3_action "$@"
+	elif [[ $wm == stumpwm ]]; then
+		stumpwm_action "$@" &
 	fi
 }
 
-#
-# Different Wm/Environment Functions
-#
-
+# * Bspwm
 bspc_state_tiled() {
 	bspc query -d focused -T | jq .layout | grep -q "tiled"
 }
@@ -56,7 +52,9 @@ case $1 in
 			if bspc_state_tiled; then
 				if [[ $2 == down ]]; then
 					# "cw"
-					bspc node -f south || bspc node -f next.local
+					bspc node -f south
+					# TODO just add a dedicated cycle keybinding; this is too confusing
+					# || bspc node -f next.local
 				else
 					bspc node -f west
 				fi
@@ -67,7 +65,8 @@ case $1 in
 			if bspc_state_tiled; then
 				if [[ $2 == up ]]; then
 					# "ccw"
-					bspc node -f north || bspc node -f prev.local
+					bspc node -f north
+					# || bspc node -f prev.local
 				else
 					bspc node -f east
 				fi
@@ -185,6 +184,7 @@ case $1 in
 esac
 }
 
+# * i3
 i3_action() {
 case $1 in
 	dsel)
@@ -265,6 +265,57 @@ case $1 in
 esac
 }
 
+# * Stumpwm
+stumpwm_action() {
+	case $1 in
+		dsel)
+			if [[ $2 == last ]]; then
+				stumpish gother
+			else
+				stumpish gselect "$2"
+			fi
+			;;
+		dbalance) stumpish balance-frames;;
+		# TODO or next in frame
+		wsel) stumpish move-focus "$2";;
+		wmove) stumpish move-window "$2";;
+		wmove_tod) stumpish gmove "$2";;
+		# TODO implement resize in split direction
+		wresize) stumpish resize-direction "$2";;
+		# TODO
+		# sticky);;
+		# TODO add command to toggle floating
+		wtoggle)
+			if [[ $2 == fullscreen ]]; then
+				stumpish fullscreen
+			fi
+			;;
+		wclose) stumpish delete-window;;
+		wkill) stumpish kill-window;;
+		# TODO add command to switch between only and auto-tile
+		# lsel)
+		# 	if [[ $2 == next ]]; then
+		# 	fi
+		psel)
+			case $2 in
+				east) stumpish hsplit;;
+				south) stumpish vsplit;;
+				*);;
+			esac
+			;;
+		# TODO add command to toggle hiding
+		# hide_all) ;;
+		reload) stumpish restart-soft;;
+		quit) stumpish quit;;
+		*)
+			echo "Not a valid action"
+			exit 1
+			;;
+	esac
+}
+
+# * Obsolete
+# ** Tmux
 tmux_action() {
 case $1 in
 	# wm desktop is equivalent to tmux window
@@ -358,6 +409,7 @@ case $1 in
 esac
 }
 
+# ** In Program
 prefix_in_program_maps() {
 case $2 in
 	# 'r' is prefix key
@@ -369,9 +421,11 @@ case $2 in
 	rd) $1 dsel 5;;
 	rh) $1 dsel 6;;
 	# down or left
-	rn) $1 wsel down;;
+	# rn) $1 wsel down;;
 	# up or right
-	re) $1 wsel up;;
+	# re) $1 wsel up;;
+	rn) $1 dsel 7;;
+	re) $1 dsel 8;;
 	# more desktop/tmux win switching
 	ri) $1 dsel 9;;
 	ro) $1 dsel 10;;
@@ -410,7 +464,7 @@ case $2 in
 	# monocle toggle
 	rk) $1 lsel next;;
 	# for wm even if tmux
-	ry) win_action wtoggle sticky;;
+	ry) win_action sticky;;
 	rf) win_action wtoggle fullscreen;;
 	# presel/tmux spltting
 	r/|r\')
@@ -437,10 +491,7 @@ case $2 in
 esac
 }
 
-#
-# Main
-#
-
+# * Main
 if [[ $1 == mpv ]]; then
 	# different bindings depending on whether mpv is running in terminal (audio)
 	# i set title for gui mpv to 'mpv - ${filename}' in .mpv/config
@@ -459,5 +510,3 @@ elif [[ $1 == tmux ]]; then
 else
 	win_action "$@"
 fi
-
-# vim: set ft=sh:

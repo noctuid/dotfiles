@@ -1,11 +1,23 @@
+;; (sb-ext:restrict-compiler-policy 'debug 3)
+
 ;;; The following lines added by ql:add-to-init-file:
 ;; #-quicklisp
 (let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp"
-                                       (user-homedir-pathname))))
-  (when (probe-file quicklisp-init)
-    (load quicklisp-init)))
+                          (user-homedir-pathname))))
+	(when (probe-file quicklisp-init)
+		(load quicklisp-init)))
 
-(defun lit/ql-update ()
-  "Get latest quicklisp libraries available and update client."
-  (ql:update-dist "quicklisp")
-  (ql:update-client))
+;; TODO need to only evaluate conditionally if above succeeds...
+;; (defun noct-ql-update ()
+;;   "Get latest quicklisp libraries available and update client."
+;;   (ql:update-dist "quicklisp")
+;;   (ql:update-client))
+
+;; #+quicklisp
+;; (ql:quickload :linedit)
+
+;; (ignore-errors
+;;  (use-package :linedit)
+;;  (linedit:install-repl :eof-quits t))
+
+(require :sb-posix)
