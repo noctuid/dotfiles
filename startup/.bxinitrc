@@ -41,6 +41,11 @@ xrdb -load ~/.Xresources
 # shellcheck disable=SC1090
 source ~/bin/helpers/xenv.sh
 
+# * Emacs
+# start now that used environment variables have been sourced
+# start emacs daemon if it isn't running (ALTERNATE_EDITOR empty)
+nohup emacsclient -e 0 &> /tmp/emacs_daemon.log &
+
 # * HiDPI
 if [[ -n $MONITOR_IS_HIDPI ]]; then
 	xrandr --dpi 192
@@ -76,7 +81,7 @@ xset -r 25
 xset r rate 400 35
 
 # Japanese input
-fcitx -r
+fcitx5 &
 
 # hotkey daemon
 if [[ -z $NO_HOTKEY ]]; then

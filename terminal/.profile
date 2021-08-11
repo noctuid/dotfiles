@@ -95,10 +95,7 @@ done <<< "$pathdirs"
 # systemctl --user --no-block start emacs
 # systemctl --user --no-block start mpd
 
-[[ ! -s ~/.mpd/pid ]] && mpd &
-
-# start emacs daemon if it isn't running (ALTERNATE_EDITOR empty)
-# LC_CTYPE=ja_JP.UTF-8 emacsclient -e 0 &> /dev/null &
+[[ ! -s ~/.mpd/pid ]] && nohup mpd &> /tmp/mpd.log &
 
 # * Startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then

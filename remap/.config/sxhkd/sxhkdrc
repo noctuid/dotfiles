@@ -75,19 +75,19 @@ alt + super + space
 
 # edi[t]
 alt + super + t
-	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
+	emacsclient -c -a ""
 
 # v because was previously bound to vim...
 # use latest good emacs configuration
 # bug in Emacs prevents using IMEs (e.g. fcitx) without changing LC_TYPE
 alt + super + v
-	LC_CTYPE=ja_JP.UTF-8 emacs --stable
+	emacs --stable
 
 # demote errors for each org source block; for debugging errors that are
 # localized to a single section without losing all configuration from following
 # sections or needing to run Emacs with a stable configuration
 alt + super + V
-	LC_CTYPE=ja_JP.UTF-8 emacs --with-demoted-errors
+	emacs --with-demoted-errors
 
 alt + super + b
 	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
