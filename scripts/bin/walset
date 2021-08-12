@@ -14,7 +14,7 @@ bgset "$@" &
 wallpaper=$(realpath "${@: -1}")
 
 # cache for i3lock-color
-multilockscreen --update "$wallpaper" &
+betterlockscreen --update "$wallpaper" &
 
 # * Update Pywal Colors
 # handles terminals, polybar, xrdb

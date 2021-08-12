@@ -423,7 +423,7 @@ sxhkd
 # * Screen locker
 xss-lock
 # wrapper around i3lock-color
-multilockscreen-git aur
+betterlockscreen-git aur
 
 # * Compositing/Redshift
 redshift
