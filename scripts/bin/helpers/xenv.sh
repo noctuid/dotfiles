@@ -38,7 +38,15 @@ WM_BORDER=$BSPWM_BORDER
 export BSPWM_GAP BSPWM_BORDER
 export WM_GAP WM_BORDER
 
-BAR_WIDTH=$(("$width" - 2 * BSPWM_GAP))
+# 3 pixels on 4k
+HALF_WM_BORDER=$(monitor_fraction_of 0.5 "$WM_BORDER")
+export HALF_WM_BORDER
+
+# 15 pixels on4k
+CORNER_RADIUS=$(monitor_fraction_of 0.5 "$WM_GAP")
+export CORNER_RADIUS
+
+BAR_WIDTH=$((width - 2 * BSPWM_GAP))
 BAR_HEIGHT=$((2 * BSPWM_GAP))
 BAR_X_OFFSET=$BSPWM_GAP
 BAR_Y_OFFSET=$BSPWM_GAP

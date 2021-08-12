@@ -119,6 +119,13 @@ alt + super + r
 alt + super + p
 	dropdown emacsclient -ce "(noct:with-q-to-exit (proced) (delete-other-windows))"
 
+# ** Dunst
+alt + super + grave
+	dunstctl history-pop
+
+alt + super + comma
+	dunstctl close-all
+
 # * Mouse
 button9
 	wm_action hide_all

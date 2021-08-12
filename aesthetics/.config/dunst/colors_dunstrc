@@ -1,9 +1,7 @@
 # colors taken from http://twily.info/.config/dunst/dunstrc#view
 # IMPORTANT: colors have to be defined in quotation marks.
 # Otherwise the "#" and following would be interpreted as a comment.
-[frame]
-    width = 2
-    color = "#d0d293"
+    frame_color = "#d0d293"
 
 [urgency_low]
     background = "#26282B"

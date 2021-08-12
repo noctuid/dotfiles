@@ -54,6 +54,8 @@ user_services_setup() {
 		# --preserve-env to avoid dbus error
 		sudo --preserve-env -u "$user" systemctl --user start udiskie
 		sudo --preserve-env -u "$user" systemctl --user enable udiskie
+		# fails and have custom run script
+		sudo --preserve-env -u "$user" systemctl --user disable dunst
 		# TODO emacs, mpd, and mpd-notification block login for a long time
 		# starting in ~/.profile instead
 		# mpd-notification service fails quickly

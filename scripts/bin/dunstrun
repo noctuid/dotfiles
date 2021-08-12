@@ -4,17 +4,23 @@
 source ~/bin/helpers/monitor.sh
 
 padding=$TOP_PADDING
-right_offset=$BSPWM_GAP
+right_offset=$WM_GAP
 monitor_width=$(monitor_get_width)
 width=$(monitor_fraction_of 0.2 "$monitor_width")
 geometry="${width}x3-$right_offset+$padding"
 
 if [[ -f ~/.cache/wal/dunstrc ]]; then
-	cat ~/.config/dunst/dunstrc ~/.cache/wal/dunstrc > /tmp/dunstrc
+	cat ~/.config/dunst/dunstrc ~/.cache/wal/dunstrc \
+		~/.config/dunst/overrides_dunstrc > /tmp/dunstrc
 else
-	cat ~/.config/dunst/dunstrc ~/.config/dunst/colors_dunstrc > /tmp/dunstrc
+	cat ~/.config/dunst/dunstrc ~/.config/dunst/colors_dunstrc \
+		~/.config/dunst/overrides_dunstrc > /tmp/dunstrc
 fi
 
 # dunst doesn't allow duplicate headings; use sed to replace placeholder width
-sed -i -e "s/width =.*/width= $BSPWM_BORDER/g" /tmp/dunstrc
-xrestart dunst -geometry "$geometry" -config /tmp/dunstrc
+sed -i -E -e "s/(frame_width )=.*/\1= $WM_BORDER/g" /tmp/dunstrc
+sed -i -E -e "s/(geometry )=.*/\1= $geometry/g" /tmp/dunstrc
+sed -i -E -e "s/(corner_radius )=.*/\1 = $CORNER_RADIUS/g" /tmp/dunstrc
+sed -i -E -e "s/(separator_height )=.*/\1= $HALF_WM_BORDER/g" /tmp/dunstrc
+
+xrestart dunst -config /tmp/dunstrc

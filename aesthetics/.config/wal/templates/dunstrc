@@ -1,7 +1,7 @@
-[frame]
-    width = 2
-    color = "{foreground}"
+# [global] continued
+    frame_color = "{color14}"
 
+# * Urgency-specific
 [urgency_low]
     # IMPORTANT: colors have to be defined in quotation marks.
     # Otherwise the "#" and following would be interpreted as a comment.
@@ -18,3 +18,4 @@
     background = "{background}"
     foreground = "{foreground}"
     timeout = 0
+

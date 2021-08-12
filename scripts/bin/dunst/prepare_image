@@ -22,5 +22,11 @@ else
 	new_image="$album_art"
 fi
 
+# for potential use elsewhere
+if [[ $appname == mpd-notification ]]; then
+	# w3m needs an extension
+	cp "$new_image" /tmp/now_playing.png
+fi
+
 # send notification with compatible image
 notify-send -a "prepare_image" -u "$urgency" -i "$new_image" "$summary" "$body"
