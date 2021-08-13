@@ -175,9 +175,9 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 fi
 
 # * Appearance
-# ** Pywal
-if [[ -f ~/.cache/wal/sequences ]]; then
-	(cat ~/.cache/wal/sequences &)
+# ** Wpg/Pywal
+if [[ -f ~/.config/wpg/sequences ]]; then
+	(cat ~/.config/wpg/sequences &)
 fi
 
 # ** Less Colors

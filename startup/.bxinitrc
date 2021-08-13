@@ -134,10 +134,10 @@ else
 	setroot --bg-color "#00ff00"
 fi
 
-# * Pywal
+# * Wpg/Pywal
 if [[ -z $NO_WAL ]]; then
-	# breaks stumpwm if in .xinitrc
-	wal -n -R &> /dev/null
+	# wall version breaks stumpwm; what about this?
+	~/.config/wpg/wp_init.sh &> /dev/null
 fi
 
 # * Other Daemons
