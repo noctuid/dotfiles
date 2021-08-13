@@ -17,11 +17,8 @@ reflector
 pkgfile
 # for paccache and other utilities
 pacman-contrib
-# aur helper
+# aur helper backup
 yay aur
-# backup
-trizen aur
-aurutils aur
 
 pacnanny aur
 
@@ -167,7 +164,7 @@ mediainfo
 # for kitty image preview
 python-pillow-simd aur
 # alternate to w3m image preview
-python-ueberzug-git aur
+ueberzug
 
 trash-cli
 
@@ -510,6 +507,9 @@ xsettingsd
 
 # display colors and system statistics
 neofetch
+# ascii art
+cbonsai aur
+asciiquarium
 
 # * DNS
 # validating, recursive, caching resolver
