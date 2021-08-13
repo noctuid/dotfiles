@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# TODO different border color for monocle?
+# https://www.reddit.com/r/bspwm/comments/dmnj2g/bspwm_laptop_clamshell_mode/
 
 bspwm_is_restarting=false
-if [[ -f /tmp/bspwm-is-restarting ]]; then
+restart_file=/tmp/bspwm-is-restarting-on-"$DISPLAY"
+if [[ -f $restart_file ]]; then
 	bspwm_is_restarting=true
-	rm /tmp/bspwm-is-restarting
+	rm "$restart_file"
 fi
 
 # * Colors
@@ -30,10 +31,7 @@ fi
 # open second window on right
 # bspc config initial_polarity second_child
 
-# https://github.com/neeasade/dotfiles/blob/master/wm/.wm/scripts/external_rules.sh
-bspc config external_rules_command ~/bin/bspwm/external_rules.sh
-
-bspc config split_ratio 0.60
+bspc config split_ratio 0.55
 
 bspc config gapless_monocle true
 bspc config top_monocle_padding "$BSPWM_GAP"

@@ -454,8 +454,7 @@ office-code-pro aur
 # hack-font nix
 # for uushi
 phallus-fonts-git aur
-otf-fura-mono-powerline-git aur
-otf-nerd-fonts-fira-code aur
+nerd-fonts-complete aur
 
 # other languages
 noto-fonts-cjk
@@ -667,6 +666,9 @@ slop
 buku-git aur
 
 # * X Related
+# automatic xrandr setup based on connected devices
+autorandr
+
 xdotool
 xorg-server
 xorg-xinit

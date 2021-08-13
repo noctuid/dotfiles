@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# stored wm name cleared in ../startup/.bxinitrc
+
+wm_file=/tmp/"$DISPLAY"_window_manager
+wm=$(< "$wm_file")
+if [[ -z $wm ]]; then
+	id=$(xprop -root -notype _NET_SUPPORTING_WM_CHECK)
+	id=${id##* }
+	wm=$(xprop -notype -id "$id" _NET_WM_NAME \
+			 | awk 'gsub("\"", "") {print $3; exit}')
+	echo "$wm" > "$wm_file"
+fi
+echo -n "$wm"

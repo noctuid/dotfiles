@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2154
+
+hc() {
+	herbstclient "$@"
+}
+
+if [[ -f ~/.cache/wal/colors.sh ]]; then
+	# shellcheck disable=SC1090
+	source ~/.cache/wal/colors.sh
+
+	hc set frame_border_active_color "${foreground}ff"
+	# yellow
+	hc set frame_border_normal_color "${color3}ff"
+
+	# green
+	hc set frame_bg_active_color "${color10}ff"
+	# frame_active_opacity looks better than setting alpha
+	# hc set frame_bg_active_color "${color10}cc"
+	hc set frame_bg_normal_color "${background}ff"
+
+	# if ever use titles
+	hc attr theme.title_color "$foreground"
+
+	hc attr theme.normal.color "$background"
+	# cyan
+	hc attr theme.active.color "$color14"
+	# dark red
+	hc attr theme.urgent.color "$color15"
+
+	# not using inner or outer
+	# copy inner color to outer_color
+	# for state in active urgent normal ; do
+	#     hc substitute C theme.${state}.inner_color \
+		#        attr theme.${state}.outer_color C
+	# done
+fi
+

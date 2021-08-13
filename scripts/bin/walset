@@ -23,13 +23,18 @@ betterlockscreen --update "$wallpaper" &
 # wal -n -i "${@: -1}"
 
 wpg -a "$wallpaper"
-wpg -n -s "$wallpaper"
+wpg -n -s "$wallpaper" || exit 1
 # wpg merges user .Xresources afterwards (and mine contains default colors)
 # redo colors
 xrdb -merge ~/.cache/wal/colors.Xresources &
 
 # * Update Colors for Applications Pywal Doesn't
-bspwm_set_wal_colors &
+wm=$(get_wm)
+if [[ $wm == bspwm ]]; then
+	bspwm_set_wal_colors &
+elif [[ $wm == herbstluftwm ]]; then
+	hc_set_wal_colors &
+fi
 
 # requires steam restart
 wal_steam -w &
@@ -40,7 +45,7 @@ dunstrun &
 emacsclient -a false -e t && emacsclient --eval '(noct-ewal)' &
 
 # reload colors for pywalfox/firefox
-pywalfox update
+pywalfox update &
 
 # reload qutebrowser config.py
 if pgrep -x qutebrowser; then

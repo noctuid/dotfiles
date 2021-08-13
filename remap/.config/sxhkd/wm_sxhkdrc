@@ -1,5 +1,16 @@
 # Window Management sxhkdrc
 # don't want this when using a WM that has its own keybinding config
+# * Reloadingo
+# reload wm config or quit
+super + control + {_,shift + }Escape
+	wm_action {reload,quit}
+
+super + period
+	wm_action reload
+
+super + greater
+	wm_action restart
+
 # * Window Management
 # ** General
 # close
@@ -43,42 +54,59 @@ super + g
 super + F
 	wm_action wsel biggest.local.floating
 
-super + b
-	wm_action dbalance
+# super + b
+# 	wm_action dbalance
+
+super + q
+	wm_action urgent
 
 # ** Desktop Movement
 # change to desktop or move selected window to desktop
-super + {_,shift +} {a,r,s,t,d,h,n,e,i,o}
-	wm_action {dsel,wmove_tod} {1-9,10}
+super + {_,shift +,control+} {a,r,s,t,d,h,n,e,i,o}
+	wm_action {dsel,wmove_tod,wmove_tod_with} {1-9,10}
+
+# ** Monitor Movement
+super + BackSpace
+	wm_action cycle_monitor
 
 # ** Resizing
-super + control + {h,n,e,i}
+super + control + {u,k,semicolon,y}
 	wm_action wresize {left,down,up,right}
 
 # moving floating windows
 # super + {Left,Down,Up,Right}
 # 	bspc node -v {-20 0,0 20,0 -20,20 0}
 
-# ** Preselection (never use)
-# direction to split
-super + p ; {h,n,e,i}
+# ** Preselection
+# chain keybindings interfere with keyup super when using buttons, so have to
+# manually handle
+super + p ; {super+h,super+n,super+e,super+i}
+	xdotool keyup super ; \
 	wm_action psel {west,south,north,east}
 
-super + p ; {_,shift + }space
+super + p ; {_,shift + }+super+space
+	xdotool keyup super ; \
 	wm_action psel {cancel,canceld}
-super + p ; {_,shift + }q
+super + p ; {_,shift + }+super+q
+	xdotool keyup super ; \
 	wm_action psel {cancel,canceld}
+
+super + apostrophe
+	wm_action psel east
 
 # set presl splitting ratio of current window
 # super + ctrl + {1-9}
 # 	wm_action splitr 0.{1-9}
 
-# ** Adjustment
+# ** Gap Adjustment
 super + minus
 	wm_action gapc +4
 
 super + equal
 	wm_action gapc -4
+
+super + G
+	wm_action gap_toggle
 
 # ** Misc
 # hide all windows

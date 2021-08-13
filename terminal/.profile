@@ -60,6 +60,7 @@ $HOME/bin/net
 $HOME/bin/not_mine
 $HOME/bin/dunst
 $HOME/bin/bspwm
+$HOME/bin/wm
 # for vimus
 $HOME/.cabal/bin
 # for adb
@@ -86,7 +87,7 @@ done <<< "$pathdirs"
 
 # import environment variables for use with user units
 # NOTE: will give failure message "Invalid environment assigments"
-# all my important env variables show up in show-environment though
+# some important env variables show up in show-environment though
 # dbus-update-activation-environment --systemd --all
 
 # with --enable, user services can block login

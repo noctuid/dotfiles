@@ -1,14 +1,16 @@
 #!/bin/bash
-# for bspwm and maybe eventually herbstluftwm, i3, etc.
+# for bspwm, herbstluftwm, stumpwm, i3, etc.
 # so can setup bindings in one place for different programs and WMs
 
-# * Wm Detection
-wm=$(< /tmp/window_manager)
-if [[ -z $wm ]] || [[ $(tty) != "$(< /tmp/last_tty)" ]]; then
-	wm=$(xprop -notype -id "$(xprop -root -notype | awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
-	echo "$wm" > /tmp/window_manager
-	echo "$tty" > /tmp/last_tty
+# only will happen if sxhkd was started in another tty outside X
+if [[ -z $WM_GAP ]]; then
+	# shellcheck disable=SC1090
+	source ~/bin/helpers/xenv.sh
 fi
+
+# * Wm Detection
+# see ./wm/get_wm
+wm=$(get_wm)
 
 win_action() {
 	if [[ $wm == bspwm ]]; then
@@ -17,6 +19,8 @@ win_action() {
 		i3_action "$@"
 	elif [[ $wm == stumpwm ]]; then
 		stumpwm_action "$@" &
+	elif [[ $wm == herbstluftwm ]]; then
+		herbstluftwm_action "$@" &
 	fi
 }
 
@@ -172,7 +176,7 @@ case $1 in
 		bspc node @/ -g hidden
 		;;
 	reload)
-		touch /tmp/bspwm-is-restarting
+		touch /tmp/bspwm-is-restarting-on-"$DISPLAY"
 		bspc wm --restart
 		;;
 	quit)
@@ -307,6 +311,173 @@ stumpwm_action() {
 		# hide_all) ;;
 		reload) stumpish restart-soft;;
 		quit) stumpish quit;;
+		*)
+			echo "Not a valid action"
+			exit 1
+			;;
+	esac
+}
+
+# * Herbstluftwm
+hc() {
+    herbstclient "$@"
+}
+
+# return 0 status if none minimized on current tag
+hc_none_minimized() {
+	# would like to be able to do this
+	# hc sprintf CURTAG "%s" "tags.focus.name" foreach C clients. \
+	#    sprintf TAG "%c.tag" C \
+	#    sprintf MIN "%c.minimized" C \
+	#    or , compare TAG != CURTAG , compare MIN = "false" , exit 1
+	hc mktemp bool ANY_MIN substitute CURTAG tags.focus.name chain . foreach C clients. \
+	   sprintf TAG "%c.tag" C \
+	   sprintf MIN "%c.minimized" C \
+	   or , compare TAG != CURTAG , compare MIN = false , set_attr ANY_MIN true \
+	   . compare ANY_MIN = 0
+}
+
+hc_delete_other_frames() {
+	frames=$(hc attr tags.focus.frame_count)
+	remove_frames=$((frames -  1))
+	for i in $(seq $remove_frames); do
+		hc remove
+	done
+}
+
+# minimize all windows on current tag
+hc_minimize_all() {
+	mkdir -p /tmp/hc
+	hc dump > /tmp/hc/"$(hc attr tags.focus.index)"_pre_hide_layout
+	hc lock
+	hc_delete_other_frames
+	# minimize all windows
+	hc substitute CURTAG tags.focus.name foreach C clients. \
+	   sprintf TAG "%c.tag" C \
+	   sprintf MIN "%c.minimized" C \
+	   and , compare TAG = CURTAG , set_attr MIN true
+	hc unlock
+}
+
+hc_only() {
+	mkdir -p /tmp/hc
+	hc dump > /tmp/hc/"$(hc attr tags.focus.index)"_pre_hide_layout
+	hc lock
+	hc_delete_other_frames
+	# minimize other windows
+	hc substitute CURTAG tags.focus.name foreach C clients. \
+	   sprintf TAG "%c.tag" C \
+	   sprintf WINID "%c.winid" C \
+	   substitute FOCUSWINID tags.focus.focused_client.winid \
+	   sprintf MIN "%c.minimized" C \
+	   and , compare TAG = CURTAG , compare WINID != FOCUSWINID , set_attr MIN true
+	hc unlock
+}
+
+hc_show_all() {
+	restore_file=/tmp/hc/"$(hc attr tags.focus.index)"_pre_hide_layout
+	hc lock
+	if [[ -f $restore_file ]]; then
+		hc load "$(< "$restore_file")"
+		rm "$restore_file"
+	else
+		hc substitute CURTAG "tags.focus.name" foreach C clients. \
+		   sprintf TAG "%c.tag" C \
+		   sprintf MIN "%c.minimized" C \
+		   and , compare TAG = CURTAG , set_attr MIN false
+	fi
+	hc unlock
+}
+
+hc_toggle_minimize() {
+	if hc_none_minimized; then
+		hc_minimize_all
+	else
+		hc_show_all
+	fi
+}
+
+# if only one frame in max, cycle through windows
+hc_overloaded_focus() {
+	local layout
+	layout=$(hc attr tags.focus.tiling.focused_frame.algorithm)
+	if [[ $(hc attr tags.focus.frame_count) == 1 ]] \
+		   && [[ $layout == max ]]; then
+		if [[ $2 =~ ^(right|up)$ ]]; then
+			hc cycle 1
+		else
+			hc cycle -1
+		fi
+	else
+		hc focus "$1"
+	fi
+}
+
+hc_toggle_window_gap() {
+	local gap
+	gap=$(hc get window_gap)
+	if [[ $gap == 0 ]]; then
+		hc set window_gap "$WM_GAP"
+	else
+		hc set window_gap 0
+	fi
+}
+
+herbstluftwm_action() {
+	# TODO split commands
+	# TODO keybinding to bring (random?) window from other frame into current
+	# TODO split and bring in
+	# minor
+	# TODO dump and load
+	# TODO raise and lower
+	case $1 in
+		dsel)
+			if [[ $2 == last ]]; then
+				hc or , use_previous , chain : focus_monitor 0 : use_last
+			else
+				hc or , use_index "$(($2 - 1))" , \
+				   chain : focus_monitor 0 : use_index "$(($2 - 1))"
+			fi
+			;;
+		cycle_monitor) hc cycle_monitor;;
+		wsel) hc_overloaded_focus "$2";;
+		urgent) hc jumpto urgent;;
+		wmove) hc shift "$2";;
+		wmove_tod) hc move_index "$(($2 - 1))";;
+		wmove_tod_with)
+			hc lock
+			hc move_index "$(($2 - 1))"
+			hc use_index "$(($2 - 1))"
+			hc unlock;;
+		wresize) hc resize "$2" 0.025;;
+		# TODO
+		# sticky);;
+		wtoggle) hc "$2";;
+		wclose) hc close_or_remove;;
+		# a little off
+		wkill) hc close_and_remove;;
+		lsel) hc cycle_layout 1 max horizontal;;
+		# TODO split and select or bring window into?
+		# split explode
+		psel)
+			case $2 in
+				north) hc split top;;
+				south) hc split bottom;;
+				east) hc split right;;
+				west) hc split left;;
+				*);;
+			esac
+			;;
+		gapc)
+			hc set window_gap $(($(hc get window_gap) + $2))
+			;;
+		gap_toggle) hc_toggle_window_gap;;
+		hide_all) hc_toggle_minimize;;
+		only) hc_only;;
+		reload) hc lock && hc reload;;
+		# e.g. after update
+		restart) hc wmexec herbstluftwm --locked;;
+		quit) hc quit;;
 		*)
 			echo "Not a valid action"
 			exit 1

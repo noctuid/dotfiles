@@ -1,185 +1,210 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# this is a simple config for herbstluftwm
-
-# hc() {
-#     herbstclient "$@"
-# }
-
+# * Setup
 hc() {
-    cmds="$cmds , $@"
+    herbstclient "$@"
 }
 
 hc emit_hook reload
 
-xsetroot -solid '#5A8E3A'
+first_load=false
+if herbstclient silent new_attr bool my_not_first_autostart; then
+   first_load=true
+fi
 
-# kill shxkd and xchainkeys for now
-pkill sxhkd
-pkill xchainkeys
-# pkill conky
-# conky &
-# remove all existing keybindings
-hc keyunbind --all
+if ! $first_load; then
+	# reload in case changed
+	# shellcheck disable=SC1090
+	source ~/bin/helpers/.xenv.sh
+fi
 
-hc set ignore_class "^(Conky)$"
+# * TODOS
+# ** make issues for
+# - maybe request local settings (e.g. tag-local gap setting); specifically
+#   attributes instead of settings; theme settings?
 
-# keybindings
-# note that keys on layers won't be bound (i.e. with Mode_switch using xmodmap)
+# - maybe request script as condition (can do hook but it would be more
+#   convenient to be make use of float, fullscreen, etc. instead of manually
+#   doing)
 
-# if you have a super key you will be much happier with Mod set to Mod4
-# Mod=Mod1    # Use alt as the main modifier
-Mod=Mod4   # Use the super key as the main modifier
+# - explode to equivalent frame layout?
 
-hc keybind $Mod-Shift-q quit
-hc keybind $Mod-Shift-r reload
-hc keybind $Mod-w close
+# ** Major
+# kill keybinding
 
-hc keybind $Mod-u spawn xterm
-hc keybind Mod1-s spawn ~/bin/hide_show.sh termite
-hc keybind Mod1-space spawn dmenu_run -fn 'Droid Sans Mono-10'
+# tdrop resize before show?
 
-# brightness
-hc keybind Mod1-e spawn light -As "acpi_video0" 10
-hc keybind Mod1-n spawn light -Us "acpi_video0" 10
+# tdrop autohide wrapper that uses hc lock; swallow&barf
 
-# volume
-hc keybind Mod1-i spawn amixer -qD pulse sset Master 5%+
-hc keybind Mod1-h spawn amixer -qD pulse sset Master 5%-
-# mute
-hc keybind Mod1-m spawn amixer -qD pulse sset Master toggle
-# mpc
-hc keybind Mod1-o spawn mpc toggle
-hc keybind Mod1-u spawn mpc prev
-hc keybind Mod1-y spawn mpc next
+# manual tiling keybindings/setup
+# - mode for creating layouts
+#   - num keys for on the fly split ratio choice
+#   - hnei for splitting
+#   - keys for resizing
+#  - split and explode
+#  - pull/bring
+#  - way to auto pull in like stump
+#  - etc.
+# - stack based movement and auto-tiling
 
-# basic movement
-# focusing clients
-# colemak
-hc keybind $Mod-h     focus left
-hc keybind $Mod-n     focus down
-hc keybind $Mod-e     focus up
-hc keybind $Mod-i     focus right
+# - cycle in addition to or instead of directional movement?
 
-# moving clients
-# colemak
-hc keybind $Mod-Shift-h     shift left
-hc keybind $Mod-Shift-n     shift down
-hc keybind $Mod-Shift-e     shift up
-hc keybind $Mod-Shift-i     shift right
+# - key to toggle showing frame on empty desktop
 
-# splitting frames
-# create an empty frame at the specified direction
-hc keybind $Mod-minus            split   bottom  0.5
-hc keybind $Mod-apostrophe       split   right   0.5
-# let the current frame explode into subframes
-hc keybind $Mod-x split explode
+# ** Minor
+# - todos in wm_action
+# - tabbed title bar to show up to three titles; clickable
+# - show icon for herbstluftwm auto layout layout in polybar and number of
+#   windows in frame if max
+# - non-panel indicator of multiple windows in frame in max mode (e.g. top frame
+#   border in different color; not currently possible)
 
-# resizing frames
-resizestep=0.05
-hc keybind $Mod-Left    resize left +$resizestep
-hc keybind $Mod-Down    resize down +$resizestep
-hc keybind $Mod-Up      resize up +$resizestep
-hc keybind $Mod-Right   resize right +$resizestep
+# ** Very Minor
+# - simulate sticky by splitting monitor into two virtual monitors
 
-# tags
-tag_names=( {1..9} )
-tag_keys=( {1..9} 0 )
+# - fullscreen only script... but still able to cycle?
 
-hc rename default "${tag_names[0]}" || true
-for i in ${!tag_names[@]} ; do
-    hc add "${tag_names[$i]}"
-    key="${tag_keys[$i]}"
-    if ! [ -z "$key" ] ; then
-        hc keybind "$Mod-$key" use_index "$i"
-        hc keybind "$Mod-Shift-$key" move_index "$i"
-    fi
-done
+# ** Open Issues
+# *** Major
+# more layouts (specifically dwindle)
+# https://github.com/herbstluftwm/herbstluftwm/issues/1003
 
-# cycle through tags
-hc keybind $Mod-period use_index +1 --skip-visible
-hc keybind $Mod-comma  use_index -1 --skip-visible
+# smart gaps
+# https://github.com/herbstluftwm/herbstluftwm/issues/1356
 
-# layouting
-hc keybind $Mod-r remove
-hc keybind $Mod-space cycle_layout 1
-hc keybind $Mod-s floating toggle
-hc keybind $Mod-f fullscreen toggle
-hc keybind $Mod-p pseudotile toggle
+# empty background-only opacity
+# https://github.com/herbstluftwm/herbstluftwm/issues/1357
 
-# mouse
-hc mouseunbind --all
-hc mousebind $Mod-Button1 move
-hc mousebind $Mod-Button2 zoom
-hc mousebind $Mod-Button3 resize
+# hide windows behind fullscreen
+# https://github.com/herbstluftwm/herbstluftwm/issues/1352
 
-# focus
-hc keybind $Mod-BackSpace   cycle_monitor
-hc keybind $Mod-Tab         cycle_all +1
-hc keybind $Mod-Shift-Tab   cycle_all -1
-hc keybind $Mod-c cycle
-hc keybind $Mod-U jumpto urgent
+# *** Minor/not builtin but possible, try to implement
+# sticky
+# https://github.com/herbstluftwm/herbstluftwm/issues/976
 
-# theme
+# swallowing
+# https://github.com/herbstluftwm/herbstluftwm/issues/925
+
+# *** Minor
+# more info in title bar
+
+# exit command
+# https://github.com/herbstluftwm/herbstluftwm/issues/1353
+
+# * General Settings
+# from default config
+hc set tree_style '╾│ ├└╼─┐'
+
+# like stumpwm; most of the time don't need to show more than 1 window
+hc set default_frame_layout max
+
+# don't show windows behind current in max layout when using transparency
+hc set hide_covered_windows on
+
+hc set focus_crosses_monitor_boundaries off
+
+# fits my workflow better; I don't use a multi-monitor setup normally; I use
+# single external monitors for videos, games, presentations, etc. and do
+# everything else on my laptop screen
+# if switch to tag on another monitor, focus that monitor
+hc set swap_monitors_to_get_tag off
+
+hc set auto_detect_monitors on
+
+# * Appearance
+# ** Global Settings
+# gaps
+hc set frame_gap 0
+hc set window_gap "$WM_GAP"
+
+# show unfocused and empty frames
+hc set always_show_frame on
+
+# don't show frame border/gap when only one frame or for active
+hc set smart_frame_surroundings on
+
+# always show window borders and gaps
+hc set smart_window_surroundings off
+
+hc set frame_border_width "$WM_BORDER"
+hc set frame_border_inner_width 0
+
+# cuts background out
+hc set frame_bg_transparent off
+
+# real transparency; requires compositor
+# 0 to not stack with active window transparency
+hc set frame_active_opacity 0
+hc set frame_normal_opacity 60
+
+# ** Theme
+# reset attributes
 hc attr theme.tiling.reset 1
 hc attr theme.floating.reset 1
-hc set frame_border_active_color '#222222'
-hc set frame_border_normal_color '#101010'
-hc set frame_bg_normal_color '#565656'
-hc set frame_bg_active_color '#345F0C'
-hc set frame_border_width 1
-hc set always_show_frame 1
-hc set frame_bg_transparent 1
-hc set frame_transparent_width 3
-hc set frame_gap 4
 
-hc attr theme.active.color '#9fbc00'
-hc attr theme.normal.color '#454545'
-hc attr theme.urgent.color orange
-hc attr theme.inner_width 1
-hc attr theme.inner_color black
-hc attr theme.border_width 2
-hc attr theme.floating.border_width 4
-hc attr theme.floating.outer_width 1
-hc attr theme.floating.outer_color black
-hc attr theme.active.inner_color '#3E4A00'
-hc attr theme.active.outer_color '#3E4A00'
-hc attr theme.background_color '#141414'
+# font if start using titles
+hc attr theme.title_font 'Office Code Pro:pixelsize=24'
+# space below the title's baseline (i.e. text depth)
+hc attr theme.padding_top 0
+# hc attr theme.title_height 20
 
-hc set window_gap 0
-hc set frame_padding 0
-hc set smart_window_surroundings 0
-hc set smart_frame_surroundings 1
-hc set mouse_recenter_gap 0
+hc attr theme.border_width "$WM_BORDER"
 
-# rules
+# no inner or outer borders
+hc attr theme.inner_width 0
+hc attr theme.outer_width 0
+
+# ** Colors/Pywal
+hc_set_wal_colors
+
+# * Tags
+hc rename default 一
+hc add 二
+hc add 三
+hc add 四
+hc add 五
+hc add 六
+hc add 七
+hc add 八
+hc add 九
+hc add 十
+
+# * Keybindings
+# # remove all existing keybindings
+hc keyunbind --all
+
+# restart sxhkd in case something goes wrong
+hc keybind Mod4+x spawn start-sxhkd
+
+# * Rules
 hc unrule -F
-#hc rule class=XTerm tag=3 # move all xterms to tag 3
-hc rule focus=on # normally focus new clients
-# hc rule focus=off # normally do not focus new clients
-# give focus to most common terminals
-#hc rule class~'(.*[Rr]xvt.*|.*[Tt]erm|Konsole)' focus=on
-hc rule class=Termite focus=on psuedotile=on
-# hc rule class=Conky manage=off
-hc rule windowtype~'_NET_WM_WINDOW_TYPE_(DIALOG|UTILITY|SPLASH)' pseudotile=on
+
+# normally focus new clients
+hc rule focus=on
+hc rule floatplacement=center
+
+hc rule windowtype~'_NET_WM_WINDOW_TYPE_(DIALOG|UTILITY|SPLASH)' floating=on
 hc rule windowtype='_NET_WM_WINDOW_TYPE_DIALOG' focus=on
 hc rule windowtype~'_NET_WM_WINDOW_TYPE_(NOTIFICATION|DOCK|DESKTOP)' manage=off
+
+hc rule class='pinentry-qt' floating=on
+hc rule class='Steam' floating=on
+hc rule class='Wpg' floating=on
+
+hc rule class=firefox title~'.*Private.*' tag=八 switchtag=on
+
+# * Hooks
+hc watch tags.focus.client_count
+hc watch monitors.count
+
+# xrestart -c herbstclient hc_watch_attr
+
+# * Start
+if $first_load; then
+	hc use_index 1
+fi
 
 # unlock, just to be sure
 hc unlock
 
-herbstclient set tree_style '╾│ ├└╼─┐'
-
-# do multi monitor setup here, e.g.:
-# hc set_monitors 1280x1024+0+0 1280x1024+1280+0
-# or simply:
-# hc detect_monitors
-
-herbstclient chain $cmds &
-# find the panel
-panel=~/.config/herbstluftwm/panel.sh
-[ -x "$panel" ] || panel=/etc/xdg/herbstluftwm/panel.sh
-for monitor in $(herbstclient list_monitors | cut -d: -f1) ; do
-    # start it on each monitor
-    "$panel" $monitor &
-done
+xrestart polybar herbstluftwm

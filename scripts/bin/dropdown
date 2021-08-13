@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-borders=$(("$BSPWM_BORDER" * 2))
-tdrop -ma -w -$borders -y "$TOP_PADDING" "$@"

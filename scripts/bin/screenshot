@@ -8,9 +8,9 @@ date=$(date +%FT%T)
 outfile="$HOME/move/screenshots/${date}_-_${title}.png"
 
 if [[ $1 == select ]]; then
-	maim -s "$outfile"
+	maim --hidecursor --select "$outfile"
 elif [[ $1 == current_window ]]; then
-	maim -i "$(xdotool getactivewindow)" "$outfile"
+	maim --hidecursor --window "$(xdotool getactivewindow)" "$outfile"
 else
-	maim "$outfile"
+	maim --hidecursor "$outfile"
 fi

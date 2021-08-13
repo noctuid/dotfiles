@@ -90,6 +90,7 @@ fi
 
 # backup hotkey program
 if [[ -z $NO_HOTKEY ]]; then
+	# TODO no longer in aur?
 	xchainkeys &
 fi
 
@@ -116,6 +117,7 @@ xsetroot -cursor_name left_ptr &
 # see ../root/etc/X11/xorg.conf.d/my-xorg.conf
 
 # use lockscreen script as screen saver
+# ~/bin/lockscreen (or ../scripts/bin/lockscreen)
 xss-lock lockscreen &
 
 # * Fonts
@@ -133,7 +135,10 @@ else
 fi
 
 # * Pywal
-wal -R
+if [[ -z $NO_WAL ]]; then
+	# breaks stumpwm if in .xinitrc
+	wal -n -R &> /dev/null
+fi
 
 # * Other Daemons
 # redshift; better options at this point than xflux
@@ -147,16 +152,25 @@ dunstrun &
 mpd-notification -m "${XDG_MUSIC_DIR:-$HOME/music}" &
 
 # * Non-DE Daemons
-if [[ -z $IS_DE ]]; then
+if [[ -z $NO_COMPOSITE ]]; then
 	# will mess things up if run with a DE like gnome or cinnamon that already
 	# has a compositor
 	picom --daemon
+	# picom --experimental-backends --daemon
 fi
 
- # * Optimus Manager
-prime-offload
-xrandr --auto
-
 # * Start WM/DE
-session=${1:-bspwm}
-exec "$session"
+# clear stored window manager
+# see ../scripts/bin/wm/get_wm
+> /tmp/"$DISPLAY"_window_manager
+
+if [[ -n $1 ]]; then
+	# startx requires absolute path or it will pass the arguments to xterm
+	# (default program)
+	if [[ $1 == xterm ]]; then
+		shift
+	fi
+	exec "$@" &> ~/.x_"$DISPLAY".log
+else
+	exec herbstluftwm --locked &> ~/.x_"$DISPLAY".log
+fi

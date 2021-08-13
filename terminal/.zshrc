@@ -625,6 +625,20 @@ poweroff() {
 
 alias reboot='poweroff reboot'
 
+startherb() (
+	export NO_HOTKEY=true
+	startx herbstluftwm --locked
+)
+
+hc() {
+	herbstclient "$@"
+}
+
+startstump() (
+	export NO_WAL=true NO_HOTKEY=true
+	startx stumpwm
+)
+
 # ** Symlinking Dotfiles With Stow
 if [[ -f ~/.zsh/stow_functions.sh ]]; then
 	source ~/.zsh/stow_functions.sh
@@ -907,10 +921,10 @@ monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
 		# monitor and a desktop by default
 		bspc monitor "$name" --remove
 	fi
-
+	
 	# add new desktop/workspace for the monitor
 	# TODO could potentially allow word splitting to add more than one desktop
-	if [[ -n $add_bspwm_desktop ]]; then
+	if [[ -n $add_bspwm_desktop ]] && [[ $(get_wm) == bspwm ]]; then
 		bspc monitor "$name" --reset-desktops "$add_bspwm_desktop"
 	fi
 )

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+wm=$(get_wm)
+float=true
+if [[ $wm == herbstluftwm ]]; then
+	algorithm=$(herbstclient attr tags.focus.tiling.focused_frame.algorithm)
+	frame_count=$(herbstclient attr tags.focus.frame_count)
+	if [[ $algorithm == max ]] && (( frame_count == 1 )); then
+		float=false
+	fi
+fi
+
+if $float; then
+	# only will happen if sxhkd was started in another tty outside X
+	if [[ -z $WM_BORDER ]]; then
+		# shellcheck disable=SC1090
+		source ~/bin/helpers/xenv.sh
+	fi
+	borders=$((WM_BORDER * 2))
+	xoff=0
+	if [[ $wm == herbstluftwm ]]; then
+		xoff=$WM_BORDER
+	fi
+	tdrop -ma -x "$xoff" -w -$borders -y "$TOP_PADDING" "$@"
+else
+	tdrop "$@"
+fi

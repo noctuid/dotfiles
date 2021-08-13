@@ -40,6 +40,10 @@ dark-cyan = ${xrdb:color6:#81a2be}
 cyan = ${xrdb:color14:#78b3cc}
 
 [bar/base]
+; https://github.com/polybar/polybar/issues/2477
+; causes above issue; don't need for hiding since can use xdotool
+; enable-ipc = true
+
 width = ${env:BAR_WIDTH:100%}
 height = ${env:BAR_HEIGHT:2%}
 offset-x = ${env:BAR_X_OFFSET:0}
@@ -52,10 +56,11 @@ tray-maxsize = ${env:TRAY_HEIGHT:100%}
 padding = 2
 
 ; no rounded borders
-radius = 0
+radius = ${env:CORNER_RADIUS:15}
 
 border-size = ${env:BAR_BORDER:0}
-border-color = ${colors.foreground}
+; border-color = ${colors.foreground}
+border-color = ${colors.cyan}
 
 line-size = 2
 line-color = #f00
@@ -72,7 +77,7 @@ font-1 = IPAGothic:pixelsize=9:weight=bold
 font-2 = Unifont:style=Sans-Serif
 font-3 = Siji:pixelsize=9
 font-4 = Symbola:pixelsize=9
-font-5 = FuraMonoForPowerline NF:pixelsize=9
+font-5 = FuraMono Nerd Font:pixelsize=9
 ; currently only used for lock (bspwm) and lightbulb icon (redshift)
 font-6 = Font Awesome:pixelsize=8
 ; TODO better font?
@@ -102,6 +107,12 @@ inherit = bar/base
 offset-y = 0
 
 wm-text =  stubwm
+modules-left = wm-text ewmh mpd
+
+[bar/herbstluftwm]
+inherit = bar/base
+
+wm-text =  holowm
 modules-left = wm-text ewmh mpd
 
 [settings]
@@ -170,10 +181,6 @@ type = internal/xworkspaces
 ;
 ; Default: false
 pin-workspaces = false
-
-; Create click handler used to focus desktop
-; Default: true
-enable-click = false
 
 ; Create scroll handlers used to cycle desktops
 ; Default: true

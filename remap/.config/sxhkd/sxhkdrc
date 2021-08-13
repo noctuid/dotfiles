@@ -4,16 +4,12 @@
 # - can only use level 1 (unshifted) key for prefix (can use keys in layer with modifier though)
 
 # * Reloading
-# reload wm config or quit
-super + control + {_,shift + }Escape
-	wm_action {reload,quit}
-
 # reload keyboad layout (if screw it up and can't type)
 any + F11
 	rldkbd
 
 # make sxhkd reload its configuration files:
-{alt + super + period, super + period}
+alt + super + period
 	pkill -USR1 -x sxhkd
 
 # * General Global Hotkeys
@@ -23,9 +19,15 @@ alt + super + e
 	light -A 10
 	# xbacklight -inc 10
 
+alt + super + E
+	light -S 100
+
 alt + super + n
 	light -U 10
 	# xbacklight -dec 10
+
+alt + super + N
+	light -S 1
 
 # ** Volume
 alt + super + i
@@ -53,6 +55,7 @@ alt + super + y
 	mpc next
 
 # ** Screenshots
+# ~/bin/screenshot
 Print
 	screenshot
 	# ~/bin/screenshot
@@ -79,7 +82,6 @@ alt + super + t
 
 # v because was previously bound to vim...
 # use latest good emacs configuration
-# bug in Emacs prevents using IMEs (e.g. fcitx) without changing LC_TYPE
 alt + super + v
 	emacs --stable
 
@@ -89,13 +91,16 @@ alt + super + v
 alt + super + V
 	emacs --with-demoted-errors
 
-alt + super + b
-	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
+# alt + super + b
+# 	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
 
 alt + super + l
 	lockscreen
 
-# ** Clicks
+super + b
+	xstop polybar
+
+# ** Clicks and Mouse Movement
 # TODO clicks don't work when modifier held
 alt + super + k
 	click middle
@@ -104,6 +109,10 @@ alt + super + k
 # regain focus from flash
 alt + super + a
 	click left
+
+# banish mouse to bottom left
+alt + super + b
+	click 0 90000
 
 # ** Terminals and Dropdowns
 alt + super + Return
