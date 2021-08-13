@@ -19,6 +19,9 @@ export BROWSER=firefox
 
 export SOURCE=$HOME/src
 export NIXPKGS=$SOURCE/nixpkgs
+
+export GUIX_PROFILE=$HOME/.guix-profile
+
 # blog dir
 export BLOG=$SOURCE/blog/pir-hana
 
