@@ -670,6 +670,7 @@ alias pacss='pacman -Ss'
 alias pacs='sudo powerpill -S'
 alias pacq='pacman -Q'
 alias pacqm='pacman -Qm'
+alias pacr='sudo pacman -Rns'
 
 # will keep 3 most recent versions and remove all versions of uninstalled
 # e.g. -rk2 to keep 2 most recent
@@ -677,8 +678,18 @@ alias cleanpaccache='paccache -rk2 && paccache -ruk0'
 # remove packages installed as dependencies but not needed anymore
 # pacman -Rs $(pacman -Qqdt)
 
+# install
 alias aur='paru -S'
+# search
 alias aurs='paru -Ss'
+# print comments
+alias aurc='paru -G --comments'
+# print pkgbuild
+alias aurp='paru -G --print'
+alias aurall='paru -Syu'
+remove_orphans() {
+	pacman -Rs $(pacman -Qqtd)
+}
 
 # select package to install with fzf (with preview)
 # https://wiki.archlinux.org/index.php/Fzf#Arch_specific_fzf_uses
@@ -748,7 +759,10 @@ alias gadd="sudo gpasswd -a $USER"
 alias groupslist="groups $USER"
 
 # ** General/Random
-unalias run-help
+if whence -w run-help | grep --quiet alias; then
+	# aliased to man by default
+	unalias run-help
+fi
 autoload -Uz run-help
 alias help='run-help'
 
@@ -1063,6 +1077,10 @@ arec() { # filename
 # ** Internet, VPN, Firewall, and Torrenting
 # *** General
 alias dl='aria2c -x 4'
+dlgo() {
+	dl "$(xsel -b)"
+}
+
 # check ip; default gateway / router
 alias gateip='ip route show'
 # check what DNS servers have in conf and which one using
