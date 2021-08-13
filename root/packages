@@ -469,7 +469,7 @@ noto-fonts-emoji
 
 # additional symbols
 # based on stlarch
-siji-git aur
+siji-ng aur
 # microsft fonts; extra requirements; https://wiki.archlinux.org/index.php/Microsoft_fonts
 # ttf-ms-win-10 aur
 
