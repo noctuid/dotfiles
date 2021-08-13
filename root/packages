@@ -405,7 +405,6 @@ pylast pip
 # * Downloading
 youtube-dl
 # youtube-dl-git aur
-# installed already for powerpill
 aria2
 megatools aur
 

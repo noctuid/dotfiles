@@ -51,8 +51,6 @@
 # - tlp config (charging rates)
 # - aur problems (aur helper issues, slowness, etc.)
 # - evm doesn't work
-# - just fall back to pacman if powerpill installation fails; duplication
-#   between pac_install and install_package
 # - https://stackoverflow.com/questions/30421986/why-does-npm-list-g-lead-to-npm-err-missing-error
 
 # * Constants
@@ -245,13 +243,10 @@ hostname_setup() {
 
 # * Pacman/AUR
 pac_install() {
-	if ! pacman -Q "$1" &> /dev/null; then
+	if ! pacman --query "$1" &> /dev/null; then
 		echo "Installing $1."
-		if pacman -Q powerpill &> /dev/null; then
-			powerpill -S --noconfirm "$1"
-		else
-			pacman -S --noconfirm "$1"
-		fi
+		pacman -S --noconfirm "$1" \
+			|| fail_echo "Failed: pacman --noconfirm -S $package"
 	fi
 }
 
@@ -270,21 +265,11 @@ update_mirror_list() {
 	fi
 }
 
-install_powerpill() {
-	if ! pacman -Q powerpill &> /dev/null; then
-		# necessary to call pacman -Syu for xyne repo to be available
-		# don't want to do partial upgrade with -Sy
-		cp "$uhome"/dotfiles/root/etc/pacman.conf /etc/ \
-			&& pacman --noconfirm -Syu \
-			&& pac_install powerpill
-	fi
-}
-
 install_paru() {
 	if ! pacman -Q paru-bin &> /dev/null; then
 		echo "Installing paru."
 		if ! group_installed base_devel; then
-			powerpill -S --noconfirm --needed base-devel
+			pacman -S --noconfirm --needed base-devel
 		fi
 		pac_install git
 		build_dir="$uhome"/build/paru-bin
@@ -534,19 +519,18 @@ generate_packages_sls() {
 
 		echo "$package-pkg:" >> "$basedir"/packages.sls
 		# 		if [[ $method == pac ]]; then
-		# 			# TODO powerpill instead?
 		# 			echo "  pkg.installed:
 		#     - pkgs:
 		#         - $package
 		# " >> "$basedir"/packages.sls
 		if [[ $method == pac ]]; then
 			echo "  cmd.run:
-    - name: powerpill --noconfirm -S $package
+    - name: pacman --noconfirm -S $package
     - unless: pacman -Q $package
 " >> "$basedir"/packages.sls
 		elif [[ $method == aur ]]; then
 			echo "  cmd.run:
-    - name: paru --pacman powerpill --noconfirm -S $package
+    - name: paru --noconfirm -S $package
     - unless: pacman -Q $package
     - runas: $builduser
 " >> "$basedir"/packages.sls
@@ -642,11 +626,7 @@ install_package() {
 	nix_path=$(echo $line | awk '{print $3}')
 
 	if [[ $method == pac ]]; then
-		if ! pacman --query "$package" &> /dev/null; then
-			echo "Installing $package."
-			powerpill -S --noconfirm "$package" \
-				|| fail_echo "Failed: powerpill  --noconfirm -S $package"
-		fi
+		pac_install "$package"
 	elif [[ $method == aur ]]; then
 		if ! pacman --query "$package" &> /dev/null; then
 			echo "Installing $package."
@@ -768,10 +748,6 @@ See $log and $failure_log for info after run."
 	home_config_setup || fail_echo "Failed to setup dotfiles with stow."
 
 	update_mirror_list || fail_echo "Failed to update pacman mirror list."
-	if ! install_powerpill; then
-		fail_echo "Failed to install powerpill. Aborting."
-		exit 1
-	fi
 	if ! install_paru; then
 		fail_echo "Failed to install paru. Aborting."
 		exit 1

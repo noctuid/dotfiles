@@ -14,7 +14,6 @@ export EDITOR=emacsclient
 export PAGER=vimpager
 # export BROWSER=qutebrowser
 export BROWSER=firefox
-export PACMAN=powerpill
 # keep SHELL as bash (e.g. Emacs tries to execute commands with zsh otherwise)
 # export SHELL=/bin/zsh
 
