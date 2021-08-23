@@ -97,21 +97,16 @@ Also tell Emacs to ignore FLAG when processing command line arguments."
 (write-region (noct-current-emacs-id) nil
               (noct-emacs-id-file))
 
-;; TODO should use a lock file instead of restricting which Emacs does it
-;; is elc written before complete? also need to check when determining whether
-;; to load compiled init if so
 (defvar noct-async-tangle-in-progress nil
   "Whether currently asynchronously tangling init.")
 
-;; FIXME
+;; FIXME maybe this is just a bad idea
 (defun noct-async-init-tangle ()
   "Tangle org init file asynchronously.
 Only tangle when the current Emacs instance is the newest one."
   (interactive)
   ;; TODO this could possibly check as another instance was creating
   ;; TODO create lock file /once/ that delete when exit emacs instead?
-  ;; TODO do with-temp-file noct-tangle-lockfile around noct-tangle awaken
-  ;; instead?
   (unless (file-exists-p noct-tangle-lock-file)
     (with-temp-buffer (write-file noct-tangle-lock-file))
     (condition-case e

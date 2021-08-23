@@ -16,6 +16,8 @@
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
+(let ((gap (or (getenv "WM_GAP") 15)))
+  (push (cons 'internal-border-width (string-to-number gap)) default-frame-alist))
 
 ;; ** Set Font
 ;; https://github.com/hlissner/doom-emacs/blob/develop/early-init.el

@@ -637,6 +637,9 @@ sbcl-bin ros
 # for cl minispec
 phantomjs-bin aur
 
+# ** Fennel
+fennel-git aur
+
 # ** Racket
 racket
 
