@@ -1,3 +1,12 @@
 [submodule "stumpwm-contrib"]
 	path = wm/.stumpwm.d/modules/stumpwm-contrib
 	url = https://github.com/stumpwm/stumpwm-contrib
+[submodule "mpv-repl"]
+	path = media/.config/mvi/repos/mpv-repl
+	url = https://github.com/rossy/mpv-repl
+[submodule "mpg-image-viewer"]
+	path = media/.config/mvi/repos/mpv-image-viewer
+	url = https://github.com/occivink/mpv-image-viewer
+[submodule "mpv-gallery-view"]
+	path = media/.config/mvi/repos/mpv-gallery-view
+	url = https://github.com/occivink/mpv-gallery-view

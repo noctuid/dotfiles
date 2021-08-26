@@ -15,7 +15,7 @@ def hook_ready(self):
 
         if self.settings.open_all_images and \
                 len(self.thisdir.marked_items) == 0 and \
-                re.match(r'^(.*sxiv|feh|imv|.*pqiv) ', command):
+                re.match(r'^(.*sxiv|feh|imv|.*pqiv|.*mvi) ', command):
 
             images = [f.relative_path for f in self.thisdir.files if f.image]
             media = [f.relative_path for f in self.thisdir.files if f.image
@@ -47,6 +47,12 @@ def hook_ready(self):
                     number = images.index(self.thisfile.relative_path)
                     new_command = command.replace("pqiv ",
                             "pqiv --action \"goto_file_byindex(%d)\" " % \
+                            number, 1)
+
+                if 'mvi ' in command:
+                    number = images.index(self.thisfile.relative_path)
+                    new_command = command.replace("mvi ",
+                            "mvi --playlist-start=%d " % \
                             number, 1)
 
                 if new_command:

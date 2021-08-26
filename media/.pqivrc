@@ -5,8 +5,12 @@
 hide-info-box=true
 slideshow-interval=2
 end-of-files-action=wrap-no-reshuffle
-# not using caching (but only 128 and 256 can be cached)
+
 thumbnail-size=256x256
+thumbnail-persistence=local
+thumbnail-preload=20
+
+box-colors=#000000:#d0d293
 
 # already defaults:
 scale-images-up=true
@@ -15,10 +19,12 @@ transparent-background=false
 
 # * Startup Actions
 [actions]
-# hide cursor after 1 second inactivtity
+# hide cursor after 1 second inactivity
 set_cursor_auto_hide(1)
 # keep user set zoom when switching images
 toggle_scale_mode(4)
+# wrap to beginning from end in montage mode
+montage_mode_set_wrap_mode(2)
 
 # * Keybindings
 [keybindings]
@@ -29,10 +35,15 @@ toggle_scale_mode(4)
 # m toggle montage mode
 
 # ** Toggle
-# <space> { toggle_slideshow(); }
+S { toggle_slideshow(); }
 s { toggle_scale_mode(); }
 # t { toggle_scale_mode(4); }
 b { toggle_info_box(); }
+r { toggle_shuffle_mode(0); }
+F { toggle_fullscreen(); }
+@MONTAGE {
+	F { toggle_fullscreen(); }
+}
 
 # ** Navigation/ Scrolling
 # file
@@ -52,12 +63,14 @@ e { shift_y(50); }
 I { shift_x(20); }
 
 @MONTAGE {
-	g { montage_mode_return_cancel(); goto_file_byindex(0); montage_mode_enter(); }
-	G { montage_mode_return_cancel(); goto_file_byindex(-1); montage_mode_enter(); }
+	f { montage_mode_follow(rstdhneiwfuy); montage_mode_return_proceed(); }
+	g { goto_file_byindex(0); }
+	G { goto_file_byindex(-1); }
+	l { goto_earlier_file(); }
 	h { montage_mode_shift_x(-1); }
+	i { montage_mode_shift_x(1); }
 	n { montage_mode_shift_y(1); }
 	e { montage_mode_shift_y(-1); }
-	i { montage_mode_shift_x(1); }
 	k { montage_mode_shift_y_pg(1); }
 	o { montage_mode_shift_y_pg(-1); }
 }
@@ -65,6 +78,7 @@ I { shift_x(20); }
 # ** Zooming
 u { set_scale_level_relative(0.8); }
 y { set_scale_level_relative(1.2); }
+Y { set_scale_level_absolute(3); }
 <equal> { set_scale_level_absolute(1); }
 # found it's not really necessary to change; auto works well
 z { set_interpolation_quality(0); }

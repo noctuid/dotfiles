@@ -1,0 +1,1 @@
+/home/noctuid/dotfiles/media/.config/mvi/repos/mpv-image-viewer/scripts/image-positioning.lua

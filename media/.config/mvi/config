@@ -1,0 +1,83 @@
+[default]
+image-display-duration=inf
+loop-file=inf
+# allow wraparound to first image
+loop-playlist=inf
+
+profile=opengl-hq
+
+screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
+
+# same as ./script-opts/status_line.conf but joined
+title="mvi - ${?media-title:${media-title}}${!media-title:No file} [${playlist-pos-1}/${playlist-count}] ${video-zoom}z [${dwidth:X}x${dheight:X}]"
+
+# required for drag-to-pan or pan-follows-cursor with MOUSE_LEFT
+window-dragging=no
+
+# * Repeating
+# default 200ms
+input-ar-delay=300
+# default 40 repeats per second
+input-ar-rate=20
+
+# * Scaling and Shaders
+# https://github.com/occivink/mpv-image-viewer/blob/master/mpv.conf
+dither-depth=auto
+correct-downscaling
+sigmoid-upscaling
+
+# https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/#external-shaders
+# https://artoriuz.github.io/mpv_upscaling.html
+# https://iamscum.wordpress.com/guides/videoplayback-guide/mpv-conf/
+
+# use the scaler even if video/image is not resized
+no-scaler-resizes-only
+
+# scale=ewa_lanczos
+scale=ewa_lanczossharp
+
+# nnedi3 and fsrcnnx both make a huge difference
+# fsrcnnx looks sharper and a little better to me
+glsl-shaders="~~/shaders/FSRCNNX_x2_56-16-4-1.glsl"
+dscale=mitchell
+cscale=spline64
+
+[fsrcnnx]
+glsl-shaders="~~/shaders/FSRCNNX_x2_56-16-4-1.glsl"
+dscale=mitchell
+cscale=spline64
+
+[no-shaders]
+glsl-shaders=
+dscale=mitchell
+cscale=spline64
+
+[anime-4k]
+# doesn't seem to do much, at least not for images
+glsl-shaders="~~/shaders/Anime4K_Adaptive_v1.0RC2.glsl"
+cscale=mitchell
+dscale=mitchell
+
+# [nnedi3]
+# 4x; glitchy
+# glsl-shaders="~~/shaders/nnedi3-nns64-win8x4.hook"
+# dscale=mitchell
+# cscale=spline64
+
+# * Extension-specific
+[extension.gif]
+interpolation=no
+osc=no
+
+# according to haasn, aspect ratio info for PNG and JPG is "universally bust"
+[extension.png]
+video-aspect-override=no
+osc=no
+
+[extension.jpg]
+video-aspect-override=no
+osc=no
+
+[extension.jpeg]
+profile=extension.jpg
+osc=no

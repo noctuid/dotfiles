@@ -23,7 +23,8 @@ profile=gpu-hq
 # https://github.com/mpv-player/mpv/wiki/Display-synchronization
 # prefer changing audio speed to dropping frames ("a slight change in audio
 # pitch is often less noticeable than dropped frames")
-video-sync=display-resample
+# TODO this causes av desync
+# video-sync=display-resample
 # also see xrandr.lua
 
 # *** Debanding

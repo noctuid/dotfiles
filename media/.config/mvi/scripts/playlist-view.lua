@@ -1,0 +1,1 @@
+/home/noctuid/dotfiles/media/.config/mvi/repos/mpv-gallery-view/scripts/playlist-view.lua
