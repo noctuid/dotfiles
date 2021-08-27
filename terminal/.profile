@@ -21,6 +21,9 @@ export SOURCE=$HOME/src
 export NIXPKGS=$SOURCE/nixpkgs
 
 export GUIX_PROFILE=$HOME/.guix-profile
+# prevent guix from breaking a lot of things (e.g. finding icons in firefox) by
+# explicitly setting
+export XDG_DATA_DIRS="$GUIX_PROFILE"/share:/usr/local/share:/usr/share
 
 # blog dir
 export BLOG=$SOURCE/blog/pir-hana
