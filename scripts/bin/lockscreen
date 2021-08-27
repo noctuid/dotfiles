@@ -15,6 +15,6 @@ blue=${color4#\#}ff
 betterlockscreen \
 	--lock dimblur -- \
 	--composite \
-	--keyhlcolor="$blue" \
-	--bshlcolor="$yellow" \
-	--insidewrongcolor="$red"
+	--keyhl-color="$blue" \
+	--bshl-color="$yellow" \
+	--insidewrong-color="$red"
