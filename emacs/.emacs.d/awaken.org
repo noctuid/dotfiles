@@ -384,6 +384,13 @@ Select the window afterwards if possible."
 Select the window afterwards if possible."
   (noct-display-and-select-buffer #'display-buffer-in-side-window buffer alist))
 
+(defun noct-display-buffer-in-side-window-no-header (buffer alist)
+  "`noct-display-buffer-in-side-window' but don't have a header line.
+Having a header line in some buffers will cause text to be cut off at the
+bottom (e.g. transient and frog menu)."
+  (noct-display-buffer-in-side-window buffer alist)
+  (setf (buffer-local-value 'header-line-format buffer) nil))
+
 (defun noct-display-buffer-same-window (buffer alist)
   "Call `display-buffer-same-window' with BUFFER and ALIST.
 Select the window afterwards if possible."
@@ -433,7 +440,19 @@ possible."
   "Display popups matching CONDITION in a side window at the top.
 When SLOT is non-nil, display popup buffers in that SLOT in the side window."
   `(noct-handle-window ,condition
-     '(noct-display-buffer-reuse-window display-buffer-in-side-window)
+     '(noct-display-buffer-reuse-window noct-display-buffer-in-side-window)
+     '(side . top)
+     '(slot . ,slot)
+     '(window-height . 0.5)))
+
+(defmacro noct-handle-popup-no-header (condition &optional slot)
+  "Display popups matching CONDITION in a side window at the top.
+Remove the header line. This handles some buffers where text would be cut off
+when there is a header line. When SLOT is non-nil, display popup buffers in that
+SLOT in the side window."
+  `(noct-handle-window ,condition
+     '(noct-display-buffer-reuse-window
+       noct-display-buffer-in-side-window-no-header)
      '(side . top)
      '(slot . ,slot)
      '(window-height . 0.5)))
@@ -554,9 +573,7 @@ Install, load, and configure =straight.el=:
       straight-cache-autoloads t
       ;; used for :fork so don't need to specify settings
       straight-host-usernames '((github . "noctuid")
-                                (gitlab . "noctuid"))
-      ;; github no longer supports password authentication
-      straight-vc-git-default-protocol 'ssh)
+                                (gitlab . "noctuid")))
 
 ;; Install and load straight.el
 ;; https://github.com/raxod502/straight.el#getting-started
@@ -643,9 +660,7 @@ Principles:
 #+begin_src emacs-lisp
 (use-package annalist
   :straight (annalist
-             :type git
-             :host github
-             :repo "noctuid/annalist.el"
+             :protocol ssh
              :local-repo "~/src/emacs/annalist")
   :demand t
   :config
@@ -654,9 +669,7 @@ Principles:
 
 (use-package general
   :straight (general
-             :type git
-             :host github
-             :repo "noctuid/general.el"
+             :protocol ssh
              :local-repo "~/src/emacs/general")
   :demand t)
 
@@ -1042,6 +1055,7 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
 (use-package evil-collection
   :straight (evil-collection
              :local-repo "~/src/forks/evil-collection"
+             :protocol ssh
              :fork t)
   :config
   (defun noct-make-evil-collection-translations (mode mode-keymaps &rest _rest)
@@ -1702,7 +1716,8 @@ Obvious ones:
 #+begin_src emacs-lisp
 (when (eq system-type 'darwin)
   ;; use command as control
-  (gsetq mac-command-modifier 'control)
+  (gsetq mac-command-modifier 'control
+         mac-option-modifier 'meta)
   ;; fix home and end
   (general-def
     "<home>" #'evil-beginning-of-visual-line
@@ -2239,7 +2254,7 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
 ** Frog Menu
 #+begin_src emacs-lisp
 (use-package frog-menu
-  :straight (:host github :repo "clemera/frog-menu" :fork t)
+  :straight (:host github :repo "clemera/frog-menu" :fork t :protocol ssh)
   :config
   (general-after 'avy
     (gsetq frog-menu-avy-keys avy-keys))
@@ -2255,7 +2270,8 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
   (map-put
    frog-menu-display-option-alist
    'avy-side-window
-   '(display-buffer-in-side-window (side . top))))
+   '(noct-display-bufer-in-side-window-no-header
+     (side . top))))
 #+end_src
 
 ** Helm
@@ -3216,6 +3232,7 @@ Sets missing metadata for completions (pairs well with embark even if not using 
              :type git
              :host github
              :repo "noctuid/framegroups.el"
+             :protocol ssh
              :local-repo "~/src/emacs/framegroups")
   :general
   ;; TODO bind globally on middle mouse on primary computer
@@ -3777,6 +3794,7 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
     "p" #'projectile-find-file
     "P" #'projectile-find-file-in-known-projects
     "c" #'projectile-switch-project
+    "C" #'noct-switch-to-project-root
     "v" #'noct-projectile-switch-and-vc
     "-" #'projectile-dired
     "D" #'projectile-find-dir
@@ -3800,6 +3818,11 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
          projectile-project-test-cmd "make test"
          projectile-completion-system 'default
          projectile-project-search-path '("~/src"))
+
+  (defun noct-switch-to-project-root ()
+    (interactive)
+    (let ((projectile-switch-project-action 'projectile-dired))
+      (call-interactively #'project-switch-project)))
 
   (defun noct-projectile-switch-and-vc ()
     "Switch project and run `projectile-vc'"
@@ -4370,6 +4393,7 @@ Soft wrap lines at =fill-column=.
              :type git
              :host github
              :repo "noctuid/rect-ext.el"
+             :protocol ssh
              :local-repo "~/src/emacs/rectangle-ext/")
   :general
   ('normal
@@ -4783,6 +4807,7 @@ Still experimental.
              :type git
              :host github
              :repo "noctuid/things.el"
+             :protocol ssh
              :local-repo "~/src/emacs/things"))
 
 (use-package things-evil
@@ -4790,6 +4815,7 @@ Still experimental.
              :type git
              :host github
              :repo "noctuid/things.el"
+             :protocol ssh
              :local-repo "~/src/emacs/things")
   :ghook
   ('(evil-operator-state-entry-hook
@@ -5041,9 +5067,7 @@ Needs to be updated to use =things.el= and needs to have more tests.
 (use-package sentence-navigation
   :disabled t
   :straight (sentence-navigation
-             :type git
-             :host github
-             :repo "noctuid/emacs-sentence-navigation"
+             :protocol ssh
              :local-repo "~/src/emacs/sentence-navigation")
   :general
   ;; TODO different keybinding?
@@ -5069,6 +5093,7 @@ Needs to be updated to use =things.el= and needs to have more tests.
              :type git
              :host github
              :repo "noctuid/evil-textobj-column"
+             :protocol ssh
              :local-repo "~/src/emacs/evil-textobj-column")
   :general ('inner
             "k" #'evil-textobj-column-word
@@ -5137,9 +5162,7 @@ This package is unfortunately unmaintained.
 #+begin_src emacs-lisp
 (use-package link-hint
   :straight (link-hint
-             :type git
-             :host github
-             :repo "noctuid/link-hint.el"
+             :protocol ssh
              :local-repo  "~/src/emacs/link-hint/")
   :general
   (general-t
@@ -5510,7 +5533,7 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
          ;; TODO issue with it failing because \.\.\. in history
          transient-save-history nil
          transient-display-buffer-action
-         '(noct-display-buffer-in-side-window
+         '(noct-display-buffer-in-side-window-no-header
            (side . top))
          transient-mode-line-format nil)
   (general-def transient-map
@@ -6440,6 +6463,11 @@ See [[https://github.com/company-mode/company-mode/issues/525][this issue]].
                       :around #'semantic-completion-advice))
 #+end_src
 
+*** Vagrant Tramp
+#+begin_src emacs-lisp
+(use-package vagrant-tramp)
+#+end_src
+
 *** Visual
 **** Rainbow Delimiters
 [[https://github.com/istib/rainbow-blocks][rainbow-blocks]] is a fork of rainbow-delimeters that highlights the entire block. There is also [[https://github.com/seanirby/rainbow-blocks-bg][rainbow-blocks-bg]]. I personally find these to be too much color.
@@ -6802,6 +6830,7 @@ TODO
 (use-package lispy
   :straight (lispy
              :local-repo "~/src/forks/lispy"
+             :protocol ssh
              :fork t)
   :defer-incrementally
   (mode-local
@@ -6974,9 +7003,7 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
 #+begin_src emacs-lisp
 (use-package lispyville
   :straight (lispyville
-             :type git
-             :host github
-             :repo "noctuid/lispyville"
+             :protocol ssh
              :local-repo "~/src/emacs/lispyville/")
   :ghook 'lispy-mode-hook
   :blackout ((lispyville-mode . (lispyville-mode-line-string " 🍙" " 🍙")))
@@ -8308,7 +8335,7 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
   :general
   (general-s "e" #'eshell))
 
-(general-with 'eshell
+(general-with 'esh-mode
   ;; performance improvement
   ;; https://old.reddit.com/r/emacs/comments/nv7x0h/eshells_speed_on_emacs_28_with_nativecompilation/h13brxk/
   (gsetq eshell-output-filter-functions
