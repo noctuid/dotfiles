@@ -8,6 +8,9 @@
 [global]
     font = Office Code Pro 9
 
+	# don't scale; also scales offset; already handling everything manually
+	# which is easier
+	scale = 1
 	# these will be replaced automatically based on monitor dimensions
     geometry = "400x5-0+14"
 	corner_radius = 15
