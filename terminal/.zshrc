@@ -667,10 +667,12 @@ sysupd() {
 }
 
 alias pacss='pacman -Ss'
-alias pacs='sudo powerpill -S'
+alias pacs='sudo pacman -S'
 alias pacq='pacman -Q'
 alias pacqm='pacman -Qm'
 alias pacr='sudo pacman -Rns'
+
+alias gensrcinfo='makepkg --printsrcinfo > .SRCINFO'
 
 # will keep 3 most recent versions and remove all versions of uninstalled
 # e.g. -rk2 to keep 2 most recent
@@ -686,7 +688,7 @@ alias aurs='paru -Ss'
 alias aurc='paru -G --comments'
 # print pkgbuild
 alias aurp='paru -G --print'
-alias aurall='paru -Syu'
+alias pacupdate='paru -Syu'
 remove_orphans() {
 	pacman -Rs $(pacman -Qqtd)
 }
