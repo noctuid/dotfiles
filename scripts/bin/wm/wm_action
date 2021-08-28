@@ -454,8 +454,7 @@ herbstluftwm_action() {
 		# sticky);;
 		wtoggle) hc "$2";;
 		wclose) hc close_or_remove;;
-		# a little off
-		wkill) hc close_and_remove;;
+		wkill) xdotool getwindowfocus windowkill;;
 		lsel) hc cycle_layout 1 max horizontal;;
 		# TODO split and select or bring window into?
 		# split explode

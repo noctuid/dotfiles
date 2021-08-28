@@ -30,8 +30,6 @@ fi
 # - explode to equivalent frame layout?
 
 # ** Major
-# kill keybinding
-
 # tdrop resize before show?
 
 # tdrop autohide wrapper that uses hc lock; swallow&barf
