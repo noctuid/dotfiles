@@ -6,4 +6,5 @@ if [[ ! -v $SXHKD_EXTRA_CONFIGS ]]; then
 	SXHKD_EXTRA_CONFIGS=(~/.config/sxhkd/wm_sxhkdrc "$extra_config")
 fi
 
-sxhkd "${SXHKD_EXTRA_CONFIGS[@]}" &>> /tmp/sxhkd_"$DISPLAY".log &
+# -m -1 fixes keybindings on keyboardio model 1
+xrestart sxhkd -m -1 "${SXHKD_EXTRA_CONFIGS[@]}" &>> /tmp/sxhkd_"$DISPLAY".log &

@@ -1,71 +1,12 @@
-// TODO add one handed colemak ?
+// see ./README.org for explanation/logic
 {
-    "fullName": "Colemak-DvbgHm Angle(z) Wide Custom",
+    "fullName": "Colemak-DvbgHk Angle(z) Wide Custom",
     "name": "colemak_dh_custom",
     "shiftlevels": [ "None", "Shift", "AltGr", "Shift+AltGr", "Extend" ],
     "singletonKeys": [
-        // used modifiers (7 total):
-        // Shift (capital letters and combined with other modifiers)
-        // window management (super)
-        // other global hotkeys ("hyper")
-        // Extend (previously Mode_switch) for global navigation keys
-        // AltGr for symbols and numbers
-        // Alt and Control for in-program keybindings
-
-        // NOTE: I say hyper here, but I'm actually using a single key for a
-        // combinaton of modifier since mod1-5 are already taken, and I couldn't
-        // get hyper working with sxhkd when it replaced Num_Lock (e.g. as mod2)
-
-        // if lacking enough positions:
-        // - can combine control and extend (lose some control keys that can be
-        // bound)
-        // - can combine hyper and super (several modifiers required for some
-        //   actions)
-
-        // 6 thumb positions and capslock available on my keyboard
-
-        // Why modifier positioning is logical/efficient:
-        // Grouped modifiers are mapped across from each other (symmetry)-
-        // - hyper and super (global keybindings with hotkey daemon)
-        // - shift and altgr (provide new symbols; potentially used with other
-        //   modifiers)
-        // - control and alt; extend (in-program actions)
-        // Positioning is good for combinations-
-        // - Shift and Control across from Super, AltGr, and Alt
-        // - Shift next to Extend and Hyper (not really needed for; not too many
-        //   actions on these layers; they can be combined with Alt if necessary)
-        // - Shift next to control (emacs doesn't support using them together)
-        // Worst position goes to least used modifier: Control
-        // - Not too many in-program actions using modifiers are needed (only
-        //   used for one-off actions that would be less efficient with
-        //   modality)
-        // - Basic navigation is already handled by Extend (no Control needed)
-        // - Alt is favored for in-program actions over control mainly because
-        //   emacs can't distinguish between control + letter and control +
-        //   shift + letter for historical reasons (which is braindead)
-        // - Doesn't matter when using nice keyboard (more/better thumbkeys)
-        // Takes into account neutral vs. right-hand oriented modifiers (only
-        // having a modifier on one side of the keyboard is not nearly as big a
-        // huge deal for thumbkeys, especially not on external keyboard)-
-        // - Extend/Hyper on left hand; mostly used with keys on right side
-        //   (especially Extend)
-
-        // Notes on worst position and future improvements:
-        // - Caps is the only pinky modifier, and Super/Win is the thumb
-        //   modifier that requires the most inward movement of the thumb (with
-        //   a wide mod)
-        // - By dual-roling colemak s as extend, caps is eliminated as a
-        //   modifier; it makes sense to put extend on the left home row since
-        //   it isn't really used with left hand keys
-        // - By dual-roling space as shift, shift can be used with modifiers on
-        //   either side (laptop keyboard only; may put shift on both sides on
-        //   ergonomic keyboard); other left modifier moves to shift's old
-        //   position, eliminating the worst thumbkey; may want to swap alt and
-        //   control, putting alt in its original position (which is better);
-
         // dual-role: BackSpace
         [ "CapsLock", "Extend" ],
-        // dual-role: (
+        // dual-role: tab
         [ "Win_L", "Control" ],
         // backup win
         [ "Control_L", "Win" ],
@@ -76,12 +17,14 @@
         // dual-role: Escape
         [ "Alt_R", "AltGr" ],
         // empty atm
-        [ "PrintScreen", "Alt" ]
+        [ "PrintScreen", "Alt" ],
+        [ "Control_R", "PrintScreen" ]
         // hyper/super on thumb mouse buttons
         // ("meta" actions; used outside programs; other modifiers used in program)
     ],
     "keys": [
-        { "pos": "~", "letters": [ "`", "~" ] },
+        { "pos": "~", "letters": [ "", "" ] },
+        // above not 30%; disable
         { "pos": "1", "letters": [ "1", "!", "Switch_VT_1" ] },
         { "pos": "2", "letters": [ "2", "@", "Switch_VT_2" ] },
         { "pos": "3", "letters": [ "3", "#", "Switch_VT_3" ] },
@@ -92,47 +35,50 @@
         { "pos": "8", "letters": [ "8", "*", "Switch_VT_8" ] },
         { "pos": "9", "letters": [ "9", "(", "Switch_VT_9" ] },
         { "pos": "0", "letters": [ "0", ")", "Switch_VT_10" ] },
+        // not 30% but allow because password muscle memory
         { "pos": "-", "letters": [ "-", "_", "Switch_VT_11" ] },
         { "pos": "+", "letters": [ "=", "+", "Switch_VT_12" ] },
 
-        { "pos": "Q", "letters": [ "q", "Q", "Tab" ] },
+        { "pos": "Q", "letters": [ "q", "Q", "`", "~" ] },
         // doesn't work with kitty
-        // { "pos": "W", "letters": [ "w", "W", "`", "~", "Control+w" ] },
-        { "pos": "W", "letters": [ "w", "W", "`", "~", "¸" ] },
-        // { "pos": "E", "letters": [ "f", "F", "[", "]", "Control+f" ] },
-        { "pos": "E", "letters": [ "f", "F", "[", "]", "`" ] },
+        // { "pos": "W", "letters": [ "w", "W", "[", "]", "Control+w" ] },
+        { "pos": "W", "letters": [ "w", "W", "[", "]", "¸" ] },
+        // { "pos": "E", "letters": [ "f", "F", ")", ")", "Control+f" ] },
+        { "pos": "E", "letters": [ "f", "F", ")", ")", "`" ] },
         { "pos": "R", "letters": [ "p", "P", "{", "}" ] },
-        { "pos": "T", "letters": [ "b", "B", "|" ] },
-        { "pos": "Y", "letters": [ "j", "J" ] },
-        { "pos": "U", "letters": [ "l", "L", "", "", "BackSpace" ] },
+        { "pos": "T", "letters": [ "b", "B", "\\", "|" ] },
+        { "pos": "Y", "letters": [ "j", "J", "@", "@" ] },
+        { "pos": "U", "letters": [ "l", "L", "_", "_", "BackSpace" ] },
         { "pos": "I", "letters": [ "u", "U", "-", "_", "Home" ] },
         { "pos": "O", "letters": [ "y", "Y", "=", "+", "End" ] },
-        { "pos": "P", "letters": [ ";", ":" ] },
-        { "pos": "[", "letters": [ "[", "]" ] },
-        { "pos": "]", "letters": [ "{", "}" ] },
+        { "pos": "P", "letters": [ ";", ":", "!", "!", "Alt+f" ] },
+        // not 30%; force to stop using
+        { "pos": "[", "letters": [ "", "" ] },
+        { "pos": "]", "letters": [ "", "" ] },
 
         { "pos": "A", "letters": [ "a", "A", "1", "!" ] },
         { "pos": "S", "letters": [ "r", "R", "2", "@" ] },
         { "pos": "D", "letters": [ "s", "S", "3", "#" ] },
         { "pos": "F", "letters": [ "t", "T", "4", "$" ] },
-        { "pos": "G", "letters": [ "g", "G" ,"\\" ] },
-        { "pos": "H", "letters": [ "k", "K" ] },
+        { "pos": "G", "letters": [ "g", "G", "|", "|" ] },
+        { "pos": "H", "letters": [ "k", "K", "&", "&", "Alt+b" ] },
         { "pos": "J", "letters": [ "n", "N", "7", "&", "Down" ] },
         { "pos": "K", "letters": [ "e", "E", "8", "*", "Up" ] },
         { "pos": "L", "letters": [ "i", "I", "9", "(", "Right" ] },
         { "pos": ";", "letters": [ "o", "O", "0", ")", "PageUp" ] },
+        // not 30% but allow since have on thumb key on external board
         { "pos": "'", "letters": [ "'", "\"" ] },
 
-        { "pos": "Z", "letters": [ "x", "X" ] },
-        { "pos": "X", "letters": [ "c", "C" ] },
+        { "pos": "Z", "letters": [ "x", "X", "~", "~" ] },
+        { "pos": "X", "letters": [ "c", "C", "#", "#" ] },
         { "pos": "C", "letters": [ "d", "D", "5", "%" ] },
-        { "pos": "V", "letters": [ "v", "V" ] },
+        { "pos": "V", "letters": [ "v", "V", "^", "^" ] },
         { "pos": "B", "letters": [ "z", "Z" ] },
-        { "pos": "N", "letters": [ "m", "M", "", "", "PageDown" ] },
+        { "pos": "N", "letters": [ "m", "M", "$", "$", "PageDown" ] },
         { "pos": "M", "letters": [ "h", "H", "6", "^", "Left" ] },
-        { "pos": ",", "letters": [ ",", "<" ] },
-        { "pos": ".", "letters": [ ".", ">" ] },
-        { "pos": "/", "letters": [ "/", "?" ] }
+        { "pos": ",", "letters": [ ",", "<", "+", "+" ] },
+        { "pos": ".", "letters": [ ".", ">" , "*", "*" ] },
+        { "pos": "/", "letters": [ "/", "?", "%", "%" ] }
 
         // needed if modifier combinations not being detected by sxhkd
         // { "pos": "A", "shiftlevels": [ "Win+AltGr" ], "letters": [ "Win+1" ] }
