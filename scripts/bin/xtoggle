@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# stop a program started by ./xrestart
 name=$1
 pidfile=/tmp/"$name"_"$DISPLAY".pid
 pid=$(< "$pidfile")
-kill "$pid"
+
+if [[ -n $pid ]]; then
+	kill "$pid" && > "$pidfile"
+else
+	xrestart "$@"
+fi

@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+dropdown -n mpglast kitty mplast

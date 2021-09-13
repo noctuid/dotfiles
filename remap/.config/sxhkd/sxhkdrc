@@ -58,7 +58,9 @@ alt + super + y
 # ~/bin/screenshot
 Print
 	screenshot
-	# ~/bin/screenshot
+
+alt + super + 1
+	screenshot
 
 alt + super + P
 	screenshot select
@@ -82,13 +84,13 @@ alt + super + t
 
 # v because was previously bound to vim...
 # use latest good emacs configuration
-alt + super + v
+alt + super + T
 	emacs --stable
 
 # demote errors for each org source block; for debugging errors that are
 # localized to a single section without losing all configuration from following
 # sections or needing to run Emacs with a stable configuration
-alt + super + V
+alt + super + D
 	emacs --with-demoted-errors
 
 # alt + super + b
@@ -98,12 +100,12 @@ alt + super + l
 	lockscreen
 
 super + b
-	xstop polybar
+	xtoggle polybar "$(get_wm)"
 
 # ** Clicks and Mouse Movement
 # TODO clicks don't work when modifier held
-alt + super + k
-	click middle
+# alt + super + k
+# 	click middle
 	# ~/bin/click
 
 # regain focus from flash
@@ -114,19 +116,57 @@ alt + super + a
 alt + super + b
 	click 0 90000
 
-# ** Terminals and Dropdowns
+# ** Terminals, Dropdowns, etc.
 alt + super + Return
 	kitty
 
 alt + super + s
 	dropdown -s dropdown kitty
+	# dropdown emacsclient -c -e "(let (display-buffer-alist) (vterm) (delete-other-windows))"
+
+# test key
+# alt + super + S
+# 	tdrop current
+
+alt + super + c
+	dropdown -n longcommands -s longcommands kitty
 
 alt + super + r
-	dropdown -n ranger -h 90% kitty \
-	         zsh -c "ranger --cmd='set preview_images_method kitty'; zsh -i"
+	max_dropdown -n ranger kitty zsh -c "ranger; zsh -i"
 
 alt + super + p
-	dropdown emacsclient -ce "(noct:with-q-to-exit (proced) (delete-other-windows))"
+	max_dropdown -n proced emacsclient -ce "(noct-with-q-to-exit (proced) (delete-other-windows))"
+
+# [v]ideo
+alt + super + v
+	dropmpgo
+
+alt + super + V
+	dropmplast
+
+# [k]alc
+alt + super + k
+	dropdown -n calc emacsclient -ce "(progn (calc) (delete-other-windows))"
+
+alt + super + slash
+	max_dropdown -n woman emacsclient -ce "(noct-with-global-completing-read (woman))"
+
+# [g]lobal capture
+alt + super + g
+	max_dropdown -n capture emacsclient -ce "(noct-with-reuse-window (org-capture))"
+
+alt + super + semicolon
+	max_dropdown -n longcommands emacsclient -ce '(noct-with-reuse-window (noct-vterm-select-or-create "long"))'
+
+alt + super + x
+	emacsclient -ce "(noct-xprop)"
+
+alt + super + X
+	emacsclient -ce '(noct-xwininfo)'
+
+# other commands
+alt + super + d
+	max_dropdown -n shell-menu emacsclient -ce '(noct-shell-menu)'
 
 # ** Dunst
 alt + super + grave

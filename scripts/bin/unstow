@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+cd ~/dotfiles || exit 1
+
+stow -Dvt ~/ aesthetics browsing common common_lisp emacs games input mail \
+	 media music remap scripts startup terminal wm vim .aesthetics \
+	 .browsing .common .emacs .mail .media .music

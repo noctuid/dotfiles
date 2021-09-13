@@ -597,10 +597,9 @@ if [[ -f ~/.zsh/borg_backup.zsh ]]; then
 	source ~/.zsh/borg_backup.zsh
 fi
 
-alias mountefi='sudo mount /dev/disk/by-label/SYSTEM /boot/efi'
-alias mountesp='mountefi'
-alias umountefi='sudo umount /dev/disk/by-label/SYSTEM'
-alias umountesp='umountefi'
+if [[ -f ~/bin/helpers/mount_commands.sh ]]; then
+	source ~/bin/helpers/mount_commands.sh
+fi
 
 alias startkbfs='systemctl --user start kbfs'
 alias stopkbfs='systemctl --user stop kbfs'
@@ -654,17 +653,6 @@ rldmirrors() {
 # view packages:
 # pacgraph -f /tmp/pacgraph
 # inkscape /tmp/pacgraph
-
-sysupd() {
-	mountesp
-	PACMAN=paru pacnanny -Syu
-	mkinitcpio --allpresets
-	# distro=$(lsb_release -is)
-	# if [[ $distro == Arch ]]; then
-	# fi
-	# # else if nix
-	# # sudo nixos-rebuild switch --upgrade
-}
 
 alias pacss='pacman -Ss'
 alias pacs='sudo pacman -S'
@@ -933,11 +921,12 @@ monitor_connect() ( # output_name right_of_primary? add_bspwm_desktop
 		# mirror screen
 		primary_geometry=$(monitor_get_dimensions "$primary")
 		xrandr --output "$name" --auto --scale-from "$primary_geometry"
-		# don't want any new desktops since just mirroring; bspc adds the
-		# monitor and a desktop by default
-		bspc monitor "$name" --remove
+		if [[ $(get_wm) == bspwm ]]; then
+			# don't want any new desktops since just mirroring; bspc adds the
+			# monitor and a desktop by default
+			bspc monitor "$name" --remove
+		fi
 	fi
-	
 	# add new desktop/workspace for the monitor
 	# TODO could potentially allow word splitting to add more than one desktop
 	if [[ -n $add_bspwm_desktop ]] && [[ $(get_wm) == bspwm ]]; then
@@ -950,44 +939,12 @@ monitor_disconnect() ( # output_name
 	set -e -o pipefail
 	name=$1
 	xrandr --output "$name" --off
-	if bspc query --monitors --names | grep --quiet "^${name}$"; then
-		bspc monitor "$name" --remove
+	if [[ $(get_wm) == bspwm ]]; then
+		if bspc query --monitors --names | grep --quiet "^${name}$"; then
+			bspc monitor "$name" --remove
+		fi
 	fi
 )
-
-# 0 is for nvidia card on p52; 1 for intel
-# media needs to start playing after add hdmi monitor (but can switch to analog
-# audio without restarting media)
-set_audio_profile() { # hdmi?
-	hdmi=${1:-false}
-	# intel_card=$(pactl list cards \
-		# 				 | grep --ignore-case --before-context 1 \
-		# 						'alsa.card_name.*intel' \
-		# 				 | awk '/alsa.card =/ {gsub(/"/,""); print $3}')
-	# nvidia_card=$(pactl list cards \
-		# 				  | grep --ignore-case --before-context 1 \
-		# 						 'alsa.card_name.*nvidia' \
-		# 				  | awk '/alsa.card =/ {gsub(/"/,""); print $3}')
-	# also card name is actually opposite of what set-card-profile uses
-	intel_card=$(pactl list cards \
-					 | grep --ignore-case --before-context 10 \
-							'alsa.card_name.*intel' \
-					 | awk '/Card #/ {gsub(/#/,""); print $2}')
-	nvidia_card=$(pactl list cards \
-					  | grep --ignore-case --before-context 10 \
-							 'alsa.card_name.*nvidia' \
-					  | awk '/Card #/ {gsub(/#/,""); print $2}')
-	if "$hdmi"; then
-		pactl set-card-profile "$nvidia_card" output:hdmi-stereo
-		# can't be output:analog-stereo
-		pactl set-card-profile "$intel_card" off
-	else
-		# nvidia card is turned off by default
-		pactl set-card-profile "$intel_card" output:analog-stereo
-	fi
-}
-alias hdmi_audio='set_audio_profile true'
-alias analog_audio='set_audio_profile'
 
 # **** VGA (old)
 alias vgain='monitor_connect VGA1'
@@ -1015,7 +972,7 @@ hdmiadd() {
 		monitor_connect HDMI-0 true 十
 	fi
 	if [[ -n $1 ]]; then
-		hdmi_audio
+		audio_switch hdmi
 	fi
 }
 
@@ -1023,7 +980,7 @@ hdmimirror() {
 	monitor_connect HDMI-1-1 \
 		|| monitor_connect HDMI-0
 	if [[ -n $1 ]]; then
-		analog_audio
+		audio_switch analog
 	fi
 }
 
@@ -1033,36 +990,7 @@ hdmiout() {
 	else
 		monitor_disconnect HDMI-0 true
 	fi
-	analog_audio
-}
-
-# *** Play Video from Clipboard
-mpgo() {
-	mkdir -p /tmp/mpv
-	if [[ -n $1 ]]; then
-		clipboard=$1
-	else
-		clipboard=$(xsel -b)
-	fi
-	local mpv_flags
-	mpv_flags=(
-		--screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
-		--script=~/.config/mpv/scripts/nightedt-mpv-scripts/recent.lua
-		"$@"
-	)
-	if [[ $clipboard == *youtube.com* ]]; then
-		echo "$clipboard" > /tmp/mpv/last_link
-		mpv "${mpv_flags[@]}" "$clipboard"
-	elif [[ $clipboard =~ ^http ]] || [[ -e $clipboard ]] \
-			 || [[ $clipboard =~ ^magnet ]]; then
-		echo "$clipboard" > /tmp/mpv/last_link
-		# ytdl messes up direct links for some reason (slow)
-		mpv --no-ytdl "${mpv_flags[@]}" "$clipboard"
-	fi
-}
-
-mplast() {
-	mpgo "$(< /tmp/mpv/last_link)"
+	audio_switch analog
 }
 
 # *** Record Audio
@@ -1190,6 +1118,14 @@ tord() {
 		awk '/100%.*Done/ {system("transmission-remote -t "$1" -r")}'
 }
 
+# remove missing torrents (file moved)
+torstar() {
+	transmission-remote -l | \
+		gawk 'match($1, /(^[0-9]+)\*$/, matchdata) {
+    system("transmission-remote -t " matchdata[1] " -r")
+}'
+}
+
 # pause torrent
 topp() {
 	transmission-remote -t "$1" --stop
@@ -1205,6 +1141,11 @@ toup() {
 
 # list
 alias tol='transmission-remote -l'
+
+tolundone() {
+	transmission-remote -l | awk '!/100%.*Done/ {print $0}'
+}
+
 # tell number of seeders
 alias -g tons='transmission-show --scrape' # <torrent file>
 alias tocs='tons'

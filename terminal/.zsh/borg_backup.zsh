@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
+# TODO borg full should include borg minimal
 # TODO reduce code duplication
 # TODO consider using --verify-data always (at least for minimal backup)
 # TODO fix luks/lvm mounting (stop using sleep)
+# TODO keep eye on restic, kopia, and bupstash
+# TODO below about backing up config
+# for now borg still seems to be the clear choice
 
-# TODO mount with discard for database (--allow-discards)
 
 # Some notes about borg:
 # - borg supports encryption, compression, deduplication, and incremental
@@ -136,6 +139,7 @@ mount_luks_lvm() {
 	volume=$2
 	dir=$3
 	if ! sudo cryptsetup status luks_"$label" | grep -q "in use"; then
+		# https://wiki.archlinux.org/title/Dm-crypt/Specialties#Discard/TRIM_support_for_solid_state_drives_(SSD)
 		# Note that --allow-discards makes it potentially possible to find out
 		# fs type, used space, etc.
 		sudo cryptsetup open --allow-discards \
@@ -176,7 +180,6 @@ alias umountbigseagate='umount_luks_lvm bigseagate'
 alias mounteightseagate='mount_luks_lvm_backup eightseagate'
 alias umounteightseagate='umount_luks_lvm eightseagate'
 
-# alias mountdatab="mount_luks_lvm cryptother database ~/database"
 mountdatab() {
 	if ! mountpoint -q ~/database; then
 		sudo mount /dev/cryptlinux_group/database ~/database
@@ -184,11 +187,20 @@ mountdatab() {
 		echo "$HOME/database is already a mountpoint. Not mounting again."
 	fi
 }
-alias umountdatab='sudo umount /dev/cryptlinux_group/database'
+umountdatab() {
+	sudo umount /dev/cryptlinux_group/database
+}
 
 # ** Borg
 # lz4 is the default
-alias borg_bk='borg create -v --stats --progress --compression lz4'
+borg_bk() {
+	borg create -v --stats --progress "$@"
+}
+borg_bk_online() {
+	# use more compression for online backup
+	# level 6 is default; higher is pointless according to borg help compression
+	borg create -v --stats --progress --compression lzma "$@"
+}
 
 borg_prune() {
 	# - only delete archives made by the current host (probably will never be an
@@ -259,37 +271,64 @@ maybe_eject() {
 # * Minimal Backup
 # For things that change most frequently and for most important smaller things
 borg_small() {
+	check=true
+	if [[ $1 == -n ]]; then
+		check=false
+		shift
+	fi
 	if [[ $# -ne 1 ]]; then
 		echo 'One argument is required: /path/to/backup_drive_dir'
 		return 1
-	elif [[ ! -d $1 ]];then
+	fi
+
+	local borgbase
+	borgbase=false
+	if echo "$1" | grep --quiet "repo.borgbase.com"; then
+		borgbase=true
+	fi
+
+	if ! $borgbase && [[ ! -d $1 ]]; then
 		echo "Error. Directory $1 does not exist."
 		return 1
 	fi
 
+	# TODO don't think can copy "$backup_dir"/config for remote repo but see
+	# what happens; can retrieve with rsync and key?
+
 	local backup_dir
-	backup_dir="$(remove_trailing_slash "$1")"/minimal_backup
-	mkdir -p "$backup_dir"
+	backup_dir=$1
+	if ! $borgbase; then
+		backup_dir="$(remove_trailing_slash "$1")"/minimal_backup
+		mkdir -p "$backup_dir"
+	fi
 	mkdir -p "$borg_backup_dir"
 	# password only (key stored in repo)
 	# backup key and config file when first creating repo (will not run if
 	# repository exists); backing up the key with repokey isn't really necessary
 	# but protects against case where only key is corrupted
-	borg init --encrypt=repokey-blake2 "$backup_dir" 2> /dev/null \
-		&& borg key export "$backup_dir" "$(borg_key_backup_file "$backup_dir")" \
-		&& cp "$backup_dir"/config "$(borg_config_backup_file "$backup_dir")"
+	if borg init --encryption=repokey-blake2 "$backup_dir"; then
+		borg key export "$backup_dir" "$(borg_key_backup_file "$backup_dir")" \
+			&& cp "$backup_dir"/config "$(borg_config_backup_file "$backup_dir")"
+	fi
 
 	# NOTE
 	# - check --repair is still experimental
 	# - check --verify-data is slow (not that bad for this small backup though)
-	if ! borg check -v "$backup_dir"; then
-		echo 'Repository corrupted or initialization failed.'
-		return 1
+	if $check; then
+		if ! borg check -v "$backup_dir"; then
+			echo 'Repository corrupted or initialization failed.'
+			return 1
+		fi
 	fi
 
 	cd ~/ || return 1
-	if borg_bk --patterns-from='.zsh/borg_minimal.txt' \
-			   "$backup_dir"::"$backup_format" ./
+	bk_command=borg_bk
+	if $borgbase; then
+		bk_command=borg_bk_online
+	fi
+	if $bk_command --patterns-from='.zsh/borg_minimal.txt' \
+				   "$backup_dir"::"$backup_format" ./
+
 	then
 		notify-send --icon=tropy-gold 'Minimal backup completed successfully.'
 	else
@@ -299,7 +338,9 @@ borg_small() {
 	# if/when size becomes an issue, start pruning:
 	# borg_prune "$backup_dir"
 
-	maybe_eject "$1"
+	if ! $borgbase; then
+		maybe_eject "$1"
+	fi
 }
 
 # * Full Home Backup
@@ -358,6 +399,10 @@ kingston() {
 
 samsung() {
 	borg_small /media/samsung
+}
+
+borgbase_small() {
+	borg_small "$@" "nwikooyy@nwikooyy.repo.borgbase.com:repo"
 }
 
 # ** Home

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# hide transient dropdowns on tag switch
+# may need to change if start using sticky
+
+herbstclient --idle tag_changed | xargs -I _args hide_floating_dropdowns

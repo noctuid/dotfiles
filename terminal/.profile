@@ -60,11 +60,11 @@ pathdirs="
 # personal scripts
 $HOME/bin
 $HOME/ebin
-$HOME/bin/video
+$HOME/bin/dunst
 $HOME/bin/net
 $HOME/bin/not_mine
-$HOME/bin/dunst
-$HOME/bin/bspwm
+$HOME/bin/media
+$HOME/bin/video
 $HOME/bin/wm
 # for vimus
 $HOME/.cabal/bin
@@ -82,6 +82,8 @@ $HOME/.cask/bin
 $HOME/.roswell/bin
 $HOME/.evm/bin
 $HOME/dotfiles/root
+# some pip packages install executables here (e.g. pywalfox)
+$HOME/.local/bin
 "
 
 while read -r dir; do

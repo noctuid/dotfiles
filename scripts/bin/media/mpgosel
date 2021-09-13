@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# use fzf or completing-read to select a directory to run ./mpgo in
+
+# selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | fzf)
+selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | esel)
+if [[ -n $selected ]]; then
+    (cd "$selected" && mpgo "$1")
+fi

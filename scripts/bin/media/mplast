@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# play last played link
+mpgo "$(< /tmp/mpv/last_link)"

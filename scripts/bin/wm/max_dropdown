@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# meant for more permanent dropdown that may stick around for a while and
+# shouldn't be automatically hidden
+
+# use max window if single frame or show over everything
+
+# TODO maybe never use floating window on herbst and just rely on tag layout
+# /normally/ being max
+
+wm=$(get_wm)
+float=true
+if [[ $wm == herbstluftwm ]]; then
+	algorithm=$(herbstclient attr tags.focus.tiling.focused_frame.algorithm)
+	frame_count=$(herbstclient attr tags.focus.frame_count)
+	if [[ $algorithm == max ]] && (( frame_count == 1 )); then
+		float=false
+	fi
+fi
+
+if $float; then
+	# only will happen if sxhkd was started in another tty outside X
+	if [[ -z $WM_BORDER ]]; then
+		# shellcheck disable=SC1090
+		source ~/bin/helpers/xenv.sh
+	fi
+	borders=$((WM_BORDER * 2))
+	gaps=$((WM_GAP * 2))
+	minus_width=$((borders + gaps))
+
+	minus_height=$((TOP_PADDING + WM_GAP + 2 * WM_BORDER))
+
+	xoff=$WM_GAP
+	if [[ $wm == herbstluftwm ]]; then
+		((xoff+=WM_BORDER))
+	fi
+
+	yoff=$TOP_PADDING
+	if [[ $wm == herbstluftwm ]]; then
+		((yoff+=WM_BORDER))
+	fi
+
+	tdrop -ma -x "$xoff" -y "$yoff" -w -$minus_width -h -$minus_height "$@"
+else
+	tdrop "$@"
+fi
+
+hide_floating_dropdowns

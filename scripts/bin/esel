@@ -6,6 +6,7 @@
 # emacsclient -s esel -e 0 &> /dev/null &
 
 # create the frame the first time and reuse afterwards
-dropdown emacsclient -c
+# dropdown emacsclient -c
 
-epipe -e "(noct-file-filter)"
+# works better in terminal
+epipe -t -e "(noct-file-filter)"

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# play the clipboard or argument in mpv
+
+# - set the screenshot template set to the current directory
+# - store files for later access
+# - store last link to be played again with ./mplast
+
+mkdir -p /tmp/mpv
+
+if [[ -n $1 ]]; then
+	clipboard=$1
+	shift
+else
+	clipboard=$(xsel -b)
+fi
+
+mpv_flags=(
+	--screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
+	--script=~/.config/mpv/scripts/nightedt-mpv-scripts/recent.lua
+	"$@"
+)
+
+if [[ $clipboard == *youtube.com* ]]; then
+	echo "$clipboard" > /tmp/mpv/last_link
+	mpv "${mpv_flags[@]}" "$clipboard"
+elif [[ $clipboard =~ ^http ]] || [[ -e $clipboard ]] \
+		 || [[ $clipboard =~ ^magnet ]]; then
+	echo "$clipboard" > /tmp/mpv/last_link
+	# ytdl messes up direct links for some reason (slow)
+	mpv --no-ytdl "${mpv_flags[@]}" "$clipboard"
+fi

@@ -6,10 +6,12 @@ P sh
 ! **/.ignore
 ! **/_no_backup
 ! **/.cask
+! **/sandbox
+! **/node_modules
 ! **/.emacs_backup
 ! **/nixpkgs
-! **/melpa
-! **/org-mode
+! **/forks/melpa
+! **/forks/org-mode
 # keep trash for now; doesn't really get big
 # ! .Trash
 
@@ -20,6 +22,8 @@ P sh
 + .local/share/dolphin-emu
 + .password-store
 + .ssh
+# sdvx game data
++ build/unnamed-sdvx-clone/bin/maps.db
 
 # qutebrowser history and sessions
 + .local/share/qutebrowser/cmd-history
@@ -31,8 +35,11 @@ P sh
 # firefox sessions
 + .mozilla/firefox/noctuid.normal/sessionstore-backups
 + .mozilla/firefox/noctuid.normal/sessionstore.jsonlz4
++ .mozilla/firefox/noctuid.normal/sessionstore.js
 
-# repl history
+# repl and other history files
++ .enhancd
++ .fasd
 + .ipython/profile_default/history.sqlite
 + .lein/repl-history
 + .local/share/nix

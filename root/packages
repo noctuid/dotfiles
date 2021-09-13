@@ -20,8 +20,6 @@ pacman-contrib
 # aur helper backup
 yay aur
 
-pacnanny aur
-
 # * Nix
 nix aur
 

@@ -1001,6 +1001,11 @@ If this is a daemon session, load them all immediately instead."
      (use-package-process-keywords name rest state))))
 #+end_src
 
+** Memoize
+#+begin_src emacs-lisp
+(use-package memoize)
+#+end_src
+
 ** No Littering
 Consistently sets the paths for various configuration, history, temporary, etc. files created by Emacs packages (e.g. =savehist-file=).
 #+begin_src emacs-lisp
@@ -8470,6 +8475,475 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     "me" (general-l (noct-vterm-select-or-create 8))
     "mi" (general-l (noct-vterm-select-or-create 9))
     "mo" (general-l (noct-vterm-select-or-create 10))))
+#+end_src
+
+** Global Hotkeys and Shell Integration
+*** Helpers
+#+begin_src emacs-lisp
+(noct-handle-popup (rx "*Shell Command Output*"))
+
+(defvar noct-global-keybinding nil
+  "Whether the current command was spawned by a global system keybinding.
+This is used to prevent deleting frames when a command is not called from a
+global keybinding.")
+
+(defmacro noct-with-global-keybinding (&rest body)
+  "Run BODY with `noct-global-keybinding' non-nil."
+  (declare (indent 0) (debug t))
+  `(let ((noct-global-keybinding t))
+     ,@body))
+
+(defmacro noct-with-reuse-window (&rest body)
+  "Run BODY reusing the current window to open new buffers. "
+  (declare (indent 0) (debug t))
+  `(let ((display-buffer-alist '((".*" . (display-buffer-use-some-window)))))
+     ,@body))
+
+(defmacro noct-with-sudo-command (&rest body)
+  "Run BODY with the default-directory' as /sudo::."
+  (declare (indent 0) (debug t))
+  `(progn
+     (require 'tramp)
+     (let ((default-directory "/sudo::")
+           ;; don't try to get sudo password from auth-sources
+           auth-sources
+           (tramp-remote-path (append tramp-remote-path
+                                      (s-split ":" (getenv "PATH")))))
+       ,@body)))
+
+(defmacro noct-with-global-completing-read (&rest body)
+  "Run BODY with selectrum taking up the full window height.
+Open any new windows in same buffer"
+  (declare (indent 0) (debug t))
+  `(let ((selectrum-num-candidates-displayed 1000)
+         (selectrum-display-action '(display-buffer-use-some-window))
+         (display-buffer-alist '((".*" . (display-buffer-use-some-window)))))
+     ,@body))
+
+(defun noct-global-completing-read-dir (prompt dirs)
+  "Run `completing-read' with PROMPT to select a directory from DIRS.
+This will add the file completion category to the directories, display selectrum
+in an existing window, and open any new windows in the same buffer."
+  (noct-with-global-completing-read
+    (completing-read prompt
+                     (lambda
+                       (str pred action)
+                       (if
+                           (eq action 'metadata)
+                           '(metadata
+                             (category . file))
+                         (complete-with-action action dirs str pred))))))
+
+(defun noct-completing-read-media-dir (prompt)
+  "Use `completing-read' to select a directory under /media."
+  (let ((dirs
+         (f-directories "/media")))
+    (noct-global-completing-read-dir prompt dirs)))
+
+(defun noct-run-with-vterm (command)
+  "Run COMMAND in a vterm buffer.
+Open the vterm buffer reusing a window."
+  (noct-with-reuse-window
+    (let ((vterm-buffer-name (format "*vterm %s*" (car (split-string command)))))
+      (vterm)
+      (vterm-insert command)
+      (with-current-buffer vterm-buffer-name
+        (evil-insert 1))
+      (vterm-send-return))))
+
+;; TODO do in empty buffer?
+;; TODO allow `completing-read-multiple'
+(defun noct-file-filter (&optional file)
+  "Use `completing-read' to select a line in the current buffer.
+If FILE is specified, first visit FILE. After selection, replace the buffer
+contents with the selected line, kill the buffer, and close the frame. This s
+meant to be used from the command line (specifically with my esel script)."
+  (interactive)
+  (when file
+    (find-file file))
+  (unwind-protect
+      ;; TODO show only the selectrum minibuffer
+      (let* ((selectrum-num-candidates-displayed 1000)
+             (selectrum-display-action '(display-buffer-use-some-window))
+             ;; (selectrum-should-sort-p)
+             (selection (completing-read
+                         "> "
+                         (thread-first (buffer-substring-no-properties
+                                        (point-min)
+                                        (point-max))
+                           (split-string (rx (1+ "\n")) t)
+                           ;; TODO optional
+                           ;; (delete-dups)
+                           ))))
+        (when selection
+          (delete-region (point-min) (point-max))
+          (insert selection)
+          (save-buffer)))
+    (kill-buffer)
+    (save-buffers-kill-terminal)
+    ;; makes flicker much better
+    ;; (switch-to-buffer "*blank*")
+    ;; (call-process-shell-command "xdotool getactivewindow windowunmap")
+    ))
+#+end_src
+
+*** Shell Command Menu
+;; TODO differentiate when called globally (don't delete frames)
+;TODO audio should close automatically update sxhkrd
+; fix delete frame
+
+**** Audio
+#+begin_src emacs-lisp
+(defun noct-hdmi-audio ()
+  "Switch to hdmi audio.
+Delete the frame if `noct-global-keybinding'."
+  (interactive)
+  (start-process "hdmi-audio" nil "audio_switch" "hdmi")
+  (when noct-global-keybinding
+    (delete-frame)))
+
+(defun noct-analog-audio ()
+  "Switch to analog audio.
+Delete the frame if `noct-global-keybinding'."
+  (interactive)
+  (start-process "hdmi-audio" nil "audio_switch" "analog")
+  (when noct-global-keybinding
+    (delete-frame)))
+#+end_src
+
+**** Backup
+#+begin_src emacs-lisp
+(defun noct--local-borg-backup (command args)
+  "Run local borg backup COMMAND with ARGS."
+  ;; uses `let*'
+  (when-let ((dirs (f-directories "/media"))
+             (backup-dir
+              ;; (noct-completing-read-media-dir "Backup to: ")
+              (frog-menu-read "Backup to: " dirs)))
+    (noct-run-with-vterm (concat
+                          "borg_backup "
+                          command
+                          " "
+                          (string-join args " ")
+                          " "
+                          (shell-quote-argument backup-dir)))))
+
+(defun noct-borg-small-local-backup (&optional args)
+  "Run small local borg backup with ARGS."
+  (interactive (list (transient-args 'noct--backup-menu)))
+  (noct--local-borg-backup "borg_small" args))
+
+(defun noct-borgbase-small-backup (&optional args)
+  "Run small local borg backup with ARGS."
+  (interactive (list (transient-args 'noct--backup-menu)))
+  (noct-run-with-vterm (concat
+                        "borg_backup borgbase_small "
+                        (string-join args " "))))
+
+(general-with 'transient
+  (transient-define-prefix noct--backup-menu ()
+    "Create a backup with borg."
+    ["Arguments"
+     ("-n" "Don't check integrity" "-n")]
+    ["Backup"
+     ("s" "Small local" noct-borg-small-local-backup)
+     ("r" "Small remote" noct-borgbase-small-backup)
+     ;; ("b" "Big local")
+     ])
+
+  (defun noct-backup-menu ()
+    "Reusing current window, call `noct--backup-menu'.
+This is suitable for a global keybinding that creates a new Emacs frame."
+    (interactive)
+    (noct-with-reuse-window (noct--backup-menu))))
+#+end_src
+
+**** Filesystem and Mounting/Unmounting
+#+begin_src emacs-lisp
+(defun noct--lsblk ()
+  "Run lsblk and display the output."
+  (interactive)
+  (noct-with-reuse-window
+    (shell-command "lsblk")))
+
+(defun noct-unmount-media ()
+  "Unmount something under /media with udiskie."
+  (interactive)
+  (let ((unmount-dir (noct-completing-read-media-dir "Unmount: ")))
+    (shell-command (concat "udiskie-umount "
+                           (shell-quote-argument unmount-dir)))))
+
+(defun noct-lvm-umount-datab ()
+  "Unmount database."
+  (interactive)
+  (noct-with-reuse-window
+    (noct-run-with-vterm "borg_backup umountdatab")))
+
+(defun noct-lvm-mount-datab ()
+  "Mount database."
+  (interactive)
+  (noct-with-reuse-window
+    (noct-run-with-vterm "borg_backup mountdatab")))
+#+end_src
+
+**** Miscellaneous Aliases
+#+begin_src emacs-lisp
+(defun noct-restow ()
+  "Restow dotfiles."
+  (interactive)
+  (noct-with-reuse-window
+    (noct-run-with-vterm "restow")))
+#+end_src
+
+**** Systemd
+#+begin_src emacs-lisp
+(defun noct--systemd-read (prompt args &optional state)
+  "Run `completing-read' on a list of systemd services.
+Use PROMPT and add ARGS to systemctl command. Only show services with STATE if
+it is specified."
+  ;; uses `let*'
+  (noct-with-global-completing-read
+    (when-let ((base-command
+                (concat
+                 "systemctl list-units --no-pager --no-legend "
+                 "--all --type=service "
+                 (string-join args " " )))
+               (command
+                (concat (if state
+                            (concat base-command " --state=" state)
+                          base-command)
+                        " | grep -v not-found"))
+               (services
+                (mapcar
+                 (lambda (str) (car (split-string str)))
+                 (split-string (shell-command-to-string command)
+                               (rx (1+ "\n"))
+                               t))))
+      (completing-read prompt services))))
+
+(defun noct--systemd-command (prompt command
+                                     &optional args sudo delete-frame state)
+  "Run a systemd command, selecting the service with `completing-read'.
+PROMPT should be the prompt when selecting the service. COMMAND should be the
+command to append the selected service. ARGS can contain arguments to pass to
+the list-units command. If sudo is non-nil, run the command with sudo. If
+DELETE-FRAME is non-nil, delete the frame on SUCCESS. If STATE is non-nil, only
+allow selecting from units with that state."
+  (let ((service (noct--systemd-read prompt args state))
+        (default-directory (if sudo "/sudo::" default-directory))
+        auth-sources)
+    (noct-with-reuse-window
+      (when (and (= (shell-command (concat command service)) 0)
+                 delete-frame
+                 noct-global-keybinding)
+        (delete-frame)))))
+
+(defun noct-systemctl-service-status (&optional args)
+  "Show the status of a systemd service.
+ARGS can contain args to add to the systemctl list-units command."
+  (interactive (list (transient-args 'noct--systemctl-menu)))
+  (noct--systemd-command "Show service status: "
+                         "systemctl --no-pager status "
+                         args))
+
+(defun noct-journalctl-logs (&optional args)
+  "Show the journalctl logs of a systemd service.
+ARGS can contain args to add to the systemctl list-units command."
+  (interactive (list (transient-args 'noct--systemctl-menu)))
+  (noct--systemd-command "Show journactl logs: "
+                         "journalctl --no-pager -u "
+                         args))
+
+(defun noct-systemctl-start-service (&optional args)
+  "Start a systemd service.
+ARGS can contain args to add to the systemctl list-units command."
+  (interactive (list (transient-args 'noct--systemctl-menu)))
+  (noct--systemd-command "Start service: " "systemctl start " args t t))
+
+(defun noct-systemctl-restart-service (&optional args)
+  "Restart a systemd service.
+ARGS can contain args to add to the systemctl list-units command."
+  (interactive (list (transient-args 'noct--systemctl-menu)))
+  (noct--systemd-command "Retart service: " "systemctl restart " args t t))
+
+(defun noct-systemctl-stop-service (&optional args)
+  "Stop a systemd service.
+ARGS can contain args to add to the systemctl list-units command."
+  (interactive (list (transient-args 'noct--systemctl-menu)))
+  (noct--systemd-command "Stop service: " "systemctl stop " args t t "active"))
+
+(defun noct-systemctl-enable-service (&optional args)
+  "Enable and start a systemd service.
+ARGS can contain args to add to the systemctl list-units command."
+  (interactive (list (transient-args 'noct--systemctl-menu)))
+  (noct--systemd-command "Enable and start service: " "systemctl enable --now"
+                         args t t))
+
+(defun noct-systemctl-disable-service (&optional args)
+  "Disable and stop a systemd service.
+ARGS can contain args to add to the systemctl list-units command."
+  (interactive (list (transient-args 'noct--systemctl-menu)))
+  (noct--systemd-command "Disable and stop service: " "systemctl disable --now"
+                         args t t "active"))
+
+(general-with 'transient
+  (transient-define-prefix noct--systemctl-menu ()
+    "Run a systemctl command using `completing-read' to select the service."
+    ["Arguments"
+     ("-u" "Act on user services" "--user")]
+    ["Systemctl"
+     ("s" "Service status" noct-systemctl-service-status)
+     ("j" "Journalctl logs" noct-journalctl-logs)
+     ("t" "Start service"
+      (lambda ()
+        (noct-with-global-keybinding
+          (noct-systemctl-start-service))))
+     ("p" "Stop service"
+      (lambda ()
+        (noct-with-global-keybinding
+          (noct-systemctl-stop-service))))
+     ("r" "Restart service"
+      (lambda ()
+        (noct-global-keybinding-lambda
+          (noct-systemctl-restart-service))))
+     ("e" "Enable/start service"
+      (lambda ()
+        (noct-with-global-keybinding
+          (noct-systemctl-enable-service)))) 
+     ("d" "Disable/stop service"
+      (lambda ()
+        (noct-with-global-keybinding
+          (noct-systemctl-disable-service))))])
+
+  (defun noct-systemctl-menu ()
+    "Reusing current window, call `noct--systemctl-menu'.
+This is suitable for a global keybinding that creates a new Emacs frame."
+    (interactive)
+    (noct-with-reuse-window (noct--systemctl-menu))))
+#+end_src
+
+**** Vpn
+#+begin_src emacs-lisp
+;; memoized
+(defun noct--wireguard-names ()
+  "Return a list of available wireguard configurations."
+  (let ((default-directory "/sudo::/etc/wireguard")
+        auth-sources)
+    (mapcar (lambda (path)
+              (file-name-sans-extension (f-filename path)))
+            (f-files "./"))))
+
+(defun noct--wireguard-command (prompt command)
+  "Run a wireguard command.
+Select a wireguard configuration using PROMPT and then run COMMAND on it."
+  (interactive)
+  (noct-with-global-completing-read
+    (noct-with-sudo-command
+      (let* ((wireguard-names (noct--wireguard-names))
+             (wireguard-name (completing-read prompt wireguard-names)))
+        (when (and (= (shell-command (concat command " " wireguard-name))
+                      0)
+                   noct-global-keybinding)
+          (delete-frame))))))
+
+(defun noct-vpnup ()
+  "Start wireguard vpn."
+  (interactive)
+  (noct--wireguard-command "Start vpn: " "vpnup"))
+
+(defun noct-vpndown ()
+  "Stop wireguard vpn."
+  (interactive)
+  (noct--wireguard-command "Stop vpn: " "vpndown"))
+
+(defun noct-revpn ()
+  "Restart wireguard vpn."
+  (interactive)
+  (noct--wireguard-command "Restart vpn: " "revpn"))
+
+(general-with 'transient
+  (require 'memoize)
+  (memoize 'noct--wireguard-names)
+
+  (noct-with-global-keybinding
+    (transient-define-prefix noct--vpn-menu ()
+      "Start/stop wireguard vpn."
+      ["Wireguard vpn"
+       ("u" "Vpn up" noct-vpnup)
+       ("d" "Vpn down" noct-vpndown)
+       ("r" "Restart vpn" noct-revpn)]))
+
+  (defun noct-vpn-menu ()
+    "Reusing current window, call `noct--vpn-menu'.
+This is suitable for a global keybinding that creates a new Emacs frame."
+    (interactive)
+    (noct-with-reuse-window (noct--vpn-menu))))
+#+end_src
+
+**** X11
+#+begin_src emacs-lisp
+(defun noct-xprop ()
+  "Run xprop in the curernt window."
+  (interactive)
+  (noct-with-reuse-window
+    (shell-command "xprop")))
+
+(defun noct-xwininfo ()
+  "Run xwininfo in the curernt window."
+  (interactive)
+  (noct-with-reuse-window
+    (shell-command "xwininfo")))
+
+(defun noct-xev ()
+  "Run xev in the curernt window."
+  (interactive)
+  (noct-with-reuse-window
+    (noct-run-with-vterm "xev")))
+#+end_src
+
+**** Menu
+#+begin_src emacs-lisp
+(general-with 'transient
+  (transient-define-prefix noct--shell-menu ()
+    "Shell command menu."
+    [:description "Shell commands"]
+    ["Audio"
+     ("h" "Switch to hdmi audio"
+      (lambda ()
+        (interactive)
+        (noct-with-global-keybinding
+          (noct-hdmi-audio))))
+     ("a" "Switch to analog audio"
+      (lambda ()
+        (interactive)
+        (noct-with-global-keybinding
+          (noct-analog-audio))))]
+    ["Backup"
+     ("b" "Backup" noct-backup-menu)]
+    ["Filesystem"
+     ("l" "Lsblk" noct--lsblk)
+     ("u" "Udiskie unmount" noct-unmount-media)
+     ("d" "Lvm mount database" noct-lvm-mount-datab)
+     ("D" "Lvm unmount database" noct-lvm-umount-datab)]
+    ["Miscellaneous"
+     ("r" "Restow" noct-restow)]
+    ["Package Management"
+     ("i" "AUR installed packages" aurel-installed-packages)
+     ("/" "AUR package search" aurel-package-search)]
+    ["Systemctl"
+     ("s" "Systemctl commands" noct-systemctl-menu)]
+    ["Vpn"
+     ("v" "Vpn commands" noct-vpn-menu)]
+    ["X11"
+     ("w" "Xwininfo" noct-xwininfo)
+     ("x" "Xprop" noct-xprop)
+     ("X" "Xev" noct-xev)]))
+
+(defun noct-shell-menu ()
+  "Reusing current window, call `noct--shell-menu'.
+This is suitable for a global keybinding that creates a new Emacs frame."
+  (require 'transient)
+  (noct-with-reuse-window (noct--shell-menu)))
 #+end_src
 
 * Fun/Games

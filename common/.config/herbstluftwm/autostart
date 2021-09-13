@@ -195,7 +195,9 @@ hc rule class=firefox title~'.*Private.*' tag=八 switchtag=on
 hc watch tags.focus.client_count
 hc watch monitors.count
 
-# xrestart -c herbstclient hc_watch_attr
+xrestart -c herbstclient hc_watch_attr
+
+xrestart -c herbstclient hc_watch_tag_changed
 
 # * Start
 if $first_load; then

@@ -167,6 +167,9 @@ do
 done
 
 # * Helpers
+# for restow
+export PATH="$uhome"/bin:"$PATH"
+
 prompt_continue() {
 	echo "continue? [y/n]"
 	read -r reply
@@ -304,7 +307,6 @@ install_emacs_lucid() {
 home_config_setup() {
 	echo "Symlinking user config files."
 	pac_install stow \
-		&& source "$uhome"/dotfiles/terminal/.zsh/stow_functions.sh \
 		&& HOME="$uhome" restow
 }
 
