@@ -34,16 +34,11 @@ networkmanager
 network-manager-applet
 nm-connection-editor
 
-# * Linux/CK
-# linux (already installed)
-# for dkms
-linux-headers
-linux-ck
-linux-ck-headers
-broadcom-wl-ck
-# virtualbox-ck-host-modules-ivybridge
-# removed from repo-ck
-# virtualbox-ck-host-modules-skylake
+# * Linux Zen
+# trying after death of linux-ck
+linux-zen
+# required for modules (e.g. nvidia-dmks)
+linux-zen-headers
 
 # * Window Manager
 bspwm
