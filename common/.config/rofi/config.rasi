@@ -1,0 +1,48 @@
+configuration {
+// * Settings
+    // run on current monitor instead of monitor mouse is on
+    m: -1;
+
+    // honor X11 dpi; too large if use 1 which checks monitor size
+    dpi: 0;
+
+    matching: "fuzzy";
+
+    // center selected instead of paging
+    scroll-method: 1;
+
+    // S-RET for run mode to run in terminal
+    terminal: "kitty";
+    run-shell-command: "{terminal} {cmd}";
+
+// * Appearance;
+    font: "Fira Mono 12";
+
+    // works for drun and window modes (not run);
+    show-icons: true;
+
+    // pywal
+    // dark theme
+    // theme: "~/.cache/wal/colors-rofi-dark.rasi";
+    // light theme
+    theme: "~/.cache/wal/colors-rofi-light.rasi";
+
+    // * Keybindings
+    // clipboard paste keys
+    kb-secondary-paste: "Control+v,Insert,Control-y";
+
+    // remove default C-w keybinding
+    kb-clear-line: "Control+Shift+BackSpace";
+    // rebind C-w
+    kb-remove-word-back: "Control-w,cedilla";
+
+// * Default
+  timeout {
+      action: "kb-cancel";
+      delay: 0;
+  }
+  filebrowser {
+      directories-first: true;
+      sorting-method: "name";
+  }
+}
