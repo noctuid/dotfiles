@@ -199,6 +199,8 @@ xrestart -c herbstclient hc_watch_attr
 
 xrestart -c herbstclient hc_watch_tag_changed
 
+xrestart -c herbstclient hc_watch_fullscreen
+
 # * Start
 if $first_load; then
 	hc use_index 1

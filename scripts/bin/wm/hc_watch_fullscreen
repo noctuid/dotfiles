@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# hide polybar in fullscreen
+herbstclient --idle fullscreen \
+	| while read -r line
+do
+	state=$(echo "$line" | awk '{print $2}')
+	echo "$state"
+    if [[ $state == on ]]; then
+		xdotool search --class polybar windowunmap "%@"
+	else
+		xdotool search --class polybar windowmap "%@"
+	fi
+done

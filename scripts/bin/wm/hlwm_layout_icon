@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+print_layout_icon() {
+	case $1 in
+		horizontal) echo ;;
+		max) echo ;;
+	esac
+}
+
+layout_attr=tags.focus.tiling.focused_frame.algorithm
+
+initial_layout=$(herbstclient attr "$layout_attr")
+print_layout_icon "$initial_layout"
+
+herbstclient watch "$layout_attr"
+
+herbstclient --idle attribute_changed \
+	| while read -r line
+do
+    attr=$(echo "$line" | awk '{print $2}')
+    layout=$(echo "$line" | awk '{print $4}')
+	if [[ $attr == "$layout_attr" ]]; then
+		print_layout_icon "$layout"
+	fi
+done

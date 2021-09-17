@@ -1,13 +1,12 @@
 ; TODO:
-; - add mail
 ; - add gpu on/off indicator
 ; - change underline/fg color for high cpu/ram
-; - ability to do color = $() or equivalent (could generate darker color for
-;   background of brightness/audio)
 ; - maybe add section for vpn, transmission, etc.
 ; Nice:
-; - support for  system tray
+; - support for system tray
+; - support for environment variables
 ; - support for percentages for padding/width
+; - inheritance
 ; - modules
 ; Annoyances:
 ; - can't do float percentages it seems (for offsets at least)
@@ -45,7 +44,7 @@ cyan = ${xrdb:color14:#78b3cc}
 ; enable-ipc = true
 
 width = ${env:BAR_WIDTH:100%}
-height = ${env:BAR_HEIGHT:2%}
+height = ${env:BAR_HEIGHT:3%}
 offset-x = ${env:BAR_X_OFFSET:0}
 offset-y = ${env:BAR_Y_OFFSET:0}
 ; use system dpi (only affects fonts that can be scaled)
@@ -54,11 +53,12 @@ dpi = 0
 tray-maxsize = ${env:TRAY_HEIGHT:100%}
 
 padding = 2
+underline-size = ${env:BAR_BORDER:6}
 
 ; no rounded borders
 radius = ${env:CORNER_RADIUS:15}
 
-border-size = ${env:BAR_BORDER:0}
+border-size = ${env:BAR_BORDER:6}
 ; border-color = ${colors.foreground}
 border-color = ${colors.cyan}
 
@@ -72,20 +72,31 @@ background = ${colors.background}
 foreground = ${colors.foreground}
 
 ; order matters (first have priority)
+; text fonts
 font-0 = Office Code Pro:pixelsize=8
-font-1 = IPAGothic:pixelsize=9:weight=bold
-font-2 = Unifont:style=Sans-Serif
+; Japanese font
+font-1 = Ricty Discord:pixelsize=9
+; alternative Japanese font; not currently used
+font-2 = IPAGothic:pixelsize=9:weight=bold
+
+; icon fonts
 font-3 = Siji:pixelsize=9
-font-4 = Symbola:pixelsize=9
-font-5 = FuraMono Nerd Font:pixelsize=9
-; currently only used for lock (bspwm) and lightbulb icon (redshift)
-font-6 = Font Awesome:pixelsize=8
-; TODO better font?
-font-7 = Ricty Discord:pixelsize=9
-font-8 = Siji:pixelsize=12
+; nerd fonts are only font awesome 4
+font-4 = Font Awesome 5 Free:style=Solid:pixelsize=8
+font-5 = Font Awesome 5 Free:pixelsize=8
+font-6 = Font Awesome 5 Brands:pixelsize=8
+; other icons; alternative icons
+font-7 = FuraMono Nerd Font:pixelsize=9
+; not used here, may be useful for website titles
+font-8 = Symbola:pixelsize=9
+font-9 = Unifont:style=Sans-Serif
+
+; used for specific sections
+; big siji
+font-10 = Siji:pixelsize=13
 
 modules-center = title
-modules-right = redshift memory cpu temperature battery backlight volume wlan eth date
+modules-right = memory cpu temperature battery backlight volume wlan eth date
 
 tray-position = right
 tray-padding = 2
@@ -112,8 +123,9 @@ modules-left = wm-text ewmh mpd
 [bar/herbstluftwm]
 inherit = bar/base
 
-wm-text =  holowm
-modules-left = wm-text ewmh mpd
+; like fura mono leaf better
+wm-text = %{T8}%{T-} holowm
+modules-left = wm-text ewmh hlwmlayout mpd
 
 [settings]
 screenchange-reload = true
@@ -186,22 +198,42 @@ pin-workspaces = false
 ; Default: true
 enable-scroll = false
 
-label-active = %name%
+label-active = %icon%
 label-active-foreground = ${colors.foreground}
 label-active-underline = ${colors.yellow}
 label-active-margin-left = 1
 
-label-occupied = %name%
+label-occupied = %icon%
 label-occupied-foreground = ${colors.foreground}
 label-occupied-margin-left = 1
 
-label-empty = %name%
+label-empty = %icon%
 label-empty-foreground = ${colors.custom-gray}
 label-empty-margin-left = 1
 
-label-urgent = %name%
+label-urgent = %icon%
 label-urgent-background = ${colors.dark-red}
 label-urgent-margin-left = 1
+
+; desktop icons
+icon-0 = 一;
+; TODO dragon emacs icon or  (new font awesome dragon)
+icon-1 = 二;
+; code overlap with siji
+icon-2 = 三;%{T7}%{T-}
+icon-3 = 四;
+icon-4 = 五;
+icon-5 = 六;
+icon-6 = 七;
+icon-7 = 八;
+icon-8 = 九;
+; or tv: 
+icon-9 = 十;
+
+[module/hlwmlayout]
+type = custom/script
+exec = ~/bin/wm/hlwm_layout_icon
+tail = true
 
 [module/mpd]
 type = custom/script
@@ -216,14 +248,6 @@ exec = ~/bin/title_scroll
 tail = true
 
 label-foreground = ${colors.cyan}
-
-[module/redshift]
-type = custom/script
-interval = 5
-
-format-font = 5
-
-exec = ~/.config/polybar/redshift.sh
 
 [module/memory]
 type = internal/memory
@@ -298,9 +322,8 @@ type = internal/backlight
 card = intel_backlight
 
 ; TODO too high/not centered
-format-prefix = "☼ "
+format-prefix = " "
 format-foreground = ${colors.yellow}
-format-prefix-font = 5
 
 ; [module/backlight-acpi]
 ; inherit = module/xbacklight
@@ -316,11 +339,8 @@ exec = ~/.config/polybar/volume.sh
 type = custom/script
 
 format-foreground = ${colors.dark-magenta}
-format-font = 8
 
 format-prefix = " "
-
-label-font = 8
 
 exec = ~/.config/polybar/date.sh
 
@@ -338,7 +358,7 @@ format-disconnected-foreground = ${colors.dark-cyan}
 ramp-signal-0 = 
 ramp-signal-1 = 
 ramp-signal-2 = 
-ramp-signal-font = 9
+ramp-signal-font = 11
 
 [module/eth]
 type = internal/network

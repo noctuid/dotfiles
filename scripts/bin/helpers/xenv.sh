@@ -25,18 +25,16 @@ else
 	export MONITOR_IS_HIDPI=false
 fi
 
-# * BSPWM and Polybar
+# * WM and Polybar
 width=$(monitor_get_width)
-# TODO fully rename WM_GAP
+height=$(monitor_get_height)
 # 15 pixels on FHD; 30 on 4k
-BSPWM_GAP=$(monitor_fraction_of 0.0078125 "$width")
-WM_GAP=$BSPWM_GAP
+WM_GAP=$(monitor_fraction_of 0.0078125 "$width")
+export WM_GAP
 
 # 3 pixels on FHD; 7 on 4k
-BSPWM_BORDER=$(monitor_fraction_of 0.001822917 "$width")
-WM_BORDER=$BSPWM_BORDER
-export BSPWM_GAP BSPWM_BORDER
-export WM_GAP WM_BORDER
+WM_BORDER=$(monitor_fraction_of 0.001822917 "$width")
+export WM_BORDER
 
 # 3 pixels on 4k
 HALF_WM_BORDER=$(monitor_fraction_of 0.5 "$WM_BORDER")
@@ -46,19 +44,19 @@ export HALF_WM_BORDER
 CORNER_RADIUS=$(monitor_fraction_of 0.5 "$WM_GAP")
 export CORNER_RADIUS
 
-BAR_WIDTH=$((width - 2 * BSPWM_GAP))
-BAR_HEIGHT=$((2 * BSPWM_GAP))
-BAR_X_OFFSET=$BSPWM_GAP
-BAR_Y_OFFSET=$BSPWM_GAP
-# 2 pixels on FHD; 4 on 4k
-# BAR_BORDER=$(monitor_fraction_of 0.00104166666 "$width")
-BAR_BORDER=$BSPWM_BORDER
-TRAY_HEIGHT=$BSPWM_GAP
+BAR_WIDTH=$((width - 2 * WM_GAP))
+# 65 on 4k (slightly bigger than 60 that is 2 * WM_GAP)
+BAR_HEIGHT=$(monitor_fraction_of 0.0305 "$height")
+BAR_X_OFFSET=$WM_GAP
+BAR_Y_OFFSET=$WM_GAP
+# 3 pixels FHD; 6 on 4k
+BAR_BORDER=$(monitor_fraction_of 0.0015625 "$width")
+TRAY_HEIGHT=$WM_GAP
 export BAR_WIDTH BAR_HEIGHT BAR_X_OFFSET BAR_Y_OFFSET BAR_BORDER TRAY_HEIGHT
 
 # pixels before top of windows
-# first part is just 4 BSPWM_GAP, but could be different
-TOP_PADDING=$((2 * BSPWM_GAP + BAR_HEIGHT + 2 * BAR_BORDER))
+# first part is just 4 WM_GAP, but could be different
+TOP_PADDING=$((2 * WM_GAP + BAR_HEIGHT + 2 * BAR_BORDER))
 export TOP_PADDING
 
 # * Network Interface

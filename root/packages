@@ -431,6 +431,7 @@ rofi
 fonts-meta-extended-lt aur
 ttf-dejavu
 otf-fira-sans
+otf-font-awesome
 
 # monospace fonts
 otf-fira-mono

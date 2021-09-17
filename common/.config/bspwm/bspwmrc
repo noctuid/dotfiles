@@ -34,7 +34,7 @@ fi
 bspc config split_ratio 0.55
 
 bspc config gapless_monocle true
-bspc config top_monocle_padding "$BSPWM_GAP"
+bspc config top_monocle_padding "$WM_GAP"
 
 bspc config click_to_focus button1
 bspc config focus_follows_pointer false
@@ -42,10 +42,10 @@ bspc config focus_follows_pointer false
 # interesting but not useful for me
 # bspc config pointer_follows_focus  true
 
-bspc config border_width "$BSPWM_BORDER"
+bspc config border_width "$WM_BORDER"
 # a small gap looks nice without taking up too much space
 # it also makes the layout (monocle or tiled) immediately obvious
-bspc config window_gap "$BSPWM_GAP"
+bspc config window_gap "$WM_GAP"
 
 # * Destktops
 bspc monitor -d "一" "二" "三" "四" "五" "六" "七" "八" "九"
