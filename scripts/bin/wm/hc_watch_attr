@@ -3,5 +3,7 @@ herbstclient --idle attribute_changed \
 	| awk '/monitors.count/ {
     system("hc_monitor_setup " $3 " " $4)
 } /tags.focus.client_count/ {
-    system("hc_watch_client_count " $3 " " $4)
+    system("hc_handle_client_count " $3 " " $4)
+} /tags.focus.name/ {
+    system("hc_handle_tag_changed " $3 " " $4)
 }'

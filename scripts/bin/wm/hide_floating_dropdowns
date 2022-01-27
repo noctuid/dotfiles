@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# hide other floating dropdowns
 
 tdrop foreach 'herbstclient compare clients.$(printf 0x%x $wid).floating = on \
                             && herbstclient compare clients.focus.winid != $(printf 0x%x $wid) \

@@ -3,6 +3,10 @@
 old_count=$1
 new_count=$2
 
+hc() {
+	herbstclient "$@"
+}
+
 if (( old_count == 1 )) && (( new_count == 2 )); then
 	hc rule label=mpv-move class='mpv' fullscreen=on monitor=1
 	herbstclient chain , lock , focus_monitor 1 , unlock_tag , use_index 9 \

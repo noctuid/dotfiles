@@ -189,15 +189,14 @@ hc rule class='pinentry-qt' floating=on
 hc rule class='Steam' floating=on
 hc rule class='Wpg' floating=on
 
-hc rule class=firefox title~'.*Private.*' tag=八 switchtag=on
+hc rule instance=firefox title~'.*Private.*' tag=八 switchtag=on
 
 # * Hooks
+hc watch tags.focus.name
 hc watch tags.focus.client_count
 hc watch monitors.count
 
 xrestart -c herbstclient hc_watch_attr
-
-xrestart -c herbstclient hc_watch_tag_changed
 
 xrestart -c herbstclient hc_watch_fullscreen
 
