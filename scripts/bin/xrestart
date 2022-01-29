@@ -8,26 +8,32 @@ This kill and (re)run a program for the current X session only. See also
 ./xstop.
 
 options:
-    -c command  specify the program name to use with pgrep to check for existing
-                pids; existing pids are ignored when determining the new pid
-                (default: first positional argument)
+    -i          use pgrep to get the pid to later kill instead of using $!
+                (default: false, [i]gnore initial pid)
+    -c name     specify the command name to use with pgrep to find the pid;
+                only useful if -i is specified (default: use the first arg)
     -n name     the name to use to store the pid; specify if you may need to use
                 xrestart for multiple instances of this program (e.g. for a bspc
                 subscribe) (default: first positional argument)
     -N name     specify the name and command with one flag
     -e          whether to evaluate the arguments (useful to provide a string
                 with a pipe in it, for example)
+    -f          wait for the program pid to exit (\"[f]oreground\")
 "
 }
 
 command=
-name=
 eval=false
-while getopts :c:ehn:N:: opt
+foreground=false
+ignore_initial_pid=false
+name=
+while getopts :c:efhin:N: opt
 do
 	case $opt in
 		c) command=$OPTARG;;
 		e) eval=true;;
+		f) foreground=true;;
+		i) ignore_initial_pid=true;;
 		n) name=$OPTARG;;
 		N) command=$OPTARG
 		   name=$OPTARG;;
@@ -60,14 +66,28 @@ else
 	"$@" &
 fi
 
+original_pid=$!
 final_pid=$!
 
-# $! is not right for xcape and dunst for example
-while read -r pid; do
-	if [[ ! $blacklist =~ (^|$'\n')"$pid"($|$'\n') ]]; then
-		final_pid=$pid
-		break
-	fi
-done < <(pgrep "$command")
+if $ignore_initial_pid; then
+	while true; do
+		# $! is not right for xcape, python, etc.
+		# $! is right for dunst, polybar, sxhkd, etc.
+		while read -r pid; do
+			if [[ ! $blacklist =~ (^|$'\n')"$pid"($|$'\n') ]]; then
+				final_pid=$pid
+				break
+			fi
+		done < <(pgrep "$command")
+		if [[ $original_pid != "$final_pid" ]]; then
+			break
+		fi
+		sleep 0.2
+	done
+fi
 
 echo "$final_pid" > "$pidfile"
+
+if $foreground; then
+	tail --pid="$final_pid" -f /dev/null
+fi

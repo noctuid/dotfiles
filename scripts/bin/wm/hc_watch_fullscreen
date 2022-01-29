@@ -1,13 +1,71 @@
-#!/usr/bin/env bash
-# hide polybar in fullscreen
-herbstclient --idle fullscreen \
-	| while read -r line
-do
-	state=$(echo "$line" | awk '{print $2}')
-	echo "$state"
-    if [[ $state == on ]]; then
-		xdotool search --class polybar windowunmap "%@"
-	else
-		xdotool search --class polybar windowmap "%@"
-	fi
-done
+#!/usr/bin/env bb
+;; TODO doesn't handle fullscreen window close correctly
+(ns hc-watch-fullscreen
+  "Herbstluftwm script to hide polybar when showing a fullscreen window"
+  (:require [clojure.java.io :as io]
+            [clojure.string :refer [split trim]]
+            [babashka.process :refer [$ sh]]))
+
+;; NOTE it would also be possible to query the fullscreen state every time, but
+;; it's simple enough to just store it with babashka
+
+(def bar-is-hidden false)
+
+(def current-tag (-> (sh "herbstclient attr tags.focus.name") :out trim))
+
+(def tag-fullscreen? {})
+
+
+(defn on-monitor-0?
+  "Return whether the current tag is on monitor 0"
+  []
+  (= (-> (sh "herbstclient attr monitors.0.tag") :out trim)
+     current-tag))
+
+(defn toggle-polybar-state
+  "Hide or show polybar."
+  ([hide]
+   ;; bar is on monitor 0, so only consider monitor 0
+   (when (on-monitor-0?)
+     (if hide
+       (sh "xdotool search --class polybar windowunmap %@")
+       (sh "xdotool search --class polybar windowmap %@"))
+     ;; TODO what is the idiomatic way to do this?
+     (def bar-is-hidden hide)))
+  ([]
+   (toggle-polybar-state (not bar-is-hidden))))
+
+(defn handle-tag-changed
+  "Handle a herbstluftwm tag_changed event."
+  [new-tag]
+  (def current-tag new-tag)
+  (when (not= (boolean (tag-fullscreen? current-tag)) bar-is-hidden)
+    (toggle-polybar-state)))
+
+(defn handle-fullscreen
+  "Handle a herbstluftwm fullscreen event."
+  [state client]
+  (let [fullscreen (= state "on")
+        fullscreen-tag (-> (sh (format "herbstclient attr clients.%s.tag" client))
+                           :out trim)]
+    (def tag-fullscreen? (assoc tag-fullscreen? fullscreen-tag fullscreen))
+    (when (= fullscreen-tag current-tag)
+      (if fullscreen
+        (toggle-polybar-state true)
+        (toggle-polybar-state false)))))
+
+(defn -main []
+  "Hide/show polybar based on fullscreen and tag_changed events."
+  (with-open [rdr (io/reader (:out ($ herbstclient
+                                      --idle
+                                      "fullscreen|tag_changed")))]
+    (binding [*in* rdr]
+      (loop [[attr arg1 arg2] (split (read-line) #"\s+")]
+        (cond (= attr "fullscreen")
+              (handle-fullscreen arg1 arg2)
+              (= attr "tag_changed")
+              (handle-tag-changed arg1))
+        (recur (split (read-line) #"\s+"))))))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main))

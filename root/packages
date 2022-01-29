@@ -548,6 +548,7 @@ harvey pip
 
 # ** Clojure
 clojure
+babashka-bin aur
 
 # ** C
 gdb

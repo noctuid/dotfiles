@@ -74,6 +74,7 @@ foreground = ${colors.foreground}
 ; order matters (first have priority)
 ; text fonts
 font-0 = Office Code Pro:pixelsize=8
+
 ; Japanese font
 font-1 = Ricty Discord:pixelsize=9
 ; alternative Japanese font; not currently used
@@ -232,19 +233,19 @@ icon-9 = 十;
 
 [module/hlwmlayout]
 type = custom/script
-exec = ~/bin/wm/hlwm_layout_icon
+exec = xrestart -fi -c herbstclient hlwm_layout_icon
 tail = true
 
 [module/mpd]
 type = custom/script
-exec = ~/bin/song_scroll
+exec = xrestart -fi -c python song_scroll
 tail = true
 
 label-foreground = ${colors.green}
 
 [module/title]
 type = custom/script
-exec = ~/bin/title_scroll
+exec = xrestart -fi -c python title_scroll
 tail = true
 
 label-foreground = ${colors.cyan}

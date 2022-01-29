@@ -1,25 +1,34 @@
 #!/usr/bin/env bash
+# print layout icon and window count
 
-print_layout_icon() {
-	case $1 in
-		horizontal) echo ;;
-		max) echo ;;
+layout_attr=tags.focus.tiling.focused_frame.algorithm
+count_attr=tags.focus.client_count
+
+layout=$(herbstclient attr "$layout_attr")
+win_count=$(herbstclient attr "$count_attr")
+
+print_layout() {
+	case $layout in
+		horizontal) echo "$win_count";;
+		max) echo "$win_count";;
 	esac
 }
 
-layout_attr=tags.focus.tiling.focused_frame.algorithm
-
-initial_layout=$(herbstclient attr "$layout_attr")
-print_layout_icon "$initial_layout"
+print_layout
 
 herbstclient watch "$layout_attr"
+herbstclient watch "$count_attr"
 
-herbstclient --idle attribute_changed \
+# exec so that pid is correct for xrestart
+exec herbstclient --idle attribute_changed \
 	| while read -r line
 do
     attr=$(echo "$line" | awk '{print $2}')
-    layout=$(echo "$line" | awk '{print $4}')
+	arg=$(echo "$line" | awk '{print $4}')
 	if [[ $attr == "$layout_attr" ]]; then
-		print_layout_icon "$layout"
+		layout=$arg
+	elif [[ $attr == "$count_attr" ]]; then
+		win_count=$arg
 	fi
+	print_layout
 done

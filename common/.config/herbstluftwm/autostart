@@ -8,7 +8,7 @@ hc() {
 hc emit_hook reload
 
 first_load=false
-if herbstclient silent new_attr bool my_not_first_autostart; then
+if hc silent new_attr bool my_not_first_autostart; then
    first_load=true
 fi
 
@@ -51,9 +51,8 @@ fi
 
 # ** Minor
 # - todos in wm_action
-# - tabbed title bar to show up to three titles; clickable
-# - show icon for herbstluftwm auto layout layout in polybar and number of
-#   windows in frame if max
+# - tabbed title bar to show up to three titles; clickable (maybe, probably
+#   unnecessary)
 # - non-panel indicator of multiple windows in frame in max mode (e.g. top frame
 #   border in different color; not currently possible)
 
@@ -202,9 +201,9 @@ hc watch tags.focus.name
 hc watch tags.focus.client_count
 hc watch monitors.count
 
-xrestart -c herbstclient hc_watch_attr
+xrestart hc_watch_attr
 
-xrestart -c herbstclient hc_watch_fullscreen
+xrestart -i -c herbstclient hc_watch_fullscreen
 
 # * Start
 if $first_load; then

@@ -3,7 +3,8 @@ name=$1
 pidfile=/tmp/"$name"_"$DISPLAY".pid
 pid=$(< "$pidfile")
 
-if [[ -n $pid ]]; then
+if [[ -n $pid ]] && kill -s 0 "$pid" &> /dev/null; then
+	# shellcheck disable=SC2188
 	kill "$pid" && > "$pidfile"
 else
 	xrestart "$@"

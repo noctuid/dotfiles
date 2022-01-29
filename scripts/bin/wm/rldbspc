@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # reload bspwm rules
 
+# TODO needs retesting with xrestart update
 # set up home row navigation keybindings on empty desktops
-xrestart -e -c bspc -n bspc_empty_desktop_subscribe \
+xrestart -ie -c bspc -n bspc_empty_desktop_subscribe \
 		 "bspc subscribe desktop_focus node_add node_remove node_transfer \
 		 	   | xargs -n 1 ~/bin/bspwm/maybe_reload_sxhkd"
 

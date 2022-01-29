@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-herbstclient --idle attribute_changed \
+# exec so that pid is correct for xrestart without need for pgrep
+exec herbstclient --idle attribute_changed \
 	| awk '/monitors.count/ {
     system("hc_monitor_setup " $3 " " $4)
 } /tags.focus.client_count/ {

@@ -1,5 +1,5 @@
 # to prevent the need to change in multiple places (~/.zshrc and ~/.xinitrc)
-xrestart \
+xrestart -i \
 	xcape -e "ISO_Level5_Shift=BackSpace;Control_L=Tab;Shift_L=Escape;ISO_Level3_Shift=Return;Alt_L=parenleft"
 
 # Local Variables:
