@@ -67,11 +67,8 @@ fi
 # more layouts (specifically dwindle)
 # https://github.com/herbstluftwm/herbstluftwm/issues/1003
 
-# smart gaps
-# https://github.com/herbstluftwm/herbstluftwm/issues/1356
-
-# empty background-only opacity
-# https://github.com/herbstluftwm/herbstluftwm/issues/1357
+# frame_bg_(active|normal)_color looks incorrect with transparency
+# https://github.com/herbstluftwm/herbstluftwm/issues/1382
 
 # hide windows behind fullscreen
 # https://github.com/herbstluftwm/herbstluftwm/issues/1352
@@ -110,30 +107,39 @@ hc set swap_monitors_to_get_tag off
 hc set auto_detect_monitors on
 
 # * Appearance
-# ** Global Settings
-# gaps
-hc set frame_gap 0
-hc set window_gap "$WM_GAP"
+# ** Consistent Gaps/Borders Regardless of Layout
+# have consistent gaps/borders regardless of whether 1 empty frame, 1 non-empty
+# frame, or multiple frames
 
 # show unfocused and empty frames
 hc set always_show_frame on
 
-# don't show frame border/gap when only one frame or for active
-hc set smart_frame_surroundings on
-
+# always show frame borders/gap
+hc set smart_frame_surroundings off
 # always show window borders and gaps
 hc set smart_window_surroundings off
 
+# gaps
+hc set frame_gap "$WM_GAP"
+hc set window_gap "$WM_GAP"
+# compensate window_gap (https://github.com/herbstluftwm/herbstluftwm/issues/1356)
+hc set frame_padding "$((-WM_GAP-WM_BORDER))"
+
+# border
+# only visible for empty frames (see frame_padding)
 hc set frame_border_width "$WM_BORDER"
 hc set frame_border_inner_width 0
 
-# cuts background out
+# ** Opacity
+# now hlwm will automatically cut out backgrounds behind windows
+
+# cuts background out if on
 hc set frame_bg_transparent off
 
+# TODO switch to frame_bg_(active|normal)_color when #1382 is fixed
 # real transparency; requires compositor
-# 0 to not stack with active window transparency
-hc set frame_active_opacity 0
-hc set frame_normal_opacity 60
+hc set frame_active_opacity 50
+hc set frame_normal_opacity 80
 
 # ** Theme
 # reset attributes
