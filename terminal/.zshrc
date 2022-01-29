@@ -638,11 +638,6 @@ startstump() (
 	startx stumpwm
 )
 
-# ** Symlinking Dotfiles With Stow
-if [[ -f ~/.zsh/stow_functions.sh ]]; then
-	source ~/.zsh/stow_functions.sh
-fi
-
 # ** Package Management
 # *** Pacman/AUR
 # make new mirror list
