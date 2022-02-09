@@ -7435,6 +7435,11 @@ TODO
 (use-package pkgbuild-mode)
 #+end_src
 
+** Powershell
+#+begin_src emacs-lisp
+(use-package powershell-mode)
+#+end_src
+
 ** Python
 TODO:
 - look at https://github.com/python-rope/ropemacs
