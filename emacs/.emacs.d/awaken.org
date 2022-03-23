@@ -1438,13 +1438,99 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 (defun noct-set-font (&rest _)
   "Set the font."
   (interactive)
-  ;; more convenient syntax than `set-frame-font'
-  ;; (set-face-attribute 'default nil :font "Fira Mono-10")
-  ;; ;; Fira Mono and Code don't have italic; add a font with italic
-  ;; (set-face-attribute 'italic nil :family "Office Code Pro")
-  (set-face-attribute 'default nil :font "Office Code Pro-10"))
+  ;; `set-face-attribute' has more convenient syntax than `set-frame-font'
 
-;; this is slow on the first run (0.01-0.05 seconds)
+  ;; no
+  ;; - iosevka - don't need a thin font (and a lot taller than others)
+  ;; - 3270
+  ;; - anonymous pro
+  ;; - aurulent
+  ;; - bitstream
+  ;; - code new roman
+  ;; - daddytimemono (a little too weird)
+  ;; - gohu (looks like a bitmap font)
+  ;; - hasklig (don't like how wide it is)
+  ;; - heavy data - unreadable
+  ;; - lekton
+  ;; - monofur (a little too weird)
+  ;; - monoid
+  ;; - m+ - too tall
+  ;; - open dyslexic - too weird
+  ;; - overpass
+  ;; - proggy (blurry)
+  ;; - source code pro (office code pro looks much better to me)
+  ;; - share tech mono
+  ;; - space mono (don't like parens and really wide)
+  ;; - tinos - monospace version is broken?
+
+  ;; Evaluate further
+  (set-face-attribute 'default nil :font "BlexMono Nerd Font-11")
+  (set-face-attribute 'default nil :font "FantasqueSansMono Nerd Font-12")
+  (set-face-attribute 'default nil :font "Hack Nerd Font-11")
+  (set-face-attribute 'default nil :font "Hurmit Nerd Font-11")
+  (set-face-attribute 'default nil :font "iMWritingMonoS Nerd Font-11")
+  (set-face-attribute 'default nil :font "iMWritingDuoS Nerd Font-11")
+  (set-face-attribute 'default nil :font "iMWritingQuattroS Nerd Font-11")
+  (set-face-attribute 'default nil :font "Inconsolata Nerd Font-12")
+  (set-face-attribute 'default nil :font "InconsolataGo Nerd Font-12")
+  (set-face-attribute 'default nil :font "InconsolataLGC Nerd Font-11")
+  (set-face-attribute 'default nil :font "LiterationMono Nerd Font-11")
+  (set-face-attribute 'default nil :font "MesloLGS Nerd Font-11")
+  ;; TODO try others
+  (set-face-attribute 'default nil :font "MesloLGL Nerd Font-11")
+  (set-face-attribute 'default nil :font "mononoki Nerd Font-12")
+  ;; TODO try others
+  (set-face-attribute 'default nil :font "Migu 1M-12")
+  (set-face-attribute 'default nil :font "NotoMono Nerd Font-11")
+  (set-face-attribute 'default nil :font "ProFontWindows Nerd Font-12")
+  (set-face-attribute 'default nil :font "ProFontIIx Nerd Font-10")
+  (set-face-attribute 'default nil :font "RobotoMono Nerd Font-10")
+  (set-face-attribute 'default nil :font "Iosevka-11")
+  ;; actually looks okay
+  (set-face-attribute 'default nil :font "TerminessTTF Nerd Font-12")
+  (set-face-attribute 'default nil :font "Ubuntu Mono-12")
+  (set-face-attribute 'default nil :font "VictorMono Nerd Font-11")
+  (set-face-attribute 'default nil :font "Recursive Mono Linear Static-10")
+  (set-face-attribute 'default nil :font "Recursive Mono Casual Static-10")
+  (set-face-attribute 'default nil :font "Sarasa Mono J-10")
+
+  ;; Fine
+  (set-face-attribute 'default nil :font "DroidSansMono Nerd Font-11")
+  ;; not too far off from droid sans; like slightly better
+  (set-face-attribute 'default nil :font "Cousine Nerd Font-11")
+  ;; like better than both cousine and droid sans
+  (set-face-attribute 'default nil :font "DejaVu Sans Mono-11")
+  ;; cool asterisk
+  (set-face-attribute 'default nil :font "GoMono Nerd Font-10")
+
+  ;; previously used
+  ;; - inconsolata, inconsolataLGC, etc.
+  ;; - fira mono
+
+  ;; TODO pragmata
+  ;; (set-face-attribute 'default nil :font "-10")
+  ;; (set-face-attribute 'default nil :font "-10")
+  ;; TODO cousine
+  ;; ttf-apple-fonts
+  ;; input mono
+  ;; monaco
+  ;; cousine
+  ;; cmu typewriter
+  ;; pt mono
+  ;; lucida console
+  ;; jula mono
+  ;; comic mono
+
+  ;; favorites
+  ;; (set-face-attribute 'default nil :font "Fira Mono-10")
+  ;; Fira Mono and Code don't have italic; add a font with italic
+  ;; (set-face-attribute 'italic nil :family "Office Code Pro")
+  (set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font-10")
+  (set-face-attribute 'default nil :font "agave Nerd Font Mono-12")
+  (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font-11")
+  (set-face-attribute 'default nil :font "Office Code Pro D-10"))
+
+;; this is slow on the first run even if set only one font (0.01-0.05 seconds)
 ;; (noct-set-font)
 ;; instead set the default font in ./early-init.el; works with daemon as well
 
@@ -2171,79 +2257,6 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
     [tab] #'corfu-next))
 #+end_src
 
-** Completing Read
-*** Completing Read Commands
-TODO Would nice to have these in a package.
-#+begin_src emacs-lisp
-;; https://github.com/raxod502/selectrum/wiki/Useful-Commands
-;; Ref: https://www.gnu.org/software/emacs/manual/html_node/eintr/yank.html
-(defun amai-kinono-yank-pop (&optional arg)
-  "Paste a previously killed string.
-With just \\[universal-argument] as ARG, put point at beginning,
-and mark at end.  Otherwise, put point at the end, and mark at
-the beginning without activating it.
-
-This is like `yank-pop'.  The differences are:
-
-- This let you manually choose a candidate to paste.
-
-- This doesn't delete the text just pasted if the previous
-  command is `yank'."
-  (interactive "P")
-  (let* ((selectrum-should-sort-p nil)
-         (text nil))
-    (setq text
-          (completing-read "Yank: "
-                           (cl-remove-duplicates
-                            kill-ring :test #'equal :from-end t)
-                           nil 'require-match))
-    (unless (eq last-command 'yank)
-      (push-mark))
-    (setq last-command 'yank)
-    (setq yank-window-start (window-start))
-    (when (and delete-selection-mode (use-region-p))
-      (delete-region (region-beginning) (region-end)))
-    (insert-for-yank text)
-    (if (consp arg)
-        (goto-char (prog1 (mark t)
-                     (set-marker (mark-marker) (point) (current-buffer)))))))
-
-;; (general-t "p" #'amai-kinono-yank-pop)
-#+end_src
-
-*** Shell Integration
-#+begin_src emacs-lisp
-;; TODO do in empty buffer?
-;; TODO allow `completing-read-multiple'
-(defun noct-file-filter (&optional file)
-  "Use `completing-read' to select a line in the current buffer.
-If FILE is specified, first visit FILE. After selection, replace the buffer
-contents with the selected line, kill the buffer, and close the frame. This s
-meant to be used from the command line (specifically with my esel script)."
-  (interactive)
-  (when file
-    (find-file file))
-  (unwind-protect
-      ;; TODO show only the selectrum minibuffer
-      (let ((selectrum-num-candidates-displayed 1000)
-            (selectrum-should-sort-p)
-            (selection (completing-read
-                        "> "
-                        (thread-first (buffer-substring-no-properties
-                                       (point-min)
-                                       (point-max))
-                          (split-string (rx (1+ "\n")) t)
-                          (delete-dups)))))
-        (when selection
-          (delete-region (point-min) (point-max))
-          (insert selection)
-          (save-buffer)))
-    (kill-buffer)
-    ;; makes flicker much better
-    (switch-to-buffer "*blank*")
-    (call-process-shell-command "xdotool getactivewindow windowunmap")))
-#+end_src
-
 ** Completion
 #+begin_src emacs-lisp
 (gsetq completion-ignore-case t)
@@ -2895,9 +2908,6 @@ file-finding commands)."
   ;; this doesn't actually load selectrum (definition is in autoload file)
   (selectrum-mode)
   :config
-  (general-after 'amx
-    (setq amx-backend 'selectrum))
-
   (gsetq selectrum-show-indices t
          selectrum-num-candidates-displayed 20
          ;; TODO async consult commands don't show full candidates without
@@ -2996,6 +3006,37 @@ https://github.com/raxod502/selectrum/issues/131#issuecomment-817191700"
   (selectrum-prescient-mode))
 #+end_src
 
+** Vertico
+#+begin_src emacs-lisp
+(use-package vertico
+  ;; specify to get extensions
+  :straight (vertico-extensions
+             :host github
+             :repo "minad/vertico"
+             :files ("*.el" "extensions/*.el"))
+  :config
+  (vertico-mode)
+
+  (gsetq vertico-count 20
+         vertico-cycle t)
+  ;; necessary for tramp hostname completion when using orderless
+  (gsetq completion-category-overrides
+         '((file (styles basic partial-completion))))
+
+  ;; Use `consult-completion-in-region' if Vertico is enabled.
+  ;; Otherwise use the default `completion--in-region' function.
+  (setq completion-in-region-function
+        (noct-defun minad-completion-in-region-function (&rest args)
+          (apply (if vertico-mode
+                     #'consult-completion-in-region
+                   #'completion--in-region)
+                 args)))
+
+  (general-s "." #'vertico-repeat)
+
+  (vertico-indexed-mode))
+#+end_src
+
 ** Consult
 #+begin_src emacs-lisp
 (use-package consult
@@ -3014,7 +3055,7 @@ https://github.com/raxod502/selectrum/issues/131#issuecomment-817191700"
   (general-s :infix "i" "l" #'consult-theme)
   (general-m "C" #'consult-compile-error)
   (help-map "a" #'consult-apropos)
-  ('normal "/" (list :def (if (or (not (boundp no-native-compile))
+  ('normal "/" (list :def (if (or (not (boundp 'no-native-compile))
                                   (not no-native-compile))
                               #'consult-line
                             #'noct-consult-ripgrep-or-line)
@@ -3037,20 +3078,21 @@ https://github.com/raxod502/selectrum/issues/131#issuecomment-817191700"
   (evil-add-command-properties #'consult-imenu :jump t)
   (evil-add-command-properties #'consult-org-heading :jump t)
 
-  (gsetq consult-ripgrep-command
-         (concat "rg "
-                 "--null "
-                 "--line-buffered "
-                 "--color=ansi "
-                 "--max-columns=1000 "
-                 "--no-heading "
-                 "--line-number "
-                 ;; adding these to default
-                 "--smart-case "
-                 "--hidden "
-                 "--max-columns-preview "
-                 ;; defaults
-                 ". -e ARG OPTS"))
+  (defconst noct-ripgrep-args
+    (concat "rg "
+            ;; defaults
+            "--line-buffered "
+            "--color=never "
+            "--max-columns=1000 "
+            "--path-separator / `"
+            "--smart-case "
+            "--no-heading "
+            "--line-number "
+            ;; adding these to default
+            "--hidden "
+            "--no-ignore "
+            "--max-columns-preview "))
+  (gsetq consult-ripgrep-args (concat noct-ripgrep-args "."))
 
   (defun noct-consult-find-fd (&optional dir initial)
     "Run `consult-find' using fd."
@@ -3081,23 +3123,14 @@ When the number of characters in a buffer exceeds this threshold,
       (when (file-writable-p buffer-file-name)
         (save-buffer))
       (let ((consult-ripgrep-command
-             (concat "rg "
-                     "--null "
-                     "--line-buffered "
-                     "--color=ansi "
-                     "--max-columns=250 "
-                     "--no-heading "
-                     "--line-number "
-                     ;; adding these to default
-                     "--smart-case "
-                     "--hidden "
-                     "--max-columns-preview "
+             (concat noct-ripgrep-args
                      ;; add back filename to get parsing to work
                      "--with-filename "
-                     ;; defaults
-                     "-e ARG OPTS "
-                     (shell-quote-argument buffer-file-name))))
+                     ".")))
         (consult-ripgrep))))
+
+  (general-advice-add #'completing-read-multiple
+                      :override #'consult-completing-read-multiple)
 
   (defun noct-consult-line-evil-history (&rest _)
     "Add latest `consult-line' search pattern to the evil search history ring.
@@ -3192,7 +3225,6 @@ Sets missing metadata for completions (pairs well with embark even if not using 
 #+begin_src emacs-lisp
 (use-package all-the-icons-completion
   :straight (all-the-icons-completion
-             :type git
              :host github
              :repo "iyefrat/all-the-icons-completion")
   :ghook
@@ -3234,7 +3266,6 @@ Sets missing metadata for completions (pairs well with embark even if not using 
 #+begin_src emacs-lisp
 (use-package framegroups
   :straight (framegroups
-             :type git
              :host github
              :repo "noctuid/framegroups.el"
              :protocol ssh
@@ -3484,7 +3515,7 @@ Globbing is used to find a matching file."
        "m" (noct-find-file "misc.org")
        "b" (noct-find-file "bio.org")
        "d" (noct-find-file "draft.org")
-       "i" (noct-find-file "~/ag-sys/else/scrawl/ideas.org")
+       "i" (noct-find-file "~/ag-sys/else/scrawl/general/ideas.org")
        "c" (noct-find-file "~/ag-sys/else/scrawl/prose/lndn/landon.org")
        "g" (noct-find-file "~/ag-sys/else/scrawl/prose/gen_misc.org")))
     ("cons"
@@ -3760,6 +3791,7 @@ Useful if constantly switching between only a few files in a project. I don't no
          frog-jump-buffer-posframe-handler
          #'noct-posframe-poshandler-frame-near-top-center))
 #+end_src
+
 ** Ibuffer
 *** Setup
 #+begin_src emacs-lisp
@@ -3827,7 +3859,7 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
   (defun noct-switch-to-project-root ()
     (interactive)
     (let ((projectile-switch-project-action 'projectile-dired))
-      (call-interactively #'project-switch-project)))
+      (call-interactively #'projectile-switch-project)))
 
   (defun noct-projectile-switch-and-vc ()
     "Switch project and run `projectile-vc'"
@@ -4198,9 +4230,9 @@ Smartparens' version is unfortunately too slow.
 
 ;; dead
 ;; (use-package gruvbox-dark-theme
-;;   :straight (gruvbox-dark-theme :type git
-;;                                 :host github
-;;                                 :repo "d125q/gruvbox-dark-emacs")
+;;   :straight (gruvbox-dark-theme
+;;              :host github
+;;              :repo "d125q/gruvbox-dark-emacs")
 ;;   :init (load-theme 'gruvbox-dark t))
 
 (use-package lenlen-theme
@@ -4395,7 +4427,6 @@ Soft wrap lines at =fill-column=.
 (use-package rect-ext
   :disabled t
   :straight (rect-ext
-             :type git
              :host github
              :repo "noctuid/rect-ext.el"
              :protocol ssh
@@ -4447,6 +4478,19 @@ Evilnc also has comment text objects, but they were fairly broken last time I tr
 ;;   (let* ((imenu-create-index-function #'evilnc-imenu-create-index-function))
 ;;     (unless (featurep 'counsel) (require 'counsel))
 ;;     (counsel-imenu)))
+#+end_src
+
+** Crux
+TODO just use evil?
+Some extra basic utilities.
+#+begin_src emacs-lisp
+(use-package crux
+  :general
+  (general-def 'insert
+    [(shift return)] #'crux-smart-open-line
+    [(control shift return)] #'crux-smart-open-line-above
+    ;; crux-indent-defun
+    ))
 #+end_src
 
 ** File Templates
@@ -4809,7 +4853,6 @@ Still experimental.
 #+begin_src emacs-lisp
 (use-package things
   :straight (things
-             :type git
              :host github
              :repo "noctuid/things.el"
              :protocol ssh
@@ -4817,7 +4860,6 @@ Still experimental.
 
 (use-package things-evil
   :straight (things-evil
-             :type git
              :host github
              :repo "noctuid/things.el"
              :protocol ssh
@@ -4973,7 +5015,11 @@ TODO Use things.el instead.
   (general-r
     "n" #'evilem-next-line
     "e" #'evilem-prev-line
-    "w" #'evilem-forward-word-begin
+    ;; too many candidates to be that useful
+    ;; "w" #'evilem-forward-word-begin
+    ;; so useful it might even warrant a single letter keybinding (e.g.
+    ;; replacing f keybinding)
+    "w" #'evil-avy-goto-word-or-subword-1
     "W" #'evilem-forward-WORD-begin
     "b" #'evilem-backward-word-begin
     "B" #'evilem-backward-WORD-begin
@@ -5095,7 +5141,6 @@ Needs to be updated to use =things.el= and needs to have more tests.
 #+begin_src emacs-lisp
 (use-package evil-textobj-column
   :straight (evil-textobj-column
-             :type git
              :host github
              :repo "noctuid/evil-textobj-column"
              :protocol ssh
@@ -5119,7 +5164,7 @@ This package is unfortunately unmaintained.
 (use-package evil-numbers
   ;; use version that supports g C-a
   ;; https://github.com/janpath/evil-numbers/issues/3
-  :straight (evil-numbers :type git :host github :repo "janpath/evil-numbers")
+  :straight (evil-numbers :host github :repo "janpath/evil-numbers")
   :general ('normal
             "C-a" #'evil-numbers/inc-at-pt
             "C-x" #'evil-numbers/dec-at-pt
@@ -5598,8 +5643,10 @@ Currently broken for github.
 #+end_src
 
 ** Smerge
+TODO RET and m-a don't work
+TODO normalize keymaps when starting smerge mode
 #+begin_src emacs-lisp
-(general-with-package 'smerge
+(general-with-package 'smerge-mode
   (general-def 'normal smerge-mode-map "RET" #'smerge-keep-current)
   ;; can temporarily override m bindings until conflicts resolved
   (general-m smerge-mode-map
@@ -5873,7 +5920,6 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 (use-package flycheck-hunspell
   :disabled t
   :straight (flycheck-hunspell
-             :type git
              :host github
              :repo "leotaku/flycheck-hunspell")
   :after flycheck
@@ -6125,8 +6171,34 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 ** Message
 #+begin_src emacs-lisp
 (general-with 'evil
-  (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (general-add-hook 'messages-buffer-mode-hook #'evil-normalize-keymaps))
+  ;; (evil-set-initial-state 'messages-buffer-mode 'normal)
+  ;; this won't work (runs too soon it seems)
+  ;; (general-add-hook 'messages-buffer-mode-hook #'evil-normalize-keymaps)
+  ;; this doesn't work
+  ;; (general-add-advice 'after-find-file
+  ;;                     :after (lambda (&rest _)
+  ;;                              (when (eq major-mode 'messages-buffer-mode)
+  ;;                                (evil-normalize-keymaps)
+  ;;                                t))
+  ;;                     nil
+  ;;                     #'identity)
+  ;; this is what fixes things
+  ;; (general-add-hook 'post-command-hook
+  ;;                   (lambda (&rest _)
+  ;;                     (when (eq major-mode 'messages-buffer-mode)
+  ;;                       (evil-normalize-keymaps)
+  ;;                       t))
+  ;;                   nil
+  ;;                   nil
+  ;;                   #'identity)
+  (general-add-hook 'after-init-hook
+                    (lambda (&rest _)
+                      (when-let ((messages-buffer (get-buffer "*Messages*")))
+                        (with-current-buffer messages-buffer
+                          (evil-normalize-keymaps))))
+                    nil
+                    nil
+                    t))
 #+end_src
 
 ** Multiple Major Modes/Polymode
@@ -6159,11 +6231,10 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   :init
   (general-add-advice 'after-find-file
                       :before
-                      (lambda (&rest _)
+                      (noct-defun noct-maybe-enable-org-hugo-auto-export
+                          (&rest _)
                         (when (noct-blog-dir-p buffer-file-name)
-                          (require 'ox-hugo-auto-export)))
-                      nil
-                      #'identity)
+                          (org-hugo-auto-export-mode))))
   (general-with 'ox
     (require 'ox-hugo)))
 #+end_src
@@ -6437,7 +6508,6 @@ If it doesn't have an extension, try to guess one."
 (use-package taskrunner)
 (use-package ivy-taskrunner
   :straight (ivy-taskrunner
-             :type git
              :host github
              :repo "emacs-taskrunner/ivy-taskrunner"))
 #+end_src
@@ -6893,12 +6963,12 @@ TODO
   (general-def lispy-mode-map-lispy
     "]" nil
     "[" nil
-    ;; "[" #'lispy-brackets-auto-wrap
     ":" nil
     ;; exit quotes with "
     "\"" #'lispy-doublequote
     "(" #'lispy-parens-auto-wrap
-    ;; "{" #'lispy-braces-auto-wrap
+    "[" #'lispy-brackets-auto-wrap
+    "{" #'lispy-braces-auto-wrap
     "TAB" #'noct-lispy-tab
     "<backtab>" #'lispy-dedent-adjust-parens
     "M-h" #'lispy-beginning-of-defun
@@ -7332,7 +7402,7 @@ This will only run `ielm-return' when at the end of the buffer."
   :config
   (general-def 'normal fennel-mode-map
     "RET" #'fennel-find-definition)
-  (general-m
+  (general-m fennel-mode-map
     "c" #'fennel-view-compilation
     "d" #'lisp-eval-defun
     ";" #'fennel-repl
@@ -7420,6 +7490,12 @@ TODO
 (use-package json-mode)
 #+end_src
 
+** Kmonad
+#+begin_src emacs-lisp
+(use-package kbd-mode
+  :straight (kbd-mode :host github :repo "kmonad/kbd-mode"))
+#+end_src
+
 ** Lua
 #+begin_src emacs-lisp
 (use-package lua-mode)
@@ -7472,7 +7548,7 @@ TODO:
 
 (use-package lpy
   :disabled t
-  :straight (lpy :type git :host github :repo "abo-abo/lpy")
+  :straight (lpy :host github :repo "abo-abo/lpy")
   :ghook 'python-mode-hook
   :config
   (general-def lpy-mode-map
@@ -7549,7 +7625,7 @@ Better than default LSP equivalent.
 Currently requires running =make= for setup and is not on MELPA.
 #+begin_src emacs-lisp
 (use-package pylookup
-  :straight (pylookup :type git :host github :repo "tsgates/pylookup")
+  :straight (pylookup :host github :repo "tsgates/pylookup")
   :general
   (general-m python-mode-map
     "H" #'pylookup-lookup-at-pount
@@ -7706,7 +7782,6 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
   ;; it requires user local file
   :disabled t
   :straight (txr-mode
-             :type git
              :host github
              :repo "piotrklibert/txr-mode"))
 #+end_src
@@ -8424,7 +8499,6 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
 
 (use-package vterm-toggle
   :straight (vterm-toggle
-             :type git
              :host github
              :repo "jixiuf/vterm-toggle")
   :general

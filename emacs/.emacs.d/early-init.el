@@ -16,7 +16,7 @@
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-(let ((gap (or (getenv "WM_GAP") 15)))
+(let ((gap (or (getenv "WM_GAP") "15")))
   (push (cons 'internal-border-width (string-to-number gap)) default-frame-alist))
 
 ;; ** Set Font
@@ -27,7 +27,11 @@
 ;; I haven't actually noticed any difference for fonts I've tried
 (setq frame-inhibit-implied-resize t)
 
-(push '(font . "Office Code Pro-10") default-frame-alist)
+;; TODO `find-font' doesn't work in early init, and Emacs fails if it can't find
+;; the font
+;; (let ((font "Office Code Pro D"))
+;;   (when (or t (find-font (font-spec :name font)))
+;;     (push `(font .  ,(concat font "-10")) default-frame-alist)))
 
 ;; ** Don't Load Site Startup File or Default Init File
 ;; not loading default.el actually does have an impact (sometimes? it seems like
