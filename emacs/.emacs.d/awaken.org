@@ -1815,6 +1815,21 @@ Obvious ones:
     "<end>" #'evil-end-of-visual-line))
 #+end_src
 
+** Path Configuration (exec-path-from-shell)
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :defer-incrementally t
+  :config
+  ;; make `exec-path' match shell path in GUI Emacs
+  ;; this is mainly useful on OSX, e.g. to get poetry in `exec-path' for
+  ;; poetry.el
+  (when (memq window-system '(mac ns x))
+    (gsetq exec-path-from-shell-shell-name "bash"
+           exec-path-from-shell-arguments '("-l"))
+    ;; takes about 0.1s
+    (exec-path-from-shell-initalize)))
+#+end_src
+
 ** Profiling
 #+begin_src emacs-lisp
 (use-package profiler
