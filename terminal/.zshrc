@@ -29,7 +29,7 @@
 # TODO look at crivotz/dot_files
 # TODO https://old.reddit.com/r/zsh/comments/f5ak4d/rfc_zsh_for_humans/fhzvc7k/
 # TODO look at raxod's zshrc
-# TODO https://github.com/zdharma/zshelldoc
+# TODO https://github.com/zdharma-continuum/zshelldoc
 # TODO https://github.com/b4b4r07/zsh-vimode-visual
 # TODO https://github.com/zsh-vi-more/evil-registers
 
@@ -62,7 +62,7 @@
 if [[ -n $NOCT_PROFILE_ZSH ]]; then
 	zmodload zsh/zprof
 elif [[ -n $NOCT_TIME_ZSH ]]; then
-	# https://github.com/zdharma/pm-perf-test
+	# https://github.com/zdharma-continuum/pm-perf-test
 	typeset -F4 SECONDS=0
 fi
 
@@ -70,14 +70,14 @@ fi
 # show cached prompt while real prompt is loading
 NOCT_INSTANT_PROMPT=true
 if $NOCT_INSTANT_PROMPT && \
-		[[ -r ~/.cache/p10k-instant-prompt-${(%):-%n}.zsh ]]; then
-	source ~/.cache/p10k-instant-prompt-${(%):-%n}.zsh
+		[[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+	source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
 # * Plugins
 if [[ ! -f ~/.zinit/bin/zinit.zsh ]]; then
 	echo "Installing zinit..."
-	git clone https://github.com/zdharma/zinit.git ~/.zinit/bin
+	git clone https://github.com/zdharma-continuum/zinit.git ~/.zinit/bin
 fi
 
 # NOTE zinit load isn't apparently much of an issue when using wait/turbo
@@ -100,7 +100,7 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	# compinit before loading; load after autosuggestions
 	zinit ice wait"0c" lucid \
 		  atinit"ZINIT[COMPINIT_OPTS]=-C; zpcompinit; zpcdreplay"
-	zinit light "zdharma/fast-syntax-highlighting"
+	zinit light "zdharma-continuum/fast-syntax-highlighting"
 
 	# ** Zle Enhancements
 	# needs to start before fast syntax highlighting and autosuggestions
@@ -1419,16 +1419,18 @@ POWERLEVEL9K_DIR_SHOW_WRITABLE=true
 # enable default branch icon (based on POWERLEVEL9K_MODE)
 unset POWERLEVEL9K_VCS_BRANCH_ICON
 
-# typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='➜'
-# typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='%%'
-typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='»'
-typeset POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VICMD_CONTENT_EXPANSION=''
+# typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='➜'
+# typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='%%'
+typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='»'
+typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VICMD_CONTENT_EXPANSION=''
 
 # don't print full prompt in scrollback; only display directory once
 typeset -g POWERLEVEL9K_TRANSIENT_PROMPT=same-dir
 
 # Finalize Powerlevel10k instant prompt. Should stay at the bottom of ~/.zshrc.
+# only run if function exists (in case p10k failed to installe
 if $NOCT_INSTANT_PROMPT \
+		&& typeset -f p10k-instant-prompt-finalize > /dev/null \
 		&& (( ! ${+functions[p10k-instant-prompt-finalize]} )); then
 	p10k-instant-prompt-finalize
 fi
