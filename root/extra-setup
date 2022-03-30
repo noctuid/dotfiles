@@ -167,8 +167,11 @@ ufw_setup() {
 			echo "Configuring UFW."
 			# https://wiki.archlinux.org/index.php/Uncomplicated_Firewall#Basic_configuration
 			ufw --force reset
-			ufw default deny
-			ufw allow from 192.168.0.0/24
+			ufw default deny incoming
+			# denying outgoing traffic can potentially prevent some malware from
+			# working, but a lot of malware just uses http or https; having to
+			# whitelist every used port for minimal benefit would be too tedious
+			ufw default allow outgoing
 			ufw enable
 		fi
 	else
