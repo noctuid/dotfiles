@@ -293,8 +293,6 @@ sharutils
 ntp
 # recommended over ntpd
 chrony
-# automatic timezone setting
-tzupdate aur
 
 # * Disk Utilities
 gparted

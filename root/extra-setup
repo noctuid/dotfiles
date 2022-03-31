@@ -33,7 +33,6 @@ service_setup() {
 	systemctl enable iwd
 	systemctl enable kwakd
 	systemctl enable ntpd
-	systemctl enable tzupdate
 	systemctl enable tlp
 	systemctl enable tlp-sleep
 	# enabled in fcron_setup

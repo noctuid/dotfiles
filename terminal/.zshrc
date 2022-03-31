@@ -713,6 +713,12 @@ fonts() {
 # set hardware clock to system time
 alias fixhwclock='sudo hwclock --systohc'
 
+fixtimezone() {
+	tz=$(curl --silent --fail https://ipapi.co/timezone)
+	echo "$tz"
+	sudo timedatectl set-timezone "$tz"
+}
+
 alias rldsxhkd='pkill -USR1 -x sxhkd'
 
 alias rldpolybar='pkill -USR1 -x polybar'
