@@ -1,7 +1,7 @@
 configuration {
 // * Settings
     // run on current monitor instead of monitor mouse is on
-    m: -1;
+    monitor: "-1";
 
     // honor X11 dpi; too large if use 1 which checks monitor size
     dpi: 0;
@@ -20,12 +20,6 @@ configuration {
 
     // works for drun and window modes (not run);
     show-icons: true;
-
-    // pywal
-    // dark theme
-    // theme: "~/.cache/wal/colors-rofi-dark.rasi";
-    // light theme
-    theme: "~/.cache/wal/colors-rofi-light.rasi";
 
     // * Keybindings
     // clipboard paste keys
@@ -46,3 +40,9 @@ configuration {
       sorting-method: "name";
   }
 }
+// pywal
+// pywal
+// dark theme
+// @theme "~/.cache/wal/colors-rofi-dark.rasi"
+// light theme
+@theme "~/.cache/wal/colors-rofi-light.rasi"
