@@ -5662,6 +5662,8 @@ TODO RET and m-a don't work
 TODO normalize keymaps when starting smerge mode
 #+begin_src emacs-lisp
 (general-with-package 'smerge-mode
+  ;; has proven to be necessary at least some of the time
+  (general-add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps)
   (general-def 'normal smerge-mode-map "RET" #'smerge-keep-current)
   ;; can temporarily override m bindings until conflicts resolved
   (general-m smerge-mode-map
