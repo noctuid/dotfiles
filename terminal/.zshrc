@@ -671,7 +671,6 @@ alias aurs='paru -Ss'
 alias aurc='paru -G --comments'
 # print pkgbuild
 alias aurp='paru -G --print'
-alias pacupdate='paru -Syu'
 remove_orphans() {
 	pacman -Rs $(pacman -Qqtd)
 }
