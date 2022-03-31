@@ -1223,6 +1223,17 @@ done
 EOF
 }
 
+syncaegis() {
+	if ! mountpoint -q ~/database; then
+		echo "Please mountdatab."
+		return 1
+	fi
+
+	# encrypted 2FA tokens
+	adb-sync --reverse "${1:-/sdcard}"/Aegis ~/database/move/phone/internal/
+	adb-sync --reverse "${1:-/sdcard}"/Aegis ~/ag-sys/backup/
+}
+
 # intentionally not using --delete (do it manually)
 # remember: trailing slashes are important on src dir
 # trailing slash on dest dir results in dir// (but this doesn't matter)
@@ -1266,6 +1277,8 @@ file in it."
 
 
 	# One Way - To Computer
+	syncaegis
+
 	# TODO exclude .thumbnails
 	# photos
 	adb-sync --reverse "$internal"/DCIM ~/database/move/phone/internal/
