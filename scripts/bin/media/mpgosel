@@ -4,5 +4,12 @@
 # selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | fzf)
 selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | esel)
 if [[ -n $selected ]]; then
+	if [[ ! -d $selected ]]; then
+		if [[ ! $selected =~ ^"$HOME"/move/Screenshots ]]; then
+			selected="$HOME/move/Screenshots/$selected"
+		fi
+		mkdir -p "$selected" || exit 1
+	fi
+
     (cd "$selected" && mpgo "$1")
 fi
