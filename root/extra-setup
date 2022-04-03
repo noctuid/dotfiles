@@ -95,6 +95,15 @@ initramfs_setup() {
 	mkinitcpio --allpresets
 }
 
+# * Kmonad
+kmonad_setup() {
+	echo "Setting up uinput permissions for kmonad"
+	user=$1
+	groupadd uinput
+	usermod -aG input "$user"
+	usermod -aG uinput "$user"
+}
+
 # * Console Colors
 vt_colors_setup() {
 	echo "Configuring vt colors."
@@ -298,6 +307,8 @@ all() {
 		|| fail_configure "Refind setup failed."
 	initramfs_setup \
 		|| fail_configure "Mkinitcpio/Initramfs setup failed."
+	kmonad_setup "$user" \
+		|| fail_configure "Kmonad setup failed."
 	vt_colors_setup "$uhome" \
 		|| fail_configure "Setting vt colors failed."
 	freetype_setup \

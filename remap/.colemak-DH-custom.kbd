@@ -1,0 +1,83 @@
+;; TODO universal config
+;; https://github.com/kmonad/kmonad/issues/90
+;; - tap hold time needs to be longer on windows (more like 125 or 150)
+;; - different input/output on windows (repeat not yet merged; 400 35)
+;; - rmet -> rctl for some computers
+;; alternatively, ability to source files would help reduce dup
+
+(defcfg
+ ;; pass through unhandled events
+ fallthrough true
+
+ ;; having to name this is pretty unfortunate
+ input (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd")
+ output (uinput-sink "my kmonad output" " ")
+
+ ;; Windows
+ ;; input  (low-level-hook)
+ ;; output (send-event-sink)
+
+ ;; OSX
+ ;; input  (iokit-name "my-keyboard-product-string")
+ ;; output (kext)
+ )
+
+(defsrc
+ ;; don't touch function keys
+ ;; esc     f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+ grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+ tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+ caps a    s    d    f    g    h    j    k    l    ;    '    ret
+ lsft z    x    c    v    b    n    m    ,    .    /    rsft
+ lctl lmet lalt           spc            ralt rmet)
+
+(defalias
+  ;; layers
+  ext (layer-toggle extend)
+  agr (layer-toggle altgr)
+
+  ;; dual-role thumbkeys
+  ;; escape/shift
+  e/S (tap-hold 50 esc lsft)
+  ;; tab/control
+  t/C (tap-hold 50 esc lctrl)
+  ;; return/altgr
+  r/G (tap-hold 50 ret @agr)
+  ;; open paren/alt
+  p/A (tap-hold 50 \( lalt)
+  ;; TODO how to get cedilla?
+  )
+
+;; TODO remove [ and \ (need to fix altgr layer first)
+(deflayer colemak-dhk
+  ;; esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    f    p    b    _    j    l    u    y    ;    [    \
+  @ext a    r    s    t    g    ret  k    n    e    i    o    '
+  lsft x    c    d    v    z    _    m    h    ,    .    /
+  lmet @t/C @e/S           spc            @r/G @p/A)
+
+(deflayer extend
+  _    _    _    _    _    _    _    _    _    _    _     _    _    _
+  _    _    _    `    _    _    _    _    bspc home end   A-f  ]    \
+  _    _    _    _    _    _    _    A-b  down up   right pgup _
+  lsft _    _    _    _    _    _    pgdn left _    _     _
+  lmet lctl lsft           spc            ralt rmet)
+
+
+;; TODO shift [ to close, same for { (will need custom shift layer)
+(deflayer altgr
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    `    [    \)   {    \\   _    @    \_   -    =    !    _    _
+  _    1    2    3    4    |    _    &    7    8    9    0    _
+  lsft ~    #    5    ^    _    _    $    6    +    *    %
+  lmet lctl lsft           spc            ralt rmet)
+
+;; TODO fix []; some way to unshift?
+;;      https://github.com/kmonad/kmonad/issues/335
+(deflayer altgr-shift
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    `    ]    _    }    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  lsft _    _    _    _    _    _    _    _    _    _    _
+  lmet lctl lsft           spc            ralt rmet)

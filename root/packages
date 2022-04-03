@@ -311,6 +311,7 @@ rng-tools
 xcape
 # klfc cabal
 klfc-bin aur
+kmonad-bin aur
 arduino
 
 # * Cron

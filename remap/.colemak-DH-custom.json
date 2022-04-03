@@ -12,11 +12,11 @@
         [ "Control_L", "Win" ],
         // backup caps
         [ "KP_Min", "CapsLock" ],
-        // dual-role: Return
-        [ "Alt_L", "Shift" ],
         // dual-role: Escape
+        [ "Alt_L", "Shift" ],
+        // dual-role: Return
         [ "Alt_R", "AltGr" ],
-        // empty atm
+        // dual-role: (
         [ "PrintScreen", "Alt" ],
         [ "Control_R", "PrintScreen" ]
         // hyper/super on thumb mouse buttons

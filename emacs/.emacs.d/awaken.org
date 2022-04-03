@@ -7510,7 +7510,9 @@ TODO
 ** Kmonad
 #+begin_src emacs-lisp
 (use-package kbd-mode
-  :straight (kbd-mode :host github :repo "kmonad/kbd-mode"))
+  :straight (kbd-mode :host github :repo "kmonad/kbd-mode")
+  :config
+  (put 'deflayer 'lisp-indent-function 'defun))
 #+end_src
 
 ** Lua
