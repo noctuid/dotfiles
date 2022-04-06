@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: until loop
-# condition: 'space-expand
+# condition: 'space-expand-code
 # key: until
 # --
 until ${1:cond}; do

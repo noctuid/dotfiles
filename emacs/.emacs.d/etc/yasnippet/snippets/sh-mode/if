@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: if
-# condition: 'space-expand
+# condition: 'space-expand-code
 # key: if
 # --
 if ${1:}; then

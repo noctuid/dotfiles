@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: for loop
-# condition: 'space-expand
+# condition: 'space-expand-code
 # key: for
 # --
 for ${1:var} in ${2:stuff}; do

@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: while loop
-# condition: 'space-expand
+# condition: 'space-expand-code
 # key: while
 # --
 while ${1:cond}; do

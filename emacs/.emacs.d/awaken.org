@@ -4765,10 +4765,12 @@ TODO number incrementing
   ;; TODO extra checks may be necessary to prevent re-expanding the snippet in
   ;; undesirable situations
   (defun noct-space-should-expand-snippet-p ()
-    "Check if a snippet whose condition returns 'space-expand is at the point."
+    "Check if a snippet whose condition is 'space-expand-code is at the point.
+Only return non-nil if not in a string or comment."
     (let ((yas-buffer-local-condition
-           ''(require-snippet-condition . space-expand)))
-      (yas--templates-for-key-at-point)))
+           ''(require-snippet-condition . space-expand-code)))
+      (and (yas--templates-for-key-at-point)
+           (null (nth 8 (syntax-ppss))))))
 
   (general-def 'insert yas-minor-mode-map
     "SPC" (list #'yas-expand :predicate '(noct-space-should-expand-snippet-p)))

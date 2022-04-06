@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: case
-# condition: 'space-expand
+# condition: 'space-expand-code
 # key: case
 # --
 case ${1:cond} in
