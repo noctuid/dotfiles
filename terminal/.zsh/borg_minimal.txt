@@ -12,48 +12,47 @@ P sh
 ! **/nixpkgs
 ! **/forks/melpa
 ! **/forks/org-mode
-# keep trash for now; doesn't really get big
-# ! .Trash
+! **/.Trash
 
-+ .gnupg
+# passwords/keys
+R .gnupg
+R .password-store
+R .ssh
 # bookmarks
-+ .local/share/buku
-# memory card and game settings
-+ .local/share/dolphin-emu
-+ .password-store
-+ .ssh
+R .local/share/buku
+# # memory card and game settings
+R .local/share/dolphin-emu
 # sdvx game data
-+ build/unnamed-sdvx-clone/bin/maps.db
+R build/unnamed-sdvx-clone/bin/maps.db
 
 # qutebrowser history and sessions
-+ .local/share/qutebrowser/cmd-history
-+ .local/share/qutebrowser/history.sqlite
-+ .local/share/qutebrowser/sessions
+R .local/share/qutebrowser/cmd-history
+R .local/share/qutebrowser/history.sqlite
+R .local/share/qutebrowser/sessions
 
 # firefox browser and download history and bookmarks
-+ .mozilla/firefox/noctuid.normal/places.sqlite
+R .mozilla/firefox/noctuid.normal/places.sqlite
 # firefox sessions
-+ .mozilla/firefox/noctuid.normal/sessionstore-backups
-+ .mozilla/firefox/noctuid.normal/sessionstore.jsonlz4
-+ .mozilla/firefox/noctuid.normal/sessionstore.js
+R .mozilla/firefox/noctuid.normal/sessionstore-backups
+# these no longer seem to exist
+# R .mozilla/firefox/noctuid.normal/sessionstore.jsonlz4
+# R .mozilla/firefox/noctuid.normal/sessionstore.js
 
 # repl and other history files
-+ .enhancd
-+ .fasd
-+ .ipython/profile_default/history.sqlite
-+ .lein/repl-history
-+ .local/share/nix
-+ .local/share/zathura
-+ .python_history
-+ .ros_history
-+ .sbcl_history
-+ .zsh_history
+R .enhancd
+R .fasd
+R .ipython/profile_default/history.sqlite
+R .lein/repl-history
+R .local/share/nix
+R .local/share/zathura
+R .python_history
+R .ros_history
+R .sbcl_history
+R .zsh_history
 
-+ ag-sys
-# currently not using Anki on laptop (and anki has backup mechanism)
-# + Documents/Anki
-+ dotfiles
-+ src
-
-# don't backup other folders
-- *
+# notes, code, etc.
+R ag-sys
+# currently not using Anki on laptop (and anki has its own backup mechanism)
+# R Documents/Anki
+R dotfiles
+R src

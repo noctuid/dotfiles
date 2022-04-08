@@ -194,7 +194,7 @@ umountdatab() {
 # ** Borg
 # lz4 is the default
 borg_bk() {
-	borg create -v --stats --progress "$@"
+	borg create --verbose --stats --progress "$@"
 }
 borg_bk_online() {
 	# use more compression for online backup
@@ -309,6 +309,8 @@ borg_small() {
 	if borg init --encryption=repokey-blake2 "$backup_dir"; then
 		borg key export "$backup_dir" "$(borg_key_backup_file "$backup_dir")" \
 			&& cp "$backup_dir"/config "$(borg_config_backup_file "$backup_dir")"
+	else
+		echo "Repo exists already or initialization failed."
 	fi
 
 	# NOTE
@@ -327,7 +329,7 @@ borg_small() {
 		bk_command=borg_bk_online
 	fi
 	if $bk_command --patterns-from='.zsh/borg_minimal.txt' \
-				   "$backup_dir"::"$backup_format" ./
+				   "$backup_dir"::"$backup_format"
 
 	then
 		notify-send --icon=tropy-gold 'Minimal backup completed successfully.'
