@@ -55,7 +55,7 @@ tray-maxsize = ${env:TRAY_HEIGHT:100%}
 padding = 2
 underline-size = ${env:BAR_BORDER:6}
 
-; no rounded borders
+; rounded borders
 radius = ${env:CORNER_RADIUS:15}
 
 border-size = ${env:BAR_BORDER:6}
@@ -83,9 +83,9 @@ font-2 = IPAGothic:pixelsize=9:weight=bold
 ; icon fonts
 font-3 = Siji:pixelsize=9
 ; nerd fonts are only font awesome 4
-font-4 = Font Awesome 5 Free:style=Solid:pixelsize=8
-font-5 = Font Awesome 5 Free:pixelsize=8
-font-6 = Font Awesome 5 Brands:pixelsize=8
+font-4 = Font Awesome 6 Free:style=Solid:pixelsize=8
+font-5 = Font Awesome 6 Free:pixelsize=8
+font-6 = Font Awesome 6 Brands:pixelsize=8
 ; other icons; alternative icons
 font-7 = FuraMono Nerd Font:pixelsize=9
 ; not used here, may be useful for website titles
