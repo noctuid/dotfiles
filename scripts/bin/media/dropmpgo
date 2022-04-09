@@ -3,4 +3,4 @@
 # dropdown for ./mpgosel
 # can hide/show while video running to see output
 # once video quits, window will exit, and tdrop will recreate
-dropdown -n mpgosel kitty mpgosel "$1"
+dropdown -n mpgosel kitty mpgosel "$@"

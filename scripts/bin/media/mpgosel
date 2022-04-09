@@ -11,5 +11,5 @@ if [[ -n $selected ]]; then
 		mkdir -p "$selected" || exit 1
 	fi
 
-    (cd "$selected" && mpgo "$1")
+    (cd "$selected" && mpgo "$@")
 fi
