@@ -392,8 +392,8 @@ python-mpd pip
 pylast pip
 
 # * Downloading
-youtube-dl
-# youtube-dl-git aur
+yt-dlp
+
 aria2
 megatools aur
 

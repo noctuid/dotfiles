@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+dir=~/database/move/ytdl
+audio_only=false
+while getopts :d:a opt
+do
+	case $opt in
+		a) audio_only=true;;
+		d) dir=$OPTARG;;
+		*) echo "Illegal flag" ; exit 1;;
+	esac
+done
+shift "$((OPTIND-1))"
+
+url=$1
+
+if [[ -z "$url" ]]; then
+	echo "One argument is required: the url to download"
+fi
+
+takedir() {
+	mkdir -p "$1"
+	cd "$1" || exit 1
+}
+
+takedir "$dir"
+
+notify-send "ytdl: Downloading to $dir"
+
+if $audio_only; then
+	yt-dlp -o './%(title)s_%(width)sx%(height)s_%(upload_date)s_audio.%(ext)s' \
+			   --external-downloader aria2c \
+			   --external-downloader-args "-c --max-connection-per-server 4" \
+			   --restrict-filenames \
+			   --extract-audio \
+			   "$url"
+else
+	# --external-downloader-args "-c --max-connection-per-server 4" \
+	yt-dlp -o "./%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s" \
+			   --external-downloader aria2c \
+			   --restrict-filenames \
+			   "$url"
+fi
+
+# shellcheck disable=SC2181
+if [[ $? -eq 0 ]]; then
+	notify-send "yt-dlp finished."
+else
+	notify-send "yt-dlp failed."
+	exit 1
+fi
