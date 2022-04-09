@@ -1,0 +1,22 @@
+# -*- mode: conf-space; -*-
+# https://github.com/EvanPurkhiser/linux-vt-setcolors/tree/master/example-colors
+0#002b36    base03
+1#dc322f    red
+2#859900    green
+3#b58900    yellow
+4#268bd2    blue
+5#d33682    magenta
+6#2aa198    cyan
+7#eee8d5    base2
+8#002b36    base03
+9#cb4b16    orange
+10#586e75   base01
+11#657b83   base00
+12#839496   base0
+13#6c71c4   violet
+14#93a1a1   base1
+15#fdf6e3   base3
+
+# Local Variables:
+# eval: (rainbow-mode 1)
+# End:
