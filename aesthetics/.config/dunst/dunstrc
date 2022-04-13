@@ -12,8 +12,10 @@
 	# which is easier
 	scale = 1
 	# these will be replaced automatically based on monitor dimensions
-    geometry = "400x5-0+14"
-	corner_radius = 15
+	width = 400
+	height = 400  # max height
+	offset = 0x14
+	corner_radius = 1
 	frame_width = 7
 	separator_height = 3
 
