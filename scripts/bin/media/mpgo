@@ -22,10 +22,10 @@ mpv_flags=(
 
 if [[ $clipboard == *youtube.com* ]]; then
 	echo "$clipboard" > /tmp/mpv/last_link
-	mpv "${mpv_flags[@]}" "$clipboard"
+	mvp "${mpv_flags[@]}" "$clipboard"
 elif [[ $clipboard =~ ^http ]] || [[ -e $clipboard ]] \
 		 || [[ $clipboard =~ ^magnet ]]; then
 	echo "$clipboard" > /tmp/mpv/last_link
 	# ytdl messes up direct links for some reason (slow)
-	mpv --no-ytdl "${mpv_flags[@]}" "$clipboard"
+	mvp --no-ytdl "${mpv_flags[@]}" "$clipboard"
 fi

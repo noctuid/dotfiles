@@ -18,24 +18,29 @@ fi
 xrdb -load ~/.Xresources
 
 # * Optimus Manager
-# # NOTE: this must come first to prevent black screen issue when switching
-# sudo prime-offload
+if [[ -z $NVIDIA_XRUN ]]; then
+	# NOTE: this must come first to prevent black screen issue when switching
+	prime-offload
 
-# # get black screen without this
-# xrandr --auto
+	# used to get black screen without this; looks like not necessary with
+	# hybrid at least (TODO retest with other modes)
+	# xrandr --auto
+fi
 
-# # set laptop screen to primary monitor (so setroot and redshift recognize it as
-# # the primary monitor/output); this is not the default when using nvidia-xrun or
-# # optimus-manager
+# * Set Laptop Screen to Primary Monitor
+# so setroot and redshift recognize it as the primary monitor/output; this is
+# not the default when using nvidia-xrun or optimus-manager
+# this is required for redshift to recognize laptop screen as crtc 0 at all
 
-# # primary seems to be the connected monitor that is alphabetically first; ensure
-# # that the primary monitor stays as the laptop screen after connecting to other
-# # outputs by explicitly setting it
+# primary seems to be the connected monitor that is alphabetically first; ensure
+# that the primary monitor stays as the laptop screen after connecting to other
+# outputs by explicitly setting it
 
-# # this is required for redshift to recognize laptop screen as crtc 0 at all
-
-# # this assumes no outputs are plugged in when starting X
-# xrandr --output "$(xrandr --listmonitors | awk '/0:/ {print $NF}')" --primary
+# this assumes no outputs are plugged in when starting X
+# it works on current laptop even if the cable is plugged in when starting X
+# (though will have to disconnect/reconnect if want separate desktop instead of
+# mirror)
+xrandr --output "$(xrandr --listmonitors | awk '/0:/ {print $NF}')" --primary
 
 # * Environment Variables
 # shellcheck disable=SC1090

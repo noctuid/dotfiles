@@ -1,0 +1,25 @@
+output DP-1-0
+off
+output DP-1-1
+off
+output DP-1-2
+off
+output DP-1-3
+off
+output eDP-1
+crtc 0
+mode 3840x2160
+pos 0x0
+primary
+rate 60.00
+x-prop-broadcast_rgb Automatic
+x-prop-colorspace Default
+x-prop-max_bpc 12
+x-prop-non_desktop 0
+x-prop-scaling_mode Full aspect
+output HDMI-1-0
+crtc 3
+mode 1920x1080
+pos 3840x0
+rate 60.00
+x-prop-non_desktop 0

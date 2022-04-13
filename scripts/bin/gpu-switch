@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# probably won't use this much (will just stay in hybrid mode)
+
+echo "Run 'sudo prime-switch' after X stops."
+echo "Press anything to continue"
+read -r
+optimus-manager --switch "$@"

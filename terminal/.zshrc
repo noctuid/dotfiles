@@ -966,30 +966,24 @@ alias nvout='monitor_disconnect DP-1 true'
 # HDMI-1-1 if on intel using nouveau
 # HDMI-0 if on nvidia
 hdmiadd() {
-	if xrandr --current | grep --quiet '^HDMI-1-1'; then
-		monitor_connect HDMI-1-1 true 十
-	else
-		monitor_connect HDMI-0 true 十
-	fi
+	monitor=$(xrandr --current | awk '/HDMI/ {print $1}')
+	monitor_connect "$monitor" true 十
 	if [[ -n $1 ]]; then
 		audio_switch hdmi
 	fi
 }
 
 hdmimirror() {
-	monitor_connect HDMI-1-1 \
-		|| monitor_connect HDMI-0
+	monitor=$(xrandr --current | awk '/HDMI/ {print $1}')
+	monitor_connect "$monitor"
 	if [[ -n $1 ]]; then
 		audio_switch analog
 	fi
 }
 
 hdmiout() {
-	if xrandr --current | grep --quiet '^HDMI-1-1'; then
-		monitor_disconnect HDMI-1-1 true
-	else
-		monitor_disconnect HDMI-0 true
-	fi
+	monitor=$(xrandr --current | awk '/HDMI/ {print $1}')
+	monitor_disconnect "$monitor" true
 	audio_switch analog
 }
 

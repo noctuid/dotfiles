@@ -2,4 +2,4 @@
 
 # prime-run just sets environment variables (so it doesn't matter if not using
 # hybrid mode)
-prime-run mpv --config-dir="$HOME"/.config/mvi "$@"
+prime-run mpv "$@"
