@@ -1597,7 +1597,7 @@ Automatically uncompress (for editing) and recompress (when saving) compressed f
 
 (general-def noct-toggle-map "S" #'noct-toggle-save-on-insert-exit)
 
-(general-t "s" #'evil-write)
+(general-t "s" #'save-buffer)
 #+end_src
 
 ** Backup
@@ -6243,6 +6243,40 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+end_src
 
 ** Org Mode
+All of my org config is in unclean.org. I will gradually move it here.
+
+*** Org Src
+#+begin_src emacs-lisp
+(defun noct-org-edit-special ()
+  "`org-edit-special' but jump to the next source block if not at one."
+  (interactive)
+  (unless (ignore-errors (org-edit-special))
+    ;; broken
+    ;; (org-in-src-block-p)
+    (org-babel-next-src-block))
+  (org-edit-special))
+
+(defun noct-org-src-exit-save ()
+  "To prevent the source buffer from being marked as edited."
+  (interactive)
+  (org-edit-src-save)
+  (org-edit-src-exit))
+
+(general-with 'org-src
+  (blackout 'org-src-mode " λ")
+
+  ;; don't indent my source blocks
+  (gsetq org-src-preserve-indentation t
+         org-edit-src-auto-save-idle-delay auto-save-timeout)
+
+  (general-m org-src-mode
+    :definer 'minor-mode
+    "'" #'noct-org-src-exit-save)
+
+  (general-def org-src-mode-map
+    [remap save-buffer] #'org-edit-src-save))
+#+end_src
+
 *** External/Contrib
 **** Ox Hugo
 #+begin_src emacs-lisp
