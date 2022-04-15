@@ -4832,7 +4832,7 @@ Linear undo while maintaining all history. Not as nice as being able to navigate
 #+end_src
 
 *** Undo Tree
-Undo tree is a great package but is unmaintained and extremely buggy.
+Undo tree is a great package but is unmaintained and extremely buggy. Even after the corruption improvements, I had issues, so I am sticking with undo-fu.
 
 [[https://github.com/syl20bnr/spacemacs/issues/774][Issue on spacemacs related to corruption]]
 
@@ -4862,6 +4862,27 @@ Undo tree is a great package but is unmaintained and extremely buggy.
     "U" #'undo-tree-redo)
 
   (general-t "u" #'undo-tree-visualize))
+#+end_src
+
+*** Vundo
+#+begin_src emacs-lisp
+(use-package vundo
+  :straight (vundo :host github :repo "casouri/vundo")
+  :general (general-t "u" #'vundo)
+  :config
+  (gsetq vundo-glyph-alist vundo-unicode-symbols
+         vundo--window-max-height 10)
+
+  ;; vundo forces emacs state
+  (general-def '(normal nil) vundo-mode-map
+    "q" #'vundo-quit
+    "h" #'vundo-backward
+    "i" #'vundo-forward
+    "n" #'vundo-next
+    "e" #'vundo-previous
+    "u" #'vundo-stem-root
+    "y" #'vundo-stem-end
+    "RET" #'vundo-confirm))
 #+end_src
 
 ** Evil Motions and Text objects
