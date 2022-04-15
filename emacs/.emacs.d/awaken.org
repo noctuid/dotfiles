@@ -1827,7 +1827,7 @@ Obvious ones:
     (gsetq exec-path-from-shell-shell-name "bash"
            exec-path-from-shell-arguments '("-l"))
     ;; takes about 0.1s
-    (exec-path-from-shell-initalize)))
+    (exec-path-from-shell-initialize)))
 #+end_src
 
 ** Profiling
@@ -2109,6 +2109,9 @@ I've switched away from putting this function in a hook because it can be jarrin
 *** Setup
 #+begin_src emacs-lisp
 (use-package company
+  :general 
+  (general-def noct-toggle-map "c" #'company-mode)
+  (general-def 'insert "C-t" #'company-yasnippet)
   :init
   ;; (noct-pre-command-or-post-file
   ;;   (global-company-mode))
@@ -2148,20 +2151,21 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   ;; add yasnippet to all backends
   (gsetq company-backends
          (mapcar #'trishume:company-backend-with-yas company-backends))
-
-  (general-def noct-toggle-map "c" #'company-mode)
-
-  (general-def 'insert "C-t" #'company-yasnippet)
-
+  
+  ;; no longer using tab
   ;; tab more similar to vim (tab tabs through completions)
-  (require 'company-tng)
-
-  (company-tng-configure-default)
+  ;; (require 'company-tng)
+  ;; (company-tng-configure-default)
 
   (general-def company-active-map
     ;; don't take over these keys
     "C-h" nil
-    "C-w" nil)
+    "C-w" nil
+    ;; only use quick access keys
+    [tab] nil
+    "TAB" nil
+    "<down>" nil
+    "<up>" nil)
 
   ;; can use for snippet expansion (if take too long to hit tab; shouldn't
   ;; happen normally)
@@ -2255,21 +2259,91 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
   :ghook 'company-mode-hook
   :blackout t
   :config
+  ;; disable automatic quickhelp
+  (gsetq company-posframe-quickhelp-delay nil)
   (general-def noct-toggle-map "C" #'company-posframe-mode))
 #+end_src
 
 ** Corfu
+TODO make faces match theme
 #+begin_src emacs-lisp
 (use-package corfu
-  :disabled t
-  :ghook 'minibuffer-setup-hook
+  ;; to get extensions
+  :straight (corfu :files (:defaults "extensions/*.el"))
+  :ghook
+  ('minibuffer-setup-hook
+   (noct-defun corfu-enable-in-minibuffer ()
+     "Enable corfu in the minibuffer if `completion-at-point' is bound."
+     (when (where-is-internal #'completion-at-point (list (current-local-map)))
+       (corfu-mode))))
+  :init
+  ;; (noct-post-insert-and-writable
+  ;;   (global-corfu-mode))
+  ;; need different key
+  (general-def noct-toggle-map "F" #'corfu-mode)
   :config
   (gsetq corfu-auto t
          corfu-auto-delay 0.15
          corfu-auto-prefix 1)
 
   (general-def corfu-map
-    [tab] #'corfu-next))
+    ;; explicit selection only for now
+    "RET" nil)
+
+  ;; TODO pcmpl-args
+  ;; TODO pcomplete advice
+
+  (corfu-indexed-mode)
+  (set-face-attribute 'corfu-indexed nil :height 1.0)
+
+  (defmacro noct-generate-corfu-select-index (index)
+    "Return a named function to run `corfu-complete' for INDEX"
+    `(noct-defun ,(intern (format "noct-corfu-complete-%s" index)) ()
+       ,(format "Call `corfu-complete' for index %s." index)
+       (interactive)
+       (let ((corfu--index ,index))
+         (corfu-complete))))
+
+  (general-def corfu-map
+    "M-a" (noct-generate-corfu-select-index 0)
+    "M-r" (noct-generate-corfu-select-index 1)
+    "M-s" (noct-generate-corfu-select-index 2)
+    "M-t" (noct-generate-corfu-select-index 3)
+    "M-d" (noct-generate-corfu-select-index 4)
+    "M-h" (noct-generate-corfu-select-index 5)
+    "M-n" (noct-generate-corfu-select-index 6)
+    "M-e" (noct-generate-corfu-select-index 7)
+    "M-i" (noct-generate-corfu-select-index 8)
+    "M-o" (noct-generate-corfu-select-index 9))
+
+  ;; sort by recency (but not frecency)
+  (corfu-history-mode)
+  (general-with 'savehist
+    (general-pushnew 'corfu-history savehist-additional-variables))
+
+  (general-add-hook 'evil-normal-state-entry-hook #'corfu-quit))
+
+
+;; looks cool but not that useful; don't normally need docs during completion; more distracting than beneficial
+(use-package corfu-doc
+  :disabled t
+  :straight (corfu-doc
+             :host github
+             :repo "galeo/corfu-doc")
+  :ghook 'corfu-mode-hook
+  :config
+  ;; increase delay
+  (gsetq corfu-doc-delay 0.2))
+
+;; TODO way too big on one computer
+(use-package kind-icon
+  :after corfu
+  :demand t
+  :config
+  ;; to compute blended backgrounds correctly
+  (gsetq kind-icon-default-face 'corfu-default)
+
+  (general-pushnew #'kind-icon-margin-formatter corfu-margin-formatters))
 #+end_src
 
 ** Completion
