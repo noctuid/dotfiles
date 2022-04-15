@@ -2720,8 +2720,13 @@ I'm keeping fuzzy out of my default styles, but I've configured things so that I
 #+begin_src emacs-lisp
 (use-package orderless
   :init
-  (gsetq completion-styles '(orderless)
-         completion-category-defaults nil)
+  (gsetq completion-category-defaults nil
+         ;; keep basic as fallback "to ensure that completion commands which
+         ;; rely on dynamic completion tables work correctly"
+         completion-styles '(orderless basic)
+         ;; necessary for tramp hostname completion when using orderless
+         completion-category-overrides
+         '((file (styles basic partial-completion))))
 
   (general-with 'ivy
     (setf (alist-get t ivy-re-builders-alist)
@@ -2917,11 +2922,10 @@ file-finding commands)."
 #+end_src
 
 ** Selectrum
+I am currently using vertico. See my notes below.
+
 #+begin_src emacs-lisp
 (use-package selectrum
-  :init
-  ;; this doesn't actually load selectrum (definition is in autoload file)
-  (selectrum-mode)
   :config
   (gsetq selectrum-show-indices t
          selectrum-num-candidates-displayed 20
@@ -3022,34 +3026,81 @@ https://github.com/raxod502/selectrum/issues/131#issuecomment-817191700"
 #+end_src
 
 ** Vertico
+I've switched to vertico due to some weird display issues with selectrum. Vertico is very simple nad just works.
+
+The only downside is the lack of prescient integration. Vertico supports recency sorting (using savehist) but not frecency. Like I was surprised to find orderless to be incredibly useful even though it does no sorting, I'll probably find recency sorting to be good enough as well. In any case, more complex sorting is best implemented elsewhere.
 #+begin_src emacs-lisp
 (use-package vertico
   ;; specify to get extensions
-  :straight (vertico-extensions
-             :host github
-             :repo "minad/vertico"
-             :files ("*.el" "extensions/*.el"))
-  :config
+  :straight (vertico :files (:defaults "extensions/*.el"))
+  :init
+  ;; run vertico on first completing-read
+  (autoload 'vertico--advice "vertico")
+  (define-minor-mode vertico-mode
+    "VERTical Interactive COmpletion."
+    :global t :group 'vertico
+    (if vertico-mode
+        (progn
+          (advice-add #'completing-read-default :around #'vertico--advice)
+          (advice-add #'completing-read-multiple :around #'vertico--advice))
+      (advice-remove #'completing-read-default #'vertico--advice)
+      (advice-remove #'completing-read-multiple #'vertico--advice)))
   (vertico-mode)
-
-  (gsetq vertico-count 20
+  :config
+  (gsetq vertico-count 10
+         vertico-scroll-margin 0
          vertico-cycle t)
-  ;; necessary for tramp hostname completion when using orderless
-  (gsetq completion-category-overrides
-         '((file (styles basic partial-completion))))
 
   ;; Use `consult-completion-in-region' if Vertico is enabled.
   ;; Otherwise use the default `completion--in-region' function.
-  (setq completion-in-region-function
-        (noct-defun minad-completion-in-region-function (&rest args)
-          (apply (if vertico-mode
-                     #'consult-completion-in-region
-                   #'completion--in-region)
-                 args)))
+  (gsetq completion-in-region-function
+         (noct-defun minad-completion-in-region-function (&rest args)
+           (apply (if vertico-mode
+                      #'consult-completion-in-region
+                    #'completion--in-region)
+                  args)))
 
   (general-s "." #'vertico-repeat)
 
-  (vertico-indexed-mode))
+  (general-add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+  (general-s
+    "." #'vertico-repeat-last
+    ;; select previous session to repeat
+    "," #'vertico-repeat-select)
+
+  ;; maybe mess with more but pretty broken; minibuffer is best
+  ;; (gsetq vertico-buffer-display-action
+  ;;        `(display-buffer-in-side-window
+  ;;          (window-height . ,(+ 3 vertico-count))
+  ;;          (side . top)))
+
+  (vertico-indexed-mode)
+  ;; make numbers look the same as selectrum
+  (set-face-attribute 'vertico-indexed nil
+                      :height 1.0
+                      :inherit 'minibuffer-prompt)
+
+  (defmacro noct-generate-vertico-select-index (index)
+    "Return a named function to run `vertico-directory-enter' for INDEX."
+    `(noct-defun ,(intern (format "noct-vertico-enter %s" index)) ()
+       ,(format "Call `vertico-directory-enter' for index %s." index)
+       (interactive)
+       (let ((vertico--index ,index))
+         (vertico-directory-enter))))
+
+  (general-def vertico-map
+    "<prior>" #'vertic-scroll-down
+    "<next>" #'vertico-scroll-up
+    "M-a" (noct-generate-vertico-select-index 0)
+    "M-r" (noct-generate-vertico-select-index 1)
+    "M-s" (noct-generate-vertico-select-index 2)
+    "M-t" (noct-generate-vertico-select-index 3)
+    "M-d" (noct-generate-vertico-select-index 4)
+    "M-h" (noct-generate-vertico-select-index 5)
+    "M-n" (noct-generate-vertico-select-index 6)
+    "M-e" (noct-generate-vertico-select-index 7)
+    "M-i" (noct-generate-vertico-select-index 8)
+    "M-o" (noct-generate-vertico-select-index 9)))
 #+end_src
 
 ** Consult
