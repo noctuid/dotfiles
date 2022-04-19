@@ -1,5 +1,0 @@
-#!/usr/bin/sh
-
-# Restore DNS settings, stop transmissiond, allow non-vpn traffic again
-# (currently --check is broken so -c)
-sleep 5 && pia-tools --restore-dns && pia-tools -c && pia-tools --allow
