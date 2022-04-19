@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# inhibit handling lid switch (inhibit hibernate) for the duration of the
+# command (30 seconds)
+systemd-inhibit --what=handle-lid-switch sleep 30 &
+
+systemctl suspend
