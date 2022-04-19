@@ -9,8 +9,13 @@ hc() {
 
 if (( old_count == 1 )) && (( new_count == 2 )); then
 	hc rule label=mpv-move class='mpv' fullscreen=on monitor=1
-	herbstclient chain , lock , focus_monitor 1 , unlock_tag , use_index 9 \
-				 , lock_tag , focus_monitor 0 , unlock
+	hc lock
+	if [[ $(hc attr tags.focus.index) == 9 ]]; then
+		# can't be the index the other monitors is on (0 default)
+		hc use_index 1
+	fi
+	hc chain , focus_monitor 1 , unlock_tag , use_index 9 \
+	   , lock_tag , focus_monitor 0 , unlock
 elif (( new_count == 1 )); then
 	hc unrule mpv-move
 fi
