@@ -32,7 +32,7 @@ print_volume() {
 	if pamixer --get-mute > /dev/null; then
 		color=$dark_red
 		icon=""
-	elif pacctl info | grep --quiet "Default Sink:.*hdmi"; then
+	elif pactl info | grep --quiet "Default Sink:.*hdmi"; then
 		icon=""
 	elif [[ $headphones == on ]]; then
 		icon=""
