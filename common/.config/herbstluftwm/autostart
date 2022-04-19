@@ -210,7 +210,10 @@ if $first_load; then
 	hc use_index 1
 fi
 
+xrestart polybar herbstluftwm
+
 # unlock, just to be sure
 hc unlock
 
-xrestart polybar herbstluftwm
+# TODO why do I need to run this later now?
+rldkbd
