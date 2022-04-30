@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if [[ $# -lt 1 ]]; then
+	exit 1
+fi
+
+name=${1%.*}
+extension=${1##*.}
+ratio=${2:-2}
+waifu2x-ncnn-vulkan -i "$1" -o "${name}_upscaled${ratio}x.$extension"

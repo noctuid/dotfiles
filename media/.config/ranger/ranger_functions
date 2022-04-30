@@ -15,17 +15,6 @@ make_thumbnail() {
 	convert "$filename" -resize 100x100 "$filename_stripped"_resized."$extension"
 }
 
-upscale() { # image (ratio)
-	if [[ $# -lt 1 ]]; then
-		return 1
-	fi
-	local name extension ratio
-	name=${1%.*}
-	extension=${1##*.}
-	ratio=${2:-2}
-	waifu2x-converter-cpp -i "$1" -o "${name}_upscaled${ratio}x.$extension"
-}
-
 imp() {
 	# using imgur-cli (imgur-cli-svn in the aur)
 	anon=false

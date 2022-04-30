@@ -141,8 +141,7 @@ fi
 
 # * Wpg/Pywal
 if [[ -z $NO_WAL ]]; then
-	# wall version breaks stumpwm; what about this?
-	~/.config/wpg/wp_init.sh &> /dev/null
+	walrestore
 fi
 
 # * Other Daemons

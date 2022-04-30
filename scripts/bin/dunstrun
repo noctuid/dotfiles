@@ -25,4 +25,4 @@ sed -i -E -e "s/^\s*(offset )=.*/\1= ${right_offset}x$padding/g" /tmp/dunstrc
 sed -i -E -e "s/^\s*(corner_radius )=.*/\1 = $CORNER_RADIUS/g" /tmp/dunstrc
 sed -i -E -e "s/^\s*(separator_height )=.*/\1= $HALF_WM_BORDER/g" /tmp/dunstrc
 
-xrestart dunst -config /tmp/dunstrc
+xrestart dunst -config /tmp/dunstrc &> /tmp/dunst.log

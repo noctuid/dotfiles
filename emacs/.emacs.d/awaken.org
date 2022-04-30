@@ -713,7 +713,6 @@ Principles:
 
 (general-create-definer general-comma
   :states 'normal
-  :keymaps 'override
   :prefix ",")
 #+end_src
 
@@ -735,11 +734,16 @@ Principles:
             (and (eq orig-fn #'switch-to-buffer) (car args)))
         (apply orig-fn buffer-or-name args)
       (let ((doom-inhibit-switch-buffer-hooks t))
-        (when-let (buffer (apply orig-fn buffer-or-name args))
-          (with-current-buffer (if (windowp buffer)
-                                   (window-buffer buffer)
-                                 buffer)
-            (run-hooks 'doom-switch-buffer-hook))
+        ;; TODO temporary workaround to not break dirvish
+        (let ((buffer (apply orig-fn buffer-or-name args)))
+          (when (if (windowp buffer)
+                    (window-live-p buffer)
+                  (buffer-live-p buffer))
+            (ignore-errors
+              (with-current-buffer (if (windowp buffer)
+                                       (window-buffer buffer)
+                                     buffer)
+                (run-hooks 'doom-switch-buffer-hook))))
           buffer)))))
 
 (defun doom-run-switch-to-next-prev-buffer-hooks-a (orig-fn &rest args)
@@ -3237,7 +3241,8 @@ The only downside is the lack of prescient integration. Vertico supports recency
   (defun noct-consult-find-fd (&optional dir initial)
     "Run `consult-find' using fd."
     (interactive "P")
-    (let ((consult-find-command
+    (let ((dir (or dir (ignore-errors (projectile-project-root)) default-directory))
+          (consult-find-command
            (concat "fd --hidden --no-ignore --exclude .git --color=never "
                    "--full-path ARG OPTS")))
       (consult-find dir initial)))
@@ -3994,7 +3999,11 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
   (gsetq projectile-enable-caching t
          projectile-project-test-cmd "make test"
          projectile-completion-system 'default
-         projectile-project-search-path '("~/src"))
+         projectile-project-search-path '("~/src")
+         ;; false positives in home directory; these are the git files but
+         ;; things like tags, ctags, etc. that will never mark the root of a
+         ;; project for me
+         projectile-project-root-files nil)
 
   (defun noct-switch-to-project-root ()
     (interactive)
@@ -5471,12 +5480,13 @@ Update: Git gutter seems to be faster than previously.
 #+end_src
 
 ** Diff HL
-Diff-hl is nice but currently doesn't support staging hunks. Diff-hl also has a dired mode, but I think that I prefer dired-k.
+Diff-hl is nice but currently doesn't support staging hunks.  Diff-hl also has a dired mode that seems to be faster than dired k.
 #+begin_src emacs-lisp
 (use-package diff-hl
   :disabled t
   :blackout t
   ;; TODO defer, e.g. `find-file-hook'
+  ;; :ghook ('dired-mode-hook #'diff-hl-dired-mode)
   :init
   (global-diff-hl-mode)
   (diff-hl-flydiff-mode)
@@ -8104,20 +8114,20 @@ Performance notes:
 - dired-k slows loading larger directories to a crawl (e.g. 0.08 -> 1 second; with all the icons -> 4 seconds; 450 items)
 - all-the-icons-dired also slows loading larger directories (e.g. 0.08 -> 0.5 seconds; 450 items)
 
-Dired-k isn't that useful, and while I really like all-the-icons-dired, I'd rather opening it be fast. I've disabled dired-k completely and for now have made all-the-icons-dired opt-in. I would try diff-hl's dired mode, but I current can't get diff-hl working at all because vc doesn't recognize my files as being under version control.
+Dired-k isn't that useful, and while I really like all-the-icons-dired, I'd rather opening dired be fast.  Luckily, we now have dirvish, which is fast.  diff-hl's dired mode also seems fast, but I like dirvish's version for now.
 
-*** Setup
+*** TODO Setup
 Notable packages not currently using:
 - dired-du
 - dired-xattr
 
-TODO: Don't create a bunch of dired buffers (e.g. dired-single-up-directory).
+TODO ls alternative that does correct sorting
 
-TODO: Async copy/paste with rsync
 #+begin_src emacs-lisp
 (use-package dired
   :straight (:type built-in)
-  :general ('normal "-" #'dired-jump)
+  ;; using dirvish-dired
+  ;; :general ('normal "-" #'dired-jump)
   :gfhook
   ;; automatically refresh
   (nil #'auto-revert-mode)
@@ -8125,34 +8135,65 @@ TODO: Async copy/paste with rsync
   ('dired-initial-position-hook #'dired-hide-details-mode)
   :config
   (gsetq dired-recursive-copies 'always
-         dired-clean-confirm-killing-deleted-buffers nil)
+         dired-clean-confirm-killing-deleted-buffers nil
+         ;; new in Emacs 28.1
+         dired-kill-when-opening-new-dired-buffer t)
 
-  (if (eq system-type 'darwin)
-      (when (executable-find "gls")
-        (gsetq insert-directory-program "gls"
-               dired-listing-switches "-lha --group-directories-first"))
+  (defvar noct-dired-listing-switches
+    (concat "-l --human-readable --almost-all --group-directories-first "
+            "--time-style=long-iso"))
+
+  ;; neither supports dired
+  ;; (cond ((executable-find "lsd")
+  ;;        (gsetq insert-directory-program "lsd"
+  ;;               dired-listing-switches
+  ;;               "--classic --almost-all -l --human-readable --group-dirs first"))
+  ;;       ((executable-find "exa")
+  ;;        (gsetq insert-directory-program "exa"
+  ;;               dired-listing-switches
+  ;;               "--color never --all -l")))
+  (cl-case system-type
+    ('darwin
+     (when (executable-find "gls")
+       (gsetq insert-directory-program "gls"
+              dired-listing-switches noct-dired-listing-switches)))
     ;; use human readable sizes and put directories first
-    (gsetq dired-listing-switches "-lha --group-directories-first")))
+    ('gnu/linux
+     (gsetq insert-directory-program "ls"
+            dired-listing-switches noct-dired-listing-switches))))
 #+end_src
 
 *** Basic Keybindings
 #+begin_src emacs-lisp
 (general-with 'dired
   (put 'dired-find-alternate-file 'disabled nil)
+
+  (defun noct-dired-toggle-mark ()
+    "Toggle marking the file at point.
+If a region is active, toggle marking all files in the region."
+    (interactive)
+    (save-restriction
+      (unless (region-active-p)
+        (narrow-to-region (point-at-bol) (point-at-eol)))
+      (dired-toggle-marks))
+    (call-interactively #'dired-next-line))
+
   (general-def 'normal dired-mode-map
-    "q" #'noct-kill-this-buffer
+    "q" #'quit-window
     "gr" #'revert-buffer
 
     ;; navigation
+    "gg" (general-l (goto-char 0))
     "h" #'dired-up-directory
     "n" #'dired-next-line
     "e" #'dired-previous-line
     "i" #'dired-find-alternate-file
     "f" #'find-file
+    "F" #'noct-consult-find-fd
 
     ;; marking
-    "TAB" #'dired-mark
-    "," #'dired-mark
+    "TAB" #'noct-dired-toggle-mark
+    "," #'noct-dired-toggle-mark
     "\"" #'dired-mark-files-regexp
     "v" #'dired-toggle-marks
     "um" #'dired-unmark
@@ -8166,8 +8207,6 @@ TODO: Async copy/paste with rsync
     "cm" #'dired-do-chmod
     "ch" #'dired-do-chown
     "cg" #'dired-do-chgrp
-
-    ;; TODO ranger u and c shell bindings (e.g. convert to pdf)
 
     "di" #'dired-do-delete
     "ud" #'trashed
@@ -8184,71 +8223,174 @@ TODO: Async copy/paste with rsync
     "zd" #'dired-hide-details-mode)
 
   (general-def 'visual dired-mode-map
-    "TAB" #'dired-mark
+    "TAB" #'noct-dired-toggle-mark
+    "," #'noct-dired-toggle-mark
     "um" #'dired-unmark))
 #+end_src
 
 *** Quickmarks
 #+begin_src emacs-lisp
 (general-with 'dired
-  ;; TODO can't use this with ranger
-  ;; (defmacro noct-dired-alt-file (filename)
-  ;;     "Create a named function to visit FILENAME.
-  ;; The created function will act like `dired-find-alternate-file'."
-  ;;     `(noct-defun ,(intern (concat "noct-dired-alt-find-" filename)) ()
-  ;;        ,(concat "Call `find-alternate-file' on " filename ".")
-  ;;        (interactive)
-  ;;        (set-buffer-modified-p nil)
-  ;;        (find-alternate-file ,filename)))
+  (defmacro noct-dired-alt-file (filename)
+    "Create a named function to visit FILENAME.
+  The created function will act like `dired-find-alternate-file'."
+    `(noct-defun ,(intern (format "noct-dired-alt-find-%s"
+                                  (if (stringp filename)
+                                      filename
+                                    (cl-gensym)))) ()
+       ,(format "Call `dired-find-alternate-file' on %s." filename)
+       (interactive)
+       (set-buffer-modified-p nil)
+       (if (functionp 'dirvish-find-file)
+           (dirvish-find-file ,filename)
+         (dired-find-alternate-file ,filename))))
+
 
   (general-def 'normal dired-mode-map
     :prefix "g"
-    "/" (noct-find-file "/")
-    "b" (noct-find-file "/bin/")
-    "e" (noct-find-file "/etc/")
-    "h" (noct-find-file "~/")
-    "m" (noct-find-file "/media/")
-    "t" (noct-find-file "/tmp/")
-    "u" (noct-find-file "/usr/")
-    "v" (noct-find-file "/var/")
-    "V" (noct-find-file "/Volumes/"))
+    "/" (noct-dired-alt-file "/")
+    "b" (noct-dired-alt-file "/bin/")
+    "e" (noct-dired-alt-file "/etc/")
+    "h" (noct-dired-alt-file "~/")
+    "m" (noct-dired-alt-file "/media/")
+    "t" (noct-dired-alt-file "/tmp/")
+    "u" (noct-dired-alt-file "/usr/")
+    "v" (noct-dired-alt-file "/var/")
+    "V" (noct-dired-alt-file "/Volumes/"))
 
   (general-def 'normal dired-mode-map
     :prefix "'"
-    "a" (noct-find-file "~/ag-sys")
-    "b" (noct-find-file "~/dotfiles/scripts/bin/")
-    "B" (noct-find-file "~/src/blog/pir-hana/")
-    "c" (noct-find-file "~/src/")
-    "d" (noct-find-file "~/database/")
-    "e" (noct-find-file user-emacs-directory)
-    "E" (noct-find-file "~/ag-sys/else/")
-    "f" (noct-find-file "~/dotfiles/")
-    "l" (noct-find-file "~/database/library/")
-    "m" (noct-find-file "~/move/")
-    "p" (noct-find-file "~/ag-sys/else/scrawl/prose/pots/")
-    "P" (noct-find-file "~/ag-sys/prog/")
-    "s" (noct-find-file "~/school/")
-    "S" (noct-find-file "~/move/Screenshots/")
-    "w" (noct-find-file "~/wallpaper/")))
+    "a" (noct-dired-alt-file "~/ag-sys")
+    "b" (noct-dired-alt-file "~/dotfiles/scripts/bin/")
+    "B" (noct-dired-alt-file "~/src/blog/pir-hana/")
+    "c" (noct-dired-alt-file "~/src/")
+    "d" (noct-dired-alt-file "~/database/")
+    "e" (noct-dired-alt-file user-emacs-directory)
+    "E" (noct-dired-alt-file "~/ag-sys/else/")
+    "f" (noct-dired-alt-file "~/dotfiles/")
+    "l" (noct-dired-alt-file "~/database/library/")
+    "m" (noct-dired-alt-file "~/move/")
+    "p" (noct-dired-alt-file "~/ag-sys/else/scrawl/prose/pots/")
+    "P" (noct-dired-alt-file "~/ag-sys/prog/")
+    "s" (noct-dired-alt-file "~/school/")
+    "S" (noct-dired-alt-file "~/move/Screenshots/")
+    "w" (noct-dired-alt-file "~/wallpaper/")))
+#+end_src
+
+*** Shell Commands
+#+begin_src emacs-lisp
+(general-with 'dired
+  (defun noct-dired-async-run (command)
+    "Run `dired-do-async-shell-command' with COMMAND and the marked files."
+    (dired-do-async-shell-command command nil (dired-get-marked-files)))
+
+  (defun noct-dired-unoconv-to-txt ()
+    "Convert selected file(s) to txt with unoconv."
+    (interactive)
+    (noct-dired-async-run "unoconv -f txt"))
+
+  (defun noct-dired-unoconv-to-pdf ()
+    "Convert selected file(s) to pdf with unoconv."
+    (interactive)
+    (noct-dired-async-run "unoconv -f pdf"))
+
+  (defun noct-dired-pandoc (extension)
+    "Convert selected file(s) to end in EXTENSION."
+    (interactive "sConvert to extension: ")
+    (dolist (file (dired-get-marked-files))
+      (let ((basename (noct-basename file)))
+        (dired-do-async-shell-command
+         (format "pandoc -o %s.%s" basename extension)
+         nil
+         (list file)))))
+
+  (defun noct-dired-walset ()
+    "Set wallpaper and update pywal colors."
+    (interactive)
+    (noct-dired-async-run "walset --store"))
+
+  (defun noct-dired-bgset ()
+    "Set wallpaper."
+    (interactive)
+    (noct-dired-async-run "bgset"))
+
+  (defun noct-dired-upscale-2 ()
+    "Upscale image at point 2x."
+    (interactive)
+    (noct-dired-async-run "upscale"))
+
+  (defun noct-dired-upscale-10 ()
+    "Upscale image at point 10x."
+    (interactive)
+    (noct-dired-async-run "upscale ? 10"))
+
+  (defun noct-dired-upscale-20 ()
+    "Upscale image at point 20x."
+    (interactive)
+    (noct-dired-async-run "upscale ? 20"))
+
+  (general-def 'normal dired-mode-map
+    "ct" #'noct-dired-unoconv-to-txt
+    "cP" #'noct-dired-unoconv-to-pdf
+    "cp" #'noct-dired-pandoc
+    "cw" #'noct-dired-walset
+    "cb" #'noct-dired-bgset
+    "cu" #'noct-dired-upscale-2
+    "cU" #'noct-dired-upscale-10
+    "cX" #'noct-dired-upscale-20)
+
+  (defun noct-dropmpgo ()
+    (interactive)
+    (noct-dired-async-run "dropmpgo"))
+
+  (general-def 'normal dired-mode-map
+    "O" #'noct-dropmpgo)
+
+  (defun noct-dired-udiskie-umount ()
+    "Unmount selected drive(s) with udiskie."
+    (interactive)
+    (noct-dired-async-run "udiskie-umount"))
+
+  (defun noct-udiskie-umount-all ()
+    "Unmount all drives with udiskie."
+    (interactive)
+    (call-process-shell-command "udiskie-umount --all &"))
+
+  ;; TODO don't have a tray anymore; does this work with external cd reader?
+  (defun noct-eject-tray ()
+    "Eject tray."
+    (interactive)
+    (let ((default-directory "/sudo::")
+          ;; don't try to get root password from auth sources
+          auth-sources)
+      (shell-command "eject /dev/sr0")))
+
+  (general-def 'normal dired-mode-map
+    "un" #'noct-dired-udiskie-umount
+    "uN" #'noct-udiskie-umount-all
+    "ue" #'noct-eject-tray)
+
+  (defun noct-dired-sanitize ()
+    "Sanitize permission of selected path(s)."
+    (interactive)
+    (noct-dired-async-run (format "sudo chmod -R u=rwX,go=rX"))
+    (noct-dired-async-run (format "sudo chown -R \"%s\" " (getenv "USER"))))
+
+  (general-def 'normal dired-mode-map
+    "cs" #'noct-dired-sanitize)
+
+  ;; TODO untested
+  (defun noct-dired-beet-import ()
+    "Call beet import on the selected path(s)."
+    (interactive)
+    (dired-do-shell-command "beet import"))
+
+  (general-def 'normal dired-mode-map
+    "ci" #'noct-dired-beet-import))
 #+end_src
 
 *** All the Icons Dired
-#+begin_src emacs-lisp
-(use-package all-the-icons-dired
-  ;; https://github.com/jtbm37/all-the-icons-dired/issues/41
-  :general (noct-toggle-map "i" #'noct-toggle-all-the-icons-dired)
-  :config
-  (defvar noct-dired-icons nil)
-  (defun noct-toggle-all-the-icons-dired ()
-    (interactive)
-    (cond (noct-dired-icons
-           (general-remove-hook 'dired-mode-hook #'all-the-icons-dired-mode)
-           (message "All the icons disabled for new dired buffers"))
-          (t
-           (general-add-hook 'dired-mode-hook #'all-the-icons-dired-mode)
-           (message "All the icons enabled for new dired buffers")))
-    (setq noct-dired-icons (not noct-dired-icons))))
-#+end_src
+Replaced in favor of dirvish which lazily adds icons instead of [[https://github.com/jtbm37/all-the-icons-dired/issues/41][always adding icons for everything in the directory]].
 
 *** Dired Atool
 #+begin_src emacs-lisp
@@ -8265,21 +8407,23 @@ TODO: Async copy/paste with rsync
    display-buffer-alist))
 #+end_src
 
-*** TODO Diredfl
-Find a theme that customizes these faces.
+*** Diredfl
+Extra font lock rules (especially with details shown, e.g. colored persmissions, file sizes, etc.)
 #+begin_src emacs-lisp
 (use-package diredfl
-  :disabled t
   :ghook 'dired-mode-hook)
 #+end_src
 
 *** Dired Git Info
+Dirvish replaces.
 #+begin_src emacs-lisp
 (use-package dired-git-info
+  :disabled t
   :general ('normal dired-mode-map ")" #'dired-git-info-mode))
 #+end_src
 
 *** Dired K
+Dirvish replaces (though not as pretty).
 #+begin_src emacs-lisp
 (use-package dired-k
   :disabled t
@@ -8289,7 +8433,7 @@ Find a theme that customizes these faces.
 #+end_src
 
 *** TODO Dired Toggle Sudo
-Change current user to root.
+Change current user to root.  Is this really necessary with my =sd= keybinding?
 #+begin_src emacs-lisp
 (use-package dired-toggle-sudo
   :after dired
@@ -8300,7 +8444,7 @@ Change current user to root.
 *** FASD
 Pretty much just using fasd in terminal at the moment, but maybe this package will be useful in the future.
 
-*** File Opening (External)
+*** TODO File Opening (External)
 https://github.com/Vifon/dired-rifle.el
 - Only supports rifle
 https://github.com/thomp/dired-launch
@@ -8321,6 +8465,9 @@ https://github.com/Fuco1/dired-hacks/blob/master/dired-open.el
 - Modifies ~~dired-find-file~ directly instead of adding a new opening command
 
 For now instead of modifying ~dired-find-file~ for specific extensions, I'm just using my own command.
+
+TODO support automatically opening images in sorted order
+TODO support passing list of marked files as argument instead of opening program for every marked file
 #+begin_src emacs-lisp
 (general-with 'dired
   (defun noct-dired-open-external ()
@@ -8337,6 +8484,7 @@ For now instead of modifying ~dired-find-file~ for specific extensions, I'm just
 
   (general-def 'normal dired-mode-map "I" #'noct-dired-open-external))
 #+end_src
+
 *** Wdired
 #+begin_src emacs-lisp
 (use-package wdired
@@ -8349,115 +8497,6 @@ For now instead of modifying ~dired-find-file~ for specific extensions, I'm just
   (general-def 'normal wdired-mode-map
     "x" #'wdired-toggle-bit
     "RET" #'wdired-finish-edit))
-#+end_src
-
-*** Ranger.el
-This package needs some work (and refactoring) and isn't actively updated, but it has a lot of good functionality from ranger that other packages don't.
-
-It also has overlapping functionality with a lot of packages. For example, I'm using ~ranger-show-history~ instead of ivy-dired-history or dired-recent.
-#+begin_src emacs-lisp
-(use-package ranger
-  :init
-  (general-add-advice 'ranger-define-additional-maps :override #'ignore)
-  :general
-  ('normal "-" #'deer)
-  (general-s "r" #'deer)
-  :config
-  ;; default
-  ;; (gsetq ranger-show-dotfiles t)
-
-  (gsetq ranger-deer-show-details nil)
-
-  (setq ranger-mode-map (make-sparse-keymap))
-
-  (general-def 'normal ranger-mode-map
-    "q" #'ranger-close
-    "Q" #'ranger-disable
-    "gr" #'ranger-refresh
-
-    ;; navigation
-    "gg" #'ranger-goto-top
-    "G" #'ranger-goto-bottom
-    "h" #'ranger-up-directory
-    "n" #'ranger-next-file
-    "e" #'ranger-prev-file
-    "i" #'ranger-find-file
-    "RET" #'ranger-find-file
-    "<next>" #'ranger-page-down
-    "<prior>" #'ranger-page-up
-    "F" #'ranger-travel
-
-    ;; sorting ([c]hange [o]rder)
-    "co" #'ranger-sort-criteria
-
-    ;; marking
-    "TAB" #'ranger-toggle-mark
-    "," #'ranger-toggle-mark
-
-    ;; copying, deleting, and pasting
-    "y" nil
-    "yy" #'ranger-copy
-    "ya" #'ranger-copy-append
-    "yp" #'ranger-copy-absolute-file-paths
-    "yd" #'ranger-copy-current-dir-path
-    "yn" #'ranger-copy-filename
-
-    "d" nil
-    "dd" #'ranger-cut
-    "da" #'ranger-cut-append
-
-    "p" nil
-    "pp" #'ranger-paste
-    "po" #'ranger-paste-over
-    "p/" #'ranger-show-copy-contents
-    "pl" #'ranger-paste-as-symlink
-    "pL" #'ranger-paste-as-relative-symlink
-
-    "du" #'ranger-show-size
-
-    ;; history
-    "l" #'ranger-prev-history
-    "L" #'ranger-next-history
-    "zz" #'ranger-show-history
-
-    ;; tabs
-    "mm" #'ranger-new-tab
-    "mq" #'ranger-close-tab
-    "ma" (general-l (ranger-goto-tab 1))
-    "mr" (general-l (ranger-goto-tab 2))
-    "ms" (general-l (ranger-goto-tab 3))
-    "mt" (general-l (ranger-goto-tab 4))
-    "md" (general-l (ranger-goto-tab 5))
-    "mh" (general-l (ranger-goto-tab 6))
-    "mn" (general-l (ranger-goto-tab 7))
-    "me" (general-l (ranger-goto-tab 8))
-    "mi" (general-l (ranger-goto-tab 9))
-    "mo" (general-l (ranger-goto-tab 0))
-    "uq" #'ranger-restore-tab
-
-    ;; toggles/settings
-    "zm" #'ranger-minimal-toggle
-    "zh" #'ranger-toggle-dotfiles
-    ;; "zi" #'ranger-toggle-literal
-    ;; "zf" #'ranger-toggle-scale-images
-    "zo" #'ranger-sort-criteria
-    "zp" #'ranger-toggle-details
-    "zd" #'ranger-toggle-dir-first
-    "zh" #'ranger-toggle-dotfiles)
-
-  (general-def 'visual ranger-mode-map
-    "TAB" #'ranger-toggle-mark
-    "," #'ranger-toggle-mark)
-
-  ;; move down after toggling mark too
-  (general-add-advice 'ranger-toggle-mark :after
-                      (lambda () (call-interactively #'ranger-next-file)))
-
-  ;; stfu
-  (general-add-advice '(ranger-window-check ranger-revert)
-                      :around #'noct-no-message)
-
-  (ranger-override-dired-mode))
 #+end_src
 
 *** Dired Hacks
@@ -8500,16 +8539,6 @@ Show entire path for a directory (or chain of directories) that only contains a 
     (dired-narrow--internal #'dired-narrow--completion-styles-filter)))
 #+end_src
 
-*** Image Handling
-Image display (and resizing) is too slow to be worth it. Assuming that ever changes, do the following:
-- Bind =cb= to change wallpaper (see rc.conf; same for below)
-- Bind =cw= to change wallpaper and theme with pywal
-- Bind =cr=, =cR=, and =cm= to rotate and mirror images
-- Bind =cu=  and =cU= to create an upscaled version
-- Bind =cj= to tesseract
-- Bind =ui= and =uI= to imgur upload
-- Bind tmsu keys
-
 *** Trashed
 #+begin_src emacs-lisp
 ;; bound in dired
@@ -8530,79 +8559,74 @@ Image display (and resizing) is too slow to be worth it. Assuming that ever chan
   (noct-handle-popup "Trash Can"))
 #+end_src
 
-*** Shell Commands
+*** Dirvish
+Dirvish is a work of art.  It is fast.  It is unobtrusive.  It is elegant.  It is all this, and it still is dired.  It is exactly what a file manager in Emacs should be.  I thought ranger was still lightyears ahead of dired, but dirvish has proved me wrong.
+
+Dirvish solves these issues for me:
+- It provides file copying/movement that is *both* multi-stage and asynchronous (unlike existing packages).  This is a game changer.
+- Image preview is actually fast and usable.  I had stopped using all packages for image preview before because they didn't work well.  With dirvish, once an image is cached, it's as fast as any preview method that ranger has, and there is no flicker (unlike some ranger preview methods).  This is also a game changer.
+- File preview in general works flawlessly out of the box and is customizable
+- Dirvish is gorgeous, more so than ranger, but without sacrificing speed
+  - The mode line is simple, customizable, and easy on the eyes
+  - Icon display is fast/lazy unlike dired-all-the-icons, which is unusably slow
+  - It can also replace the functionality of dired-k (very slow) and dired-git-info
+  - I only had to customize one face to get it to look great with my theme
+- It provides a 3-pane layout that just works (parent directory, current directory, preview).  I never used ranger.el's 3-pane layout, but I will use dirvish's.
+- It provides various other helpful commands/features like bookmarks
+- It is a minimal layer on top of dired and requires minimal configuration.  I had to make many more keybindings for ranger.el since it creates alternatives for a lot of existing dired commands, and I had a bunch of ugly configuration because it was comparably invasive (as both a dired user and as an evil user).
+
+Dirvish replaces
+- Replaces ranger.el (though not a ranger clone)
+- Replaces dired-async, tmtxt-dired-async, dired-ranger, etc.
+- Replaces dired-all-the-icons with a much more performant implementation
+- Can replace dired-k, dired-git-info, and diff-hl-dired-mode (though my experience with diff-hl was much better than dired-k)
+
 #+begin_src emacs-lisp
-(general-with 'dired
-  (defun noct-dired-async-run (command)
-    "Run `dired-do-async-shell-command' with COMMAND and the marked files."
-    (dired-do-async-shell-command command nil (dired-get-marked-files)))
+(use-package dirvish
+  :general
+  ('normal "-" #'dirvish-dired)
+  (general-s "r" #'dirvish)
+  :config
+  ;; (gsetq dirvish-bookmarks-alist)
+  (gsetq dirvish-attributes '(all-the-icons file-size vc-state))
 
-  (defun noct-dired-unoconv-to-txt ()
-    "Convert selected file(s) to txt with unoconv."
+  (when (ignore-errors (ewal-load-colors))
+    (set-face-attribute 'dirvish-hl-line nil
+                        :background (ewal-get-color 'green -5)))
+
+  (defun noct-dirvish-move ()
     (interactive)
-    (noct-dired-async-run "unoconv -f txt"))
+    (dirvish--yank 'move))
 
-  (defun noct-dired-unoconv-to-pdf ()
-    "Convert selected file(s) to pdf with unoconv."
+  (defun noct-dirvish-relalink ()
     (interactive)
-    (noct-dired-async-run "unoconv -f pdf"))
+    (dirvish--yank 'relalink))
 
-  (defun noct-dired-pandoc (extension)
-    "Convert selected file(s) to end in EXTENSION."
-    (interactive "sConvert to extension: ")
-    (dolist (file (dired-get-marked-files))
-      (let ((basename (noct-basename file)))
-        (dired-do-async-shell-command
-         (format "pandoc -o %s.%s" basename extension)
-         nil
-         (list file)))))
+  (defun noct-dirvish-symlink ()
+    (interactive)
+    (dirvish--yank 'symlink))
 
   (general-def 'normal dired-mode-map
-    "ct" #'noct-dired-unoconv-to-txt
-    "cP" #'noct-dired-unoconv-to-pdf
-    "cp" #'noct-dired-pandoc)
+    "a" #'dirvish-dispatch
 
-  (defun noct-dired-udiskie-umount ()
-    "Unmount selected drive(s) with udiskie."
-    (interactive)
-    (noct-dired-async-run "udiskie-umount"))
+    "b" #'dirvish-show-history
 
-  (defun noct-udiskie-umount-all ()
-    "Unmount all drives with udiskie."
-    (interactive)
-    (call-process-shell-command "udiskie-umount --all &"))
+    "yp" #'dirvish-copy-file-path
+    "yn" #'dirvish-copy-file-name
+    "yd" #'dirvish-copy-file-directory
 
-  ;; TODO don't have a tray anymore; does this work with external cd reader?
-  (defun noct-eject-tray ()
-    "Eject tray."
-    (interactive)
-    (let ((default-directory "/sudo::")
-          ;; don't try to get root password from auth sources
-          auth-sources)
-      (shell-command "eject /dev/sr0")))
+    "pp" #'dirvish-yank
+    "pm" #'noct-dirvish-move
+    "pl" #'noct-dirvish-symlink
+    "pL" #'noct-dirvish-relalink
 
-  (general-def 'normal dired-mode-map
-    "un" #'noct-dired-udiskie-umount
-    "uN" #'noct-udiskie-umount-all
-    "ue" #'noct-eject-tray)
+    "co" #'dirvish-sort-by-criteria
 
-  (defun noct-dired-sanitize ()
-    "Sanitize permission of selected path(s)."
-    (interactive)
-    (noct-dired-async-run (format "sudo chmod -R u=rwX,go=rX"))
-    (noct-dired-async-run (format "sudo chown -R \"%s\" " (getenv "USER"))))
+    "du" #'dirvish-total-file-size)
 
-  (general-def 'normal dired-mode-map
-    "cs" #'noct-dired-sanitize)
-
-  ;; TODO untested
-  (defun noct-dired-beet-import ()
-    "Call beet import on the selected path(s)."
-    (interactive)
-    (dired-do-shell-command "beet import"))
-
-  (general-def 'normal dired-mode-map
-    "bi" #'noct-dired-beet-import))
+  (dirvish-override-dired-mode)
+  ;; find-file preview
+  (dirvish-peek-mode))
 #+end_src
 
 ** Eshell

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# meant to be called before starting X to restore
+# does not reload for running aplications
+
+# wal version breaks stumpwm; what about this?
+~/.config/wpg/wp_init.sh &> /dev/null
+
+# wpg merges user .Xresources afterwards (and mine contains default colors)
+# redo colors
+echo "Re-updating .Xresources as workaround (e.g. for polybar)"
+xrdb -merge ~/.cache/wal/colors.Xresources

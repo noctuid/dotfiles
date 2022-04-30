@@ -9,12 +9,10 @@
 #      -l pywal, -L wpg
 
 # * Set Wallpaper
+echo "Setting wallpaper"
 bgset "$@" &
 
 wallpaper=$(realpath "${@: -1}")
-
-# cache for i3lock-color
-betterlockscreen --update "$wallpaper" &
 
 # * Update Pywal Colors
 # handles terminals, polybar, xrdb
@@ -22,33 +20,51 @@ betterlockscreen --update "$wallpaper" &
 
 # wal -n -i "${@: -1}"
 
+echo "Generating colorscheme with wpg"
 wpg -a "$wallpaper"
+echo "Applying colorscheme with wpg"
+# NOTE: this command will mess up terminal output regardless of how it is run
+# (and even with --no-reload)
 wpg -n -s "$wallpaper" || exit 1
+
+# * Fix Xresources
 # wpg merges user .Xresources afterwards (and mine contains default colors)
 # redo colors
-xrdb -merge ~/.cache/wal/colors.Xresources &
+echo "Re-updating .Xresources as workaround (e.g. for polybar)"
+xrdb -merge ~/.cache/wal/colors.Xresources
+pkill -USR1 -x polybar &
 
 # * Update Colors for Applications Pywal Doesn't
 wm=$(get_wm)
 if [[ $wm == bspwm ]]; then
+	echo "Setting bspwm colors"
 	bspwm_set_wal_colors &
 elif [[ $wm == herbstluftwm ]]; then
+	echo "Setting herbstluftwm colors"
 	hc_set_wal_colors &
 fi
 
-# requires steam restart
-wal_steam -w &
+echo "Setting Dunst colors"
+# nohup since will continue running; will not work when called from dired
+# without this
+nohup dunstrun &> /dev/null &
 
-dunstrun &
+# requires steam restart
+echo "Setting Steam colors"
+wal_steam -w &> /dev/null &
 
 # reload emacs color scheme
-emacsclient -a false -e t && emacsclient --eval '(noct-ewal)' &
+echo "Setting Emacs colors"
+emacsclient -a false -e t &> /dev/null \
+	&& emacsclient --eval '(noct-ewal)' &> /dev/null &
 
 # reload colors for pywalfox/firefox
+echo "Setting pywalfox colors"
 pywalfox update &
 
 # reload qutebrowser config.py
 if pgrep -x qutebrowser; then
+	echo "Setting qutebrowser colors"
 	qutebrowser ':config-source ~/.cache/wal/qutebrowser_colors.py' &
 fi
 
@@ -58,3 +74,14 @@ fi
 # source ~/.cache/wal/colors.sh
 # shellcheck disable=SC2154
 # xsetroot -cursor_name heart -bg "$background" -fg "$background" &
+
+# * Set Lockscreen
+# cache for i3lock-color
+# slowest and least immediately important; start last
+echo "Setting lockscreen"
+betterlockscreen --update "$wallpaper" &
+
+# necessary to use with dired-do-async-shell-command, for example, so all
+# processes complete
+wait
+echo "walset finished"
