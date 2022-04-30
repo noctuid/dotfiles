@@ -211,9 +211,9 @@ Start Emacs with --record-requires to populate. This still needs work.")
       ((noct-command-line-flag-specified-p "--stable")
        ;; NOTE for now ignoring stable elc files
        (load-file (expand-file-name "awaken-stable.el" user-emacs-directory))
-       ;; TODO remove
-       (let ((unclean-stable-file (expand-file "unclean-stable.el"
-                                               user-emacs-directory)))
+       ;; TODO remove unclean
+       (let ((unclean-stable-file (expand-file-name "unclean-stable.el"
+                                                    user-emacs-directory)))
          (when (file-exists-p unclean-stable-file)
            (load-file unclean-stable-file))))
       ((noct-command-line-flag-specified-p "--profile-dotemacs")
