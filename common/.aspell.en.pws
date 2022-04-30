@@ -1,4 +1,4 @@
-personal_ws-1.1 en 65 
+personal_ws-1.1 en 73 
 NixOS
 Vencent
 accessor
@@ -17,12 +17,16 @@ customizable
 deduplication
 deliverables
 discoverability
+disqus
 disturbable
 docstring
 dotfiles
 emacsclient
 filesystem
+flycheck
 flyspell
+frecency
+glitchy
 hackable
 hinderance
 interruptability
@@ -35,7 +39,9 @@ keypresses
 minibuffer
 nixos
 obsoletion
+orderless
 overwater
+performant
 plist
 posframe
 posix
@@ -50,6 +56,7 @@ runtime
 sanitization
 scriptable
 selectable
+selectrum
 shellcheck
 sonification
 sonified
@@ -61,6 +68,7 @@ symlinking
 thumbcluster
 tradeoff
 uncompress
+unintuitive
 unsetting
 whitespace
 yasnippet
