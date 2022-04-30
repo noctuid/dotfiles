@@ -1,1 +1,1 @@
-./.bxinitrc
+./.bxinitrc "$@" &> ~/.xinit_log
