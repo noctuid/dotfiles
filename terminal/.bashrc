@@ -4,3 +4,5 @@
 [[ $- != *i* ]] && return
 
 PS1='[\u@\h \W]\$ '
+
+export HISTCONTROL=ignoreboth:erasedups
