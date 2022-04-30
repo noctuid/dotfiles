@@ -21,7 +21,7 @@ def hook_ready(self):
             media = [f.relative_path for f in self.thisdir.files if f.image
                      or f.video]
             escaped_filenames = " ".join(shell_quote(f) \
-                    for f in images if "\x00" not in f)
+                    for f in media if "\x00" not in f)
 
             if (images and self.thisfile.relative_path in images) or \
                     (media and self.this)and \
@@ -44,13 +44,13 @@ def hook_ready(self):
                             "imv -n %d " % number, 1)
 
                 if 'pqiv ' in command:
-                    number = images.index(self.thisfile.relative_path)
+                    number = media.index(self.thisfile.relative_path)
                     new_command = command.replace("pqiv ",
                             "pqiv --action \"goto_file_byindex(%d)\" " % \
                             number, 1)
 
                 if 'mvi ' in command:
-                    number = images.index(self.thisfile.relative_path)
+                    number = media.index(self.thisfile.relative_path)
                     new_command = command.replace("mvi ",
                             "mvi --playlist-start=%d " % \
                             number, 1)
