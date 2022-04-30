@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# TODO
+# - just remove salt stuff completely
+# - tlp config (charging rates)
+# - aur problems (aur helper issues, slowness, etc.)
+# - evm doesn't work
+# - https://stackoverflow.com/questions/30421986/why-does-npm-list-g-lead-to-npm-err-missing-error
+
 # Goal: idempotent post-install setup script
 # Notes:
 # - almost nothing needs to be done manually; this handles all installation
@@ -46,12 +53,6 @@
 #   any part of it fails (not using set -e; see
 #   http://mywiki.wooledge.org/BashFAQ/105; main annoyance was behavior where
 #   failed function will continue if do func ||)
-
-# TODO
-# - tlp config (charging rates)
-# - aur problems (aur helper issues, slowness, etc.)
-# - evm doesn't work
-# - https://stackoverflow.com/questions/30421986/why-does-npm-list-g-lead-to-npm-err-missing-error
 
 # * Constants
 basedir="$(dirname "$(realpath "$0")")"
