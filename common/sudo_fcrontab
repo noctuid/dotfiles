@@ -7,4 +7,4 @@
 # may be better as systemd service since can run after network is up
 %monthly * * * curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
 # run lock_down on weekdays at 5; replace uhome before installing
-& 0 17 * * 1-5 uhome/bin/lock_down
+# & 0 17 * * 1-5 uhome/bin/lock_down
