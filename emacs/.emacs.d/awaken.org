@@ -4166,6 +4166,9 @@ A helper library for inserting icons (used by other packages in my config).
 
 (use-package doom-modeline
   :init
+  (gsetq-default mode-line-format (propertize (make-string 300 ?─)
+                                              ;; use default background color
+                                              'face 'default))
   (general-after-init
     (general-add-advice
      'doom-modeline-set-modeline
