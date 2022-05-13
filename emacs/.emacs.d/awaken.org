@@ -1342,7 +1342,8 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
  ;; scroll-preserve-screen-position t
  )
 
-(gsetq sentence-end-double-space nil)
+;; default; was previously using as nil
+(gsetq sentence-end-double-space t)
 
 ;; don't ask; follow symlinks to file under version control
 (gsetq find-file-visit-truename t
