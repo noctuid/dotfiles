@@ -6455,6 +6455,15 @@ All of my org config is in unclean.org. I will gradually move it here.
 #+end_src
 
 *** External/Contrib
+**** Org Appear
+Show invisible things when point is on them in org (e.g. links).
+#+begin_src emacs-lisp
+(use-package org-appear
+  :ghook 'org-mode-hook
+  :config
+  (gsetq org-appear-autolinks t))
+#+end_src
+
 **** Ox Hugo
 #+begin_src emacs-lisp
 (use-package ox-hugo
