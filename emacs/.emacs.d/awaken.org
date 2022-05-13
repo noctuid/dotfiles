@@ -2113,7 +2113,7 @@ I've switched away from putting this function in a hook because it can be jarrin
 *** Setup
 #+begin_src emacs-lisp
 (use-package company
-  :general 
+  :general
   (general-def noct-toggle-map "c" #'company-mode)
   (general-def 'insert "C-t" #'company-yasnippet)
   :init
@@ -2155,7 +2155,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   ;; add yasnippet to all backends
   (gsetq company-backends
          (mapcar #'trishume:company-backend-with-yas company-backends))
-  
+
   ;; no longer using tab
   ;; tab more similar to vim (tab tabs through completions)
   ;; (require 'company-tng)
@@ -2166,6 +2166,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     "C-h" nil
     "C-w" nil
     ;; only use quick access keys
+    [return] nil
+    "RET" nil
     [tab] nil
     "TAB" nil
     "<down>" nil
@@ -2175,13 +2177,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   ;; happen normally)
   (general-def company-active-map
     :predicate '(company-explicit-action-p)
-    "RET" #'company-complete)
-
-  ;; TODO messes up company-posframe
-  ;; (popup will dissappear when quickhelp pops up.. presumably because evil is
-  ;; enabled in it?)
-  ;; (general-add-hook 'evil-normal-state-entry-hook #'company-abort)
-  )
+    "RET" #'company-complete))
 #+end_src
 
 *** Company in Minibuffer
@@ -2269,7 +2265,6 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
 #+end_src
 
 ** Corfu
-TODO make faces match theme
 #+begin_src emacs-lisp
 (use-package corfu
   ;; to get extensions
@@ -2292,7 +2287,9 @@ TODO make faces match theme
 
   (general-def corfu-map
     ;; explicit selection only for now
-    "RET" nil)
+    "RET" nil
+    "<down>" nil
+    "<up>" nil)
 
   ;; TODO pcmpl-args
   ;; TODO pcomplete advice
@@ -2320,15 +2317,31 @@ TODO make faces match theme
     "M-i" (noct-generate-corfu-select-index 8)
     "M-o" (noct-generate-corfu-select-index 9))
 
+  ;; don't require multiple escape presses to exit minibuffer
+  (general-def :keymaps noct-minibuffer-maps
+    "<escape>" (noct-defun corfu-quit-minibuffer ()
+                 "`escape-quit-minibuffer' but quit corfu if active."
+                 (interactive)
+                 (when (and (boundp 'corfu--frame)
+                            (frame-live-p corfu--frame))
+                   (corfu-quit))
+                 (keyboard-escape-quit)))
+
   ;; sort by recency (but not frecency)
   (corfu-history-mode)
   (general-with 'savehist
     (general-pushnew 'corfu-history savehist-additional-variables))
 
-  (general-add-hook 'evil-normal-state-entry-hook #'corfu-quit))
+  ;; don't do this... some how deletes buffer contents first time
+  (general-add-hook 'evil-normal-state-entry-hook
+                    (defun noct-maybe-corfu-quit ()
+                      ;; check necessary... or entire buffer contents will be
+                      ;; deleted first time enter minibuffer
+                      (when (bound-and-true-p corfu--candidates)
+                        (corfu-quit)))))
 
-
-;; looks cool but not that useful; don't normally need docs during completion; more distracting than beneficial
+;; looks cool   but not that useful; don't normally need docs during completion;
+;; more distracting than beneficial
 (use-package corfu-doc
   :disabled t
   :straight (corfu-doc
@@ -2341,6 +2354,7 @@ TODO make faces match theme
 
 ;; TODO way too big on one computer
 (use-package kind-icon
+  :disabled t
   :after corfu
   :demand t
   :config
@@ -3129,15 +3143,6 @@ The only downside is the lack of prescient integration. Vertico supports recency
          vertico-scroll-margin 0
          vertico-cycle t)
 
-  ;; Use `consult-completion-in-region' if Vertico is enabled.
-  ;; Otherwise use the default `completion--in-region' function.
-  (gsetq completion-in-region-function
-         (noct-defun minad-completion-in-region-function (&rest args)
-           (apply (if vertico-mode
-                      #'consult-completion-in-region
-                    #'completion--in-region)
-                  args)))
-
   (general-s "." #'vertico-repeat)
 
   (general-add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
@@ -3157,6 +3162,8 @@ The only downside is the lack of prescient integration. Vertico supports recency
   (set-face-attribute 'vertico-indexed nil
                       :height 1.0
                       :inherit 'minibuffer-prompt)
+
+  (vertico-multiform-mode)
 
   (defmacro noct-generate-vertico-select-index (index)
     "Return a named function to run `vertico-directory-enter' for INDEX."
@@ -3208,9 +3215,21 @@ The only downside is the lack of prescient integration. Vertico supports recency
   ;; TODO move this somewhere else
   (gsetq org-imenu-depth 10)
 
+  ;; drastically decrease; fontification in slow in larger org files
+  (gsetq consult-fontify-max-size 250000)
+
   (gsetq consult-buffer-sources
          (remove 'consult--source-bookmark consult-buffer-sources)
          consult-preview-key '(:debounce 0.1 any))
+
+  ;; Use `consult-completion-in-region' if Vertico is enabled.
+  ;; Otherwise use the default `completion--in-region' function.
+  (gsetq completion-in-region-function
+         (noct-defun minad-completion-in-region-function (&rest args)
+           (apply (if (bound-and-true-p vertico-mode)
+                      #'consult-completion-in-region
+                    #'completion--in-region)
+                  args)))
 
   (general-after 'projectile
     ;; will cause `consult-ripgrep' and similar to use project root
@@ -8870,15 +8889,20 @@ meant to be used from the command line (specifically with my esel script)."
       (let* ((selectrum-num-candidates-displayed 1000)
              (selectrum-display-action '(display-buffer-use-some-window))
              ;; (selectrum-should-sort-p)
+             (vertico-count 1000)
+             (vertico-multiform-categories
+              '((t
+                 buffer
+                 (vertico-buffer-display-action . (display-buffer-same-window)))))
              (selection (completing-read
                          "> "
                          (thread-first (buffer-substring-no-properties
                                         (point-min)
                                         (point-max))
-                           (split-string (rx (1+ "\n")) t)
-                           ;; TODO optional
-                           ;; (delete-dups)
-                           ))))
+                                       (split-string (rx (1+ "\n")) t)
+                                       ;; TODO optional
+                                       ;; (delete-dups)
+                                       ))))
         (when selection
           (delete-region (point-min) (point-max))
           (insert selection)
