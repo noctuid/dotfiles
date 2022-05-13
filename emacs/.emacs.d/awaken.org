@@ -7133,7 +7133,9 @@ Currently, tree sitter can be used for syntax highlighting. There is also the pa
   ('prog-mode-hook #'global-tree-sitter-mode nil nil t)
   ('tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
-(use-package tree-sitter-langs)
+(use-package tree-sitter-langs
+  :after tree-sitter
+  :demand t)
 #+end_src
 
 ** Lisps (General)
