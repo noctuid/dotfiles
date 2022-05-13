@@ -3928,7 +3928,7 @@ I prefer to have a buffer-local jumplist and use a separate key for ~winner-undo
 ** Deadgrep
 #+begin_src emacs-lisp
 (use-package deadgrep
-  :general (general-t "/" #'deadgrep)
+  :general (general-t "/" #'deadgrep-incremental)
   :init
   (gsetq smart-jump-find-references-fallback-function
          #'noct-deadgrep-current)
