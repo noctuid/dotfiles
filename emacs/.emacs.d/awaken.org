@@ -3245,10 +3245,11 @@ The only downside is the lack of prescient integration. Vertico supports recency
   (defconst noct-ripgrep-args
     (concat "rg "
             ;; defaults
+            "--null "
             "--line-buffered "
             "--color=never "
             "--max-columns=1000 "
-            "--path-separator / `"
+            "--path-separator / "
             "--smart-case "
             "--no-heading "
             "--line-number "
