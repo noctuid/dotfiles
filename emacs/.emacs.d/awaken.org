@@ -716,56 +716,11 @@ Principles:
   :prefix ",")
 #+end_src
 
-** Doom Helpers
-*** Switch Buffer Hook
+** On.el - Extra Hooks
 #+begin_src emacs-lisp
-(defvar doom-switch-buffer-hook nil
-  "A list of hooks run after changing the current buffer.")
-
-(defvar doom-inhibit-switch-buffer-hooks nil
-  "Letvar for inhibiting `doom-switch-buffer-hook'. Do not set this directly.")
-
-(defun doom-run-switch-buffer-hooks-a (orig-fn buffer-or-name &rest args)
-  "Run hooks from `doom-switch-buffer-hook' in buffer if it has changed."
-  (let ((gc-cons-threshold most-positive-fixnum))
-    (if (or doom-inhibit-switch-buffer-hooks
-            (eq (current-buffer) (get-buffer buffer-or-name))
-            ;; norecord
-            (and (eq orig-fn #'switch-to-buffer) (car args)))
-        (apply orig-fn buffer-or-name args)
-      (let ((doom-inhibit-switch-buffer-hooks t))
-        ;; TODO temporary workaround to not break dirvish
-        (let ((buffer (apply orig-fn buffer-or-name args)))
-          (when (if (windowp buffer)
-                    (window-live-p buffer)
-                  (buffer-live-p buffer))
-            (ignore-errors
-              (with-current-buffer (if (windowp buffer)
-                                       (window-buffer buffer)
-                                     buffer)
-                (run-hooks 'doom-switch-buffer-hook))))
-          buffer)))))
-
-(defun doom-run-switch-to-next-prev-buffer-hooks-a (orig-fn &rest args)
-  "Run hooks from `doom-switch-buffer-hook' in new buffer."
-  (let ((gc-cons-threshold most-positive-fixnum))
-    (if doom-inhibit-switch-buffer-hooks
-        (apply orig-fn args)
-      (let ((doom-inhibit-switch-buffer-hooks t))
-        (when-let (buffer (apply orig-fn args))
-          (with-current-buffer buffer
-            (run-hooks 'doom-switch-buffer-hook))
-          buffer)))))
-
-(general-add-advice '(switch-to-buffer display-buffer)
-                    :around #'doom-run-switch-buffer-hooks-a)
-
-(general-add-advice '(switch-to-next-buffer switch-to-prev-buffer)
-                    :around #'doom-run-switch-to-next-prev-buffer-hooks-a)
-
-;; (defun noct-call-after-buffer (fun)
-;;   (general-add-hook 'doom-switch-window-hook fun)
-;;   (general-add-advice 'after-find-file :before (lambda (&rest _) (funcall fun))))
+(use-package on
+  :straight (:host github :repo "ajgrf/on.el")
+  :demand t)
 
 (defvar noct-elisp-scratch-hook nil
   "Hook run when scratch buffer switches from fundamental to emacs-lisp mode.
@@ -779,7 +734,7 @@ BODY run if I switch the scratch buffer to elisp."
   (declare (indent defun))
   `(let ((fun (lambda (&rest _)
                 ,@body)))
-     (general-add-hook '(doom-switch-buffer-hook
+     (general-add-hook '(on-switch-buffer-hook
                          noct-elisp-scratch-hook) fun nil nil t)
      (general-add-advice 'after-find-file :before fun nil t)))
 
@@ -788,7 +743,7 @@ BODY run if I switch the scratch buffer to elisp."
   (declare (indent defun))
   `(let ((fun (lambda (&rest _)
                 ,@body)))
-     (general-add-hook 'doom-switch-window-hook fun nil nil t)
+     (general-add-hook 'on-switch-window-hook fun nil nil t)
      (general-add-advice 'after-find-file :before fun nil t)))
 
 (defmacro noct-pre-command-or-post-file (&rest body)
@@ -813,49 +768,7 @@ BODY run if I switch the scratch buffer to elisp."
                        #'identity)))
 #+end_src
 
-*** Switch Window Hook
-#+begin_src emacs-lisp
-(defvar doom-switch-window-hook nil
-  "A list of hooks run after changing the focused windows.")
-
-(defvar doom-inhibit-switch-window-hooks nil
-  "Letvar for inhibiting `doom-switch-window-hook'. Do not set this directly.")
-
-(defvar doom--last-window nil)
-
-(defun doom-run-switch-window-hooks-h ()
-  (let ((gc-cons-threshold most-positive-fixnum))
-    (unless (or doom-inhibit-switch-window-hooks
-                (eq doom--last-window (selected-window))
-                (minibufferp))
-      (let ((doom-inhibit-switch-window-hooks t))
-        (run-hooks 'doom-switch-window-hook)
-        (setq doom--last-window (selected-window))))))
-
-(general-add-hook 'buffer-list-update-hook #'doom-run-switch-window-hooks-h)
-#+end_src
-
-*** Switch Frame Hook
-#+begin_src emacs-lisp
-(defvar doom-switch-frame-hook nil
-  "A list of hooks run after changing the focused frame.")
-
-(defvar doom-inhibit-switch-frame-hooks nil
-  "Letvar for inhibiting `doom-switch-frame-hook'. Do not set this directly.")
-
-(defvar doom--last-frame nil)
-
-(defun doom-run-switch-frame-hooks-h (&rest _)
-  (unless (or doom-inhibit-switch-frame-hooks
-              (eq doom--last-frame (selected-frame))
-              (frame-parameter nil 'parent-frame))
-    (let ((doom-inhibit-switch-frame-hooks t))
-      (run-hooks 'doom-switch-frame-hook)
-      (setq doom--last-frame (selected-frame)))))
-
-(general-add-hook 'focus-in-hook #'doom-run-switch-frame-hooks-h)
-#+end_src
-
+** Doom Helpers
 *** Large File Handling
 #+begin_src emacs-lisp
 (defvar-local doom-large-file-p nil)
@@ -1881,7 +1794,7 @@ Obvious ones:
         recentf-auto-cleanup 'never)
   (general-add-hook 'kill-emacs-hook #'recentf-cleanup)
   (general-add-hook
-   '(doom-switch-window-hook write-file-functions)
+   '(on-switch-window-hook write-file-functions)
    (progn (defun doom--recentf-touch-buffer-h ()
             "Bump file in recent file list when it is switched or written to."
             (when buffer-file-name
