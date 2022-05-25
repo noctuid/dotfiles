@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 name=$1
+off_file=/tmp/xtoggle/"$name"_"$DISPLAY"_off
 pidfile=/tmp/"$name"_"$DISPLAY".pid
+touch "$pidfile"
 pid=$(< "$pidfile")
+
+mkdir -p /tmp/xtoggle
 
 if [[ -n $pid ]] && kill -s 0 "$pid" &> /dev/null; then
 	# shellcheck disable=SC2188
 	kill "$pid" && > "$pidfile"
+	touch "$off_file"
 else
 	xrestart "$@"
+	rm -f "$off_file"
 fi

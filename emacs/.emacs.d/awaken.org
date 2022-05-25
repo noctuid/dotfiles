@@ -109,6 +109,7 @@ Used throughout configuration.
     scheme-mode-hook
     sly-mrepl-mode-hook
     clojure-mode-hook
+    cider-repl-mode-hook
     lisp-mode-hook)
   "List of hooks for all used lisp modes.")
 
@@ -7013,7 +7014,10 @@ TODO lsp-use-plists (https://github.com/emacs-lsp/lsp-mode/issues/1807 now fixed
   :gfhook
   ('lsp-ui-doc-frame-mode-hook (noct-disable display-line-numbers-mode))
   :config
-  (gsetq lsp-ui-sideline-ignore-duplicate t))
+  (gsetq lsp-ui-sideline-ignore-duplicate t
+         ;; annoying, especially in modes where there are always code actions;
+         ;; can manually show when want to
+         lsp-ui-sideline-show-code-actions nil))
 
 (use-package lsp-ivy
   :disabled t
@@ -7105,6 +7109,8 @@ TODO
          lispy-outline (rx (and bol ";;" (or (and ";" (not (any "#")))
                                              (and (0+ space) (1+ "*"))))))
 
+  (noct-handle-popup-other-window "*lispy-message*")
+
   (general-def noct-toggle-map "l" #'lispy-mode)
 
   (general-def 'normal lispy-mode-map
@@ -7172,6 +7178,23 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
              (lispy-new-copy)
              (lispy-delete-backward arg)))))
 
+
+  (defun noct-lispy-eval ()
+    "Call `cider-eval-last-sexp' where possible otherwise call `lispy-eval'.
+This ensures that cider's evaluations fringe indicators are up-to-date."
+    (interactive)
+    (cond ((or (region-active-p)
+               (not (derived-mode-p 'clojure-mode)))
+           (call-interactively #'lispy-eval))
+          ((lispyville--at-left-p)
+           (lispy-different)
+           (cider-eval-last-sexp)
+           (lispy-different))
+          ((lispyville--at-right-p)
+           (cider-eval-last-sexp))
+          (t
+           (call-interactively #'lispy-eval))))
+
   (general-def lispy-mode-map
     :definer 'lispy
     "n" #'lispy-down                    ; lose lispy-new-copy -> y
@@ -7180,7 +7203,7 @@ Passes ARG to `lispy-delete' or `lispy-delete-backward'."
     ;; N and E instead of s and w
     "N" #'lispy-move-down               ; lose lispy-narrow -> w
     "E" #'lispy-move-up                 ; lose lispy-eval-and-insert -> L
-    "l" #'lispy-eval                    ; (freed by i)
+    "l" #'noct-lispy-eval               ; (freed by i)
     "L" #'lispy-eval-and-insert         ; (unbound)
     "y" #'lispy-new-copy                ; lose lispy-occur -> /
     "/" #'lispy-occur                   ; lose lispy-splice -> x
@@ -7286,41 +7309,211 @@ For quasi-quoted expressions.
 
 ** cc-mode
 ** Clojure
-TODO look at these:
-- https://github.com/candid82/flycheck-joker
-- https://github.com/clojure-emacs/squiggly-clojure
-- https://github.com/sanel/monroe
-- https://github.com/seanirby/cider-buddy
-- etc.
+Other packages to investigate
+- sayid - debugger and profiler
+- dap-mode for clojurescript
+- kaocha-runner - to run kaocha tests
 
 *** Setup
+TODO bind
+- clojure-sort-ns
+- clojure-thread* and clojure-unwind*
+- clojure-cycle-privacy
+- clojure*let
+- clojure-add-arity
+
 #+begin_src emacs-lisp
-(use-package clojure-mode)
+;; `lsp-mode' with clojure-lsp will already use clj-condo
+;; older alternavites are squiggly-clojure and flycheck-joker
+;; (use-package flycheck-clj-kondo)
+
+(use-package clojure-mode
+  :magic "#!/usr/bin/env bb"
+  :config
+  (gsetq clojure-align-forms-automatically t))
 #+end_src
 
 *** Cider
-TODO read docs
-- https://cider.readthedocs.io/en/latest/
-- https://www.youtube.com/watch?v=aYA4AAjLfT0
-#+begin_src emacs-lisp
-(use-package cider
-  :ghook 'clojure-mode-hook
-  :config
-  (general-m clojure-mode-map
-    "j" #'cider-jack-in
-    "l"  #'cider-eval-last-sexp
-    "n" #'cider-repl-set-ns
-    "b" #'cider-load-buffer
-    "d" #'cider-eval-defun-at-point)
+Nice functionality
+- shows marker in fringe for top-level forms that have not changed since being evaluated
+- shows result in overlay when eval
+- failing tests highlighted
 
-  (general-def 'normal clojure-mode-map
-    "RET" #'cider-find-var
-    "N" #'cider-doc)
+Useful but not enough to bind at this point:
+- cider-brows-ns
+- cider-browse-spec
+- cider-undef
+- cider-apropos-*
+
+TODO eventually
+- bind stacktrace keys
+- bind cider toggle trace ns or trace var
+- set cider-repl-buffer-size-limit if it becomes necessary
+
+- TODO some lsp stuff does not work with babashka
+
+#+begin_src emacs-lisp
+(defun noct-cider-setup ()
+  "Setup cider mode, configuring lsp and cider to play nicely."
+  ;; because `cider-mode' does not load cider and my :config will not run otherwise
+  (require 'cider)
+
+  ;; use cider's eldoc
+  ;; lsp's eldoc can only show qualified function name or everything; cider can
+  ;; show qualified function name and signature
+  (gsetq-local lsp-eldoc-enable-hover nil)
+
+  ;; use `clojure-mode's formatting
+  ;; - makes more sense for editor not server to handle
+  ;; - lsp does not fully support aligning
+  ;; - `agressive-indent-mode' conflicts with lsp formatting
+  (gsetq-local lsp-enable-on-type-formatting nil)
+  ;; also makes more sense for editor to handle
+  ;; TODO would be slightly better to change only once jacked in
+  (gsetq-local lsp-enable-indentation nil)
+
+  ;; use cider completion
+  ;; - formatting is slightly different
+  ;;   - cider - macro-name (namespace name) <m>
+  ;;   - lsp - var-name ns/var-name (Variable)
+  ;; - lsp completion seems to have some issues (2022-03-04) - e.g. not offering
+  ;;   completion for macro defined in a dependency with regular clojure, does
+  ;;   not work with babashka (e.g. if import fs, get no fs/ completions)
+  ;; - lsp's doc popup looks better
+  ;; - downside is of course have to eval before get completions for
+  ;; NOTE needs to be set before calling `lsp'; TODO some way to disable later?
+  (gsetq-local lsp-completion-enable nil)
+
+  ;; use cider for syntax highlighting; don't use lsp's semantic highlight
+  ;; functionality
+  ;; use font/var lock faces for defined vars and functions
+  (gsetq cider-font-lock-dynamically '(macro core deprecated var function)))
+
+(use-package cider
+  :ghook
+  'clojure-mode-hook
+  'clojurescript-mode-hook
+  :gfhook #'noct-cider-setup
+  :config
+  ;; cider-preferred-build-tool
+  (gsetq cider-default-cljs-repl 'shadow
+         ;; TODO may need to add custom type?
+         ;; https://docs.cider.mx/cider/1.1/cljs/configuration.html
+         cider-shadow-cljs-command "clojure -M:shadow-cljs"
+         ;; save file when evaluating buffer without prompting
+         cider-save-file-on-load t
+         cider-eldoc-display-context-dependent-info t)
+
+  ;; NOTE: clojure-mode-map keybindings should be useable in clojurescript-mode
+  ;; (it is a derived mode)
+  (general-m cider-mode-map
+    "j" #'cider-jack-in
+    ";" #'noct-cider-switch-to-repl-creating
+    "l" #'cider-eval-last-sexp
+    "b" #'cider-load-buffer
+    "d" #'cider-eval-defun-at-point
+    ;; "Reload modified and unloaded namespaces on the classpath."
+    "R" #'cider-ns-refresh
+    ;; debug defun - just use C-u with above
+    "p" #'cider-macroexpand-1
+    "P" #'cider-macroexpand-all
+    "t" #'cider-test-run-project-tests
+    "I" #'cider-inspect-last-result
+    ;; find file containing ns
+    "/" #'cider-find-ns
+    ;; don't think I will need compile for anything
+    "c" #'lsp-clojure-clean-ns)
+
+  ;; `lsp-find-definition' works just as well without repl connection
+  ;; "RET" #'cider-find-dwim
+
+  ;; `lsp-describe-thing-at-point' is a prettier `cider-clojuredocs'
+  ;; `cider-doc' has the advantage of showing "see also" as buttons/links
+  ;; "N" #'cider-doc
+
+  ;; Use `lsp-find-references' for references
+  ;; - Cider limitations: https://docs.cider.mx/cider/usage/misc_features.html
+  ;; - Cider won't show references for functions not defined in the ns (only
+  ;;   shows for loaded namespaces); lsp can show all references to e.g. =
+  ;; TODO try clj-refactor find usages
+
+  (general-m (cider-mode-map cider-repl-mode-map)
+    "s" #'cider-repl-set-ns)
 
   ;; repl maps
+  (general-m cider-repl-mode-map
+    ";" #'cider-switch-to-last-clojure-buffer
+    "o" #'cider-repl-switch-to-other
+    "e" #'cider-repl-previous-prompt
+    "n" #'cider-repl-next-prompt)
+
   (general-def 'insert cider-repl-mode-map
     "<up>" #'cider-repl-backward-input
-    "<down>" #'cider-repl-forward-input))
+    "<down>" #'cider-repl-forward-input)
+
+  (noct-handle-popup-other-window "*cider-doc*")
+  (noct-handle-popup-other-window "*cider-clojuredocs*")
+  (noct-handle-popup-other-window "*cider-error*")
+  (noct-handle-popup-other-window "*cider-ns-browser*")
+  (noct-handle-popup-other-window "*cider-spec-browser*")
+  (noct-handle-popup-other-window cider-repl-mode)
+
+  (defun noct--bb-nrepl-filter (proc string)
+    "Wait for bb nrepl to start then connect to it with cider."
+    ;; insert text (default example)
+    (when (buffer-live-p (process-buffer proc))
+      (with-current-buffer (process-buffer proc)
+        (let ((moving (= (point) (process-mark proc))))
+
+          (save-excursion
+            (goto-char (process-mark proc))
+            (insert string)
+            (set-marker (process-mark proc) (point)))
+          (if moving (goto-char (process-mark proc))))))
+    ;; connect once up
+    (save-match-data
+      (when (string-match (rx (and "Started nREPL server at "
+                                   (group (1+ (or digit ".")))
+                                   ":"
+                                   (group (1+ digit))))
+                          string)
+        (cider-connect-clj (list :host (match-string 1 string)
+                                 :port (match-string 2 string))))))
+
+  (defun noct-cider-jack-in-babashka ()
+    "Start a babashka nrepl and connect to it.
+NOTE: Starting with CIDER 1.2, cider-jack-in-clj works with Babashka projects
+that are using bb.edn, so this is no longer normally necessary."
+    (interactive)
+    (set-process-filter
+     (start-process "bb nrepl" "*bb-nrepl*" "bb" "--nrepl-server")
+     #'noct--bb-nrepl-filter))
+
+  (defun noct-cider-switch-to-repl-creating ()
+    "Switch to cider repl, creating it if necessary.
+Set namespace of repl buffer to current namespace"
+    (interactive)
+    (condition-case e
+        (cider-switch-to-repl-buffer t)
+      (error
+       (cl-case major-mode
+         (clojure-mode
+          (if (save-excursion
+                (goto-char (point-min))
+                (looking-at (rx bol "#!/usr/bin/env bb" eol)))
+              (noct-cider-jack-in-babashka)
+            (cider-jack-in '())))
+         (clojurescript-mode (cider-jack-in-cljs '())))))))
+#+end_src
+
+*** TODO Clj-Refactor
+TODO look at what provides and bind useful keys; see how find usages compares
+#+begin_src emacs-lisp
+;; TODO bind hydra
+(use-package clj-refactor)
+
+;; clojure-lsp already supports
+;; (setq cljr-add-ns-to-blank-clj-files nil) ; disable clj-refactor adding ns to blank files
 #+end_src
 
 ** Emacs Lisp
