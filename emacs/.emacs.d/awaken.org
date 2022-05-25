@@ -6206,7 +6206,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (general-with 'debug
   (general-def 'normal debugger-mode-map
-    "q" #'debugger-quit)
+    "q" #'top-level)
 
   (general-after 'evil
     (general-add-hook 'debugger-mode-hook #'evil-normalize-keymaps)))
