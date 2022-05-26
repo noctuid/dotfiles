@@ -170,8 +170,6 @@ pv
 # for coreutils commands (e.g. cp, dd)
 progress
 
-htop
-
 fasd
 
 # random/fun
