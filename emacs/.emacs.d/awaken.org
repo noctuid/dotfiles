@@ -1920,6 +1920,24 @@ I've switched away from putting this function in a hook because it can be jarrin
 (general-s "d" #'noct-maybe-sudo-edit)
 #+end_src
 
+** Tabulated List Mode and Tablist Mode
+#+begin_src emacs-lisp
+(use-package tabulated-list
+  :config
+  (general-def 'normal tabulated-list-mode-map
+    "o" #'tabulated-list-sort
+    "w" #'tabulated-list-next-column
+    "b" #'tabulated-list-previous-column))
+
+;; for forge, for example
+(use-package tablist
+  :ghook ('tabulated-list-mode-hook #'tablist-minor-mode)
+  :config
+  (general-def 'normal tablist-minor-mode-map
+    "f" #'tablist-edit-filter
+    "g/" tablist-mode-filter-map))
+#+end_src
+
 ** Text Scaling Keybindings
 #+begin_src emacs-lisp
 ;; (general-def 'normal
@@ -5480,7 +5498,7 @@ Diff-hl is nice but currently doesn't support staging hunks.  Diff-hl also has a
   :defer-incrementally
   (dash f s with-editor git-commit package eieio transient)
   :general
-  ('normal 'override "S" #'magit-status-here)
+  ('normal "S" #'magit-status-here)
   ('normal dired-mode-map "C" #'magit-clone)
   (general-spc
     "." #'magit-find-git-config-file
@@ -5600,6 +5618,7 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
 (noct-handle-popup-same-window magit-status-mode)
 (noct-handle-popup-same-window magit-log-mode)
 (noct-handle-popup-same-window magit-cherry-mode)
+(noct-handle-popup-same-window magit-log-select-mode)
 (noct-handle-popup-other-window magit-revision-mode)
 (noct-handle-popup-other-window-no-select magit-diff-mode)
 #+end_src
@@ -5728,7 +5747,15 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
   (general-with 'magit
     (require 'forge))
   :config
-  (gsetq forge-owned-accounts '(("noctuid")))
+  (gsetq forge-owned-accounts `((,user-login-name))
+         forge-topic-list-columns
+         '(("#" 4
+            forge-topic-list-sort-by-number
+            (:right-align t) number nil)
+           ("Title" 35 t nil title  nil)
+           ("Milestone" 9 t nil milestone nil)
+           ("State" 6 t nil state nil)
+           ("Updated" 10 t nill updated nil)))
 
   (general-t
     :infix "g"
@@ -5741,10 +5768,23 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
   (general-def 'normal forge-post-mode-map
     "q" #'forge-post-cancel)
 
+  ;; TODO bind forge-edit commands or magit-edit-thing
+
+  (noct-handle-popup-same-window forge-topic-mode)
+  (noct-handle-popup-same-window forge-post-mode)
+
   (general-with 'hardhat
     (general-pushnew
      (cons 'forge-post-mode (lambda (&rest _) t))
      hardhat-buffer-editable-functions)))
+#+end_src
+
+*** Magit delta
+#+begin_src emacs-lisp
+(use-package magit-delta
+  ;; seems too slow
+  :disabled t
+  :ghook 'magit-mode-hook)
 #+end_src
 
 ** TODO Git Commit Insert Issue
