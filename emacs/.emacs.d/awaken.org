@@ -8924,6 +8924,7 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     "<prior>" nil
     "<next>" nil)
 
+  ;; TODO fix
   (general-m vterm-mode-map
     "e" (list #'vterm-previous-prompt :repeat t)
     "n" (list #'vterm-next-prompt :repeat t))
@@ -8933,22 +8934,19 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     (noct-defun noct-vterm-send-escape ()
       "Send <escape> key."
       (interactive)
-      (vterm-send-key "<escape>"))))
+      (vterm-send-key "<escape>")))
 
-(use-package vterm-toggle
-  :straight (vterm-toggle
-             :host github
-             :repo "jixiuf/vterm-toggle")
-  :general
-  ('normal 'override "T" #'vterm-toggle-cd)
-  :init
-  (noct-handle-popup vterm-mode)
-  :config
-  (gsetq vterm-toggle-fullscreen-p nil
-         vterm-toggle-evil-state-when-enter nil
-         vterm-toggle-evil-state-when-leave nil
-         ;; don't create a new buffer if the prompt is not available
-         vterm-toggle-cd-auto-create-buffer nil)
+  ;; temporary to fix if re-eval
+  (general-def 'insert vterm-mode-map
+    "C-c" nil)
+  (evil-collection-init 'vterm)
+  ;; x is weird but I don't need it
+  (general-def 'normal vterm-mode-map
+    ;; swap a and a
+    "a" #'evil-collection-vterm-append
+    "A" #'evil-collection-vterm-append-line
+    "s" nil
+    "S" nil)
 
   (general-def 'visual vterm-mode-map
     "<home>" #'evil-beginning-of-visual-line
@@ -8961,7 +8959,24 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     "C-c" #'vterm--self-insert
     "C-u" #'vterm--self-insert
     "C-w" #'vterm--self-insert
-    "¸" #'vterm--self-insert)
+    "¸" #'vterm--self-insert))
+
+(use-package vterm-toggle
+  :straight (vterm-toggle
+             :host github
+             :repo "jixiuf/vterm-toggle")
+  :general
+  ('normal 'override "T" #'vterm-toggle-cd)
+  :init
+  ;; (noct-handle-popup vterm-mode)
+  ;; too early first time show for major mode to work
+  (noct-handle-popup-same-window (rx "*vterm"))
+  :config
+  (gsetq vterm-toggle-fullscreen-p nil
+         vterm-toggle-evil-state-when-enter nil
+         vterm-toggle-evil-state-when-leave nil
+         ;; don't create a new buffer if the prompt is not available
+         vterm-toggle-cd-auto-create-buffer nil)
 
   ;; (cl-defun noct-tmux-select-or-create (number &optional (session "emacs"))
   ;;     "Select the tmux window with NUMBER, cerating it if it does not exist.
