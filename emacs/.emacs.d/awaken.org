@@ -1928,10 +1928,25 @@ I've switched away from putting this function in a hook because it can be jarrin
 
 ;; change text scale everywhere
 (use-package default-text-scale
+  :disabled t
   :general
   ('normal
    "C-=" #'default-text-scale-increase
    "C--" #'default-text-scale-decrease))
+
+;; automatically change text size everywhere based on resolution (e.g. to get
+;; same size on different sized monitors)
+(use-package textsize
+  ;; for some reason straight claims the recipe is malformed otherwise
+  :straight (:host github :repo "WJCFerguson/textsize")
+  :general
+  ('normal
+   "C-=" #'textsize-increment
+   "C--" #'textsize-decrement)
+  :init
+  (general-after-gui
+    (gsetq textsize-default-points 10)
+    (textsize-mode)))
 #+end_src
 
 ** Toggle Settings Keybindings
