@@ -1653,7 +1653,7 @@ Obvious ones:
 - =v=: ~describe-variable~
 
 #+begin_src emacs-lisp
-(general-with-package 'help-mode
+(general-with-package 'help
   (general-def 'normal "h" #'help-command)
 
   (general-def help-map
@@ -6266,8 +6266,30 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   (general-pushnew (expand-file-name "info" user-emacs-directory)
                    Info-additional-directory-list)
 
+  ;; overriding `describe-input-method' (which I don't need bound)
+  (general-def help-map "I" #'Info-history)
+
+  ;; keybindings partially overlap with evil collection
   (general-def 'normal Info-mode-map
-    "ESC" #'quit-window))
+    "q" #'Info-exit
+    "RET" #'Info-follow-nearest-node
+    ;; "h" #'Info-prev
+    ;; "i" #'Info-next
+    ;; can go through entire manual with these (will have to use `Info-up' if
+    ;; using above keybindings)
+    "h" #'Info-backward-node
+    "i" #'Info-forward-node
+    ;; not every manual has index
+    "I" #'Info-index
+    "<tab>" #'Info-next-reference
+    "S-<tab>" #'Info-prev-reference
+    "u" #'Info-up
+    "U" #'Info-top-node
+    "d" #'Info-directory
+    "gt" 'Info-toc
+    ;; TODO vs `Info-goto-node'? vs `Info-follow-reference'
+    [remap consult-imenu] #'Info-menu
+    "g?" #'Info-summary))
 #+end_src
 
 ** Lilypond
