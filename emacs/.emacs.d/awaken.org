@@ -98,6 +98,12 @@ Used throughout configuration.
 (require 'cl-lib)
 #+end_src
 
+** Map
+Necessary to be able to use ~(setf (map-elt ...) ...)~, for example.
+#+begin_src emacs-lisp
+(require 'map)
+#+end_src
+
 ** Helpers
 *** General
 #+begin_src emacs-lisp
@@ -3423,7 +3429,7 @@ Sets missing metadata for completions (pairs well with embark even if not using 
        (find-file (getenv "BLOG")))
       ;; writing
       ("wr"
-       (find-file "~/ag-sys/else/scrawl/prose/tr/"))
+       (find-file "~/ag-sys/else/scrawl/prose/tr/draft.org"))
       ;; ebooks and more notes
       ("cons"
        (find-file "~/ag-sys/else/consume/books.org"))
@@ -3621,13 +3627,13 @@ Globbing is used to find a matching file."
     ("wr"
      (general-comma
        "," (noct-find-file "~/ag-sys/else/scrawl/prose/notes/standards+procedure.org")
-       "p" (noct-find-file "plot.org")
-       "f" (noct-find-file "~/ag-sys/else/scrawl/prose/tr/")
+       "f" (noct-find-file "~/ag-sys/else/scrawl/prose/tr/draft.org")
        "t" (noct-find-file "~/ag-sys/else/scrawl/prose/pots/misc.org")
-       "w" (noct-find-file "world.org")
-       "m" (noct-find-file "misc.org")
-       "b" (noct-find-file "bio.org")
-       "d" (noct-find-file "draft.org")
+       "p" (noct-find-file (expand-file-name "plan.org" (projectile-project-root)))
+       "w" (noct-find-file (expand-file-name "wiki.org" (projectile-project-root)))
+       "m" (noct-find-file (expand-file-name "misc.org" (projectile-project-root)))
+       "b" (noct-find-file (expand-file-name "bio.org" (projectile-project-root)))
+       "d" (noct-find-file (expand-file-name "draft.org" (projectile-project-root)))
        "i" (noct-find-file "~/ag-sys/else/scrawl/general/ideas.org")
        "c" (noct-find-file "~/ag-sys/else/scrawl/prose/lndn/landon.org")
        "g" (noct-find-file "~/ag-sys/else/scrawl/prose/gen_misc.org")))
@@ -5364,7 +5370,8 @@ This package is unfortunately unmaintained.
   (general-r
     "y" #'link-hint-copy-link
     "Y" #'link-hint-copy-multiple-links)
-  ('normal "gf" #'link-hint-open-link-at-point)
+  ('normal "gf" #'link-hint-open-link-at-point
+           "RET" #'link-hint-open-link-at-point)
   :config
   (defun noct-terminal-link-hint-file (file)
     (find-file file)
@@ -5372,7 +5379,24 @@ This package is unfortunately unmaintained.
       (kill-buffer)
       (start-process-shell-command "xdotool getactivewindow windowunmap")
       ;; (delete-frame)
-      )))
+      ))
+
+  (defun noct-open ()
+    "Open the thing at point.
+Try with lsp or smart jump (if in a prog-mode buffer) then with hyperbole."
+    (interactive)
+    (or (when (derived-mode-p 'prog-mode)
+          (cond ((bound-and-true-p lsp-mode)
+                 (not (stringp (lsp-find-definition))))
+                ((fboundp 'smart-jump-go)
+                 ;; return nil instead of prompting when there is no definition
+                 ;; at point
+                 (cl-letf (((symbol-function 'xref--prompt-p) #'ignore))
+                   (smart-jump-go)))))
+        (when (fboundp 'action-key)
+          (action-key))))
+
+  (gsetq link-hint-action-fallback-commands (list :open #'noct-open)))
 
 (use-package browse-url
   :config
@@ -6414,7 +6438,56 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+end_src
 
 ** Org Mode
-All of my org config is in unclean.org. I will gradually move it here.
+All of my org config is in unclean.org.  I will gradually move it here.
+
+*** Setup
+#+begin_src emacs-lisp
+(use-package org-contrib)
+(use-package org
+  :defer-incrementally
+  calendar find-func format-spec org-macs org-compat org-faces org-entities
+  org-list org-pcomplete org-src org-footnote org-macro ob org org-agenda
+  org-capture
+  :init
+  ;; (cl-pushnew org-modules 'ol-man)
+
+  :config
+  (gsetq org-man-command #'woman
+         ;; can only mark something as done when subheadings are also done
+         ;; don't insert newlines with `org-insert-new-heading'
+         org-blank-before-new-entry '((heading)
+                                      (plain-list-item . auto))
+         ;; don't allow editing of folded/hidden sections
+         ;; doesn't actually work that well
+         org-catch-invisible-edits 'error
+         ;; can't think of a case where I would want to split
+         org-M-RET-may-split-line nil
+         ;; e.g. refile to top not bottom
+         org-reverse-note-order t)
+
+  ;; basic visual settings
+  (gsetq org-ellipsis " ▼"
+         ;; gray all but last star in heading
+         org-hide-leading-stars t
+         ;; hide italics/bold/etc. markers
+         org-hide-emphasis-markers t
+         ;; show entities as their symbol (e.g. show \euro as €)
+         org-pretty-entities t
+         ;; never show blank line when folding
+         org-cycle-separator-lines 0
+         ;; don't indent headings or text below them
+         org-adapt-indentation nil)
+
+  ;; TODO there should be a lineage-full
+  ;; show heading, ancestors, /and siblings/ by default
+  (setf (map-elt org-show-context-detail 'default) 'lineage)
+  ;; only hide siblings for sparse trees
+  ;; also show contents of matched headings by default
+  (setf (map-elt org-show-context-detail 'tags-tree) 'ancestors-full)
+
+  ;; open file links in the same window
+  (setf (map-elt org-link-frame-setup 'file) #'find-file))
+#+end_src
 
 *** Org Src
 #+begin_src emacs-lisp
@@ -6438,6 +6511,7 @@ All of my org config is in unclean.org. I will gradually move it here.
 
   ;; don't indent my source blocks
   (gsetq org-src-preserve-indentation t
+         org-edit-src-content-indentation 0
          org-edit-src-auto-save-idle-delay auto-save-timeout)
 
   (general-m org-src-mode
@@ -6470,6 +6544,117 @@ Show invisible things when point is on them in org (e.g. links).
                           (org-hugo-auto-export-mode))))
   (general-with 'ox
     (require 'ox-hugo)))
+#+end_src
+
+**** Orglink
+Make org links work everywhere.
+#+begin_src emacs-lisp
+(use-package orglink
+  :after org
+  :demand t
+  :config
+  (gsetq orglink-activate-in-modes '(text-mode prog-mode))
+  (global-orglink-mode))
+#+end_src
+
+**** Org Modern
+#+begin_src emacs-lisp
+(use-package org-modern
+  :ghook
+  'org-mode-hook
+  ('org-agenda-finalize-hook #'org-modern-agenda)
+  :config
+  (gsetq org-modern-hide-stars nil
+         org-modern-star
+         ["●"
+          "◉"
+          "○"
+          "◆"
+          "◈"
+          ;; too big
+          ;; "🞛"
+          "◇"
+          "*"
+          ;; "▪"
+          ;; "▫"
+          ]
+         org-modern-checkbox
+         '((?X . "☑")
+           (?- . "▣")
+           (?\s . "☐"))
+         ;; e.g. for #+title
+         org-modern-keyword "‣ "
+         org-modern-variable-pitch 'fixed-pitch
+         org-modern-table-vertical 1
+         org-modern-table-horizontal 1)
+
+  ;; has equally sized bullets and nice checkboxes (that don't change when you
+  ;; put the point on them like for a lot of nerd fonts)
+  ;; (set-face-attribute 'org-modern-symbol nil :font "Sarasa Mono J-9")
+  ;; Delugia looks fine
+
+  ;; TODO make feature request for option for this?
+  (defun noct--org-modern-upate-label-face (&rest _)
+    "Make org-modern labels less wide."
+    (let ((border-reduce (if (eq org-modern-label-border 'auto)
+                             (- (/ (frame-char-height) 10))
+                           (- org-modern-label-border))))
+      (set-face-attribute
+       'org-modern-label nil
+       :box (list :color (face-attribute 'default :background nil t)
+                  :line-width (cons (* 2 border-reduce)
+                                    border-reduce)))))
+  (general-add-advice 'org-modern--update-label-face
+                      :after #'noct--org-modern-upate-label-face))
+#+end_src
+
+**** Org Ql
+#+begin_src emacs-lisp
+(use-package org-ql
+  :general
+  (general-spc "q" #'noct-org-ql)
+  :config
+  (noct-handle-popup "*Org QL")
+
+  (defun noct-org-ql ()
+    (interactive)
+    (org-ql-search (org-agenda-files)
+      (read-string "Query: ")
+      :super-groups '((:auto-parent))
+      :sort '(priority)))
+
+  ;; TODO make feature request
+  ;; TODO why matching against full heading and not stripped?
+  ;; this is heading-regxep without the 0+ nonl and adds args to
+  ;; `org-get-heading'
+  (org-ql-defpred noct-heading-regexp (&rest regexps)
+    "Return non-nil if current entry's heading matches all REGEXPS.
+Matching is done case-insensitively."
+    :coalesce t
+    :normalizers ((`(,predicate-names . ,args)
+                   `(noct-heading-regexp ,@args)))
+    ;; MAYBE: Adjust regexp to avoid matching in tag list.
+    :preambles ((`(,predicate-names ,regexp)
+                 ;; Only one regexp: match with preamble, then let predicate
+                 ;; confirm (because the match could be in e.g. the tags rather
+                 ;; than the heading text).
+                 (list :regexp (rx-to-string `(seq bol (1+ "*") (1+ blank)
+                                                   (? (and "TODO" (1+ blank)))
+                                                   (regexp ,regexp))
+                                             'no-group)
+                       :case-fold t :query query))
+                (`(,predicate-names . ,regexps)
+                 ;; Multiple regexps: use preamble to match against first
+                 ;; regexp, then let the predicate match the rest.
+                 (list :regexp (rx-to-string `(seq bol (1+ "*") (1+ blank)
+                                                   (? (and "TODO" (1+ blank)))
+                                                   (regexp ,(car regexps)))
+                                             'no-group)
+                       :case-fold t :query query)))
+    :body (let ((heading (org-get-heading 'no-tags 'no-todo 'no-priority
+                                          'no-comment))
+                (case-fold-search t))
+            (--all? (string-match it heading) regexps))))
 #+end_src
 
 ** Pentadactyl
@@ -8287,6 +8472,142 @@ This is installed here and manually (and temporarily) enabled in my =init.el=.
     (benchmark-init/show-durations-tree)))
 
 (general-t "b" #'noct-end-benchmarking)
+#+end_src
+
+** Hyperbole
+Implicit links are occasionally useful.  For the most part, I'd rather use explicit org links.  In my case, implicit links are generally more useful for automatic cross referencing in cases where some text was not actually written with the intention of being a link.  The particularly nice ones I'm using are:
+- Any elisp library in load path (e.g. subr.el; builtin)
+- Jumping from a word/name/phrase/variable/function/etc. to a heading in a "wiki" org file (kind of like radio targets except multifile and automatic; defined below)
+
+I might add this eventually:
+- Variable, function, or key sequence in literal org syntax (jump to definition or execute key sequence)
+
+How useful is this compared to embark given that I'm only using one of the builtin implicit links?  I'm not sure, but since I only need one action for these links, less code is needed with hyperbole than with embark, and I get some builtin implicit links out-of-the-box.  If I don't end up using any other builtin hyperbole features, I may switch to using embark.
+
+#+begin_src emacs-lisp
+(use-package hyperbole
+  :defer-incrementally t
+  :general
+  ('normal "<S-return>" #'hkey-either)
+  :init
+  (autoload 'action-key "hyperbole")
+  :config
+  ;; technically unnecessary since hyperbole does this when you require it...
+  (hyperbole-mode)
+
+  (defun noct--minify-heading-link (link)
+    "Return a minified heading link.
+- Strip the target
+- Greedily strip around | or / (in case heading has multiple equivalent names)
+
+Try stripping before the last | or after the first | and return the shorter
+match."
+    (let* ((no-target-link
+            (s-replace-regexp (rx bol "[" (*? any) "]") "" link))
+           (min-link-1
+            (s-replace-regexp (rx (or "|" "/")
+                                  (0+ any))
+                              ""
+                              no-target-link))
+           (min-link-2
+            (s-replace-regexp (rx (0+ any)
+                                  (or "|" "/"))
+                              ""
+                              no-target-link)))
+      (if (< (length min-link-1) (length min-link-2))
+          min-link-1
+        min-link-2)))
+
+  (defun noct--find-matching-heading (bounds files &optional relaxed)
+    "Look up org headings for text from BOUNDS in FILES.
+Return a list of a link to the heading, the text at BOUNDS, and BOUNDS if a
+match is found or nil otherwise.  By default try to match the text directly
+after the heading start but with some leniency:
+
+- Optionally after anything then \"|\" or \"/\" (the heading has equivalent
+  names/aliases)
+- Optionally after \"the\"
+- Optionally after some org markup syntax
+
+If RELAXED is non-nil, match the heading if the text appears anywhere in the
+heading."
+    (when (require 'org-ql nil t)
+      (when-let (
+                 ;; allow one of bounds to be nil (abort)
+                 (beg (car bounds))
+                 (end (cdr bounds))
+                 (search-text (buffer-substring-no-properties beg end))
+                 (link
+                  (car-safe
+                   (org-ql-query
+                     ;; won't touch `org-stored-links' when not called
+                     ;; interactively
+                     :select '(org-store-link nil)
+                     :from files
+                     :where (list 'noct-heading-regexp
+                                  (rx-to-string
+                                   (if relaxed
+                                       `(and (0+ any) ,search-text)
+                                     `(and (? (0+ any)
+                                              (or "|" "/")
+                                              (0+ space))
+                                           (? "the ")
+                                           ;; basic org syntax
+                                           (? (or "=" "~" "*"))
+                                           ,search-text))))
+                     ;; shortest matches first
+                     :order-by
+                     (lambda (a b)
+                       (let ((a (noct--minify-heading-link a))
+                             (b (noct--minify-heading-link b)))
+                         (< (length a) (length b))))))))
+        (list link search-text bounds))))
+
+  (defun noct--find-matching-heading-at-point (&rest files)
+    "Lookup org heading for word(s) at point in FILES in the current project.
+Return a list of a link to the heading, the text at BOUNDS, and BOUNDS if a
+match is found or nil otherwise.  Try finding a match the word at point and the
+following word, the previous word and the word at point, or just the word at
+point (in that order)."
+    (when-let ((word-bounds (bounds-of-thing-at-point 'word))
+               (2-words-bounds
+                (save-excursion
+                  (goto-char (cdr word-bounds))
+                  (forward-word)
+                  (cons (car word-bounds)
+                        (cdr (bounds-of-thing-at-point 'word)))))
+               (last-2-words-bounds
+                (save-excursion
+                  (goto-char (car word-bounds))
+                  (backward-word)
+                  (cons (car (bounds-of-thing-at-point 'word))
+                        (cdr word-bounds)))))
+      (or (noct--find-matching-heading 2-words-bounds files)
+          (noct--find-matching-heading last-2-words-bounds files)
+          (noct--find-matching-heading word-bounds files)
+          (noct--find-matching-heading 2-words-bounds files t)
+          (noct--find-matching-heading last-2-words-bounds files t)
+          (noct--find-matching-heading word-bounds files t))))
+
+  (defun noct-wiki-lookup-at-point ()
+    "Lookup the words at point in the \"wiki\" file in the current project."
+    (interactive)
+    (when-let ((root (or (when (require 'projectile nil t)
+                           (projectile-project-root))
+                         default-directory))
+               (files (or (file-expand-wildcards (concat root "*wiki*.org"))
+                          (file-expand-wildcards (concat root "README.org")))))
+      (apply #'noct--find-matching-heading-at-point files)))
+
+  ;; define new implicit link type
+  (defib noct-wiki-entry ()
+    "A link to a wiki entry for a name at the point."
+    (when-let ((match (noct-wiki-lookup-at-point))
+               (link (car match))
+               (word (cadr match))
+               (bounds (caddr match)))
+      (ibut:label-set word (car bounds) (cdr bounds))
+      (hact 'org-link link))))
 #+end_src
 
 ** Profile Dotemacs
