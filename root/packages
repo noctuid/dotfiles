@@ -185,6 +185,10 @@ restic
 # sanitizing filenames
 detox
 
+# alternate ls
+exa
+lsd
+
 bat
 bat-extras-git
 

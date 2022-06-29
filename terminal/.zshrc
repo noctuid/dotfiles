@@ -144,7 +144,7 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	ENHANCD_COMPLETION_BEHAVIOR=list
 
 	# ** Commands/Other
-	# prettier ls; nice if only had zshrc and no ranger or exa
+	# prettier ls; nice if only had zshrc and no ranger, exa, or lsd
 	# zinit ice wait lucid
 	# zinit light "supercrabtree/k"
 
@@ -809,14 +809,13 @@ alias -- -='popd'
 alias cpwd='pwd | tr -d "\n" | xsel -ib'
 
 # *** ls Stuff
-# https://github.com/supercrabtree/k
-# nice if don't have exa installed but much slower
-alias kls='k -ah'
-
 # https://github.com/ogham/exa
 alias els='exa --all --long --group'
 
-alias l='ls -alh'
+# https://github.com/Peltoche/lsd
+alias ls='lsd'
+
+alias l='ls -lah'
 
 # http://jeff.robbins.ws/reference/my-zshrc-file
 # these require zsh
