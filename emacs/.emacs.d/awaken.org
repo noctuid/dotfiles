@@ -5375,6 +5375,7 @@ This package is unfortunately unmaintained.
   :config
   (defun noct-terminal-link-hint-file (file)
     (find-file file)
+    (goto-address-mode)
     (unwind-protect (link-hint-open-link)
       (kill-buffer)
       (start-process-shell-command "xdotool getactivewindow windowunmap")
