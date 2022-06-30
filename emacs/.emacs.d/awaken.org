@@ -107,16 +107,22 @@ Necessary to be able to use ~(setf (map-elt ...) ...)~, for example.
 ** Helpers
 *** General
 #+begin_src emacs-lisp
+(defconst noct-lisp-modes
+  '(emacs-lisp-mode
+    lisp-interaction-mode
+    ielm-mode
+    eshell-mode
+    fennel-mode
+    scheme-mode
+    clojure-mode
+    cider-repl-mode
+    lisp-mode
+    sly-mrepl-mode)
+  "List for all used lisp modes.")
+
 (defconst noct-lisp-mode-hooks
-  '(emacs-lisp-mode-hook
-    eshell-mode-hook
-    fennel-mode-hook
-    ielm-mode-hook
-    scheme-mode-hook
-    sly-mrepl-mode-hook
-    clojure-mode-hook
-    cider-repl-mode-hook
-    lisp-mode-hook)
+  (mapcar (lambda (mode) (intern (format "%s-hook" mode)))
+          noct-lisp-modes)
   "List of hooks for all used lisp modes.")
 
 (defconst noct-minibuffer-maps
@@ -1360,104 +1366,108 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
 
 *** Font
 #+begin_src emacs-lisp
-(defun noct-set-font (&rest _)
+;; no
+;; - iosevka - don't need a thin font (and a lot taller than others)
+;; - 3270 - medium looks horrible; narrow is better but not favorite
+;; - anonymous pro - not terrible but don't particularly like
+;; - daddytimemono - a little too weird
+;; - gohu - looks like a bitmap font; awful
+;; - heavy data - completely unreadable garbage
+;; - lekton - meh
+;; - monofur - nice but a little too weird
+;; - monoid - meh
+;; - m+ - too tall (is this monospace...? messes up alignment)
+;; - open dyslexic - too weird (is this monospace...? messes up alignment)
+;; - overpass - meh (does not look monospaced...? messes up alignment)
+;; - proggy - blurry
+;; - source code pro - office code pro looks much better to me
+;; - share tech mono
+;; - space mono - don't like parens, and it's really wide
+;; - tinos - monospace version is broken?
+;; - aurulent - parens too weird
+;; - ProFontWindows - slightly too weird (may change mind)
+;; - VictorMono - don't like parens; quite tall
+;; - recursive - monospaced version is messed up
+
+;; untried
+;; - recursive - couldn't get working properly
+;; - input mono
+;; - monaco
+;; - cmu typewriter
+;; - pt mono
+;; - lucida console
+;; - julia mono
+;; - comic mono
+
+(defconst noct-fine-fonts
+  (list "BlexMono Nerd Font-11"
+        "Hack Nerd Font-11"
+        "iMWritingMonoS Nerd Font-11"
+        ;; "iMWritingDuoS Nerd Font-11"
+        ;; first used fonts
+        "Inconsolata Nerd Font-12"
+        "InconsolataGo Nerd Font-12"
+        "InconsolataLGC Nerd Font-10"
+        "LiterationMono Nerd Font-11"
+        "MesloLGS Nerd Font-11"
+        ;; taller; don't like as much
+        ;; "MesloLGL Nerd Font-11"
+        "Migu 1M-12"
+        "NotoMono Nerd Font-11"
+        "RobotoMono Nerd Font-10"
+        "TerminessTTF Nerd Font-12"
+        "DroidSansMono Nerd Font-10"
+        ;; not too far off from droid sans; like slightly better
+        "Cousine Nerd Font-11"
+        ;; like better than both cousine and droid sans
+        "DejaVu Sans Mono-11"
+        ;; cool asterisk but otherwise don't love it
+        "GoMono Nerd Font-10"
+        "BitstreamVeraSansMono Nerd Font-10")
+  "Fonts that are fine but don't stand out to me.")
+
+(defconst noct-good-fonts
+  (list "FantasqueSansMono Nerd Font-12"
+        "Hurmit Nerd Font-10"
+        "mononoki Nerd Font-12"
+        ;; fira fonts are former favorites but no italics
+        ;; "Fira Mono-10"
+        "FiraCode Nerd Font-10"
+        "CodeNewRoman Nerd Font-11"
+        ;; nice but pretty plain
+        "JetBrainsMono Nerd Font-11"
+        ;; solid font
+        "Ubuntu Mono-12"
+        ;; weird but not too weird; really like but doesn't have italics
+        "agave Nerd Font-12")
+  "Good fonts.")
+
+(defconst noct-favorite-fonts
+  (list "Delugia-10"
+        ;; okay but I much prefer office code pro
+        ;; "SauceCodePro Nerd Font-10"
+        "Office Code Pro D-10")
+  "My favorite fonts.
+The difference from `noct-preferred-fonts' is that there are no
+duplicates/fallback variants included here.")
+
+(defun noct-set-font (&optional font)
   "Set the font."
   (interactive)
-  ;; `set-face-attribute' has more convenient syntax than `set-frame-font'
+  (let* ((fonts (unless font
+                  (cl-remove-if-not
+                   (lambda (font) (find-font (font-spec :name font)))
+                   (append noct-favorite-fonts noct-good-fonts))))
+         (font (or font (completing-read "Font:" fonts))))
+    (when font
+      ;; `set-face-attribute' has more convenient syntax than `set-frame-font'
+      (set-face-attribute 'default nil :font font))))
 
-  ;; no
-  ;; - iosevka - don't need a thin font (and a lot taller than others)
-  ;; - 3270
-  ;; - anonymous pro
-  ;; - aurulent
-  ;; - bitstream
-  ;; - code new roman
-  ;; - daddytimemono (a little too weird)
-  ;; - gohu (looks like a bitmap font)
-  ;; - hasklig (don't like how wide it is)
-  ;; - heavy data - unreadable
-  ;; - lekton
-  ;; - monofur (a little too weird)
-  ;; - monoid
-  ;; - m+ - too tall
-  ;; - open dyslexic - too weird
-  ;; - overpass
-  ;; - proggy (blurry)
-  ;; - source code pro (office code pro looks much better to me)
-  ;; - share tech mono
-  ;; - space mono (don't like parens and really wide)
-  ;; - tinos - monospace version is broken?
-
-  ;; Evaluate further
-  (set-face-attribute 'default nil :font "BlexMono Nerd Font-11")
-  (set-face-attribute 'default nil :font "FantasqueSansMono Nerd Font-12")
-  (set-face-attribute 'default nil :font "Hack Nerd Font-11")
-  (set-face-attribute 'default nil :font "Hurmit Nerd Font-11")
-  (set-face-attribute 'default nil :font "iMWritingMonoS Nerd Font-11")
-  (set-face-attribute 'default nil :font "iMWritingDuoS Nerd Font-11")
-  (set-face-attribute 'default nil :font "iMWritingQuattroS Nerd Font-11")
-  (set-face-attribute 'default nil :font "Inconsolata Nerd Font-12")
-  (set-face-attribute 'default nil :font "InconsolataGo Nerd Font-12")
-  (set-face-attribute 'default nil :font "InconsolataLGC Nerd Font-11")
-  (set-face-attribute 'default nil :font "LiterationMono Nerd Font-11")
-  (set-face-attribute 'default nil :font "MesloLGS Nerd Font-11")
-  ;; TODO try others
-  (set-face-attribute 'default nil :font "MesloLGL Nerd Font-11")
-  (set-face-attribute 'default nil :font "mononoki Nerd Font-12")
-  ;; TODO try others
-  (set-face-attribute 'default nil :font "Migu 1M-12")
-  (set-face-attribute 'default nil :font "NotoMono Nerd Font-11")
-  (set-face-attribute 'default nil :font "ProFontWindows Nerd Font-12")
-  (set-face-attribute 'default nil :font "ProFontIIx Nerd Font-10")
-  (set-face-attribute 'default nil :font "RobotoMono Nerd Font-10")
-  (set-face-attribute 'default nil :font "Iosevka-11")
-  ;; actually looks okay
-  (set-face-attribute 'default nil :font "TerminessTTF Nerd Font-12")
-  (set-face-attribute 'default nil :font "Ubuntu Mono-12")
-  (set-face-attribute 'default nil :font "VictorMono Nerd Font-11")
-  (set-face-attribute 'default nil :font "Recursive Mono Linear Static-10")
-  (set-face-attribute 'default nil :font "Recursive Mono Casual Static-10")
-  (set-face-attribute 'default nil :font "Sarasa Mono J-10")
-
-  ;; Fine
-  (set-face-attribute 'default nil :font "DroidSansMono Nerd Font-11")
-  ;; not too far off from droid sans; like slightly better
-  (set-face-attribute 'default nil :font "Cousine Nerd Font-11")
-  ;; like better than both cousine and droid sans
-  (set-face-attribute 'default nil :font "DejaVu Sans Mono-11")
-  ;; cool asterisk
-  (set-face-attribute 'default nil :font "GoMono Nerd Font-10")
-
-  ;; previously used
-  ;; - inconsolata, inconsolataLGC, etc.
-  ;; - fira mono
-
-  ;; TODO pragmata
-  ;; (set-face-attribute 'default nil :font "-10")
-  ;; (set-face-attribute 'default nil :font "-10")
-  ;; TODO cousine
-  ;; ttf-apple-fonts
-  ;; input mono
-  ;; monaco
-  ;; cousine
-  ;; cmu typewriter
-  ;; pt mono
-  ;; lucida console
-  ;; jula mono
-  ;; comic mono
-
-  ;; favorites
-  ;; (set-face-attribute 'default nil :font "Fira Mono-10")
-  ;; Fira Mono and Code don't have italic; add a font with italic
-  ;; (set-face-attribute 'italic nil :family "Office Code Pro")
-  (set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font-10")
-  (set-face-attribute 'default nil :font "agave Nerd Font Mono-12")
-  (set-face-attribute 'default nil :font "JetBrainsMono Nerd Font-11")
-  (set-face-attribute 'default nil :font "Office Code Pro D-10"))
+(general-s "f" #'noct-set-font)
 
 ;; this is slow on the first run even if set only one font (0.01-0.05 seconds)
-;; (noct-set-font)
-;; instead set the default font in ./early-init.el; works with daemon as well
+;; (noct-set-font ...)
+;; instead set the default frame font in ./early-init.el
 
 ;; https://www.djcbsoftware.nl/code/mu/mu4e/Fancy-characters.html#Fancy-characters
 (use-package unicode-fonts
@@ -1468,6 +1478,45 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
   ;; doing everything again
   (noct-after-gui
     (unicode-fonts-setup)))
+#+end_src
+
+*** Ligature
+I avoided ligatures for a long time, but at this point, I don't see a reason to avoid them.  I'm not going to use =prettify-symbols-mode= to prettify lambda as a single character, and I never use most of these symbols, but some of them look pretty nice without getting in the way (e.g. elisp comments: =;;=, double colon, www, ellipsis, etc.).  These don't affect editing like prettifying lambda to a single character does.
+#+begin_src emacs-lisp
+(use-package ligature
+  :straight (:host github :repo "mickeynp/ligature.el")
+  :defer-incrementally t
+  :config
+  (ligature-set-ligatures t '("www" "..."))
+
+  ;; enable traditional ligature support in eww-mode, if the
+  ;; `variable-pitch' face supports it
+  (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+
+  ;; only use ligature for 2 semicolons (unfortunately there is not one for 3/4
+  ;; in any font I've seen)
+  (ligature-set-ligatures
+   noct-lisp-modes
+   '((";" (rx (* ";")))))
+
+  ;; enable all Cascadia Code ligatures in programming modes
+  (ligature-set-ligatures
+   'prog-mode
+   '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+     ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+     "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+     "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+     "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+     "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+     "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+     "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+     ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+     "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+     "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+     "?=" "?." "??"  ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+     "\\\\" "://"))
+
+  (global-ligature-mode t))
 #+end_src
 
 ** Auth Source
@@ -3581,6 +3630,7 @@ Globbing is used to find a matching file."
   (pcase name
     ("emacs"
      (general-comma
+       "e" (noct-find-file (expand-file-name "early-init.el" user-emacs-directory))
        "," (noct-find-file (expand-file-name "init.el" user-emacs-directory))
        "f" (noct-find-file (expand-file-name "awaken.org" user-emacs-directory))
        "s" (noct-find-file (expand-file-name "unclean.org" user-emacs-directory))
