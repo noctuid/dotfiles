@@ -1090,7 +1090,14 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
     (let ((evil-respect-visual-line-mode t))
       (evil-append-line count vcount)))
 
+  (defun noct-evil-insert-at-last-change ()
+    "Insert at the last change."
+    (interactive)
+    (evil-goto-mark ?.)
+    (evil-append 1))
+
   (general-def 'normal
+    "gI" #'noct-evil-insert-at-last-change
     ;; just "@q" won't work in insert state (if recorded in insert state), but
     ;; that doesn't seem efficient
     "Q" "@q"
