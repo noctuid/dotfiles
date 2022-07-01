@@ -278,7 +278,8 @@ readable."
   ;; generally don't like overuse threading macros, but this seems like the
   ;; place to use
   ;; makes flycheck unhappy though
-  (let ((name (thread-last body
+  (let ((name (thread-last
+                body
                 (format "%s")
                 (replace-regexp-in-string "[()]" "")
                 (replace-regexp-in-string (rx (or space "\n")) "-")
@@ -671,23 +672,19 @@ Principles:
 - Use =:general= and =:ghook= keywords for keybindings and hooks meant to load packages.
 - Use ~general-with-package~ instead of ~use-package~ if the ~use-package~ statement would only have =:config= and not install the package (like ~with-eval-after-load~ but allows automatically recording the package name with keybindings and settings). All general functions should appear in either a ~general-with-package~ or a ~use-package~ statement if there is a specific, corresponding package.
 #+begin_src emacs-lisp
-(use-package annalist
-  :straight (annalist
-             :protocol ssh
-             :local-repo "~/src/emacs/annalist")
-  :demand t
-  :config
-  (with-eval-after-load 'general
-    (general-add-hook 'annalist-describe-hook #'noct-bind-q-to-quit)))
-
 (use-package general
   :straight (general
              :protocol ssh
              :local-repo "~/src/emacs/general")
   :demand t)
 
-(general-add-hook 'annalist-describe-hook
-                  (lambda () (visual-fill-column-mode -1)))
+(use-package annalist
+  :straight (annalist
+             :protocol ssh
+             :local-repo "~/src/emacs/annalist")
+  :gfhook
+  ('annalist-describe-hook #'noct-bind-q-to-quit)
+  ('annalist-describe-hook (noct-disable visual-fill-column-mode)))
 
 (general-auto-unbind-keys)
 
