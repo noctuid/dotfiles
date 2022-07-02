@@ -9246,7 +9246,7 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
   :ghook 'eshell-mode-hook)
 
 (use-package eshell-syntax-highlighting
-  :ghook ('eshell-mode-hook #'eshell-syntax-highlighting-enable))
+  :ghook 'eshell-mode-hook)
 #+end_src
 
 ** Shell
