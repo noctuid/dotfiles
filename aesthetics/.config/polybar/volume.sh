@@ -29,7 +29,7 @@ print_volume() {
 
 	color=$blue
 
-	if pamixer --get-mute > /dev/null; then
+	if [[ $(pamixer --get-mute) == true ]]; then
 		color=$dark_red
 		icon=""
 	elif pactl info | grep --quiet "Default Sink:.*hdmi"; then
