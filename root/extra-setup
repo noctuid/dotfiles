@@ -34,7 +34,8 @@ service_setup() {
 	systemctl enable kwakd
 	systemctl enable ntpd
 	systemctl enable tlp
-	systemctl enable tlp-sleep
+	# tlp requires these to be masked
+	systemctl mask systemd-rfkill.service systemd-rfkill.socket
 	# enabled in fcron_setup
 	# systemctl enable fcron
 	systemctl enable ufw
