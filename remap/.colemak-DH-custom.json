@@ -53,8 +53,11 @@
         { "pos": "O", "letters": [ "y", "Y", "=", "+", "End" ] },
         { "pos": "P", "letters": [ ";", ":", "!", "!", "Alt+f" ] },
         // not 30%; force to stop using
-        { "pos": "[", "letters": [ "", "" ] },
-        { "pos": "]", "letters": [ "", "" ] },
+        { "pos": "[", "letters": [ "z", "" ] },
+        { "pos": "]", "letters": [ "x", "" ] },
+        // won't use on normal keyboard or will need on jp keyboard
+        { "pos": "\\", "letters": [ "'", "\"" ] },
+
 
         { "pos": "A", "letters": [ "a", "A", "1", "!" ] },
         { "pos": "S", "letters": [ "r", "R", "2", "@" ] },
@@ -86,16 +89,30 @@
     ],
     "mods": [
         { "name": "Wide",
-          "permutation": [
-              [ "Y", "U", "I", "O", "P", "[" ],
-              [ "H", "J", "K", "L", ";", "'", "Enter" ],
-              [ "N", "M", ",", ".", "/", "Shift_R" ]
-          ]}
-        // { "name": "DH-angle-z",
-        //   "permutation": [
+		  "permutation": [
+			  [ "Y", "U", "I", "O", "P", "[" ],
+			  [ "H", "J", "K", "L", ";", "'", "Enter" ],
+			  [ "N", "M", ",", ".", "/", "Shift_R" ]
+		  ]},
+		{
+			"name": "Wide-ja",
+			"permutation": [
+				[ "Y", "U", "I", "O", "P", "[" ],
+				[ "H", "J", "K", "L", ";", "'", "Enter" ],
+				[ "N", "M", ",", ".", "/", "Ro" ],
+				// use closestkeys to spacebar as thumb modifiers
+				[ "Control_L", "Win_L", "Alt_L", "Muhenkan" ],
+				[ "Henkan", "Alt_r" ],
+				// found with grep 101 /usr/share/X11/xkb/keycodes/evdev (found
+				// 101 from xev)
+				[ "HKTG", "PrintScreen" ]
+			]
+			// { "name": "DH-angle-z",
+		//   "permutation": [
         //       [ "C", "X", "Z", "B" ],
         //       [ "D", "B", "G" ],
         //       [ "H", "M" ]
         //   ]}
+		}
     ]
 }
