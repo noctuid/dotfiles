@@ -5232,6 +5232,12 @@ Currently trying with vundo only.
 #+end_src
 
 ** Evil Motions and Text objects
+*** Builtin
+#+begin_src emacs-lisp
+(general-def '(operator visual)
+  "p" #'evil-inner-paragraph)
+#+end_src
+
 *** Things
 Still experimental.
 #+begin_src emacs-lisp
