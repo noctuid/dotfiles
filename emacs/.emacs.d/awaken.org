@@ -2819,21 +2819,21 @@ This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I m
 #+end_src
 
 ** Orderless
-One notable difference between using orderless (or prescient) and some older fuzzy matchers/plugins is that space does not act as =.*=. Spaces (by default) separate components, all of which must match. You can still use space the same way as before (type different parts of a file path separated by space, for example), but now order does not matter. This allows you to refine your query as needed without having to delete and re-enter a more specific query.
+One notable difference between using orderless (or prescient) and some older fuzzy matchers/plugins is that space does not act as =.*=.  Spaces (by default) separate components, all of which must match.  You can still use space the same way as before (type different parts of a file path separated by space, for example), but now order does not matter.  This allows you to refine your query as needed without having to delete and re-enter a more specific query.
 
-Unlike traditional fuzzy matchers (e.g. flx, fzf, etc.), =orderless= does no sorting. This means you can't do something like rank initials as a better match than characters in the middle of the word for a fuzzy query. However, sorting this way takes extra time, and I've never really liked fuzzy matching. When I used to use fuzzy matching, I never used to know what to type. Instead of ranking initials as higher, why not only use initials? Matching based on initials is more precise, and for me, it's actually easier for me to construct a query for a function's initials or file path's initials than to try to construct a fuzzy query in some other way.
+Unlike traditional fuzzy matchers (e.g. flx, fzf, etc.), =orderless= does no sorting/scoring.  This means you can't do something like rank initials as a better match than characters in the middle of the word for a fuzzy query.  However, sorting this way takes extra time, and I've never really liked fuzzy matching.  When I used to use fuzzy matching fzf, I never knew what to type.  I ended up just typing fragments or initials and not actually using fuzzy queries.  Initials and fragments as queries are just easier for me to construct than randomly picking or excluding letters.  Scoring on top of orderless would be a slight improvement (e.g. score a fragment that matches the beginning of a word higher than something in the middle), but scoring would be an improvement, but since you get a comparably small number of garbage results when not using fuzzy matching, orderless without fuzzy matching doesn't really need scoring to be useful.
 
-With a more restrictive/specific query, ranking matches surprisingly isn't necessary in my experience. Combined with frecency sorting, initialism is good enough. Initialism is incredible for completing file paths, heading names, and function/variable names (~describe-variable~, ~describe-function~, ~find-function~, ~find-library~, company, etc.). With prescient or orderless, if the initialism doesn't get the candidate you want in sight, you can just hit space and add another query (regexp, fuzzy, or whatever you want) to further refine. As soon as the candidate is visible, you can use a keybinding to select it based on its index (or with something like ~ivy-avy~ or ~selectrum-quick-select~).
+Combined with frecency sorting, initialism is good enough for me.  Initialism is incredible for completing file paths, heading names, and function/variable names (~describe-variable~, ~describe-function~, ~find-function~, ~find-library~, company, etc.).  With prescient or orderless, if the initialism doesn't get the candidate you want in sight, you can just hit space and add another query (regexp, fuzzy, or whatever you want) to further refine.  As soon as the candidate is visible, you can use a keybinding to select it based on its index (or with something like ~ivy-avy~ or ~selectrum-quick-select~).
 
-Of course, initialism isn't great for everything, but I've found it's often still possible to quickly create queries that are more specific than fuzzy queries but still short. For example, if I want to pull up a help buffer for a variable in =orderless= but don't remember the specific name, I can start by limiting the query to variables prefixed with =orderless=. Instead of typing that out exactly, I can get a good approximation by typing something like =o,s= (still undecided on best syntax; might use =o..s=) to match words that start with =o= and end with =s=. For commands like ~describe-function~, I normally use ~orderless-strict-leading-initialism~ since I always type the first initial first. I'm relaxing this to ~orderless-strict-initialism~ for queries after the second, so I could type something like =o..s cs= to match =orderless-component-separator=.
+Of course, initialism isn't great for everything, but I've found it's often still possible to quickly create queries that are more specific than fuzzy queries but still short.  For example, if I want to pull up a help buffer for a variable in =orderless= but don't remember the specific name, I can start by limiting the query to variables prefixed with =orderless=.  Instead of typing that out exactly, I can get a good approximation by typing something like =o,s= (still undecided on best syntax; might use =o..s=) to match words that start with =o= and end with =s=.  For commands like ~describe-function~, I normally use ~orderless-strict-leading-initialism~ since I always type the first initial first.  I'm relaxing this to ~orderless-strict-initialism~ for queries after the second, so I could type something like =o,s cs= to match =orderless-component-separator=.
 
 This can also work well for other query types where initialism is fairly useless (e.g. text search), and you can always add multiple full word queries as needed.
 
-Even simpler is to just mash out words or partial words separated by spaces (more precise than fuzzy) in cases where initialism or orderless-prefixes can't be used. Again, if you can't quickly construct a query, then it doesn't matter how great the matching is. Dumb queries can often get you the result you want faster.
+Even simpler is to just mash out words or partial words separated by spaces (more precise than fuzzy) in cases where initialism or orderless-prefixes can't be used.  Again, if you can't quickly construct a query, then it doesn't matter how great the matching is.  Dumb queries can often get you the result you want faster.
 
-I'm keeping fuzzy out of my default styles, but I've configured things so that I can switch to it if needed by prefixing a query with =f;= or suffixing a query with =;f=. If you want fuzzy matching, orderless may not be the best choice though. I've found it can get slow quickly once queries get longer.
+I'm keeping fuzzy out of my default styles, but I've configured things so that I can switch to it if needed by prefixing a query with =f;= or suffixing a query with =;f=.  If you want fuzzy matching, orderless may not be the best choice though.  I've found it can get slow quickly once queries get longer.  I wrote more thoughts on fuzzy matching in [[https://old.reddit.com/r/emacs/comments/v4rq3p/fussy_a_completionstylefuzzy_matchingscoring/ibf5yu8/][this conversation with the author of fussy]].  I did try out fussy then, but at that time the performance was just too noticeably slow for me to try it out for long.
 
-=orderless= is infinitely customizable, so you can choose better default query styles for different commands. If you wanted, you could remove initialism from ~swiper-isearch~ completely, for example. I'm still experimenting with how restrictive I can make things without harming usability (e.g. can I remove ~orderless-regexp~ entirely as a default style for the first component for commands like ~describe-function~?). So far it seems like I don't need to go this far and I don't need any sorting/ranking to get amazing matching.
+=orderless= is infinitely customizable, so you can choose better default query styles for different commands.  If you wanted, you could remove initialism from ~swiper-isearch~ completely, for example.  I'm still experimenting with how restrictive I can make things without harming usability (e.g. can I remove ~orderless-regexp~ entirely as a default style for the first component for commands like ~describe-function~?).  So far it seems like I don't need to go this far, and I don't need any sorting/ranking to get amazing matching.
 #+begin_src emacs-lisp
 (use-package orderless
   :init
@@ -2853,17 +2853,38 @@ I'm keeping fuzzy out of my default styles, but I've configured things so that I
           #'ivy--regex-plus))
 
   :config
+  (defvar noct-orderless-separator "[ &]")
+
   ;; necessary at the time of writing for index-based rules to work
   (defun noct-split-orderless-component (str)
-    (let ((components (split-string str "[ &]")))
+    (let ((components (split-string str noct-orderless-separator)))
       (when (remove "" components)
         components)))
 
   (gsetq orderless-matching-styles
          '(orderless-strict-initialism orderless-regexp)
          ;; & for company-capf
+         ;; can just use `corfu-insert-separator' with corfu
          ;; orderless-component-separator "[ &]"
-         orderless-component-separator #'noct-split-orderless-component)
+         orderless-component-separator
+         #'noct-split-orderless-component)
+
+  ;; TODO ideally should immediately refresh; right now need to type more to get
+  ;; new results
+  (defun noct-toggle-orderless-separator ()
+    "Toggle the orderless separator."
+    (interactive)
+    (let ((normal-separator "[ &]")
+          (allow-spaces-separator "&"))
+      (if (equal noct-orderless-separator normal-separator)
+          (setq noct-orderless-separator allow-spaces-separator)
+        (setq noct-orderless-separator normal-separator))
+      ;; TODO may not be necessary
+      (gsetq orderless-component-separator
+             #'noct-split-orderless-component)))
+
+  (general-with 'vertico
+    (general-def vertico-map "M-SPC" #'noct-toggle-orderless-separator))
 
   (defun orderless--use-completions-common-part (fn &rest args)
     (let ((orderless-match-faces [completions-common-part]))
@@ -2987,7 +3008,11 @@ file-finding commands)."
     (when (and (= index 0)
                (memq current-minibuffer-command
                      noct-strict-leading-initialism-commands))
-      (cons '(orderless-strict-leading-initialism orderless-regexp)
+      (cons '(orderless-strict-leading-initialism
+              ;; currently experimenting with not allowing regexp; can hit
+              ;; space if want it to go to next component
+              ;; orderless-regexp
+              )
             pattern)))
 
   (gsetq orderless-style-dispatchers
