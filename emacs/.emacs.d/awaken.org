@@ -1912,7 +1912,14 @@ Obvious ones:
 ** So Long
 #+begin_src emacs-lisp
 (use-package so-long
-  :general (noct-toggle-map "s" #'so-long-mode))
+  :general (noct-toggle-map "s" #'so-long-mode)
+  ;; :once #'after-find-file
+  :init
+  (general-add-advice 'after-find-file
+                      :before
+                      (lambda (&rest _)
+                        (global-so-long-mode))
+                      nil t))
 #+end_src
 
 ** Scratch Buffer
