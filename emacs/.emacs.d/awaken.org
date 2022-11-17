@@ -6625,6 +6625,12 @@ Show invisible things when point is on them in org (e.g. links).
     (require 'ox-hugo)))
 #+end_src
 
+**** Org Cv
+#+begin_src emacs-lisp
+(use-package ox-moderncv
+  :straight (ox-moderncv :host gitlab :repo "Titan-C/org-cv"))
+#+end_src
+
 **** Orglink
 Make org links work everywhere.
 #+begin_src emacs-lisp
