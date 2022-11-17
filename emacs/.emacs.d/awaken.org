@@ -2346,7 +2346,7 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
                       (when (bound-and-true-p corfu--candidates)
                         (corfu-quit)))))
 
-;; looks cool   but not that useful; don't normally need docs during completion;
+;; looks cool but not that useful; don't normally need docs during completion;
 ;; more distracting than beneficial
 (use-package corfu-doc
   :disabled t
@@ -3933,7 +3933,6 @@ I prefer to have a buffer-local jumplist and use a separate key for ~winner-undo
   :config
   (gsetq better-jumper-context 'buffer))
 #+end_src
-
 
 ** Deadgrep
 #+begin_src emacs-lisp
