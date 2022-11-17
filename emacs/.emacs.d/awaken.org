@@ -2122,7 +2122,6 @@ I've switched away from putting this function in a hook because it can be jarrin
 (use-package company
   :general
   (general-def noct-toggle-map "c" #'company-mode)
-  (general-def 'insert "C-t" #'company-yasnippet)
   :init
   ;; (noct-pre-command-or-post-file
   ;;   (global-company-mode))
@@ -3199,6 +3198,8 @@ The only downside is the lack of prescient integration. Vertico supports recency
 #+begin_src emacs-lisp
 (use-package consult
   :general
+  (general-def 'normal
+    "g/" #'consult-keep-lines)
   (general-spc
     "f" #'consult-buffer
     ;; generally `projectile-find-file' is a better option
@@ -3206,7 +3207,9 @@ The only downside is the lack of prescient integration. Vertico supports recency
     "l" #'consult-locate
     "u" (list :def #'consult-outline :jump t)
     "y" (general-predicate-dispatch #'consult-imenu
-          (eq major-mode 'org-mode) #'consult-org-heading)
+          (or (eq major-mode 'org-mode)
+              (bound-and-true-p poly-org-mode))
+          #'consult-org-heading)
     ;; works inside or outside project already
     "/" #'consult-ripgrep)
   (general-t "p" #'consult-yank-from-kill-ring)
@@ -4890,7 +4893,8 @@ must be non-read-only, empty, and there must be a rule in
                                     ("\n * ||\n[i]" "*")))))
 #+end_src
 
-** auto-yasnippet
+** Snippets
+*** auto-yasnippet
 TODO broken basically
 TODO fix tab
 TODO bind both in insert only
@@ -4905,8 +4909,8 @@ TODO number incrementing
     "<C-tab>" #'aya-expand))
 #+end_src
 
-** Yasnippet
-*** Setup
+*** Yasnippet
+**** Setup
 #+begin_src emacs-lisp
 (use-package yasnippet
   :defer-incrementally (eldoc easymenu help-mode)
@@ -4961,7 +4965,7 @@ Only return non-nil if not in a string or comment."
                            (overlay-buffer yas-active-field-overlay)))))
 #+end_src
 
-*** Extra Snippets
+**** Extra Snippets
 #+begin_src emacs-lisp
 (use-package yasnippet-snippets
   :after yasnippet
@@ -4970,6 +4974,13 @@ Only return non-nil if not in a string or comment."
   ;; for some reason this is necessary for my personal snippets to override some
   ;; of these
   (yas-reload-all))
+#+end_src
+
+**** Consult Yasnippet
+Very useful to learn snippets or for less-often used snippets.  A better ~yas-insert-snippet~.
+#+begin_src emacs-lisp
+(use-package consult-yasnippet
+  :general ('insert "C-t" #'consult-yasnippet))
 #+end_src
 
 ** Undo
