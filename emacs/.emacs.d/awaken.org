@@ -7880,7 +7880,9 @@ TODO bind
 ;; (use-package flycheck-clj-kondo)
 
 (use-package clojure-mode
-  :magic "#!/usr/bin/env bb"
+  :magic
+  "#!/usr/bin/env bb"
+  "#!/usr/bin/env -S bb"
   :config
   (gsetq clojure-align-forms-automatically t))
 #+end_src
