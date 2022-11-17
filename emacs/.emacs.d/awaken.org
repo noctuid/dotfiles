@@ -1896,6 +1896,14 @@ Obvious ones:
         (recentf-save-list)))))
 #+end_src
 
+** Repeat Mode
+#+begin_src emacs-lisp
+;; TODO make it shut up when starting
+(use-package repeat
+  ;; :once 'pre-command-hook
+  :ghook ('pre-command-hook nil nil nil t))
+#+end_src
+
 ** Reveal
 #+begin_src emacs-lisp
 (use-package reveal
