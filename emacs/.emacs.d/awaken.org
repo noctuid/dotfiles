@@ -5193,6 +5193,44 @@ Undo tree is a great package but is unmaintained and extremely buggy. Even after
     "RET" #'vundo-confirm))
 #+end_src
 
+*** Undo HL
+Currently trying with vundo only.
+#+begin_src emacs-lisp
+(use-package undo-hl
+  :straight (:host github :repo "casouri/undo-hl")
+  :init
+  ;; https://github.com/casouri/vundo/pull/44#issuecomment-1139127706
+  (defvar ideasman42-real-vundo-buf nil)
+  (defun ideasman42-vundo-forward-pre-command-hook ()
+    (let ((buf (current-buffer)))
+      (when (bound-and-true-p ideasman42-real-vundo-buf)
+        (unless (eq buf ideasman42-real-vundo-buf)
+          (with-current-buffer ideasman42-real-vundo-buf
+            (run-hooks 'pre-command-hook))))))
+
+  (general-add-hook 'vundo-pre-enter-hook
+                    (lambda ()
+                      (setq ideasman42-real-vundo-buf (current-buffer))
+                      (add-hook 'pre-command-hook
+                                #'ideasman42-vundo-forward-pre-command-hook)
+                      (undo-hl-mode 1)))
+  (general-add-hook 'vundo-post-exit-hook
+                    (lambda ()
+                      (remove-hook 'pre-command-hook
+                                   #'ideasman42-vundo-forward-pre-command-hook)
+                      (undo-hl-mode -1)
+                      (makunbound 'ideasman42-real-vundo-buf)))
+  :config
+  (gsetq undo-hl-undo-commands
+         (list #'vundo-backward
+               #'vundo-forward
+               #'vundo-next
+               #'vundo-previous
+               #'vundo-stem-root
+               #'vundo-stem-end)
+         undo-hl-flash-duration 0.1))
+#+end_src
+
 ** Evil Motions and Text objects
 *** Things
 Still experimental.
