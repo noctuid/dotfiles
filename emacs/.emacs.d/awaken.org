@@ -2494,6 +2494,7 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
 #+end_src
 
 ** Frog Menu
+TODO don't delete old window/mess up things
 #+begin_src emacs-lisp
 (use-package frog-menu
   :straight (:host github :repo "clemera/frog-menu" :fork t :protocol ssh)
@@ -2502,18 +2503,15 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
     (gsetq frog-menu-avy-keys avy-keys))
   (general-after-gui
     (gsetq frog-menu-posframe-border-width (noct-border-width)))
-  (setf (alist-get 'avy-posframe frog-menu-display-option-alist)
-        #'noct-posframe-poshandler-frame-near-top-center)
   ;; readable background color
   (set-face-background 'frog-menu-posframe-background-face "black")
   ;; for now don't use posframe
   (gsetq frog-menu-type-function (lambda () 'avy-side-window))
   ;; show at top instead of bottom
-  (map-put
-   frog-menu-display-option-alist
-   'avy-side-window
-   '(noct-display-bufer-in-side-window-no-header
-     (side . top))))
+  (gsetq frog-menu-display-option-alist
+         '((avy-posframe . noct-posframe-poshandler-frame-near-top-center)
+           (avy-side-window . (noct-display-buffer-in-side-window-no-header
+                               (side . top))))))
 #+end_src
 
 ** Helm
