@@ -6456,7 +6456,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 
   ;; keybindings partially overlap with evil collection
   (general-def 'normal Info-mode-map
-    "q" #'Info-exit
+    "q" #'quit-window
     "RET" #'Info-follow-nearest-node
     ;; "h" #'Info-prev
     ;; "i" #'Info-next
@@ -6466,6 +6466,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
     "i" #'Info-forward-node
     ;; not every manual has index
     "I" #'Info-index
+    "l" #'Info-history
     "<tab>" #'Info-next-reference
     "S-<tab>" #'Info-prev-reference
     "u" #'Info-up
