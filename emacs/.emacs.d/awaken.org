@@ -2146,6 +2146,9 @@ I've switched away from putting this function in a hook because it can be jarrin
 *** Setup
 #+begin_src emacs-lisp
 (use-package company
+  :ghook
+  ('comint-mode-hook (noct-disable company-mode))
+  ('eshell-mode-hook (noct-disable company-mode))
   :general
   (general-def noct-toggle-map "c" #'company-mode)
   :init
@@ -2302,6 +2305,9 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
   ;; to get extensions
   :straight (corfu :files (:defaults "extensions/*.el"))
   :ghook
+  ;; for shell also
+  'comint-mode-hook
+  'eshell-mode-hook
   ('minibuffer-setup-hook
    (noct-defun corfu-enable-in-minibuffer ()
      "Enable corfu in the minibuffer if `completion-at-point' is bound."
@@ -2322,9 +2328,6 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
     "RET" nil
     "<down>" nil
     "<up>" nil)
-
-  ;; TODO pcmpl-args
-  ;; TODO pcomplete advice
 
   (corfu-indexed-mode)
   (set-face-attribute 'corfu-indexed nil :height 1.0)
@@ -2394,6 +2397,80 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
   (gsetq kind-icon-default-face 'corfu-default)
 
   (general-pushnew #'kind-icon-margin-formatter corfu-margin-formatters))
+#+end_src
+
+** Pcompl Args
+[[https://github.com/minad/corfu#completing-with-corfu-in-the-eshell-or-shell][Corfu with Eshell and Shell]]
+#+begin_src emacs-lisp
+(use-package pcmpl-args
+  :after pcomplete
+  :demand t)
+#+end_src
+
+** Cape
+#+begin_src emacs-lisp
+;; TODO something makes company unusable... should only be used with corfu?
+
+;; 10446  77% - ...
+;; 9014  66%  - company-capf
+;; 9014  66%   - cond
+;; 9014  66%    - let
+;; 9014  66%     - let
+;; 9014  66%      - company--capf-data
+;; 9014  66%       - let
+;; 9014  66%        - if
+;; 9014  66%         - let
+;; 9014  66%          - company--capf-data-real
+;; 9014  66%           - let*
+;; 9014  66%            - unwind-protect
+;; 9014  66%             - progn
+;; 9014  66%              - let
+;; 9014  66%               - let
+;; 9014  66%                - run-hook-wrapped
+;; 9014  66%                 - company--capf-wrapper
+;; 9013  66%                  - let
+;; 9013  66%                   - catch
+;; 9012  66%                    - condition-case
+;; 9011  66%                     - completion--capf-wrapper
+;; 9011  66%                      - apply
+;; 9011  66%                       - corfu--capf-wrapper-advice
+;; 9011  66%                        - #<subr completion--capf-wrapper>
+;; 9008  66%                         - #<compiled 0x66df05b22cbc4d8>
+;; 9008  66%                          - complete-with-action
+;; 9008  66%                           - #<compiled 0xe9c51c93b2eb44c>
+;; 9008  66%                            - cape--dabbrev-list
+;; 9007  66%                             - dabbrev--find-all-expansions
+;; 8973  66%                              - dabbrev--find-expansion
+;; 8924  66%                               - dabbrev--try-find
+;; 7689  56%                                - dabbrev--search
+;; 3   0%                                   dabbrev--goto-start-of-abbrev
+
+(use-package cape
+  :init
+  ;; (general-pushnew #'cape-file completion-at-point-functions)
+  ;; (general-pushnew #'cape-dabbrev completion-at-point-functions)
+
+  ;; https://github.com/minad/corfu#completing-with-corfu-in-the-minibuffer
+  ;; Silence the pcomplete capf, no errors or messages!
+  (general-add-advice 'pcomplete-completions-at-point
+                      :around #'cape-wrap-silent)
+  ;; Ensure that pcomplete does not write to the buffer
+  ;; and behaves as a pure `completion-at-point-function'.
+  (general-advice-add 'pcomplete-completions-at-point
+                      :around #'cape-wrap-purify)
+
+  ;; company adapter examples
+  ;; (setq-local completion-at-point-functions
+  ;;             (mapcar #'cape-company-to-capf
+  ;;                     (list #'company-files
+  ;;                           #'company-ispell
+  ;;                           #'company-dabbrev)))
+  ;; (setq completion-at-point-functions
+  ;;       (list
+  ;;        (cape-company-to-capf
+  ;;         (apply-partially #'company--multi-backend-adapter
+  ;;                          '(company-dabbrev company-elisp)))))
+  )
 #+end_src
 
 ** Completion
