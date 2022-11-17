@@ -1253,6 +1253,21 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
     (load-file local-file)))
 #+end_src
 
+** Other Constants
+#+begin_src emacs-lisp
+(defun noct-mode-line-height ()
+  "Return the height to use for the mode line.
+This should be run in a graphical frame."
+  ;; 35 on 4k
+  (round (* 0.00911458333333333 (noct-default-monitor-width))))
+
+(defun noct-smaller-mode-line-height ()
+  "Return the height to use for a smaller mode line.
+This should be run in a graphical frame."
+  ;; 30 on 4k
+  (round (* 0.0078125 (noct-default-monitor-width))))
+#+end_src
+
 * Basic and Builtin Functionality
 ** General Settings
 #+begin_src emacs-lisp
@@ -4175,9 +4190,10 @@ A helper library for inserting icons (used by other packages in my config).
 
 (use-package doom-modeline
   :init
-  (gsetq-default mode-line-format (propertize (make-string 300 ?─)
-                                              ;; use default background color
-                                              'face 'default))
+  (gsetq-default mode-line-format
+                 (list (propertize (make-string 300 ?─)
+                                   ;; use default background color
+                                   'face 'default)))
   (general-after-init
     (general-add-advice
      'doom-modeline-set-modeline
@@ -4186,9 +4202,7 @@ A helper library for inserting icons (used by other packages in my config).
   :config
   (gsetq doom-modeline-buffer-encoding 'nondefault)
   (general-after-gui
-    (gsetq doom-modeline-height
-           ;; 35 on 4k
-           (round (* 0.00911458333333333 (noct-default-monitor-width))))
+    (gsetq doom-modeline-height (noct-mode-line-height))
     ;; TODO why does the `buffer-live-p' check fail for Messages?
     (dolist (bname '(
                      ;; "*scratch*"
