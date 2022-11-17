@@ -7374,8 +7374,13 @@ This is a maintained fork of =electric-spacing=.
     (global-flycheck-mode))
   :blackout t
   :config
-  ;; decrease delay before showing error
-  (gsetq flycheck-display-errors-delay 0.2)
+  (gsetq flycheck-check-syntax-automatically
+         ;; remove new-line
+         '(idle-change save mode-enabled)
+         ;; increase idle delay before linting
+         flycheck-idle-change-delay 1.5
+         ;; decrease delay before showing error
+         flycheck-display-errors-delay 0.2)
 
   (general-def noct-toggle-map "f" #'flycheck-mode)
 
@@ -7412,6 +7417,7 @@ Seems fast but the addition of extra lines is jarring. I've updated the display 
 
   (defvar-local noct-flycheck-inline-last-error-point nil)
 
+  ;; TODO after updating Emacs, popups delete text
   (defun noct-flycheck-inline-phantom-display (msg &optional pos err)
     "Display MSG in a phantom starting at the beginning of the next line.
 
@@ -7460,8 +7466,9 @@ Return the displayed phantom."
           (push ov flycheck-inline--phantoms)
           ov))))
 
-  (gsetq flycheck-inline-display-function
-         #'noct-flycheck-inline-phantom-display)
+  ;; TODO fix
+  ;; (gsetq flycheck-inline-display-function
+  ;;        #'noct-flycheck-inline-phantom-display)
 
   (defun general-flycheck-inline-hide-errors ()
     "Hide all inline messages currently being shown if point has changed."
@@ -7469,9 +7476,11 @@ Return the displayed phantom."
                (not (= noct-flycheck-inline-last-error-point (point))))
       (funcall flycheck-inline-clear-function)))
 
+  ;; TODO add back if fix `noct-flycheck-inline-phantom-display'
   ;; prevent errors from disappearing unless point moves
-  (general-add-advice 'flycheck-inline-hide-errors
-                      :override #'general-flycheck-inline-hide-errors))
+  ;; (general-add-advice 'flycheck-inline-hide-errors
+  ;;                     :override #'general-flycheck-inline-hide-errors)
+  )
 #+end_src
 
 **** TODO Flycheck Posframe
@@ -7516,6 +7525,21 @@ TODO lsp-use-plists (https://github.com/emacs-lsp/lsp-mode/issues/1807 now fixed
    lsp-prefer-capf t
    read-process-output-max (* 1024 1024)
    lsp-headerline-breadcrumb-enable nil)
+
+  ;; (satch-shove lsp-file-watch-ignored-directories
+  ;;              '("[/\\\\]\\__pycache__\\'"
+  ;;                "[/\\\\]\\.mypy_cache\\'"
+  ;;                "[/\\\\]\\.venv\\'"))
+
+  (general-pushnew
+   "[/\\\\]\\__pycache__\\'"
+   lsp-file-watch-ignored-directories)
+  (general-pushnew
+   "[/\\\\]\\.mypy_cache\\'"
+   lsp-file-watch-ignored-directories)
+  (general-pushnew
+   "[/\\\\]\\.venv\\'"
+   lsp-file-watch-ignored-directories)
 
   (general-def 'normal lsp-mode-map
     "N" #'lsp-describe-thing-at-point
