@@ -6,6 +6,10 @@
 
 # I'm using ~org-sort-entries~ (with =a=) for sorting many subheadings.
 
+#+begin_quote
+He could code anything--but life is short, and most significant systems were terribly large.   So Pham learned to hack about with the leviathans of the past.
+#+end_quote
+
 * Initial Notes
 ** Org Configuration
 I moved my Emacs init file to org after becoming comfortable enough with evil to use Emacs instead of vim for editing my init file. The initial reason I switched to org was to be able to use org's outline syntax instead of marker folds (={{{...}}}=). The main reasons I haven't switched back are because I prefer writing notes using org's markup and soft-wrapping over using comments and hard-wrapping. Also, org's extra features and packages like [[https://github.com/abo-abo/worf][worf]] make org very convenient and powerful, and I like being able to easily export to other formats.
