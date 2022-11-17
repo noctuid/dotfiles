@@ -6544,18 +6544,22 @@ pressing \".\" before selecting the word. Otherwise, correct it."
   ;; TODO shouldn't be enabled by default
   :general (noct-toggle-map "o" #'poly-org-mode)
   :config
-  (general-def 'normal poly-org-mode-map "SPC u" #'worf-goto)
-
   (general-with 'lispy
     (mapc (lambda (x)
             (advice-add x :around #'pm-execute-narrowed-to-span))
           (append (apropos-internal "^lispy-" #'commandp)
                   (apropos-internal "^special-lispy-" #'commandp))))
 
+  (general-spc poly-org-mode-map
+    "'" #'noct-org-edit-special)
+  ;; can still be useful in some cases
+  (general-m poly-org-mode-map
+    "'" #'noct-org-edit-special)
+
   (general-add-advice '(outline-toggle-children
-                        counsel-outline
-                        counsel-semantic-or-imenu
-                        worf-goto)
+                        consult-outline
+                        consult-org-heading
+                        noct-org-edit-special)
                       :around #'polymode-with-current-base-buffer))
 #+end_src
 
