@@ -5849,6 +5849,16 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
     "q" #'with-editor-cancel))
 #+end_src
 
+*** Git Commit
+#+begin_src emacs-lisp
+(use-package git-commit
+  :config
+  ;; so `fill-paragraph' works correctly for bullet points
+  (gsetq git-commit-major-mode #'org-mode)
+  (general-add-hook 'git-commit-mode-hook
+                    #'auto-fill-mode))
+#+end_src
+
 *** Transient
 #+begin_src emacs-lisp
 (use-package transient
