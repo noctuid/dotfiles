@@ -1,5 +1,6 @@
 " clear existing searchuls
-setnull searchurls
+" setnull will prevent from adding back in this way; set to empty object instead
+js tri.config.set("searchurls", {})
 
 " add mine
 set searchurls.am https://www.amazon.com/s?k=%s
