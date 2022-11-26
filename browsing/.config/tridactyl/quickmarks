@@ -1,5 +1,7 @@
 unbind '
 bind '13 tabopen localhost:1313
+bind '? tabopen about:about
+bind '. tabopen about:config
 bind '4 tabopen https://boards.4chan.org/g/
 bind '8 tabopen https://8ch.net/tech/
 bind 'a tabopen https://bbs.archlinux.org/
@@ -8,11 +10,14 @@ bind 'b tabopen https://www.dustloop.com/forums/index.php?/forum/63-blazblue/
 bind 'B tabopen https://lispcookbook.github.io/cl-cookbook/
 bind 'c js tri.excmds.tabopen(`https://camelcamelcamel.com/search?sq=${document.location.href}`)
 bind 'C tabopen https://forum.colemak.com/
+bind 'd tabopen about:addons
+bind 'D tabopen about:downloads
 bind 'e tabopen https://www.reddit.com/r/emacs/
 bind 'f js tri.excmds.tabopen(`https://fakespot.com/analyze?url=${document.location.href}`)
 bind 'g tabopen https://www.github.com/
 bind 'G tabopen https://www.geekhack.org/
 bind 'h tabopen https://news.ycombinator.com/news
+bind 'H tabopen about:history
 bind 'i tabopen https://imgur.com/
 bind 'l tabopen https://lainchan.org/%CE%BB/index.html
 bind 'L tabopen https://planet.lisp.org/
@@ -35,6 +40,7 @@ bind 'y tabopen https://youtube.com/
 " to get to login page (e.g. airport/hotel)
 " https://github.com/tridactyl/tridactyl/issues/2002
 bind 'z jsb tri.native.run("ip route | awk '/default/ {print $3}'").then(result => tri.excmds.tabopen(result.content))
+" detectportal.firefox.com/canonical.html
 
 " Local Variables:
 " mode: vimrc
