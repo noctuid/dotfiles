@@ -1,0 +1,494 @@
+" NOTE have gone through entire pentadactyl config (excluding firefox settings)
+
+" * Missing Functionality
+" ** Most Important but Currently Unfixable
+" - Can't work on every page (about:*, data:*, view-source:* and file:*);
+"   very jarring
+" - doesn't work while loading page (possibly fixable):
+"   https://github.com/tridactyl/tridactyl/issues/1445
+"   https://github.com/tridactyl/tridactyl/issues/1995
+
+" ** Major
+" - Prevent keybinding hijacking:
+"   https://github.com/tridactyl/tridactyl/issues/904
+" - Autofocusjackhammer improvements:
+"   https://github.com/tridactyl/tridactyl/issues/2485
+
+" - Better completion (multiple issues open; need to open more); no setting;
+"   undo completion now exists though; can't use space as .*
+" - fuzzy matching
+"   https://github.com/tridactyl/tridactyl/issues/936
+"   https://github.com/tridactyl/tridactyl/issues/1175
+" - custom matcher? - need to open issue
+" - customizable keybindings to select completion candidate by index (need to
+"   open issue)
+
+" - DownloadPost autocommand
+"   https://github.com/cmcaine/tridactyl/issues/807
+"   https://github.com/tridactyl/tridactyl/pull/1495
+" - Autocommands overwrite each other:
+"   https://github.com/cmcaine/tridactyl/issues/650
+" - remove cookies for specific site or container
+"   https://github.com/tridactyl/tridactyl/issues/1973
+
+" ** Minor
+" - Popup showing commands for incomplete key sequences (like qutebrowser,
+"   which-key, etc.)
+"   https://github.com/tridactyl/tridactyl/issues/1446
+" - Maybe TST support:
+"   https://github.com/cmcaine/tridactyl/issues/377
+" - Ex completion is lacking (e.g. doesn't show --mode or options for when input
+"   :bind)
+"   https://github.com/tridactyl/tridactyl/issues/1447
+
+" impossible with webextension limitations
+" - interacting with other extensions (pentadactyl emenu), e.g. to disable
+"   adblock for the current page:
+"   https://github.com/tridactyl/tridactyl/issues/1306
+"   pentadactyl: command disab -description "disable addblock edge for current page" emenu Tools.Adblock Edge.Disable on this page only
+" - in addition to emenu, pentadactyl had a lot nicities like the addons
+"   command, which would show a list of addons with link-hintable actions like
+"   delete, update, configure options, and turn on/off; something like this just
+"   isn't possible anymore
+
+" ** Very Minor
+" - Dialog support:
+"   https://github.com/tridactyl/tridactyl/issues/137
+" - Keyboard macro support:
+"   https://github.com/tridactyl/tridactyl/issues/2717
+" - :tabdo (needs issue; :tabdo <command to run for each tab>)
+
+" ** Theme Related
+" https://github.com/tridactyl/tridactyl/issues/1444
+
+" * Make (or find) Issues
+" - keybindings for selecting completion candidate by index
+" - option to use external matcher for completion?
+" - saved/named url patterns for bindurl (to reduce verbosity; like pentadactyl
+"   groups)
+
+" - way to paste into input (bind to gp)
+" - use typescript or javascript for logic/functions
+" - splitting lines in config (e.g. pentadactyl allowed heredoc)
+"   command! -nargs=1 relative-tab-move <<EOF
+"   if tabs.getTab().dactylOrdinal < "11"
+"   if <args> == 0
+"   normal 10gt
+"   else
+"   normal <args>gt
+"   endif
+"   elseif tabs.getTab().dactylOrdinal > "10" && tabs.getTab().dactylOrdinal < "21"
+"   normal 1<args>gt
+"   ...
+"   endif
+"   endif
+"   EOF
+" - feed keys to firefox or to website (probably not possible)
+" - on OSX, click on tab, hit : and commandline doesn't get focus
+" - real echo area (not just filling commandline and changing input)
+"   - probably unnecessary - already don't have to hit escape e.g. when yank
+" - tab jump list
+" - sass?
+" - t; as last ex command (possible in pentadactyl)
+" - clipboard fillcmdline
+" - firefox reading mode with tridactyl controls
+
+" * TODO List
+" - user.js configuration (highest priority)
+
+" - bind key to toggle between old and new reddi
+" - keys to scroll left/right
+" - bind key to click a corner (to get cursor off image)
+" - bind urlincrement, urlroot (gU), urlparent (gu); see followpagepatterns
+" - relative tab jump keybindings (1-9 in current range, e.g. SPC-a to jump to
+"   11 if at tab 15)
+" - autocontain setup (e.g. google/youtube)
+" - containers; autocontain setting
+" - tabgroupswitch keybindings: source a file that checks tabgroup name and
+"   makes different keybindings depending on it
+" - os specific settings, e.g.:
+"   jsb browser.runtime.getPlatformInfo().then(os=>{const profiledir = os.os=="win" ? "C:\\Users\\olie\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\gwm76nmk.default" : "auto"; tri.config.set("profiledir", profiledir)})
+
+" once DownloadPost PR is merged
+" - bind dl_move bulk_store and dl_move toggle (tr and tR)
+
+" - blacklistkeys (don't let sites override these keys; leavegithubalone must be
+"   false)
+" - increase historyresults (doesn't seem like it would do anything; says
+"   display top 20 or so?)
+" - bind quickfind (default ')
+" - bind rssexec
+" - make issue for hinting in menu (ivy-avy)
+" - bind buku/bookmark key
+" - bind key to clone? prompt for dir with Emacs, rofi, or terminal?
+"   alias gitclone jsb -p tri.native.run("git clone '" + JS_ARG + "' /home/me/prog/" + JS_ARG.split("/").slice(-1))
+
+" - try https://github.com/glacambre/firenvim
+
+" * Reminders
+" - :issue - create new issue, pre-filling firefox and tridactyl versions
+" - :tabaudio (bound to ga) - go to tab playing audio
+
+" default keybindings:
+" https://github.com/cmcaine/tridactyl/blob/af61d8a42e55fa8590ef91e90f474528bcd82ba5/src/config.ts#L37
+
+" * Cool
+" - Shows up-to-date bindings in help page
+" - Mode indicator is purple in private mode
+" - :js
+" - urlmodify
+
+" * Clear Stored Configuration
+sanitize tridactylsync
+
+" * About:config and user.js
+source ~/.config/tridactyl/userjs
+
+" * Settings
+" ** Appearance
+" ./themes/custom.css
+" set theme custom
+colorscheme custom
+
+set modeindicatorshowkeys true
+
+" https://github.com/tridactyl/tridactyl/issues/1212
+" set customthemes.custom span.TridactylHint { font-family: monospace !important; background: transparent !important; color: black !important; text-shadow: cyan -1px -1px 0px, cyan -1px 0px 0px, cyan -1px 1px 0px, cyan 1px -1px 0px, cyan 1px 0px 0px, cyan 1px 1px 0px, cyan 0px 1px 0px, cyan 0px -1px 0px !important; }
+" set customthemes.custom span.TridactylHint { background: repeating-linear-gradient(45deg, #3f87a6, #ebf8e1 15%, #f69d3c 20%) !important; }
+
+" ** Autofocus
+" stay in normal mode when loading new page
+setpref browser.autofocus false
+" default
+set allowautofocus false
+seturl .*github.com preventautofocusjackhammer false
+" somewhat similar to strictfocus despotic in pentadactyl
+" prevent focus until you interact with a page; this makes tridactyl much more
+" pleasant to use... but breaks on some sites like github
+" https://github.com/tridactyl/tridactyl/issues/2485
+" TODO bugs out searching?
+" set preventautofocusjackhammer true
+
+setmode ignore allowautofocus true
+" setmode ex allowautofocus true
+
+" can use C-, to get back focus from address bar
+
+" ** CSP
+" required for tridactyl to work on some sites
+" unfortunately has been removed because Mozilla
+" seturl raw.githubusercontent.com csp clobber
+
+" ** Editor
+set editorcmd emacsclient -c "+%l:%c" "%f"
+
+" ** Hinting
+set hintchars arstdhneiowfpluy
+" hintfiltermode
+" hintnames
+
+" ** Quickmarks
+source ~/.config/tridactyl/quickmarks
+
+" ** Search Engines
+source ~/.config/tridactyl/searchengines
+
+" ** Tabs
+" TODO
+" set newtab ~/src/homepage/home.html
+" set homepages ["file:~/src/homepage/home.html"]
+" TODO containers
+
+" default tabopenpos (next) and relatedopenpos (related) - open new tabs after
+" current tab or after tabs already opened from current tab
+
+" tabopencontaineraware false is default
+
+" * Commands
+alias xa qall
+
+alias print js window.print()
+
+" save wayback machine archive for current url
+alias archive js tri.excmds.open("https://web.archive.org/save/" + window.location.href)
+
+" view wayback machine archive for current url
+alias view-archive js tri.excmds.open("https://web.archive.org/*/" + window.location.href)
+alias va view-archive
+
+" view google cache for current url
+alias view-google-cache js tri.excmds.open("https://www.google.com/search?q=cache:" + window.location.href)
+alias vgc view-google-cache
+
+" * Key Bindings
+" ** Appearance
+" don't have a key to toggle showing tabs/menu with guiset because can just
+" enter fullscreen
+
+" ** Editing/Input
+bind --mode=input ¸ text.backward_kill_word
+bind --mode=ex ¸ text.backward_kill_word
+bind --mode=insert ¸ text.backward_kill_word
+
+bind --mode=input <c-y> exclaim_quiet xdotool key "ctrl+v"
+bind --mode=ex <c-y> exclaim_quiet xdotool key "ctrl+v"
+bind --mode=insert <c-y> exclaim_quiet xdotool key "ctrl+v"
+
+" ** Unbind Prefix Keys
+unbind t
+unbind <spc>
+
+" ** Re-Source Config
+bind t. source
+
+" ** Colemak Swaps
+" TODO consider scrollpage 0.2
+bind n scrollline 15
+bind e scrollline -15
+
+" visual mode
+bind --mode=visual <ArrowLeft> js document.getSelection().modify("extend","backward","character")
+bind --mode=visual <ArrowRight> js document.getSelection().modify("extend","forward","character")
+bind --mode=visual n js document.getSelection().modify("extend","forward","line")
+bind --mode=visual e js document.getSelection().modify("extend","backward","line")
+bind --mode=visual j js document.getSelection().modify("extend","forward","word")
+
+" ** Tabs and Windows
+bind o fillcmdline tabopen
+bind O fillcmdline open
+
+" s to :open search; o is normally good enough
+" usually won't need this either
+bind gs clipboard tabopen search
+
+bind c current_url open
+bind C current_url tabopen
+
+bind tn tabmove -1
+bind te tabmove +1
+
+bind N tabprev
+bind E tabnext
+
+bind tp winopen -private
+
+" go to last accessed tab
+bind l tab #
+
+bind tt pin
+
+" NOTE tridactyl has no left option (qutebrowser select_on_remove equivalent),
+" but we can bind d to tabclose and go to the last accessed tab (which can be a
+" tab opened in the background); this works well when opening multiple tabs:
+" you can then press d to jump to the most recently opened one then d to
+" continue going through tabs in reverse order
+" TODO: this won't respect tab groups (will show tabs from other tab groups)
+bind d composite tab #; tabclose #
+
+" ** History
+bind h back
+bind H forward
+
+" ** Changlist and Jumplist
+" not fully implemented
+" bind ... changelistjump
+bind tl jumpprev
+bind tL jumpnext
+
+" ** Searching
+" incsearch is false by default
+" findcase smart is the default
+bind / fillcmdline find
+bind k findnext
+bind K findnext -1
+bind <esc> nohlsearch
+
+" old workaround when things were completely broken
+" unbind <c-f>
+" bind / exclaim_quiet xdotool key "ctrl+f"
+" bind k exclaim_quiet xdotool key "ctrl+g"
+" bind K exclaim_quiet xdotool key "ctrl+shift+g"
+
+" ** Yanking and Pasting
+unbind yy
+unbind ys
+unbind yc
+unbind ym
+unbind yt
+" bind y clipboard yankshort
+bind y clipboard yank
+bind ty hint -p
+bind Y composite js window.getSelection().toString() | yank
+
+" swap p and P
+bind p clipboard tabopen
+bind P clipboard open
+
+" ** Undo
+bind U fillcmdline undo
+bind tu undo window
+
+" ** Tab Groups
+" TODO might be nice to have group specific quickmarks that can see in
+" completion without having to necessarily remember them
+
+unbind v
+bind V hint -h
+
+bind vA tabgroupabort
+bind vc fillcmdline tabgroupcreate
+bind vv fillcmdline tabgroupswitch
+bind vm fillcmdline tabgroupmove
+bind vR fillcmdline tabgrouprename
+
+bind vl tabgrouplast
+
+bind va tgroupswitch emacs
+bind vr tgroupswitch life
+bind vs tgroupswitch learn
+bind vt tgroupswitch prog
+bind vd tgroupswitch dots
+bind vn tgroupswitch wr
+bind ve tgroupswitch cons
+bind vi tgroupswitch buy
+
+" ** Followpage; Navigate Next/Prev/Inc
+bind gn followpage prev
+bind ge followpage next
+
+" ** Hinting
+" -; focus element
+" comment toggler for reddit and hacker news (suggested in example config)
+bind ;c hint -c [class*="expand"],[class="togg"]
+bind tc hint -c [class*="expand"],[class="togg"]
+
+" swap ; and :
+keymap ; :
+keymap : ;
+
+" instead of first input, pick input
+bind gi hint -c input,textarea
+
+" open in new foreground tab
+bind tf composite hint -t
+
+" download hinting (anything, image)
+bind ts hint -s
+bind tS hint -S
+
+" NOTE :a - save linked resource
+" image hinting
+bind ti hint -I
+bind tI hint -i
+bind tw saveas ~/database/move/
+
+" this works
+alias mpgosafe js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('dropmpgo ' + url))
+" I don't know why this doesn't work
+" bind tv hint -W mpgosafe
+bind tv composite hint -y ; exclaim_quiet "dropmpgo"
+
+alias transmissionadd js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('transmission-remote -a ' + url))
+bind ta hint -W transmissionadd
+
+" ** Play Videos
+" https://github.com/glacambre/.dotfiles/blob/2077603882c7bfe695dd7bc61b539650419598ac/default/.config/tridactyl/
+alias playAllVideos js tri.native.run("mvp --really-quiet --ontop --keepaspect-window --profile=protocol.http " + Array.from(document.querySelectorAll("a, iframe, video")).reduce((s, e) => {let r=(/^https?:\/\/((www.)?youtu((\.be\/)|(be\.com\/((embed\/)|(watch\?v=))))[^ ]+)|(.+\.webm)$/);let l="";if(e.tagName=="IFRAME")l=e.src.match(r);else if(e.tagName=="A")l=e.href.match(r)||e.innerText.match(r);else if(e.tagName=="VIDEO")l=[e.currentSrc?e.currentSrc:e.src];console.log(l);return s+(l && l.length > 0 && s.indexOf(l[0])<0?"'"+l[0]+"' ":"")},""))
+
+" ** External Commands (Media, Downloading, etc.)
+" NOTE: nohup is not necessary (will continue to run if close firefox)
+
+bind ty composite get_current_url | shellescape | !s mvp
+" bind V composite get_current_url | shellescape | !s mvp --fullscreen
+
+" alias mvigallery js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('mvigallery ' + url))
+bind tg composite get_current_url | shellescape | !s mvigallery
+
+bind tG composite get_current_url | shellescape | !s dlg
+bind tY composite get_current_url | shellescape | !s ytdl
+bind tA composite get_current_url | shellescape | !s ytdl -a
+
+" ** Console/Inspector
+" can C-, then j afterwards to close
+bind j !s xdotool key "ctrl+shift+i"
+
+" ** Mute
+bind tm mute toggle
+bind tM mute toggle all
+
+" ** Reload
+bind tr reloadallbut
+" overrides :reader
+bind gr reloadhard
+
+" ** Zoom
+bind = zoom 1
+
+" * Passthrough
+" TODO blacklistadd
+bind , mode ignore
+bind --mode=ignore <esc> mode normal
+
+" * AutoCmds
+
+" * Site Specific
+" ** Amazon
+" from example config
+autocmd DocStart ^http(s?)://www\.amazon\.com urlmodify -t www smile
+
+" ** Duck Duck Go
+" from example config (swapped)
+" too restrictive, e.g. some websites have sublinks
+" bindurl ^https://duckduckgo.com f hint -Jc [data-testid="result-title-a"]
+" bindurl ^https://duckduckgo.com F hint -Jbc [data-testid="result-title-a"]
+bindurl ^https://duckduckgo.com gi hint -Jbc .js-search-input
+
+" ** Githhub
+" https://github.com/glacambre/.dotfiles/blob/master/default/.config/tridactyl/tridactylrc
+" alias openGithubNotifications composite js Array.from(document.querySelectorAll("li.list-group-item > span:nth-child(1) > a:nth-child(2)")).map(e => e.href) | jsb -p JS_ARG.forEach(url => tri.excmds.tabopen(url))
+" bindurl https://github.com/notifications <Space><Space> openGithubNotifications
+
+" from glacambre; also hint line numbers on github"
+bindurl https://github.com/.*/.*/blob f hint -c .blob-num,a
+
+" ** Google
+" limit selectable links on google
+" https://github.com/glacambre/.dotfiles/blob/master/default/.config/tridactyl/tridactylrc
+bindurl google(\.[a-zA-Z0-9]+){1,2}/search f hint -Jc #top_nav a, #search a, .card-section a, a.fl, #pnnext, #pnprev
+bindurl google(\.[a-zA-Z0-9]+){1,2}/search F hint -Jbc #top_nav a, #search a, .card-section a, a.fl, #pnnext, #pnprev
+bindurl google(\.[a-zA-Z0-9]+){1,2}/search tf hint -Jtc #top_nav a, #search a, .card-section a, a.fl, #pnnext, #pnprev
+bindurl google(\.[a-zA-Z0-9]+){1,2}/search gF hint -Jqbc #top_nav a, #search a, .card-section a, a.fl, #pnnext, #pnprev
+
+" from example config
+" bindurl www.google.com f hint -Jc #search div:not(.action-menu) > a
+" bindurl www.google.com F hint -Jbc #search div:not(.action-menu) > a
+
+" ** Images
+" bindurl .*\.jpg|.*\.jpeg|.*\.png|.*\.gif u zoom -0.2 true
+" bindurl .*\.jpg|.*\.jpeg|.*\.png|.*\.gif y zoom 0.2 true
+
+" don't need search on images
+bindurl .*\.jpg|.*\.jpeg|.*\.png|.*\.gif k zoom 0.2 true
+bindurl .*\.jpg|.*\.jpeg|.*\.png|.*\.gif K zoom -0.2 true
+
+" ** Youtube
+" https://github.com/glacambre/.dotfiles/blob/master/default/.config/tridactyl/tridactylrc
+" disable hints for invisible elements (no js hinting)
+bindurl youtu((\.be)|(be\.com)) f hint -J
+bindurl youtu((\.be)|(be\.com)) F hint -b -J
+bindurl youtu((\.be)|(be\.com)) tf hint -t -J
+
+" ** Reddit
+autocmd DocStart ^http(s?)://www\.reddit\.com urlmodify -t www old
+
+" ** Twitter
+" so I don't have to login to view things
+" https://github.com/glacambre/.dotfiles/blob/ce464f5dee258a912d3ab319857aaaea838f7e7d/default/.config/tridactyl/tridactylrc#L11
+autocmd DocStart ^http(s?)://twitter\.com urlmodify -t twitter.com nitter.net
+
+" * Local Config
+source ~/.config/tridactyl/local
+
+" Local Variables:
+" mode: vimrc
+" End:

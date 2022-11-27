@@ -1,0 +1,89 @@
+* Theming
+I've stopped trying to manually manage colorschemes and am just using [[https://github.com/dylanaraps/pywal][pywal]] and [[wpgtk]] for everything.  I'm no longer using my own custom tmux status bar, zsh prompt, Emacs mode line, etc. either.  It's simpler to just use someone else's customizable prompt/bar/whatever.  I'm more interested in functionality and my panel/visual setup has barely changed in years.  Pywal is great in that it allows for variety in themes without effort.  It does not work well for all wallpaper though (e.g. wallpaper that is mostly shades of a single color).
+
+* Wallpaper
+After having tried pretty much every wallpaper setter, I've settled with using [[https://github.com/ttzhou/setroot][setroot]].  It has the equivalent of feh's =--bg-fill= option (fits an image to either the height or width in order to completely cover the screen without stretching) which =xsetroot=, =hsetroot=, and =imlibsetroot= all don't have (or at least didn't when I started using setroot; you could write a wrapper for imlibsetroot if you wanted to).  It's also not a full image viewer unlike feh.
+
+In comparison to imlibsetroot, setroot has better multiple monitor support and a more convenient =--store= option that stores both the image location and settings used (to be restored with =--restore=).  Setroot allows setting different wallpaper on different monitors at the same time using =--on <number>=.  This allows the use of a single command to set all wallpaper even for monitors that aren't currently plugged in.  I often connect to a tv and just want the monitor to be black. Since setroot's default action without any =--on= options is to use the picture for the first (0th) monitor and set the other monitor(s) black, I just have =setroot --restore= called when adding a new monitor to achieve this.
+
+The only thing imlibsetroot has over setroot is its specific x,y options for centering at a specific position (=-p x,y=), stretching to exact dimensions (=-s x,y=), and tiling with a specific width and height (=-t w,h=). I've never found these to be particularly useful though.  Setroot also has an actual manpage and some cool options such as contrast, flip, sharpen, blur, brightness, and greyscale.  These options could be replicated by using imagemagick/graphicsmagick, but setroot makes it quite easy and quick to find out how altering these values will change a wallpaper's look.
+
+* Panel
+I switched from [[https://github.com/LemonBoy/bar][lemonar]]-xft to [[https://github.com/jaagr/polybar][polybar]].  It has a few annoyances but it allowed me to replicate my lemonbar setup more simply/concisely without losing scriptability.  It makes it simple to reuse configuration for different panels (e.g. for different window managers).  It also actually has system tray support.
+
+* Fonts
+My current favorite monospaced font is [[https://github.com/adam7/delugia-code][Delugia]].  It is like CaskaydiaCove, the nerd fonts version of Cascadia Code, but better (e.g. it has italics).  Previously I primarily used Office Code Pro D, Fira Mono, and various versions of Inconsolata.
+
+In addition to Cascadia, in my panel I am using [[https://github.com/gstk/siji][siji]] for some icons, Ricty for Japanese characters, Font Awesome for some icons, symbola, and unifont.
+
+* Compositor
+Since the death of compton, I've been using [[https://github.com/yshui/picom][picom]].  I didn't bother trying any of the forks.  Now that it has rounded corners and Kawase blur, I don't have any issues with it.  I initially hated rounded corners but now like them to have my corners slightly rounded.
+
+* Notifications
+I'm using dunst for notifications. It has a nice configuration file, is scriptable, and looks good.  It is a bit annoying to get working with pywal (see my dunstrun script), but it does what I need.
+
+* Screenshots
+Here's what an empty desktop looks like:
+#+CAPTION: Empty Desktop
+[[https://pir-hana.cafe/screenshots/2022-11-26T18:25:23-clean.png]]
+
+This is what dunst notifications look like:
+#+CAPTION: Dunst
+[[https://pir-hana.cafe/screenshots/2022-11-27T10:59:59-dunst-fs8.png]]
+
+Here's a dropdown terminal showing my tmux status bar (outsourced to [[https://github.com/arcticicestudio/nord-tmux][nord-tmux]]), zsh prompt (outsourced to [[https://github.com/romkatv/powerlevel10k][powerlevel10k]] with instant prompt and transient prompt; layout based on the Pure theme) and neofetch:
+#+CAPTION: Dropdown Fetch
+[[https://pir-hana.cafe/screenshots/2022-11-27T10:47:36-dropdown-fetch.png]]
+
+I'm theming firefox with [[https://github.com/Frewacom/pywalfox][pywalfox]], and my custom tridactyl theme uses pywal colors:
+#+CAPTION: Firefox
+[[https://pir-hana.cafe/screenshots/2022-11-27T11:28:30-firefox.png]]
+
+Here's Emacs with [[https://github.com/seagle0128/doom-modeline][doom-modeline]] and [[https://gitlab.com/jjzmajic/ewal][ewal]] for the theme:
+#+CAPTION: Emacs
+[[https://pir-hana.cafe/screenshots/2022-11-27T11:09:06-emacs.png]]
+
+Here's ranger:
+#+CAPTION: Ranger
+[[https://pir-hana.cafe/screenshots/2022-11-27T10:57:30-ranger-fs8.png]]
+
+Here's [[https://github.com/alexluigit/dirvish][dirvish]]:
+#+CAPTION: Dirvish
+[[https://pir-hana.cafe/screenshots/2022-11-27T11:35:03-dirvish.png]]
+
+Fish:
+#+CAPTION: Fish in Vterm
+[[https://pir-hana.cafe/screenshots/2022-11-27T11:26:10-vterm.png]]
+
+I have more screenshots [[https://gitlab.com/noctuid/noctuid.gitlab.io/-/tree/master/static/screenshots][here]].
+
+* Old Screenshots
+Here I'm using [[https://github.com/eworm-de/mpd-notification][mpd-notifcation]] for song state change notifications:
+#+CAPTION: MPD Notifications
+[[./notifications.gif]]
+
+[[./notifications.mkv][Here]] is a smaller video version of higher quality.
+
+This gif shows panel changes and truncation from left to right (I'm no longer using truncation, now I'm just using numbers for volume and brightness).  After focusing a window, the =xtitle= output is displayed in the middle.  Unplugging the laptop charger changes the battery icon.  Brightness level information is truncated by default and displayed for a couple of seconds after brightness changes.  The volume bar is truncated when the audio is muted or at full volume.  The signal strength indicator is only displayed when there is a connection.
+
+#+CAPTION: Truncating Panel
+[[./truncation.gif]]
+
+[[./truncation.mkv][Here]] is a smaller video version of higher quality.
+
+Termite and pentadactyl colors:
+#+CAPTION: Termite and Pentadactyl Colors
+[[./term_and_penta_colours.png]]
+
+[[https://github.com/noctuid/homepage][My old homepage]] (modified from [[https://github.com/gokoururi/homepage][gokoururi's homepage]]):
+#+CAPTION: Old Homepage
+[[./homepage.png]]
+
+Old tmux status bar:
+
+#+CAPTION: Old Tmux Status Bar
+[[./newtmuxline.png]]
+
+Older:
+#+CAPTION: Older Tmux Status Bar
+[[./tmux_statusline.png]]

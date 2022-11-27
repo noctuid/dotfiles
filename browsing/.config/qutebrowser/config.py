@@ -500,7 +500,6 @@ nmap('zo', 'zoom-out')
 nmap('ti', 'inspector')
 
 # * TODO Per Domain
-# ~/.pentadactyl/groups.penta
 # ** Settings
 # ** Keybindings
 

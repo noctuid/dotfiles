@@ -1,10 +1,27 @@
 #!/usr/bin/env bash
 # open ranger with downloaded file(s) cut; using instead of 'save as' dialog
-# see corresponding pentadactylrc section: ../../../browsing/.pentadactylrc
 # $ dl_move (toggle|bulk_store|</absolute/path/to/file to move>)
-# TODO:
-# - add better emacs support (maybe using ranger.el)
+# TODO
+# - cleanup
 # - re-use fm_open for moving contents of dir (test -d)
+# - better fix escaping; this doesn't work "test -- #1.htm"?
+
+fm_type=ranger
+temp_dir=/tmp/dl_move
+detox=false
+while getopts :ed opt
+do
+	case $opt in
+	e) fm_type=emacs;;
+	d) detox=true;;
+	*) echo "Invalid flag specified" >&2 && exit 1;;
+    esac
+done
+
+if [[ -z $1 ]]; then
+	echo "Positional argument for file path required" >&2
+	exit 1
+fi
 
 # automatic moving
 if [[ $1  =~ ^.*\.torrent$ ]]; then
@@ -12,69 +29,52 @@ if [[ $1  =~ ^.*\.torrent$ ]]; then
 	exit 0
 fi
 
-fm_type=ranger
-temp_dir=/tmp/dl_move
-geo="600x400"
-detox=false
-while getopts :e opt
-do
-	case $opt in
-	e) fm_type=emacs;;
-	d) detox=true;;
-    esac
-done
-
 function fm_open() { # <file to cut>
 	if [[ $fm_type == emacs ]]; then
-		bspc rule -a \*:emacs -o state=floating center=true
 		emacsclient -c \
-			-e "(add-hook 'dired-mode-hook (lambda () (evil-local-set-key 'normal \"q\" 'delete-frame)))" \
-			-e "(dired-jump nil \"$1\")" \
-			-e "(call-interactively #'dired-ranger-copy)"
+			-e "(noct-with-q-to-exit (dired-jump nil \"$1\"))" \
+			-e "(call-interactively #'noct-dired-toggle-mark)"
 	else
-		file=$(printf %q "$1")
-		bspc rule -a \*:termite -o state=floating center=true
-		termite --geometry="$geo" -e "ranger --selectfile=$file --cmd=cut" &
+		kitty -- ranger --selectfile="$1" --cmd=cut
 	fi
 }
 
-mkdir -p "$temp_dir"
+mkdir -p $temp_dir
 # toggle script
 # full path of file passed in, so a file named toggle will be /...toggle
 if [[ $1 == toggle ]]; then
-	if [[ -f "$temp_dir"/off ]]; then
-		rm "$temp_dir"/off
+	if [[ -f $temp_dir/off ]]; then
+		rm $temp_dir/off
 	else
-		touch "$temp_dir"/off
+		touch $temp_dir/off
 	fi
 # turns on "bulk store" mode; all files will be saved in the same temp dir
-elif [[ $1 == bulk_store ]] && [[ ! -f "$tempdir"/temp_on ]]; then
-	rm "$temp_dir"/off 2> /dev/null
-	mkdir -p "$temp_dir"/temp_store
-	touch "$temp_dir"/temp_on
+elif [[ $1 == bulk_store ]] && [[ ! -f $temp_dir/temp_on ]]; then
+	rm $temp_dir/off 2> /dev/null
+	mkdir -p $temp_dir/temp_store
+	touch $temp_dir/temp_on
 # ends "bulk store" mode and opens ranger with the previously saved files cut
 elif [[ $1 == bulk_store ]]; then
 	if [[ $fm_type == ranger ]]; then
-		rm "$temp_dir"/temp_on
-		touch "$temp_dir"/move_to_dir
+		rm $temp_dir/temp_on
+		touch $temp_dir/move_to_dir
 		# no way to do this currently (see above ranger issue)
-		# termite --geometry="$geo" -e "ranger --cmd=mark --cmd=cut" &
-		# termite --geometry="$geo" -e "ranger --selectfiles='*'" &
-		
+		# "ranger --cmd=mark --cmd=cut" &
+		# "ranger --selectfiles='*'" &
+
 		# ranger --choosedir=/dev/stdout
-		bspc rule -a termite -o state=floating center=true
-		termite --geometry="$geo" \
-			-e "ranger --choosedir=/$temp_dir/move_to_dir"
-		move_to_dir=$(< "$temp_dir"/move_to_dir)
-		if [[ -n "$move_to_dir" ]]; then
-			mv "$temp_dir"/temp_store/* "$move_to_dir"
+
+		kitty -- ranger --choosedir=/$temp_dir/move_to_dir
+		move_to_dir=$(< $temp_dir/move_to_dir)
+		if [[ -n $move_to_dir ]]; then
+			mv $temp_dir/temp_store/* "$move_to_dir"
 		fi
-		rm "$temp_dir"/move_to_dir
+		rm $temp_dir/move_to_dir
 	fi
-elif [[ ! -f "$temp_dir"/off ]]; then
+elif [[ ! -f $temp_dir/off ]]; then
 	filename=${*: -1}
-	if [[ -f "$temp_dir"/temp_on ]]; then
-		mv "$filename" "$temp_dir"/temp_store
+	if [[ -f $temp_dir/temp_on ]]; then
+		mv "$filename" $temp_dir/temp_store
 		if $detox; then
 			file=$(basename "$filename")
 			detox "$temp_dir/temp_store/$file"
@@ -83,8 +83,9 @@ elif [[ ! -f "$temp_dir"/off ]]; then
 		# conditionally executing with pentadactyl isn't possible:
 		# https://github.com/5digits/dactyl/issues/29
 		# prevent multiple ranger instances due to autocmd pileup
-		last_filename="$(< "$temp_dir"/last_filename)"
-		echo "$filename" > "$temp_dir"/last_filename
+		# may not be necessary with tridactyl
+		last_filename="$(< $temp_dir/last_filename)"
+		echo "$filename" > $temp_dir/last_filename
 		if [[ ! $filename =~ ^/tmp.* ]] && \
 			[[ ! $last_filename == "$filename" ]]; then
 			if $detox; then
