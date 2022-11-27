@@ -9,20 +9,23 @@ monitor_width=$(monitor_get_width)
 width=$(monitor_fraction_of 0.2 "$monitor_width")
 
 if [[ -f ~/.cache/wal/dunstrc ]]; then
-	cat ~/.config/dunst/dunstrc ~/.cache/wal/dunstrc \
-		~/.config/dunst/overrides_dunstrc > /tmp/dunstrc
+	cat ~/.config/dunst/dunstrc_template ~/.cache/wal/dunstrc \
+		~/.config/dunst/overrides_dunstrc > ~/.config/dunst/dunstrc
 else
-	cat ~/.config/dunst/dunstrc ~/.config/dunst/colors_dunstrc \
-		~/.config/dunst/overrides_dunstrc > /tmp/dunstrc
+	cat ~/.config/dunst/dunstrc_tumplate ~/.config/dunst/colors_dunstrc \
+		~/.config/dunst/overrides_dunstrc > ~/.config/dunst/dunstrc
 fi
 
 # dunst doesn't allow duplicate headings; use sed to replace placeholder width
-sed -i -E -e "s/^\s*(frame_width )=.*/\1= $WM_BORDER/g" /tmp/dunstrc
-sed -i -E -e "s/^\s*(width )=.*/\1= $width/g" /tmp/dunstrc
+sed -i -E -e "s/^\s*(frame_width )=.*/\1= $WM_BORDER/g" ~/.config/dunst/dunstrc
+sed -i -E -e "s/^\s*(width )=.*/\1= $width/g" ~/.config/dunst/dunstrc
 # max height
-sed -i -E -e "s/^\s*(height )=.*/\1= $width/g" /tmp/dunstrc
-sed -i -E -e "s/^\s*(offset )=.*/\1= ${right_offset}x$padding/g" /tmp/dunstrc
-sed -i -E -e "s/^\s*(corner_radius )=.*/\1 = $CORNER_RADIUS/g" /tmp/dunstrc
-sed -i -E -e "s/^\s*(separator_height )=.*/\1= $HALF_WM_BORDER/g" /tmp/dunstrc
+sed -i -E -e "s/^\s*(height )=.*/\1= $width/g" ~/.config/dunst/dunstrc
+sed -i -E -e "s/^\s*(offset )=.*/\1= ${right_offset}x$padding/g" \
+	~/.config/dunst/dunstrc
+sed -i -E -e "s/^\s*(corner_radius )=.*/\1 = $CORNER_RADIUS/g" \
+	~/.config/dunst/dunstrc
+sed -i -E -e "s/^\s*(separator_height )=.*/\1= $HALF_WM_BORDER/g" \
+	~/.config/dunst/dunstrc
 
-xrestart dunst -config /tmp/dunstrc &> /tmp/dunst.log
+xrestart dunst &> /tmp/dunst.log
