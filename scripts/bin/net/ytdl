@@ -31,14 +31,12 @@ if $audio_only; then
 	yt-dlp -o './%(title)s_%(width)sx%(height)s_%(upload_date)s_audio.%(ext)s' \
 			   --external-downloader aria2c \
 			   --external-downloader-args "-c --max-connection-per-server 4" \
-			   --restrict-filenames \
 			   --extract-audio \
 			   "$url"
 else
 	# --external-downloader-args "-c --max-connection-per-server 4" \
 	yt-dlp -o "./%(title)s_%(width)sx%(height)s_%(upload_date)s.%(ext)s" \
 			   --external-downloader aria2c \
-			   --restrict-filenames \
 			   "$url"
 fi
 
