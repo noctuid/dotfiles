@@ -1,10 +1,36 @@
-#!/usr/bin/env bash
-# exec so that pid is correct for xrestart without need for pgrep
-exec herbstclient --idle attribute_changed \
-	| awk '/monitors.count/ {
-    system("hc_monitor_setup " $3 " " $4)
-} /tags.focus.client_count/ {
-    system("hc_handle_client_count " $3 " " $4)
-} /tags.focus.name/ {
-    system("hc_handle_tag_changed " $3 " " $4)
-}'
+#!/usr/bin/env -S bb -cp ${HOME}/bin
+;; more verbose (including boilerplate) than piping herbstclient into awk, but I
+;; couldn't find a good way to get get herbstclient to close when xrestart
+;; killed the script (exec herbstclient would work but not exec herbstclient |
+;; awk); this cleans up correctly (may need to take some action before cleanup
+;; happens, e.g. fullscreen or switch desktop)
+
+(ns wm.hc-watch-attr
+  "Herbstluftwm script to handle various attribute changes."
+  (:require
+   [babashka.process :refer [sh]]
+   [bb.util :refer [cmd-reader]]
+   [clojure.string :refer [split]]))
+
+(defn -main
+  "Watch herbstluftwm attributes and handle various changes."
+  []
+  (sh "herbstclient watch monitors.count")
+  (sh "herbstclient watch tags.focus.client_count")
+  (sh "herbstclient watch tags.focus.name")
+  (with-open [rdr (cmd-reader
+                   ["herbstclient"
+                    "--idle"
+                    "attribute_changed"])]
+    (binding [*in* rdr]
+      (loop [[_ attr old new] (split (read-line) #"\t")]
+        (cond (= attr "monitors.count")
+              (sh ["hc_monitor_setup" old new])
+              (= attr "tags.focus.client_count")
+              (sh ["hc_handle_client_count" old new])
+              (= attr "tags.focus.name")
+              (sh ["hc_handle_tag_changed" old new]))
+        (recur (split (read-line) #"\t"))))))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main))

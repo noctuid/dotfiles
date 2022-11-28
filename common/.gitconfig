@@ -12,8 +12,8 @@
 	default = simple
 [user]
 	name = Fox Kiester
-	email = noct@posteo.net
-	signingkey = noct@posteo.net
+	email = noctuid@pir-hana.cafe
+	signingkey = noctuid@pir-hana.cafe
 [github]
 	user = noctuid
 [commit]

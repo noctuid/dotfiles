@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 
-zscroll -d 0.2 -l 100 -b "| " -a " |" -u true "xtitle" &
-
-wait
+# exec so will work with xrestart script
+exec zscroll -d 0.2 -l 100 -b "| " -a " |" -u true "xtitle"

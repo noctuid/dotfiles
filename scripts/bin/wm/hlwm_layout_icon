@@ -1,34 +1,55 @@
-#!/usr/bin/env bash
-# print layout icon and window count
+#!/usr/bin/env -S bb -cp ${HOME}/bin
 
-layout_attr=tags.focus.tiling.focused_frame.algorithm
-count_attr=tags.focus.client_count
+(ns wm.hlwm_layout_icon
+  "Herbstluftwm script to continuously print an icon when the layout changes."
+  (:require
+   [babashka.process :refer [sh]]
+   [bb.util :refer [cmd-reader sh-out]]
+   [clojure.string :refer [split]]))
 
-layout=$(herbstclient attr "$layout_attr")
-win_count=$(herbstclient attr "$count_attr")
+(def layout-icons
+  "Map of layouts to Siji icons."
+  {"horizontal" ""
+   "vertical"   ""
+   "max"        ""})
 
-print_layout() {
-	case $layout in
-		horizontal) echo "$win_count";;
-		max) echo "$win_count";;
-	esac
-}
+(defn print-layout
+  "Print an icon for the given herbstluftwm layout."
+  [layout window-count]
+  (print (or (layout-icons layout) ""))
+  (println window-count))
 
-print_layout
+(defmacro print-and-recur
+  "Helper for -main to print the current herbstluftwm layout than recur."
+  [layout window-count]
+  `(do
+     (print-layout ~layout ~window-count)
+     (recur ~layout ~window-count (split (read-line) #"\t"))))
 
-herbstclient watch "$layout_attr"
-herbstclient watch "$count_attr"
+(defn -main
+  "Print an icon for the current herbstluftwm layout whenever it changes."
+  []
+  (let [layout-attr "tags.focus.tiling.focused_frame.algorithm"
+        count-attr  "tags.focus.client_count"
+        layout      (sh-out ["herbstclient" "attr" layout-attr])
+        count       (sh-out ["herbstclient" "attr" count-attr])]
+    (print-layout layout count)
+    (sh ["herbstclient" "watch" layout-attr])
+    (sh ["herbstclient" "watch" count-attr])
+    (with-open [rdr (cmd-reader
+                     ["herbstclient"
+                      "--idle"
+                      "attribute_changed"])]
+      (binding [*in* rdr]
+        (loop [layout         layout
+               count          count
+               [_ attr _ new] (split (read-line) #"\t")]
+          (cond (= attr layout-attr)
+                (print-and-recur new count)
+                (= attr count-attr)
+                (print-and-recur layout new)
+                :else
+                (recur layout count (split (read-line) #"\t"))))))))
 
-# exec so that pid is correct for xrestart
-exec herbstclient --idle attribute_changed \
-	| while read -r line
-do
-    attr=$(echo "$line" | awk '{print $2}')
-	arg=$(echo "$line" | awk '{print $4}')
-	if [[ $attr == "$layout_attr" ]]; then
-		layout=$arg
-	elif [[ $attr == "$count_attr" ]]; then
-		win_count=$arg
-	fi
-	print_layout
-done
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main))

@@ -1,7 +1,7 @@
 (ns bb.util
   "General babashka script helper utilities."
   (:require
-   [babashka.process :refer [$ sh]]
+   [babashka.process :refer [sh process destroy-tree]]
    [clojure.java.io :as io]
    [clojure.string :refer [split trim]]))
 
@@ -10,7 +10,7 @@
   [cmd]
   (-> (sh cmd) :out trim))
 
-(defmacro $-reader
+(defn cmd-reader
   "Return the output of a command as a stream using io/reader."
-  [& args]
-  `(-> ($ ~@args) :out io/reader))
+  [cmd]
+  (io/reader (:out (process cmd {:shutdown destroy-tree}))))

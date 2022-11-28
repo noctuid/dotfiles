@@ -57,11 +57,12 @@ if [[ -f "$pidfile" ]]; then
 	pkill --pidfile "$pidfile" 2> /dev/null
 fi
 
-
-blacklist=$(pgrep "$command")
+if $ignore_initial_pid; then
+	blacklist=$(pgrep "$command")
+fi
 
 if $eval; then
-	eval "$@" &
+	eval "$*" &
 else
 	"$@" &
 fi

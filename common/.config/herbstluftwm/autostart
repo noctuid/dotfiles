@@ -91,6 +91,8 @@ hc set tree_style '╾│ ├└╼─┐'
 
 # like stumpwm; most of the time don't need to show more than 1 window
 hc set default_frame_layout max
+# change default tag to also be max (setting only affects new tags)
+hc load '(clients max:0)'
 
 # don't show windows behind current in max layout when using transparency
 hc set hide_covered_windows on
@@ -197,13 +199,9 @@ hc rule class='Wpg' floating=on
 hc rule instance=firefox title~'.*Private.*' tag=八 switchtag=on
 
 # * Hooks
-hc watch tags.focus.name
-hc watch tags.focus.client_count
-hc watch monitors.count
-
 xrestart hc_watch_attr
 
-xrestart -i -c herbstclient hc_watch_fullscreen
+xrestart hc_watch_fullscreen
 
 # * Start
 if $first_load; then

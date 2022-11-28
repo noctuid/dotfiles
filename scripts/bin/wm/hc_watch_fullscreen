@@ -3,11 +3,11 @@
 ;; or is this just misconfiguration on my part?
 
 (ns wm.hc-watch-fullscreen
-  "Herbstluftwm script to hide polybar when showing a fullscreen window"
+  "Herbstluftwm script to hide polybar when showing a fullscreen window."
   (:require
    [babashka.fs :as fs]
    [babashka.process :refer [sh]]
-   [bb.util :refer [sh-out $-reader]]
+   [bb.util :refer [sh-out cmd-reader]]
    [clojure.string :refer [split trim]]))
 
 (defn polybar-disabled?
@@ -37,14 +37,16 @@
   ([]
    (toggle-polybar-state (is-fullscreen?))))
 
-(defn -main []
-  "Hide/show polybar based on changles to clients.focus.fullscreen events."
+(defn -main
+  "Hide/show polybar based on changes to clients.focus.fullscreen events."
+  []
   (sh "herbstclient watch clients.focus.fullscreen")
   (sh "herbstclient watch monitors.focus.index")
-  (with-open [rdr ($-reader herbstclient
-                            --idle
-                            attribute_changed
-                            clients.focus.fullscreen|monitors.focus.index)]
+  (with-open [rdr (cmd-reader
+                   ["herbstclient"
+                    "--idle"
+                    "attribute_changed"
+                    "clients.focus.fullscreen|monitors.focus.index"])]
     (binding [*in* rdr]
       (loop [[_ attr old new] (split (read-line) #"\t")]
         (when-not (polybar-disabled?)

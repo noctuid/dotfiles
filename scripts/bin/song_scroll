@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-zscroll -b " " -d 0.3 \
+# exec so will work with xrestart script
+# 
+exec zscroll -b " " -d 0.3 \
 		-M "mpc status" \
-		-m "playing" "-b ' '" \
+		-m "playing" "-b ' '" \
 		-m "paused" "-b ' ' -s false" \
-		-u true "mpc current" &
-
-wait
+		-u true "mpc current"
