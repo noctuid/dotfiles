@@ -56,17 +56,21 @@ luks_header_backup_file() {
 
 # https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions
 luks_create() {
-	if [[ $# -ne 2 ]]; then
-		echo 'Two arguments required: /path/to/partition new-label'
-		return 1
-	elif [[ ! -e $1 ]];then
-		echo "Error. $1 does not exist."
-		return 1
-	fi
-	echo "Wipe file system and then run cryptsetup luksFormat on $1? (y/n)"
-	confirm_do echo || return 1
 	partition=$1
 	label=$2
+	if [[ $# -ne 2 ]]; then
+		echo 'Two arguments required: /path/to/disk-or-partition new-label'
+		echo 'e.g. luks_create /dev/sdz some-label'
+		return 1
+	elif [[ ! -e $partition ]]; then
+		echo "Error: $partition does not exist."
+		return 1
+	elif [[ -e /dev/mapper/luks_"$label" ]]; then
+		echo "Error: A LUKS partition is already open with that label/name."
+		return 1
+	fi
+	echo "Wipe file system and then run cryptsetup luksFormat on $partition? (y/n)"
+	confirm_do echo || return 1
 
 	# https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#2-setup
 	# eventually wiping will be implemented in cryptsetup directly
@@ -77,17 +81,26 @@ luks_create() {
 		return 1
 	fi
 
+	# can check defaults each time use to ensure still using more secure settings
+	echo "Do you want to continue without updating crypsetup flags? (y/n)"
+	confirm_do echo || return 1
+
 	# overkill (doesn't hurt)
-	# verify-password is the default
-	# argon2i is the default for luks2; aes-xts-plain64 is default for luks
+	# https://wiki.archlinux.org/title/Dm-crypt/Device_encryption#Encryption_options_for_LUKS_mode
 	# https://security.stackexchange.com/questions/40208/recommended-options-for-luks-cryptsetup/40218#40218
-	# sha512 (about as fast as sha256); --key-size 512 is overkil
-	# longer iteration time (tradeoff is that it takes longer to open)
-	# use /dev/random instead of /dev/urandom (will block if not enough entropy;
-	# using rngd)
+	# can check defaults with cryptsetup --help
+	# - --verify-passphrase (2.5.0 default) - query for passwords twice
+	# - --use-random (not default) - use /dev/random instead of /dev/urandom
+	#    when creating volume master key (will block if not enough entropy;
+	#    using rngd)
+	# - --hash - sha256 is default; using sha512 since it's about as fast
+	# - --cipher aes-xts-plain64 is default
+	# - --pbkdf argon2id is default for luks2
+	# - --key-size - not explicitly specifying; default of 256 is fine
+	# - --iter-time - increase from default 2000 to 3000
 	if sudo cryptsetup --verbose --verify-passphrase --use-random --type luks2 \
-			--key-size 256 --hash sha512 --cipher aes-xts-plain64 \
-			--pbkdf argon2i --iter-time 3000 --label "$label" \
+			--hash sha512 --cipher aes-xts-plain64 --pbkdf argon2id \
+			--iter-time 3000 --label "$label" \
 			luksFormat "$partition"
 	then
 		echo "Successfully encrypted $partition."
@@ -116,7 +129,23 @@ luks_create() {
 	fi
 
 	echo "Create an lvm volume group on $partition? (y/n)"
-	confirm_do echo || return 0
+	if ! confirm_do echo; then
+
+		echo 'Make the new LUKS partition a single ext4 partition? (y/n)'
+		confirm_do echo || return 0
+		if ! sudo cryptsetup open "$partition" luks_"$label"; then
+			echo 'Failed to open the LUKS partition'
+			return 1
+		fi
+		sudo mkfs.ext4 /dev/mapper/luks_"$label" || return 1
+		echo "Successfully created an ext4 partition"
+		echo "After mounting, chown:"
+		# shellcheck disable=SC2016
+		echo '# chown -R "$USER" /path/to/mountpoint'
+
+		return 0
+	fi
+
 	if sudo cryptsetup open "$partition" luks_"$label" \
 			&& sudo vgcreate "$label"_group /dev/mapper/luks_"$label"
 	then
@@ -134,17 +163,46 @@ luks_create() {
 	fi
 }
 
-mount_luks_lvm() {
+cryptsetup_open() { # <label>
 	label=$1
-	volume=$2
-	dir=$3
-	if ! sudo cryptsetup status luks_"$label" | grep -q "in use"; then
+	if sudo cryptsetup status luks_"$label" | grep -q "in use"; then
+		echo "A luks partition named/labeled $partition has already been opened"
+		echo "Skipping opening"
+	else
 		# https://wiki.archlinux.org/title/Dm-crypt/Specialties#Discard/TRIM_support_for_solid_state_drives_(SSD)
 		# Note that --allow-discards makes it potentially possible to find out
 		# fs type, used space, etc.
 		sudo cryptsetup open --allow-discards \
 			 /dev/disk/by-label/"$label" luks_"$label"
 	fi
+
+}
+
+mount_luks() { # <label> <mountdir>
+	label=$1
+	mountdir=$2
+	cryptsetup_open "$label"
+	if ! mkdir -p "$mountdir"; then
+		echo "Failed to create mount point $dir."
+	fi
+	if mountpoint -q "$mountdir"; then
+		echo "$mountdir is already a mountpoint."
+	else
+		sudo mount /dev/mapper/luks_"$label" "$mountdir"
+	fi
+}
+
+umount_luks() { # <label> <mountdir>
+	label=$1
+	mountdir=$2
+	sudo umount "$mountdir" && sudo cryptsetup close luks_"$label"
+}
+
+mount_luks_lvm() { # <label> <volume> <mountdir>
+	label=$1
+	volume=$2
+	dir=$3
+	cryptsetup_open "$label"
 	if ! mkdir -p "$dir"; then
 		echo "Failed to create mount point $dir."
 	fi
@@ -159,7 +217,6 @@ mount_luks_lvm() {
 		sudo mount /dev/"$label"_group/"$volume" "$dir"
 	fi
 }
-
 
 mount_luks_lvm_backup() {
 	label=$1
@@ -181,13 +238,20 @@ alias mounteightseagate='mount_luks_lvm_backup eightseagate'
 alias umounteightseagate='umount_luks_lvm eightseagate'
 
 mountdatab() {
+	mount_luks database ~/database
+}
+umountdatab() {
+	umount_luks database ~/database
+}
+
+mountolddatab() {
 	if ! mountpoint -q ~/database; then
 		sudo mount /dev/cryptlinux_group/database ~/database
 	else
 		echo "$HOME/database is already a mountpoint. Not mounting again."
 	fi
 }
-umountdatab() {
+umountolddatab() {
 	sudo umount /dev/cryptlinux_group/database
 }
 
