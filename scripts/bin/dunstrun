@@ -29,3 +29,11 @@ sed -i -E -e "s/^\s*(separator_height )=.*/\1= $HALF_WM_BORDER/g" \
 	~/.config/dunst/dunstrc
 
 xrestart dunst &> /tmp/dunst.log
+sleep 1
+pid=$(awk -F "'" '/Cannot acquire/ {print $(NF-1)}' /tmp/dunst.log)
+if [[ -n $pid ]]; then
+	# starting dunst failed because dbus-daemon already automatically started it
+	echo "Dbus-daemon previously started dunst, killing that instance"
+	kill "$pid"
+	xrestart dunst &> /tmp/dunst.log
+fi
