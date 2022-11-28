@@ -22,8 +22,8 @@ if [[ -z $NVIDIA_XRUN ]]; then
 	# NOTE: this must come first to prevent black screen issue when switching
 	prime-offload
 
-	# used to get black screen without this; looks like not necessary with
-	# hybrid at least (TODO retest with other modes)
+	# used to get black screen without this; looks like not necessary anymore;
+	# prime-offload runs it
 	# xrandr --auto
 fi
 
@@ -96,19 +96,13 @@ fi
 # backup hotkey program
 if [[ -z $NO_HOTKEY ]]; then
 	# TODO no longer in aur?
-	xchainkeys &
+	# xchainkeys &
+	echo
 fi
-
 
 # * Mouse/Pointer
 # disable mouse acceleration
 # see ../root/etc/X11/xorg.conf.d/my-xorg.conf
-
-# disable mousepad when typing
-# i- disable for x second(s) after last keypress
-# k- ignore modifier keys (i.e. control left click)
-# t- only disable scrolling and clicking
-syndaemon -k -i 1 -d
 
 # set cursor look
 xsetroot -cursor_name left_ptr &
@@ -160,12 +154,12 @@ if [[ -z $NO_COMPOSITE ]]; then
 	# will mess things up if run with a DE like gnome or cinnamon that already
 	# has a compositor
 	picom --daemon
-	# picom --experimental-backends --daemon
 fi
 
 # * Start WM/DE
 # clear stored window manager
 # see ../scripts/bin/wm/get_wm
+# shellcheck disable=SC2188
 > /tmp/"$DISPLAY"_window_manager
 
 if [[ -n $1 ]]; then
