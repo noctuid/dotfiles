@@ -257,6 +257,13 @@ imagemagick
 gifsicle
 graphicsmagick
 waifu2x-ncnn-vulkan aur
+soryu-git aur
+# png compression
+oxipng
+# lossy png compression (huge size savings)
+pngquant
+# cwebp - convert to webp
+libwebp
 
 # * Torrents
 # includes trasmission-show (used for ranger)

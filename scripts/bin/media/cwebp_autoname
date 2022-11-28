@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [[ $# -lt 1 ]]; then
+	exit 1
+fi
+
+image=${*: -1}
+name=${image%.*}
+cwebp "$@" -o "$name".webp
