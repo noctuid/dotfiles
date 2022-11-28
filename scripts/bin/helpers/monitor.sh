@@ -28,6 +28,13 @@ monitor_get_width() { # [monitor]
 	echo "${geometry%x*}"
 }
 
+monitor_get_height() { # [monitor]
+	local geometry height
+	geometry=$(monitor_get_geometry "$1")
+	height="${geometry#*x}"
+	echo ${height%%+*}
+}
+
 monitor_fraction_of() { # <decimal number> <total>
 	# awk "BEGIN {printf(\"%.0f\", $1 * $2)}"
 	# slightly faster
