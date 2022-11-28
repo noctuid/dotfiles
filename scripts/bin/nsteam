@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-prime-run steam
+prime-run firejail --noprofile --blacklist=/sys/class/hidraw/ steam
