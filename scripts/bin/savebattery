@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-pkill -x conky
 pkill -x picom
 pkill -x polybar
 # pkill -x firefox

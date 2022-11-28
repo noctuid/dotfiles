@@ -490,7 +490,6 @@ unorm npm
 polybar-git aur
 setroot aur
 xtitle-git aur
-conky-lua-nv aur
 numix-gtk-theme
 # for icons
 numix-icon-theme-git aur

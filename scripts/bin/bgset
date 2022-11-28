@@ -4,8 +4,3 @@
 setroot "$@"
 
 echo -n "setroot $*" | xsel -bi
-
-# if conky is running, reload it with the same theme
-if pgrep -x conky; then
-	conky_switcher
-fi
