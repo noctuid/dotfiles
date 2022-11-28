@@ -49,6 +49,6 @@ partial xkb_keycodes "Wide-ja" {
     <MUHE> = 37;	// Muhenkan → Control_L
     <HENK> = 108;	// Henkan → Alt_R
     <RALT> = 100;	// Alt_R → Henkan
-    <AE13> = 107;	// Yen → PrintScreen
-    <PRSC> = 132;	// PrintScreen → Yen
+    <HKTG> = 107;	// Hiragana Katakana → PrintScreen
+    <PRSC> = 101;	// PrintScreen → Hiragana Katakana
 };

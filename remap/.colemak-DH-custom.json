@@ -102,10 +102,12 @@
 				[ "N", "M", ",", ".", "/", "Ro" ],
 				// use closestkeys to spacebar as thumb modifiers
 				[ "Control_L", "Win_L", "Alt_L", "Muhenkan" ],
-				[ "Henkan", "Alt_r" ],
+				[ "Henkan", "Alt_r" ]
+				// NOTE: klfc does not currently support, so I've manually
+				// changed ./xkb/keycodes/colemak_dh_custom
 				// found with grep 101 /usr/share/X11/xkb/keycodes/evdev (found
 				// 101 from xev)
-				[ "HKTG", "PrintScreen" ]
+				// [ "HKTG", "PrintScreen" ]
 			]
 			// { "name": "DH-angle-z",
 		//   "permutation": [
