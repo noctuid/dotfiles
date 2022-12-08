@@ -1,5 +1,7 @@
 # -*- mode: conf-space; -*-
 # for small, most frequently changed files
+# NOTE: update full backup when updating this
+
 # default
 P sh
 
@@ -13,8 +15,10 @@ P sh
 ! **/forks/melpa
 ! **/forks/org-mode
 ! **/.Trash
+! **/.Trash-1000
 
 # passwords/keys
+R .authinfo.gpg
 R .gnupg
 R .password-store
 R .ssh
@@ -22,8 +26,6 @@ R .ssh
 R .local/share/buku
 # # memory card and game settings
 R .local/share/dolphin-emu
-# sdvx game data
-R build/unnamed-sdvx-clone/bin/maps.db
 
 # qutebrowser history and sessions
 R .local/share/qutebrowser/cmd-history
@@ -39,15 +41,19 @@ R .mozilla/firefox/noctuid.normal/sessionstore-backups
 # R .mozilla/firefox/noctuid.normal/sessionstore.js
 
 # repl and other history files
+R .bash_history
 R .enhancd
 R .fasd
 R .ipython/profile_default/history.sqlite
 R .lein/repl-history
-R .local/share/nix
+R .local/share/iwctl/history
+R .local/share/nix/repl-history
 R .local/share/zathura
+R .ptpython/history
 R .python_history
 R .ros_history
 R .sbcl_history
+R .sly-mrepl-history
 R .zsh_history
 
 # notes, code, etc.
@@ -56,3 +62,6 @@ R ag-sys
 # R Documents/Anki
 R dotfiles
 R src
+
+# sdvx game data
+R /opt/unnamed-sdvx-clone/maps.db

@@ -1,0 +1,101 @@
+# -*- mode: conf-space; -*-
+# NOTE: update ~/.config/safe-rm when update this (only have major folders there)
+
+# NOTE: unlike borg, this way of exclude then include is efficient in terms of scanning/walking (e.g. it will only scan the directories in home explicitly included with !)
+
+# exclude everything in home then add back specific directories
+# using this syntax is better than listing each directory as a root because they
+# would all individually show up in the snapshots instead of just the home dir
+$HOME/*
+
+!$HOME/.authinfo.gpg
+!$HOME/.bash_history
+# intentionally not backing this up
+# !$HOME/.emacs-backups
+!$HOME/.emacs.d
+!$HOME/.enhancd
+!$HOME/.fasd
+!$HOME/.fonts
+!$HOME/.ghc/ghci_history
+!$HOME/.gnupg
+!$HOME/.ipython/profile_default/history.sqlite
+!$HOME/.lein/repl-history
+# not backing up since data already stored in cloud
+# !$HOME/.local/share/Anki2
+!$HOME/.local/share/buku
+# memory card and game settings
+!$HOME/.local/share/dolphin-emu
+!$HOME/.local/share/iwctl/history
+!$HOME/.local/share/nix/repl-history
+!$HOME/.local/share/nyxt/history
+!$HOME/.local/share/qutebrowser/cmd-history
+!$HOME/.local/share/qutebrowser/greasemonkey
+!$HOME/.local/share/qutebrowser/history.sqlite
+!$HOME/.local/share/qutebrowser/sessions
+# bookmarks and history
+!$HOME/.local/share/zathura
+# TODO rethink including; older mail is elsewhere; this is currently small though
+!$HOME/.mail
+# for my firefox profile
+!$HOME/.mozilla
+!$HOME/.mpd/database
+!$HOME/.password-store
+!$HOME/.ptpython/history
+!$HOME/.python_history
+!$HOME/.ros_history
+!$HOME/.roswell
+!$HOME/.sbcl_history
+!$HOME/.sly-mrepl-history
+!$HOME/.ssh
+# tmsu database; in case I ever start using
+!$HOME/.tmsu
+!$HOME/.zsh_history
+
+# have stopped including these (except for history files, see ghci above)
+# !$HOME/.cabal
+# !$HOME/.cargo
+# !$HOME/.gem
+# !$HOME/.ghc
+# !$HOME/.npm
+# !$HOME/quicklisp
+
+!$HOME/ag-sys
+# no point backing up
+# !$HOME/anime
+!$HOME/database
+!$HOME/Documents
+!$HOME/dotfiles
+!$HOME/Downloads
+!$HOME/move
+!$HOME/music
+# just a directory of symlinks for what should be synced to phone
+!$HOME/music-android
+!$HOME/Pictures
+!$HOME/ps_vita
+!$HOME/school
+# backup unnecessary
+# !$HOME/sdvx
+!$HOME/src
+!$HOME/usb-backup
+# !$HOME/vboxshare
+# mostly empty
+!$HOME/Videos
+# TODO get rid of
+!$HOME/vimwiki
+# TODO mayb eadd after cleaning up
+# !$HOME/VirtualBox VMs
+!$HOME/wallpaper
+!$HOME/work
+
+# * Exclude These Anywhere
+**/_no_backup
+**/.cask
+**/sandbox
+**/node_modules
+# fine to keep as it is not huge like .emacs-backups
+# **/.emacs_backup
+**/nixpkgs
+**/forks/melpa
+**/forks/org-mode
+**/.Trash
+**/.Trash-1000

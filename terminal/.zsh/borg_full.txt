@@ -1,70 +1,100 @@
 # -*- mode: conf-space; -*-
 # NOTE update ~/.config/safe-rm when update this (only have major folders there)
-# TODO
-# /home/noctuid/.local/share/Anki2 ?
-# maybe vboxshare
 
 # default
 P sh
 
 ! **/.ignore
 ! **/_no_backup
+! **/.cask
+! **/sandbox
+! **/node_modules
+# fine to keep as it is not huge like .emacs-backups
+# ! **/.emacs_backup
+! **/nixpkgs
+! **/forks/melpa
+! **/forks/org-mode
+! **/.Trash
+! **/.Trash-1000
+
 # directories are recursively included by default
-+ .cabal
-+ .cargo
-+ .emacs.d
-+ .fonts
-+ .gem
-+ .ghc
-+ .gnupg
-+ .ipython/profile_default/history.sqlite
-+ .lein/repl-history
-+ .local/share/buku
+
+R .authinfo.gpg
+R .bash_history
+# intentionally not backing this up
+# R .emacs-backups
+R .emacs.d
+R .enhancd
+R .fasd
+R .fonts
+R .ghc/ghci_history
+R .gnupg
+R .ipython/profile_default/history.sqlite
+R .lein/repl-history
+# not backing up since data stored in cloud
+# R .local/share/Anki2
+R .local/share/buku
 # memory card and game settings
-+ .local/share/dolphin-emu
-+ .local/share/nix
-+ .local/share/qutebrowser/cmd-history
-+ .local/share/qutebrowser/greasemonkey
-+ .local/share/qutebrowser/history.sqlite
-+ .local/share/qutebrowser/sessions
+R .local/share/dolphin-emu
+R .local/share/iwctl/history
+R .local/share/nix/repl-history
+R .local/share/nyxt/history
+R .local/share/qutebrowser/cmd-history
+R .local/share/qutebrowser/greasemonkey
+R .local/share/qutebrowser/history.sqlite
+R .local/share/qutebrowser/sessions
 # bookmarks and history
-+ .local/share/zathura
-+ .lyrics
-+ .mail
-+ .mozilla
-# TODO move to .emacs.d
-+ .mu
-+ .npm
-+ .password-store
-+ .python_history
-+ .ros_history
-+ .roswell
-+ .sbcl_history
-+ .ssh
-# + .stack/**
-+ .tmsu
+R .local/share/zathura
+# TODO rethink including; older mail is elsewhere; this is currently small though
+R .mail
+# for my firefox profile
+R .mozilla
+R .mpd/database
+R .password-store
+R .ptpython/history
+R .python_history
+R .ros_history
+R .roswell
+R .sbcl_history
+R .sly-mrepl-history
+R .ssh
+# tmsu database; in case I ever start using
+R .tmsu
+R .zsh_history
 
-+ ag-sys
-+ anime
-+ database
-+ Documents/Anki
-+ dotfiles
-+ Downloads
-+ manga
-+ move
-+ music
-+ Pictures
-+ ps_vita
-+ quicklisp
-+ school
-+ src
-+ vboxshare
-+ Videos
+# have stopped including these (except for history files, see ghci above)
+# R .cabal
+# R .cargo
+# R .gem
+# R .ghc
+# R .npm
+# R quicklisp
+
+R ag-sys
+# no point backing up
+# R anime
+R database
+R Documents
+R dotfiles
+R Downloads
+R move
+R music
+R Pictures
+R ps_vita
+R school
+# backup unnecessary
+# R sdvx
+R src
+R usb-backup
+# R vboxshare
+# mostly empty
+R Videos
 # TODO get rid of
-+ vimwiki
-# TODO add after cleaning up
-# + VirtualBox VMs/**
-+ wallpaper
+R vimwiki
+# TODO maybeadd after cleaning up
+# R VirtualBox VMs
+R wallpaper
+R work
 
-# don't backup other folders
-- *
+# sdvx game data
+R /opt/unnamed-sdvx-clone/maps.db

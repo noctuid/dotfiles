@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# TODO borg full should include borg minimal
 # TODO reduce code duplication
-# TODO consider using --verify-data always (at least for minimal backup)
 # TODO fix luks/lvm mounting (stop using sleep)
-# TODO keep eye on restic, kopia, and bupstash
+# TODO keep eye on rustic, kopia, and bupstash
 # TODO below about backing up config
-# for now borg still seems to be the clear choice
 
 
 # Some notes about borg:
@@ -20,6 +17,13 @@
 #	https://github.com/borgbackup/borg/issues/1003
 # - hardlinks and most useful attributes are stored as well
 #	(https://borgbackup.readthedocs.io/en/stable/usage/general.html)
+
+# Some notes about restic:
+# - Restic supports these same features (encryption, deduplication, resume,
+#   restoring hardlinks, symlinks as symlinks, etc.)
+# - Restic now supports compression and more complex include/exclude patterns
+# - Restic has much better support for things like backblaze (borg has no
+#   support except through rclone)
 
 # * Helpers
 # ** General
@@ -166,7 +170,7 @@ luks_create() {
 cryptsetup_open() { # <label>
 	label=$1
 	if sudo cryptsetup status luks_"$label" | grep -q "in use"; then
-		echo "A luks partition named/labeled $partition has already been opened"
+		echo "A luks partition named/labeled $label has already been opened"
 		echo "Skipping opening"
 	else
 		# https://wiki.archlinux.org/title/Dm-crypt/Specialties#Discard/TRIM_support_for_solid_state_drives_(SSD)
@@ -300,6 +304,43 @@ borg_config_backup_file() {
 	echo "$borg_backup_dir/$(convert_slashes "$1")_$(date +%Y.%m.%d)"_config
 }
 
+# ** Restic
+# initialize restic repo if it does not exist
+# backup up key for borg; key is stored in the repo so only potential use case
+# is if just the key in the repo gets corrupted; unlikely so not doing for
+# restic currently
+restic_init() { # <backup dir>
+	local backup_dir
+	backup_dir=$1
+	# this is what is recommended, but it requires password...
+	# if ! restic --repo "$backup_dir" snapshots 2> /dev/null; then
+	# 	restic init --repo "$backup_dir"
+	# fi
+
+	# https://github.com/restic/restic/issues/3688
+	if [[ ! -d $backup_dir/data ]] || [[ ! -d $backup_dir/snapshots ]] \
+		   || [[ ! -f $backup_dir/config ]]; then
+		restic init --repo "$backup_dir"
+	fi
+}
+
+restic_bk() {
+	restic --verbose backup "$@"
+}
+
+restic_prune() {
+	# rules are essentially the same for restic as for borg
+	# the main difference is that borg will go backwards since last kept backup;
+	# for example, with --keep-yearly 1, if the last backup of the year is
+	# already included because of another rule, borg will keep a snapshot from
+	# the previous year but restic considers the rule already satisfied
+	repo=$1
+	# TODO make consistent with borg?
+	restic forget --repo "$repo" --prune --host "$(hostname)" \
+		   --keep-within-duration 7d --keep-weekly 5 --keep-monthly 2 \
+		   --keep-yearly 4
+}
+
 # ** Rsync
 backup_rsync() {
 	# long flags to make easier to read
@@ -330,6 +371,34 @@ maybe_eject() {
 	echo 'Unmount last mounted external drive? (y/n)'
 	# confirm_do devmon --unmount-recent --no-gui || return 1
 	confirm_do udiskie-umount "$1" || return 1
+}
+
+# ** File Copying and Tree to File Backups
+backup_tree_dirs="
+$HOME/anime
+# won't include in full remote backup; can rerip if necessary
+$HOME/music
+"
+
+backup_tree_dirs() {
+	# -J
+	local backup_dir
+	backup_dir="$HOME/database/backup/trees"
+	mkdir -p "$backup_dir"
+
+while read -r dir; do
+	if [[ -n $dir ]] && [[ ! ${dir:0:1} == '#' ]]; then
+		name=${dir//\//-}
+		tree -a --dirsfirst -o "$backup_dir/$name".txt "$dir"
+
+	fi
+done <<< "$backup_tree_dirs"
+}
+
+pre_backup() {
+	backup_tree_dirs
+	mkdir -p ~/ag-sys/backup/sdvx
+	cp /opt/unnamed-sdvx-clone/maps.db ~/ag-sys/backup/sdvx/
 }
 
 # * Minimal Backup
@@ -411,6 +480,12 @@ borg_small() {
 
 # * Full Home Backup
 borg_home() {
+	local check
+	check=false
+	if [[ $1 =~ ^(-c|--check)$ ]]; then
+		check=false
+		shift
+	fi
 	if [[ $# -ne 1 ]]; then
 		echo 'One argument is required: /path/to/backup_drive_dir'
 		return 1
@@ -421,20 +496,28 @@ borg_home() {
 
 	local backup_dir
 	backup_dir="$(remove_trailing_slash "$1")"/home
-	mkdir -p "$backup_dir"
-	mkdir -p "$borg_backup_dir"
-	borg init --encryption=none "$backup_dir" 2> /dev/null \
-		&& cp "$backup_dir"/config "$(borg_config_backup_file "$backup_dir")"
+	mkdir -p "$backup_dir" "$borg_backup_dir"
+	# no encryption since using LUKS on backup drives
+	if borg init --encryption=none "$backup_dir" 2> /dev/null; then
+		# if start using encryption
+		# borg key export "$backup_dir" "$(borg_key_backup_file "$backup_dir")"
+
+		cp "$backup_dir"/config "$(borg_config_backup_file "$backup_dir")"
+	else
+		echo "Repo exists already or initialization failed."
+	fi
 
 	# TODO takes forever
-	# if ! borg check -v "$backup_dir"; then
-	# 	echo 'Repository corrupted or initialization failed.'
-	# 	return 1
-	# fi
+	if $check; then
+		if ! borg check -v "$backup_dir"; then
+			echo 'Repository corrupted or initialization failed.'
+			return 1
+		fi
+	fi
 
 	cd ~/ || return 1
 	if borg_bk --patterns-from=".zsh/borg_full.txt" \
-			   "$backup_dir"::"$backup_format" ./
+			   "$backup_dir"::"$backup_format"
 	then
 		notify-send --icon=trophy-gold 'Home backup completed successfully.'
 	else
@@ -457,6 +540,63 @@ borg_home() {
 # trailing slash is important
 # backup_rsync --exclude={"ISO/*","PSX/*"} "$psp_dir"/ ~/database/gaming/psp/backup/
 
+# * Restic
+# ** full backup
+restic_full() {
+	local check_data
+	check_data=false
+	if [[ $1 =~ ^(-c|--check)$ ]]; then
+		check_data=false
+		shift
+	fi
+	if [[ $# -ne 1 ]]; then
+		echo 'One argument is required: /path/to/backup_drive_dir'
+		return 1
+	elif [[ ! -d $1 ]];then
+		echo "Error. Directory $1 does not exist."
+		return 1
+	fi
+
+	local backup_dir
+	backup_dir="$(remove_trailing_slash "$1")"/home
+	mkdir -p "$backup_dir"
+
+	# restic does not support unencrypted backups, but this is not a must have
+	# https://github.com/restic/restic/issues/1018
+	# would prefer to just use LUKS on the entire backup drive so can unlock
+	# once instead of having to type password every time want to do anything
+	restic_init "$backup_dir"
+
+	# TODO test how long normal check takes
+	if $check_data; then
+		# this will require reading the entire repository, which will be
+		# extremely slow for an external hdd
+		if ! restic --repo "$backup_dir" check --read-data; then
+			echo 'Repository corrupted or initialization failed.'
+			return 1
+		fi
+	else
+		if ! restic --repo "$backup_dir" check; then
+			echo 'Repository corrupted or initialization failed.'
+			return 1
+		fi
+	fi
+
+	cd ~/ || return 1
+	pre_backup
+	# TODO if remote --exclude-if-present=".no_remote_backup"
+	if restic_bk --repo "$backup_dir" \
+				 --exclude-if-present=".backup_tree_only" \
+				 --exclude-if-present=".no_backup" \
+				 --exclude-file=".zsh/restic_full_exclude.txt" \
+				 ~/
+	then
+		notify-send --icon=trophy-gold 'Full backup completed successfully.'
+	else
+		notify-send --icon=face-angry 'Full backup failed.'
+	fi
+}
+
 # * Specific
 # ** Minimal
 kingston() {
@@ -472,17 +612,15 @@ borgbase_small() {
 }
 
 # ** Home
-# backup to main external drive
-bigseagate() {
-	mountdatab || return 1
-	mountbigseagate || return 1
-	borg_home ~/backup_mount/bigseagate
-}
+# bigseagate() {
+# 	mountdatab || return 1
+# 	mountbigseagate || return 1
+# 	borg_ome ~/backup_mount/bigseagate
+# }
 
-eightseagate() {
+fivewd() {
 	mountdatab || return 1
-	mounteightseagate || return 1
-	borg_home ~/backup_mount/eightseagate
+	restic_full /media/fivewd
 }
 
 # * Remote Backup
@@ -492,6 +630,12 @@ eightseagate() {
 # have to use rclone for most cloud services (or a vps)
 # rsync.net has a borg deal but is comparatively expensive
 
+# * External Drives/Smartctl
+# may not use since the drive died
+# https://www.backblaze.com/blog/hard-drive-smart-stats/
+tempfixseagateuas() {
+	echo "0x0bc2:0x3343:u" | sudo tee /sys/module/usb_storage/parameters/quirks
+}
+
 # * Restoration
 # (when) will it overwrite files?
-

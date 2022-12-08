@@ -593,8 +593,8 @@ fl() {
 }
 
 # ** Backup & Mounting
-if [[ -f ~/.zsh/borg_backup.zsh ]]; then
-	source ~/.zsh/borg_backup.zsh
+if [[ -f ~/.zsh/backup.zsh ]]; then
+	source ~/.zsh/backup.zsh
 fi
 
 if [[ -f ~/bin/helpers/mount_commands.sh ]]; then
