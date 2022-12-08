@@ -478,59 +478,6 @@ borg_small() {
 	fi
 }
 
-# * Full Home Backup
-borg_home() {
-	local check
-	check=false
-	if [[ $1 =~ ^(-c|--check)$ ]]; then
-		check=false
-		shift
-	fi
-	if [[ $# -ne 1 ]]; then
-		echo 'One argument is required: /path/to/backup_drive_dir'
-		return 1
-	elif [[ ! -d $1 ]];then
-		echo "Error. Directory $1 does not exist."
-		return 1
-	fi
-
-	local backup_dir
-	backup_dir="$(remove_trailing_slash "$1")"/home
-	mkdir -p "$backup_dir" "$borg_backup_dir"
-	# no encryption since using LUKS on backup drives
-	if borg init --encryption=none "$backup_dir" 2> /dev/null; then
-		# if start using encryption
-		# borg key export "$backup_dir" "$(borg_key_backup_file "$backup_dir")"
-
-		cp "$backup_dir"/config "$(borg_config_backup_file "$backup_dir")"
-	else
-		echo "Repo exists already or initialization failed."
-	fi
-
-	# TODO takes forever
-	if $check; then
-		if ! borg check -v "$backup_dir"; then
-			echo 'Repository corrupted or initialization failed.'
-			return 1
-		fi
-	fi
-
-	cd ~/ || return 1
-	if borg_bk --patterns-from=".zsh/borg_full.txt" \
-			   "$backup_dir"::"$backup_format"
-	then
-		notify-send --icon=trophy-gold 'Home backup completed successfully.'
-	else
-		notify-send --icon=face-angry 'Home backup failed.'
-	fi
-}
-
-# * Online
-# TODO just use restic after compression and patterns merged
-# https://github.com/restic/restic/pull/2441
-# https://github.com/restic/restic/pull/2311
-# rclone -v sync ${REPO} b2:${BUCKET}
-
 # * PSP
 # vita
 # alias cm="qcma --verbose"
@@ -541,7 +488,7 @@ borg_home() {
 # backup_rsync --exclude={"ISO/*","PSX/*"} "$psp_dir"/ ~/database/gaming/psp/backup/
 
 # * Restic
-# ** full backup
+# ** Full Backup
 restic_full() {
 	local check_data
 	check_data=false
