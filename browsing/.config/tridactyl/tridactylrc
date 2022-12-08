@@ -434,7 +434,9 @@ bind --mode=ignore <esc> mode normal
 " * Site Specific
 " ** Amazon
 " from example config
-autocmd DocStart ^http(s?)://www\.amazon\.com urlmodify -t www smile
+" causes infinite loop when not logged in
+" https://github.com/tridactyl/tridactyl/issues/516
+" autocmd DocStart ^http(s?)://www\.amazon\.com urlmodify -t www smile
 
 " ** Duck Duck Go
 " from example config (swapped)
@@ -479,7 +481,7 @@ bindurl youtu((\.be)|(be\.com)) F hint -b -J
 bindurl youtu((\.be)|(be\.com)) tf hint -t -J
 
 " ** Reddit
-autocmd DocStart ^http(s?)://www\.reddit\.com urlmodify -t www old
+autocmd DocStart ^http(s?)://www\.reddit\.com(?!/poll) urlmodify -t www old
 
 " ** Twitter
 " so I don't have to login to view things
