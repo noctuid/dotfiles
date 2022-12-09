@@ -7,6 +7,7 @@ set searchurls.am https://www.amazon.com/s?k=%s
 set searchurls.aw https://wiki.archlinux.org/index.php?search=%s
 set searchurls.az https://search.azlyrics.com/search.php?q=%s
 set searchurls.camel https://camelcamelcamel.com/search?sq=%s
+set searchurls.clj https://clojuredocs.org/search?q=%s
 set searchurls.d https://duckduckgo.com/?kam=google-maps&kp=-2&q=%s
 set searchurls.dv https://www.deviantart.com/?q=%s
 set searchurls.fake https://fakespot.com/analyze?url=%s
