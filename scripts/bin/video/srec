@@ -1,6 +1,13 @@
 #!/bin/bash
+# look at 
 # credit to gotbletu for ffmpeg opts and to
 # http://wiki.oz9aec.net/index.php/High_quality_screen_capture_with_Ffmpeg
+# if ever need to stream, tweak to this:
+# https://trac.ffmpeg.org/wiki/EncodingForStreamingSites
+# use -framerate because x11grab
+# TODO:
+# - system aduio..
+# take into account borders...
 
 print_help() {
 	echo "
@@ -67,7 +74,8 @@ elif $choose_window; then
 	h=$((h+border_width*2))
 	geometry="${w}x$h"
 fi
-	
-ffmpeg -f alsa -ac 2 -i hw:"$audio_card" \
+ffmpeg \
+	-f alsa -ac 2 -i hw:"$audio_card" -acodec libopus \
+	-thread_queue_size 512 \
 	-f x11grab -framerate "$fps" -s "$geometry" -i :0.0"$offset" \
-	-acodec pcm_s16le -vcodec libx264 -preset ultrafast -crf 0 "$output_name"
+	
