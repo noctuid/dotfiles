@@ -8,3 +8,5 @@ packages.sls
 custom.el
 # using a template
 dunstrc
+# using a template to generate
+/aesthetics/.config/tridactyl/themes/custom.css
