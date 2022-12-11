@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # hide transient dropdowns on tag switch
 # may need to change if start using sticky
+# not using for now; usually want to handle manually
 
-# TODO for some reason can't unmap windows on different tags
-# means can't check focus and must unmap when switching back to the tag
-# (but it won't be visible/flicker)
-# && herbstclient compare clients.focus.winid != $(printf 0x%x $wid)
-tdrop foreach 'herbstclient compare clients.$(printf 0x%x $wid).floating = on \
-	  && unmap $wid'
+# TODO for some reason you can't unmap windows on different tags on hlwm
+# instead we have to unmap when switching back to the tag (which causes flicker)
+# tdrop foreach 'herbstclient compare clients.$(printf 0x%x $wid).floating = on \
+# 	  && unmap $wid'
