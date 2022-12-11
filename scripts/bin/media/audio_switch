@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # switch between playing audio through laptop and hdmi
 
-# 0 is for nvidia card on p52; 1 for intel
+# 0 was for nvidia card on p52; 1 for intel
+# now 49 and 50
 # media needs to start playing after add hdmi monitor (but can switch to analog
 # audio without restarting media)
 
@@ -14,12 +15,13 @@
 	# 						 'alsa.card_name.*nvidia' \
 	# 				  | awk '/alsa.card =/ {gsub(/"/,""); print $3}')
 # also card name is actually opposite of what set-card-profile uses
+context_lines=75
 intel_card=$(pactl list cards \
-				 | grep --ignore-case --before-context 10 \
+				 | grep --ignore-case --before-context "$context_lines" \
 						'alsa.card_name.*intel' \
 				 | awk '/Card #/ {gsub(/#/,""); print $2}')
 nvidia_card=$(pactl list cards \
-				  | grep --ignore-case --before-context 10 \
+				  | grep --ignore-case --before-context "$context_lines" \
 						 'alsa.card_name.*nvidia' \
 				  | awk '/Card #/ {gsub(/#/,""); print $2}')
 
@@ -28,6 +30,6 @@ if [[ $1 == hdmi ]]; then
 	# can't be output:analog-stereo
 	pactl set-card-profile "$intel_card" off
 else
-	# nvidia card is turned off by default
 	pactl set-card-profile "$intel_card" output:analog-stereo
+	pactl set-card-profile "$nvidia_card" off
 fi

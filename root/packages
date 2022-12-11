@@ -370,10 +370,15 @@ nspluginwrapper
 procmail
 
 # * Sound/Music
+pipewire
+pipewire-pulse
+# parametric eq using pipewire
+jamesdsp-git
+
 # for amixer and alsamixer
 alsa-utils
 # required for amixer to work without sudo (even when in audio group)
-pulseaudio-alsa
+pipewire-alsa
 pavucontrol
 pamixer
 mpd
