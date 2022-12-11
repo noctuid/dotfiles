@@ -16,7 +16,6 @@
   "Watch herbstluftwm attributes and handle various changes."
   []
   (sh "herbstclient watch monitors.count")
-  (sh "herbstclient watch tags.focus.client_count")
   (sh "herbstclient watch tags.focus.name")
   (with-open [rdr (cmd-reader
                    ["herbstclient"
@@ -26,8 +25,6 @@
       (loop [[_ attr old new] (split (read-line) #"\t")]
         (cond (= attr "monitors.count")
               (sh ["hc_monitor_setup" old new])
-              (= attr "tags.focus.client_count")
-              (sh ["hc_handle_client_count" old new])
               (= attr "tags.focus.name")
               (sh ["hc_handle_tag_changed" old new]))
         (recur (split (read-line) #"\t"))))))

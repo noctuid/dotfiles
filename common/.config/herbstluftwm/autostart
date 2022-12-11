@@ -201,6 +201,8 @@ hc rule instance=firefox title~'.*Private.*' tag=八 switchtag=on
 # * Hooks
 xrestart hc_watch_attr
 
+xrestart hc_watch_client_count
+
 xrestart hc_watch_fullscreen
 
 # * Start

@@ -1,0 +1,52 @@
+#!/usr/bin/env -S bb -cp ${HOME}/bin
+
+(ns wm.hc-watch-client-count
+  "Herbstluftwm script to handle change in client count."
+  (:require
+   [babashka.process :refer [sh]]
+   [bb.util :refer [cmd-reader env]]
+   [clojure.string :refer [split]]))
+
+(defn reload-sxhkd [reload-sxhkd-future empty-desktop?]
+  "Return a future to reload sxhkd with the correct config in 0.1 seconds.
+The delay is meant to prevent problems when the client count rapidly changes."
+  ;; since using mouse buttons as modifiers; see .sxhkdrc
+  (if reload-sxhkd-future
+    (future-cancel reload-sxhkd-future))
+  (future
+    (Thread/sleep 100)
+    (sh "xdotool keyup control shift alt super")
+    (let [empty-config (str (env "HOME") "/.config/sxhkd/empty_sxhkdrc")
+          extra-config (str "/tmp/" (env "DISPLAY") "_extra_sxhkdrc")]
+      (println empty-config extra-config)
+      (if empty-desktop?
+        (sh ["ln" "-sf" empty-config extra-config])
+        (sh ["ln" "-sf" "/dev/null" extra-config])))
+    (sh "pkill -USR1 -x sxhkd")))
+
+(defn handle-client-count-change
+  "Reload sxhkd when changing to or from an empty desktop."
+  [reload-sxhkd-future old-count new-count]
+  (let [empty-desktop? (= new-count "0")]
+    (if (or empty-desktop? (= old-count "0"))
+      (reload-sxhkd reload-sxhkd-future empty-desktop?)
+      reload-sxhkd-future)))
+
+(defn -main
+  "Watch herbstluftwm attributes and handle changes in the client count."
+  []
+  (sh "herbstclient watch tags.focus.client_count")
+  (with-open [rdr (cmd-reader
+                   ["herbstclient"
+                    "--idle"
+                    "attribute_changed"
+                    "tags.focus.client_count"])]
+    (binding [*in* rdr]
+      (loop [reload-sxhkd-future nil
+             [_ _attr old new]   (split (read-line) #"\t")]
+        (println old new)
+        (recur (handle-client-count-change reload-sxhkd-future old new)
+               (split (read-line) #"\t"))))))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main))

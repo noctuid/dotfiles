@@ -73,7 +73,7 @@ alt + super + w
 
 # ** Program hotkeys
 alt + super + f
-	firejail --seccomp firefox
+	vfox
 
 alt + super + space
 	rofi -show run
@@ -125,11 +125,14 @@ alt + super + s
 	# dropdown emacsclient -c -e "(let (display-buffer-alist) (vterm) (delete-other-windows))"
 
 # test key
-# alt + super + S
-# 	tdrop current
+alt + super + S
+	tdrop --debug -a current
 
 alt + super + c
 	dropdown -n longcommands -s longcommands kitty
+
+alt + super + d
+	max_dropdown -n ranger emacsclient -ce "(dirvish)"
 
 alt + super + r
 	max_dropdown -n ranger kitty zsh -c "ranger; zsh -i"
@@ -165,11 +168,11 @@ alt + super + X
 	emacsclient -ce '(noct-xwininfo)'
 
 # other commands
-alt + super + d
+super + space
 	max_dropdown -n shell-menu emacsclient -ce '(noct-shell-menu)'
 
 # ** Dunst
-alt + super + grave
+alt + super + shift + comma
 	dunstctl history-pop
 
 alt + super + comma

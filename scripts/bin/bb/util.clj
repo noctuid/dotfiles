@@ -14,3 +14,8 @@
   "Return the output of a command as a stream using io/reader."
   [cmd]
   (io/reader (:out (process cmd {:shutdown destroy-tree}))))
+
+(defn env
+  "Return the value of an environment variable."
+  [environment-variable]
+  (System/getenv environment-variable))

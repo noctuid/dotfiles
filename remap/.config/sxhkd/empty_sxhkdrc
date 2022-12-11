@@ -1,33 +1,40 @@
 # * Single-key Hotkeys
-# desktop switching
+# ** Desktop Switching
 {a,r,s,t,d,h,n,e,i,o}
 	wm_action dsel {1-9,10}
-
-# launcher
-space
-	rofi -show run
-
-u
-	urxvt
-
-k
-	kitty
 
 l
 	wm_action dsel last
 
-# focus only of course
-f
-	dropdown -s dropdown kitty
+# ** Programs
+# launcher
+space
+	rofi -show run
 
-semicolon ; f
-	firejail --seccomp firefox
+Return
+	kitty
+
+u
+	urxvt
+
+f
+	vfox
 
 q
 	firejail --seccomp qutebrowser --enable-webengine-inspector
+
+c
+	chromium
 
 semicolon ; e
 	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
 
 v
 	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
+
+m
+	spotify --force-device-scale-factor=2
+
+# ** Dropdowns
+k
+	dropdown -n calc emacsclient -ce "(progn (calc) (delete-other-windows))"
