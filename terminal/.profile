@@ -64,6 +64,7 @@ $HOME/bin/dunst
 $HOME/bin/net
 $HOME/bin/not_mine
 $HOME/bin/media
+$HOME/bin/music
 $HOME/bin/video
 $HOME/bin/wm
 # for vimus

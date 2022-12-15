@@ -5,8 +5,9 @@ source ~/bin/helpers/monitor.sh
 
 # * HiDPI
 # honor screen DPI
-# deprecated
-# export QT_AUTO_SCREEN_SCALE_FACTOR=1
+# deprecated (though zoom is still using old QT it looks like)
+# replaced by QT_ENABLE_HIGHDPI_SCALING
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
 
 if monitor_is_hidpi; then
 	export MONITOR_IS_HIDPI=true

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# spotify cannot auto detect
+spotify --force-device-scale-factor=2
