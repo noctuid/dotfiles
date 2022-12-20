@@ -29,7 +29,11 @@ export XDG_DATA_DIRS="$GUIX_PROFILE"/share:/usr/local/share:/usr/share
 export BLOG=$SOURCE/blog/pir-hana
 
 # so pinentry knows the current tty
+# shellcheck disable=SC2155
 export GPG_TTY=$(tty)
+# use gpg for ssh agent
+# export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/gnupg/S.gpg-agent.ssh"
 # need to run if trying to use agent on different terminal/display from where it
 # was started:
 # gpg-connect-agent updatestartuptty /bye >/dev/null

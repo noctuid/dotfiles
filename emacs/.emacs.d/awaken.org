@@ -1655,6 +1655,14 @@ Don't backup remote directories or encrypted files."
 (blink-cursor-mode -1)
 #+end_src
 
+** EPG
+Use Emacs for pinentry where possible (pinentry.el is no longer needed).
+#+begin_src emacs-lisp
+;; TODO why doesn't this work for SSH key passphrase? (SSH_AUTH_SOCK is set
+;; correctly in Emacs)
+(gsetq epg-pinentry-mode 'loopback)
+#+end_src
+
 ** Executable
 #+begin_src emacs-lisp
 ;; insert "/usr/bin/env interpreter" for shebangs
