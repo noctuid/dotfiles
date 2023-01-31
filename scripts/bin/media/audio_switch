@@ -2,7 +2,7 @@
 # switch between playing audio through laptop and hdmi
 
 # 0 was for nvidia card on p52; 1 for intel
-# now 49 and 50
+# now changes
 # media needs to start playing after add hdmi monitor (but can switch to analog
 # audio without restarting media)
 
@@ -27,9 +27,12 @@ nvidia_card=$(pactl list cards \
 
 if [[ $1 == hdmi ]]; then
 	pactl set-card-profile "$nvidia_card" output:hdmi-stereo
-	# can't be output:analog-stereo
-	pactl set-card-profile "$intel_card" off
+	# need to be able to use mic
+	pactl set-card-profile "$intel_card" input:analog-stereo
+	# pactl set-card-profile "$intel_card" off
 else
-	pactl set-card-profile "$intel_card" output:analog-stereo
+	# input required or mic won't be detected
+	pactl set-card-profile "$intel_card" \
+		  output:analog-stereo+input:analog-stereo
 	pactl set-card-profile "$nvidia_card" off
 fi
