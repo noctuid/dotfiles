@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# use fzf or completing-read to select a directory to run ./mpgo in
+# instead of running immediately, queue the media information to play later in a
+# random order with ./dropmpgo
+
+# selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | fzf)
+selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | esel)
+if [[ -n $selected ]]; then
+	if [[ ! -d $selected ]]; then
+		if [[ ! $selected =~ ^"$HOME"/move/Screenshots ]]; then
+			selected="$HOME/move/Screenshots/$selected"
+		fi
+		mkdir -p "$selected" || exit 1
+	fi
+    output_info=$(jq --null-input --compact-output \
+					 --arg path "$selected" \
+					 --arg mpgoargs "$@" \
+					 '{"path": $path, "mpgoargs": $mpgoargs}')
+	echo "$output_info" >> /tmp/mpv-queue
+fi

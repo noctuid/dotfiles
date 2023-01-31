@@ -300,7 +300,7 @@ bind tL jumpnext
 " findcase smart is the default
 bind / fillcmdline find
 bind k findnext
-bind K findnext -1
+bind K findnext --reverse 1
 bind <esc> nohlsearch
 
 " old workaround when things were completely broken
@@ -383,10 +383,13 @@ bind tI hint -i
 bind tw saveas ~/database/move/
 
 " this works
+alias mpqueuesafe js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('kitty-mpqueue ' + url))
+bind tv hint -W mpqueuesafe
+" used to work but and above didn't and now it's the opposite...
+" bind tv composite hint -y ; exclaim_quiet "kitty-mpqueue"
+
 alias mpgosafe js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('dropmpgo ' + url))
-" I don't know why this doesn't work
-" bind tv hint -W mpgosafe
-bind tv composite hint -y ; exclaim_quiet "dropmpgo"
+bind tV hint -W mpgosafe
 
 alias transmissionadd js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('transmission-remote -a ' + url))
 bind ta hint -W transmissionadd
