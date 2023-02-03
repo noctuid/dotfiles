@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# see also ../net/dlg
+
+if [[ -d $1 ]]; then
+	if [[ ! -f "$1"/gallery ]]; then
+		notify-send "Gallery file does not exist in specified directory"
+		exit 1
+	fi
+	url=$(< "$1"/gallery)
+elif [[ -f $1 ]]; then
+	url=$(< "$1")
+else
+	url=$1
+fi
+dir=$2
+
+# shellcheck disable=SC1090
+source ~/bin/media/gallery_util.sh
+
+if [[ -n $dir ]]; then
+	takedir "$dir"
+else
+	take_gallery_dir "$url"
+fi
+
+notify-send "Opening gallery for $url in $(pwd)"
+
+# kitty zsh -is eval tdrop -a auto_hide && mvi "gallery-dl://$1" && tdrop -a auto_show
+# kitty zsh -is eval mvi "gallery-dl://$url"
+
+mvi_command() {
+	if [[ -f $COOKIES_FILE ]] && [[ -n $USER_AGENT ]]; then
+		# TODO this isn't parsed correctly; right way?
+		# mvi --script-opts=gallery-dl-view-download_args="[[[\"-d\",\".\",\"-o\",\"--user-agent=$USER_AGENT\",\"--cookies\",\"$COOKIES_FILE\"]]]" "$@"
+		mvi "$@"
+	else
+		mvi "$@"
+	fi
+}
+
+mvi_command --prefetch-playlist "gallery-dl://$url"
+# automatically generated directory so open afterwards
+if [[ -z $dir ]]; then
+	kitty zsh -c "ranger; zsh -i"
+fi

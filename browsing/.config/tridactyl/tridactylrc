@@ -401,7 +401,9 @@ alias playAllVideos js tri.native.run("mvp --really-quiet --ontop --keepaspect-w
 " ** External Commands (Media, Downloading, etc.)
 " NOTE: nohup is not necessary (will continue to run if close firefox)
 
-bind ty composite get_current_url | shellescape | !s mvp
+" [y]outube; force-window in case cycle video (otherwise no way to get back mpv
+" window since not running in terminal)
+bind ty composite get_current_url | shellescape | !s mvp --force-window
 " bind V composite get_current_url | shellescape | !s mvp --fullscreen
 
 " alias mvigallery js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('mvigallery ' + url))

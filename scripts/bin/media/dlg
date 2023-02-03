@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+url=$1
+dir=$2
+
+# shellcheck disable=SC1090
+source ~/bin/media/gallery_util.sh
+
+if [[ -n $dir ]]; then
+	takedir "$dir"
+else
+	take_gallery_dir "$url"
+fi
+
+notify-send "Downloading gallery for $url to $(pwd)"
+# prevent downloading duplicates (based on file name)
+# https://github.com/aria2/aria2/issues/865
+# not really necessary now that using ../media/mvigallery
+# - only download at most 2000 files
+# - -j 1 - limit concurrent downloads to not make some sites angry
+if gallery_dl_command --download-archive "./download-archive" --get-urls "$url" \
+		| head -n 2000 | aria2c -j 1 --auto-file-renaming=false -c -x 4 -i -
+then
+	notify-send "Gallery download finished."
+else
+	notify-send "Gallery download failed."
+fi

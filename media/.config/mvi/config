@@ -4,6 +4,10 @@ loop-file=inf
 # allow wraparound to first image
 loop-playlist=inf
 
+# always show window (even if cycle video to none); don't want window to
+# disappear and be unrecoverable
+force-window=yes
+
 profile=opengl-hq
 
 screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
