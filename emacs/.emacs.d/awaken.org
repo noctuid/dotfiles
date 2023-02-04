@@ -43,26 +43,40 @@ I find =C-o= (~evil-jump-backward~) to be a command that deserves a better posit
 
 Although I now use Colemak-DH (where =m= is in the QWERTY =h= position), I still use =h= as "left." This is partially because all my configuration files already used =h= before I switchedB. ecause the idea of Colemak-DH is to move =h= to a better location, I don't think any changes are necessary.
 
+*** Hybrid Modal/Chording
+I don't exclusively use modal keybindings.  I'm using more and more modifier keybindings because chords are better for one-off actions such as [[#window-managementnavigation][Window Management/Navigation]], basic buffer navigation actions like =M-f= and =M-b=, commenting single lines, pasting at the point, etc.  For example, I used to have all window management keybindings under a prefix key in normal state, but now I use only control keybindings.
+
 *** Standard Prefixes
-These are global prefixes that are sometimes bound in =general-override-mode-map= (whose evil auxiliary keymaps are evil intercept keymaps). =m= and =,= do not need to be bound globally since they are specific to the current major mode and group respectively. Keys like =r= that may not be useful in every major mode are not bound in an evil intercept map either. =SPC= and =t= are the main keys that are bound in evil intercept maps, so that their functionality will always be available.
+These are global prefixes that are sometimes bound in =general-override-mode-map= (whose evil auxiliary keymaps are evil intercept keymaps).  =m= and =,= do not need to be bound globally since they are specific to the current major mode and group respectively.  Keys like =r= that may not be useful in every major mode are not bound in an evil intercept map either.  =SPC= and =t= are the main keys that are bound in evil intercept maps, so that their functionality will always be available.
 
-Having a lot of prefixes helps to keep the number of keypresses required for a command at around two for the most common commands. I've remapped my least used vim letter keys as prefixes (which conveniently happen to also be home row keys for Colemak). =s= and =r= are probably the least generic/useful default vim keys. The default =s= and =S= are equivalent to =cl= and =cc=. They aren't useful enough to me to deserve dedicated keys. The same is true for =r= (~evil-replace~), and I don't use =R= (~evil-replace-state~) at all. I use =x= occasionally (e.g. =xp= is convenient for swapping characters), so I keep it. I never use =X=, but it's not in a good enough position for me to want to repurpose it. On the other hand, =SPC= is generally the best position on the keyboard and doesn't have a unique keybinding either (same as =l=), so its one of my most used prefix keys.
+Having a lot of prefixes helps to keep the number of keypresses required for a command at around two for the most common commands.  I've remapped my least used vim letter keys as prefixes (which conveniently happen to also be home row keys for Colemak).  =s= and =r= are probably the least generic/useful default vim keys.  The default =s= and =S= are equivalent to =cl= and =cc=.  They aren't useful enough to me to deserve dedicated keys.  The same is true for =r= (~evil-replace~), and I don't use =R= (~evil-replace-state~) at all.  I use =x= occasionally (e.g. =xp= is convenient for swapping characters), so I keep it.  I never use =X=, but it's not in a good enough position for me to want to repurpose it.  On the other hand, =SPC= is generally the best position on the keyboard and doesn't have a unique keybinding either (same as =l=), so its one of my most used prefix keys.
 
-The more "controversial" keys I use as prefixes are =m=, =h=, =t=, and =T=. I used ='= a lot more than =m= in vim and didn't use =m= at all until recently in Emacs (you can persist markers, but you have to use =desktop-mode= or extract the code to do it yourself). I don't use =M= at all (~evil-window-middle~, which moves the point to the middle of the window), so I move ~evil-set-marker~ to =M= and use =m= as a prefix. As for =t=, =T=, =f=, and =F=, I prefer to use a two-char search command that will search across lines and allow selection with avy when there is more than one match (like =vim-sneak= or =vim-easymotion=). I bind these commands to =f= and =F= and use =t= as a prefix key as I can just change the characters I search for if I want to go to the character before some other character.
+The more "controversial" keys I rebind are =m=, =h=, =t=, and =T=.  I used ='= a lot more than =m= in vim and didn't use =m= at all until recently in Emacs (you can persist markers, but you have to use =desktop-mode= or extract the code to do it yourself).  I don't use =M= at all (~evil-window-middle~, which moves the point to the middle of the window), so I move ~evil-set-marker~ to =M= and use =m= as a prefix.  As for =t=, =T=, =f=, and =F=, I prefer to use a two-char search command that will search across lines and allow selection with avy when there is more than one match (like =vim-sneak= or =vim-easymotion= or just ~evil-avy-goto-char-2~).  I bind these commands to =f= and =F= and use =t= as a prefix key as I can just change the characters I search for if I want to go to the character before some other character.
 
 - =SPC=: for buffer/file/group navigation/management
 - =,=: for "quickmarked" files/applications for the current group
 - =r=: for "[r]emote" movement and for "[r]emoved" (or "[r]emapped") keys
   - used for remote motions (motions using avy; also used for remote text objects in =evil-(inner|outer)-text-objects-map=)
   - used for preserving some clobbered keys (e.g. the default =;=, =,=, and =/= are now prefixed with =r=)
-- =s=: for "[s]tarting" applications (mu4e, elfeed, mingus, woman, proced, calc, etc.) and for "[s]traight" commands (on =ss= currently)
+- formerly =s=, now =C-t=: for "[s]tarting" applications (mu4e, elfeed, mingus, woman, proced, calc, etc.) and for "[s]traight" commands (on =ss= currently)
+  - the commands I have bound on this prefix should be available in any context, so it doesn't make sense to use =s= (which I am binding to something else in some modes like =magit-status-mode=); now =s= can always be used for something that makes sense in the current major mode
+  - similarly, it doesn't really make sense to have to switch to normal state to be able to use some of these commands
+  - =C-t= matches =t= as another universal prefix I guess
 - =t=: previously my "leader" key in vim
-  - window navigation/management
-  - other general-purpose commonly used commands (e.g. ~link-hint-open-link~)
-- =T=: used for one-off "gi[t]" commands (previously on =tg=; haven't completely switched over yet)
-- =h=: bound to ~help-command~
+  - formerly window navigation/management - now dedicated control keybindings are used for window management
+  - other general-purpose/commonly used commands (e.g. ~link-hint-open-link~)
+- =T=: vterm (possibly also better as a chord)
+- =h=: formerly bound to ~help-command~, now ~evil-avy-goto-word-1~ (just use =C-h= for help)
 - =m=: used for "[m]ajor [m]ode" specific keybindings (e.g. org commands)
-- =tt=: used to "[t]oggle" options and minor modes (previously I was using =co=, but I didn't want =c= to be a prefix everywhere)
+- =to=: used to "[to]ggle" options and minor modes (previously I was using =co=, but I didn't want =c= to be a prefix everywhere)
+
+Some of these make sense as normal state prefixes (e.g. =r= for more motions).  Some of them don't really (e.g. =t= is just a whole bunch of miscellaneous commands, many which are state-agnostic), but I leave them as normal state prefixes because I'm used to the keybindings and because I don't really have better keys to put them on.  I'm trying to reserve chords for the most frequently used one-off actions (especially those useful when editing in order to minimize extra transitions between normal and insert state).  I don't really care as much if some actions unrelated to editing (like file navigation) are only available in normal state since it's the "default" state anyway.
+
+*** Why I Bind All My Own Keys
+It's partially because I used a non-QWERTY keyboard layout, partially
+because I have a lot of non-standard customizations (see previous heading) and like having full control, and partially because I've already done it.  When I learn a new mode (e.g. magit), I look through all the commands anyway.  Binding them doesn't take a significant amount of extra time.  It also serves as reference for what commands I found most useful.
+
+I think using =evil-collection= is a great idea if you're new to Emacs or for anyone whose setup isn't as weird as mine.  I'm trying to use it more myself (at least for reference or as a base with my changes on top).
 
 ** Configuration Principles
 My configuration may not meet these requirements at this point in time, but these are the goals.
@@ -717,9 +731,11 @@ Principles:
   :states 'motion
   :prefix "rr")
 
+;; TODO rename to something else
 (general-create-definer general-s
-  :keymaps 'normal
-  :prefix "s")
+  :keymaps '(insert normal)
+  :keymaps 'override
+  :prefix "C-t")
 
 (general-create-definer general-m
   :states 'normal
@@ -1172,10 +1188,7 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
   ;; l for "[l]ast"
   (general-def 'motion
     "l" #'evil-jump-backward
-    "L" #'evil-jump-forward)
-
-  (general-def '(normal insert)
-    "C-l" #'evil-switch-to-windows-last-buffer))
+    "L" #'evil-jump-forward))
 #+end_src
 
 **** Escape Everywhere
@@ -1404,6 +1417,10 @@ using this command."
 #+begin_src emacs-lisp
 ;; worse keybinding but sometimes I use on OSX
 (general-def "C-v" #'yank)
+
+(general-def
+  "C-y" #'yank
+  "M-y" #'yank-pop)
 
 (general-def '(normal visual)
   ":" #'eval-expression)
@@ -1650,7 +1667,7 @@ Automatically uncompress (for editing) and recompress (when saving) compressed f
 
 (general-def noct-toggle-map "S" #'noct-toggle-save-on-insert-exit)
 
-(general-t "s" #'save-buffer)
+(general-def "C-s" #'save-buffer)
 #+end_src
 
 ** Backup
@@ -1796,8 +1813,6 @@ Obvious ones:
 
 #+begin_src emacs-lisp
 (general-with-package 'help
-  (general-def 'normal "h" #'help-command)
-
   (general-def help-map
     ;; swap c and C
     "c" #'describe-coding-system
@@ -3412,6 +3427,7 @@ The only downside is the lack of prescient integration. Vertico supports recency
           #'consult-org-heading)
     ;; works inside or outside project already
     "/" #'consult-ripgrep)
+  ("C-S-y" #'consult-yank-from-kill-ring)
   (general-t "p" #'consult-yank-from-kill-ring)
   (general-s :infix "i" "l" #'consult-theme)
   (general-m "C" #'consult-compile-error)
@@ -3911,6 +3927,10 @@ Globbing is used to find a matching file."
 #+end_src
 
 * Window Management/Navigation
+:PROPERTIES:
+:CUSTOM_ID: window-managementnavigation
+:END:
+
 ** Ace Window
 I generally only use two windows in a frame, but once I start pulling up help buffers, magit status, etc., this can be useful. It also replaces ~other-window~, so it's nice for two windows as well.
 #+begin_src emacs-lisp
@@ -3932,22 +3952,18 @@ I generally only use two windows in a frame, but once I start pulling up help bu
 (defun noct-vsplit ()
   "Vertically split window and switch to new window."
   (interactive)
-  (split-window-vertically)
-  (other-window 1))
+  (split-window-below)
+  (other-window 1)
+  (balance-windows))
 
 (defun noct-hsplit ()
   "Horizontally split window and switch to new window."
   (interactive)
-  (split-window-horizontally)
-  (other-window 1))
+  (split-window-right)
+  (other-window 1)
+  (balance-windows))
 
-(general-t
-  "q" #'delete-window
-  "d" #'delete-window
-  "k" #'noct-kill-this-buffer
-  "D" #'noct-kill-buffer-delete-window
-  "-" #'noct-vsplit
-  "'" #'noct-hsplit)
+(general-t "-" #'noct-vsplit)
 
 (defun noct-zoom-win ()
   "Toggle making the current window the only one."
@@ -3956,12 +3972,19 @@ I generally only use two windows in a frame, but once I start pulling up help bu
       (winner-undo)
     (delete-other-windows)))
 
-(general-t
-  "h" #'windmove-left
-  "n" #'windmove-down
-  "e" #'windmove-up
-  "i" #'windmove-right
-  "z" #'noct-zoom-win)
+(general-def '(insert normal)
+  "C-'" #'noct-hsplit
+  "C-n" #'evil-window-prev
+  "C-e" #'evil-window-next
+  ;; #'balance-windows
+  ;; quit-window may not close (may show other buffer); delete always closes
+  ;; #'quit-window
+  "C-w" #'delete-window
+  "M-w" #'noct-kill-this-buffer
+  "C-M-w" #'noct-kill-buffer-delete-window
+  ;; [o]nly
+  "M-o" #'noct-zoom-win
+  "C-," #'evil-switch-to-windows-last-buffer)
 #+end_src
 
 ** Window Too Small For Splitting Fix
@@ -3980,9 +4003,25 @@ See [[https://github.com/rnkn/olivetti/issues/12][here]].
   :init
   (noct-after-window (winner-mode))
   :config
-  (general-t
-    "l" #'winner-undo
-    "L" #'winner-redo))
+  (general-def '(insert normal)
+    "C-l" #'winner-undo
+    "C-S-l" #'winner-redo))
+#+end_src
+
+** Auto Balance Windows
+I don't need zoom as this is good enough.
+
+#+begin_src emacs-lisp
+;; this messes up `which-key', for example
+;; (general-add-hook 'window-configuration-change-hook
+;;                   #'balance-windows)
+
+(general-advice-add '(quit-window delete-window org-edit-special)
+                    :after
+                    (noct-defun noct-balance-advice (&rest _)
+                      "Balance windows.
+Ignore arguments."
+                      (balance-windows)))
 #+end_src
 
 ** Zoom
@@ -4016,8 +4055,6 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
          ivy-virtual-abbreviate 'full))
 
 (use-package swiper
-  :general
-  (general-def "C-s" #'swiper-isearch)
   :config
   (gsetq swiper-goto-start-of-match t))
 
@@ -4117,6 +4154,23 @@ TODO: This should be in counsel (variable to jump to match end and evil integrat
                                                     #'noct-match-beginning
                                                     #'noct-add-ivy-text-to-history
                                                     #'noct-evil-search-action)))
+#+end_src
+
+** Ctrlf
+#+begin_src emacs-lisp
+(use-package ctrlf
+  :general
+  ('(normal insert)
+   "C-f" #'ctrlf-forward-default
+   "C-S-f" #'ctrlf-backward-default)
+  :config
+  ;; must happen after loading ctrlf
+  (general-def ctrlf-minibuffer-mode-map
+    "<down>" #'ctrlf-forward-default
+    "<up>" #'ctrlf-forward-default
+    "C-f" #'ctrlf-forward-default
+    "C-S-f" #'ctrlf-backward-default
+    "<escape>" #'ctrlf-cancel))
 #+end_src
 
 ** Better Jumper
@@ -4842,6 +4896,7 @@ Evilnc also has comment text objects, but they were fairly broken last time I tr
 (use-package evil-nerd-commenter
   :general
   (general-t 'normal 'override "c" #'evilnc-comment-or-uncomment-lines)
+  ("C-/" #'evilnc-comment-or-uncomment-lines)
   ('normal "gc" #'evilnc-comment-operator)
   ('visual "/" #'evilnc-comment-operator))
 
@@ -5176,7 +5231,10 @@ Only return non-nil if not in a string or comment."
 Very useful to learn snippets or for less-often used snippets.  A better ~yas-insert-snippet~.
 #+begin_src emacs-lisp
 (use-package consult-yasnippet
-  :general ('insert "C-t" #'consult-yasnippet))
+  :general ('insert "C-<tab>" #'consult-yasnippet))
+#+end_src
+
+*** Auto-activating Snippets
 #+end_src
 
 ** Undo
@@ -5458,8 +5516,16 @@ TODO Use things.el instead.
 (use-package evil-easymotion
   :general
   (general-def 'motion
-    "f" #'noct-sneak-forward-f
-    "F" #'noct-sneak-backward-F)
+    ;; not sure this any different from `avy-goto-word-or-subword-1' with
+    ;; `global-subword-mode' enabled
+    "h" #'evil-avy-goto-word-1
+    ;;"f" #'noct-sneak-forward-f
+    "f" #'evil-avy-goto-char-2
+    ;; "F" #'noct-sneak-backward-F
+    ;; not sure what to bind this to
+    "F" #'evil-avy-goto-line)
+
+  (general-def 'normal "?" #'evil-avy-goto-char-timer)
 
   (general-r
     "t" #'noct-sneak-forward-exclusive-t
