@@ -1,4 +1,9 @@
 #!/bin/bash
+# TODO
+# - keep quality when not using copy? (has been nice so far but I notice size
+#   goes way down when not using copy)
+
+# If I recall correctly, the order in which you give the -ss and -t flags change the behaviour subtly. If you declare them before -i, it seeks in the input file and starts decoding from there (which is not always accurate). If you declare it after, it decodes the file as if it was playing and then discards the content outside the boundaries.
 
 function print_help() {
 	echo "
@@ -33,7 +38,7 @@ output_name="cut_$(date +%Y.%m.%d_%H:%M:%S).$extension"
 full_path=$(readlink -f "$filepath")
 
 mkdir -p ~/move/gif
-cd ~/move/gif
+cd ~/move/gif || exit 1
 
 start_time=$(< /tmp/ffcut/start)
 end_time=$(< /tmp/ffcut/end)
@@ -58,7 +63,7 @@ if $copy; then
 	ffmpeg -i "$full_path" -ss "$start_time" -to "$end_time" -c copy "$output_name"
 else
 	# can take a while
-	ffmpeg -i "$full_path" -ss "$start_time" -to "$end_time" "$output_name"
+	ffmpeg -i "$full_path" -strict -2 -ss "$start_time" -to "$end_time" "$output_name"
 fi
 
 # to go ahead and make a gif with default settings
