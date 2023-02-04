@@ -7946,6 +7946,10 @@ TODO bind
   :magic
   "#!/usr/bin/env bb"
   "#!/usr/bin/env -S bb"
+  :gfhook
+  #'lsp
+  ('clojurescript-mode-hook #'lsp)
+  ('clojurec-mode-hook #'lsp)
   :config
   (gsetq clojure-align-forms-automatically t))
 #+end_src
@@ -7972,7 +7976,8 @@ TODO eventually
 #+begin_src emacs-lisp
 (defun noct-cider-setup ()
   "Setup cider mode, configuring lsp and cider to play nicely."
-  ;; because `cider-mode' does not load cider and my :config will not run otherwise
+  ;; because `cider-mode' does not load cider and my :config will not run
+  ;; otherwise
   (require 'cider)
 
   ;; use cider's eldoc
@@ -8009,16 +8014,12 @@ TODO eventually
 (use-package cider
   :ghook
   'clojure-mode-hook
-  'clojurescript-mode-hook
   :gfhook #'noct-cider-setup
   :config
   ;; cider-preferred-build-tool
   (gsetq cider-default-cljs-repl 'shadow
-         ;; TODO may need to add custom type?
-         ;; https://docs.cider.mx/cider/1.1/cljs/configuration.html
-         cider-shadow-cljs-command "clojure -M:shadow-cljs"
          ;; save file when evaluating buffer without prompting
-         cider-save-file-on-load t
+         ;; cider-save-file-on-load t
          cider-eldoc-display-context-dependent-info t)
 
   ;; NOTE: clojure-mode-map keybindings should be useable in clojurescript-mode
