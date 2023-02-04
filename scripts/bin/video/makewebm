@@ -3,18 +3,25 @@
 # https://wiki.installgentoo.com/index.php/WebM#Converting_with_ffmpeg
 # https://superuser.com/questions/556463/converting-video-to-webm-with-ffmpeg-avconv
 
+# TODO if ever use this again
+# ffmpeg -i %1 -r 30 -c:v libvpx-vp9 -pass 1 -b:v 1500K -threads 4 -speed 4 -tile-columns 6 -frame-parallel 1 -an -f webm -y NUL
+# ffmpeg -i %1 -r 30 -c:v libvpx-vp9 -pass 2 -b:v 1500K -threads 4 -speed 1 -tile-columns 6 -frame-parallel 1 -auto-alt-ref 1 -lag-in-frames 25 -c:a libopus -b:a 64k -f webm -y "%~n1.webm"
+# shift
+# >add -f 1, -f 2 as a flag for your two passes
+# ffmpeg -ss <start_time> -i <source> -an -t <length> -b:v <24/length>M -vf "scale=-1:480" <destination_path>
+
 function print_help() {
 	echo "
 $ makewebm /path/to/video
 
 Creates a webm from  a video.
 
--w <width>     specify a width for the webm 
+-w <width>     specify a width for the webm
                (default: not scaled to any specific width)
 -o <filename>  specify an output name (default: output.webm)
 -d <dir>       specify the dir to create the frames and output webm in
                (default: ~/move/gif)
--q <crf>       specify the crf value from 4-63; lower is higher quality 
+-q <crf>       specify the crf value from 4-63; lower is higher quality
                (default: 10)
 -a             include audio in webm (default: false)
 -h             print help and exit
