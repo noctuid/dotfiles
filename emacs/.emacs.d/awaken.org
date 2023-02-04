@@ -6149,7 +6149,8 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
            (side . top))
          transient-mode-line-format nil)
   (general-def transient-map
-    "<escape>" #'transient-quit-one
+    ;; don't want to accidentally close
+    ;; "<escape>" #'transient-quit-one
     "q" #'transient-quit-one))
 #+end_src
 
@@ -9830,8 +9831,8 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
 
 (defvar noct-global-keybinding nil
   "Whether the current command was spawned by a global system keybinding.
-This is used to prevent deleting frames when a command is not called from a
-global keybinding.")
+This is used to prevent hiding or deleting frames when a command is not called
+from a global keybinding.")
 
 (defmacro noct-with-global-keybinding (&rest body)
   "Run BODY with `noct-global-keybinding' non-nil."
@@ -9886,6 +9887,8 @@ in an existing window, and open any new windows in the same buffer."
          (f-directories "/media")))
     (noct-global-completing-read-dir prompt dirs)))
 
+;; must declare before loading vterm
+(defvar vterm-buffer-name)
 (defun noct-run-with-vterm (command)
   "Run COMMAND in a vterm buffer.
 Open the vterm buffer reusing a window."
@@ -9943,6 +9946,14 @@ meant to be used from the command line (specifically with my esel script)."
 ;TODO audio should close automatically update sxhkrd
 ; fix delete frame
 
+**** Frame Hiding
+#+begin_src emacs-lisp
+(defun noct-maybe-hide-frame ()
+  "Unmap this frame with xdotool if `noct-global-keybinding'."
+  (when noct-global-keybinding
+    (start-process "noct-unmap" nil "xdotool" "windowunmap" (fg--wid))))
+#+end_src
+
 **** Audio
 #+begin_src emacs-lisp
 (defun noct-hdmi-audio ()
@@ -9950,16 +9961,14 @@ meant to be used from the command line (specifically with my esel script)."
 Delete the frame if `noct-global-keybinding'."
   (interactive)
   (start-process "hdmi-audio" nil "audio_switch" "hdmi")
-  (when noct-global-keybinding
-    (delete-frame)))
+  (noct-maybe-hide-frame))
 
 (defun noct-analog-audio ()
   "Switch to analog audio.
 Delete the frame if `noct-global-keybinding'."
   (interactive)
   (start-process "hdmi-audio" nil "audio_switch" "analog")
-  (when noct-global-keybinding
-    (delete-frame)))
+  (noct-maybe-hide-frame))
 #+end_src
 
 **** Backup
@@ -10145,26 +10154,11 @@ ARGS can contain args to add to the systemctl list-units command."
     ["Systemctl"
      ("s" "Service status" noct-systemctl-service-status)
      ("j" "Journalctl logs" noct-journalctl-logs)
-     ("t" "Start service"
-      (lambda ()
-        (noct-with-global-keybinding
-          (noct-systemctl-start-service))))
-     ("p" "Stop service"
-      (lambda ()
-        (noct-with-global-keybinding
-          (noct-systemctl-stop-service))))
-     ("r" "Restart service"
-      (lambda ()
-        (noct-global-keybinding-lambda
-          (noct-systemctl-restart-service))))
-     ("e" "Enable/start service"
-      (lambda ()
-        (noct-with-global-keybinding
-          (noct-systemctl-enable-service)))) 
-     ("d" "Disable/stop service"
-      (lambda ()
-        (noct-with-global-keybinding
-          (noct-systemctl-disable-service))))])
+     ("t" "Start service" noct-systemctl-start-service)
+     ("p" "Stop service" noct-systemctl-stop-service)
+     ("r" "Restart service" noct-systemctl-restart-service)
+     ("e" "Enable/start service" noct-systemctl-enable-service)
+     ("d" "Disable/stop service" noct-systemctl-disable-service)])
 
   (defun noct-systemctl-menu ()
     "Reusing current window, call `noct--systemctl-menu'.
@@ -10259,16 +10253,11 @@ This is suitable for a global keybinding that creates a new Emacs frame."
     "Shell command menu."
     [:description "Shell commands"]
     ["Audio"
-     ("h" "Switch to hdmi audio"
-      (lambda ()
-        (interactive)
-        (noct-with-global-keybinding
-          (noct-hdmi-audio))))
-     ("a" "Switch to analog audio"
-      (lambda ()
-        (interactive)
-        (noct-with-global-keybinding
-          (noct-analog-audio))))]
+     ("h" "Switch to hdmi audio" noct-hdmi-audio
+      ;; don't exit transient
+      :transient t)
+     ("a" "Switch to analog audio" noct-analog-audio
+      :transient t)]
     ["Backup"
      ("b" "Backup" noct-backup-menu)]
     ["Filesystem"
@@ -10293,6 +10282,7 @@ This is suitable for a global keybinding that creates a new Emacs frame."
 (defun noct-shell-menu ()
   "Reusing current window, call `noct--shell-menu'.
 This is suitable for a global keybinding that creates a new Emacs frame."
+  (interactive)
   (require 'transient)
   (noct-with-reuse-window (noct--shell-menu)))
 #+end_src
