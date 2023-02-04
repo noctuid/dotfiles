@@ -5707,7 +5707,7 @@ This package is unfortunately unmaintained.
    t)
   ;; https://github.com/timcharper/evil-surround/pull/48
   :config
-  (general-def 'visual evil-surround-mode-map
+  (general-def 'visual
     "s" #'evil-surround-region))
 #+end_src
 
@@ -6024,8 +6024,9 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
   (general-def 'normal magit-mode-map
     "<tab>" #'magit-section-toggle
     "RET" #'magit-visit-thing
-    "C-n" #'magit-section-forward
-    "C-e" #'magit-section-backward
+    ;; don't override window management keybindings; can just to H then N,E
+    ;; "C-n" #'magit-section-forward
+    ;; "C-e" #'magit-section-backward
     "N" #'magit-section-forward-sibling
     "E" #'magit-section-backward-sibling
     "H" #'magit-section-up
@@ -6071,7 +6072,6 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
     "u" #'magit-unstage-file
     "U" #'magit-unstage-all
     ;; swap revert and revert-no-commit
-    ;; TODO visual state and yanking
     "v" #'magit-revert
     "V" #'magit-revert-no-commit
     "w" #'magit-am
@@ -6086,6 +6086,14 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
     ":" #'magit-git-command
     "!" #'magit-run)
 
+  ;; use v for revert in log mode but for line staging in status mode
+  (general-def 'normal magit-status-mode-map
+    "v" #'evil-visual-line)
+
+  (general-def 'visual magit-mode-map
+    "s" #'magit-stage-file
+    "u" #'magit-unstage-file)
+
   (general-def 'normal magit-log-mode-map
     "q" #'magit-log-bury-buffer
     "RET" #'magit-show-commit
@@ -6099,8 +6107,12 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
   (general-def magit-commit-section-map
     "a" #'magit-cherry-pick)
 
-  (general-def 'normal magit-blame-mode-map
-    "q" #'magit-blame-quit))
+  (general-def 'normal magit-blame-mode
+    :definer 'minor-mode
+    "q" #'magit-blame-quit
+    "E" #'magit-blame-previous-chunk
+    "N" #'magit-blame-next-chunk
+    "RET" #'magit-show-commit))
 #+end_src
 
 *** With Editor
