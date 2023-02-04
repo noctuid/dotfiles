@@ -7088,7 +7088,8 @@ Used for =*Warnings*= buffer, for example.
   :ghook ('pre-command-hook nil nil nil t)
   :general
   (noct-toggle-map "W" #'which-key-mode)
-  (general-s "W" #'which-key-show-top-level)
+  ;; replace `where-is'; don't need because can show in M-x
+  (help-map "w" #'which-key-show-top-level)
   :init
   ;; should be set before loading
   (gsetq which-key-idle-delay 0.3)
