@@ -1,6 +1,11 @@
+# fcrontab ~/dotfiles/common/fcrontab
+# http://fcron.free.fr/doc/en/fcrontab.5.html#AEN1941
 # fcron sends mail with sendmail (I'm using msmtp-mta)
 # mailto can be set to the email address directly
 # I have "me" specified in my msmtp alias file
+
+# @ - elapsed system time (e.g. for every day of uptime) 
+# % - based on real time (e.g. e.g. between beginning and end of day)
 
 DISPLAY=:0
 
@@ -9,14 +14,12 @@ DISPLAY=:0
 # run every 3 minutes of uptime (fcron active time)
 @ 3 ~/bin/xrun ~/bin/system_check
 
-# run every day of uptime
-@mail 1d ~/bin/xrun ~/bin/remind_me
+# run as soon as compute on between 8-12 daily (backup reminders)
+%mail,daily * 20-23 ~/bin/xrun ~/bin/remind_me
 
-# empty trash every 2 weeks of uptime
-@ 2w /usr/bin/env trash-empty
-
-# run once a month as soon as computer is on between 8 and 12
-%monthly,mail * 20-23 * ~/bin/net/ep_backup.sh
+# empty trash older than 30 days every day
+# should detect that being run with cron (-f can force)
+%mail,daily * * /usr/bin/env trash-empty 30
 
 # only in 3.3.0
 # @runatresume ~/bin/xrun xinput --set-button-map "TPPS/2 IBM TrackPoint" 50 1 51
