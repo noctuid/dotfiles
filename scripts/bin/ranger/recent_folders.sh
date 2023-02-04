@@ -2,6 +2,9 @@
 # switch to most recently modified directory (i.e. file saved in)
 # don't think there's any way to evaluate a shell command in combination with a ranger command (i.e. :cd $(something))
 # chaining looks like it might allow for executing ranger commands on output of others ( [comamnd 1[2]]), but it doesn't
+# TODO:
+# - for faster lookup, use ranger history with time lookup as fallback
+# - prevent need for tmux send-keys https://github.com/hut/ranger/issues/224
 
 if [ "$1" == "ag-sys" ]; then
 	cd ~/ag-sys
