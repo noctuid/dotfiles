@@ -4,11 +4,13 @@ if [[ $1 =~ ^(middle|left)$ ]]; then
 	geo=$(xwininfo -root | awk '/geometry/ {print $2}')
 	width=$(echo "$geo" | awk -F 'x' '{print $1}')
 	height=$(echo "$geo" | awk -F 'x|+' '{print $2}')
+	mid_height=$((width / 2))
 	if [[ $1 == middle ]]; then
-		xdotool mousemove $((width / 2)) $((height / 2)) click 1
+		mid_width=$((width / 2))
+		xdotool mousemove "$mid_width" "$mid_height" click --clearmodifiers 1
 	else
-		xdotool mousemove 50 $((height / 2)) click 1
+		xdotool mousemove 50 "$mid_height" click --clearmodifiers  1
 	fi
 else
-	xdotool mousemove "$1" "$2" click 1
+	xdotool mousemove "$1" "$2" click --clearmodifiers 1
 fi
