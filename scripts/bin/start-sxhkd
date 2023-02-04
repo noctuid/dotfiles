@@ -3,6 +3,8 @@
 if [[ ! -v $SXHKD_EXTRA_CONFIGS ]]; then
 	extra_config=/tmp/"$DISPLAY"_extra_sxhkdrc
 	ln -sf ~/.config/sxhkd/empty_sxhkdrc "$extra_config"
+	# don't use empty desktop keybindings for now (see comment in autostart file)
+	ln -sf /dev/null "$extra_config"
 	SXHKD_EXTRA_CONFIGS=(~/.config/sxhkd/wm_sxhkdrc "$extra_config")
 fi
 
