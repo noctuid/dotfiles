@@ -7196,10 +7196,10 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 (use-package dockerfile-mode)
 
 ;; /docker:user@container:/path/to/file
-(use-package docker-tramp
-  :config
-  ;; (gsetq docker-tramp-use-names t)
-  )
+;; /podman:user@container:/path/to/file
+;; now builtin
+(use-package tramp-container
+  :straight (:type built-in))
 #+end_src
 
 *** Dtrt Indent
