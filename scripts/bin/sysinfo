@@ -51,9 +51,9 @@ kernel=$(uname -srm)
 
 shell=$(basename "$SHELL")
 
-wm=$(xprop -notype -id "$(xprop -root -notype | \
-		awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" \
-		-f _NET_WM_NAME 8u | awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
+# https://github.com/dylanaraps/neofetch/blob/master/neofetch#L1943
+wm=$(xprop -id "$(xprop -root _NET_SUPPORTING_WM_CHECK | awk '{print $NF}')" \
+		_NET_WM_NAME | awk -F "\"" '{print $2}' | head -n 1)
 
 # distro=$(lsb_release -i -s)
 # distro=$(< /etc/issue | sed 's/ \\r.*//')
