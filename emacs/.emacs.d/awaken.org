@@ -1887,6 +1887,9 @@ Obvious ones:
   (when (memq window-system '(mac ns x))
     (gsetq exec-path-from-shell-shell-name "bash"
            exec-path-from-shell-arguments '("-l"))
+    (general-pushnew "LSP_USE_PLISTS" exec-path-from-shell-variables)
+    (general-pushnew "HATCH_ENV_TYPE_VIRTUAL_PATH"
+                     exec-path-from-shell-variables)
     ;; takes about 0.1s
     (exec-path-from-shell-initialize)))
 #+end_src
@@ -8486,11 +8489,18 @@ TODO:
 - look at https://github.com/python-rope/ropemacs
 - look at https://github.com/millejoh/emacs-ipython-notebook
 - look at https://github.com/anachronic/importmagic.el
+  - TODO pyright supports auto-import but only as completion, not as code action
 - dap-mode
 
-*** Setup/LSP
+*** Pyright/LSP Setup
+- Issue with multi-root and multiple projects/virtual environments: https://github.com/emacs-lsp/lsp-pyright/issues/66
+- Issue with plists: https://github.com/emacs-lsp/lsp-pyright/issues/75
 #+begin_src emacs-lisp
-(use-package lsp-pyright)
+(use-package lsp-pyright
+  :init
+  ;; default; not necessary
+  ;; (gsetq lsp-pyright-venv-directory ".venv")
+  (gsetq lsp-pyright-multi-root nil))
 
 (noct-defun noct-lsp-pyright ()
   "Require lsp-pyright and run `lsp'."
@@ -8503,7 +8513,7 @@ TODO:
 
 (use-package python
   :init
-  (noct-handle-popup inferior-python-mode)
+  (noct-handle-popup-other-window inferior-python-mode)
   :gfhook #'noct-lsp-pyright)
 #+end_src
 
@@ -8649,19 +8659,6 @@ $ autoflake --remove-all-unused-imports -i unused_imports.py"
 #+end_src
 
 *** TODO Debugger
-*** TODO Pyvenv
-TODO look at other packages...
-https://github.com/robert-zaremba/auto-virtualenvwrapper.el
-https://github.com/marcwebbie/auto-virtualenv
-https://github.com/ssbb/pyenv-mode-auto
-#+begin_src emacs-lisp
-(use-package pyvenv
-  :general
-  (general-m python-mode-map
-    "v" #'pyvenv-workon
-    "V" #'pyvenv-deactivate))
-#+end_src
-
 *** Pytest
 #+begin_src emacs-lisp
 (use-package pytest
@@ -8687,6 +8684,50 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
 #+begin_src emacs-lisp
 (use-package poetry)
 #+end_src
+
+*** Jupyter (Ein)
+- The easiest way to use jupyter when using hatch to manage the virtual environment/dependencies is to add jupyter as a dependency in the pyproject.toml rather than use a globally installed jupyter (which would require [[https://www.geeksforgeeks.org/using-jupyter-notebook-in-virtual-environment/][manually compiling and selecting a new kernel inside the environment]])
+- To have ein use hatch, create a .dir-locals.el file with ~((nil . ((ein:jupyter-server-command . "hatch-jupyter"))))~ (where hatch-jupyter is a script in the path to run ~hatch run jupyter "$@"~) then =M-x ein:run=
+#+begin_src emacs-lisp
+(use-package ein
+  :init
+  (general-pushnew '(ein:jupyter-server-command . "hatch-jupyter")
+                   safe-local-variable-values)
+  ;; :config
+  ;; (general-def 'normal ein:notebook-mode-map
+  ;;   "RET" #'ein:worksheet-execute-cell-km)
+
+  ;; (general-def 'normal poly-ein-mode-map
+  ;;   "RET" #'ein:worksheet-execute-cell-km)
+  )
+#+end_src
+
+*** Hatch
+Setup
+- ~hatch new --init~ (--init for existing project)
+  - ensure ==__about__.py= file with something like =__version__ = 0.1.0=
+  - ensure readme exists
+- ~hatch env create~ (~hatch env prune~ if errors then recreate)
+- ~hatch run x~
+
+*** Pyenv and Auto-Virtualenv
+Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= so autoenv and pyright can easily use virtual environments created by hatch.
+
+#+begin_src emacs-lisp
+(use-package pyvenv
+  :general
+  (general-m python-mode-map
+    "v" #'pyvenv-workon
+    "V" #'pyvenv-deactivate))
+
+;; tries name from .python-version and <project root>/(\.venv|\.virtualenv|venv)
+;; see also https://github.com/robert-zaremba/auto-virtualenvwrapper.el
+;; I am already using pyenv (elpy is not needed as a dependency for
+;; auto-virtualenv)
+(use-package auto-virtualenv
+  :gfhook ('python-mode-hook #'auto-virtualenv-set-virtualenv))
+#+end_src
+
 
 ** R (ESS)
 #+begin_src emacs-lisp
