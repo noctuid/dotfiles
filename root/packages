@@ -1,11 +1,12 @@
 # An organized list of my packages
 # TODO switch to dkms for as much as possible
 # TODO switch away from aur as much as possible
-# TODO don't do global installations with pip, etc.
+# TODO don't do global installations with pip, etc. wherever possible
 # https://www.reddit.com/r/archlinux/comments/770fch/lpt_install_python_modules_using_pacman_instead/
 
 # TODO:
-# - python setup (see todos below)
+# - consider using pacdef for ability to clean/remove unlisted packages:
+#   https://github.com/steven-omaha/pacdef
 
 # <package> <method (defaults to using pacman)> <extra information>
 
@@ -41,16 +42,17 @@ linux-zen
 linux-zen-headers
 
 # * Window Manager
+herbstluftwm
 bspwm
 
 # * Filesystem Support
 ntfs-3g
 dosfstools
-exfat-utils
+# exfat-utils
+# for creating partitions with gparted (alternative to exfat-utils)
+exfatprogs
 
 # * Input
-xf86-input-synaptics
-
 # scim -> ibus -> fcitx -> fcitx5
 fcitx5-im
 fcitx5-mozc
@@ -92,12 +94,13 @@ wireguard-tools
 wireguard-dkms
 # encryption
 # veracrypt
+# srm (TODO remove? already have shred from coreutils)
 secure-delete aur
 # firewall management
 ufw
 # password management
 pass
-passff-host aur
+passff-host
 # sandboxing
 firejail
 
@@ -119,8 +122,8 @@ powertop
 
 # * Performance
 preload aur
-# not using currently; may not use again
-# psd
+# not using currently; may not use again (seems completely unnecessary)
+# profile-sync-daemon
 
 # * Printing
 # https://wiki.archlinux.org/index.php/CUPS
@@ -151,10 +154,16 @@ tmux
 ranger
 # for ranger video preview
 ffmpegthumbnailer
-# ranger info (alterantively exiftool)
+# ranger info (alternatively exiftool)
 mediainfo
+
+# for fzf_preview script with fzf-tab
+lesspipe
+
 # for kitty image preview
 python-pillow-simd aur
+# terminal graphics
+chafa
 # alternate to w3m image preview
 ueberzug
 
@@ -189,9 +198,12 @@ exa
 lsd
 
 bat
-bat-extras-git
+bat-extras
+delta
 
 # * Editors
+# emacs is installed directly in post-install
+# emacs-git-shallow aur
 gvim
 neovim
 pynvim pip
@@ -199,19 +211,13 @@ nvimpager-git aur
 vimpager-git aur
 # see ./post-install script; using emacs lucid
 jansson
-# emacs-git-shallow aur
 # evm gem
 cask aur
-emacs-25.1 evm
 
 # * Browsers
-qutebrowser
-qt5-webengine
 firefox
-# using for now
-firefox-esr-bin aur
+qutebrowser
 profile-cleaner aur
-profile-sync-daemon aur
 chromium
 # used, for example, by ranger for image preview and html preview
 w3m
@@ -219,9 +225,9 @@ w3m
 
 # * Video/Images
 mpv
-pqiv aur
+pqiv
 # mpv-git aur
-gallery-dl aur
+gallery-dl-git aur
 # color picker
 gpick
 
@@ -267,7 +273,7 @@ libwebp
 # * Torrents
 # includes trasmission-show (used for ranger)
 transmission-cli
-nodejs-webtorrent-cli aur
+webtorrent-cli aur
 
 # * PDF Viewer
 zathura
@@ -277,8 +283,8 @@ zathura
 zathura-pdf-mupdf
 zathura-djvu
 
-# another backup
-apvlv aur
+# another backup; never use
+# apvlv aur
 
 # * Emulators
 ppsspp
@@ -381,6 +387,10 @@ pipewire-alsa
 pavucontrol
 pamixer
 mpd
+mopidy
+mopidy-local aur
+mopidy-mpd aur
+mopidy-spotify aur
 mpd-notification aur
 mpc
 # vimus nix nixpkgs.haskellPackages.vimus
@@ -413,6 +423,9 @@ megatools aur
 # * Typesetting
 texlive-bin
 texlive-latexextra
+texlive-langchinese
+texlive-langjapanese
+texlive-fontsextra
 # sile
 # for syntax highlignt in latex export and elsewhere
 python-pygments
@@ -432,7 +445,7 @@ picom
 
 # * Notifications
 libnotify
-dunst-git aur
+dunst
 
 # * Launchers
 # bemenu
@@ -512,9 +525,15 @@ xsettingsd
 
 # display colors and system statistics
 neofetch
+disfetch aur
+uwufetch-git aur
+sysfetch-git aur
+nerdfetch aur
+
 # ascii art
 cbonsai aur
 asciiquarium
+pokemon-colorscripts-git aur
 
 # * DNS
 # validating, recursive, caching resolver
@@ -538,7 +557,8 @@ atool
 
 # * MTPFS
 # the worst filesystem
-jmtpfs aur
+# orphaned
+# jmtpfs aur
 
 # * Statistics
 r
@@ -548,11 +568,12 @@ tk
 # * Search/Fuzzy finder
 ripgrep
 fzf
-fd-rs-git aur
+fd
 
 # * Programming
 # ** General
 editorconfig-core-c
+tree-sitter
 
 # ** Licensing
 harvey pip
@@ -560,6 +581,7 @@ harvey pip
 # ** Clojure
 clojure
 babashka-bin aur
+shadow-cljs npm
 
 # ** C
 gdb
@@ -570,17 +592,17 @@ go
 # ** Python
 python-pip
 
+# build system
+python-hatch
+# required for hatch but for some reason not included
+python-tomli-w
+python-hatchling
+
+jupyter-notebook
+python-ipykernel
+
 # lsp implementation
-python-language-server
-
-# completions, definitions, references, etc. (used by palantir server)
-python-jedi
-# completions and renaming (used by palantir server)
-python-rope
-
-# for importmagic.el; resolve unimported symbols
-python-epc aur
-python-importmagic aur
+pyright
 
 # *** Repl
 ipython
@@ -604,21 +626,18 @@ flake8
 python-pylint
 # type hint linting
 mypy
-pyls-mypy aur
 
 # *** Formatting
 # sort imports
 python-isort
-python-pyls-isort-git aur
 
 # remove unused variables and imports using pyflakes
 python-autoflake aur
 
 # formatting
 # yapf
-# less configurable; deterministic (used by palantir server with plugin)
+# less configurable; deterministic
 python-black
-python-language-server-black aur
 
 # pre-commit hook configuration
 python-pre-commit aur
@@ -660,6 +679,7 @@ npm
 typescript
 typescript-language-server npm
 yarn
+pnpm npm
 
 # ** Lua
 lua-language-server
@@ -688,7 +708,8 @@ xorg-xlsfonts
 xorg-xsetroot
 xorg-xev
 xorg-xbacklight
-light
+# light in official repos has not worked for a long time
+light-git aur
 # clipboard
 xsel
 xclip
