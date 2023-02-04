@@ -4,16 +4,15 @@ takedir() {
 }
 
 BASE_GALLERY_DIR=$HOME/database/move/gallery/
+COOKIES_FILE=$BASE_GALLERY_DIR/cookies.txt
+# NOTE: need to check headers to get user agent (can differ from what
+# shown in javascript console)
+# cat instead of < to silence errors
+USER_AGENT=$(cat "$BASE_GALLERY_DIR"/user-agent.txt 2> /dev/null)
 
 gallery_dl_command() {
-	local cookies_file user_agent
-	cookies_file=$BASE_GALLERY_DIR/cookies.txt
-	# NOTE: need to check headers to get user agent (can differ from what
-	# shown in javascript console)
-	# cat instead of < to silence errors
-	user_agent=$(cat "$BASE_GALLERY_DIR"/user-agent.txt 2> /dev/null)
-	if [[ -f $cookies_file ]] && [[ -n $user_agent ]]; then
-		gallery-dl -o user-agent="$user_agent" --cookies "$cookies_file" "$@"
+	if [[ -f $COOKIES_FILE ]] && [[ -n $USER_AGENT ]]; then
+		gallery-dl -o user-agent="$USER_AGENT" --cookies "$COOKIES_FILE" "$@"
 	else
 		gallery-dl "$@"
 	fi
