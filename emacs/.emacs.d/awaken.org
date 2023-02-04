@@ -6923,6 +6923,19 @@ All of my org config is in unclean.org.  I will gradually move it here.
     [remap save-buffer] #'org-edit-src-save))
 #+end_src
 
+*** Keybindings
+**** Basic Navigation
+#+begin_src emacs-lisp
+(general-with 'org
+  ;; affects `org-beggining-of-line' and `org-end-of-line' even though not using
+  ;; C-a and C-e for them
+  (gsetq org-special-ctrl-a/e t)
+
+  (general-def '(insert normal) org-mode-map
+    [remap evil-beginning-of-visual-line] #'org-beginning-of-line
+    [remap evil-end-of-visual-line] #'org-end-of-line ))
+#+end_src
+
 *** External/Contrib
 **** Org Appear
 Show invisible things when point is on them in org (e.g. links).
