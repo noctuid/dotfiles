@@ -117,7 +117,9 @@
 				[ "Control_L", "Win_L", "Alt_L", "Muhenkan" ],
 				[ "Henkan", "Alt_r" ]
 				// NOTE: klfc does not currently support, so I've manually
-				// changed ./xkb/keycodes/colemak_dh_custom
+				// changed ./xkb/keycodes/colemak_dh_custom:
+                // <HKTG> = 107;	// Hiragana Katakana → PrintScreen
+                // <PRSC> = 101;	// PrintScreen → Hiragana Katakana
 				// found with grep 101 /usr/share/X11/xkb/keycodes/evdev (found
 				// 101 from xev)
 				// [ "HKTG", "PrintScreen" ]
