@@ -8252,7 +8252,8 @@ TODO look at what provides and bind useful keys; see how find usages compares
 
   (general-def 'normal emacs-lisp-mode-map
     "RET" #'xref-find-definitions
-    "<S-return>" #'pop-tag-mark
+    ;; just use M-, (using S-return for hkey-either)
+    ;; "<S-return>" #'pop-tag-mark
     "N" #'helpful-at-point))
 #+end_src
 
@@ -8418,7 +8419,8 @@ Highlight defined elisp symbols.
     "mb" #'eval-buffer
     "md" #'eval-defun
     "RET" #'xref-find-definitions
-    "<S-Return>" #'pop-tag-mark
+    ;; just use M-, (using S-return for hkey-either)
+    ;; "<S-Return>" #'pop-tag-mark
     "N" #'helpful-at-point)
 
   (with-eval-after-load 'lispy
