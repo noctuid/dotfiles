@@ -18,11 +18,12 @@ check_run_within_days() { # command days message
 	day_in_seconds=$((60*60*24))
 	days_passed=$((seconds_passed/day_in_seconds))
 	if [[ $days_passed -gt $2 ]]; then
-		notify-send "$3 in over $days_passed"
+		notify-send -u critical "$3 in over $days_passed days"
 		return 1
 	fi
 }
 
 check_run_within_days borg_small 3 "No small backup"
+check_run_within_days borgbase_small 3 "No remote small backup"
 
-check_run_within_days pacnanny 14 "No system update"
+check_run_within_days sysupdate 14 "No system update"
