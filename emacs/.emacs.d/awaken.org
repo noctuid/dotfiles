@@ -5718,11 +5718,10 @@ Try with lsp or smart jump (if in a prog-mode buffer) then with hyperbole."
 ** Git Major Modes
 #+begin_src emacs-lisp
 ;; https://github.com/magit/git-modes
-(use-package gitattributes-mode)
-
-(use-package gitconfig-mode)
+(use-package git-modes)
 
 (use-package gitignore-mode
+  :straight nil
   :mode "/.dockerignore\\'")
 #+end_src
 
