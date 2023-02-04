@@ -7677,9 +7677,14 @@ Don't immediately jump to the symbol at the point."
 #+end_src
 
 *** LSP Mode
-TODO lsp-use-plists (https://github.com/emacs-lsp/lsp-mode/issues/1807 now fixed)
+NOTE: Have had issues where I've accidentally added a folder (e.g. my home folder), causing freezing and other issues.  Use ~lsp-workspace-folders-remove~ to fix issues like this.
 #+begin_src emacs-lisp
 (use-package lsp-mode
+  ;; :init
+  ;; https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization
+  ;; doesn't work for pyright?
+  ;; https://github.com/emacs-lsp/lsp-pyright/issues/75
+  ;; (gsetq lsp-use-plists t)
   :config
   (gsetq
    ;; https://github.com/emacs-lsp/lsp-mode#performance
