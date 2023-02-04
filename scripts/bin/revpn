@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# mainly to fix connection issues
+
+if ! systemctl is-active --quiet wg-quick@"$1"; then
+	echo "wg-quick@$1 is not active"
+	exit 1
+fi
+
+# leave firewall rules in place when restarting
+sudo systemctl stop transmission || exit 1
+pkill WebTorrent
+sudo systemctl restart connman iwd
+sudo systemctl restart wg-quick@"$1"

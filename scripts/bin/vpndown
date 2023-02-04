@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+sudo systemctl stop transmission || exit 1
+pkill WebTorrent
+
+# * Disconnect from vpn
+sudo systemctl disable --now wg-quick@"$1" || exit 1
+
+# * Reset resolv.conf
+# TODO
+# sudo extra-setup dns_setup?
+sudo chattr -i /etc/resolv.conf
+echo -e "nameserver ::1
+nameserver 127.0.0.1
+options edns0 single-request-reopen" | sudo tee /etc/resolv.conf
+sudo chattr +i /etc/resolv.conf
+
+# * Reset ufw rules
+sudo extra-setup ufw_setup force

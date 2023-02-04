@@ -5,9 +5,25 @@
 
 # also can use _fzf_comprun to change --preview based on command:
 # https://github.com/junegunn/fzf#settings
+# that only works for ** (not fzf-tab; can use zstyle)
 
-if [[ -f $1 ]]; then
-	bat --style=numbers --color=always --line-range :"$LINES" "$1"
-elif [[ -d $1 ]]; then
-	tree -C "$1" | head -n "$LINES"
+if [[ -d $1 ]]; then
+	# tree -C "$1" | head -n "$LINES"
+	exa -1 --color=always --header "$1"
+else
+	# modified from
+	# https://github.com/Aloxaf/fzf-tab/wiki/Preview
+	mime=$(file -bL --mime-type "$1")
+	category=${mime%%/*}
+	# kind=${mime##*/}
+	if [[ $category == image ]]; then
+		# doesn't work with kitty in fzf... though in tmux the basic preview works
+		chafa "$1"
+		# fallback if chafa fails
+		mediainfo "$1"
+	elif [[ $category == text ]]; then
+		bat --style=numbers --color=always --line-range :"$LINES" "$1"
+	else
+		lesspipe.sh "$1" | bat --color=always
+	fi
 fi

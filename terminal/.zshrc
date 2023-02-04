@@ -115,6 +115,12 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	zinit ice wait lucid
 	zinit light "kutsan/zsh-system-clipboard"
 
+	# extra vi motions; automatically binds brackets and quotes and gets
+	# surround keybindings working even with low KEYTIMEOUT:
+	# https://old.reddit.com/r/zsh/comments/gktca7/use_vi_mode_surround_without_high_keytimeout/
+	zinit ice wait lucid
+	zinit light "zsh-vi-more/vi-motions"
+
 	# ** Completion
 	# oh-my-zsh's completion setup (e.g. colors, case sensitivity, etc.)
 	zinit ice wait lucid
@@ -142,6 +148,35 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	ENHANCD_FILTER=fzf
 	# fzf selection with cd <return> or cd [..|-] <return>
 	ENHANCD_COMPLETION_BEHAVIOR=list
+
+	# fzf for completion
+	# testing; seems nice so far
+	zinit ice wait lucid
+	zinit light "Aloxaf/fzf-tab"
+	# set list-colors to enable filename colorizing
+	# not sure what this actually does
+	zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+	# cd (and enhancd) preview
+	zstyle ':fzf-tab:complete:(\\|*)cd:*' fzf-preview 'exa -1 --color=always --icons $realpath'
+	# systemd unit status preview
+	zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
+	# environment variable preview
+	zstyle ':fzf-tab:complete:(-command-|-parameter-|-brace-parameter-|export|unset|expand):*' \
+		fzf-preview 'echo ${(P)word}'
+
+	# TODO this doesn't actually seem to work
+	# give a preview of commandline arguments when completing `kill`
+	zstyle ':completion:*:*:*:*:processes' command "ps -u $USER -o pid,user,comm -w -w"
+	zstyle ':fzf-tab:complete:(kill|ps):argument-rest' fzf-preview \
+	'[[ $group == "[process ID]" ]] && ps --pid=$word -o cmd --no-headers -w -w'
+	zstyle ':fzf-tab:complete:(kill|ps):argument-rest' fzf-flags --preview-window=down:3:wrap
+
+	# preview file contents
+	zstyle ':fzf-tab:complete:*:*' fzf-preview 'less ${(Q)realpath}'
+	export LESSOPEN='|fzf_preview %s'
+	# but don't preview options and subcommands
+	zstyle ':fzf-tab:complete:*:options' fzf-preview 
+	zstyle ':fzf-tab:complete:*:argument-1' fzf-preview
 
 	# ** Commands/Other
 	# prettier ls; nice if only had zshrc and no ranger, exa, or lsd
@@ -374,33 +409,17 @@ bindkey -a -r t
 # for bash there is https://github.com/ardagnir/athame
 # alternatively run shell in neovim or emacs
 
-# enable surround
-autoload -Uz surround
-zle -N delete-surround surround
-zle -N add-surround surround
-zle -N change-surround surround
-bindkey -a cs change-surround
-bindkey -a ds delete-surround
-bindkey -a ys add-surround
-bindkey -M visual S add-surround
-#  quote text objects
-autoload -U select-quoted
-
-# bracket text objects
-autoload -U select-bracketed
-zle -N select-bracketed
-for m in visual viopp; do
-	for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
-		bindkey -M $m $c select-bracketed
-	done
-done
+# NOTE: surround, bracket text objects, and quote text are being handled by
+# vi-motions plugin automatically, so I've removed my manual config
 
 # delay to enter normal mode normal mode
 # https://coderwall.com/p/h63etq
 # https://github.com/pda/dotzsh/blob/master/keyboard.zsh#L10
-# unfortunately needs to be higher for surround keybindings to work
+# needs to be higher for surround keybindings to work
 # https://github.com/softmoth/zsh-vim-mode/issues/13
-KEYTIMEOUT=30
+# BUT vi-motions plugin fixes this:
+# https://old.reddit.com/r/zsh/comments/gktca7/use_vi_mode_surround_without_high_keytimeout/
+KEYTIMEOUT=1
 
 # add missing vim hotkeys
 bindkey -a u undo
@@ -427,7 +446,8 @@ bindkey -a "^[[1~" beginning-of-line
 bindkey -a "^[[4~" end-of-line
 
 # http://zshwiki.org./home/zle/bindkeys#why_isn_t_control-r_working_anymore
-bindkey -M vicmd 't?' history-incremental-pattern-search-backward
+# just use C-r
+# bindkey -M vicmd 't?' history-incremental-pattern-search-backward
 
 # ** Insert Mode
 # bind UP and DOWN arrow keys (on caps or thumbkey)
@@ -529,7 +549,8 @@ FZF_TMUX_HEIGHT="90%"
 # advised against, but only downside with -f guard is that there is always a
 # preview window; hopefully we'll get support for this:
 # https://github.com/junegunn/fzf/issues/1928
-export FZF_DEFAULT_OPTS='--preview "fzf_preview {}"'
+# not really needed when using fzf-tab though
+# export FZF_DEFAULT_OPTS='--preview "fzf_preview {}"'
 
 # https://github.com/junegunn/fzf#settings
 # Use fd (https://github.com/sharkdp/fd) instead of the default find
@@ -545,6 +566,7 @@ _fzf_compgen_dir() {
 	fd --type d --hidden --follow --exclude ".git" . "$1"
 }
 
+# this works with **<tab>
 # (EXPERIMENTAL) Advanced customization of fzf options via _fzf_comprun function
 # - The first argument to the function is the name of the command.
 # - You should make sure to pass the rest of the arguments to fzf.
@@ -552,6 +574,7 @@ _fzf_comprun() {
 	local command=$1
 	shift
 	case "$command" in
+		cd)           fzf --preview 'tree -C {} | head -200'   "$@" ;;
 		export|unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
 		ssh)          fzf "$@" --preview 'dig {}' ;;
 		*)            fzf "$@" ;;
@@ -563,6 +586,10 @@ _fzf_comprun() {
 # export FZF_DEFAULT_COMMAND='
 # (git ls-tree -r --name-only HEAD ||
 # ag -l -g "") 2> /dev/null'
+
+# C-r - paste from history
+# C-t - paste selected files and directories
+# M-c - cd into directory
 
 # using FZF completion script (see plugins section) for the following:
 # $ cd ** <tab> # dirs
@@ -791,6 +818,7 @@ alias stl='sudo systemctl'
 # use spacemacs config (not symlinking to home with stow)
 alias spacemacs="env HOME=$HOME/spacemacs emacs"
 alias testemacs="env HOME=$HOME/test-emacs emacs"
+alias doom="env HOME=$HOME/doom emacs"
 
 alias checkclass='xprop | grep WM_CLASS'
 
@@ -1093,7 +1121,25 @@ defaultresolv() {
 }
 
 # *** Torrents
-alias starttr='sudo systemctl start transmission'
+# alias starttr='sudo systemctl start transmission'
+
+starttr() {
+	vpn_status=$(curl --silent https://am.i.mullvad.net/json \
+					 | jq '.mullvad_exit_ip')
+	if [[ $vpn_status != true ]]; then
+		echo "Connect to vpn first or manually enable"
+		return 1
+	fi
+
+	sudo systemctl start transmission
+	if [[ -n $1 ]]; then
+		down=${2:-300}
+		up=${3:-100}
+		transmission-remote --alt-speed --alt-speed-downlimit=$down \
+							--alt-speed-uplimit=$up
+	fi
+}
+
 alias stoptr='sudo systemctl stop transmission'
 
 # https://github.com/gotbletu/shownotes/blob/e6fe01c4567a4129558c3911a412cf5af4448cf9/transmission-cli.txt
@@ -1315,6 +1361,7 @@ newphonerestore() {
 }
 
 # ** Keyboard
+# https://kaleidoscope.readthedocs.io/en/latest/setup_toolchain.html
 flash_keyboard() {
 	export ARDUINO_PATH=/usr/local/arduino
 	if [[ ! -d ~/Arduino ]]; then
@@ -1323,15 +1370,19 @@ flash_keyboard() {
 			https://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio.git \
 			~/Arduino/hardware/keyboardio
 		ln -sf ~/src/forks/Model01-Firmware ~/Arduino/
+		cd ~/Arduino/hardware/keyboardio/avr/libraries/Kaleidoscope || exit 1
+		make setup
 	fi
-	libraries=~/Arduino/hardware/keyboardio/avr/libraries
-	# install plugins
-	wavepool="$libraries"/Kaleidoscope-LED-Wavepool
-	if [[ ! -d "$wavepool" ]]; then
-		git clone \
-			https://github.com/ToyKeeper/Kaleidoscope-LED-Wavepool \
-			"$wavepool"
-	fi
+	# TODO now part of kaleidoscope
+	# libraries=~/Arduino/hardware/keyboardio/avr/libraries
+	# # install plugins
+	# wavepool="$libraries"/Kaleidoscope-LED-Wavepool
+	# if [[ ! -d "$wavepool" ]]; then
+	# 	git clone \
+	# 		https://github.com/ToyKeeper/Kaleidoscope-LED-Wavepool \
+	# 		"$wavepool"
+	# fi
+	# TODO can this be removed? should just be able to use arduino from pacman
 	if [[ ! -d $ARDUINO_PATH ]]; then
 		wget https://www.arduino.cc/download_handler.php?f=/arduino-1.8.12-linuxaarch64.tar.xz \
 			 -o /tmp/arduino.tar.xz

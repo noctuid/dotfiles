@@ -11,6 +11,8 @@ export ALTERNATE_EDITOR=
 # using no flags actually seems preferable; use GUI with X running and also
 # works in framebuffer (emacsclient -t doesn't work in framebuffer terminal)
 export EDITOR=emacsclient
+# doesn't work for python (pyright) so commented for now
+# export LSP_USE_PLISTS=true
 export PAGER=vimpager
 # export BROWSER=qutebrowser
 export BROWSER=firefox
@@ -55,6 +57,8 @@ export CLASSPATH=$CLASSPATH:/usr/share/java/junit.jar:/usr/share/java/hamcrest-c
 
 # for python
 export WORKON_HOME=~/.virtualenvs
+# put virtualenvs in current directory
+export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv
 
 # temporary for testing
 export PATH="$HOME/.tmuxifier/bin:$PATH"
