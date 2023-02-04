@@ -93,7 +93,6 @@ wireguard-dkms
 # encryption
 # veracrypt
 secure-delete aur
-safe-rm aur
 # firewall management
 ufw
 # password management

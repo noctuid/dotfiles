@@ -253,11 +253,6 @@ fi
 # ** General
 # 10 second wait then prompt if use rm with *
 setopt RM_STAR_WAIT
-# prompt if removing more than 3 files; don't delete anything from ~/.config/safe-rm
-# I generally use trash-cli instead of rm
-if hash safe-rm 2> /dev/null; then
-	alias rm='safe-rm -I'
-fi
 
 # show nonzero exit codes
 setopt print_exit_value
