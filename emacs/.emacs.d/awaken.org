@@ -2450,6 +2450,7 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
                       (when (bound-and-true-p corfu--candidates)
                         (corfu-quit)))))
 
+;; TODO merged into main
 ;; looks cool but not that useful; don't normally need docs during completion;
 ;; more distracting than beneficial
 (use-package corfu-doc
@@ -3166,10 +3167,8 @@ file-finding commands)."
                (memq current-minibuffer-command
                      noct-strict-leading-initialism-commands))
       (cons '(orderless-strict-leading-initialism
-              ;; currently experimenting with not allowing regexp; can hit
-              ;; space if want it to go to next component
-              ;; orderless-regexp
-              )
+              ;; can remove/comment to be more strict
+              orderless-regexp)
             pattern)))
 
   (gsetq orderless-style-dispatchers
@@ -3416,7 +3415,8 @@ The only downside is the lack of prescient integration. Vertico supports recency
   (general-t "p" #'consult-yank-from-kill-ring)
   (general-s :infix "i" "l" #'consult-theme)
   (general-m "C" #'consult-compile-error)
-  (help-map "a" #'consult-apropos)
+  (help-map "a" #'consult-apropos
+            "i" #'consult-info)
   ('normal "/" (list :def (if (or (not (boundp 'no-native-compile))
                                   (not no-native-compile))
                               #'consult-line
@@ -3504,9 +3504,6 @@ When the number of characters in a buffer exceeds this threshold,
                      "--with-filename "
                      ".")))
         (consult-ripgrep))))
-
-  (general-advice-add #'completing-read-multiple
-                      :override #'consult-completing-read-multiple)
 
   (defun noct-consult-line-evil-history (&rest _)
     "Add latest `consult-line' search pattern to the evil search history ring.
