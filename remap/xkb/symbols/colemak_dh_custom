@@ -4,26 +4,16 @@
 default
 xkb_symbols "basic" {
     key <TLDE> { [   VoidSymbol,   VoidSymbol ] };
-    key <AE01> { [            1,       exclam, XF86_Switch_VT_1 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=1, !same) ] };
-    key <AE02> { [            2,           at, XF86_Switch_VT_2 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=2, !same) ] };
-    key <AE03> { [            3,   numbersign, XF86_Switch_VT_3 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=3, !same) ] };
-    key <AE04> { [            4,       dollar, XF86_Switch_VT_4 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=4, !same) ] };
-    key <AE05> { [            5,      percent, XF86_Switch_VT_5 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=5, !same) ] };
-    key <AE06> { [            6,  asciicircum, XF86_Switch_VT_6 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=6, !same) ] };
-    key <AE07> { [            7,    ampersand, XF86_Switch_VT_7 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=7, !same) ] };
-    key <AE08> { [            8,     asterisk, XF86_Switch_VT_8 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=8, !same) ] };
-    key <AE09> { [            9,    parenleft, XF86_Switch_VT_9 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=9, !same) ] };
-    key <AE10> { [            0,   parenright, XF86_Switch_VT_10 ],
-                 actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=10, !same) ] };
+    key <AE01> { [            1,       exclam ] };
+    key <AE02> { [            2,           at ] };
+    key <AE03> { [            3,   numbersign ] };
+    key <AE04> { [            4,       dollar ] };
+    key <AE05> { [            5,      percent ] };
+    key <AE06> { [            6,  asciicircum ] };
+    key <AE07> { [            7,    ampersand ] };
+    key <AE08> { [            8,     asterisk ] };
+    key <AE09> { [            9,    parenleft ] };
+    key <AE10> { [            0,   parenright ] };
     key <AE11> { [        minus,   underscore, XF86_Switch_VT_11 ],
                  actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=11, !same) ] };
     key <AE12> { [        equal,         plus, XF86_Switch_VT_12 ],

@@ -5,8 +5,10 @@ xkb_dir_from=$(dirname "$0")
 xkb_dir_to="/usr/share/X11/xkb"
 layout="colemak_dh_custom"
 description="Colemak-DvbgHk Angle(z) Wide Custom"
-mods="Wide"
-description_mods="Wide"
+mods="Wide
+Wide-ja"
+description_mods="Wide
+Wide-ja"
 variants=""
 description_variants=""
 
