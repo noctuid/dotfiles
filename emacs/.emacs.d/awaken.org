@@ -5235,6 +5235,49 @@ Very useful to learn snippets or for less-often used snippets.  A better ~yas-in
 #+end_src
 
 *** Auto-activating Snippets
+Automatic two-spacing and capitalization.
+#+begin_src emacs-lisp
+(use-package aas
+  :ghook ('text-mode-hook #'aas-activate-for-major-mode)
+  :config
+  (defun noct-before-possible-sentence-end-p ()
+    "Return whether before a possible sentence end position."
+    (looking-back "[^\\.\\?!\"[:space:]]"
+                  (line-beginning-position)))
+
+  (aas-set-snippets 'text-mode
+    :cond #'noct-before-possible-sentence-end-p
+    "  " ".  "
+    "? " "?  "
+    "! " "!  ")
+
+  (defun noct-before-quote-sentence-end-p ()
+    "Return whether after punctuation and optionally single quotes."
+    (looking-back "[\\.\\?!]'?"
+                  (line-beginning-position)))
+
+  (aas-set-snippets 'text-mode
+    :cond #'noct-before-quote-sentence-end-p
+    "\" " "\"  ")
+  
+  (defun noct-after-sentence-end-p ()
+    "Return whether after a two-spaced sentence end or at the bol."
+    (and (looking-back (rx (or (and (not space) "  "
+                                    (0+ "\"")
+                                    (0+ "'"))
+                               bol))
+                       (line-beginning-position))
+         ;; condition will take place with point before snippet
+         (looking-at (rx (and alpha (or eol "  "))))))
+
+  ;; auto-capitalize
+  (let ((char ?a))
+    (dotimes (_ 26)
+      (aas-set-snippets 'text-mode
+        :cond #'noct-after-sentence-end-p
+        (char-to-string char)
+        (capitalize (char-to-string char)))
+      (cl-incf char))))
 #+end_src
 
 ** Undo
