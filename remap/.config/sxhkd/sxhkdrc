@@ -132,7 +132,7 @@ alt + super + c
 	dropdown -n longcommands -s longcommands kitty
 
 alt + super + d
-	max_dropdown -n ranger emacsclient -ce "(dirvish)"
+	max_dropdown -n ranger emacsclient --socket-name=dirvish -ce "(dirvish)"
 
 alt + super + r
 	max_dropdown -n ranger kitty zsh -c "ranger; zsh -i"

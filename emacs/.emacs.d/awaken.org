@@ -6144,9 +6144,19 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
          transient-default-level 7
          ;; TODO issue with it failing because \.\.\. in history
          transient-save-history nil
+         ;; don't use this as it will break some commands
+         ;; (e.g. `dirvish-setup-menu') probably because they rely on the buffer
+         ;; staying the same and this selects a the transient window
+         ;; '(noct-display-buffer-in-side-window-no-header
+         ;;   (side . top))
+         ;; default except at top
          transient-display-buffer-action
-         '(noct-display-buffer-in-side-window-no-header
-           (side . top))
+         '(display-buffer-in-side-window
+           (side . top)
+           (dedicated . t)
+           (inhibit-same-window . t)
+           (window-parameters
+            (no-other-window . t)))
          transient-mode-line-format nil)
   (general-def transient-map
     ;; don't want to accidentally close
@@ -9159,8 +9169,7 @@ TODO ls alternative that does correct sorting
 #+begin_src emacs-lisp
 (use-package dired
   :straight (:type built-in)
-  ;; using dirvish-dired
-  ;; :general ('normal "-" #'dired-jump)
+  :general ('normal "-" #'dired-jump)
   :gfhook
   ;; automatically refresh
   (nil #'auto-revert-mode)
@@ -9173,7 +9182,9 @@ TODO ls alternative that does correct sorting
          dired-kill-when-opening-new-dired-buffer t)
 
   (defvar noct-dired-listing-switches
-    (concat "-l --human-readable --almost-all --group-directories-first "
+    ;; -v - natural sort numbers
+    ;; --almost-all - all except . and ..
+    (concat "-l -v --human-readable --almost-all --group-directories-first "
             "--time-style=long-iso"))
 
   ;; neither supports dired
@@ -9184,7 +9195,7 @@ TODO ls alternative that does correct sorting
   ;;       ((executable-find "exa")
   ;;        (gsetq insert-directory-program "exa"
   ;;               dired-listing-switches
-  ;;               "--color never --all -l")))
+  ;;               "--color never --oneline --all -l")))
   (cl-case system-type
     ('darwin
      (when (executable-find "gls")
@@ -9225,8 +9236,8 @@ If a region is active, toggle marking all files in the region."
     "F" #'noct-consult-find-fd
 
     ;; marking
-    "TAB" #'noct-dired-toggle-mark
     "," #'noct-dired-toggle-mark
+    ;; this is actually very useful
     "\"" #'dired-mark-files-regexp
     "v" #'dired-toggle-marks
     "um" #'dired-unmark
@@ -9250,13 +9261,18 @@ If a region is active, toggle marking all files in the region."
     "Es" #'epa-dired-do-sign
     "Ee" #'epa-dired-do-encrypt
 
-    "o" #'dired-do-shell-command
+    "RET" #'dired-do-shell-command
 
     ;; toggle details
-    "zd" #'dired-hide-details-mode)
+    "TAB" #'dired-hide-details-mode)
+
+  (general-m dired-mode-map
+    "d" #'epa-dired-do-decrypt
+    "v" #'epa-dired-do-verify
+    "s" #'epa-dired-do-sign
+    "e" #'epa-dired-do-encrypt)
 
   (general-def 'visual dired-mode-map
-    "TAB" #'noct-dired-toggle-mark
     "," #'noct-dired-toggle-mark
     "um" #'dired-unmark))
 #+end_src
@@ -9274,10 +9290,10 @@ If a region is active, toggle marking all files in the region."
        ,(format "Call `dired-find-alternate-file' on %s." filename)
        (interactive)
        (set-buffer-modified-p nil)
-       (if (functionp 'dirvish-find-file)
-           (dirvish-find-file ,filename)
-         (dired-find-alternate-file ,filename))))
-
+       ;; dired-jump will maintain pane-layout when using dirvish unlike `find-alternate-file'
+       (if (featurep 'dirvish)
+           (dired-jump nil ,filename)
+         (find-alternate-file ,filename))))
 
   (general-def 'normal dired-mode-map
     :prefix "g"
@@ -9348,19 +9364,41 @@ If a region is active, toggle marking all files in the region."
     (noct-dired-async-run "bgset"))
 
   (defun noct-dired-upscale-2 ()
-    "Upscale image at point 2x."
+    "Upscale selected images or image at point 2x."
     (interactive)
     (noct-dired-async-run "upscale"))
 
   (defun noct-dired-upscale-10 ()
-    "Upscale image at point 10x."
+    "Upscale selected images or image at point 10x."
     (interactive)
     (noct-dired-async-run "upscale ? 10"))
 
   (defun noct-dired-upscale-20 ()
-    "Upscale image at point 20x."
+    "Upscale selected images or image at point 20x."
     (interactive)
     (noct-dired-async-run "upscale ? 20"))
+
+  (defun noct-oxipng ()
+    "Compress selected pngs or png at point with oxipng in-place (lossless)."
+    (interactive)
+    ;; higher than opt 4 not recommended (barely more compression)
+    (noct-dired-async-run "oxipng --opt 4 --strip safe"))
+
+  (defun noct-pngquant ()
+    "Compress selected pngs or png at point to new <name>-fs.png (lossy)."
+    (interactive)
+    ;; higher than opt 4 not recommended (barely more compression)
+    (noct-dired-async-run "pngquant"))
+
+  (defun noct-to-high-quality-webp ()
+    "Convert selected images or image at point to a quality 100 webp."
+    (interactive)
+    (noct-dired-async-run "cwebp_autoname -mt -q 100"))
+
+  (defun noct-to-near-lossless-webp ()
+    "Convert selected images or image at point to a -near_lossless 60 webp."
+    (interactive)
+    (noct-dired-async-run "cwebp_autoname -mt -near_lossless 60"))
 
   (general-def 'normal dired-mode-map
     "ct" #'noct-dired-unoconv-to-txt
@@ -9371,6 +9409,13 @@ If a region is active, toggle marking all files in the region."
     "cu" #'noct-dired-upscale-2
     "cU" #'noct-dired-upscale-10
     "cX" #'noct-dired-upscale-20)
+
+  (general-def 'normal dired-mode-map
+    :infix "ci"
+    "p" #'noct-oxipng
+    "P" #'noct-pngquant
+    "w" #'noct-to-high-quality-webp
+    "W" #'noct-to-near-lossless-webp)
 
   (defun noct-dropmpgo ()
     (interactive)
@@ -9419,7 +9464,7 @@ If a region is active, toggle marking all files in the region."
     (dired-do-shell-command "beet import"))
 
   (general-def 'normal dired-mode-map
-    "ci" #'noct-dired-beet-import))
+    "cB" #'noct-dired-beet-import))
 #+end_src
 
 *** All the Icons Dired
@@ -9593,22 +9638,22 @@ Show entire path for a directory (or chain of directories) that only contains a 
 #+end_src
 
 *** Dirvish
-Dirvish is a work of art.  It is fast.  It is unobtrusive.  It is elegant.  It is all this, and it still is dired.  It is exactly what a file manager in Emacs should be.  I thought ranger was still lightyears ahead of dired, but dirvish has proved me wrong.
+Dirvish is a work of art.  It is fast.  It is unobtrusive.  It is elegant.  It is all this, and it still is dired.  It is exactly what a file manager in Emacs should be.  I thought ranger was still light-years ahead of dired, but dirvish has proved me wrong.
 
 Dirvish solves these issues for me:
 - It provides file copying/movement that is *both* multi-stage and asynchronous (unlike existing packages).  This is a game changer.
 - Image preview is actually fast and usable.  I had stopped using all packages for image preview before because they didn't work well.  With dirvish, once an image is cached, it's as fast as any preview method that ranger has, and there is no flicker (unlike some ranger preview methods).  This is also a game changer.
-- File preview in general works flawlessly out of the box and is customizable
-- Dirvish is gorgeous, more so than ranger, but without sacrificing speed
-  - The mode line is simple, customizable, and easy on the eyes
-  - Icon display is fast/lazy unlike dired-all-the-icons, which is unusably slow
-  - It can also replace the functionality of dired-k (very slow) and dired-git-info
+- File preview in general works flawlessly out of the box and is customizable.
+- Dirvish is gorgeous, more so than ranger, but it doesn't sacrifice speed.
+  - The mode line is simple, customizable, and easy on the eyes.
+  - Icon display is fast/lazy unlike dired-all-the-icons, which is unusably slow.
+  - It can also replace the functionality of dired-k (very slow) and dired-git-info.
   - I only had to customize one face to get it to look great with my theme
-- It provides a 3-pane layout that just works (parent directory, current directory, preview).  I never used ranger.el's 3-pane layout, but I will use dirvish's.
+- It provides a 3-pane layout that just works (parent directory, current directory, preview).  I never used ranger.el's 3-pane layout, but I will use dirvish's.  You can choose the number of panes (1, 2, or more than 3) and customize their sizes.
 - It provides various other helpful commands/features like bookmarks
 - It is a minimal layer on top of dired and requires minimal configuration.  I had to make many more keybindings for ranger.el since it creates alternatives for a lot of existing dired commands, and I had a bunch of ugly configuration because it was comparably invasive (as both a dired user and as an evil user).
 
-Dirvish replaces
+Dirvish replaces multiple packages:
 - Replaces ranger.el (though not a ranger clone)
 - Replaces dired-async, tmtxt-dired-async, dired-ranger, etc.
 - Replaces dired-all-the-icons with a much more performant implementation
@@ -9617,43 +9662,91 @@ Dirvish replaces
 #+begin_src emacs-lisp
 (use-package dirvish
   :general
-  ('normal "-" #'dirvish-dired)
   (general-s "r" #'dirvish)
+  :gfhook
+  (nil (noct-disable display-line-numbers-mode))
+  ;; truncate long file names instead of wrapping
+  ('dirvish-find-entry-hook
+   (lambda (&rest _) (setq-local truncate-lines t)))
+  ('dirvish-preview-setup-hook (noct-defun noct-dirvish-preview-setup ()
+                                 (display-line-numbers-mode -1)
+                                 (setq-local mode-line-format nil
+                                             truncate-lines t)))
+  :init
+  (general-after 'dired
+    (require 'dirvish))
   :config
   ;; (gsetq dirvish-bookmarks-alist)
-  (gsetq dirvish-attributes '(all-the-icons file-size vc-state))
+
+  (dirvish-define-attribute symlink-arrow
+    "Show -> on symlinks but not full target."
+    :when (and dired-hide-details-mode
+               (default-value 'dired-hide-details-hide-symlink-targets))
+    (when (< (+ f-end 4) l-end)
+      (let ((ov (make-overlay (+ f-end 4) l-end)))
+        (overlay-put ov 'invisible t) ov)))
+
+  (general-pushnew (cons (list "png" "jpg" "jpeg" "webp") (list "mvi" "%f"))
+                   dirvish-open-with-programs)
+
+  (gsetq dirvish-yank-overwrite-existing-files 'never
+         dirvish-attributes '(all-the-icons file-size vc-state symlink-arrow)
+         dirvish-yank-new-name-style 'append-to-filename
+         dirvish-yank-new-name-style 'append-to-ext
+         dirvish-mode-line-position 'global
+         dirvish-mode-line-format
+         '(:left
+           (" " file-modes " " file-link-number " " file-user ":" file-group " "
+            symlink omit vc-info)
+           :right
+           (sort yank index))
+         dirvish-header-line-format
+         '(:left
+           (path symlink)
+           :right
+           (free-space))
+         dirvish-layout-recipes
+         (list '(0 0 0.8)
+               '(0 0 0.4)
+               dirvish-default-layout))
+
+  (general-after-gui
+    (gsetq dirvish-header-line-height
+           (cons (noct-mode-line-height)
+                 (noct-mode-line-height))
+           dirvish-mode-line-height
+           (cons (noct-smaller-mode-line-height)
+                 (noct-smaller-mode-line-height))))
 
   (when (ignore-errors (ewal-load-colors))
     (set-face-attribute 'dirvish-hl-line nil
                         :background (ewal-get-color 'green -5)))
 
-  (defun noct-dirvish-move ()
-    (interactive)
-    (dirvish--yank 'move))
-
-  (defun noct-dirvish-relalink ()
-    (interactive)
-    (dirvish--yank 'relalink))
-
-  (defun noct-dirvish-symlink ()
-    (interactive)
-    (dirvish--yank 'symlink))
-
   (general-def 'normal dired-mode-map
+    ;; https://github.com/alexluigit/dirvish/issues/186
+    "i" #'dired-find-file
+
     "a" #'dirvish-dispatch
 
-    "b" #'dirvish-show-history
+    "l" #'dirvish-history-go-backward
+    "L" #'dirvish-history-go-forward
+    "b" #'dirvish-history-jump
+
+	"M" #'dirvish-layout-switch
+
+    "z" #'dirvish-setup-menu
 
     "yp" #'dirvish-copy-file-path
     "yn" #'dirvish-copy-file-name
     "yd" #'dirvish-copy-file-directory
 
     "pp" #'dirvish-yank
-    "pm" #'noct-dirvish-move
-    "pl" #'noct-dirvish-symlink
-    "pL" #'noct-dirvish-relalink
+    "pm" #'dirvish-move
+    "pl" #'dirvish-symlink
+    "pL" #'dirvish-relative-symlink
+    "ph" #'dirvish-hardlink
 
-    "co" #'dirvish-sort-by-criteria
+    "o" #'dirvish-quicksort
 
     "du" #'dirvish-total-file-size)
 
