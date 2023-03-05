@@ -4709,6 +4709,8 @@ Smartparens' version is unfortunately too slow.
   :straight (rose-pine-emacs
              :host github
              :repo "thongpv87/rose-pine-emacs"))
+
+(use-package catppuccin-theme)
 #+end_src
 
 *** Pywal
