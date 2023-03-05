@@ -485,7 +485,9 @@ noto-fonts-emoji
 
 # additional symbols
 # based on stlarch
-siji-ng aur
+# siji-ng aur
+# scalable
+siji-ttf aur
 # microsft fonts; extra requirements; https://wiki.archlinux.org/index.php/Microsoft_fonts
 # ttf-ms-win-10 aur
 
