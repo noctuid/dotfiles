@@ -677,7 +677,7 @@ jq
 nodejs
 npm
 typescript
-typescript-language-server npm
+typescript-language-server
 yarn
 pnpm npm
 

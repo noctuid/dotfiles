@@ -7814,16 +7814,27 @@ NOTE: Have had issues where I've accidentally added a folder (e.g. my home folde
 #+end_src
 
 *** Tree Sitter
-Currently, tree sitter can be used for syntax highlighting. There is also the package tree-sitter-indent, but it currently only supports Rust.
-#+begin_src emacs-lisp
-(use-package tree-sitter
-  :ghook
-  ('prog-mode-hook #'global-tree-sitter-mode nil nil t)
-  ('tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+Tree sitter support is now builtin.  It is interesting to see the difference in approach from [[https://www.youtube.com/watch?v=QHlB6w8HFao][ commercial-emacs']] (which tries to do as little in the major mode files as possible) and the previous [[https://github.com/emacs-tree-sitter/elisp-tree-sitter][elisp-tree-sitter]] (which just provides minor modes).
 
-(use-package tree-sitter-langs
-  :after tree-sitter
-  :demand t)
+Now there are new tree sitter major modes like =python-ts-mode=.  Luckily, =python-mode= and and =python-ts-mode= both derive from =python-base-mode=, so =python-base-mode-hook= can be used for both.  Unfortunately, this is not the case for all new major modes.  At the time of writing, a lot of packages (e.g. flycheck and lsp-mode) need to be updated to support some of the new ts modes.
+
+I am using the =treesit-auto= package to automate the process of installing the grammars and activating the tree sitter major modes when possible.
+#+begin_src emacs-lisp
+(use-package treesit-auto
+  ;; some things that don't work: yasnippet association
+  :disabled t
+  :init
+  (gsetq treesit-auto-install 'prompt)
+  ;; use treesitter where possible
+  (global-treesit-auto-mode)
+
+  (defun noct-maybe-enable-bash-ts-mode ()
+    (when (and (eq major-mode 'sh-mode)
+               (eq sh-shell 'bash))
+      (unless (treesit-ready-p 'bash t)
+        (treesit-auto--prompt-to-install-package 'bash))
+      (bash-ts-mode)))
+  (add-hook 'sh-mode-hook #'noct-maybe-enable-bash-ts-mode))
 #+end_src
 
 ** Lisps (General)
@@ -8669,7 +8680,7 @@ TODO:
 (use-package python
   :init
   (noct-handle-popup-other-window inferior-python-mode)
-  :gfhook #'noct-lsp-pyright)
+  :gfhook ('python-base-mode-hook #'noct-lsp-pyright))
 #+end_src
 
 *** LPY
@@ -8679,7 +8690,7 @@ TODO:
 (use-package lpy
   :disabled t
   :straight (lpy :host github :repo "abo-abo/lpy")
-  :ghook 'python-mode-hook
+  :ghook 'python-base-mode-hook
   :config
   (general-def lpy-mode-map
     :definer 'lpy
@@ -8767,12 +8778,12 @@ Currently requires running =make= for setup and is not on MELPA.
 ;; adds syntax highlighting for reST (and epydoc) docstrings and makes filling
 ;; work as expected.(for all multi-line strings)
 (use-package python-docstring
-  :ghook 'python-mode-hook
+  :ghook 'python-base-mode-hook
   :blackout t)
 
 ;; allows inserting reST docstring skeleton
 (use-package sphinx-doc
-  :ghook 'python-mode-hook
+  :ghook 'python-base-mode-hook
   :blackout t
   :config
   (general-m python-mode-map
@@ -8827,7 +8838,7 @@ Needs extra setup (need to pip install cov2emacs that is in source directory).
 #+begin_src emacs-lisp
 (use-package pycoverage
   :disabled t
-  :ghook 'python-mode-hook)
+  :ghook 'python-base-mode-hook)
 #+end_src
 
 *** Requirements Mode
@@ -8880,7 +8891,7 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= so autoenv and pyr
 ;; I am already using pyenv (elpy is not needed as a dependency for
 ;; auto-virtualenv)
 (use-package auto-virtualenv
-  :gfhook ('python-mode-hook #'auto-virtualenv-set-virtualenv))
+  :gfhook ('python-base-mode-hook #'auto-virtualenv-set-virtualenv))
 #+end_src
 
 
@@ -8921,9 +8932,20 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= so autoenv and pyr
     (lsp)))
 
 (use-package sh-script
-  :gfhook ('sh-mode-hook #'noct-sh-mode-setup)
+  :gfhook ('sh-base-mode-hook #'noct-sh-mode-setup)
   :config
-  (with-eval-after-load 'flycheck
+  ;; TODO make issues
+  (general-with 'lsp-mode
+    (general-add-advice
+     'lsp-bash-check-sh-shell
+     :override
+     (noct-defun noct-lsp-bash-check-sh-shell (&rest _)
+       (and (memq major-mode '(sh-mode bash-ts-mode))
+            (memq sh-shell '(sh bash)))))
+    (general-pushnew (cons 'bash-ts-mode "shellscript")
+                     lsp-language-id-configuration))
+  (general-with 'flycheck
+    (setf (flycheck-checker-get 'sh-bash 'modes) (list 'sh-mode 'bash-ts-mode))
     (general-pushnew 'zsh flycheck-shellcheck-supported-shells)))
 
 (use-package company-shell
@@ -8979,6 +9001,7 @@ TODO
 #+end_src
 
 *** Web
+TODO should I switch to =tsx-ts-mode= now?
 #+begin_src emacs-lisp
 (use-package web-mode
   ;; web-mode gives better syntax highlighting than just typescript-mode (and
