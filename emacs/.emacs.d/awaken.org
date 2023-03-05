@@ -5169,7 +5169,8 @@ TODO number incrementing
   :defer-incrementally (eldoc easymenu help-mode)
   :general
   ;; no mnemonic but next to C-n and default keybinding already on extend layer
-  (general-def 'insert "C-e" #'yas-insert-snippet)
+  ;; using `consult-yasnippet' instead
+  ;; (general-def 'insert "C-e" #'yas-insert-snippet)
   (general-s "y" #'yas-new-snippet)
   (general-def help-map
     ;; unbound by default
