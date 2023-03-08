@@ -1,6 +1,8 @@
 ;;; noct-util.el --- Helper functions for use with async.el. -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
+;; TODO allow extending with keywords? e.g. to wrap body in something?
+
 ;; * Faster Untangling
 (defconst noct-init-file (expand-file-name "awaken.org" user-emacs-directory)
   "Main init file.")
@@ -76,10 +78,10 @@ Only source blocks that meet these requirements will be tangled:
 
 (defun noct-tangle-org-init (file &optional load compile retangle demote-errors)
   "Tangle org init FILE if it has not already been tangled.
-If LOAD is non-nil, load it as well. If RETANGLE is non-nil,
+If LOAD is non-nil, load it as well.  If RETANGLE is non-nil,
 tangle FILE even if it is not newer than the current tangled
-file. If COMPILE is non-nil, and the uncompiled file is newer,
-compile it. If DEMOTE-ERRORS is non-nil, wrap each source block
+file. If  COMPILE is non-nil, and the uncompiled file is newer,
+compile it.  If DEMOTE-ERRORS is non-nil, wrap each source block
 with `with-demoted-errors'.
 
 If both LOAD and COMPILE are specified, load the compiled version
@@ -119,7 +121,10 @@ loaded)."
            (unless demote-errors
              ;; successfully loaded without errors; save stable configuration
              (copy-file init-tangled init-tangled-stable t)))
-          ((and compile (file-newer-than-file-p init-tangled init-compiled))
+          ((and compile
+                ;; using `not' and this order because of the behavior of
+                ;; `file-newer-than-file-p' when a file does not exist
+                (not (file-newer-than-file-p init-compiled init-tangled)))
            (load-file init-tangled)
            (byte-compile-file init-tangled)))))
 
