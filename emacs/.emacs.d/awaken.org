@@ -560,7 +560,7 @@ Since ~setq~, ~add-hook~, and ~evil-define-key~ can all be used before the speci
 Here are the guidelines I follow for using ~use-package~ keywords and the order I use them in.
 
 Package installation:
-- =:straight= to specify recipes for custom or local packages
+- =:straight= to specify recipes for custom or local packages (don't use ~straight-override-recipe~ when using =:straight= for clarity as it will inherit from the default recipe when used before the use-package statement or it will be too late if used after the use-package statement)
 
 Package loading:
 - =:disabled= for disabled packages (e.g. unused themes)
@@ -607,6 +607,9 @@ Install, load, and configure =straight.el=:
       straight-host-usernames '((github . "noctuid")
                                 (gitlab . "noctuid")))
 
+;; reset recipe overrides (for reloading config)
+(setq straight-recipe-overrides nil)
+
 ;; Install and load straight.el
 ;; https://github.com/raxod502/straight.el#getting-started
 (defvar bootstrap-version)
@@ -635,6 +638,8 @@ Install, load, and configure =straight.el=:
             (car args))
           noct-straight-packages)))
 (advice-add 'straight-use-package :around #'noct-straight-use-package)
+;; need to do this early again to prevent "org version mismatch" error
+(straight-use-package 'org)
 #+end_src
 
 *** Use-package
@@ -690,16 +695,16 @@ Principles:
 - Use =:general= and =:ghook= keywords for keybindings and hooks meant to load packages.
 - Use ~general-with-package~ instead of ~use-package~ if the ~use-package~ statement would only have =:config= and not install the package (like ~with-eval-after-load~ but allows automatically recording the package name with keybindings and settings). All general functions should appear in either a ~general-with-package~ or a ~use-package~ statement if there is a specific, corresponding package.
 #+begin_src emacs-lisp
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(general :protocol ssh :local-repo "~/src/emacs/general")))
 (use-package general
-  :straight (general
-             :protocol ssh
-             :local-repo "~/src/emacs/general")
   :demand t)
 
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(annalist :protocol ssh :local-repo "~/src/emacs/annalist")))
 (use-package annalist
-  :straight (annalist
-             :protocol ssh
-             :local-repo "~/src/emacs/annalist")
   :gfhook
   ('annalist-describe-hook #'noct-bind-q-to-quit)
   ('annalist-describe-hook (noct-disable visual-fill-column-mode)))
@@ -1004,11 +1009,13 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
 (general-def :keymaps noct-minibuffer-maps
   "¸" #'evil-delete-backward-word)
 
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(evil-collection
+     :protocol ssh
+     :local-repo "~/src/forks/evil-collection"
+     :fork t)))
 (use-package evil-collection
-  :straight (evil-collection
-             :local-repo "~/src/forks/evil-collection"
-             :protocol ssh
-             :fork t)
   :config
   (defun noct-make-evil-collection-translations (mode mode-keymaps &rest _rest)
     (when mode-keymaps
@@ -1250,7 +1257,9 @@ Now that =general.el= and =evil= are installed, I set up some keybindings for in
   "c" #'straight-check-all
   "f" #'straight-freeze-versions
   "t" #'straight-thaw-versions
-  "u" #'straight-use-package)
+  "u" #'straight-use-package
+  "n" #'straight-normalize-package
+  "N" #'straight-normalize-all)
 #+end_src
 
 ** Hydra
@@ -2580,7 +2589,7 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
 TODO don't delete old window/mess up things
 #+begin_src emacs-lisp
 (use-package frog-menu
-  :straight (:host github :repo "clemera/frog-menu" :fork t :protocol ssh)
+  :straight (frog-menu :host github :repo "clemera/frog-menu")
   :config
   (general-after 'avy
     (gsetq frog-menu-avy-keys avy-keys))
@@ -3654,11 +3663,11 @@ Sets missing metadata for completions (pairs well with embark even if not using 
 ** Framegroups
 #+begin_src emacs-lisp
 (use-package framegroups
-  :straight (framegroups
-             :host github
-             :repo "noctuid/framegroups.el"
-             :protocol ssh
-             :local-repo "~/src/emacs/framegroups")
+  :straight `(framegroups :host github :repo "noctuid/framegroups.el"
+                          ,@(if noct-personal-computer-p
+                                (list :protocol 'ssh
+                                      :local-repo "~/src/emacs/framegroups")
+                              (list :protcol nil)))
   :general
   ;; TODO bind globally on middle mouse on primary computer
   (general-spc
@@ -4439,7 +4448,9 @@ A helper library for inserting icons (used by other packages in my config).
   :config
   (gsetq doom-modeline-buffer-encoding 'nondefault)
   (general-after-gui
-    (gsetq doom-modeline-height (noct-mode-line-height))
+    (gsetq doom-modeline-height (noct-mode-line-height)
+           ;; for some reason normal panel's height is broken otherwise
+           doom-modeline-hud t)
     ;; TODO why does the `buffer-live-p' check fail for Messages?
     (dolist (bname '(
                      ;; "*scratch*"
@@ -4858,14 +4869,16 @@ Soft wrap lines at =fill-column=.
 * Text Editing/Interaction
 ** =rect-ext.el=
 #+begin_src emacs-lisp
-;; TODO eventualy switch to more generic narrowing solution
+;; TODO eventually switch to more generic narrowing solution
 (use-package rect-ext
   :disabled t
-  :straight (rect-ext
-             :host github
-             :repo "noctuid/rect-ext.el"
-             :protocol ssh
-             :local-repo "~/src/emacs/rectangle-ext/")
+  :straight `(rect-ext
+              :host github
+              :repo "noctuid/rect-ext.el"
+              ,@(if noct-personal-computer-p
+                    (list :protcol 'ssh
+                          :local-repo "~/src/emacs/rectangle-ext/")
+                  (list :protocol nil)))
   :general
   ('normal
    [remap evil-ex] #'rect-ext-evil-ex))
@@ -5304,7 +5317,7 @@ Linear undo while maintaining all history. Not as nice as being able to navigate
 
 ;; ignores encrypted files by default
 (use-package undo-fu-session
-  :init (global-undo-fu-session-mode))
+  :init (undo-fu-session-global-mode))
 #+end_src
 
 *** Undo Tree
@@ -5410,18 +5423,16 @@ Currently trying with vundo only.
 Still experimental.
 #+begin_src emacs-lisp
 (use-package things
-  :straight (things
-             :host github
-             :repo "noctuid/things.el"
-             :protocol ssh
-             :local-repo "~/src/emacs/things"))
+  :straight `(things
+              :host github
+              :repo "noctuid/things.el"
+              ,@(if noct-personal-computer-p
+                    (list :protcol 'ssh
+                          :local-repo "~/src/emacs/things")
+                  (list :protocol nil))))
 
 (use-package things-evil
-  :straight (things-evil
-             :host github
-             :repo "noctuid/things.el"
-             :protocol ssh
-             :local-repo "~/src/emacs/things")
+  :straight nil
   :ghook
   ('(evil-operator-state-entry-hook
      evil-visual-state-entry-hook)
@@ -5681,11 +5692,13 @@ TODO Use things.el instead.
 *** Sentence Navigation
 Needs to be updated to use =things.el= and needs to have more tests.
 #+begin_src emacs-lisp
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(sentence-navigation
+     :protocol ssh
+     :local-repo "~/src/emacs/sentence-navigation")))
 (use-package sentence-navigation
   :disabled t
-  :straight (sentence-navigation
-             :protocol ssh
-             :local-repo "~/src/emacs/sentence-navigation")
   :general
   ;; TODO different keybinding?
   ('normal
@@ -5705,12 +5718,15 @@ Needs to be updated to use =things.el= and needs to have more tests.
 *** Column Text Object
 Needs to be updated to use =things.el= and needs to have more tests.
 #+begin_src emacs-lisp
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(evil-textobj-column
+     :protocol ssh
+     :local-repo "~/src/emacs/evil-textobj-column")))
 (use-package evil-textobj-column
   :straight (evil-textobj-column
              :host github
-             :repo "noctuid/evil-textobj-column"
-             :protocol ssh
-             :local-repo "~/src/emacs/evil-textobj-column")
+             :repo "noctuid/evil-textobj-column")
   :general ('inner
             "k" #'evil-textobj-column-word
             "K" #'evil-textobj-column-WORD))
@@ -5776,10 +5792,12 @@ This package is unfortunately unmaintained.
 
 ** Link Hint
 #+begin_src emacs-lisp
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(link-hint
+     :protocol ssh
+     :local-repo  "~/src/emacs/link-hint/")))
 (use-package link-hint
-  :straight (link-hint
-             :protocol ssh
-             :local-repo  "~/src/emacs/link-hint/")
   :general
   (general-t
     "f" #'link-hint-open-link
@@ -6617,7 +6635,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
     (unless buffer-read-only
       (apply orig-fun args)))
   (general-add-advice 'spell-fu-mode-turn-on :around #'noct-maybe-enable-spell-fu)
-  (noct-after-buffer (global-spell-fu-mode))
+  (noct-after-buffer (spell-fu-global-mode))
   :config
   (gsetq-default spell-fu-faces-exclude
                  (cl-union '(org-block org-block-begin-line)
@@ -7847,12 +7865,14 @@ TODO
 - probably split this section up
 
 #+begin_src emacs-lisp
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(lispy
+     :local-repo "~/src/forks/lispy"
+     :protocol ssh
+     :fork t)))
 ;; TODO why is hydra/lv loaded?! (even if never load lispy)
 (use-package lispy
-  :straight (lispy
-             :local-repo "~/src/forks/lispy"
-             :protocol ssh
-             :fork t)
   :defer-incrementally
   (mode-local
    lispy-tags
@@ -8027,10 +8047,10 @@ This ensures that cider's evaluations fringe indicators are up-to-date."
         ;; easy way to undo unwanted wrap on reaction
         ;; instead of planning with a prefix arg
         (define-key map ")"
-          (lambda ()
-            (interactive)
-            (call-interactively #'lispy-barf-to-point)
-            (backward-char)))
+                    (lambda ()
+                      (interactive)
+                      (call-interactively #'lispy-barf-to-point)
+                      (backward-char)))
         (set-transient-map map))))
 
   (general-add-advice 'lispy-parens-auto-wrap :after #'noct-paren-advice)
@@ -8041,10 +8061,12 @@ This ensures that cider's evaluations fringe indicators are up-to-date."
 
 *** Lispyville
 #+begin_src emacs-lisp
+(when noct-personal-computer-p
+  (straight-override-recipe
+   '(lispyville
+     :protocol ssh
+     :local-repo "~/src/emacs/lispyville/")))
 (use-package lispyville
-  :straight (lispyville
-             :protocol ssh
-             :local-repo "~/src/emacs/lispyville/")
   :ghook 'lispy-mode-hook
   :blackout ((lispyville-mode . (lispyville-mode-line-string " 🍙" " 🍙")))
   :config
