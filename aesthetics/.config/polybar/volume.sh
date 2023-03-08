@@ -11,7 +11,10 @@
 source ~/.cache/wal/colors.sh
 
 print_volume() {
-	headphones=$(amixer -c 0 contents | grep "Headphone Jack'" -A 2 \
+	# to /dev/null to prevent printing this error which happens occasionally:
+	# amixer: Control sysdefault:0 element read error: Invalid argument
+	headphones=$(amixer -c 0 contents 2> /dev/null \
+					 | grep "Headphone Jack'" -A 2 \
 					 | awk -F "=" 'NR==3 { print $2 }')
 
 	percent=$(pamixer --get-volume)
