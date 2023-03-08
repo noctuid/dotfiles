@@ -8970,7 +8970,7 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= so autoenv and pyr
     (general-pushnew (cons 'bash-ts-mode "shellscript")
                      lsp-language-id-configuration))
   (general-with 'flycheck
-    (setf (flycheck-checker-get 'sh-bash 'modes) (list 'sh-mode 'bash-ts-mode))
+    (put 'sh-bash 'flycheck-modes (list 'sh-mode 'bash-ts-mode))
     (general-pushnew 'zsh flycheck-shellcheck-supported-shells)))
 
 (use-package company-shell
