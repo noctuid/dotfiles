@@ -155,7 +155,7 @@ do
 			case $OPTION in
 				timezone) timezone=$OPTARG;;
 				hostname) hostname=$OPTARG;;
-				username) username=$OPTARG;;
+				user) user=$OPTARG;;
 				log-level) log_level=$OPTARG;;
 				use-salt) use_salt=true;;
 				force-reflector) force_reflector=true;;
@@ -168,9 +168,6 @@ do
 done
 
 # * Helpers
-# for restow
-export PATH="$uhome"/bin:"$PATH"
-
 prompt_continue() {
 	echo "continue? [y/n]"
 	read -r reply
@@ -232,7 +229,7 @@ time_setup() {
 # ** Locale
 locale_setup() {
 	echo "Performing locale configuration."
-	echo "en_US.UTF-8 UTF-8" > /etc/locale.gen | return 1
+	echo "en_US.UTF-8 UTF-8" > /etc/locale.gen || return 1
 	# necessary because of Emacs bug
 	echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen \
 		&& locale-gen \
@@ -285,7 +282,7 @@ install_paru() {
 		chown "$user":"$user" "$build_dir" \
 			&& cd "$build_dir" \
 			&& sudo -u "$user" makepkg --noconfirm -fsr \
-			&& pacman --noconfirm -U *.pkg.tar.xz
+			&& pacman --noconfirm -U -- *.pkg.tar.xz
 	fi
 }
 
@@ -305,10 +302,12 @@ install_emacs_lucid() {
 }
 
 # * Home Config Setup
-home_config_setup() {
+home_config_setup() { # <user>
 	echo "Symlinking user config files."
+	cp "$uhome"/bin/restow /usr/local/bin
 	pac_install stow \
-		&& HOME="$uhome" restow
+		&& sudo -u "$1" restow
+	rm /usr/local/bin/restow
 }
 
 # * Install Package Managers
@@ -489,7 +488,7 @@ setup_salt() {
 	rm -r /srv/salt &> /dev/null
 	mkdir -p /srv/salt
 	# cd to the directory of this script
-	cd "$basedir"
+	cd "$basedir" || exit 1
 	cp ./top.sls /srv/salt
 	cp ./user_groups.sls /srv/salt
 	cp ./root_config.sls /srv/salt
@@ -529,10 +528,10 @@ generate_packages_sls() {
 			continue
 		fi
 
-		package=$(echo $line | awk '{print $1}')
-		method=$(echo $line | awk '{print $2}')
+		package=$(echo "$line" | awk '{print $1}')
+		method=$(echo "$line" | awk '{print $2}')
 		method=${method:-pac}
-		nix_path=$(echo $line | awk '{print $3}')
+		nix_path=$(echo "$line" | awk '{print $3}')
 
 		echo "$package-pkg:" >> "$basedir"/packages.sls
 		# 		if [[ $method == pac ]]; then
@@ -610,10 +609,105 @@ generate_packages_sls() {
 
 # * No Salt
 # ** User Groups
-update_user_groups() {
+update_user_groups() { # <user>
+	local user
+	user=$1
 	echo "Updating ${user}'s groups."
 	# https://wiki.archlinux.org/index.php/users_and_groups#Group_list
-	usermod --append --groups wheel,uucp,games,lock "$user"
+	usermod --append --groups users,wheel,uucp,games,lock,input,uinput "$user"
+}
+
+validate_user() { # <user>
+	local user
+	user=$1
+	if ! id -u "$user"; then
+		echo "Please create $user:
+- useradd --create-home $user
+- passwd $user
+
+Note that this script will take care of adding the user to groups."
+		exit 1
+	fi
+	if [[ "$(passwd --status "$user" | awk '{print $2}')" == NP ]]; then
+		echo "Please give $user a password
+- passwd $user"
+		exit 1
+	fi
+}
+
+share_directory_with_secondary_user() { # <dirname under home> <user2> <git repo?>
+	local name dir user2 uhome2
+	name=$1
+	dir=$uhome/$name
+	user2=$2
+	uhome2=/home/$user2
+	chown -R :users "$dir"
+	find "$dir" -exec chmod g=u {} +
+
+	# set sgid bit to ensure newly created files in dir get "users" as the group
+	find "$dir" -type d -exec chmod g+s "$dir" {} +
+
+	# set default permissions for group to be same as user
+	setfacl -R -d -m g::rwX "$dir"
+
+	ln -sf "$dir" "$uhome2/"
+	# change symlink permissions
+	chown --no-dereference "$user2":"$user2" "$uhome2/$name"
+
+	# just store manually in .gitconfig in this repo
+	# if [[ -n $git ]]; then
+	# 	sudo -u "$user2" git config --global --add safe.directory "$dir"
+	# fi
+}
+
+configure_secondary_user() { # <user>
+	local user2
+	user2=$1
+	uhome2=/home/$user2
+	validate_user "$user2"
+	update_user_groups "$user2"
+
+	# hide primary user's files from secondary users
+	# leave x bit to allow cd into (so can have rwx permissions on some
+	# subdirectories)
+	chmod 710 "$uhome"
+	chown :users "$uhome"
+
+	# share dotfiles directory with secondary user
+	share_directory_with_secondary_user dotfiles "$user2" true
+	# create straight before stow to prevent Emacs packages from being installed
+	# in main user's dotfiles directory
+	sudo -u "$user2" mkdir -p "$uhome2"/.emacs.d/straight
+	# prevent new profile from being stored in dotfiles (user.normal is correct,
+	# not user2)
+	sudo -u "$user2" mkdir -p \
+		 "$uhome2"/.mozilla/firefox/"$user".normal/chorme/_userChrome.css
+	sudo -u "$user2" mkdir -p "$uhome2"/.config/fcitx
+	sudo -u "$user2" mkdir -p "$uhome2"/.config/ranger/plugins
+	# remove default bashrc to prevent conflict with restow
+	rm -f "uhome2"/.bashrc
+
+	# symlink dotfiles with stow
+	home_config_setup "$user2"
+
+	# set up wallpaper
+	sudo -u "$user2" mkdir -p "$uhome2"/.config/setroot
+	cp "$uhome"/wallpaper/secondary "$uhome2"/wallpaper_image
+	echo "setroot '--zoom' '$uhome2/wallpaper_image'" > \
+		 "$uhome2"/.config/setroot/.setroot-restore
+	chown "$user2":"$user2" "$uhome2"/.config/setroot/.setroot-restore
+	chmod +x "$uhome2"/.config/setroot/.setroot-restore
+
+	echo "
+- Manually run \"walset /home/$user2/wallpaper_image\" as $user2 to set up pywal
+- Install firefox plugins
+- Run :installnative in firefox after installing tridactyl
+- Prefix I in tmux to install plugins
+- Future work:
+  - run home-manager for different user
+  - Gruvbox wallpaper and theme?
+  - Separate git config/signing setup"
+
 }
 
 # ** Copy Root Config files
@@ -637,10 +731,10 @@ copy_root_config_files() {
 # ** Package Installation
 install_package() {
 	line=$1
-	package=$(echo $line | awk '{print $1}')
-	method=$(echo $line | awk '{print $2}')
+	package=$(echo "$line" | awk '{print $1}')
+	method=$(echo "$line" | awk '{print $2}')
 	method=${method:-pac}
-	nix_path=$(echo $line | awk '{print $3}')
+	nix_path=$(echo "$line" | awk '{print $3}')
 
 	if [[ $method == pac ]]; then
 		pac_install "$package"
@@ -712,22 +806,14 @@ configure_packages() {
 	"$basedir"/extra-setup all "$user"
 }
 
-# ** Enable Services
+# ** Nix User Packages (Home Manager)
+nix_user_setup() {
+	home-manager switch --flake '<flake-uri>#jdoe'
+}
+
 # * Main
 default() {
-	if ! id -u "$user"; then
-		echo "Please create $user:
-- useradd $user
-- passwd $user
-
-Note that this script will take care of adding the user to groups."
-		exit 1
-	fi
-	if [[ "$(passwd --status "$user" | awk '{print $2}')" == NP ]]; then
-		echo "Please give $user a password
-- passwd $user"
-		exit 1
-	fi
+	validate_user "$user"
 
 	echo "Prerequisites:
 - Inside chroot (or on existing installation that should be updated)
@@ -742,11 +828,8 @@ Current variables:
 - Hostname: $hostname
 - Username: $user
 - Log level: $log_level
-- Timeout: $timeout
 - Using salt?: $use_salt
 - Force reflector update?: $force_reflector
-
-Operation: ${1:-everything}
 
 Please make sure that the ESP is already mounted under /boot/efi if installing a
 new system.
@@ -762,7 +845,7 @@ See $log and $failure_log for info after run."
 	locale_setup || fail_echo "Failed to update locale configuration."
 	hostname_setup || fail_echo "Failed to set hostname."
 
-	home_config_setup || fail_echo "Failed to setup dotfiles with stow."
+	home_config_setup "$user" || fail_echo "Failed to setup dotfiles with stow."
 
 	update_mirror_list || fail_echo "Failed to update pacman mirror list."
 	if ! install_paru; then
@@ -777,7 +860,7 @@ See $log and $failure_log for info after run."
 		setup_salt
 		salt-call --log-level "$log_level" --local state.apply
 	else
-		update_user_groups || fail_echo "Failed to update user groups."
+		update_user_groups "$user" || fail_echo "Failed to update user groups."
 		copy_root_config_files || fail_echo "Failed to copy root config files."
 		install_packages
 		install_nix_packages
@@ -807,6 +890,7 @@ case $1 in
 	fix) copy_root_config_files \
 			   && "$basedir"/extra-setup refind_setup \
 			   && "$basedir"/extra-setup initramfs_setup;;
+	user) configure_secondary_user "$2";;
 	emacs) install_emacs_lucid true;;
 	nix) install_nix_packages "$2";;
 	*) default 2>&1 | tee "$log";;

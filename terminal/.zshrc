@@ -615,7 +615,7 @@ fl() {
 }
 
 # ** Backup & Mounting
-if [[ -f ~/.zsh/backup.zsh ]]; then
+if [[ -f ~/.zsh/backup.zsh ]] && [[ $USER == noctuid ]]; then
 	source ~/.zsh/backup.zsh
 fi
 

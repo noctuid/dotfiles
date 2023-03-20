@@ -5,4 +5,5 @@ cat ~/.cache/wal/colors.css \
 	~/.config/tridactyl/themes/custom_template.css \
 	> ~/.config/tridactyl/themes/custom.css
 
-firefox
+# new instance to allow running multiple profiles at once
+firefox --new-instance

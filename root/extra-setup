@@ -186,7 +186,7 @@ transmission_setup() {
 	# for config file and other directories (e.g. resume)
 	chown -R transmission:transmission /var/lib/transmission
 	# give transmission user and group rwx permissions
-	chmod -R 775 /home/transmission
+	chmod -R 770 /home/transmission
 	# add user to transmission group
 	gpasswd -a "$user" transmission
 }

@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # meant to be called before starting X to restore
-# does not reload for running aplications
+# does not reload for running applications
 
 # wal version breaks stumpwm; what about this?
-~/.config/wpg/wp_init.sh &> /dev/null
+setup_file=~/.config/wpg/wp_init.sh
+if [[ -f $setup_file ]]; then
+	"$setup_file" &> /dev/null
+fi
 
 # wpg merges user .Xresources afterwards (and mine contains default colors)
 # redo colors

@@ -23,3 +23,6 @@
 	# https://git-scm.com/docs/git-config#git-config-tagforceSignAnnotated
 	# sign annotated tags
 	forceSignAnnotated = true
+[safe]
+	# allow other users to edit dotfiles
+	directory = /home/noctuid/dotfiles

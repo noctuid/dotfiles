@@ -1,3 +1,8 @@
 #!/usr/bin/env zsh
-source ~/.zsh/backup.zsh
-"$@"
+if [[ $USER == noctuid ]]; then
+	source ~/.zsh/backup.zsh
+	"$@"
+else
+	echo "Scripts meant for primary user data."
+fi
+

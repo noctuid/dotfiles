@@ -8,6 +8,23 @@
 # TODO some way to do light theme instead (may not use)
 #      -l pywal, -L wpg
 
+# * Pre-parse arguments
+if [[ $1 == --theme ]]; then
+	# use walset with a pre-existing theme rather than generating one from the
+	# wallpaper (e.g. when using)
+
+	# example themes:
+	# base16-gruvbox-medium
+	# gruvbox
+	# base16-gruvbox-soft
+	# base16-gruvbox-hard
+	# base16-gruvbox-pale
+	# base16-nord
+
+	theme=$2
+	shift 2
+fi
+
 # * Set Wallpaper
 echo "Setting wallpaper"
 bgset "$@" &
@@ -22,6 +39,12 @@ wallpaper=$(realpath "${@: -1}")
 
 echo "Generating colorscheme with wpg"
 wpg -a "$wallpaper"
+
+if [[ -n $theme ]]; then
+	echo "Associating builtin theme $theme with wallpaper instead"
+	wpg -Ti "$wallpaper" "$theme"
+fi
+
 echo "Applying colorscheme with wpg"
 # NOTE: this command will mess up terminal output regardless of how it is run
 # (and even with --no-reload)
