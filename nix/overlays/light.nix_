@@ -1,0 +1,12 @@
+# fails to build
+final: prev: {
+  picom = prev.light.overrideAttrs (old: {
+    src = prev.fetchFromGitHub {
+      owner = "haikarainen";
+      repo = "light";
+      rev = "c5fb45423ec1ee1080e442e061ccfcdb98b32e4a";
+      sha256 = "sha256-8v9ytywv2+/qqN94g44vHMGsbKueYSDXq76wo95pSFE=";
+    };
+  });
+}
+

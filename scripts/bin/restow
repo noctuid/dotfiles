@@ -5,6 +5,6 @@ cd ~/dotfiles || exit 1
 
 # organized by category for more clear separation and so can have readmes in
 # each dir without conflict
-stow -Rvt ~/ aesthetics browsing common common_lisp emacs \
-	 games input mail media music remap scripts startup terminal vim wm \
+stow -Rvt ~/ aesthetics browsing common common_lisp emacs games input mail \
+	 media music remap scripts startup terminal vim wm \
 	 .aesthetics .browsing .common .emacs .mail .media .music

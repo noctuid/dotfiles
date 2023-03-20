@@ -82,6 +82,7 @@ rldkbd
 
 # faster key repeat rate and shorter delay (default is 660 25)
 # https://github.com/39aldo39/klfc/issues/10
+# 400ms wait, 35 repeats per second
 xset -r 25
 xset r rate 400 35
 

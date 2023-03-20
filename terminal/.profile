@@ -20,7 +20,14 @@ export BROWSER=firefox
 # export SHELL=/bin/zsh
 
 export SOURCE=$HOME/src
-export NIXPKGS=$SOURCE/nixpkgs
+
+# fix locale issues for packages installed with nix (e.g. rofi and xtitle)
+# https://github.com/NixOS/nixpkgs/issues/6878
+export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
+# https://github.com/NixOS/nixpkgs/issues/34603#issuecomment-1242546619
+# fix cursor size when cursor on nix GUI applications; doesn't fix for root
+# window when herbstluftwm installed through nix
+export XCURSOR_PATH=$HOME/.local/share/icons:$HOME/.nix-profile/share/icons:/usr/share/icons
 
 export GUIX_PROFILE=$HOME/.guix-profile
 # prevent guix from breaking a lot of things (e.g. finding icons in firefox) by

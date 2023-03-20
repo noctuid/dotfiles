@@ -22,7 +22,7 @@ pacman-contrib
 yay aur
 
 # * Nix
-nix aur
+nix
 
 # * Booatloader
 refind-efi
@@ -118,7 +118,6 @@ acpi
 tlp
 # for thinkpad charging/discharging rates
 acpi_call-dkms
-powertop
 
 # * Performance
 preload aur
@@ -141,8 +140,6 @@ kitty
 xterm
 rxvt-unicode
 urxvt-perls
-termite
-termite-terminfo
 xst-git aur
 
 # * Shell/TUI/CLI
@@ -201,6 +198,8 @@ bat
 bat-extras
 delta
 
+jq
+
 # * Editors
 # emacs is installed directly in post-install
 # emacs-git-shallow aur
@@ -227,7 +226,6 @@ w3m
 mpv
 pqiv
 # mpv-git aur
-gallery-dl-git aur
 # color picker
 gpick
 
@@ -241,7 +239,7 @@ winetricks
 # * DOC, PPT, etc. Editing/Conversion
 libreoffice-fresh
 unoconv
-pandoc
+pandoc-cli
 wkhtmltopdf
 # for pdfunite, pdftotext (ranger preview), etc.
 poppler
@@ -347,6 +345,9 @@ hunspell-en_US
 aspell-en
 enchant
 sdcv
+
+# nix does not provide /usr/share/dict/words
+# NixOS has an option: https://github.com/NixOS/nixpkgs/issues/16545
 words
 
 # grammar
@@ -369,8 +370,6 @@ msmtp-mta
 # mu and mu4e (email client)
 mu-git aur
 
-# http://www.djcbsoftware.nl/code/mu/mu4e/Reading-messages.html#Reading-messages
-nspluginwrapper
 # used for formail to get header information
 procmail
 
@@ -378,7 +377,7 @@ procmail
 pipewire
 pipewire-pulse
 # parametric eq using pipewire
-jamesdsp-git
+jamesdsp-git aur
 
 # for amixer and alsamixer
 alsa-utils
@@ -416,6 +415,7 @@ pylast pip
 
 # * Downloading
 yt-dlp
+gallery-dl-git aur
 
 aria2
 megatools aur
@@ -452,6 +452,8 @@ dunst
 rofi
 
 # * Fonts
+ttf-delugia-code aur
+
 # includes cantarell, ubuntu, droid, gsfonts, liberation, noto, etc.
 fonts-meta-extended-lt aur
 ttf-dejavu
@@ -510,8 +512,11 @@ polybar-git aur
 setroot aur
 xtitle-git aur
 numix-gtk-theme
+numix-cursor-theme-git aur
+
 # for icons
 numix-icon-theme-git aur
+
 # for framebuffer colors
 setcolors-git aur
 # colorscheme generation/setup from wallpaper
@@ -673,7 +678,6 @@ racket
 # ** Bash/Shell Scripting
 bash-language-server
 shellcheck
-jq
 
 # ** Web - JavaScript, TypeScript, etc.
 nodejs
@@ -717,8 +721,7 @@ xsel
 xclip
 
 # hiding mouse
-# use after next release
-# unclutter
+# use after https://github.com/Airblader/unclutter-xfixes/issues/46
 # unclutter-xfixes-git aur
 
 # * Android

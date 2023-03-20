@@ -312,14 +312,28 @@ home_config_setup() {
 }
 
 # * Install Package Managers
-# ** TODO Nix
-# TODO fix; do extra necessary setup
-install_nix() {
-	# use nix install script
-	pacman -Q nix || aura -A nix
-	# TODO don't use aur; use install script and either need to delete /nix (maybe) or chown to user
-	# add unstable channell
-	# nix-channel --update
+# ** Nix
+# undecided whether it is a good idea to mix pacman and nix as a lot of
+# applications have issues (see OpenGL workarounds in linux packages file)
+install_nix_packages() { # <update?>
+	if ! pacman -Q nix; then
+		pacman -S nix
+		sudo -u "$user" nix-channel \
+			 --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+		sudo -u "$user" nix-channel \
+			 --add http://nixos.org/channels/nixpkgs-unstable nixpkgs
+		sudo -u "$user" nix-channel \
+			 --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
+		sudo -u "$user" nix-channel --update
+
+	fi
+	cd "$uhome"/dotfiles/nix || return 1
+	if [[ -n $1 ]]; then
+		sudo -u "$user" nix flake update
+	fi
+	# impure is required to be able to use nixgl
+	sudo -u "$user" nix run "path:.#homeConfigurations.noct.activationPackage" \
+		 --impure
 }
 
 # ** EVM
@@ -766,6 +780,7 @@ See $log and $failure_log for info after run."
 		update_user_groups || fail_echo "Failed to update user groups."
 		copy_root_config_files || fail_echo "Failed to copy root config files."
 		install_packages
+		install_nix_packages
 		install_mpv_scripts
 		configure_packages
 	fi
@@ -793,5 +808,6 @@ case $1 in
 			   && "$basedir"/extra-setup refind_setup \
 			   && "$basedir"/extra-setup initramfs_setup;;
 	emacs) install_emacs_lucid true;;
+	nix) install_nix_packages "$2";;
 	*) default 2>&1 | tee "$log";;
 esac
