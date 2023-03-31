@@ -7393,6 +7393,19 @@ If it doesn't have an extension, try to guess one."
                     #'doom-+editorconfig-disable-indent-detection-h))
 #+end_src
 
+*** Envrc (Direnv Integration)
+Envrc has a clear advantage over direnv.el in that it sets environment variables buffer-locally.  For nix, I am just using [[https://github.com/nix-community/nix-direnv][nix-direnv]] for persistence.  If performance ever becomes an issue, I will try [[https://github.com/nix-community/lorri][lorri]] (which uses a daemon), but for now it is fine.
+ #+begin_src emacs-lisp
+(use-package envrc
+  :when (executable-find "direnv")
+  :ghook ('on-first-file-hook #'envrc-global-mode)
+  :config
+  ;; https://github.com/doomemacs/doomemacs/blob/master/modules/tools/direnv/config.el
+  ;; Ensure babel's execution environment matches the host buffer's.
+  (advice-add #'org-babel-execute-src-block
+              :around #'envrc-propagate-environment))
+ #+end_src
+
 *** Prog Mode Setup
 #+begin_src emacs-lisp
 (general-add-hook 'after-save-hook
@@ -7595,7 +7608,7 @@ This is a maintained fork of =electric-spacing=.
 #+begin_src emacs-lisp
 (use-package electric-operator
   :ghook
-  'python-mode-hook
+  'python-base-mode-hook
   'c-mode-hook)
 #+end_src
 
@@ -8699,7 +8712,7 @@ TODO:
   (setq yyoncho-flycheck-local-cache
         '((lsp . ((next-checkers
                    .
-                   (python-flake8 python-pylint python-mypy))))))
+                   (python-pylint python-mypy))))))
   (lsp))
 
 (use-package python
@@ -8707,6 +8720,53 @@ TODO:
   (noct-handle-popup-other-window inferior-python-mode)
   :gfhook ('python-base-mode-hook #'noct-lsp-pyright))
 #+end_src
+
+*** Ruff LSP
+[[https://github.com/charliermarsh/ruff][Ruff]] does not replace these (see [[https://beta.ruff.rs/docs/faq/][the FAQ]]):
+- [[https://github.com/psf/black][black]] (is compatible with though)
+- [[https://github.com/python/mypy][mypy]] (ruff is a linter not a type checker)
+
+Ruff does not replaces these (at least not as of [2023-03-08 Wed]):
+- [[https://github.com/PyCQA/pylint][pylint]] (see [[https://github.com/charliermarsh/ruff/issues/970][issue 970]])
+- others in [[https://github.com/PyCQA/prospector][prospector]]
+  - [[https://github.com/landscapeio/dodgy][dodgy]]
+  - [[https://github.com/jendrikseipp/vulture][vulture]]
+  - [[https://github.com/regebro/pyroma][pyroma]]
+- [[https://github.com/MichaelKim0407/flake8-use-fstring][flake8-use-fstring]]
+- [[https://github.com/peterjc/flake8-rst-docstrings][flake8-rst-docstrings]]
+- [[https://github.com/PyCQA/flake8-import-order][flake8-import-order]]
+- [[https://github.com/tyleryep/flake8-future-annotations][flake8-future-annotations]]
+- [[https://github.com/rubik/radon][radon]] (which [[https://github.com/klen/pylama][pylama]] supports, though I don't really need it)
+
+Example configuration:
+ #+begin_src toml
+[tool.ruff]
+# increase line length to 100
+line-length = 100
+# support Python 3.11+
+target-version = "py311"
+# allow imports relative to the "src" and "test" directories
+src = ["src", "test"]
+# add additional rules
+select = [
+  # defaults
+  "E",   # pycodestyle, omits stylistic checks covered by black
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "D",   # pydocstyle
+  # ...
+]
+# github actions annotations
+# format = "github"
+ #+end_src
+
+ #+begin_src emacs-lisp
+(use-package lsp-ruff-lsp
+  :straight nil
+  :after lsp-mode
+  :demand t)
+ #+end_src
 
 *** LPY
 #+begin_src emacs-lisp
@@ -8902,7 +8962,9 @@ Setup
 - ~hatch run x~
 
 *** Pyenv and Auto-Virtualenv
-Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= so autoenv and pyright can easily use virtual environments created by hatch.
+Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = true= in the poetry config.toml so autoenv and pyright can easily use virtual environments created by hatch.
+
+[[https://github.com/wyuenho/emacs-pet][emacs-pet]] makes this unnecessary (automatically handling a lot of different project types), though it currently requires external dependencies, and auto-virtualenv is working well enough currently for my use-case.
 
 #+begin_src emacs-lisp
 (use-package pyvenv

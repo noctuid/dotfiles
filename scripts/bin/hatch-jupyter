@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# necessary for ein:jupyter-server-command, which requires a single command
+hatch run -- jupyter "$@"

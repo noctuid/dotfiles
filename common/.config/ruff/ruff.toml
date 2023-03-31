@@ -1,0 +1,79 @@
+# would be nice to have
+# - full pylint support (https://github.com/charliermarsh/ruff/issues/970)
+# - https://github.com/landscapeio/dodgy
+# - https://github.com/jendrikseipp/vulture
+# - https://github.com/tyleryep/flake8-use-fstring
+# - https://github.com/regebro/pyroma
+# - https://github.com/peterjc/flake8-rst-docstrings
+
+# defaults (e.g. for small files outside of project)
+# increase line length to 100
+line-length = 100
+# support Python 3.10+
+target-version = "py310"
+
+# add additional rules
+select = [
+    # defaults
+    "E",   # pycodestyle, omits stylistic checks covered by black
+    "F",   # pyflakes
+    # add
+    # "C90", # mccabe
+    "I",   # isort
+    "N",   # pep8-naming
+    "D",   # pydocstyle
+    "UP",  # pyupgrade (detect old syntax, e.g. suggest using set literals)
+    "YTT", # flake8-2020 (detect sys.version misuse)
+    # if want to require type annotations
+    # "ANN", # flake8-annotations
+    "S",   # flake8-bandit (security checks)
+    # "BLE", # flake8-blind-except (also disallow except Exception:)
+    "B",   # flake8-bugbear (bug detection beyond pycodestyle)
+    "A",   # flake8-builtins (warn about shadowing builtins)
+    # not useful when already using black
+    # "COM", # flake8-comma (require trialing commas)
+    # some overlap with pyupgrade
+    "C4",  # flake8-comprehensions (set/list/dict comprehension suggestions)
+    "DTZ", # flake8-datetimez (require tz info when using datetime)
+    "T10", # flake8-debugger (ipdb/pdb statement checker)
+    "EM",  # flake8-errmsg (disallow using format strings directly when raising)
+    "EXE", # flake8-executable (shebang and executable bit checks) 
+    "ISC", # flake8-implicit-str-concat (e.g. disallow '111' '222' on same line)
+    # TODO not in official release
+    # "INC", # flake8-import-conventions (e.g. expect import numpy as np)
+    "G",   # flake8-logging-format (disallow format strings with logging; use extra= instead)
+    "INP", # flake8-no-pep420 (require __init__.py so as to not break tools that require)
+    "PIE", # flake8-pie (misc lints)
+    "T20", # flake8-print (check for print statements) 
+    "PYI", # flake8-pyi (lint stubs files)
+    "PT",  # flake8-pytest-style (check for common pytest style issues)
+    # "Q",   # flake8-quotes (enforce single or double quotes)
+    "RSE", # flake8-raise (detect unnecessary parens on raise)
+    "RET", # flake8-return (return statement linting)
+    "SLF", # flake8-self (disallow private member access)
+    "SIM", # flake8-simplify (rules to simplify code)
+    # TODO not in official release
+    # "TD",  # flake8-tidy-imports (e.g. ban some? relative imports)
+    # "TCH", # flake8-type-checking
+    "ARG", # flake8-unused-arguments
+    # "PTH", # flake8-use-pathlib (prefer pathlib functions over os.<whatever> and open())
+    # "ERA", # eradicate (disallow commented code)
+    "PD",  # pandas-vet (opinionated pandas linting)
+    "PGH", # pygrep-hooks (e.g. require ignoring specific codes, no eval())
+    # not using until can replace pylint completely
+    # "PL",  # pylint
+    "TRY", # tryceratops (detect exception handling anti-patterns)
+    "NPY", # numpy-specific rules (e.g. warn about deprecated/legacy code)
+    "RUF", # ruf-specific rules (e.g. unused noqa)
+]
+
+ignore = [
+    # do not require black line before class docstring (conflicts with D211)
+    "D203",
+    # do not require multi-line docstrings to start at second line (conflicts with D212)
+    "D213"
+]
+
+[per-file-ignores]
+# don't lint test files with bandit (e.g. assert is supposed to be used in tests)
+"test_*.py" = ["S"]

@@ -1492,6 +1492,11 @@ if $NOCT_INSTANT_PROMPT \
 	p10k-instant-prompt-finalize
 fi
 
+# * Direnv
+if hash direnv 2> /dev/null; then
+	eval "$(direnv hook zsh)"
+fi
+
 # * End Profiling
 if [[ -n $NOCT_PROFILE_ZSH ]]; then
 	zprof

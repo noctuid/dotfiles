@@ -8,6 +8,7 @@ P sh
 ! **/.ignore
 ! **/_no_backup
 ! **/.cask
+! **/.venv
 ! **/sandbox
 ! **/node_modules
 ! **/.emacs_backup

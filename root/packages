@@ -633,6 +633,11 @@ flake8
 python-pylint
 # type hint linting
 mypy
+# "Ruff can be used to replace Flake8 (plus dozens of plugins), isort,
+# pydocstyle, yesqa, eradicate, pyupgrade, and autoflake, all while executing
+# tens or hundreds of times faster than any individual tool."
+ruff
+ruff-lsp
 
 # *** Formatting
 # sort imports
