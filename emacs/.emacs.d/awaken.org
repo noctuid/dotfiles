@@ -4576,6 +4576,11 @@ Default modeline if doom-modeline is not installed.
   (force-mode-line-update))
 #+end_src
 
+** Emojify
+ #+begin_src emacs-lisp
+(use-package emojify)
+ #+end_src
+
 ** Evil Visual Mark Mode
 Display an overlay for evil marks in normal state.
 #+begin_src emacs-lisp
