@@ -4701,10 +4701,10 @@ Smartparens' version is unfortunately too slow.
   :config
   (general-with 'org
     (set-face-attribute 'org-level-1 nil :height 1.0 :weight 'semi-bold
-                        :background nil)
-    (set-face-attribute 'org-block nil :background nil)
-    (set-face-attribute 'org-block-begin-line nil :background nil)
-    (set-face-attribute 'org-ellipsis nil :background nil)))
+                        :background 'unspecified)
+    (set-face-attribute 'org-block nil :background 'unspecified)
+    (set-face-attribute 'org-block-begin-line nil :background 'unspecified)
+    (set-face-attribute 'org-ellipsis nil :background 'unspecified)))
 ;; doom-spacegrey
 
 (use-package kaolin-themes)
@@ -7524,8 +7524,8 @@ Doesn't work well (highlighting doesn't show up for new... goes away if go to li
   (gsetq fic-highlighted-words '("TODO" "FIXME" "OPTIMIZE" "HACK" "REVIEW" "BUG"))
 
   ;; remove white background
-  (set-face-attribute 'fic-face nil :background nil)
-  (set-face-attribute 'fic-author-face nil :background nil))
+  (set-face-attribute 'fic-face nil :background 'unspecified)
+  (set-face-attribute 'fic-author-face nil :background 'unspecified))
 #+end_src
 ***** Fixmee Mode
 Breaks syntax highlighting.
@@ -9350,12 +9350,12 @@ TODO ls alternative that does correct sorting
   ;;               dired-listing-switches
   ;;               "--color never --oneline --all -l")))
   (cl-case system-type
-    ('darwin
+    (darwin
      (when (executable-find "gls")
        (gsetq insert-directory-program "gls"
               dired-listing-switches noct-dired-listing-switches)))
     ;; use human readable sizes and put directories first
-    ('gnu/linux
+    (gnu/linux
      (gsetq insert-directory-program "ls"
             dired-listing-switches noct-dired-listing-switches))))
 #+end_src
@@ -9736,7 +9736,7 @@ Allows browsing archives.
 #+begin_src emacs-lisp
 (use-package dired-avfs
   :when (executable-find "avfs")
-  :after 'dired
+  :after dired
   :demand t)
 #+end_src
 
