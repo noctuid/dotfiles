@@ -7638,7 +7638,7 @@ This is a maintained fork of =electric-spacing=.
          ;; remove new-line
          '(idle-change save mode-enabled)
          ;; increase idle delay before linting
-         flycheck-idle-change-delay 1.5
+         flycheck-idle-change-delay 1
          ;; decrease delay before showing error
          flycheck-display-errors-delay 0.2)
 
@@ -7668,12 +7668,20 @@ Compared to other flycheck frontends, pos tip is pretty slow and can cause signi
 **** Flycheck Inline
 Seems fast but the addition of extra lines is jarring. I've updated the display function to show over the line after the error. It now handles multiple error messages (at the end of the buffer too).
 #+begin_src emacs-lisp
+(defun noct-maybe-flycheck-inline ()
+  "Enable `flycheck-inline-mode' if `lsp-mode' is not enabled."
+  (unless (bound-and-true-p lsp-mode)
+    (flycheck-inline-mode)))
+
 (use-package flycheck-inline
-  :ghook 'flycheck-mode-hook
+  :ghook ('flycheck-mode-hook #'noct-maybe-flycheck-inline)
   :config
   ;; NOTE: unicode prefix makes it shift the line down slightly
   ;; (defconst noct-flycheck-prefix "➵ ")
   (defconst noct-flycheck-prefix "~> ")
+
+  ;; disable when using lsp
+  (general-add-hook 'lsp-mode-hook (noct-disable flycheck-inline-mode))
 
   (defvar-local noct-flycheck-inline-last-error-point nil)
 
