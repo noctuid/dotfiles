@@ -1,0 +1,21 @@
+#!/usr/bin/env -S bb -cp ${HOME}/bin
+
+(ns wm.hc-open-app-for-tag
+  "Open the main app for the current tag/desktop."
+  (:require
+   [babashka.process :refer [sh]]
+   [bb.util :refer [sh-out]]))
+
+(defn -main
+  "Open the main app for the current tag/desktop."
+  []
+  (let [tag (sh-out ["herbstclient" "attr" "tags.focus.index"])]
+    (case tag
+      "0" (sh "vspotify")
+      "1" (sh "emacsclient -c -a ''")
+      "2" (sh "vfox")
+      "3" (sh "chromium")
+      "4" (sh "nsteam"))))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main))

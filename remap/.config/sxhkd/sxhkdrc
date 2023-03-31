@@ -78,11 +78,10 @@ alt + super + f
 alt + super + space
 	rofi -show run
 
-# edi[t]
+# open [t]ag app
 alt + super + t
-	emacsclient -c -a ""
+	hc_open_app_for_tag
 
-# v because was previously bound to vim...
 # use latest good emacs configuration
 alt + super + T
 	emacs --stable
