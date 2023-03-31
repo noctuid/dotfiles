@@ -65,6 +65,7 @@ unnamed-sdvx-clone-git aur
 # * Graphics/Drivers/Steam
 steam
 lib32-curl
+# opengl
 mesa
 # for steam?
 lib32-mesa
@@ -84,10 +85,16 @@ bbswitch-dkms
 # intel-virtual-output
 xf86-video-intel
 nvidia-dkms
+# contains opengl and vulkan drivers
 nvidia-utils
 # see linux-ck heading
 # needed for steam
 lib32-nvidia-utils
+
+# ** Vulkan
+vulkan-icd-loader
+# for testing vulkan
+vulkan-tools
 
 # * Security
 wireguard-tools

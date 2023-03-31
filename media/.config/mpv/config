@@ -17,8 +17,8 @@ save-position-on-quit
 # I have keybindings to switch between this and low-latency
 profile=gpu-hq
 
-# TODO vulkan (not working)
-# gpu-api=vulkan
+# testing
+gpu-api=vulkan
 
 # https://github.com/mpv-player/mpv/wiki/Display-synchronization
 # prefer changing audio speed to dropping frames ("a slight change in audio

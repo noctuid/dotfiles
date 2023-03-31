@@ -8,7 +8,9 @@ loop-playlist=inf
 # disappear and be unrecoverable
 force-window=yes
 
-profile=opengl-hq
+profile=gpu-hq
+# TODO messes up on some images (transparency? think it's some other property)
+# gpu-api=vulkan
 
 screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
 
