@@ -1254,6 +1254,7 @@ Now that =general.el= and =evil= are installed, I set up some keybindings for in
   "P" #'straight-pull-recipe-repositories
   "a" #'straight-pull-all
   "r" #'straight-rebuild-package
+  "R" #'straight-rebuild-all
   "c" #'straight-check-all
   "f" #'straight-freeze-versions
   "t" #'straight-thaw-versions
