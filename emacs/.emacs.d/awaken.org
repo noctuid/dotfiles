@@ -1996,6 +1996,12 @@ Obvious ones:
   :ghook ('pre-command-hook nil nil nil t))
 #+end_src
 
+** Reload
+ #+begin_src emacs-lisp
+(use-package reload
+  :straight (:host github :repo "progfolio/reload.el"))
+ #+end_src
+
 ** Reveal
 #+begin_src emacs-lisp
 (use-package reveal
