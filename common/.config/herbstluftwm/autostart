@@ -217,5 +217,5 @@ xrestart polybar herbstluftwm
 # unlock, just to be sure
 hc unlock
 
-# TODO why do I need to run this later now?
+# TODO why do I need to run this later now for herbstluftwm?
 rldkbd

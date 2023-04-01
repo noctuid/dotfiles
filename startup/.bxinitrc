@@ -77,6 +77,13 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 xset -b
 
 # * Keyboard/Input
+# Japanese input
+# TODO: it seems starting fcitx5 resets keyboard layout (at least when done
+# manually), so this should come before rldkbd; however I still have to run
+# rldkbd later for herbstluftwm and didn't for bspwm, so the issue must be
+# elsewhere
+fcitx5 &
+
 # setup keyboard layout (~/bin/rldkbd)
 rldkbd
 
@@ -85,9 +92,6 @@ rldkbd
 # 400ms wait, 35 repeats per second
 xset -r 25
 xset r rate 400 35
-
-# Japanese input
-fcitx5 &
 
 # hotkey daemon
 if [[ -z $NO_HOTKEY ]]; then
