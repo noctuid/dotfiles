@@ -350,6 +350,7 @@ virtualbox-host-dkms
 # * Spelling/Dictionary/Grammar/English
 hunspell-en_US
 aspell-en
+nuspell
 enchant
 sdcv
 

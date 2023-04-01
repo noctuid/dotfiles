@@ -6570,7 +6570,7 @@ of (command . word) to be used by `flyspell-do-correct'."
 **** Ace Flyspell
 #+begin_src emacs-lisp
 (use-package ace-flyspell
-  :general (general-r "s" #'noct-flyspell-dwim)
+  :disabled t
   :config
   (gsetq ace-flyspell-handler #'flyspell-correct-at-point)
 
@@ -6589,7 +6589,6 @@ pressing \".\" before selecting the word. Otherwise, correct it."
         (ace-flyspell-correct-word)))))
 #+end_src
 
-*** Flycheck Aspell
 *** Flycheck Hunspell
 #+begin_src emacs-lisp
 (use-package flycheck-hunspell
@@ -6609,7 +6608,6 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (use-package ispell
   :config
-  ;; TODO try enchant
 
   ;; http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
   ;; https://blog.binchen.org/posts/how-to-spell-check-functionvariable-in-emacs.html
@@ -6638,9 +6636,20 @@ pressing \".\" before selecting the word. Otherwise, correct it."
          '("--sug-mode=ultra" "--lang=en_US" "--camel-case")))
 #+end_src
 
+*** Jinx
+Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false positives than aspell so far, and I will probably switch to it completely and remove the rest of my spelling config.  ~jinx-correct~ doesn't have avy support, but it will jump to the closest word, which is good enough if you just fix all visible issues at once
+ #+begin_src emacs-lisp
+(use-package jinx
+  :init
+  (noct-after-buffer (global-jinx-mode))
+  :config
+  (general-r "s" #'jinx-correct))
+ #+end_src
+
 *** Spell Fu
 #+begin_src emacs-lisp
 (use-package spell-fu
+  :disabled t
   :when (executable-find "aspell")
   :init
   (defun noct-maybe-enable-spell-fu (orig-fun &rest args)

@@ -168,6 +168,7 @@ with pkgs; [
   aspellDicts.en
   hunspell
   hunspellDicts.en-us
+  nuspell
   enchant
   sdcv
 
