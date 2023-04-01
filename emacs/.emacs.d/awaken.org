@@ -4577,8 +4577,12 @@ Default modeline if doom-modeline is not installed.
 #+end_src
 
 ** Emojify
+Display and insert emojis.
  #+begin_src emacs-lisp
-(use-package emojify)
+(use-package emojify
+  :defer-incrementally t
+  :config
+  (global-emojify-mode))
  #+end_src
 
 ** Evil Visual Mark Mode
@@ -9967,6 +9971,63 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
 (use-package eshell-syntax-highlighting
   :ghook 'eshell-mode-hook)
 #+end_src
+
+** Ement.el
+ #+begin_src emacs-lisp
+(use-package ement
+  :init
+  ;; https://github.com/alphapapa/ement.el/issues/132
+  (defun noct-ement-connect-or-list-rooms ()
+    "List matrix rooms or connect if not connected."
+    (interactive)
+    (cond (ement-sessions
+           (call-interactively #'ement-list-rooms))
+          ((ement--read-sessions)
+           (call-interactively #'ement-connect))
+          (t
+           (ement-connect :user-id (concat "@" user-login-name ":matrix.org")
+                          :password (password-store-get "matrix")
+                          ;; use pantalaimon
+                          :uri-prefix "http://localhost:8009"))))
+  :general
+  (general-s "l" #'noct-ement-connect-or-list-rooms)
+  :gfhook ('ement-room-mode-hook (noct-disable display-line-numbers-mode))
+  :config
+  (gsetq ement-room-send-message-filter #'ement-room-send-org-filter)
+
+  (noct-handle-popup-same-window (rx "*Ement room description"))
+  (noct-handle-popup-same-window (rx "*Ement event"))
+  (noct-handle-popup-same-window (rx "*Ement compose"))
+
+  ;; TODO write reply in separate buffer command?
+  (defun noct-ement-send ()
+    "Reply if on an event, otherwise send a new message."
+    (interactive)
+    (if (ement-event-p (ewoc-data (ewoc-locate ement-ewoc)))
+        (call-interactively #'ement-room-write-reply)
+      (call-interactively #'ement-room-send-message)))
+
+  (general-def 'normal ement-room-list-mode-map
+    "q" #'quit-window
+    "RET" #'ement-room-list-RET
+    "S" #'ement-create-space
+    "C" #'ement-create-room)
+
+  (general-def 'normal ement-room-mode-map
+    "q" #'quit-window
+    "m" #'ement-room-transient
+    "i" #'ement-room-send-message
+    "o" #'ement-room-compose-message
+    "RET" #'noct-ement-send
+    "c" #'ement-room-edit-message
+    "d" #'ement-room-delete-message)
+
+  (general-def ement-room-minibuffer-map
+    "C-'" #'ement-room-compose-from-minibuffer)
+
+  (general-def 'normal ement-describe-room-mode-map
+    "q" #'quit-window))
+ #+end_src
 
 ** GPT and AI
 *** Get API Key

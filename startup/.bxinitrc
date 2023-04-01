@@ -154,6 +154,13 @@ dunstrun &
 # https://github.com/vehk/mpdnotify works well with mpdcron also
 mpd-notification -m "${XDG_MUSIC_DIR:-$HOME/music}" &
 
+# daemon for sending encrypted matrix messages
+# not in official repos and currently have installed through nix which doesn't
+# give a systemd unit file
+if ! pgrep pantalaimon; then
+	pantalaimon &
+fi
+
 # * Non-DE Daemons
 if [[ -z $NO_COMPOSITE ]]; then
 	# will mess things up if run with a DE like gnome or cinnamon that already

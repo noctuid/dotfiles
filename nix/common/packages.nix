@@ -18,6 +18,14 @@ with pkgs; [
   keybase
   kbfs
 
+  # for matrix
+  # will need to verify all other devices through panctl
+  # > list-devices - see available devices
+  # > start-verification tab tab <device to verify>
+  # confirm on other device
+  # > confirm verification <same args>
+  pantalaimon
+
 # * VCS
   git
   # for github auth token
