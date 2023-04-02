@@ -1429,6 +1429,18 @@ colors() (
 	done
 )
 
+# ** Printing
+# list available printers on network
+list-printers() {
+	lpinfo --include-schemes dnssd -v
+}
+
+add-printer() { # name uri
+	name=$1
+	uri=$2
+	lpadmin -p "$name" -E -v "$uri"
+}
+
 # * Kitty Fix
 # should be able to read terminfo correctly
 bindkey '\e[H'  beginning-of-line

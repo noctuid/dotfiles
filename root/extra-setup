@@ -40,10 +40,11 @@ service_setup() {
 	# systemctl enable fcron
 	systemctl enable ufw
 	systemctl enable resume@"$user"
-	# don't need immediately or frequently
-	# systemctl enable org.cups.cupsd
 	systemctl enable preload
 	systemctl enable systemd-modules-load
+	# printing/printer discovery
+	systemctl enable cups
+	systemctl enable avahi-daemon
 }
 
 # ** User Services

@@ -220,6 +220,8 @@ alias va view-archive
 alias view-google-cache js tri.excmds.open("https://www.google.com/search?q=cache:" + window.location.href)
 alias vgc view-google-cache
 
+alias cups open http://localhost:631/
+
 " * Key Bindings
 " ** Appearance
 " don't have a key to toggle showing tabs/menu with guiset because can just
@@ -239,7 +241,8 @@ unbind t
 unbind <spc>
 
 " ** Re-Source Config
-bind t. source
+" explicitly source correct file; have had issues using just "source"
+bind t. source ~/.config/tridactyl/tridactylrc
 
 " ** Colemak Swaps
 " TODO consider scrollpage 0.2

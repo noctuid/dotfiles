@@ -140,6 +140,10 @@ splix
 # hplip
 # gutenprint
 
+# for printer discovery
+avahi
+nss-mdns
+
 # * Terminals
 kitty
 
