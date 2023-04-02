@@ -3234,13 +3234,21 @@ file-finding commands)."
   (gsetq ivy-prescient-enable-filtering nil
          ivy-prescient-sort-commands
          ;; add `counsel-grep', `counsel-yank-pop', etc.
-         '(:not swiper swiper-isearch counsel-yank-pop
+         '(:not
+           swiper swiper-isearch counsel-yank-pop
            counsel-grep counsel-outline worf-goto counsel-org-goto
            counsel-semantic-or-imenu counsel-rg
            consult-line consult-imenu consult-yank-from-kill-ring
            consult-ripgrep consult-org-heading consult-compile-error
            consult-flycheck affe-grep))
   (ivy-prescient-mode))
+
+(use-package vertico-prescient
+  :after vertico
+  :demand t
+  :config
+  (gsetq vertico-prescient-enable-filtering nil)
+  (vertico-prescient-mode))
 #+end_src
 
 ** Restricto
@@ -3355,9 +3363,7 @@ https://github.com/raxod502/selectrum/issues/131#issuecomment-817191700"
 #+end_src
 
 ** Vertico
-I've switched to vertico due to some weird display issues with selectrum. Vertico is very simple nad just works.
-
-The only downside is the lack of prescient integration. Vertico supports recency sorting (using savehist) but not frecency. Like I was surprised to find orderless to be incredibly useful even though it does no sorting, I'll probably find recency sorting to be good enough as well. In any case, more complex sorting is best implemented elsewhere.
+I've switched to vertico due to some weird display issues with selectrum. Vertico is very simple and just works.  Selectrum is now deprecated in favor of it.
 #+begin_src emacs-lisp
 (use-package vertico
   ;; specify to get extensions
