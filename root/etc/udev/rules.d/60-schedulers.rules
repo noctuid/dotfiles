@@ -1,4 +1,16 @@
-# use BFQ for everything
-# elevator=bfq no longer works after bfq was merged into linux
-# scsi_mod.use_blk_mq=1 is required in kernel parameters
-ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/scheduler}="bfq"
+# Linux-zen (https://liquorix.net/) defaults to BFQ (at least for most things),
+# but I noticed my "nvme" named SSD was using Kyber; after looking into it, I've
+# decided to do what Pop-OS does and use Kyber for my SSDs
+
+# Pop-OS uses kyber for SSDs and BFQ for flash drives, microsd, rotational
+# drives, etc.:
+# https://github.com/pop-os/default-settings/blob/03df90f4a92a884c6c271a4fda35918c2399f625/lib/udev/rules.d/60-block-pop.rules
+# https://old.reddit.com/r/pop_os/comments/vyaqt9/next_update_will_change_io_schedulers_to_kyber/
+# see here for the rationale:
+# https://github.com/pop-os/default-settings/pull/149
+
+ACTION=="add|change", SUBSYSTEM=="block", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="mmcblk?", ATTR{queue/scheduler}="bfq"
+
+ACTION=="add|change", SUBSYSTEM=="block", ATTR{queue/rotational}=="0", KERNEL=="nvme?n?", ATTR{queue/scheduler}="kyber"
+ACTION=="add|change", SUBSYSTEM=="block", ATTR{queue/rotational}=="0", KERNEL=="sd?", ATTR{queue/scheduler}="kyber"
