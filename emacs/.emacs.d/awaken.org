@@ -9198,6 +9198,9 @@ How useful is this compared to embark given that I'm only using one of the built
   ;; technically unnecessary since hyperbole does this when you require it...
   (hyperbole-mode)
 
+  ;; hyperbole rebinds C-h h...
+  (general-def help-map "h" #'find-function)
+
   (defun noct--minify-heading-link (link)
     "Return a minified heading link.
 - Strip the target
