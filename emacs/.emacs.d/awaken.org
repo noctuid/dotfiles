@@ -3410,8 +3410,11 @@ The only downside is the lack of prescient integration. Vertico supports recency
        (let ((vertico--index ,index))
          (vertico-directory-enter))))
 
+  ;; start indexing at 1
+  (gsetq vertico-indexed-start 1)
+
   (general-def vertico-map
-    "<prior>" #'vertic-scroll-down
+    "<prior>" #'vertico-scroll-down
     "<next>" #'vertico-scroll-up
     "M-a" (noct-generate-vertico-select-index 0)
     "M-r" (noct-generate-vertico-select-index 1)
