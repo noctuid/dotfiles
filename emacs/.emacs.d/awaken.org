@@ -7204,6 +7204,11 @@ Used for =*Warnings*= buffer, for example.
   "q" #'quit-window)
 #+end_src
 
+** Udev
+ #+begin_src emacs-lisp
+(use-package udev-mode)
+ #+end_src
+
 ** Vimrc Mode
 #+begin_src emacs-lisp
 (use-package vimrc-mode)
