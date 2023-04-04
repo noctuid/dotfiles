@@ -3,7 +3,7 @@
 (ns wm.hc-open-app-for-tag
   "Open the main app for the current tag/desktop."
   (:require
-   [babashka.process :refer [sh]]
+   [babashka.process :refer [shell]]
    [bb.util :refer [sh-out]]))
 
 (defn -main
@@ -11,11 +11,11 @@
   []
   (let [tag (sh-out ["herbstclient" "attr" "tags.focus.index"])]
     (case tag
-      "0" (sh "vspotify")
-      "1" (sh "emacsclient -c -a ''")
-      "2" (sh "vfox")
-      "3" (sh "chromium")
-      "4" (sh "nsteam"))))
+      "0" (shell "vspotify")
+      "2" (shell "vfox")
+      "3" (shell "chromium")
+      "4" (shell "nsteam")
+      (shell "emacsclient -c -a ''"))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (-main))

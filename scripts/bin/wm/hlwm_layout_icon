@@ -4,7 +4,7 @@
   "Herbstluftwm script to continuously print an icon when the layout changes."
   (:require
    [babashka.process :refer [sh]]
-   [bb.util :refer [cmd-reader sh-out]]
+   [bb.util :refer [loop-lines sh-out]]
    [clojure.string :refer [split]]))
 
 (def layout-icons
@@ -24,7 +24,7 @@
   [layout window-count]
   `(do
      (print-layout ~layout ~window-count)
-     (recur ~layout ~window-count (split (read-line) #"\t"))))
+     (recur (read-line) ~layout ~window-count)))
 
 (defn -main
   "Print an icon for the current herbstluftwm layout whenever it changes."
@@ -36,20 +36,20 @@
     (print-layout layout count)
     (sh ["herbstclient" "watch" layout-attr])
     (sh ["herbstclient" "watch" count-attr])
-    (with-open [rdr (cmd-reader
-                     ["herbstclient"
-                      "--idle"
-                      "attribute_changed"])]
-      (binding [*in* rdr]
-        (loop [layout         layout
-               count          count
-               [_ attr _ new] (split (read-line) #"\t")]
+    (while true
+      (loop-lines ["herbstclient"
+                   "--idle"
+                   "attribute_changed"]
+          [line (read-line)
+           layout layout
+           count count]
+        (let [[_ attr _ new] (split line #"\t")]
           (cond (= attr layout-attr)
                 (print-and-recur new count)
                 (= attr count-attr)
                 (print-and-recur layout new)
                 :else
-                (recur layout count (split (read-line) #"\t"))))))))
+                (recur (read-line) layout count)))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (-main))

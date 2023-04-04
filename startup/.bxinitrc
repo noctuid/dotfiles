@@ -38,8 +38,9 @@ fi
 
 # this assumes no outputs are plugged in when starting X
 # it works on current laptop even if the cable is plugged in when starting X
-# (though will have to disconnect/reconnect if want separate desktop instead of
-# mirror)
+# calling autorandr separately in herbstluftwm's autostart (so
+# herbstluftwm-specific changes will be triggered) to set up external monitor if
+# it is already plugged in when starting X
 xrandr --output "$(xrandr --listmonitors | awk '/0:/ {print $NF}')" --primary
 
 # * Environment Variables
@@ -130,22 +131,14 @@ xss-lock lockscreen &
 xset +fp ~/.fonts
 xset fp rehash
 
-# * Wallpaper
-# restore background image/settings
-if [[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/setroot/.setroot-restore ]]; then
-	setroot --restore
-else
-	setroot --bg-color "#00ff00"
-fi
-
-# * Wpg/Pywal
+# * Wpg/Pywal and Wallpaper
 if [[ -z $NO_WAL ]]; then
 	walrestore
 fi
 
 # * Other Daemons
 # redshift; better options at this point than xflux
-redshift &
+xrestart redshift &
 
 # notifications
 dunstrun &

@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# wrapper script for setting wallpaper
-
-setroot "$@"
-
-echo -n "setroot $*" | xsel -bi

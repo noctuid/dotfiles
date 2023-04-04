@@ -81,6 +81,7 @@ $HOME/bin/not_mine
 $HOME/bin/media
 $HOME/bin/music
 $HOME/bin/video
+$HOME/bin/wal
 $HOME/bin/wm
 # for vimus
 $HOME/.cabal/bin

@@ -8,26 +8,26 @@
 (ns wm.hc-watch-attr
   "Herbstluftwm script to handle various attribute changes."
   (:require
-   [babashka.process :refer [sh]]
-   [bb.util :refer [cmd-reader]]
+   [babashka.process :refer [shell]]
+   [bb.util :refer [loop-lines]]
    [clojure.string :refer [split]]))
 
 (defn -main
   "Watch herbstluftwm attributes and handle various changes."
   []
-  (sh "herbstclient watch monitors.count")
-  (sh "herbstclient watch tags.focus.name")
-  (with-open [rdr (cmd-reader
-                   ["herbstclient"
-                    "--idle"
-                    "attribute_changed"])]
-    (binding [*in* rdr]
-      (loop [[_ attr old new] (split (read-line) #"\t")]
+  (shell "herbstclient watch monitors.count")
+  (shell "herbstclient watch tags.focus.name")
+  (while true
+    (loop-lines ["herbstclient"
+                 "--idle"
+                 "attribute_changed"]
+        [line (read-line)]
+      (let [[_ attr old new] (split line #"\t")]
         (cond (= attr "monitors.count")
-              (sh ["hc_monitor_setup" old new])
+              (shell ["hc_monitor_setup" old new])
               (= attr "tags.focus.name")
-              (sh ["hc_handle_tag_changed" old new]))
-        (recur (split (read-line) #"\t"))))))
+              (shell ["hc_handle_tag_changed" old new]))
+        (recur (read-line))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (-main))

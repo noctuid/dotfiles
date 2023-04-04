@@ -1,0 +1,29 @@
+#!/usr/bin/env -S bb -cp ${HOME}/bin
+;; <non-global options> <wallpaper file>
+
+(ns wal.bgset
+  "Wrapper script to set wallpaper."
+  (:require
+   [babashka.fs :refer [absolutize]]
+   [babashka.process :refer [sh]]
+   [bb.util :refer [pr-edn]]
+   [clojure.java.io :as io]
+   [wal.shared-paths :refer [setroot-store-path]]))
+
+(defn -main
+  "Set wallpaper with setroot and store options for later.
+  Only non-global setroot options are curerntly supported (e.g. --zoom is
+  supported, but --store and --use-x-geometry are not.  It is also not expected
+  for --on to be used (it will be added later as neccessary: see ./walrestore)."
+  [args]
+  (let [options             (butlast args)
+        full-wallpaper-path (str (absolutize (last args)))
+        args                (conj (vec options) full-wallpaper-path)]
+    ;; store options in edn file (more control than --store and --restore)
+    (with-open [w (io/writer setroot-store-path)]
+      (binding [*out* w]
+        (pr-edn args)))
+    (apply sh "setroot" args)))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main *command-line-args*))

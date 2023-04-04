@@ -1,7 +1,8 @@
 configuration {
 // * Settings
     // run on current monitor instead of monitor mouse is on
-    monitor: "-1";
+    // -1 seems to detect by mouse
+    monitor: "-4";
 
     // honor X11 dpi; too large if use 1 which checks monitor size
     dpi: 0;

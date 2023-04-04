@@ -1,0 +1,52 @@
+#!/usr/bin/env -S bb -cp ${HOME}/bin
+
+(ns wal.walrestore
+  "Script to restore wallpaper and wpgtk/pywal configuration."
+  (:require
+   [babashka.fs :refer [regular-file?]]
+   [babashka.process :refer [sh]]
+   [bb.util :refer [read-edn sh-out]]
+   [clojure.string :refer [split split-lines]]
+   [wal.shared-paths :refer [setroot-store-path]]))
+
+(def setup-path
+  (str (System/getenv "HOME") "/.config/wpg/wp_init.sh"))
+
+(def wal-xresources-path
+  (str (System/getenv "HOME") "/.cache/wal/colors.Xresources"))
+
+(defn -main
+  "Restore wallpaper and wpgtk/pywal configuration.
+  This is meant to be called before starting X as it will not reload settings
+  for running applications.  If called with an argument, restore the stored
+  wallpaper to all monitors.  Otherwise set any blank monitors to be explicitly
+  black (not explicitly setting them to black seems to cause flickering
+  issues)."
+  [[mirror-wallpaper]]
+  (when (regular-file? setup-path)
+    (println "Restoring wpgtk/pywal configuration")
+    (sh setup-path))
+
+  (when (regular-file? wal-xresources-path)
+    (println "Re-updating .Xresources as workaround (e.g. for polybar)")
+    (sh (str "xrdb -merge " wal-xresources-path)))
+
+  (when (regular-file? setroot-store-path)
+    (println "Restoring wallpaper")
+    (let [stored-args (read-edn setroot-store-path)]
+      (if mirror-wallpaper
+        (let
+            [monitor-count      (-> (sh-out "xrandr --listmonitors")
+                                    split-lines
+                                    first
+                                    (split #" ")
+                                    last
+                                    Integer/parseInt)
+             multi-monitor-args (apply concat
+                                       (for [i (range 1 (+ monitor-count 1))]
+                                         (concat stored-args ["--on" i])))]
+          (apply sh "setroot" multi-monitor-args))
+        (apply sh "setroot" (concat stored-args ["--blank-color" "#000000"]))))))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main *command-line-args*))

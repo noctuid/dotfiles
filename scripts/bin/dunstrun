@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# dunstrun <show on screen with keyboard focus?>
 
 # shellcheck disable=SC1090
 source ~/bin/helpers/monitor.sh
@@ -14,6 +15,10 @@ if [[ -f ~/.cache/wal/dunstrc ]]; then
 else
 	cat ~/.config/dunst/dunstrc_tumplate ~/.config/dunst/colors_dunstrc \
 		~/.config/dunst/overrides_dunstrc > ~/.config/dunst/dunstrc
+fi
+
+if [[ -n $1 ]]; then
+	sed -i -E -e "s/^\s*(follow )=.*/\1= keyboard/g" ~/.config/dunst/dunstrc
 fi
 
 # dunst doesn't allow duplicate headings; use sed to replace placeholder width

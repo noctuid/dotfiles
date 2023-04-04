@@ -7,15 +7,76 @@ hc() {
 	herbstclient "$@"
 }
 
-if (( old_count == 1 )) && (( new_count == 2 )); then
+# just meant as dedicated tag/desktop/workspace for video, game, presentation,
+# etc.
+setup_tv() {
+	# if switch to tag on another monitor, focus that monitor
+	hc set swap_monitors_to_get_tag off
 	hc rule label=mpv-move class='mpv' fullscreen=on monitor=1
-	hc lock
 	if [[ $(hc attr tags.focus.index) == 9 ]]; then
-		# can't be the index the other monitors is on (0 default)
+		# can't be the index the other monitor is on (0 default)
 		hc use_index 1
 	fi
 	hc chain , focus_monitor 1 , unlock_tag , use_index 9 \
-	   , lock_tag , focus_monitor 0 , unlock
+	   , lock_tag , focus_monitor 0
+	# set new monitor's wallpaper to black (flickers if don't explicitly set)
+	walrestore
+	dunstrun
+}
+
+setup_polybar() {
+	polybar --list-monitors | awk -F ':' '!/primary/ {print $1}' \
+		| while read -r monitor; do
+		POLYBAR_MONITOR=$monitor xrestart -n polybar-"$monitor" polybar \
+								 herbstluftwm
+	done
+}
+
+# may use any tag on any monitor
+setup_desk() {
+	# currently only have 1 monitor, but that might change
+	new_count=$1
+	# TODO think I prefer explicit monitor switching here but unsure
+	hc set swap_monitors_to_get_tag on
+	if (( new_count == 2 )); then
+		# default to index 9/tag 10
+		hc chain , focus_monitor 1 , use_index 9 , focus_monitor 0
+	fi
+	# don't have speakers, use headphones
+	audio_switch analog
+	# set wallpaper for all monitors
+	walrestore true
+	setup_polybar
+	# show notifications on focused monitor rather than always on primary
+	dunstrun true
+
+	# enable redshift on all monitors;
+	# TODO redshift freaks out when being killed
+	# xrestart redshift -c ~/.config/redshift-all.conf
+}
+
+teardown() {
+	echo "Undoing multi-monitor config"
+	hc unrule mpv-move 2> /dev/null
+	# TODO don't kill main polybar? (barely noticeable though)
+	# kill other polybar
+	pkill polybar
+	xrestart polybar herbstluftwm
+	dunstrun true
+	# restart redshift
+}
+
+hc lock
+if (( old_count == 1 )); then
+	# autorandr --current is not reliable since it will report multiple profiles
+	# if they both have the same config (even if the setup is different)
+	if [[ -f ~/.config/autorandr/current ]] \
+			&& [[ $(< ~/.config/autorandr/current) == optimus-desk ]]; then
+		setup_desk "$new_count"
+	else
+		setup_tv
+	fi
 elif (( new_count == 1 )); then
-	hc unrule mpv-move
+	teardown
 fi
+hc unlock

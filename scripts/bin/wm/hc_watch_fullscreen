@@ -1,5 +1,5 @@
 #!/usr/bin/env -S bb -cp ${HOME}/bin
-;; TODO auto-detect bb.edn (https://github.com/babashka/babashka#869 ?)
+;; TODO auto-detect bb.edn (https://github.com/babashka/babashka/issues/869 ?)
 ;; or is this just misconfiguration on my part?
 
 (ns wm.hc-watch-fullscreen
@@ -7,8 +7,8 @@
   (:require
    [babashka.fs :as fs]
    [babashka.process :refer [sh]]
-   [bb.util :refer [sh-out cmd-reader]]
-   [clojure.string :refer [split trim]]))
+   [bb.util :refer [sh-out loop-lines]]
+   [clojure.string :refer [split]]))
 
 (defn polybar-disabled?
   "Return whether polybar is completely disabled"
@@ -42,13 +42,13 @@
   []
   (sh "herbstclient watch clients.focus.fullscreen")
   (sh "herbstclient watch monitors.focus.index")
-  (with-open [rdr (cmd-reader
-                   ["herbstclient"
-                    "--idle"
-                    "attribute_changed"
-                    "clients.focus.fullscreen|monitors.focus.index"])]
-    (binding [*in* rdr]
-      (loop [[_ attr old new] (split (read-line) #"\t")]
+  (while true
+    (loop-lines ["herbstclient"
+                 "--idle"
+                 "attribute_changed"
+                 "clients.focus.fullscreen|monitors.focus.index"]
+        [line (read-line)]
+      (let [[_ attr _old new] (split line #"\t")]
         (when-not (polybar-disabled?)
           (cond (= attr "monitors.focus.index")
                 (when (= new 0)
@@ -58,7 +58,7 @@
                   ;; hide if new state is fullscreen; otherwise false or nil (no
                   ;; client)
                   (toggle-polybar-state (= new "true")))))
-        (recur (split (read-line) #"\t"))))))
+        (recur (read-line))))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (-main))

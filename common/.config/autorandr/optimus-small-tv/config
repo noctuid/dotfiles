@@ -19,7 +19,7 @@ x-prop-non_desktop 0
 x-prop-scaling_mode Full aspect
 output HDMI-1-0
 crtc 3
-mode 3840x2160
+mode 1920x1080
 pos 3840x0
-rate 30.00
+rate 60.00
 x-prop-non_desktop 0

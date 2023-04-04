@@ -21,17 +21,9 @@
 
 	separator_color = frame
 
-    # Display notification on focused monitor.  Possible modes are:
-    #   mouse: follow mouse pointer
-    #   keyboard: follow window with keyboard focus
-    #   none: don't follow anything
-    #
-    # "keyboard" needs a window manager that exports the
-    # _NET_ACTIVE_WINDOW property.
-    # This should be the case for almost all modern window managers.
-    #
-    # If this option is set to mouse or keyboard, the monitor option
-    # will be ignored.
+    # keyboard - display notifications on monitor with keyboard focus
+    # none - will always show on primary
+	# changed by dunstrun script depending on monitor setup (see hc_monitor_setup)
     follow = none
 
     # Paths to default icons.

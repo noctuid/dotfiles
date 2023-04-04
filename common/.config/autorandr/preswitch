@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# autorandr --current is not reliable since it will report multiple profiles if
+# they both have the same config (even if the setup is different)
+echo "$AUTORANDR_CURRENT_PROFILE" > ~/.config/autorandr/current

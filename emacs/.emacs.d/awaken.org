@@ -8243,6 +8243,7 @@ TODO eventually
   ;; - `agressive-indent-mode' conflicts with lsp formatting
   (gsetq-local lsp-enable-on-type-formatting nil)
   ;; also makes more sense for editor to handle
+  ;; - don't think lsp can handle macro's {style/indent}
   ;; TODO would be slightly better to change only once jacked in
   (gsetq-local lsp-enable-indentation nil)
 
@@ -9559,7 +9560,7 @@ If a region is active, toggle marking all files in the region."
   (defun noct-dired-walset ()
     "Set wallpaper and update pywal colors."
     (interactive)
-    (noct-dired-async-run "walset --store"))
+    (noct-dired-async-run "walset --zoom"))
 
   (defun noct-dired-bgset ()
     "Set wallpaper."

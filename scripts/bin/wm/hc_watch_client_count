@@ -4,7 +4,7 @@
   "Herbstluftwm script to handle change in client count."
   (:require
    [babashka.process :refer [sh]]
-   [bb.util :refer [cmd-reader env]]
+   [bb.util :refer [env loop-lines]]
    [clojure.string :refer [split]]))
 
 (defn reload-sxhkd [reload-sxhkd-future empty-desktop?]
@@ -36,17 +36,15 @@ The delay is meant to prevent problems when the client count rapidly changes."
   "Watch herbstluftwm attributes and handle changes in the client count."
   []
   (sh "herbstclient watch tags.focus.client_count")
-  (with-open [rdr (cmd-reader
-                   ["herbstclient"
-                    "--idle"
-                    "attribute_changed"
-                    "tags.focus.client_count"])]
-    (binding [*in* rdr]
-      (loop [reload-sxhkd-future nil
-             [_ _attr old new]   (split (read-line) #"\t")]
-        (println old new)
-        (recur (handle-client-count-change reload-sxhkd-future old new)
-               (split (read-line) #"\t"))))))
+  (loop-lines ["herbstclient"
+               "--idle"
+               "attribute_changed"
+               "tags.focus.client_count"]
+      [line (read-line)
+       reload-sxhkd-future nil]
+    (let [[_ _attr old new] (split line #"\t")]
+      (recur (read-line)
+             (handle-client-count-change reload-sxhkd-future old new)))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (-main))

@@ -99,12 +99,6 @@ hc set hide_covered_windows on
 
 hc set focus_crosses_monitor_boundaries off
 
-# fits my workflow better; I don't use a multi-monitor setup normally; I use
-# single external monitors for videos, games, presentations, etc. and do
-# everything else on my laptop screen
-# if switch to tag on another monitor, focus that monitor
-hc set swap_monitors_to_get_tag off
-
 hc set auto_detect_monitors on
 
 # * Appearance
@@ -207,12 +201,16 @@ xrestart hc_watch_attr
 
 xrestart hc_watch_fullscreen
 
+# * X/Monitor Setup
+xrestart polybar herbstluftwm
+
+# must come after hc_watch_attr, which will trigger hc_monitor_setup
+autorandr --change
+
 # * Start
 if $first_load; then
 	hc use_index 1
 fi
-
-xrestart polybar herbstluftwm
 
 # unlock, just to be sure
 hc unlock
