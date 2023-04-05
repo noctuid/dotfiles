@@ -23,7 +23,7 @@ bind 'l tabopen https://lainchan.org/%CE%BB/index.html
 bind 'L tabopen https://planet.lisp.org/
 bind 'm tabopen https://myanimelist.net
 bind 'n tabopen https://www.reddit.com/r/neovim
-bind 'p tabopen https://privacytools.io
+bind 'p tabopen https://www.privacyguides.org/en/tools/
 bind 'P tabopen https://prism-break.org
 bind 'q tabopen https://quora.com/
 bind 'r tabopen https://reddit.com/

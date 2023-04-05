@@ -142,7 +142,7 @@
 sanitize tridactylsync
 
 " * About:config and user.js
-source ~/.config/tridactyl/userjs
+" see ../../.mozilla/firefox/noctuid.normal/user-overrides.js
 
 " * Settings
 " ** Appearance
@@ -158,7 +158,8 @@ set modeindicatorshowkeys true
 
 " ** Autofocus
 " stay in normal mode when loading new page
-setpref browser.autofocus false
+" setting in user-overrides.js
+" setpref browser.autofocus false
 " default
 set allowautofocus false
 seturl .*github.com preventautofocusjackhammer false

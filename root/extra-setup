@@ -269,6 +269,20 @@ optimus_setup() {
 	systemctl disable --now optimus-manager
 }
 
+# * Arkenfox
+arkenfox_setup() {
+	user=$1
+	if pgrep firefox > /dev/null; then
+		echo "Please close firefox before running arkenfox's cleaner" >&2
+		return 1
+	fi
+	# arkenfox-updater can detect profile, but cleaner must be run in profile
+	# directory
+	cd ~/.mozilla/firefox/"$user".normal || return 1
+	arkenfox-updater
+	arkenfox-cleaner
+}
+
 # * Pywalfox
 pywalfox_setup() {
 	echo "Running pywalfox install."
@@ -319,6 +333,7 @@ all() {
 	connman_setup || fail_configure "Connman setup failed."
 	nix_setup "$user" || fail_configure "Nix setup failed."
 	optimus_setup || fail_configure "Optimus manager setup failed."
+	arkenfox_setup "$user" || fail_configure "Arkenfox setup failed"
 	pywalfox_setup || fail_configure "Pywalfox setup failed."
 }
 

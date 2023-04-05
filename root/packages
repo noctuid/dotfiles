@@ -114,6 +114,9 @@ firejail
 keybase
 kbfs
 
+# includes updater and cleaner
+arkenfox-user.js
+
 # * VCS
 git
 
