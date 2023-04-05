@@ -123,9 +123,9 @@ freetype_setup() {
 	# 10-hinting-slight.conf already linked
 	# 30-infinality-aliases requires fonts-meta-extended-lt
 	cd /etc/fonts/conf.d \
-		&& ln -sf ../conf.avail/10-sub-pixel-rgb.conf . \
-		&& ln -sf ../conf.avail/11-lcdfilter-default.conf . \
-		&& ln -sf ../conf.avail/30-infinality-aliases.conf .
+		&& ln -sf /usr/share/fontconfig/conf.avail/10-sub-pixel-rgb.conf . \
+		&& ln -sf /usr/share/fontconfig/conf.avail/11-lcdfilter-default.conf . \
+		&& ln -sf /usr/share/fontconfig/conf.avail/30-infinality-aliases.conf .
 }
 
 # * Lambda Fortunes
