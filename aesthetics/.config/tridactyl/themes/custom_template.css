@@ -94,6 +94,10 @@
     box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 15px !important;
     border: solid var(--tridactyl-fg) 2px !important;
     border-top: none !important;
+    /* on top of everything */
+    /* TODO doesn't work for sites that also use the max z-index (e.g. banners*/
+    /* on old reddit Emacs subreddit and wayback machine)*/
+    z-index: 2147483647 !important;
 }
 
 /* input bar/completions at top of popup insteda of at bottom */
