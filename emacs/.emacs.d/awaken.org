@@ -6983,6 +6983,8 @@ All of my org config is in unclean.org.  I will gradually move it here.
          org-hide-emphasis-markers t
          ;; show entities as their symbol (e.g. show \euro as €)
          org-pretty-entities t
+         ;; until org-appear is fixed
+         org-descriptive-links nil
          ;; never show blank line when folding
          org-cycle-separator-lines 0
          ;; don't indent headings or text below them
@@ -7047,12 +7049,26 @@ All of my org config is in unclean.org.  I will gradually move it here.
 
 *** External/Contrib
 **** Org Appear
-Show invisible things when point is on them in org (e.g. links).
+Show invisible things when point is on them in org (e.g. links).  I have currenly disabled it since it constantly flickers when typing for me (see [[https://github.com/awth13/org-appear/issues/34][here]]).
 #+begin_src emacs-lisp
+(defun noct-org-appear-setup ()
+  "Set up org-appear in thecurrent buffer to show when in insert state."
+  (general-add-hook 'evil-insert-state-entry-hook
+                    #'org-appear-manual-start
+                    nil
+                    t)
+  (general-add-hook 'evil-insert-state-exit-hook
+                    #'org-appear-manual-stop
+                    nil
+                    t))
+
 (use-package org-appear
+  :disabled t
   :ghook 'org-mode-hook
+  :gfhook #'noct-org-appear-setup
   :config
-  (gsetq org-appear-autolinks t))
+  (gsetq org-appear-trigger 'manual
+         org-appear-autolinks t))
 #+end_src
 
 **** Ox Hugo
