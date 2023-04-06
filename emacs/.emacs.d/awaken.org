@@ -528,7 +528,7 @@ Create another window if one doesn't exist"
 #+end_src
 
 *** Debugging
-Useful for debugging selectrum or ivy.
+Useful for debugging vertico, ivy, etc.
 #+begin_src emacs-lisp
 ;; https://github.com/raxod502/prescient.el/issues/56#issuecomment-614094583
 (defun raxod502-force-debug (func &rest args)
@@ -2720,25 +2720,29 @@ Select candidate as soon as there is only one (like the headlong package but for
 ;; (general-add-hook 'post-command-hook #'noct-maybe-block-input)
 
 
-(defvar noct-selectrum-command nil)
-(defvar noct-selectrum-major-mode nil)
-(defun noct-set-selectrum-info (&rest _)
-  (setq noct-selectrum-command this-command
-        noct-selectrum-major-mode major-mode))
-(general-add-advice 'selectrum--read :before #'noct-set-selectrum-info)
+(defvar noct-vertico-command nil)
+(defvar noct-vertico-major-mode nil)
+(defun noct-set-vertico-info (&rest _)
+  (setq noct-vertico-command this-command
+        noct-vertico-major-mode major-mode))
+(general-add-advice 'completing-read-default :before #'noct-set-vertico-info)
 
-(defun noct-selectrum-premature-select (&rest _)
+(defvar vertico--total)
+(declare-function vertico-exit "vertico")
+(defun noct-vertico-premature-select (&rest _)
   (cond ((or (and (memq current-minibuffer-command '(find-file
-                                                 dired-goto-file))
-                  (memq noct-selectrum-major-mode '(ranger-mode dired-mode)))
-             (eq noct-selectrum-command #'projectile-find-test-file))
-         (cond ((= selectrum--actual-num-candidates-displayed 0)
-                (backward-delete-char-untabify 1))
-               ((= selectrum--actual-num-candidates-displayed 1)
-                (noct-wait-for-user 0.2)
-                (ignore-errors (selectrum-select-current-candidate)))))))
+                                                     dired-goto-file))
+                  (memq noct-vertico-major-mode '(ranger-mode dired-mode)))
+             (eq noct-vertico-command #'projectile-find-test-file))
+         (cond
+          ;; this will actually mess things up; require manually going back
+          ;; ((= vertico--total 0)
+          ;;  (call-interactively #'evil-delete-backward-char))
+          ((= vertico--total 1)
+           (noct-wait-for-user 0.2)
+           (ignore-errors (vertico-exit)))))))
 
-(general-add-advice 'selectrum--update :after #'noct-selectrum-premature-select)
+(general-add-advice 'vertico--update :after #'noct-vertico-premature-select)
 #+end_src
 
 ** Ivy
@@ -3258,112 +3262,8 @@ file-finding commands)."
   :general ('insert minibuffer-completion-map "S-SPC" #'restricto-narrow))
 #+end_src
 
-** Selectrum
-I am currently using vertico. See my notes below.
-
-#+begin_src emacs-lisp
-(use-package selectrum
-  :config
-  (gsetq selectrum-show-indices t
-         selectrum-num-candidates-displayed 20
-         ;; TODO async consult commands don't show full candidates without
-         selectrum-max-window-height 30
-         ;; TODO this doesn't seem necessary anymore to prevent height from
-         ;; changing?!
-         ;; selectrum-fix-vertical-window-height t
-         ;; selectrum-multiline-display-settings
-         selectrum-count-style 'current/matches)
-
-  ;; only highlight visible candidates; performance improvement (both settings
-  ;; required)
-  (gsetq selectrum-highlight-candidates-function #'orderless-highlight-matches)
-  (general-with 'orderless
-    (gsetq orderless-skip-highlighting (lambda () selectrum-is-active)))
-
-  (general-s "." #'selectrum-repeat)
-
-  (general-def selectrum-minibuffer-map
-    "<prior>" #'selectrum-previous-page
-    "<next>" #'selectrum-next-page
-    "C-s" #'selectrum-select-from-history
-    ;; all of these are useless or superseded by other keybindings except for
-    ;; maybe M-s and M-r
-    "M-a" (general-l (selectrum-select-current-candidate 1))
-    "M-r" (general-l (selectrum-select-current-candidate 2))
-    "M-s" (general-l (selectrum-select-current-candidate 3))
-    "M-t" (general-l (selectrum-select-current-candidate 4))
-    "M-d" (general-l (selectrum-select-current-candidate 5))
-    "M-h" (general-l (selectrum-select-current-candidate 6))
-    "M-n" (general-l (selectrum-select-current-candidate 7))
-    "M-e" (general-l (selectrum-select-current-candidate 8))
-    "M-i" (general-l (selectrum-select-current-candidate 9))
-    "M-o" (general-l (selectrum-select-current-candidate 10)))
-
-  (defun clemera--selectrum-selectable-prompt-p ()
-    (not (and (selectrum--match-strictly-required-p)
-              (cond (minibuffer-completing-file-name
-                     (not (selectrum--at-existing-prompt-path-p))
-                     (t
-                      (not (string-empty-p selectrum--virtual-input))))))))
-
-  (defun clemera-selectrum-next-candidate (&optional arg)
-    "`selectrum-next-candidate' but with wrapping.
-https://github.com/raxod502/selectrum/issues/131#issuecomment-817191700"
-    (interactive "p")
-    (when selectrum--current-candidate-index
-      (let ((selectable-prompt
-             (clemera--selectrum-selectable-prompt-p))
-            (index (+ selectrum--current-candidate-index (or arg 1)))
-            (max (1- (length selectrum--refined-candidates))))
-        (setq selectrum--current-candidate-index
-              (cond ((< index (if selectable-prompt -1 0))
-                     max)
-                    ((> index max)
-                     (if selectable-prompt -1 0))
-                    (t
-                     index))))))
-
-  (general-add-advice 'selectrum-next-candidate
-                      :override #'clemera-selectrum-next-candidate)
-
-  ;; TODO some way to not use for specific commands (e.g. `consult-line') or use
-  ;; `mini-frame' if it becomes less glitchy
-  ;; would be better to keep everything in minibuffer but have it at top instead
-  ;; of bottom
-  ;; (gsetq selectrum-display-action '(display-buffer-show-in-posframe))
-
-  ;; (defun display-buffer-show-in-posframe (buffer _alist)
-  ;;   (frame-root-window
-  ;;    (posframe-show buffer
-  ;;                   :min-height selectrum-num-candidates-displayed
-  ;;                   :min-width (round (* 0.6 (frame-width)))
-  ;;                   :internal-border-width 1
-  ;;                   :left-fringe 8
-  ;;                   :right-fringe 8
-  ;;                   :poshandler 'noct-posframe-poshandler-frame-near-top-center)))
-
-  ;; (general-add-hook 'minibuffer-exit-hook #'posframe-delete-all)
-
-  ;; show in top window
-  ;; minibuffer just looks better
-  ;; (gsetq selectrum-display-action
-  ;;        '((noct-display-buffer-reuse-window
-  ;;           noct-display-buffer-in-side-window)
-  ;;          (side . top)
-  ;;          (slot)
-  ;;          (window-height . 0.5)))
-  )
-
-(use-package selectrum-prescient
-  :after selectrum
-  :demand t
-  :config
-  (gsetq selectrum-prescient-enable-filtering nil)
-  (selectrum-prescient-mode))
-#+end_src
-
 ** Vertico
-I've switched to vertico due to some weird display issues with selectrum. Vertico is very simple and just works.  Selectrum is now deprecated in favor of it.
+I've switched to vertico due to some weird display issues with selectrum. Vertico is very simple and just works, and selectrum is now deprecated in favor of it.
 #+begin_src emacs-lisp
 (use-package vertico
   ;; specify to get extensions
@@ -3581,13 +3481,6 @@ This only works with orderless and for the first component of the search."
 
   (gsetq embark-cycle-key (kbd "C-n"))
 
-  (general-after 'selectrum
-    ;; refresh candidate list after action
-    (defun embark-wiki-refresh-selectrum ()
-      (setq selectrum--previous-input-string nil))
-
-    (general-add-hook 'embark-pre-action-hook #'embark-wiki-refresh-selectrum))
-
   (general-def embark-general-map "y" #'kill-new)
 
   (general-def embark-identifier-map "f" #'xref-find-definitions)
@@ -3645,7 +3538,7 @@ Sets missing metadata for completions (pairs well with embark even if not using 
   ('marginalia-mode-hook #'all-the-icons-completion-marginalia-setup))
 
 (use-package marginalia
-  :after selectrum
+  :after vertico
   :demand t
   :config
   (marginalia-mode)
@@ -6000,8 +5893,6 @@ Diff-hl is nice but currently doesn't support staging hunks.  Diff-hl also has a
     "gb" #'magit-blame)
   :config
   (gsetq magit-diff-refine-hunk t
-         ;; required for prescient to be used
-         magit-completing-read-function #'selectrum-completing-read
          magit-display-buffer-function #'display-buffer
          magit-blame-echo-style '(lines
                                   (show-lines . t)
@@ -9977,7 +9868,7 @@ Dirvish replaces multiple packages:
 
 ** Eshell
 The nice thing about eshell is Emacs integration:
-- ability to use ivy/helm/selectrum for completion and search
+- ability to use ivy/helm/vertico for completion and search
 - evil for navigation/copying/etc.
 - ability to use snippets
 - intercept commands like man and ~grep <text> <file>~
@@ -10276,18 +10167,21 @@ from a global keybinding.")
        ,@body)))
 
 (defmacro noct-with-global-completing-read (&rest body)
-  "Run BODY with selectrum taking up the full window height.
+  "Run BODY with vertico taking up the full window height.
 Open any new windows in same buffer"
   (declare (indent 0) (debug t))
-  `(let ((selectrum-num-candidates-displayed 1000)
-         (selectrum-display-action '(display-buffer-use-some-window))
+  `(let ((vertico-count 1000)
+         (vertico-multiform-categories
+          '((t
+             buffer
+             (vertico-buffer-display-action . (display-buffer-use-some-window)))))
          (display-buffer-alist '((".*" . (display-buffer-use-some-window)))))
      ,@body))
 
 (defun noct-global-completing-read-dir (prompt dirs)
   "Run `completing-read' with PROMPT to select a directory from DIRS.
-This will add the file completion category to the directories, display selectrum
-in an existing window, and open any new windows in the same buffer."
+This will add the file completion category to the directories, display
+completions in an existing window, and open any new windows in the same buffer."
   (noct-with-global-completing-read
     (completing-read prompt
                      (lambda
@@ -10328,11 +10222,8 @@ meant to be used from the command line (specifically with my esel script)."
   (when file
     (find-file file))
   (unwind-protect
-      ;; TODO show only the selectrum minibuffer
-      (let* ((selectrum-num-candidates-displayed 1000)
-             (selectrum-display-action '(display-buffer-use-some-window))
-             ;; (selectrum-should-sort-p)
-             (vertico-count 1000)
+      ;; TODO show only the minibuffer
+      (let* ((vertico-count 1000)
              (vertico-multiform-categories
               '((t
                  buffer
