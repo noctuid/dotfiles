@@ -118,7 +118,10 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	# extra vi motions; automatically binds brackets and quotes and gets
 	# surround keybindings working even with low KEYTIMEOUT:
 	# https://old.reddit.com/r/zsh/comments/gktca7/use_vi_mode_surround_without_high_keytimeout/
-	zinit ice wait lucid
+	# I don't believe vi-motions is what is binding control-h (which is the same
+	# as control-backspace in terminal), but this fixes the issue by running it
+	# as late as possible
+	zinit ice wait atload"bindkey '^H' backward-kill-word" lucid
 	zinit light "zsh-vi-more/vi-motions"
 
 	# ** Completion
@@ -461,7 +464,9 @@ bindkey "^[[2~" quoted-insert
 # allow deleting before insertion
 bindkey '^?' backward-delete-char
 bindkey "^W" backward-kill-word
-bindkey "¸" backward-kill-word
+# NOTE: something is overriding this later (probably something vi mode relate)
+# working around it by using zinit's atload (see above)
+bindkey '^H' backward-kill-word
 
 # used by vterm-toggle.el
 bindkey "\C-a" beginning-of-line

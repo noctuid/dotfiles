@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# clear modifiers
+xdotool keyup control alt shift super Mode_switch Hyper_L Super_R
+
+# * TrackPoint Settings
+# enable tap to click on touch pad
+xinput set-prop "Elan Touchpad" "libinput Tapping Enabled" 1
+
+# * Keyboard Layout
+if [[ $1 == klfc ]]; then
+	rldkbd-klfc "$2"
+else
+	xrestart kanata -c ~/.config/kanata/colemak-dhk-custom.kbd
+	# wait for startup
+	sleep 3.5
+fi
+
+# * Repeat Rate
+# faster key repeat rate and shorter delay (default is 660 25)
+# https://github.com/39aldo39/klfc/issues/10
+# 300ms wait, 50 repeats per second
+# seems like must come after kanata
+xset -r 25
+xset r rate 300 50
+
+# * Hotkey Daemon(s)
+# may need to come after rest of rldkbd depending on current configuration (did
+# when was creating hyper with xmodmap)
+if [[ -z $NO_HOTKEY ]]; then
+	start-hotkey
+fi

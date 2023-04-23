@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# this is a backup solution if I ever happen to have an issue with my main
+# kanata setup
+# notice how many extra programs/steps are needed when not using kanata for
+# everything (klfc/XKB, xmodmap, xcape, hkd)
+
+# * TrackPoint Buttons as Keys
+# Old method:
+# # using these as thumbkeys (see ~/.config/sxhkd/sxhkdrc)
+# xinput --set-button-map "TPPS/2 IBM TrackPoint" 50 1 51
+# xinput --set-button-map "ETPS/2 Elantech TrackPoint" 50 1 51
+# xinput --set-button-map "Elan TrackPoint" 50 3 51
+
+# NOTE: I would just remap the scan codes if I could:
+# https://askubuntu.com/questions/1145057/remapping-mouse-buttons-to-keyboard-keys
+
+# new method that allows for dual-role
+# must happen before or klfc sets up capslock or it can't be used correctly for
+# nav layer
+xrestart kanata -c ~/.config/kanata/trackpoint.kbd
+# wait for kanata startup
+sleep 3
+
+# * Klfc
+if [[ -n $1 ]]; then
+	# regenerate layout
+	klfc --from-json ~/dotfiles/remap/.colemak-DH-custom.json \
+			--xkb ~/dotfiles/remap/xkb
+fi
+~/dotfiles/remap/xkb/run-session.sh -m Wide-ja
+
+# * Add Hyper
+# needs to be done after klfc's run-session (which will reset mods)
+# make hyper a unique modifier for sxhkd (will be left trackpoint button)
+# don't need numlock (which is normally mod2)
+xmodmap -e "clear mod2"
+# make F24 hyper/mod2
+xmodmap -e "remove mod4 = Hyper_L"
+xmodmap -e "add mod2 = Hyper_L Hyper_L"
+xmodmap -e "keycode 202 = Hyper_L"
+
+# * Dual-role
+rldxcape
+
+# * Fix Media Keys
+# media keys bound on layer don't work with sxhkd; need to use hkd to grab the
+# physical positions
+xrestart hkd

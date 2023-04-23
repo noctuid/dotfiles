@@ -17,10 +17,14 @@
         // dual-role: Return
         [ "Alt_R", "AltGr" ],
         // dual-role: (
-        [ "PrintScreen", "Alt" ],
-        [ "Control_R", "PrintScreen" ]
-        // hyper/super on thumb mouse buttons
-        // ("meta" actions; used outside programs; other modifiers used in program)
+        [ "PrintScreen", "Alt" ]
+		// have printscreen on nav layer
+        // [ "Control_R", "PrintScreen" ]
+
+        // hyper/super on thumb mouse buttons (with [ and { as dual role)
+		// hyper - global hotkeys (e.g. open programs)
+		// super - window management hotkeys
+		// see rldkbd
     ],
     "keys": [
         { "pos": "~", "letters": [ "", "" ] },
@@ -53,36 +57,38 @@
         { "pos": "+", "letters": [ "=", "+", "Switch_VT_12" ] },
 
         { "pos": "Q", "letters": [ "q", "Q", "`", "~" ] },
-        // doesn't work with kitty
+        // doesn't work with kitty; too aggressive when just want backspace word
+        // behavior (closes windows/tabs)
         // { "pos": "W", "letters": [ "w", "W", "[", "]", "Control+w" ] },
-        { "pos": "W", "letters": [ "w", "W", "[", "]", "¸" ] },
-        // { "pos": "E", "letters": [ "f", "F", ")", ")", "Control+f" ] },
-        { "pos": "E", "letters": [ "f", "F", ")", ")", "`" ] },
-        { "pos": "R", "letters": [ "p", "P", "{", "}" ] },
-        { "pos": "T", "letters": [ "b", "B", "\\", "|" ] },
-        { "pos": "Y", "letters": [ "j", "J", "@", "@" ] },
-        { "pos": "U", "letters": [ "l", "L", "_", "_", "BackSpace" ] },
-        { "pos": "I", "letters": [ "u", "U", "-", "_", "Home" ] },
-        { "pos": "O", "letters": [ "y", "Y", "=", "+", "End" ] },
-        { "pos": "P", "letters": [ ";", ":", "!", "!", "Alt+f" ] },
-        // not 30%; force to stop using
-        { "pos": "[", "letters": [ "z", "" ] },
-        { "pos": "]", "letters": [ "x", "" ] },
+        { "pos": "W", "letters": [ "w", "W", "=", "=", "Control+BackSpace" ] },
+        { "pos": "E", "letters": [ "f", "F", "]", "]" ] },
+        { "pos": "R", "letters": [ "p", "P", "_", "_", "PrintScreen" ] },
+        { "pos": "T", "letters": [ "b", "B", "\\", "\\" ] },
+        { "pos": "Y", "letters": [ "j", "J", "@", "@", "BrightnessDown" ] },
+        { "pos": "U", "letters": [ "l", "L", "-", "-", "PageDown" ] },
+        { "pos": "I", "letters": [ "u", "U", ")", ")", "Home" ] },
+        { "pos": "O", "letters": [ "y", "Y", "}", "}", "End" ] },
+        { "pos": "P", "letters": [ ";", ":", "!", "!", "PageUp" ] },
+        // not 30%; generally don't use except now for brightness
+		// need to explicitly keep [ bound for xcape to be able to output [ and {
+        { "pos": "[", "letters": [ "[", "{" ] },
+        { "pos": "]", "letters": [ "]", "}", "", "", "BrightnessUp" ] },
         // won't use on normal keyboard or will need on jp keyboard
         { "pos": "\\", "letters": [ "'", "\"" ] },
-
 
         { "pos": "A", "letters": [ "a", "A", "1", "!" ] },
         { "pos": "S", "letters": [ "r", "R", "2", "@" ] },
         { "pos": "D", "letters": [ "s", "S", "3", "#" ] },
         { "pos": "F", "letters": [ "t", "T", "4", "$" ] },
         { "pos": "G", "letters": [ "g", "G", "|", "|" ] },
-        { "pos": "H", "letters": [ "k", "K", "&", "&", "Alt+b" ] },
+		// media next/prev; for some reason can't get Previous to output, but
+		// using hkd to bind anyway, so it doesn't matter
+        { "pos": "H", "letters": [ "k", "K", "&", "&", "Next", "Previous" ] },
         { "pos": "J", "letters": [ "n", "N", "7", "&", "Down" ] },
         { "pos": "K", "letters": [ "e", "E", "8", "*", "Up" ] },
         { "pos": "L", "letters": [ "i", "I", "9", "(", "Right" ] },
-        { "pos": ";", "letters": [ "o", "O", "0", ")", "PageUp" ] },
-        // not 30% but allow since have on thumb key on external board
+        { "pos": ";", "letters": [ "o", "O", "0", ")", "PlayPause" ] },
+        // not 30% but right pinky is stronger
         { "pos": "'", "letters": [ "'", "\"" ] },
 
         { "pos": "Z", "letters": [ "x", "X", "~", "~" ] },
@@ -90,10 +96,10 @@
         { "pos": "C", "letters": [ "d", "D", "5", "%" ] },
         { "pos": "V", "letters": [ "v", "V", "^", "^" ] },
         { "pos": "B", "letters": [ "z", "Z" ] },
-        { "pos": "N", "letters": [ "m", "M", "$", "$", "PageDown" ] },
+        { "pos": "N", "letters": [ "m", "M", "$", "$", "Mute" ] },
         { "pos": "M", "letters": [ "h", "H", "6", "^", "Left" ] },
-        { "pos": ",", "letters": [ ",", "<", "+", "+" ] },
-        { "pos": ".", "letters": [ ".", ">" , "*", "*" ] },
+        { "pos": ",", "letters": [ ",", "<", "*", "*", "VolumeDown" ] },
+        { "pos": ".", "letters": [ ".", ">" , "+", "+", "VolumeUp" ] },
         { "pos": "/", "letters": [ "/", "?", "%", "%" ] }
 
         // needed if modifier combinations not being detected by sxhkd

@@ -238,6 +238,8 @@ w3m
 
 # * Video/Images
 mpv
+# control mpv with playerclt
+mpv-mpris
 pqiv
 # mpv-git aur
 # color picker
@@ -334,11 +336,12 @@ hdparm
 rng-tools
 
 # * Keyboard Remapping
-xcape
+# xcape nix
 # klfc cabal
 klfc-bin aur
-kmonad-bin aur
+kanata aur
 arduino
+qmk
 
 # * Cron
 fcron
@@ -407,6 +410,7 @@ mopidy-mpd aur
 mopidy-spotify aur
 mpd-notification aur
 mpc
+# playerctl nix
 # vimus nix nixpkgs.haskellPackages.vimus
 # backup client
 ncmpcpp
@@ -448,6 +452,7 @@ python-pygments
 # * Hotkey Daemon
 sxhkd
 # xchainkeys nix
+hkd-git aur
 
 # * Screen locker
 xss-lock

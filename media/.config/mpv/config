@@ -3,6 +3,9 @@
 
 # * Default Profile
 [default]
+# to be able to send commands to most recent mpv instance; also required for svp
+input-ipc-server=/tmp/mpvsocket
+
 save-position-on-quit
 
 # disable screen blanking while video playing (default)
@@ -59,7 +62,7 @@ gpu-api=vulkan
 # ** Screenshots
 # %F is title with removed extension; if include it, some filenames cause errors
 # when saving the screenshot
-screenshot-template=~/move/Screenshots/%tY.%tm.%td_%tH:%tM:%tS
+screenshot-template=~/move/Screenshots/%tFT%tT
 # jpeg is default
 screenshot-format=png
 

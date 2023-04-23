@@ -20,22 +20,25 @@ xkb_symbols "basic" {
                  actions[Group1] = [ NoAction(), NoAction(), SwitchScreen(Screen=12, !same) ] };
     key <AD01> { [            q,            Q,        grave,   asciitilde ] };
     key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND_ALPHABETIC";
-    key <AD02> { [            w,            W,  bracketleft, bracketright,      cedilla ] };
-    key <AD03> { [            f,            F,   parenright,   parenright,        grave ] };
+    key <AD02> { [            w,            W,        equal,        equal,    BackSpace ],
+                 actions[Group1] = [ NoAction(), NoAction(), NoAction(), NoAction(), Redirect(key=<AD02>,mods=Control) ] };
     key.type[Group1] = "FOUR_LEVEL_ALPHABETIC";
-    key <AD04> { [            p,            P,    braceleft,   braceright ] };
-    key <AD05> { [            b,            B,    backslash,          bar ] };
-    key <AD06> { [            j,            J,           at,           at ] };
+    key <AD03> { [            f,            F, bracketright, bracketright ] };
     key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND_ALPHABETIC";
-    key <AD07> { [            l,            L,   underscore,   underscore,    BackSpace ] };
-    key <AD08> { [            u,            U,        minus,   underscore,         Home ] };
-    key <AD09> { [            y,            Y,        equal,         plus,          End ] };
+    key <AD04> { [            p,            P,   underscore,   underscore,        Print ] };
+    key.type[Group1] = "FOUR_LEVEL_ALPHABETIC";
+    key <AD05> { [            b,            B,    backslash,    backslash ] };
+    key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND_ALPHABETIC";
+    key <AD06> { [            j,            J,           at,           at, XF86MonBrightnessDown ] };
+    key <AD07> { [            l,            L,        minus,        minus,         Next ] };
+    key <AD08> { [            u,            U,   parenright,   parenright,         Home ] };
+    key <AD09> { [            y,            Y,   braceright,   braceright,          End ] };
     key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND";
-    key <AD10> { [    semicolon,        colon,       exclam,       exclam,            f ],
-                 actions[Group1] = [ NoAction(), NoAction(), NoAction(), NoAction(), Redirect(key=<AD10>,mods=Alt) ] };
-    key.type[Group1] = "ALPHABETIC";
-    key <AD11> { [            z,   VoidSymbol ] };
-    key <AD12> { [            x,   VoidSymbol ] };
+    key <AD10> { [    semicolon,        colon,       exclam,       exclam,        Prior ] };
+    key.type[Group1] = "TWO_LEVEL";
+    key <AD11> { [  bracketleft,    braceleft ] };
+    key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND";
+    key <AD12> { [ bracketright,   braceright,   VoidSymbol,   VoidSymbol, XF86MonBrightnessUp ] };
     key.type[Group1] = "TWO_LEVEL";
     key <BKSL> { [   apostrophe,     quotedbl ] };
     key.type[Group1] = "FOUR_LEVEL_ALPHABETIC";
@@ -45,12 +48,11 @@ xkb_symbols "basic" {
     key <AC04> { [            t,            T,            4,       dollar ] };
     key <AC05> { [            g,            G,          bar,          bar ] };
     key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND_ALPHABETIC";
-    key <AC06> { [            k,            K,    ampersand,    ampersand,            b ],
-                 actions[Group1] = [ NoAction(), NoAction(), NoAction(), NoAction(), Redirect(key=<AD05>,mods=Alt) ] };
+    key <AC06> { [            k,            K,    ampersand,    ampersand, XF86AudioNext ] };
     key <AC07> { [            n,            N,            7,    ampersand,         Down ] };
     key <AC08> { [            e,            E,            8,     asterisk,           Up ] };
     key <AC09> { [            i,            I,            9,    parenleft,        Right ] };
-    key <AC10> { [            o,            O,            0,   parenright,        Prior ] };
+    key <AC10> { [            o,            O,            0,   parenright, XF86AudioPlay ] };
     key.type[Group1] = "TWO_LEVEL";
     key <AC11> { [   apostrophe,     quotedbl ] };
     key.type[Group1] = "FOUR_LEVEL_ALPHABETIC";
@@ -61,11 +63,12 @@ xkb_symbols "basic" {
     key.type[Group1] = "ALPHABETIC";
     key <AB05> { [            z,            Z ] };
     key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND_ALPHABETIC";
-    key <AB06> { [            m,            M,       dollar,       dollar,         Next ] };
+    key <AB06> { [            m,            M,       dollar,       dollar, XF86AudioMute ] };
     key <AB07> { [            h,            H,            6,  asciicircum,         Left ] };
+    key.type[Group1] = "NONE_SHIFT_ALTGR_SHIFT+ALTGR_EXTEND";
+    key <AB08> { [        comma,         less,     asterisk,     asterisk, XF86AudioLowerVolume ] };
+    key <AB09> { [       period,      greater,         plus,         plus, XF86AudioRaiseVolume ] };
     key.type[Group1] = "FOUR_LEVEL";
-    key <AB08> { [        comma,         less,         plus,         plus ] };
-    key <AB09> { [       period,      greater,     asterisk,     asterisk ] };
     key <AB10> { [        slash,     question,      percent,      percent ] };
     key.type[Group1] = "ONE_LEVEL";
     key <CAPS> { [ ISO_Level5_Shift ],
@@ -83,7 +86,6 @@ xkb_symbols "basic" {
     key <PRSC> { [        Alt_L ],
                  actions[Group1] = [ SetMods(mods=Alt) ],
                  vmods=Alt };
-    key <RCTL> { [        Print ] };
     modifier_map Mod3 { ISO_Level5_Shift };
     include "level3(ralt_switch)"
 };

@@ -13,7 +13,7 @@
     (case tag
       "0" (shell "vspotify")
       "2" (shell "vfox")
-      "3" (shell "chromium")
+      "3" (shell "chromium --enable-features=WebUIDarkMode --force-dark-mode")
       "4" (shell "nsteam")
       (shell "emacsclient -c -a ''"))))
 

@@ -172,8 +172,8 @@ hc add 十
 # # remove all existing keybindings
 hc keyunbind --all
 
-# restart sxhkd in case something goes wrong
-hc keybind Mod4+x spawn start-sxhkd
+# super+1: restart sxhkd/keyboard config in case something goes wrong
+hc keybind Mod4+1 spawn rldkbd
 
 # * Rules
 hc unrule -F

@@ -93,16 +93,6 @@ filtered-packages ++ [
   # (nixGLIntelWrap ungoogled-chromium)
   (nixGLIntelWrap qutebrowser)
 
-# * Video/Images/Media
-  # no video track...
-  # (nixGLWrap mpv)
-
-  # linux only
-  pqiv
-
-  # color picker
-  gpick
-
 # * Wine
   wine
   winetricks
@@ -172,6 +162,10 @@ filtered-packages ++ [
   # for keyboardio model 01
   arduino
 
+# * Mouse Tools
+  # prefer to keynav though don't really use
+  warpd
+
 # * Virtualization
   # doesn't work on new macs (and no nix darwin version)
   virtualbox
@@ -223,6 +217,19 @@ filtered-packages ++ [
   python311Packages.pyacoustid
   python311Packages.requests
   # python-mpd
+
+# * Video/Images/Other Media
+  # control mpd, spotify, browser video/audo/etc.
+  playerctl
+
+  # no video track...
+  # (nixGLWrap mpv)
+
+  # linux only
+  pqiv
+
+  # color picker
+  gpick
 
 # * Hotkey Daemon
   sxhkd

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# separate server for gnus since it blocks
+max_dropdown -n gnus emacsclient --socket-name gnus -ce '(gnus)'

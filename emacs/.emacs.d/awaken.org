@@ -7117,6 +7117,11 @@ Used for =*Warnings*= buffer, for example.
   "q" #'quit-window)
 #+end_src
 
+** Sxhkdrc Mode
+#+begin_src emacs-lisp
+(use-package sxhkdrc-mode)
+#+end_src
+
 ** Udev
  #+begin_src emacs-lisp
 (use-package udev-mode)
@@ -9905,6 +9910,7 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
   (defun noct-ement-connect-or-list-rooms ()
     "List matrix rooms or connect if not connected."
     (interactive)
+    (require 'ement)
     (cond (ement-sessions
            (call-interactively #'ement-list-rooms))
           ((ement--read-sessions)

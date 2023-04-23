@@ -185,9 +185,13 @@ cryptsetup_open() { # <label>
 mount_luks() { # <label> <mountdir>
 	label=$1
 	mountdir=$2
-	cryptsetup_open "$label"
+	if ! cryptsetup_open "$label"; then
+		echo "Failed to open LUKS container $label"
+		return 1
+	fi
 	if ! mkdir -p "$mountdir"; then
 		echo "Failed to create mount point $dir."
+		return 1
 	fi
 	if mountpoint -q "$mountdir"; then
 		echo "$mountdir is already a mountpoint."
@@ -206,9 +210,14 @@ mount_luks_lvm() { # <label> <volume> <mountdir>
 	label=$1
 	volume=$2
 	dir=$3
-	cryptsetup_open "$label"
+	if ! cryptsetup_open "$label"; then
+		echo "Failed to open LUKS container $label"
+		return 1
+	fi
+
 	if ! mkdir -p "$dir"; then
 		echo "Failed to create mount point $dir."
+		return 1
 	fi
 	# TODO unfortunately neither of these block until the symlinks are created
 	sudo vgchange --activate y

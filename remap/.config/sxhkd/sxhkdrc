@@ -1,7 +1,20 @@
 # Base sxhkdrc
 # Limitations:
 # - chaining isn't perfect (use xchainkeys instead)
-# - can only use level 1 (unshifted) key for prefix (can use keys in layer with modifier though)
+# - can only use level 1 (unshifted) key for prefix (can use keys in layer with
+#   modifier though)
+# - "hyper" acts as super even if a different modifier:
+#   https://github.com/baskerville/sxhkd/issues/175; using "mod2" instead
+
+# NOTE: using both mod2 (f24 on thumb key as hyper) /and/ super+control
+# - super+control is norm (kanata, QMK, and kaleidoscope)
+# - f24/hyper is for backup config that uses xcape (which can only make a single
+#   key dual-role)
+
+# Unbound keys:
+# - u
+# - {
+# - alt combinations
 
 # * Reloading
 # reload keyboad layout (if screw it up and can't type)
@@ -9,190 +22,207 @@ any + F11
 	rldkbd
 
 # make sxhkd reload its configuration files:
-alt + super + period
+{mod2,super+control} + period
 	pkill -USR1 -x sxhkd
 
 # * General Global Hotkeys
-# actually one key bound to alt + super
 # ** Brightness
-alt + super + e
-	light -A 10
-	# xbacklight -inc 10
+# light is currently orphaned, but xbacklight does not work
+XF86MonBrightness{Down,Up}
+	light {-U,-A} 10
+	# xbacklight {-dec,-inc} 10
 
-alt + super + E
-	light -S 100
-
-alt + super + n
-	light -U 10
-	# xbacklight -dec 10
-
-alt + super + N
+{mod2,super+control} + n
 	light -S 1
 
-# ** Volume
-alt + super + i
-	pactl set-sink-volume @DEFAULT_SINK@ +5%
-	# amixer -qD pulse sset Master 5%+
+{mod2,super+control} + e
+	light -S 100
 
-alt + super + h
-	pactl set-sink-volume @DEFAULT_SINK@ -5%
-	# amixer -qD pulse sset Master 5%-
+# ** Media/Volume
+XF86Audio{Lower,Raise}Volume
+	pactl set-sink-volume @DEFAULT_SINK@ {-,+}5%
 
-# mute
-alt + super + m
+XF86AudioMute
 	pactl set-sink-mute @DEFAULT_SINK@ toggle
 	# amixer -qD pulse sset Master toggle
 
-# play/pause
-alt + super + o
-	mpc toggle
+XF86AudioPlay
+	playerctl --player=spotify,mpd play-pause
+
+# play/pause last used player (requires playerctl daemon)
+{mod2,super+control} + o
+	playerctl play-pause
 
 # next/prev
-alt + super + u
-	mpc prev
+XF86Audio{Prev,Next}
+	playerctl --player=spotify,mpd {previous,next}
 
-alt + super + y
-	mpc next
+{mod2,super+control} + z
+	playerctl --player=spotify,mpd shuffle Toggle
+
+{mod,super+control} + y
+	echo async no-osd screenshot | socat - /tmp/mpvsocket
 
 # ** Screenshots
 # ~/bin/screenshot
 Print
 	screenshot
 
-alt + super + 1
-	screenshot
-
-alt + super + P
+{mod2,super+control} + q
 	screenshot select
 
-alt + super + w
+{mod2,super+control} + w
 	screenshot current_window
 
-# alt + super+ v
-# 	mkdir ~/move/srec && cd ~/move/srec && srec -s
-
 # ** Program hotkeys
-alt + super + f
+{mod2,super+control} + f
 	vfox
 
-alt + super + space
+{mod2,super+control} + space
 	rofi -show run
 
 # open [t]ag app
-alt + super + t
+{mod2,super+control} + t
 	hc_open_app_for_tag
 
+# TODO get this to work
+{mod2,super+control} + (
+	emacsclient -c
+
 # use latest good emacs configuration
-alt + super + T
+{mod2,super+control} + alt + t
 	emacs --stable
 
 # demote errors for each org source block; for debugging errors that are
 # localized to a single section without losing all configuration from following
 # sections or needing to run Emacs with a stable configuration
-alt + super + D
+{mod2,super+control} + alt + d
 	emacs --with-demoted-errors
 
-# alt + super + b
+# {mod2,super+control} + b
 # 	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
 
-alt + super + l
+{mod2,super+control} + l
 	lockscreen
 
 super + b
 	xtoggle polybar "$(get_wm)"
 
 # ** Clicks and Mouse Movement
-# TODO clicks don't work when modifier held
-# alt + super + k
-# 	click middle
-	# ~/bin/click
+{mod2,super+control} + h
+	warpd --hint
 
-# regain focus from flash
-alt + super + a
+{mod2,super+control} + j
+	warpd --hint2
+
+# TODO clicks don't work when modifiers held
+# {mod2,super+control} + alt + c
+# 	click middle
+# 	# ~/bin/click
+
+# regain focus from browser media
+{mod2,super+control} + a
 	click left
 
 # banish mouse to bottom left
-alt + super + b
+{mod2,super+control} + b
 	click 0 90000
 
 # ** Terminals, Dropdowns, etc.
-alt + super + Return
+{mod2,super+control} + Return
 	kitty
 
-alt + super + s
+{mod2,super+control} + s
 	dropdown -s dropdown kitty
 	# dropdown emacsclient -c -e "(let (display-buffer-alist) (vterm) (delete-other-windows))"
 
-# test key
-alt + super + S
-	tdrop --debug -a current
-
-alt + super + c
+{mod2,super+control} + c
 	dropdown -n longcommands -s longcommands kitty
 
-alt + super + d
-	max_dropdown -n ranger emacsclient --socket-name=dirvish -ce "(dirvish)"
+{mod2,super+control} + semicolon
+	max_dropdown -n vtermlongcommands emacsclient -ce '(noct-with-reuse-window (noct-vterm-select-or-create "long"))'
 
-alt + super + r
+# test key
+{mod2,super+control} + S
+	tdrop --debug -a current
+
+{mod2,super+control} + r
 	max_dropdown -n ranger kitty zsh -c "ranger; zsh -i"
 
-alt + super + p
+{mod2,super+control} + d
+	max_dropdown -n ranger emacsclient --socket-name=dirvish -ce "(dirvish)"
+
+{mod2,super+control} + p
 	max_dropdown -n proced emacsclient -ce "(noct-with-q-to-exit (proced) (delete-other-windows))"
 
 # [v]ideo
-alt + super + v
+{mod2,super+control} + v
 	dropmpgo
 
-alt + super + V
+{mod2,super+control} + alt + v
 	dropmplast
 
-# [k]alc
-alt + super + k
-	dropdown -n calc emacsclient -ce "(progn (calc) (delete-other-windows))"
-
-alt + super + slash
-	max_dropdown -n woman emacsclient -ce "(noct-with-global-completing-read (woman))"
-
-# [g]lobal capture
-alt + super + g
+# [i]nsert capture
+{mod2,super+control} + i
 	max_dropdown -n capture emacsclient -ce "(noct-with-reuse-window (org-capture))"
 
-alt + super + semicolon
-	max_dropdown -n longcommands emacsclient -ce '(noct-with-reuse-window (noct-vterm-select-or-create "long"))'
+# [k]alc
+{mod2,super+control} + k
+	dropdown -n calc emacsclient -ce "(progn (calc) (delete-other-windows))"
 
-alt + super + x
+{mod2,super+control} + slash
+	max_dropdown -n woman emacsclient -ce "(noct-with-global-completing-read (woman))"
+
+# {mod2,super+control} + m
+# 	some mpd client
+
+{mod2,super+control} + alt + m
+	max_dropdown -n mu4e emacsclient -ce "(mu4e)"
+
+{mod2,super+control} + g
+	gnus
+
+{mod2,super+control} + apostrophe
+	emacsclient -ce "(noct-ement-connect-or-list-rooms)"
+
+{mod2,super+control} + x
 	emacsclient -ce "(noct-xprop)"
 
-alt + super + X
+{mod2,super+control} + X
 	emacsclient -ce '(noct-xwininfo)'
 
 # other commands
 super + space
-	max_dropdown -n shell-menu emacsclient -ce '(noct-shell-menu)'
+	max_dropdown -n shell-menu emacsclient --socket-name=shell-menu -ce '(noct-shell-menu)'
 
 # ** Dunst
-alt + super + shift + comma
-	dunstctl history-pop
-
-alt + super + comma
+{mod2,super+control} + comma
 	dunstctl close-all
+
+{mod2,super+control} + alt + comma
+	dunstctl history-pop
 
 # * Mouse
 button9
 	wm_action hide_all
 
 # ** Modifiers
+# NOTE: this is the old method for making my trackpoint buttons act as modifier keys
+# I'm now using kanata instead so they can be dual-role keys
+# see rldkbd
+
+
 # buttons should not simulate dual-role keys (won't work consistently and will
 # result in unwanted keypresses)
 # http://www.linuxforums.org/forum/hardware-peripherals/169773-solved-map-mouse-button-modifier-key.html
-{_,super +, super + shift + } button51
-	xdotool keydown super
+# {_,super +, super + shift + } button51
+# 	xdotool keydown super
 
-{_,super +, super + shift + } @button51
-	xdotool keyup super
+# {_,super +, super + shift + } @button51
+# 	xdotool keyup super
 
-{_,shift +, super +, alt +}{_,shift +, super +, alt +}{_,shift +, super +, alt +} button50
-	xdotool keydown super alt
+# {_,shift +, super +, alt +}{_,shift +, super +, alt +}{_,shift +, super +, alt +} button50
+# 	xdotool keydown super alt
 
-{_,shift +, super +, alt +}{_,shift +, super +, alt +}{_,shift +, super +, alt +} @button50
-	xdotool keyup super alt
+# {_,shift +, super +, alt +}{_,shift +, super +, alt +}{_,shift +, super +, alt +} @button50
+# 	xdotool keyup super alt

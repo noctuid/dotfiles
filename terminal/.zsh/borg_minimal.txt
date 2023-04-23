@@ -64,5 +64,8 @@ R ag-sys
 R dotfiles
 R src
 
+# keyboard configs
+R qmk_firmware/keyboards/splitkb/kyria/keymaps/noctuid
+
 # sdvx game data
 R /opt/unnamed-sdvx-clone/maps.db

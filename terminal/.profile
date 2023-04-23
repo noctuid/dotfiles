@@ -76,6 +76,7 @@ pathdirs="
 $HOME/bin
 $HOME/ebin
 $HOME/bin/dunst
+$HOME/bin/input
 $HOME/bin/net
 $HOME/bin/not_mine
 $HOME/bin/media

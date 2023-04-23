@@ -1,0 +1,19 @@
+;; trackpoint-only kanata config meant to be used with klfc and xcape
+(defcfg
+ ;; Elan TrackPoint
+ ;; unfortunately only parent gets a symlink (same ids for trackpoint and
+ ;; touchpad but I only want to grab trackpoint)
+ linux-dev /dev/input/event15)
+
+;; /could/ use kanata's tap-hold instead of xcape for these keys, but
+;; tap-hold-release won't work if we aren't also grabbing the keyboard;
+;; therefore we later remap f24 to hyper (a single modifier that can be used
+;; with xcape unlike a combo)
+
+(defsrc mouseleft
+        mousemid
+        mouseright)
+
+(deflayer main
+  ;; use rmet since it is not remapped by klfc
+  f24 caps rmet)

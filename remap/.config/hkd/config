@@ -1,0 +1,30 @@
+# only necessary when using klfc; not needed with kanata
+# using hkd for keys not picked up by any X hotkey daemon (sxhkd, dxhd,
+# herbstluftwm's keybinding system, etc.), e.g. media keys bound on extend layer
+# are not captured by sxhkd
+
+# this is completely specific to keyboard positions and does not take into
+# account remapping/wide layout (except for that done by keyszer for middle
+# trackpoint button -> capslock)
+
+# XF86MonBrightnessDown
+- capslock, u : light -U 10
+# XF86MonBrightnessUp
+- capslock, rightbrace : light -A 10
+
+# XF86AudioLowerVolume
+- capslock, dot : pactl set-sink-volume @DEFAULT_SINK@ -5%
+# XF86AudioRaiseVolume
+- capslock, slash : pactl set-sink-volume @DEFAULT_SINK@ +5%
+# XF86AudioMute
+- capslock, m : pactl set-sink-mute @DEFAULT_SINK@ toggle
+
+# XF86AudioPlay
+- capslock, apostrophe : playerctl --player=spotify,mpd play-pause
+# XF86AudioNext
+- capslock, j : playerctl --player=spotify,mpd next
+# XF86AudioPrev
+* capslock, muhenkan, j : playerctl --player=spotify,mpd previous
+
+# Print
+- capslock, r : screenshot

@@ -85,26 +85,8 @@ xset -b
 # elsewhere
 fcitx5 &
 
-# setup keyboard layout (~/bin/rldkbd)
-rldkbd
-
-# faster key repeat rate and shorter delay (default is 660 25)
-# https://github.com/39aldo39/klfc/issues/10
-# 400ms wait, 35 repeats per second
-xset -r 25
-xset r rate 400 35
-
-# hotkey daemon
-if [[ -z $NO_HOTKEY ]]; then
-	start-sxhkd
-fi
-
-# backup hotkey program
-if [[ -z $NO_HOTKEY ]]; then
-	# TODO no longer in aur?
-	# xchainkeys &
-	echo
-fi
+# setup keyboard layout (~/bin/input/rldkbd)
+rldkbd &
 
 # * Mouse/Pointer
 # disable mouse acceleration
@@ -146,6 +128,10 @@ dunstrun &
 # notifications when mpd song changes
 # https://github.com/vehk/mpdnotify works well with mpdcron also
 mpd-notification -m "${XDG_MUSIC_DIR:-$HOME/music}" &
+
+# record media player activity to act on most recently used player
+# just warns if already running
+playerctld daemon
 
 # daemon for sending encrypted matrix messages
 # not in official repos and currently have installed through nix which doesn't

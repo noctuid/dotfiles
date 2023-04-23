@@ -1,0 +1,55 @@
+# * Basic
+hint_chars: abcdefghijklmnopqrstuvwxy;,.
+hint2_chars: arstdhneiowflpuy
+hint2_grid_size: 4
+
+hint: f
+hint2: F
+
+left: h
+down: n
+up: e
+right: i
+
+grid_keys: u y n e
+
+buttons: m , .
+oneshot_buttons: l u y
+
+# grid: Activate (g)rid mode while in normal mode. (default: g)
+# screen: Activate (s)creen selection while in normal mode. (default: s)
+
+# drag: Toggle drag mode (mnemonic (v)isual mode). (default: v)
+# accelerator: Increase the acceleration of the pointer while held. (default: a)
+# decelerator: Decrease the speed of the pointer while held. (default: d)
+# buttons: A space separated list of mouse buttons (2 is middle click). (default: m , .)
+
+# top: Moves the cursor to the top of the screen in normal mode. (default: H)
+# middle: Moves the cursor to the middle of the screen in normal mode. (default: M)
+# bottom: Moves the cursor to the bottom of the screen in normal mode. (default: L)
+# start: Moves the cursor to the leftmost corner of the screen in normal mode. (default: 0)
+# end: Moves the cursor to the rightmost corner of the screen in normal mode. (default: $)
+
+# scroll_down: Scroll down key. (default: e)
+# scroll_up: Scroll up key. (default: r)
+
+# * Settings
+# repeat_interval: The number of milliseconds before repeating a movement event. (default: 20)
+# speed: Pointer speed in pixels/second. (default: 220)
+# max_speed: The maximum pointer speed. (default: 1600)
+# decelerator_speed: Pointer speed while decelerator is depressed. (default: 50)
+# acceleration: Pointer acceleration in pixels/second^2. (default: 700)
+# accelerator_acceleration: Pointer acceleration while the accelerator is depressed. (default: 2900)
+
+# * appearance
+hint_font: Delugia
+
+# show indicator when normal mode is active
+indicator: topright
+# indicator_size: The size of the visual indicator in pixels. (default: 12)
+
+indicator_color: #C38A22
+grid_color: #C38A22
+hint_bgcolor: #C38A22
+hint_fgcolor: #000000
+normal_system_cursor: 1
