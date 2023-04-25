@@ -194,13 +194,17 @@ filtered-packages ++ [
   pavucontrol
   pamixer
 
-  mpd
-  mpc-cli
+  # mpd
+  # mpc-cli
   # TODO mpd-notification
-  mopidy
-  mopidy-local
-  mopidy-mpd
+
+  # TODO just fails to find extensions
+  # mopidy
+  # mopidy-local
+  # mopidy-mpd
   # TODO mopidy-spotify
+
+  tidal-hifi
 
   # cd ripping
   abcde

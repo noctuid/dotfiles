@@ -3,7 +3,7 @@
 # exec so will work with xrestart script
 # 
 exec zscroll -b " " -d 0.3 \
-		-M "mpc status" \
+		-M "mpcq status" \
 		-m "playing" "-b ' '" \
 		-m "paused" "-b ' ' -s false" \
-		-u true "mpc current"
+		-u true "mpcq current"

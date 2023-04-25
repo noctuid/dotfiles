@@ -407,6 +407,8 @@ mpd
 mopidy
 mopidy-local aur
 mopidy-mpd aur
+# for playerctl
+mopidy-mpris aur
 mopidy-spotify aur
 mpd-notification aur
 mpc

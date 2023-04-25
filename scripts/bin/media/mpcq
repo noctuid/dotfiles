@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# mpc but without the "warning: mpd 0.21 required" when using mopidy
+mpc "$@" 2> /dev/null

@@ -2125,7 +2125,7 @@ I've switched away from putting this function in a hook because it can be jarrin
   :ghook ('tabulated-list-mode-hook #'tablist-minor-mode)
   :config
   (general-def 'normal tablist-minor-mode-map
-    "f" #'tablist-edit-filter
+    "s" #'tablist-edit-filter
     "g/" tablist-mode-filter-map))
 #+end_src
 
@@ -4353,7 +4353,18 @@ A helper library for inserting icons (used by other packages in my config).
     (general-add-advice
      'doom-modeline-set-modeline
      :override #'noct-set-doom-modeline-advice)
-    (doom-modeline-mode))
+    (doom-modeline-mode)
+
+    ;; show in modeline when something else is using header
+    (defun noct-doom-headerline-to-modeline (sym value operation &rest _)
+      "Move doom line from header to modeline when there's a different header."
+      (when (and (eq sym 'header-line-format)
+                 (eq operation 'set)
+                 (not (string-match "dirvish" (symbol-name major-mode)))
+                 (not (string-match "doom-modeline"
+                                    (format "%s" value))))
+        (setq mode-line-format (doom-modeline 'main))))
+    (add-variable-watcher 'header-line-format #'noct-doom-headerline-to-modeline))
   :config
   (gsetq doom-modeline-buffer-encoding 'nondefault)
   (general-after-gui
@@ -10000,6 +10011,55 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
          gptel-default-mode 'org-mode)
 
   (noct-handle-popup-same-window (rx "*ChatGPT")))
+ #+end_src
+
+** Music
+- EMMS supports mpd, though I think the other options have nicer interfaces
+- Simple-mpc - too simple
+- Mingus - think I prefer over mpdel though would need to try both thoroughly again
+
+*** Smudge
+Liked songs is not a playlist.
+ #+begin_src emacs-lisp
+(use-package smudge
+  :general
+  (general-s
+    :infix "s"
+    "d" #'smudge-select-device
+    "m" #'smudge-my-playlists
+    "/" #'smudge-track-search
+    "?" #'smudge-playlist-search
+    "." #'smudge-recently-played)
+  :config
+  (setq smudge-oauth2-client-id
+        (password-store-get-field "smudge" "id")
+        smudge-oauth2-client-secret
+        (password-store-get "smudge"))
+
+  (noct-handle-popup-same-window smudge-playlist-search-mode)
+  (noct-handle-popup-same-window smudge-track-search-mode)
+  (noct-handle-popup-same-window smudge-device-select-mode)
+
+  ;; NOTE: tabulated list keybindings are available for sorting
+  (general-def 'normal (smudge-playlist-search-mode-map
+                        smudge-track-search-mode-map)
+    "f" #'link-hint-open-link
+    "i" #'push-button
+    "c" #'smudge-create-playlist)
+
+  (general-def 'normal smudge-playlist-search-mode-map
+    "gr" #'smudge-playlist-reload
+    "u" #'smudge-playlist-load-more
+    "o" #'smudge-playlist-select)
+
+  (general-def 'normal smudge-track-search-mode-map
+    "gr" #'smudge-track-reload
+    "u" #'smudge-track-load-more
+    ;; add to playlist
+    "a" #'smudge-track-add))
+
+;; smudge-track-playlist-follow
+;; smudge-playlist-follow
  #+end_src
 
 ** Pass

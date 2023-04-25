@@ -46,19 +46,21 @@ XF86AudioMute
 	pactl set-sink-mute @DEFAULT_SINK@ toggle
 	# amixer -qD pulse sset Master toggle
 
+# tidal shows as chromium
 XF86AudioPlay
-	playerctl --player=spotify,mpd play-pause
+	playerctl --player=spotify,chromium,mopidy,mpd play-pause
 
 # play/pause last used player (requires playerctl daemon)
 {mod2,super+control} + o
 	playerctl play-pause
 
 # next/prev
-XF86Audio{Prev,Next}
-	playerctl --player=spotify,mpd {previous,next}
+# any because prev is accessed with shift
+any + XF86Audio{Prev,Next}
+	playerctl --player=spotify,chromium,mopidy,mpd {previous,next}
 
 {mod2,super+control} + z
-	playerctl --player=spotify,mpd shuffle Toggle
+	playerctl --player=spotify,chromium,mopidy,mpd shuffle Toggle
 
 {mod,super+control} + y
 	echo async no-osd screenshot | socat - /tmp/mpvsocket
