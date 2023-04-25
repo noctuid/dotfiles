@@ -5102,7 +5102,7 @@ TODO number incrementing
   ;; no mnemonic but next to C-n and default keybinding already on extend layer
   ;; using `consult-yasnippet' instead
   ;; (general-def 'insert "C-e" #'yas-insert-snippet)
-  (general-s "y" #'yas-new-snippet)
+  (general-s "Y" #'yas-new-snippet)
   (general-def help-map
     ;; unbound by default
     "y" #'yas-describe-tables)
@@ -10001,6 +10001,38 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
 
   (noct-handle-popup-same-window (rx "*ChatGPT")))
  #+end_src
+
+** Pass
+#+begin_src emacs-lisp
+(use-package password-store
+  :general
+  (general-s
+    "y" #'password-store-copy
+    "u" #'password-store-url))
+
+;; built on top of password-store.el
+(use-package pass
+  :general (general-s "p" #'pass)
+  :config
+  (noct-handle-popup-same-window (rx "*Password-Store*"))
+
+  ;; NOTE: imenu works
+  (general-def 'normal pass-mode-map
+    "RET" #'pass-view
+    ;; copy password
+    "y" #'pass-copy
+    ;; delete entry
+    "d" #'pass-kill
+    ;; create new entry with generated password
+    "i" #'pass-insert-generated
+    ;; without
+    "I" #'pass-insert
+    "r" #'pass-rename
+    ;; currently don't use
+    ;; "o" #'pass-otp-options
+    "q" #'pass-quit
+    "gr" #'pass-update-buffer))
+#+end_src
 
 ** Shell
 Shell has some of the advantages of eshell like ~completing-read~ integration in ~term-line-mode~, but it supports zsh and other shells.  Plugins like autosuggestions won't work in line mode (and at least with this basic configuration autosuggestions don't seem to work in char-mode either for fish or zsh). Obviously, it can't execute emacs lisp. It can run it on a remote host, but the shell has to be available there.
