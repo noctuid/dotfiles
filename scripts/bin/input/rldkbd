@@ -11,7 +11,7 @@ xinput set-prop "Elan Touchpad" "libinput Tapping Enabled" 1
 if [[ $1 == klfc ]]; then
 	rldkbd-klfc "$2"
 else
-	xrestart kanata -c ~/.config/kanata/colemak-dhk-custom.kbd
+	rldkanata
 	# wait for startup
 	sleep 3.5
 fi

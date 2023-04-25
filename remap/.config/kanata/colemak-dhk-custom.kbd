@@ -42,7 +42,9 @@
  lsft z    x    c    v    b    n    m    ,    .    /    ro   rsft
  lctl lmet lalt mhnk spc       henk kana ralt prtsc
  ;; this is trackpoint other (not grabbing touchpad)
- mouseleft mousemid mouseright)
+ mouseleft mousemid mouseright
+ ;; use to toggle kanata "off"
+ del)
 
 ;; wide angle-mod
 (deflayer colemak-dhk
@@ -53,7 +55,8 @@
   XX   a    r    s    t    g    ret  k    n    e    i    o    '
   XX   x    c    d    v    z    _    m    h    ,    .    /    /
   mhnk lmet @t/C @e/S spc       @r/G @p/A henk kana
-  @bracket/hotkey @bspc/nav @paren/super)
+  @bracket/hotkey @bspc/nav @paren/super
+  (layer-switch kanata-off))
 
 (defalias
   mwu (mwheel-up 50 120)
@@ -84,7 +87,8 @@
   _    _    @ma← @ma↓ @ma→ _    _    next down up   rght  pp   _
   _    _    mlft mmid mrgt @mwu @mwd mute left vold volu  _    _
   _    _    _    @cst @ct       _    _    _    _
-  _ _ _)
+  _ _ _
+  _)
 
 (defalias
   ~ S-`
@@ -110,4 +114,15 @@
   _    1    2    3    4    @|   _    @&   7    8    9    0    _
   _    @~   @#   5    @^   _    _    @$   6    @*   @+   @%   _
   _    _    _    _    _         _    _    _    _
-  _ _ _)
+  _ _ _
+  _)
+
+;; needed on ttys
+(deflayer kanata-off
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _         _    _    _    _
+  _ _ _
+  (layer-switch colemak-dhk))
