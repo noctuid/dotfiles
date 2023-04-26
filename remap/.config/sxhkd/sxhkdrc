@@ -57,7 +57,7 @@ XF86AudioPlay
 # next/prev
 # any because prev is accessed with shift
 any + XF86Audio{Prev,Next}
-	playerctl --player=spotify,chromium,mopidy,mpd {previous,next}
+	playerctl --player=spotify,chromium,mpd {previous,next}
 
 {mod2,super+control} + z
 	playerctl --player=spotify,chromium,mopidy,mpd shuffle Toggle

@@ -3,7 +3,7 @@
 ;; key names: https://github.com/jtroo/kanata/blob/main/src/keys/mod.rs
 
 (defcfg
- linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd:/dev/input/event11)
+ linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd:/dev/input/event15)
 
 (defvar ht 200)
 
@@ -78,7 +78,10 @@
   ;; m0 (setmouse 0 0)
 
   cbs C-bspc
+  st S-tab
   ct C-tab
+  ;; NOTE: this will still fallthrough to dual-role shift when held without
+  ;; special handling
   cst C-S-tab)
 
 (deflayer extend
@@ -86,7 +89,7 @@
   _    _    @cbs @ma↑ prnt _    _    brdn pgdn home end   pgup brup _
   _    _    @ma← @ma↓ @ma→ _    _    next down up   rght  pp   _
   _    _    mlft mmid mrgt @mwu @mwd mute left vold volu  _    _
-  _    _    _    @cst @ct       _    _    _    _
+  _    _    @st  @cst @ct       _    _    _    _
   _ _ _
   _)
 
