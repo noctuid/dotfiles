@@ -13,6 +13,7 @@ P sh
 ! **/node_modules
 ! **/.emacs_backup
 ! **/nixpkgs
+! **/src/Kaleidoscope
 ! **/forks/melpa
 ! **/forks/org-mode
 ! **/.Trash

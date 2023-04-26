@@ -1362,9 +1362,9 @@ newphonerestore() {
 
 # ** Keyboard
 # https://kaleidoscope.readthedocs.io/en/latest/setup_toolchain.html
-flash_keyboard() {
+flash_keyboardio_old() {  # <no-compile>
 	export ARDUINO_PATH=/usr/local/arduino
-	if [[ ! -d ~/Arduino ]]; then
+	if [[ ! -d ~/Arduino/hardware ]]; then
 		mkdir -p ~/Arduino/hardware
 		git clone --recursive \
 			https://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio.git \
@@ -1389,8 +1389,30 @@ flash_keyboard() {
 		sudo atool -x /tmp/arduino.tar.xz "$ARDUINO_PATH"
 	fi
 	cd ~/Arduino/Model01-Firmware/ || return 1
-	make && make flash
+	if [[ -z $1 ]]; then
+		make || return 1
+	fi
+	make flash
 }
+
+flash_keyboardio() (  # <no-compile>
+	export KALEIDOSCOPE_DIR=~/src/Kaleidoscope
+	if [[ ! -d $KALEIDOSCOPE_DIR ]]; then
+		git clone https://github.com/keyboardio/Kaleidoscope "$KALEIDOSCOPE_DIR"
+		cd "$KALEIDOSCOPE_DIR" || exit 1
+		make setup
+	fi
+	cd ~/dotfiles/remap/Model01-Firmware/ || return 1
+	if [[ -z $1 ]]; then
+		make || return 1
+	fi
+	echo "Hold prog while pressing Enter; you can continue to hold prog"
+	echo "You do not need to hold prog while connecting the keyboard."
+	sleep 2
+	make flash
+ )
+
+alias keyboardio='flash_keyboardio'
 
 # ** Other Functions
 if [[ -f ~/.config/ranger/ranger_functions ]]; then

@@ -1,0 +1,2 @@
+* About
+I was originally keeping this in a separate repo as a fork of [[https://github.com/keyboardio/Model01-Firmware][this repo]], which is supposedly [[https://github.com/keyboardio/Model01-Firmware/issues/112][the official firmware]].  However, it is behind the example in the Kaleidoscope repo (e.g. aurduino now requires a sketch.yaml and it still has a sketch.json).  In any case [[https://github.com/keyboardio/Kaleidoscope/tree/master/examples/Devices/Keyboardio/Model01][only a few files are necessary]] and they can be anywhere, so I've moved my config to my dotfiles.

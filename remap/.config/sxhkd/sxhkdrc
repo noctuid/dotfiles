@@ -80,7 +80,9 @@ Print
 {mod2,super+control} + f
 	vfox
 
-{mod2,super+control} + space
+# backspace since can only type space on one side on external keyboard;
+# backspace is in mirrored position
+{mod2,super+control} + {space,BackSpace}
 	rofi -show run
 
 # open [t]ag app

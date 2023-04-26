@@ -1,0 +1,47 @@
+* Plugins
+** Interesting but can't think of use case for currently
+- OneShot, Leader, MagicCombo, TopsyTurvy
+- https://github.com/cdisselkoen/Kaleidoscope-MacrosOnTheFly
+- https://github.com/christo-auer/Kaleidoscope-AdhocMacros
+- https://github.com/keyboardio/Kaleidoscope/blob/master/docs/plugins/DynamicMacros.md
+- https://github.com/CapeLeidokos/Kaleidoscope-XKeymaps
+
+** Use Eventually
+- https://github.com/keyboardio/Kaleidoscope/blob/master/docs/plugins/Steno.md
+
+** Maybe Eventually
+- maybe useful for tmux: https://github.com/jamesnvc/Kaleidoscope-PrefixLayer; or just use a modifier for tmux keybindings
+- https://github.com/keyboardio/Kaleidoscope/blob/master/docs/plugins/WinKeyToggle.md
+- https://github.com/keyboardio/Kaleidoscope/blob/master/docs/plugins/GhostInTheFirmware.md
+- more generic shapeshifter (but dead; malob fork doesn't work for me either) https://github.com/malob/Kaleidoscope-ModifierLayers/tree/fix-keyboardio-apis
+
+** DONE MouseKeys
+* LED Effects
+** TODO LED Fire
+https://github.com/kevinr/Kaleidoscope-LED-Fire
+** TODO Christmas Lights
+Uses deprecated APIs
+https://github.com/avonderluft/Kaleidoscope-LED-ChristmasLights
+
+** TODO Digital Rain
+https://github.com/tremby/Kaleidoscope-LEDEffect-DigitalRain
+
+** TODO Borealis
+https://github.com/algernon/Kaleidoscope-LEDEffect-Borealis
+
+** TODO Fingerpainter
+https://github.com/keyboardio/Kaleidoscope/blob/master/docs/plugins/FingerPainter.md
+
+** TODO Heatmap
+https://github.com/keyboardio/Kaleidoscope/blob/master/docs/plugins/Heatmap.md
+
+* TODO Macro to insert keyboard layout as text
+* DONE Sxhkd Integration
+CLOSED: [2021-09-10 Fri 22:46]
+Fixed with -m -1 on latest versions
+
+
+Problems
+- Acts as qwerty versions (maybe can simulate all keys explicitly on a layer)
+# - have to release and press modifier again to do more than one action (actually this seems to be okay now?)
+- Gui + Alt key causes some issues with modifers being locked; using a macro doesn't work at all
