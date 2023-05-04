@@ -22,26 +22,31 @@ if [[ -z $NVIDIA_XRUN ]]; then
 	# NOTE: this must come first to prevent black screen issue when switching
 	prime-offload
 
-	# used to get black screen without this; looks like not necessary anymore;
-	# prime-offload runs it
-	# xrandr --auto
+	# necessary for laptop screen to not be black and to show up in xrandr
+	# --listmonitors in nvidia mode (but not hybrid mode); prime-offload maybe
+	# used to run it, but it does not currently
+	xrandr --auto
 fi
 
 # * Set Laptop Screen to Primary Monitor
-# so setroot and redshift recognize it as the primary monitor/output; this is
-# not the default when using nvidia-xrun or optimus-manager
-# this is required for redshift to recognize laptop screen as crtc 0 at all
+# necessary so setroot and redshift recognize my laptop screen as the primary
+# monitor/output; necessary for my xenv.sh script to work; this is not the
+# default when using nvidia-xrun or optimus-manager and is required for redshift
+# to recognize the laptop screen as crtc 0 at all
 
 # primary seems to be the connected monitor that is alphabetically first; ensure
 # that the primary monitor stays as the laptop screen after connecting to other
 # outputs by explicitly setting it
 
-# this assumes no outputs are plugged in when starting X
-# it works on current laptop even if the cable is plugged in when starting X
-# calling autorandr separately in herbstluftwm's autostart (so
-# herbstluftwm-specific changes will be triggered) to set up external monitor if
-# it is already plugged in when starting X
-xrandr --output "$(xrandr --listmonitors | awk '/0:/ {print $NF}')" --primary
+# pick the first monitor that is not HDMI as the primary; this works on my
+# current laptop even when connected to HDMI when starting X but may need to be
+# changed if I start using displayport or thunderbolt
+primary=$(xrandr --listmonitors | awk 'NR>1 && !/HDMI/ {print $NF; exit}')
+xrandr --output "$primary" --primary
+# NOTE: the consequence of setting the primary monitor incorrectly is that
+# autorandr --change will fail; I'm calling autorandr separately in
+# herbstluftwm's autostart (so herbstluftwm-specific changes will be triggered)
+# to set up the external monitor if it is already plugged in when starting X
 
 # * Environment Variables
 # shellcheck disable=SC1090

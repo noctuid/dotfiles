@@ -78,16 +78,15 @@ intel-ucode
 # having both installed has not caused me issues
 nvidia-xrun-git aur
 optimus-manager-git aur
-# nouveau is builtin to the kernel, so I don't think this is necessary
-xf86-video-nouveau
 # not currently using
 bbswitch-dkms
 # intel-virtual-output
 xf86-video-intel
 nvidia-dkms
-# contains opengl and vulkan drivers
+# WAITING switch to nvidia-open-dkms when get new graphics card and it is stable
+# contains opengl and vulkan drivers; contains file to blacklist nouveau
 nvidia-utils
-# see linux-ck heading
+# see linux zen heading
 # needed for steam
 lib32-nvidia-utils
 
