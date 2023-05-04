@@ -289,6 +289,13 @@ pywalfox_setup() {
 	pywalfox install
 }
 
+# * QMK
+qmk_setup() {
+	qmk setup || return 1
+	qmk config user.keyboard=splitkb/kyria/rev3 || return 1
+	qmk config user.keymap=noctuid || return 1
+}
+
 # * All
 all() {
 	user=$1
@@ -335,6 +342,7 @@ all() {
 	optimus_setup || fail_configure "Optimus manager setup failed."
 	arkenfox_setup "$user" || fail_configure "Arkenfox setup failed"
 	pywalfox_setup || fail_configure "Pywalfox setup failed."
+	qmk_setup || fail_configure "QMK setup failed."
 }
 
 # * Non-chroot

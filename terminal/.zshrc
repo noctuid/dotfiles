@@ -1414,6 +1414,13 @@ flash_keyboardio() (  # <no-compile>
 
 alias keyboardio='flash_keyboardio'
 
+kyria() {
+	if [[ -z $1 ]]; then
+		qmk compile || return 1
+	fi
+	qmk flash
+}
+
 # ** Other Functions
 if [[ -f ~/.config/ranger/ranger_functions ]]; then
 	source ~/.config/ranger/ranger_functions
