@@ -8665,7 +8665,7 @@ TODO
 
 ** Powershell
 #+begin_src emacs-lisp
-(use-package powershell-mode)
+(use-package powershell)
 #+end_src
 
 ** Python
