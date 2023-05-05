@@ -4365,6 +4365,7 @@ A helper library for inserting icons (used by other packages in my config).
     (defun noct-doom-headerline-to-modeline (sym value operation &rest _)
       "Move doom line from header to modeline when there's a different header."
       (when (and (eq sym 'header-line-format)
+                 value
                  (eq operation 'set)
                  (not (string-match "dirvish" (symbol-name major-mode)))
                  (not (string-match "doom-modeline"
