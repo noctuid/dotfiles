@@ -7960,6 +7960,9 @@ TODO
     "(" #'lispy-parens-auto-wrap
     "[" #'lispy-brackets-auto-wrap
     "{" #'lispy-braces-auto-wrap
+    "]" #'lispy-right-nostring
+    "}" #'lispy-right-nostring
+
     "TAB" #'noct-lispy-tab
     "<backtab>" #'lispy-dedent-adjust-parens
     "M-h" #'lispy-beginning-of-defun
@@ -8258,12 +8261,21 @@ TODO eventually
     ;; don't think I will need compile for anything
     "c" #'lsp-clojure-clean-ns)
 
-  ;; `lsp-find-definition' works just as well without repl connection
-  ;; "RET" #'cider-find-dwim
+  (general-def 'normal cider-mode-map
+    ;; `lsp-find-definition' often works just as well without repl connection,
+    ;; but in some cases it won't work until a file containing a definition has
+    ;; been visited (e.g. my bb.util file for babashka scripts)
+    "RET" (general-predicate-dispatch nil
+            (and (fboundp 'cider-current-connection)
+                 (cider-current-connection))
+            #'cider-find-dwim)
 
-  ;; `lsp-describe-thing-at-point' is a prettier `cider-clojuredocs'
-  ;; `cider-doc' has the advantage of showing "see also" as buttons/links
-  ;; "N" #'cider-doc
+    ;; `lsp-describe-thing-at-point' is a prettier `cider-clojuredocs'; however,
+    ;; it works for fewer things (e.g. it shows nothing for "try" for me)
+    ;; cider's doc commands also have the advantage of showing "see also" as
+    ;; buttons/links
+    ;; "N" #'cider-doc
+    "N" #'cider-clojuredocs)
 
   ;; Use `lsp-find-references' for references
   ;; - Cider limitations: https://docs.cider.mx/cider/usage/misc_features.html
