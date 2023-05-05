@@ -7752,6 +7752,8 @@ https://github.com/emacs-lsp/lsp-ui/issues/437
 *** Xref
 #+begin_src emacs-lisp
 (general-with 'xref
+  (gsetq xref-history-storage 'xref-window-local-history)
+
   ;; window for selecting between definition and variable
   (noct-handle-popup "*xref*")
 
