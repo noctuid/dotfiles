@@ -4094,6 +4094,8 @@ TODO: This should be in counsel (variable to jump to match end and evil integrat
 
 ** Better Jumper
 I prefer to have a buffer-local jumplist and use a separate key for ~winner-undo~ to switch between previously displayed windows/buffers.
+
+[[https://github.com/gilbertw1/better-jumper/issues/14][It would be nice to have completing-read support]].
 #+begin_src emacs-lisp
 (use-package better-jumper
   :ghook ('pre-command-hook nil nil nil t)
@@ -4102,7 +4104,9 @@ I prefer to have a buffer-local jumplist and use a separate key for ~winner-undo
     [remap evil-jump-forward] #'better-jumper-jump-forward
     [remap evil-jump-backward] #'better-jumper-jump-backward)
   :config
-  (gsetq better-jumper-context 'buffer))
+  (gsetq better-jumper-context 'buffer
+         ;; save/restore history with savehist
+         better-jumper-use-savehist t))
 #+end_src
 
 ** Deadgrep
