@@ -7018,6 +7018,15 @@ Make org links work everywhere.
   (global-orglink-mode))
 #+end_src
 
+**** Org Make ToC
+ #+begin_src emacs-lisp
+(use-package org-make-toc
+  :straight (org-make-toc :host github
+                          :repo "noctuid/org-make-toc"
+                          :branch "feature/auto-insert-custom-ids")
+  :config (gsetq org-make-toc-insert-custom-ids t))
+ #+end_src
+
 **** Org Modern
 #+begin_src emacs-lisp
 (use-package org-modern
