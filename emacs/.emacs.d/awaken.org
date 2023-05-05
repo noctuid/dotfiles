@@ -5639,15 +5639,6 @@ TODO Use things.el instead.
   (evilem-make-motion evilem-backward-WORD-begin
                       #'evil-backward-WORD-begin)
 
-  (evilem-make-motion evilem-sentence-nav-forward
-                      #'sentence-nav-evil-forward)
-  (evilem-make-motion evilem-sentence-nav-backward
-                      #'sentence-nav-evil-backward)
-  (evilem-make-motion noct-sentence-easymotion
-                      (list #'sentence-nav-forward
-                            #'sentence-nav-backward))
-
-
   (evilem-make-motion evilem-forward-paragraph
                       #'evil-forward-paragraph)
   (evilem-make-motion evilem-backward-paragraph
