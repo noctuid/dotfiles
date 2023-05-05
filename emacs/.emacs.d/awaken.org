@@ -10039,6 +10039,13 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
   (noct-handle-popup-same-window (rx "*ChatGPT")))
  #+end_src
 
+*** Chatgpt Shell
+#+begin_src emacs-lisp
+(use-package chatgpt-shell
+  :config
+  (gsetq chatgpt-shell-openai-key #'noct-get-openai-key))
+#+end_src
+
 ** Music
 - EMMS supports mpd, though I think the other options have nicer interfaces
 - Simple-mpc - too simple
