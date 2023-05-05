@@ -1001,13 +1001,8 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
   (general-def 'insert
     "C-o" #'evil-execute-in-normal-state
     "C-r" #'evil-paste-from-register
-    "C-w" #'evil-delete-backward-word
     ;; trying out since don't normally use `universal-argument' in insert
-    "C-u" #'evil-delete-back-to-indentation
-    "¸" #'evil-delete-backward-word))
-
-(general-def :keymaps noct-minibuffer-maps
-  "¸" #'evil-delete-backward-word)
+    "C-u" #'evil-delete-back-to-indentation))
 
 (when noct-personal-computer-p
   (straight-override-recipe
@@ -1079,15 +1074,17 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 *** Advice
 #+begin_src emacs-lisp
 (general-with 'evil
-  ;; TODO move this stuff to some dedicated non-package-specific heading
+  ;; TODO move this stuff to some dedicated non-package-specific heading; no
+  ;; need to load after evil
   (defun noct-nop-kill-new (orig-func &rest args)
     "Run ORIG-FUNC with ARGS preventing any `kill-new's from running."
     ;; http://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
     (cl-letf (((symbol-function 'kill-new) #'ignore))
       (apply orig-func args)))
 
-  ;; don't copy for C-w or visually selected text
-  (general-add-advice '(evil-visual-paste
+  ;; don't copy for C-w/C-<backspace> or visually selected text
+  (general-add-advice '(backward-kill-word
+                        evil-visual-paste
                         evil-delete-backward-word
                         lispyville-delete-backward-word)
                       :around #'noct-nop-kill-new))
@@ -2640,8 +2637,7 @@ TODO Try more helm.
          helm-ff-skip-boring-files t)
 
   (general-def 'helm-map
-    "<tab>" #'helm-execute-persistent-action
-    "¸" #'evil-delete-backward-word)
+    "<tab>" #'helm-execute-persistent-action)
 
   (helm-autoresize-mode))
 
@@ -2763,8 +2759,6 @@ Select candidate as soon as there is only one (like the headlong package but for
 
   (general-def ivy-minibuffer-map
     "<escape>" #'minibuffer-keyboard-quit
-    "C-w" #'evil-delete-backward-word
-    "¸" #'evil-delete-backward-word
     "<next>" #'ivy-scroll-up-command
     "<prior>" #'ivy-scroll-down-command
     "C-e" #'previous-history-element
@@ -5051,6 +5045,21 @@ must be non-read-only, empty, and there must be a rule in
           :mode org-mode)
          (emacs-lisp-mode :trigger "__package")
          (python-mode)))
+#+end_src
+
+** Hungry Delete
+Have =C-w= and =C-<backspace>= delete whitespace before deleting words when there is more than one space.
+ #+begin_src emacs-lisp
+(use-package hungry-delete
+  :general
+  ('override
+   [remap backward-kill-word]
+   (general-predicate-dispatch #'backward-kill-word
+     (looking-back (rx (and space (1+ space)))
+                   (line-beginning-position))
+     #'hungry-delete-backward
+     (bound-and-true-p lispyville-mode)
+     #'lispyville-delete-backward-word)))
 #+end_src
 
 ** Smart Parens
@@ -8966,9 +8975,6 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
   :config
   (gsetq geiser-active-implementations '(chicken guile racket))
 
-  (general-def 'insert geiser-repl-mode-map
-    "¸" 'sp-backward-kill-word)
-
   (general-m (scheme-mode-map racket-mode-map)
     "b" #'geiser-eval-buffer
     "d" #'geiser-eval-definition
@@ -10180,7 +10186,11 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     "C-c" #'vterm--self-insert
     "C-u" #'vterm--self-insert
     "C-w" #'vterm--self-insert
-    "¸" #'vterm--self-insert))
+    "C-<backspace>"
+    (noct-defun noct-vterm-send-c-w ()
+      "Send <escape> key."
+      (interactive)
+      (vterm-send-key "w" nil nil t))))
 
 (use-package vterm-toggle
   :straight (vterm-toggle
