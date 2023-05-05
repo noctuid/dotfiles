@@ -1747,6 +1747,7 @@ Use Emacs for pinentry where possible (pinentry.el is no longer needed).
 #+begin_src emacs-lisp
 ;; TODO why doesn't this work for SSH key passphrase? (SSH_AUTH_SOCK is set
 ;; correctly in Emacs)
+;; TODO allow retries like other pinentry methods
 (gsetq epg-pinentry-mode 'loopback)
 #+end_src
 
@@ -2684,7 +2685,7 @@ TODO Try more helm.
 #+end_src
 
 ** Headlong
-Select candidate as soon as there is only one (like the headlong package but for ivy and selectrum). This is used for cases where you know there is a correct match in the candidates and there aren't too many candidates. Right now, I'm using it mainly for dired (like ranger's =f=), but this could be used elsewhere.
+Select candidate as soon as there is only one (like the headlong package but for ivy and vertico). This is used for cases where you know there is a correct match in the candidates and there aren't too many candidates. Right now, I'm using it mainly for dired (like ranger's =f=), but this could be used elsewhere.
 #+begin_src emacs-lisp
 ;; TODO consider making a PR with a better implementation
 (defvar noct-ivy-command nil)
@@ -4639,7 +4640,6 @@ Smartparens' version is unfortunately too slow.
     (set-face-attribute 'org-block nil :background 'unspecified)
     (set-face-attribute 'org-block-begin-line nil :background 'unspecified)
     (set-face-attribute 'org-ellipsis nil :background 'unspecified)))
-;; doom-spacegrey
 
 (use-package kaolin-themes)
 ;; these are nice:
@@ -4734,6 +4734,22 @@ Smartparens' version is unfortunately too slow.
 
 *** Default Theme
 #+begin_src emacs-lisp
+(defconst noct-favorite-themes
+  '(doom-opera
+    doom-spacegry
+    doom-zenburn
+    doom-nord
+    doom-miramare
+    doom-lantern
+    doom-rouge
+    gruvbox-dark-soft
+    kaolin-shiva
+    kaolin-eclipse
+    ;; looks great but too shiny
+    ;; twilight-bright
+    catppuccin
+    rose-pine-mone))
+
 (unless (or (featurep 'circadian)
             (bound-and-true-p ewal-base-palette))
   ;; 0.2 seconds
@@ -7778,6 +7794,8 @@ NOTE: Have had issues where I've accidentally added a folder (e.g. my home folde
    read-process-output-max (* 1024 1024)
    lsp-headerline-breadcrumb-enable nil)
 
+  (noct-handle-popup-other-window (rx "*lsp-help*"))
+
   ;; (satch-shove lsp-file-watch-ignored-directories
   ;;              '("[/\\\\]\\__pycache__\\'"
   ;;                "[/\\\\]\\.mypy_cache\\'"
@@ -10131,6 +10149,7 @@ Liked songs is not a playlist.
 
   ;; NOTE: imenu works
   (general-def 'normal pass-mode-map
+    ;; can still edit
     "RET" #'pass-view
     ;; copy password
     "y" #'pass-copy
