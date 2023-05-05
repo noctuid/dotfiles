@@ -658,13 +658,20 @@ Install =use-package.el= with optional dependencies and configure:
   ;; entire init file before compiling already
   (setq use-package-always-defer t)
 
+  (defun noct-package-available-p (package keywords)
+    "Return whether PACKAGE is in `noct-straight-packages'.
+Also return non-nil if KEYWORDS contains :straight nil."
+    (or (and (memq :straight keywords)
+             (null (plist-get keywords :straight)))
+        ;; must be quoted so doesn't check at expansion time
+        `(memq ',package noct-straight-packages)))
+
   ;; don't do anything if installation fails; like
   ;; `use-package-check-before-init' but works for :config and other keywords;
   ;; recording `straight-use-package' return values instead of using
   ;; `locate-library' since it was adding an extra 0.15 seconds to init
   (cl-pushnew '(:when
-                (lambda (package &rest _)
-                  `(memq ',package noct-straight-packages))
+                noct-package-available-p
                 t)
               use-package-defaults
               :test #'equal))
