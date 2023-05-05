@@ -9285,6 +9285,26 @@ For making certain files read-only automatically.
 #+end_src
 
 * Applications/Other
+** Calc
+#+begin_quote
+Like abacus experts, emacs experts continue to leave the mousers in the dust.  But we all know what became of abacus experts.  -- dickmao
+#+end_quote
+
+[[https://florian.adamsky.it/2016/03/31/emacs-calc-for-programmers-and-cs.html][Nice article on calc]]
+
+#+begin_src emacs-lisp
+(general-after 'evil
+  (evil-set-initial-state 'calc-mode 'insert))
+
+(use-package calc
+  :straight nil
+  :general
+  (general-s "k" #'calc)
+  :config
+  (general-def 'normal calc-mode-map
+    "q" #'calc-quit))
+#+end_src
+
 ** Dired
 Performance notes:
 - dired-k slows loading larger directories to a crawl (e.g. 0.08 -> 1 second; with all the icons -> 4 seconds; 450 items)
