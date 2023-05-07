@@ -4,13 +4,14 @@
 
 with pkgs;
 let
+  # generally it's not worth trying to install anything that needs to run on GPU
   # https://pmiddend.github.io/posts/nixgl-on-ubuntu/
   # https://github.com/NixOS/nixpkgs/issues/9415
   # https://nixos.wiki/wiki/Nixpkgs_with_OpenGL_on_non-NixOS
   # this approach: https://github.com/guibou/nixGL/issues/44#issuecomment-1361524862
   # alt approach: https://github.com/guibou/nixGL/issues/16#issuecomment-903188923
   # need prime-run when using Nvidia and optimus-manager
-  nixGLWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
+  nixGLPrimeWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
     mkdir "$out"
     ln -s ${pkg}/* "$out"
     rm -f "$out"/bin
@@ -45,6 +46,7 @@ filtered-packages ++ [
   nixgl.auto.nixGLDefault
   nixgl.nixGLIntel
 
+  # other wrappers will break ueberzug
   (nixGLIntelWrap kitty)
 
 # * Filesystem Support
@@ -57,21 +59,22 @@ filtered-packages ++ [
   # bspwm
 
 # * Input
-  fcitx5
-  fcitx5-mozc
-  # latex input
-  fcitx5-table-other
+  # fcitx5
+  # fcitx5-mozc
+  # # latex input
+  # fcitx5-table-other
 
 # * Graphics, Drivers, Games, Emulators
   # TODO missing
   # unnamed sdvx clone
 
   # missing fonts and other issues
-  # (nixGLWrap steam)
-  # (nixGLWrap lutris)
+  # (nixGLPrimeWrap steam)
+  # (nixGLPrimeWrap lutris)
 
-  ppsspp
-  dolphin-emu
+  # again, better to use system version for anything want to run on GPU
+  # ppsspp
+  # dolphin-emu
 
 # * Security
   wireguard-tools
@@ -87,7 +90,7 @@ filtered-packages ++ [
   detox
 
 # * Browsers
-  # breaks some tridactyl scripts
+  # using nix version breaks some tridactyl scripts
   # (nixGLIntelWrap firefox)
   # TODO still crashes
   # (nixGLIntelWrap ungoogled-chromium)
@@ -107,11 +110,12 @@ filtered-packages ++ [
   hugo
 
 # * Image Editing/Conversion
-  gimp-with-plugins
+  # gimp-with-plugins
   imagemagick
   gifsicle
   graphicsmagick
-  waifu2x-converter-cpp
+  # better to use system package for GPU-intensive packages
+  # waifu2x-converter-cpp
   # TODO waifu2x-ncnn-vulka
   # TODO soryu
 
@@ -123,7 +127,8 @@ filtered-packages ++ [
   libwebp
 
 # * Torrents
-  transmission
+  # use system version since systemd service
+  # transmission
   nodePackages.webtorrent-cli
 
 # * General Utilities
@@ -141,7 +146,8 @@ filtered-packages ++ [
 
 # * Time Syncing
   # time syncing
-  ntp
+  # use system version since systemd service
+  # ntp
   # recommended over ntpd but unnecessarily complicated to set up
   # chrony
 
@@ -154,7 +160,8 @@ filtered-packages ++ [
   hdparm
 
 # * Entropy
-  rng-tools
+  # use system version since systemd service
+  # rng-tools
 
 # * Keyboard Remapping
   xcape
@@ -163,12 +170,15 @@ filtered-packages ++ [
   arduino
 
 # * Mouse Tools
-  # prefer to keynav though don't really use
-  warpd
+  # prefer warpd over keynav though don't really use
+  # it's too old
+  # warpd
 
 # * Virtualization
   # doesn't work on new macs (and no nix darwin version)
-  virtualbox
+  # fails with my existing VMs; not sure if it's an opengl issue; not going to
+  # investigate; use distro package
+  # virtualbox
 
 # * Mail
   # getting mail
@@ -183,9 +193,9 @@ filtered-packages ++ [
   procmail
 
 # * Sound/Music
-  # TODO should be system level
+  # no, installed at system level
   # pipewire
-  # TODO pipewire-pulse, pipewire-alsa?
+  # pipewire-pulse, pipewire-alsa?
   jamesdsp
   # jamesdsp-puls
 
@@ -217,7 +227,7 @@ filtered-packages ++ [
   cdrtools
 
   beets
-  # is this still needed with nix
+  # is this still needed with nix?
   python311Packages.pyacoustid
   python311Packages.requests
   # python-mpd
@@ -227,7 +237,7 @@ filtered-packages ++ [
   playerctl
 
   # no video track...
-  # (nixGLWrap mpv)
+  # (nixGLPrimeWrap mpv)
 
   # linux only
   pqiv
@@ -246,8 +256,13 @@ filtered-packages ++ [
   # betterlockscreen
 
 # * Compositing
-  # will completely mess up screen with nixGLWrap!
-  (nixGLIntelWrap picom)
+  # not installing here because I want to run piocm on my GPU; by default
+  # (i.e. without nixGL) nix's picom will fail to start when running on the
+  # nvidia card; nixGLPrimeWrap does not make it work with Nvidia (the screen
+  # will be black) as prime-run seems to never work with picom; simpler to just
+  # install through system and not use hybrid mode
+  # https://github.com/yshui/picom/issues/1060
+  # (nixGLIntelWrap picom)
 
 # * Notifications
   libnotify
@@ -258,10 +273,11 @@ filtered-packages ++ [
   rofi
 
 # * Fonts
-  # TODO system level?
+  # installed at system level
 
 # * Appearance/Theming
-  polybarFull
+  # TODO currently need polybar-git for tray module
+  # polybarFull
   setroot
   xtitle
 
@@ -274,13 +290,13 @@ filtered-packages ++ [
   # colorscheme generation/setup from wallpaper
   pywal
   wpgtk
-  # TODO flatcolor included? wpg-install.sh?
+  # TODO flatcolor included? run wpg-install.sh in setup?
 
   # TODO python-wal-steam-git aur
   # TODO pywalfox
 
   # display colors and system statistics
-  neofetch
+  # neofetch  # in common packages
   disfetch
   # TODOfails to build
   # uwufetch
@@ -302,10 +318,11 @@ filtered-packages ++ [
 
 # * X11
   # automatic xrandr setup based on connected devices
-  autorandr
+  # causes issues when installed alongside arch autorandr
+  # autorandr
 
   xdotool
-  # TODO not here
+  # installed at system level
   # xorg-server
   # xorg-xinit
 
@@ -324,7 +341,6 @@ filtered-packages ++ [
   xsel
   xclip
 
-  # TODO start using
   unclutter-xfixes
 
 # * Android

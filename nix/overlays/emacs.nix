@@ -7,31 +7,31 @@
 # https://github.com/nix-community/emacs-overlay/blob/master/overlays/emacs.nix
 # https://github.com/d12frosted/homebrew-emacs-plus/tree/master/patches/emacs-30
 
-final: prev: {
+self: super: rec {
   emacsNoctuid =
-    if prev.stdenv.isDarwin
+    if super.stdenv.isDarwin
     then
-      prev.emacsGit.overrideAttrs (old: {
+      super.emacsGit.overrideAttrs (old: {
         patches =
           (old.patches or [])
           ++ [
             # Fix OS window role so that yabai can pick up emacs
-            (prev.fetchpatch {
+            (super.fetchpatch {
               url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30fix-window-role.patch";
               sha256 = "+z/KfsBm1lvZTZNiMbxzXQGRTjkCFO4QPlEK35upjsE=";
             })
             # Use poll instead of select to get file descriptors
-            (prev.fetchpatch {
+            (super.fetchpatch {
               url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30/poll.patch";
               sha256 = "jN9MlD8/ZrnLuP2/HUXXEVVd6A+aRZNYFdZF8ReJGfY=";
             })
             # Enable rounded window with no decoration
-            (prev.fetchpatch {
+            (super.fetchpatch {
               url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30/round-undecorated-frame.patch";
               sha256 = "qPenMhtRGtL9a0BvGnPF4G1+2AJ1Qylgn/lUM8J2CVI=";
             })
             # Make emacs aware of OS-level light/dark mode
-            (prev.fetchpatch {
+            (super.fetchpatch {
               url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-30/system-appearance.patch";
               sha256 = "oM6fXdXCWVcBnNrzXmF0ZMdp8j0pzkLE66WteeCutv8=";
             })
@@ -40,7 +40,7 @@ final: prev: {
     else
       # TODO nix's lucid reports the wrong mm-size (breaks textsize package):
       # (frame-monitor-attribute 'mm-size (selected-frame))
-      (prev.emacsGit.override {
+      (super.emacsGit.override {
         withSQLite3 = true;
         withWebP = true;
         withX = true;
@@ -68,4 +68,27 @@ final: prev: {
           "--with-xinput2"
         ];
       });
+  emacsNoctuidWithPackages =
+    ((super.emacsPackagesFor emacsNoctuid).emacsWithPackages (epkgs: [
+      # necessary to install through nix to get libenchant integration working
+      epkgs.jinx
+    ]));
+
+  # for WSL with weston
+  emacsPgtk =
+    (super.emacsGit.override {
+      # pgtk since wslg uses weston (at least bydefault)
+      withX = false;
+      withPgtk = true;
+      withSQLite3 = true;
+      withWebP = true;
+      withImageMagick = true;
+      # have to force this; lib.version check wrong or because emacsGit?
+      withTreeSitter = true;
+    });
+  emacsPgtkWithPackages =
+    ((super.emacsPackagesFor emacsPgtk).emacsWithPackages (epkgs: [
+      # necessary to install through nix to get libenchant integration working
+      epkgs.jinx
+    ]));
 }

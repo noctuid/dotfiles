@@ -25,9 +25,8 @@
 
     # https://nixos.wiki/wiki/Emacs
     # https://nixos.wiki/wiki/Overlays#In_a_Nix_flake
-    # updated commit hash 2023-03-18
     emacs-overlay = {
-      url = "github:nix-community/emacs-overlay/a3abd804a0f05d3d388a6efced4f7bf50792deb6";
+      url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -76,6 +75,11 @@
       homeConfigurations.noct = home-manager.lib.homeManagerConfiguration {
         pkgs = linux-pkgs;
         modules = [ ./linux ];
+      };
+
+      homeConfigurations.wsl = home-manager.lib.homeManagerConfiguration {
+        pkgs = linux-pkgs;
+        modules = [ ./wsl ];
       };
     };
 }

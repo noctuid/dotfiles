@@ -54,6 +54,14 @@ exd() {
 	atool -x "$1" && rm "$1"
 }
 
+trash-ignore-empty() {
+	if [[ -z $1 ]]; then
+		return 1
+	fi
+	# trash-cli's "trash-put -- -foo" will error that -- does not exist
+	trash -- "$@"
+}
+
 # vim: ft=sh:
 # Local Variables:
 # mode: sh

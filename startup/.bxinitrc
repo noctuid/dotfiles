@@ -100,9 +100,8 @@ rldkbd &
 # set cursor look
 xsetroot -cursor_name left_ptr &
 
-# TODO hide cursor after a second
-# https://github.com/Airblader/unclutter-xfixes/issues/40
-# unclutter -idle 1 -b
+# hide cursor after a second of inactivity
+unclutter -idle 1 -b
 
 # * Screen
 # blank/screen saver after 15 minutes of inactivity

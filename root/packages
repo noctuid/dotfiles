@@ -178,6 +178,8 @@ chafa
 ueberzug
 
 trash-cli
+# installed through nix
+# trashy aur
 
 # progress bars:
 # https://github.com/DeeNewcum/dotfiles/blob/master/bin/eta
@@ -384,8 +386,6 @@ isync
 msmtp
 # symlinks sendmail to msmtp
 msmtp-mta
-# mu and mu4e (email client)
-mu-git aur
 
 # used for formail to get header information
 procmail
@@ -603,6 +603,10 @@ fd
 editorconfig-core-c
 tree-sitter
 
+docker
+docker-compose
+nvidia-container-runtime aur
+
 # ** Licensing
 harvey pip
 
@@ -749,6 +753,9 @@ xclip
 # hiding mouse
 # use after https://github.com/Airblader/unclutter-xfixes/issues/46
 # unclutter-xfixes-git aur
+
+# * Mouse Tools
+warpd-git aur
 
 # * Android
 # for adb

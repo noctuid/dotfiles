@@ -1,0 +1,12 @@
+* About
+I'm using nix for installing more packages even though I am not using NixOS.  This has the advantage of working across operating systems (e.g. macOS has good support for nix and system configuration using nix-darwin, and I can use nix packages on any distro in WSL).
+
+The disadvantage is that nix not suitable for some types of packages and can be a major pain (e.g. various issues with gpg version mismatches because the running gpg-agent is a different version than gpg used by some other program like pass or isync).  It cannot be used for system-level packages that are needed immediately/on boot (e.g. refind, iwd, linux kernel, ntp, etc.), but it doesn't need to be since I wouldn't be installing these packages on WSL or macOS anyway.  Many nix packages also do not come with/enable systemd services like the pacman equivalent would.  For daemons I run as a user, this doesn't usually matter as I don't use many user services even if a service is available (e.g. mpd).
+
+The biggest annoyance is that nix does not currently work with openGL applications on non-NixOS distros.  There is [[https://github.com/guibou/nixGL][nixGL]], which I've tried, but it's much simpler and less buggy to just use the distro package for most graphical applications.  Even with nixGL, I had a lot of issues (e.g. chromium crashes).
+
+Nix can at least cover command-line and basic utilities, simple GUI applications that don't use openGL/don't need to run on GPU, user-level daemons, and Emacs.
+
+[[https://github.com/nix-community/emacs-overlay][emacs-overlay]] makes using nix for Emacs especially nice.  You can use Emacs master, customize configure flags, apply patches (e.g. like emacs-plus does on macOS), and having a flake.lock file that locks to a specific commit further solidifies reproducibility.
+
+The only major gotcha I've encountered so far is that packages that use dynamic modules need to be installed through nix.  The only two I'm using at the time of writing are jinx and vterm, and vterm will work regardless of how it is installed (as long as you recompile the module after installing Emacs through nix).  Nix Emacs also doesn't find mu4e by default (as mu4e comes with mu rather than being installed with an Emacs package manager), so you have to tell it where to find the package.  These are fairly minor issues though, so I am sticking with nix Emacs for now.

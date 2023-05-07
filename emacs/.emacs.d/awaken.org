@@ -6583,6 +6583,10 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false positives than aspell so far, and I will probably switch to it completely and remove the rest of my spelling config.  ~jinx-correct~ doesn't have avy support, but it will jump to the closest word, which is good enough if you just fix all visible issues at once
  #+begin_src emacs-lisp
 (use-package jinx
+  ;; must be installed through nix to work with Emacs installed through nix
+  :straight nil
+  ;; necessary when installed through nix
+  :autoload global-jinx-mode
   :init
   (noct-after-buffer (global-jinx-mode))
   :config

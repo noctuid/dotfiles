@@ -9,10 +9,13 @@ with pkgs; [
   gvfs
 
 # * Security
-  gnupg
+  # gnupg
+  # TODO issues when different versions of gpg are installed  (mismatched
+  # version compared to whatever gpg-agent started first)
+  # pass
+
   pinentry
 
-  pass
   passff-host
 
   keybase
@@ -63,6 +66,7 @@ with pkgs; [
   ffmpegthumbnailer
   # ranger info (alternatively exiftool)
   mediainfo
+  # won't work with kitty installed through system
   # alternate to w3m image preview
   ueberzug
 
@@ -72,8 +76,14 @@ with pkgs; [
   # terminal graphics
   chafa
 
-  trash-cli
-  # TODO vs trashy?
+  # trashy and trash-cli conflict; installing trash-cli on the system side
+  # - trashy for trashing since "trash-put -- -foo" works but complains that --
+  #   does not exist
+  # - trash-cli for restore since it is limited to the current directory and
+  #   interactive by default; trashy can only do one of those two at a time
+  # https://github.com/oberblastmeister/trashy/issues/77
+  # trash-cli
+  trashy
 
   # progress bars:
   # https://github.com/DeeNewcum/dotfiles/blob/master/bin/eta
@@ -88,6 +98,8 @@ with pkgs; [
   # random/fun
   cowsay
   fortune
+
+  neofetch
 
   # ls alternatives
   exa
@@ -109,38 +121,44 @@ with pkgs; [
   jq
   miller
 
-
 # * Disk Usage
   baobab
   du-dust
   ncdu
-
 
 # * Backup
   borgbackup
   restic
 
 # * Editors
-  # emacsGit with emacs-plus patches on OSX and lucid on linux
-  emacsNoctuid
+  # emacsGit with emacs-plus patches on OSX and packages that must be installed
+  # through nix
+  emacsNoctuidWithPackages
   jansson
   emacsPackages.cask
 
   neovim
-  neovide
-  nvimpager
+  # opengl
+  # neovide
+  # TODO fails to build
+  # nvimpager
 
   # backup
+  # telemetry disabled by default; some extensions have licenses that
+  # only allow use with official vscode, but I don't care since I will ideally
+  # never use
   vscodium
 
 # * Browsers
-  # NOTE: firefox/chrome not available for darwin
+  # NOTE: firefox/chrome are not available for darwin and I wouldn't want to run
+  # them through wsl
 
   # used, for example, by ranger for image preview and html preview
   w3m
 
 # * Video/Images
-  mpv
+  # better to use distro package
+  # mpv
 
 # * File Type Support and Conversion
   pandoc
@@ -155,7 +173,6 @@ with pkgs; [
 # * PDF Viewing
   zathura
 
-
 # * Shared Disk Utilities
   # automatic mounting
   udiskie
@@ -165,8 +182,8 @@ with pkgs; [
   btop
 
 # * Cross-Platform Keyboard Remapping
-  # TODO fails to build
-  # haskellPackages.kmonad
+  # currently need git version on linux; need on system side for wsl
+  # kanata
 
 # * Cron
   fcron
@@ -177,7 +194,9 @@ with pkgs; [
   hunspell
   hunspellDicts.en-us
   nuspell
-  enchant
+  # no point since need library for emacs (using jinx package to handle):
+  # https://nixos.wiki/wiki/FAQ#I_installed_a_library_but_my_compiler_is_not_finding_it._Why.3F
+  # enchant
   sdcv
 
   # grammar
@@ -185,7 +204,9 @@ with pkgs; [
   vale
 
 # * Downloading
-  yt-dlp
+  # audio doesn't work when used with mpv? (no audio tracks); may just be
+  # out-of-date
+  # yt-dlp
   gallery-dl
   aria
   megatools
@@ -223,9 +244,11 @@ with pkgs; [
   act
 
 # ** Docker/Podman
-  docker
-  docker-compose
-  podman
+  # docker
+  # docker-compose
+  # couldn't get this working; nvidia-container-runtime in aur works fine
+  # nvidia-docker
+  # podman
 
 # ** Licensing
   # TODO harvey
@@ -265,40 +288,44 @@ with pkgs; [
   statix
 
 # ** Python
-  python311
-  python311Packages.pip
-  python311Packages.pipx
+  # TODO messes with system python/package installation? (e.g. zscroll)
+  # python311
+  # python311Packages.pip
+  # python311Packages.pipx
 
 # *** Project Management
+  # TODO installing poetry this way is not officially supported and it seems
+  # like poetry plugins will not work (though that seems to also be the case for
+  # the distro package?)
   poetry
   hatch
   # required for hatch (check if included)
-  python311Packages.tomli-w
-  python311Packages.hatchling
+  # python311Packages.tomli-w
+  # python311Packages.hatchling
 
 # *** Python LSP
   pyright
 
 # *** Jupyter
   jupyter
-  python311Packages.ipykernel
+  # python311Packages.ipykernel
 
 # *** Repl
-  python311Packages.ipython
-  python311Packages.ptpython
+  # python311Packages.ipython
+  # python311Packages.ptpython
 
 # *** Debugger
-  python311Packages.ipdb
+  # python311Packages.ipdb
 
 # *** Linting
   # using project local installation of mypy, black, etc., so none of this is
   # really needed
 
   ruff
-  # TODO ruff-lsp
+  # TODO ruff-lsp; not packaged
 
 # ** Racket
-  racket
+  # racket
 
 # ** Ruby
   # if need gem
@@ -319,7 +346,7 @@ with pkgs; [
   nodePackages.typescript-language-server
 
 # * Screenshots
-  # TODO test (packaged for darwin)
+  # TODO test on macOS (packaged for darwin)
   maim
 
 ]
