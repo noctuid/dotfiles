@@ -262,13 +262,6 @@ nix_setup() {
 	sudo -u "$user" nix-channel --update
 }
 
-# * Optimus Manager
-optimus_setup() {
-	echo "Setting startup mode for optimus-manager to nvidia."
-	optimus-manager --set-startup nvidia
-	systemctl disable --now optimus-manager
-}
-
 # * Arkenfox
 arkenfox_setup() {
 	user=$1
@@ -339,7 +332,6 @@ all() {
 	udiskie_setup || fail_configure "Udiskie setup failed."
 	connman_setup || fail_configure "Connman setup failed."
 	nix_setup "$user" || fail_configure "Nix setup failed."
-	optimus_setup || fail_configure "Optimus manager setup failed."
 	arkenfox_setup "$user" || fail_configure "Arkenfox setup failed"
 	pywalfox_setup || fail_configure "Pywalfox setup failed."
 	qmk_setup || fail_configure "QMK setup failed."
