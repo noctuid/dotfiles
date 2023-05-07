@@ -5216,11 +5216,14 @@ Very useful to learn snippets or for less-often used snippets.  A better ~yas-in
   :general ('insert "C-<tab>" #'consult-yasnippet))
 #+end_src
 
-*** Auto-activating Snippets
+*** Auto-activating Snippets (Auto-capitalization)
 Automatic two-spacing and capitalization.
 #+begin_src emacs-lisp
 (use-package aas
-  :ghook ('text-mode-hook #'aas-activate-for-major-mode)
+  :ghook
+  ;; don't want in yaml-mode
+  ;; ('text-mode-hook #'aas-activate-for-major-mode)
+  ('org-mode-hook #'aas-activate-for-major-mode)
   :config
   (defun noct-before-possible-sentence-end-p ()
     "Return whether before a possible sentence end position."
@@ -5241,7 +5244,7 @@ Automatic two-spacing and capitalization.
   (aas-set-snippets 'text-mode
     :cond #'noct-before-quote-sentence-end-p
     "\" " "\"  ")
-  
+
   (defun noct-after-sentence-end-p ()
     "Return whether after a two-spaced sentence end or at the bol."
     (and (looking-back (rx (or (and (not space) "  "
