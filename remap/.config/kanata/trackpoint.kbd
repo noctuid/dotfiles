@@ -1,9 +1,6 @@
 ;; trackpoint-only kanata config meant to be used with klfc and xcape
 (defcfg
- ;; Elan TrackPoint
- ;; unfortunately only parent gets a symlink (same ids for trackpoint and
- ;; touchpad but I only want to grab trackpoint)
- linux-dev /dev/input/event15)
+ linux-dev /dev/trackpoint)
 
 ;; /could/ use kanata's tap-hold instead of xcape for these keys, but
 ;; tap-hold-release won't work if we aren't also grabbing the keyboard;

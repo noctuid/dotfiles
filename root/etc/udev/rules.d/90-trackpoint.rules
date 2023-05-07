@@ -1,0 +1,8 @@
+# https://reactivated.net/writing_udev_rules.html
+# give trackpoint a /dev/trackpoint symlink
+# - using ATTRS instead of ATTR because the actual correct event/device does not
+#   have a name, its *parent* does
+# - KERNEL is necessary because the Elan TrackPoint device also has a
+#   /dev/input/mouse<#> child
+SUBSYSTEM=="input", KERNEL=="event[0-9]*", ATTRS{name}=="Elan TrackPoint", SYMLINK+="trackpoint"
+
