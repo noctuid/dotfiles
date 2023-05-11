@@ -60,6 +60,7 @@
         overlays = common-overlays ++ [ nixgl.overlays.default ];
       };
       darwin-pkgs = import nixpkgs {
+        # M1
         system = "aarch64-darwin";
         config = pkg-config;
         overlays = common-overlays;
