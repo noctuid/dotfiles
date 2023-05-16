@@ -3,7 +3,7 @@
 # get window title
 # remove punctuation (e.g. "/") and replace whitespace with underscores
 title=$(xtitle | \
-	awk -F "-" '{gsub(/[[:punct:]]/, "") gsub(/\s/, "_"); print $1}')
+	awk '{gsub(/[[:punct:]]/, "") gsub(/\s/, "_"); print $O}')
 date=$(date +%FT%T)
 outfile="$HOME/move/screenshots/${date}_-_${title}.png"
 

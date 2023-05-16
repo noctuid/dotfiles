@@ -20,6 +20,11 @@
 (let ((gap (or (getenv "WM_GAP") "15")))
   (push (cons 'internal-border-width (string-to-number gap)) default-frame-alist))
 
+;; no titlebar
+;; added in a patch; see my emacs.nix overlay
+(when (eq system-type 'darwin)
+  (push '(undecorated-round . t) default-frame-alist))
+
 ;; ** Set Font
 ;; https://github.com/hlissner/doom-emacs/blob/develop/early-init.el
 ;; "Resizing the Emacs frame can be a terribly expensive part of changing the

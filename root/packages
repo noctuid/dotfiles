@@ -622,6 +622,7 @@ gdb
 go
 
 # ** Python
+pyenv
 python-pip
 
 # build system
@@ -711,6 +712,7 @@ shellcheck
 
 # ** Web - JavaScript, TypeScript, etc.
 nodejs
+nvm aur
 npm
 typescript
 typescript-language-server

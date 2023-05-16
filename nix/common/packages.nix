@@ -38,20 +38,25 @@ with pkgs; [
   subversion
 
 # * Terminals
-  kitty
   # backup
-  xterm
-  rxvt-unicode
+  kitty
 
 # * Shell/TUI/CLI
-  # TODO prefixed like gls on darwin?
+  # WARNING: this will actually replace ls, cat, rm, etc. on darwin rather than
+  # giving g-prefixed versions (e.g. gls) like the brew versions does; I haven't
+  # run into issues yet, but there could be issues when running scripts intended
+  # to work specific with the mac versions of these
   coreutils
+
+  gawk
 
   stow
 
   zsh
   fish
-  powershell
+
+  # currently depends on insecure openssl
+  # powershell
 
   direnv
   nix-direnv
@@ -76,14 +81,18 @@ with pkgs; [
   # terminal graphics
   chafa
 
-  # trashy and trash-cli conflict; installing trash-cli on the system side
-  # - trashy for trashing since "trash-put -- -foo" works but complains that --
-  #   does not exist
-  # - trash-cli for restore since it is limited to the current directory and
-  #   interactive by default; trashy can only do one of those two at a time
-  # https://github.com/oberblastmeister/trashy/issues/77
-  # trash-cli
-  trashy
+  # trashy and trash-cli conflict; both have upsides/downsides
+  # - "trash-put -- -foo" works but complains that -- does not exist; trashy
+  #   doesn't have this issue
+  # - trash-cli is nicer for restore since it is limited to the current
+  #   directory and interactive by default; trashy can only do one of those two
+  #   at a time:
+  #   https://github.com/oberblastmeister/trashy/issues/77
+  # - trashy is only packaged form arm mac, which is annoying for testing
+  # - main reason not using trashy:
+  #   https://github.com/oberblastmeister/trashy/issues/48
+  trash-cli
+  # trashy
 
   # progress bars:
   # https://github.com/DeeNewcum/dotfiles/blob/master/bin/eta
@@ -122,7 +131,6 @@ with pkgs; [
   miller
 
 # * Disk Usage
-  baobab
   du-dust
   ncdu
 
@@ -142,12 +150,6 @@ with pkgs; [
   # neovide
   # TODO fails to build
   # nvimpager
-
-  # backup
-  # telemetry disabled by default; some extensions have licenses that
-  # only allow use with official vscode, but I don't care since I will ideally
-  # never use
-  vscodium
 
 # * Browsers
   # NOTE: firefox/chrome are not available for darwin and I wouldn't want to run
@@ -175,7 +177,8 @@ with pkgs; [
 
 # * Shared Disk Utilities
   # automatic mounting
-  udiskie
+  # TODO packaged for darwin but currently fails to build for me
+  # udiskie
 
 # * System Status Monitoring
   htop
@@ -184,9 +187,6 @@ with pkgs; [
 # * Cross-Platform Keyboard Remapping
   # currently need git version on linux; need on system side for wsl
   # kanata
-
-# * Cron
-  fcron
 
 # * Language Tools (Spellchecking, Grammar, Dictionary)
   aspell
@@ -216,9 +216,6 @@ with pkgs; [
   texlive.combined.scheme-full
   # sile
 
-# * Redshift
-  redshift
-
 # * Archive Utilities
   unrar
   unzip
@@ -231,7 +228,7 @@ with pkgs; [
 
 # * Programming
 # ** General
-  # for syntax highlignt in latex export and elsewhere
+  # for syntax highlighting in latex export and elsewhere
   python311Packages.pygments
 
   editorconfig-core-c
@@ -242,6 +239,8 @@ with pkgs; [
 
   # run github actions locally
   act
+
+  gnumake
 
 # ** Docker/Podman
   # docker
@@ -282,16 +281,19 @@ with pkgs; [
 # ** Lua/Fennel
   lua-language-server
   luajitPackages.fennel
+  luajitPackages.luacheck
 
 # ** Nix
   rnix-lsp
   statix
+  # to index store to be able to use nix-locate
+  nix-index
 
 # ** Python
   # TODO messes with system python/package installation? (e.g. zscroll)
   # python311
   # python311Packages.pip
-  # python311Packages.pipx
+  python311Packages.pipx
 
 # *** Project Management
   # TODO installing poetry this way is not officially supported and it seems
@@ -336,17 +338,11 @@ with pkgs; [
   sqlite
 
 # ** Web - JavaScript, TypeScript, etc.
-  nodejs
-
   yarn
   nodePackages.npm
   nodePackages.pnpm
 
   nodePackages.typescript
   nodePackages.typescript-language-server
-
-# * Screenshots
-  # TODO test on macOS (packaged for darwin)
-  maim
 
 ]

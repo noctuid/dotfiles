@@ -166,9 +166,8 @@ super + b
 {mod2,super+control} + alt + v
 	dropmplast
 
-# [i]nsert capture
 {mod2,super+control} + i
-	max_dropdown -n capture emacsclient -ce "(noct-with-reuse-window (org-capture))"
+	emacsclient --eval "(emacs-everywhere)"
 
 # [k]alc
 {mod2,super+control} + k

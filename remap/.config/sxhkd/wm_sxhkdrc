@@ -70,8 +70,10 @@ super + comma
 	wm_action cycle_monitor
 
 # ** Resizing
-super + control + {u,k,semicolon,y}
-	wm_action wresize {left,down,up,right}
+# TODO I don't think I want to use these; replace with mode for setting up
+# herbstluftwm frames instead
+# super + control + {u,k,semicolon,y}
+# 	wm_action wresize {left,down,up,right}
 
 # moving floating windows
 # super + {Left,Down,Up,Right}

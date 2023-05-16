@@ -89,6 +89,20 @@ filtered-packages ++ [
   # sanitize file names
   detox
 
+# * Cron
+  # listed as for darwin, but depends on busybox (which isn't compatible with
+  # darwin)
+  fcron
+
+# * Disk Usage
+  # GNOME tool; linux only
+  baobab
+
+# * Redshift
+  # doesn't support multiple monitors on darwin/mac
+  # https://github.com/jonls/redshift/issues/337
+  redshift
+
 # * Browsers
   # using nix version breaks some tridactyl scripts
   # (nixGLIntelWrap firefox)
@@ -310,7 +324,9 @@ filtered-packages ++ [
   # TODO pokemon-colorscripts-git
 
 # * Screenshots
-  # maim is in common
+  # packaged for darwin but doesn't build
+  maim
+  # not packaged for darwin
   slop
 
 # * Bookmarking

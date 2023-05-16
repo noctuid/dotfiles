@@ -1457,6 +1457,7 @@ using this command."
 (gsetq x-underline-at-descent-line t)
 
 ;; https://github.com/baskerville/bspwm/issues/551#issuecomment-574975395
+;; https://github.com/d12frosted/homebrew-emacs-plus#emacs-28-and-emacs-27
 (gsetq window-resize-pixelwise t
        frame-resize-pixelwise t)
 
@@ -8137,6 +8138,11 @@ For quasi-quoted expressions.
   (gsetq highlight-stages-highlight-real-quote nil))
 #+end_src
 
+** AppleScript Mode
+#+begin_src emacs-lisp
+(use-package applescript-mode)
+#+end_src
+
 ** C
 #+begin_src emacs-lisp
 (use-package cc-mode
@@ -9400,15 +9406,15 @@ TODO ls alternative that does correct sorting
   ;;        (gsetq insert-directory-program "exa"
   ;;               dired-listing-switches
   ;;               "--color never --oneline --all -l")))
-  (cl-case system-type
-    (darwin
-     (when (executable-find "gls")
-       (gsetq insert-directory-program "gls"
-              dired-listing-switches noct-dired-listing-switches)))
-    ;; use human readable sizes and put directories first
-    (gnu/linux
-     (gsetq insert-directory-program "ls"
-            dired-listing-switches noct-dired-listing-switches))))
+
+  (let ((darwin (eq system-type 'darwin))
+        (gls (executable-find "gls"))
+        (nix-ls (string-match-p "\\.nix-profile/bin" (executable-find "ls"))))
+    (when (or (eq system-type 'gnu/linux)
+              (and darwin (or gls nix-ls)))
+      (gsetq dired-listing-switches noct-dired-listing-switches)
+      (when (and darwin (not nix-ls))
+        (gsetq insert-directory-program "gls")))))
 #+end_src
 
 *** Basic Keybindings
@@ -9959,6 +9965,14 @@ Dirvish replaces multiple packages:
   (dirvish-peek-mode))
 #+end_src
 
+** Emacs Everywhere
+#+begin_src emacs-lisp
+(use-package emacs-everywhere
+  :config
+  (general-def 'normal emacs-everywhere-mode-map
+    "RET" #'emacs-everywhere-finish-or-ctrl-c-ctrl-c))
+#+end_src
+
 ** Eshell
 The nice thing about eshell is Emacs integration:
 - ability to use ivy/helm/vertico for completion and search
@@ -10271,6 +10285,16 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
       (interactive)
       (vterm-send-key "w" nil nil t))))
 
+(defvar vterm-buffer-name)
+(defun noct-vterm-select-or-create (&optional number)
+  "Switch to a vterm buffer, creating it if it does not exist.
+  NUMBER specifies which vterm buffer to switch to. If nil, switch to the
+    \"vterm\" buffer."
+  (let ((vterm-buffer-name (if number
+                               (format "*vterm<%s>*" number)
+                             "vterm")))
+    (vterm)))
+
 (use-package vterm-toggle
   :straight (vterm-toggle
              :host github
@@ -10294,15 +10318,6 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
   ;;     (shell-command
   ;;      (format "tmux select-window -t %1$s:%2$s || tmux new-window -t %1$s:%2$s"
   ;;              session number)))
-
-  (defun noct-vterm-select-or-create (&optional number)
-    "Switch to a vterm buffer, creating it if it does not exist.
-  NUMBER specifies which vterm buffer to switch to. If nil, switch to the
-    \"vterm\" buffer."
-    (let ((vterm-buffer-name (if number
-                                 (format "*vterm<%s>*" number)
-                               "vterm")))
-      (vterm)))
 
   (general-def 'normal vterm-mode-map
     "mm" #'vterm
@@ -10357,13 +10372,16 @@ from a global keybinding.")
   "Run BODY with vertico taking up the full window height.
 Open any new windows in same buffer"
   (declare (indent 0) (debug t))
-  `(let ((vertico-count 1000)
-         (vertico-multiform-categories
-          '((t
-             buffer
-             (vertico-buffer-display-action . (display-buffer-use-some-window)))))
-         (display-buffer-alist '((".*" . (display-buffer-use-some-window)))))
-     ,@body))
+  `(progn
+     (defvar vertico-count)
+     (defvar vertico-multiform-categories)
+     (let ((vertico-count 1000)
+           (vertico-multiform-categories
+            '((t
+               buffer
+               (vertico-buffer-display-action . (display-buffer-use-some-window)))))
+           (display-buffer-alist '((".*" . (display-buffer-use-some-window)))))
+       ,@body)))
 
 (defun noct-global-completing-read-dir (prompt dirs)
   "Run `completing-read' with PROMPT to select a directory from DIRS.
@@ -10398,6 +10416,8 @@ Open the vterm buffer reusing a window."
         (evil-insert 1))
       (vterm-send-return))))
 
+(defvar vertico-count)
+(defvar vertico-multiform-categories)
 ;; TODO do in empty buffer?
 ;; TODO allow `completing-read-multiple'
 (defun noct-file-filter (&optional file)
@@ -10761,7 +10781,8 @@ This is suitable for a global keybinding that creates a new Emacs frame."
      ("d" "Lvm mount database" noct-lvm-mount-datab)
      ("D" "Lvm unmount database" noct-lvm-umount-datab)]
     ["Miscellaneous"
-     ("r" "Restow" noct-restow)]
+     ("r" "Restow" noct-restow)
+     ("SPC" "Capture" org-capture)]
     ["Package Management"
      ("i" "AUR installed packages" aurel-installed-packages)
      ("/" "AUR package search" aurel-package-search)]

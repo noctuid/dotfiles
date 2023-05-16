@@ -1,8 +1,18 @@
 { pkgs }:
 
 with pkgs;
-let common = import ../common/packages.nix { pkgs = pkgs; }; in
-common ++ [
+let
+  common-packages = import ../common/packages.nix { pkgs = pkgs; };
+  remove-packages = [
+    # keybase fails to build
+    keybase
+    kbfs
+  ];
+  filtered-packages =
+    builtins.filter (x: !builtins.elem x remove-packages) common-packages;
+in
+filtered-packages ++ [
+
   exfat
 
   # backup terminal
@@ -16,8 +26,12 @@ common ++ [
   # not in common since included in unoconv (in linux packages)
   odt2txt
 
+  # wm
+  yabai
   # hotkey daemon
   skhd
+  # panel
+  sketchybar
 
   karabiner-elements
 

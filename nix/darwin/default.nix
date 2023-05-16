@@ -3,15 +3,20 @@
 # settings may need to change in the future
 # - system.defaults.LaunchServices.LSQuarantine - Whether to enable quarantine
 #   for downloaded applications. The default is true.
-# - system.defaults.NSGlobalDomain.com.apple.sound.beep.volume
-# - system.defaults.NSGlobalDomain.com.apple.sound.beep.feedback
+# - system.defaults.NSGlobalDomain."com.apple.sound.beep.volume"
+# - system.defaults.NSGlobalDomain."com.apple.sound.beep.feedback"
 # - programs.nix-index.enable - Whether to enable nix-index and its
 #   command-not-found helper.
 # - security.pam.enableSudoTouchIdAuth
 # - system.defaults.NSGlobalDomain.NSAutomaticQuoteSubstitutionEnabled
 # - system.defaultsNSGlobalDomain._HIHideMenuBar - whether to autohide menu bar
 
-let user = builtins.readFile ./username; in
+let
+  user = builtins.readFile ./username;
+  homeDir = "/Users/${user}";
+  configDir = "${homeDir}/.config";
+  cacheDir = "${homeDir}/.cache";
+in
 {
   # https://nix-community.github.io/home-manager/index.html#sec-install-nix-darwin-module
   imports = [
@@ -81,7 +86,9 @@ let user = builtins.readFile ./username; in
     (pkgs.nerdfonts.override {
       fonts = ["CascadiaCode" "FiraCode" "FiraMono"];
     })
+    pkgs.cascadia-code
     pkgs.office-code-pro
+    pkgs.font-awesome
   ];
 
   # * Homebrew
@@ -90,7 +97,8 @@ let user = builtins.readFile ./username; in
     enable = true;
     # completely remove brew packages/casks and their files if they are removed
     # here
-    onActivation.cleanup = "zap";
+    # may want to install from other brewfiles
+    # onActivation.cleanup = "zap";
     taps = [
       "homebrew/core"
       "homebrew/cask"
@@ -98,9 +106,16 @@ let user = builtins.readFile ./username; in
       "koekeishiya/formulae"
     ];
     brews =  [
+      "wallpaper"
+
+      "pyenv"
+      "nvm"
+
       # for gls for example
-      "ext4fuse"
-      # TODO trash-cli works?
+      # TODO fails
+      # "ext4fuse"
+
+      # trash-cli works; doesn't show up in trash can, but I don't use it
       # "trash"
 
       # not packaged in nix for darwin for some reason
@@ -110,6 +125,7 @@ let user = builtins.readFile ./username; in
     casks = [
       # not packaged for nix
       "font-delugia-complete"
+      "sf-symbols"
 
       # keyboard layout editing
       "ukelele"
@@ -118,14 +134,10 @@ let user = builtins.readFile ./username; in
       "alfred"
       "raycast"
 
+      "wezterm"
+
       # window switching; bound to command+. by default
-      "hotswitch"
-      # "koekeishiya/formulae/yabai"
-
-      "osxfuse"
-
-      # nix only packages for linux
-      "progress"
+      # "hotswitch"
 
       # if ever need and it works
       # "virtualbox"
@@ -137,6 +149,9 @@ let user = builtins.readFile ./username; in
 
       # TODO maybe if want 3 finger middle click
       # https://formulae.brew.sh/cask/middleclick#default
+
+      # backup
+      "visual-studio-code"
 
     ];
     # need to be signed into app store; won't automatically uninstall if remove
@@ -151,13 +166,21 @@ let user = builtins.readFile ./username; in
   # * Networking
   # networking.dns
 
-  # * Services
-  services.skhd.enable = true;
+  # * Program Configuration
+  programs.zsh.enable = true;
 
-  # services.yabai.enable = true;
-  # services.yabai.pkg = pkgs.yabai;
-  # SIP must be disabled
-  # services.yabai.enableScriptingAddition
+  # * Services
+  # would rather use user service and config; see home-manager config below
+  # services.skhd.enable = true;
+
+  # yabai needs root to set up scripting additions; this seems a lot saner than
+  # having to configure for passwordless sudo; instead run as root and drop root
+  # permissions to run the user config (which is possible since the config just
+  # a script, unlike skhd)
+  services.yabai.enable = true;
+  services.yabai.enableScriptingAddition = true;
+  services.yabai.extraConfig =
+    "sudo -u ${user} ${configDir}/yabai/yabairc";
 
   # * System Settings
   # TODO what does this actually do?
@@ -168,10 +191,16 @@ let user = builtins.readFile ./username; in
     # dark mode
     NSGlobalDomain.AppleInterfaceStyle = "Dark";
 
+    # ** Dock, Mission Control
     dock = {
         autohide = true;
         # make smaller (default 64)
         tilesize = 48;
+
+        # whether to automatically rearrange spaces based on most recent use
+        # don't want if using yabai
+        mru-spaces = false;
+
         # make icons of hidden applications translucent
         # showhidden
         # autohide-delay
@@ -179,8 +208,6 @@ let user = builtins.readFile ./username; in
         # autohide-time-modifier
         # mission control animation speed
         # expose-animation-duration
-        # whether to automatically rearrange spaces based on most recent use
-        # mru-spaces
 
         # defaults
         # show-recents = true;
@@ -204,18 +231,22 @@ let user = builtins.readFile ./username; in
     # enable tap to click
     trackpad.Clicking = true;
     # TODO what is the difference between these two?
-    NSGlobalDomain.com.apple.mouse.tapBehavior = 1;
+    NSGlobalDomain."com.apple.mouse.tapBehavior" = 1;
 
     # disable mouse acceleration
-    GlobalPreferences.com.apple.mouse.scaling = -1;
+    # FIXME
+    # ".GlobalPreferences"."com.apple.mouse.scaling" = (-1.0);
 
     # disable natural scroll direction
-    NSGlobalDomain.com.apple.swipescrolldirection = false;
+    NSGlobalDomain."com.apple.swipescrolldirection" = false;
 
     # tracking speed; 0.0-3.0 (default 1)
-    # NSGlobalDomain.com.apple.trackpad.scaling
+    # NSGlobalDomain."com.apple.trackpad.scaling"
 
     # ** Finder
+    # don't show desktop icons
+    finder.CreateDesktop = false;
+
     NSGlobalDomain.AppleShowAllExtensions = true;
     finder.AppleShowAllExtensions = true;
     # default to list view
@@ -228,6 +259,12 @@ let user = builtins.readFile ./username; in
     # NSGlobalDomain.NSTableViewDefaultSizeMode
   };
 
+  # * Users
+  users.users.${user} = {
+    name = user;
+    home = homeDir;
+  };
+
   # * Home Manager
   # use home manager as nix-darwin module, so that user profiles are built
   # together with the system when running darwin-rebuild
@@ -237,8 +274,45 @@ let user = builtins.readFile ./username; in
       home.enableNixpkgsReleaseCheck = false;
       home.packages = pkgs.callPackage ./packages.nix {};
 
-      # if need to add anything to PATH:
-      # home.sessionPath
+      home.stateVersion = "22.11";
+
+      # extra directories to add to path
+      home.sessionPath = [
+        "${user}/bin"
+      ];
+
+      launchd.agents.skhd = {
+        enable = true;
+        config = {
+          ProgramArguments = [
+            "${pkgs.skhd}/bin/skhd"
+            "-c"
+            "${configDir}/skhd/skhdrc"
+          ];
+          KeepAlive = true;
+          ProcessType = "Interactive";
+          EnvironmentVariables = {
+            # NOTE: not necessary; will get PATH from non-interactive shell
+            # config (.zshenv, which loads my profile)
+
+            # PATH = pkgs.lib.concatStringsSep ":" [
+            #   "/run/current-system/sw/bin"
+
+            #   "/nix/var/nix/profiles/default/"
+            #   "${homeDir}/.nix-profile/bin"
+
+            #   "/bin"
+            #   "/sbin"
+            #   "/usr/bin"
+            #   "/usr/sbin"
+            #   "/usr/local/bin"
+            #   "${homeDir}/.local/bin"
+            # ];
+          };
+          StandardOutPath = "${cacheDir}/skhd.log";
+          StandardErrorPath = "${cacheDir}/skhd.log";
+        };
+      };
 
       # https://github.com/dustinlyons/nixos-config/blob/21b871ed43e821611dd00c9874112a0a2c4c0bcd/darwin/home-manager.nix#L85
       # https://github.com/nix-community/home-manager/issues/3344

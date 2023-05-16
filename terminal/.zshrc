@@ -841,9 +841,7 @@ alias cpwd='pwd | tr -d "\n" | xsel -ib'
 alias els='exa --all --long --group'
 
 # https://github.com/Peltoche/lsd
-alias ls='lsd'
-
-alias l='ls -lah'
+alias l='lsd'
 
 # http://jeff.robbins.ws/reference/my-zshrc-file
 # these require zsh

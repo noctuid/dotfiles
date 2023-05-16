@@ -59,7 +59,8 @@ trash-ignore-empty() {
 		return 1
 	fi
 	# trash-cli's "trash-put -- -foo" will error that -- does not exist
-	trash -- "$@"
+	# fixed on master though
+	trash-put "$@"
 }
 
 # vim: ft=sh:
