@@ -5084,7 +5084,7 @@ Have =C-w= and =C-<backspace>= delete whitespace before deleting words when ther
   ('override
    [remap backward-kill-word]
    (general-predicate-dispatch #'backward-kill-word
-     (looking-back (rx (and space (1+ space)))
+     (looking-back (rx (1+ space))
                    (line-beginning-position))
      #'hungry-delete-backward
      (bound-and-true-p lispyville-mode)
