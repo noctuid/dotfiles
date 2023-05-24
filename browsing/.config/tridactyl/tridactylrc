@@ -83,8 +83,9 @@
 "   endif
 "   endif
 "   EOF
-" - feed keys to firefox or to website (probably not possible)
-" - on OSX, click on tab, hit : and commandline doesn't get focus
+" - feed keys to firefox or to website (probably not possible) (can keyfeed pass
+"   through to website?)
+" - on macOS, click on tab, hit : and commandline doesn't get focus
 " - real echo area (not just filling commandline and changing input)
 "   - probably unnecessary - already don't have to hit escape e.g. when yank
 " - tab jump list
@@ -94,10 +95,8 @@
 " - firefox reading mode with tridactyl controls
 
 " * TODO List
-" - user.js configuration (highest priority)
+" - bind key to toggle between old and new reddit
 
-" - bind key to toggle between old and new reddi
-" - keys to scroll left/right
 " - bind key to click a corner (to get cursor off image)
 " - bind urlincrement, urlroot (gU), urlparent (gu); see followpagepatterns
 " - relative tab jump keybindings (1-9 in current range, e.g. SPC-a to jump to
@@ -116,7 +115,7 @@
 "   false)
 " - increase historyresults (doesn't seem like it would do anything; says
 "   display top 20 or so?)
-" - bind quickfind (default ')
+" - bind quickfind (default ') (this doesn't exist)
 " - bind rssexec
 " - make issue for hinting in menu (ivy-avy)
 " - bind buku/bookmark key
@@ -139,7 +138,8 @@
 " - urlmodify
 
 " * Clear Stored Configuration
-sanitize tridactylsync
+" tridactyllocal is more important (clear keybindings for example)
+sanitize tridactylsync tridacytllocal
 
 " * About:config and user.js
 " see ../../.mozilla/firefox/noctuid.normal/user-overrides.js
@@ -181,12 +181,13 @@ setmode ignore allowautofocus true
 " seturl raw.githubusercontent.com csp clobber
 
 " ** Editor
-set editorcmd emacsclient -c "+%l:%c" "%f"
+set editorcmd emacsclient -a "" -c "+%l:%c" "%f"
 
 " ** Hinting
 set hintchars arstdhneiowfpluy
 " hintfiltermode
-" hintnames
+" default
+" set hintnames short
 
 " ** Quickmarks
 source ~/.config/tridactyl/quickmarks
@@ -229,17 +230,12 @@ alias cups open http://localhost:631/
 " enter fullscreen
 
 " ** Editing/Input
-bind --mode=input ¸ text.backward_kill_word
-bind --mode=ex ¸ text.backward_kill_word
-bind --mode=insert ¸ text.backward_kill_word
-
-bind --mode=input <c-y> exclaim_quiet xdotool key "ctrl+v"
-bind --mode=ex <c-y> exclaim_quiet xdotool key "ctrl+v"
-bind --mode=insert <c-y> exclaim_quiet xdotool key "ctrl+v"
+bind --mode=ex <c-y> composite getclip | text.insert_text
+bind --mode=input <c-y> composite getclip | text.insert_text
+bind --mode=insert <c-y> composite getclip | text.insert_text
 
 " ** Unbind Prefix Keys
 unbind t
-unbind <spc>
 
 " ** Re-Source Config
 " explicitly source correct file; have had issues using just "source"
@@ -249,6 +245,8 @@ bind t. source ~/.config/tridactyl/tridactylrc
 " TODO consider scrollpage 0.2
 bind n scrollline 15
 bind e scrollline -15
+bind <left> scrollpx -30
+bind <right> scrollpx 30
 
 " visual mode
 bind --mode=visual <ArrowLeft> js document.getSelection().modify("extend","backward","character")
@@ -293,9 +291,9 @@ bind d composite tab #; tabclose #
 bind h back
 bind H forward
 
-" ** Changlist and Jumplist
-" not fully implemented
-" bind ... changelistjump
+" ** Changelist and Jumplist
+" focus last focused input (even ifon another tab); more like vim gi
+bind gI changelistjump
 bind tl jumpprev
 bind tL jumpnext
 
@@ -336,25 +334,23 @@ bind tu undo window
 " TODO might be nice to have group specific quickmarks that can see in
 " completion without having to necessarily remember them
 
-unbind v
-bind V hint -h
+unbind <Space>
 
-bind vA tabgroupabort
-bind vc fillcmdline tabgroupcreate
-bind vv fillcmdline tabgroupswitch
-bind vm fillcmdline tabgroupmove
-bind vR fillcmdline tabgrouprename
+bind <Space>A tabgroupabort
+bind <Space>c fillcmdline tabgroupcreate
+bind <Space>v fillcmdline tabgroupswitch
+bind <Space>m fillcmdline tabgroupmove
+bind <Space>R fillcmdline tabgrouprename
 
-bind vl tabgrouplast
-
-bind va tgroupswitch emacs
-bind vr tgroupswitch life
-bind vs tgroupswitch learn
-bind vt tgroupswitch prog
-bind vd tgroupswitch dots
-bind vn tgroupswitch wr
-bind ve tgroupswitch cons
-bind vi tgroupswitch buy
+bind <Space>l tabgrouplast
+bind <Space>a tgroupswitch emacs
+bind <Space>r tgroupswitch life
+bind <Space>s tgroupswitch learn
+bind <Space>t tgroupswitch prog
+bind <Space>d tgroupswitch dots
+bind <Space>n tgroupswitch wr
+bind <Space>e tgroupswitch cons
+bind <Space>i tgroupswitch buy
 
 " ** Followpage; Navigate Next/Prev/Inc
 bind gn followpage prev
@@ -363,8 +359,8 @@ bind ge followpage next
 " ** Hinting
 " -; focus element
 " comment toggler for reddit and hacker news (suggested in example config)
-bind ;c hint -c [class*="expand"],[class="togg"]
-bind tc hint -c [class*="expand"],[class="togg"]
+bind ;c hint -c [class*="expand"],[class*="togg"]
+bind tc hint -c [class*="expand"],[class*="togg"]
 
 " swap ; and :
 keymap ; :
@@ -427,7 +423,8 @@ bind tM mute toggle all
 
 " ** Reload
 bind tr reloadallbut
-" overrides :reader
+" binds over :reader (though reader is curerntly annoying since it doesn't work
+" with tridactyl)
 bind gr reloadhard
 
 " ** Zoom
@@ -439,30 +436,30 @@ bind , mode ignore
 bind --mode=ignore <esc> mode normal
 
 " * AutoCmds
-
-" * Site Specific
-" ** Amazon
+" ** Site Specific
+" *** Amazon
 " from example config
 " causes infinite loop when not logged in
 " https://github.com/tridactyl/tridactyl/issues/516
 " autocmd DocStart ^http(s?)://www\.amazon\.com urlmodify -t www smile
+" and now amazon smile is dead
 
-" ** Duck Duck Go
+" *** Duck Duck Go
 " from example config (swapped)
 " too restrictive, e.g. some websites have sublinks
 " bindurl ^https://duckduckgo.com f hint -Jc [data-testid="result-title-a"]
 " bindurl ^https://duckduckgo.com F hint -Jbc [data-testid="result-title-a"]
 bindurl ^https://duckduckgo.com gi hint -Jbc .js-search-input
 
-" ** Githhub
+" *** Githhub
 " https://github.com/glacambre/.dotfiles/blob/master/default/.config/tridactyl/tridactylrc
 " alias openGithubNotifications composite js Array.from(document.querySelectorAll("li.list-group-item > span:nth-child(1) > a:nth-child(2)")).map(e => e.href) | jsb -p JS_ARG.forEach(url => tri.excmds.tabopen(url))
 " bindurl https://github.com/notifications <Space><Space> openGithubNotifications
 
-" from glacambre; also hint line numbers on github"
+" from glacambre; also hint line numbers on github
 bindurl https://github.com/.*/.*/blob f hint -c .blob-num,a
 
-" ** Google
+" *** Google
 " limit selectable links on google
 " https://github.com/glacambre/.dotfiles/blob/master/default/.config/tridactyl/tridactylrc
 bindurl google(\.[a-zA-Z0-9]+){1,2}/search f hint -Jc #top_nav a, #search a, .card-section a, a.fl, #pnnext, #pnprev

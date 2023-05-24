@@ -3,40 +3,28 @@
 " can now just do this (https://github.com/tridactyl/tridactyl/issues/2327)
 unset searchurls
 
-" add mine
-set searchurls.am https://www.amazon.com/s?k=%s
-set searchurls.aw https://wiki.archlinux.org/index.php?search=%s
-set searchurls.az https://search.azlyrics.com/search.php?q=%s
-set searchurls.camel https://camelcamelcamel.com/search?sq=%s
 set searchurls.clj https://clojuredocs.org/search?q=%s
 set searchurls.c https://clojuredocs.org/search?q=%s
 set searchurls.d https://duckduckgo.com/?kam=google-maps&kp=-2&q=%s
-set searchurls.dv https://www.deviantart.com/?q=%s
-set searchurls.fake https://fakespot.com/analyze?url=%s
 set searchurls.gh https://github.com/search?q=%s
 set searchurls.goo https://google.com/search?q=%s
 set searchurls.hg https://www.haskell.org/hoogle/?hoogle=%s
-set searchurls.j https://jisho.org/search/%s
 set searchurls.nix https://search.nixos.org/packages?query=%s
-set searchurls.mal https://myanimelist.net/search/all?q=%s
 set searchurls.mdn https://developer.mozilla.org/en-US/search?q=%s
-set searchurls.mus https://www.allmusic.com/search/all/%s
 set searchurls.q https://www.qwant.com/?q=%s&t=web
 set searchurls.r https://www.reddit.com/r/%s/
-set searchurls.rt https://www.rottentomatoes.com/search/?search=%s
 set searchurls.s https://searx.be/?q=%s
 " dark theme; don't always open in new tab
 set searchurls.sp https://www.startpage.com/do/search?query=%s&prfe=36c84513558a2d34bf0d89ea505333ad25eaad7546bb0b480adc2e9be9271a9b54b2adb3b1f304d3530bea21aa54bdf5
-set searchurls.t https://www.tumblr.com/search/%s
-# other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
-# useful mostly for stuff that combines things like mash, split, weird
-# piping stuff, etc.
+set searchurls.wayback https://web.archive.org/web/*/%s
+" other useful yub nub commands: cnv, gim, tiny, ddg, torf, etc.
+" useful mostly for stuff that combines things like mash, split, weird
+" piping stuff, etc.
 set searchurls.yub https://yubnub.org/parser/parse?command=%s
 set searchurls.y https://www.youtube.com/results?search_query=%s
-set searchurls.wayback https://web.archive.org/web/*/%s
-set searchurls.zerochan https://www.zerochan.net/%s
 
-set searchengine d
+" entertainment, shopping, linux only, etc.; never useful for work
+source ~/.config/tridactyl/other_searchengines
 
 " Local Variables:
 " mode: vimrc

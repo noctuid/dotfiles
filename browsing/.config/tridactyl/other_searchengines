@@ -1,0 +1,17 @@
+" entertainment, shopping, linux only, etc.; never useful for work
+set searchurls.am https://www.amazon.com/s?k=%s
+set searchurls.aw https://wiki.archlinux.org/index.php?search=%s
+set searchurls.az https://search.azlyrics.com/search.php?q=%s
+set searchurls.camel https://camelcamelcamel.com/search?sq=%s
+set searchurls.dv https://www.deviantart.com/?q=%s
+set searchurls.fake https://fakespot.com/analyze?url=%s
+set searchurls.j https://jisho.org/search/%s
+set searchurls.mal https://myanimelist.net/search/all?q=%s
+set searchurls.mus https://www.allmusic.com/search/all/%s
+set searchurls.rt https://www.rottentomatoes.com/search/?search=%s
+set searchurls.t https://www.tumblr.com/search/%s
+set searchurls.zerochan https://www.zerochan.net/%s
+
+" Local Variables:
+" mode: vimrc
+" End:

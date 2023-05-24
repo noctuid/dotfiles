@@ -1,0 +1,25 @@
+" entertainment, shopping, linux only, etc.; never useful for work
+bind '4 tabopen https://boards.4chan.org/g/
+bind '8 tabopen https://8ch.net/tech/
+bind 'a tabopen https://bbs.archlinux.org/
+bind 'b tabopen https://www.dustloop.com/forums/index.php?/forum/63-blazblue/
+bind 'c js tri.excmds.tabopen(`https://camelcamelcamel.com/search?sq=${document.location.href}`)
+bind 'C tabopen https://forum.colemak.com/
+bind 'e tabopen https://www.reddit.com/r/emacs/
+bind 'f js tri.excmds.tabopen(`https://fakespot.com/analyze?url=${document.location.href}`)
+bind 'G tabopen https://www.geekhack.org/
+bind 'h tabopen https://news.ycombinator.com/news
+bind 'l tabopen https://lainchan.org/%CE%BB/index.html
+bind 'm tabopen https://myanimelist.net
+bind 'n tabopen https://www.reddit.com/r/neovim
+bind 'R tabopen https://redditbooru.com/
+bind 's tabopen https://myanimelist.net/anime/season
+bind 'S tabopen https://myanimelist.net/clubs.php?cid=27907
+bind 't tabopen https://www.tumblr.com/dashboard/
+bind 'T tabopen https://twitter.com/home/
+bind 'v tabopen https://www.reddit.com/r/vim/
+bind 'W tabopen https://www.wololo.net
+
+" Local Variables:
+" mode: vimrc
+" End:
