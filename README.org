@@ -139,70 +139,78 @@ These applications are generally better than cli, tui, and gui equivalents in te
 * Programs
 Here I've organized my thoughts from trying from trying out and choosing various programs. Arrows indicate switching primary program.
 
-| Type                      | Program                                                    |
-|---------------------------+------------------------------------------------------------|
-| distro                    | Ubuntu->Mint->Arch                                         |
-| kernel                    | linux-ck                                                   |
-| config management/setup   | bash+SaltStack+stow                                        |
-| arch package manager      | pacman+powerpill+pacnanny+(yaourt->pacaur->trizen or yay?) |
-| universal package manager | nix                                                        |
-| emacs package manager     | package.el->straight.el                                    |
-| vim plugin manager        | neobundle->dein or vim-plug?                               |
-| shell plugin manager      | antigen->antigen-hs->zgen->zplug->zplugin                  |
-| tmux plugin manager       | tpm                                                        |
-| boot loader               | GRUB->rEFInd                                               |
-| display manager           | none                                                       |
-| DE                        | everything->none                                           |
-| window manager            | everything->bspwm                                          |
-| hotkey daemon             | sxhkd and xchainkeys                                       |
-| remapping                 | xmodmap->klfc (to generate mainly XKB configs)             |
-| screen locker             | slimlock->i3lock-color+multilock                           |
-| text editor               | notepad++->gedit->sublime->vim->emacs (tried all vim alts) |
-| shell                     | bash->zsh (fish is fine too; eshell occasionally)          |
-| terminal multiplexor      | tmux                                                       |
-| network manager           | connman (NetworkManager as backup)                         |
-| old terminal emulators    | gnome-terminal->xfce4-terminal->guake->URxvt->termite      |
-| terminal emulator         | (termite and xst->kitty)+tdrop+tmux (also emacs libvterm)       |
-| launcher                  | dmenu->bemenu->rofi                                        |
-| wallpaper setter          | everything->setroot                                        |
-| panel                     | lemonbar(-xft)->polybar                                    |
-| compositor                | picom                                                      |
-| notifications             | dunst                                                      |
-| file manager              | ranger->(maybe eventually) dired/ranger.el                 |
-| mass renaming             | ranger's :bulkrename (and wdired)                          |
-| browser                   | firefox+pentadactyl->qutebrowser->firefox+tridactyl        |
-| password manager          | pass                                                       |
-| image viewer              | everything (mainly feh and sxiv)->pqiv                     |
-| media player              | vlc/mplayer->mpv                                           |
-| mail sending              | msmtp                                                      |
-| mail fetching             | offlineimap->isync                                         |
-| mail client               | mutt+abook+notmuch->emacs+mu4e                             |
-| irc client                | weechat->emacs+circe                                       |
-| feed reader               | canto->emacs+elfeed                                        |
-| pdf viewer                | apvlv->emacs+pdf-tools and zathura                         |
-| music                     | clementine/a lot->mpd+(ncmpcpp->vimus->mingus)             |
-| cd ripping                | abcde                                                      |
-| music tagging             | beets                                                      |
-| scheduling                | fcron                                                      |
-| firewall                  | ufw                                                        |
-| encryption                | truecrypt->veracrypt                                       |
-| backup                    | rsync->borg                                                |
-| searching                 | helm->ivy+flx (emacs), FZF (terminal), unite (vim)         |
-| pager                     | vimpager (and woman in emacs)                              |
-| screenshots               | scrot->maim+slop                                           |
-| torrent client            | transmission                                               |
-| video recording           | ffmpeg+slop                                                |
-| audio/video conversion    | ffmpeg                                                     |
-| torrent client            | transmission                                               |
-| tagging                   | tmsu (don't really use)                                    |
-| download manager          | aria2c (haven't tried saldl)                               |
-| calendar                  | emacs+org+calfw                                            |
-| language input            | scim->ibus->fcitx                                          |
-| typesetting               | have only tried LaTeX (and groff I guess)                  |
-| markup/notes              | doc->odt->markdown->org                                    |
-| VC                        | git                                                        |
-| fonts                     | inconsolata (LGC), fira-mono/code, uushi, siji             |
-| nvidia GPU management     | bumblebee->nvidia-xrun->optimus-manager->nvidia-xrun       |
+| Type                         | Program                                                                           |
+|------------------------------+-----------------------------------------------------------------------------------|
+| distro                       | Ubuntu->Mint->Arch (have tried NixOS but no plans to switch)                      |
+| kernel                       | linux-ck(dead)->linux-zen                                                         |
+| config management/setup      | bash+SaltStack+stow->bash+stow                                                    |
+| arch package manager         | pacman+(pacnanny -> --newsonupgrade)+(yaourt->pacaur->trizen->yay->paru)          |
+| universal package manager    | nix                                                                               |
+| Emacs package manager        | package.el->straight.el                                                           |
+| vim plugin manager           | neobundle->dein->minpac->packages.nvim->lazy.nvim                                 |
+| shell plugin manager         | antigen->antigen-hs->zgen->zplug->zinit (formerly "zplugin")                      |
+| tmux plugin manager          | tpm                                                                               |
+| boot loader                  | GRUB->rEFInd                                                                      |
+| display manager              | none                                                                              |
+| DE                           | everything->none                                                                  |
+| window manager               | everything(incl. awesome and xmonad)->bspwm->herbstluftwm                         |
+| hotkey daemon                | sxhkd and xchainkeys                                                              |
+| old remapping                | xmodmap->klfc (to generate mainly XKB configs); kmonad as backup and on other OS  |
+| remapping                    | -> kanata                                                                         |
+| screen locker                | slimlock->i3lock-color+multilockscreen(now betterlockscreen)                      |
+| text editor                  | notepad++->gedit->sublime->vim->Emacs (tried all vim alts)                        |
+| shell                        | bash->zsh (fish is fine too; eshell occasionally, e.g. with TRAMP)                |
+| network manager              | iwctl+connman                                                                     |
+| old terminal emulators       | gnome-terminal->xfce4-terminal->guake->URxvt->termite                             |
+| terminal emulator            | ->xst->kitty+tdrop+tmux->tdrop+wezterm and Emacs vterm                            |
+| terminal multiplexor         | tmux->wezterm                                                                     |
+| launcher                     | dmenu->bemenu->rofi (just to launch rarely used gui programs)                     |
+| wallpaper setter             | everything->setroot                                                               |
+| panel                        | lemonbar(-xft)->polybar                                                           |
+| compositor                   | compton->picom                                                                    |
+| theming                      | pywal+wpgtk+wal_steam+pywalfox+ewal                                                |
+| notifications                | dunst                                                                             |
+| file manager                 | ranger and Emacs+dired/dirvish (very little ranger now, dirvish is amazing)       |
+| mass renaming                | ranger's :bulkrename and wdired                                                   |
+| browser                      | chromium->firefox+pentadactyl->qutebrowser->firefox+tridactyl (nyxt next decade?) |
+| password manager             | pass->?->pass+pass.el                                                             |
+| image viewer                 | everything (mainly feh and sxiv)->pqiv->mpv                                       |
+| media player                 | vlc/mplayer->mpv                                                                  |
+| mail sending                 | msmtp                                                                             |
+| mail fetching                | offlineimap->isync                                                                |
+| mail client                  | mutt+abook+notmuch->Emacs+mu4e->phone->phone+mu4e                                 |
+| news reader                  | canto->Emacs+elfeed->nothing->gnus (for large volumes of mail/news)               |
+| irc client                   | weechat->Emacs+circe->nothing (don't really use irc anymore)                      |
+| matrix client                | element and ement.el                                                              |
+| pdf viewer                   | apvlv->Emacs+pdf-tools and zathura                                                |
+| music                        | clementine/a lot->mpd+(ncmpcpp->vimus->mingus)->spotify->spotify and mopidy+Emacs |
+| cd ripping                   | abcde                                                                             |
+| music tagging                | beets                                                                             |
+| scheduling                   | fcron                                                                             |
+| firewall                     | ufw                                                                               |
+| encryption                   | truecrypt->veracrypt->LUKS                                                        |
+| backup                       | rsync->borg->borg and restic for larger backups                                   |
+| Emacs searching/filtering    | helm->ivy+flx->selectrum/prescient/orderless/embark/consult/marginalia and ivy    |
+| Emacs searching/filtering    | ->vertico (instead of selectrum/prescient)                                        |
+| Terminal searching/filtering | fzf                                                                               |
+| Vim searching/filtering      | unite->denite->telescope                                                          |
+| pager                        | vimpager->nvimpager (used infrequently); woman in Emacs for reading manpages      |
+| screenshots                  | scrot->maim+slop                                                                  |
+| torrent client               | transmission                                                                      |
+| video recording              | ffmpeg+slop                                                                       |
+| audio/video conversion       | ffmpeg                                                                            |
+| torrent client               | transmission                                                                      |
+| tagging                      | tmsu (don't really use)                                                           |
+| download manager             | aria2c (haven't tried saldl)                                                      |
+| calendar                     | Emacs+org+calfw (don't really use)                                                |
+| language input               | scim->ibus->fcitx                                                                 |
+| typesetting                  | have only tried LaTeX (and groff I guess)                                         |
+| markup/notes                 | doc->odt->markdown->org                                                           |
+| VC                           | git                                                                               |
+| fonts                        | Mainly Delugia, sometimes Office Code Pro, uushi, siji, one billion others        |
+| nvidia GPU management        | bumblebee->nvidia-xrun->optimus-manager->nvidia-xrun->optimus-manager             |
+| process manager/viewer       | htop->Emacs+proced                                                                |
+| calculator                   | python->calc.el                                                                   |
 
 ** OS and Package Managers
 I started out using debian-based distros but quickly switched to Arch mainly for the minimal base installation, pacman, the aur, the wiki, and the rolling-release system. I love that essentially all the software I use is available in the aur (though I like that a good portion of my aur-only packages are in the official nix repos better). On the other hand, I hate having to recompile all my aur packages to ensure nothing breaks after a system update. This isn't always technically necessary if major packages (like gpg) haven't been updated, but it's risky not to. This makes me wish that more programs were in the official repos. As for aur helpers, I don't really have a strong preference. I'm mainly using trizen since pacaur development died; I really like that it asks to retry instead of quitting (e.g. if I leave it alone for a while after it's done/wrong password). Bauerbill and aura are also interesting. I like that pacaur can be used for both the aur and official repos at once, and I like that aura is run as root from the start like pacman, but I don't really use any of their advanced functionality.

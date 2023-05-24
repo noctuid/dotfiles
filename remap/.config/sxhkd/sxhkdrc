@@ -137,21 +137,23 @@ super + b
 	kitty
 
 {mod2,super+control} + s
-	dropdown -s dropdown kitty
+	dropdown wezterm connect unix
 	# dropdown emacsclient -c -e "(let (display-buffer-alist) (vterm) (delete-other-windows))"
 
 {mod2,super+control} + c
-	dropdown -n longcommands -s longcommands kitty
+	dropdown -n longcommands wezterm connect --workspace longcommands unix
 
 {mod2,super+control} + semicolon
-	max_dropdown -n vtermlongcommands emacsclient -ce '(noct-with-reuse-window (noct-vterm-select-or-create "long"))'
+	dropdown -n vtermlongcommands emacsclient -ce '(noct-with-reuse-window (noct-vterm-select-or-create "long"))'
 
 # test key
 {mod2,super+control} + S
 	tdrop --debug -a current
 
+# unfortunately ranger does not have wezterm image preview support, and ueberzug
+# does not work with wezterm multiplexing
 {mod2,super+control} + r
-	max_dropdown -n ranger kitty zsh -c "ranger; zsh -i"
+	max_dropdown -n ranger wezterm start --workspace ranger zsh -c "ranger; zsh -i"
 
 {mod2,super+control} + d
 	max_dropdown -n ranger emacsclient --socket-name=dirvish -ce "(dirvish)"

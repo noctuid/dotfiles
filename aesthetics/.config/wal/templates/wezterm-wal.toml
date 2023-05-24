@@ -1,0 +1,56 @@
+[colors]
+foreground = "{foreground}"
+background = "{background}"
+
+# overrides the cell background color when the current cell is occupied by the
+# cursor and the cursor style is set to Block
+cursor_bg = "{cursor}"
+# overrides the text color when the current cell is occupied by the cursor
+cursor_fg = "{background}"
+# specifies the border color of the cursor when the cursor style is set to Block,
+# of the color of the vertical or horizontal bar when the cursor style is set to
+# Bar or Underline
+cursor_border = "{color2}"
+
+# the foreground color of selected text
+selection_fg = "black"
+# the background color of selected text
+selection_bg = "{color1}"
+
+# the portion that represents the current viewport
+scrollbar_thumb = "{color8}"
+
+split = "{color8}"
+
+ansi = [
+    "{color0}",
+    "{color1}",
+    "{color2}",
+    "{color3}",
+    "{color4}",
+    "{color5}",
+    "{color6}",
+    "{color7}",
+]
+
+brights = [
+    "{color8}",
+    "{color9}",
+    "{color10}",
+    "{color11}",
+    "{color12}",
+    "{color13}",
+    "{color14}",
+    "{color15}",
+]
+
+[colors.tab_bar]
+background = "{background}"
+
+[colors.tab_bar.active_tab]
+fg_color = "{foreground}"
+bg_color = "{color1}"
+
+[colors.tab_bar.inactive_tab]
+fg_color = "{foreground}"
+bg_color = "{background}"

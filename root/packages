@@ -147,13 +147,8 @@ avahi
 nss-mdns
 
 # * Terminals
+wezterm
 kitty
-
-# backup
-xterm
-rxvt-unicode
-urxvt-perls
-xst-git aur
 
 # * Shell/TUI/CLI
 # zplug installed in zshrc
