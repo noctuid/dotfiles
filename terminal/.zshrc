@@ -1488,34 +1488,35 @@ fi
 # based off Pure
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-POWERLEVEL9K_INSTANT_PROMPT=quiet
 
-POWERLEVEL9K_MODE='nerdfont-complete'
+# some overrides/important settings
 
-POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
 	os_icon
 	background_jobs
 	dir                       # current directory
 	vcs                       # git status
-	anaconda
 	context                   # user@host
-	command_execution_time    # previous command duration
+	status                    # and exit status
 	newline                   # \n
 	virtualenv                # python virtual environment
 	prompt_char               # prompt symbol
 )
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(ranger)
+# just enable everything when run p10k configure
+# POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(ranger xplr)
 
 # enable icons (e.g. for dir_writable)
 unset POWERLEVEL9K_VISUAL_IDENTIFIER_EXPANSION
 
 # show number of jobs if >1
-POWERLEVEL9K_BACKGROUND_JOBS_VERBOSE=true
+typeset -g POWERLEVEL9K_BACKGROUND_JOBS_VERBOSE=true
 # get rid of extra space after background jobs icon
-POWERLEVEL9K_BACKGROUND_JOBS_ICON=
+typeset -g POWERLEVEL9K_BACKGROUND_JOBS_ICON=
 
 # show lock for dir section if not writable
-POWERLEVEL9K_DIR_SHOW_WRITABLE=true
+typeset -g POWERLEVEL9K_DIR_SHOW_WRITABLE=true
 
 # enable default branch icon (based on POWERLEVEL9K_MODE)
 unset POWERLEVEL9K_VCS_BRANCH_ICON
