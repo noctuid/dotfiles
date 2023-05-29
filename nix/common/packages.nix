@@ -67,10 +67,13 @@ with pkgs; [
   wget
 
   ranger
+  # scope.sh replacement
+  pistol
   # ranger video preview
   ffmpegthumbnailer
   # ranger info (alternatively exiftool)
   mediainfo
+  xlsx2csv
   # won't work with kitty installed through system
   # alternate to w3m image preview
   ueberzug

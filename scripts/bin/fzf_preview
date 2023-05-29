@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # script for fzf's --preview
+# TODO integrate with ./media/pistol-preview script?
 
 # https://github.com/junegunn/fzf/issues/1928
 

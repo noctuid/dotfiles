@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# these are ranger args not lf; scope.sh replacement
+file=$1
+# w=$2
+# h=$3
+cache_path=$4
+
+
+if [[ "$(file -Lb --mime-type "$file")" =~ ^image ]]; then
+	# let ranger handle image previews
+	exit 7
+fi
+
+if [[ "$(file -Lb --mime-type "$file")" =~ ^video ]]; then
+	ffmpegthumbnailer -i "$file" -o "$cache_path" -s 0 && exit 6
+	exit 1
+fi
+
+pistol "$file"
