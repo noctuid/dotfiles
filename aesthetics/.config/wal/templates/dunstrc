@@ -1,5 +1,5 @@
 # [global] continued
-    frame_color = "{color14}"
+    frame_color = "{color3}"
 
 # * Urgency-specific
 [urgency_low]

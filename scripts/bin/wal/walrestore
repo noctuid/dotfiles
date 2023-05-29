@@ -5,8 +5,7 @@
   (:require
    [babashka.fs :refer [regular-file?]]
    [babashka.process :refer [sh]]
-   [bb.util :refer [read-edn sh-out]]
-   [clojure.string :refer [split split-lines]]
+   [bb.util :refer [read-edn setroot-multi-monitor]]
    [wal.shared-paths :refer [setroot-store-path]]))
 
 (def setup-path
@@ -35,17 +34,7 @@
     (println "Restoring wallpaper")
     (let [stored-args (read-edn setroot-store-path)]
       (if mirror-wallpaper
-        (let
-            [monitor-count      (-> (sh-out "xrandr --listmonitors")
-                                    split-lines
-                                    first
-                                    (split #" ")
-                                    last
-                                    Integer/parseInt)
-             multi-monitor-args (apply concat
-                                       (for [i (range 1 (+ monitor-count 1))]
-                                         (concat stored-args ["--on" i])))]
-          (apply sh "setroot" multi-monitor-args))
+        (setroot-multi-monitor stored-args)
         (apply sh "setroot" (concat stored-args ["--blank-color" "#000000"]))))))
 
 (when (= *file* (System/getProperty "babashka.file"))

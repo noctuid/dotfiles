@@ -4,7 +4,7 @@
    [babashka.process :refer [sh process destroy-tree]]
    [clojure.edn :as edn]
    [clojure.java.io :as io]
-   [clojure.string :refer [trim]]))
+   [clojure.string :refer [trim split split-lines]]))
 
 (defn sh-out
   "Return the trimmed output of a command."
@@ -52,3 +52,15 @@
                 ~@(drop 2 bindings)]
            (when ~bind-var
              ~@body))))))
+
+(defn setroot-multi-monitor [setroot-args]
+  (let [monitor-count      (-> (sh-out "xrandr --listmonitors")
+                               split-lines
+                               first
+                               (split #" ")
+                               last
+                               Integer/parseInt)
+        multi-monitor-args (apply concat
+                                  (for [i (range 1 (+ monitor-count 1))]
+                                    (concat setroot-args ["--on" i])))]
+    (apply sh "setroot" multi-monitor-args)))

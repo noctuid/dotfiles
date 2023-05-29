@@ -112,6 +112,9 @@ Print
 super + b
 	xtoggle polybar "$(get_wm)"
 
+{mod2,super+control} + alt + w
+	walrandom
+
 # ** Clicks and Mouse Movement
 {mod2,super+control} + h
 	warpd --hint

@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+sudo oomoxify-cli ~/.cache/wal/colors-oomox

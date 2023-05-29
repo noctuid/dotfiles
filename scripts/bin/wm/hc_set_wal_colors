@@ -9,9 +9,9 @@ if [[ -f ~/.cache/wal/colors.sh ]]; then
 	# shellcheck disable=SC1090
 	source ~/.cache/wal/colors.sh
 
-	hc set frame_border_active_color "${foreground}ff"
-	# yellow
-	hc set frame_border_normal_color "${color3}ff"
+	hc set frame_border_normal_color "${background}ff"
+	# yellow for active borders
+	hc set frame_border_active_color "${color3}ff"
 
 	# green
 	hc set frame_bg_active_color "${color10}ff"
@@ -23,8 +23,8 @@ if [[ -f ~/.cache/wal/colors.sh ]]; then
 	hc attr theme.title_color "$foreground"
 
 	hc attr theme.normal.color "$background"
-	# cyan
-	hc attr theme.active.color "$color14"
+	# yellow
+	hc attr theme.active.color "$color3"
 	# dark red
 	hc attr theme.urgent.color "$color15"
 

@@ -10,3 +10,6 @@
 [submodule "mpv-gallery-view"]
 	path = media/.config/mvi/repos/mpv-gallery-view
 	url = https://github.com/occivink/mpv-gallery-view
+[submodule "refind-catppuccin"]
+	path = root/boot/efi/EFI/refind/themes/catppuccin
+	url = https://github.com/catppuccin/refind

@@ -390,7 +390,9 @@ hc_show_all() {
 }
 
 hc_toggle_minimize() {
-	if hc_none_minimized; then
+	if [[ $(hc attr tags.focus.client_count) == 0 ]]; then
+		hc toggle frame_bg_transparent
+	elif hc_none_minimized; then
 		hc_minimize_all
 	else
 		hc_show_all

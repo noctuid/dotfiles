@@ -1,0 +1,18 @@
+#!/usr/bin/env -S bb -cp ${HOME}/bin
+
+(ns wal.walrandom
+  "Set a random stored pywal wallpaper/theme."
+  (:require
+   [babashka.fs :refer [expand-home list-dir unixify]]
+   [babashka.process :refer [sh]]))
+
+(defn -main
+  "Randomly pick a pywal-friendly wallpaper and run walset on it."
+  []
+  (let [wallpaper-dir (expand-home "~/wallpaper/pywal")
+        wallpapers    (list-dir wallpaper-dir)
+        selected      (unixify (rand-nth wallpapers))]
+    (sh "walset" selected)))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (-main))

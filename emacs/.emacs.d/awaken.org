@@ -4652,6 +4652,7 @@ Smartparens' version is unfortunately too slow.
 
 (use-package shades-of-purple-theme)
 
+;; missing a lot of faces (like dired)
 (use-package rose-pine-emacs
   :straight (rose-pine-emacs
              :host github
