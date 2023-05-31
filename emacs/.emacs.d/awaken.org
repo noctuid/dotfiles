@@ -160,6 +160,10 @@ Necessary to be able to use ~(setf (map-elt ...) ...)~, for example.
     lispy-space)
   "List of self-insert commands.")
 
+(defconst noct-shell-prompt-pattern
+  "^[^#$%»>\\n]*[#$%»>] *"
+  "Prompt pattern for my shell.")
+
 (defun noct-blog-dir-p (file)
   "Return whether the current file is in my blog post directory."
   (file-in-directory-p
@@ -1018,16 +1022,18 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
      :local-repo "~/src/forks/evil-collection"
      :fork t)))
 (use-package evil-collection
-  :config
-  (defun noct-make-evil-collection-translations (mode mode-keymaps &rest _rest)
-    (when mode-keymaps
-      (general-with mode
-        (general-translate-key 'normal mode-keymaps
-          "C-n" "C-j"
-          "C-e" "C-k"))))
+  ;; :config
+  ;; TODO now using these for window management
+  ;; (defun noct-make-evil-collection-translations (mode mode-keymaps &rest _rest)
+  ;;   (when mode-keymaps
+  ;;     (general-with mode
+  ;;       (general-translate-key 'normal mode-keymaps
+  ;;         "C-n" "C-j"
+  ;;         "C-e" "C-k"))))
 
-  (general-add-hook 'evil-collection-setup-hook
-                    #'noct-make-evil-collection-translations))
+  ;; (general-add-hook 'evil-collection-setup-hook
+  ;;                   #'noct-make-evil-collection-translations)
+  )
 #+end_src
 
 *** Settings
@@ -2252,6 +2258,14 @@ I've switched away from putting this function in a hook because it can be jarrin
     (general-r "/" #'noct-goto-char-timer-or-swiper-isearch)
 
     (general-add-advice 'avy-resume :after #'evil-normal-state)))
+#+end_src
+
+** Capf Autosuggest
+#+begin_src emacs-lisp
+(use-package capf-autosuggest
+  :ghook
+  'comint-mode-hook
+  'eshell-mode-hook)
 #+end_src
 
 ** Company
@@ -7227,12 +7241,20 @@ Used for =*Warnings*= buffer, for example.
                    which-key-replacement-alist))
 #+end_src
 
-** Woman
+** Woman and Man
 #+begin_src emacs-lisp
 (use-package woman
+  :straight nil
   :general (general-s "w" #'woman)
   :init
   (noct-handle-popup woman-mode))
+
+(use-package man
+  :straight nil
+  :init
+  ;; TODO doesn't work
+  (noct-handle-popup-same-window Man-mode)
+  (noct-handle-popup-same-window (rx "*Man")))
 #+end_src
 
 ** Xmodmap
@@ -9974,21 +9996,45 @@ Dirvish replaces multiple packages:
     "RET" #'emacs-everywhere-finish-or-ctrl-c-ctrl-c))
 #+end_src
 
+** Eat
+#+begin_src emacs-lisp
+(use-package eat
+  ;; TODO I couldn't actually get this to work
+  :ghook ('eshell-load-hook #'eat-eshell-mode)
+  :config
+  (gsetq eshell-visual-commands nil))
+#+end_src
+
 ** Eshell
 The nice thing about eshell is Emacs integration:
-- ability to use ivy/helm/vertico for completion and search
-- evil for navigation/copying/etc.
-- ability to use snippets
+- ability to execute elisp
 - intercept commands like man and ~grep <text> <file>~
 - TRAMP integration (including docker container integration)
-- ability to execute elisp
+- ability to use ivy/helm/vertico/corfu for completion and search (shell can too)
+- ability to use snippets (shell probably can too)
+- evil for navigation/copying/etc. (shell and vterm also can)
 
-That said, I don't do many complicated things in terminal, so I mostly use a dedicated terminal window for one-off commands and vterm for project related commands (e.g. ~yarn~ and ~make~). Though for project commands, I try to use keybindings where possible (e.g. ~makefile-executor~).
+That said, I don't do many complicated things in terminal, so I mostly use a dedicated terminal window for one-off commands and vterm for project related commands (e.g. ~yarn~ and ~make~).  Though for project commands, I try to use keybindings where possible (e.g. ~makefile-executor~).
+
+The main use case of eshell for me is in situations where no other shell is available.  It will work on Windows if you're not using WSL and don't have vsh, and since it works with TRAMP, you can use it on systems (or containers) that don't have your normal shell.
+
+TODO
+- https://gitlab.com/ambrevar/emacs-fish-completion
+- better prompt (multiline)
+- complete in vertico... optionally?
+- syntax highlight not working
 
 #+begin_src emacs-lisp
 (use-package eshell
   :general
-  (general-s "e" #'eshell))
+  (general-s "e" #'eshell)
+  :config
+  ;; e.g. get cc on prompt line to work
+  (evil-collection-init 'eshell)
+  (general-def 'insert eshell-mode-map
+    ;; override lispy ret
+    "RET" #'eshell-send-input
+    "C-r" #'consult-history))
 
 (general-with 'esh-mode
   ;; performance improvement
@@ -10003,6 +10049,11 @@ That said, I don't do many complicated things in terminal, so I mostly use a ded
 
 (use-package eshell-syntax-highlighting
   :ghook 'eshell-mode-hook)
+
+;; didn't work; capf-autosuggest is more generic (works in comint and doesn't
+;; rely on company)
+;; (use-package esh-autosuggest
+;;   :ghook 'eshell-mode-hook)
 #+end_src
 
 ** Ement.el
@@ -10195,7 +10246,7 @@ Liked songs is not a playlist.
 #+end_src
 
 ** Shell
-Shell has some of the advantages of eshell like ~completing-read~ integration in ~term-line-mode~, but it supports zsh and other shells.  Plugins like autosuggestions won't work in line mode (and at least with this basic configuration autosuggestions don't seem to work in char-mode either for fish or zsh). Obviously, it can't execute emacs lisp. It can run it on a remote host, but the shell has to be available there.
+Shell has some of the advantages of eshell like ~completing-read~ integration in ~term-line-mode~, but it supports zsh and other shells.  Plugins like autosuggestions won't work in line mode (and at least with this basic configuration autosuggestions don't seem to work in char-mode either for fish or zsh).  Obviously, it can't execute emacs lisp.  It can run it on a remote host, but the shell has to be available there.
 
 #+begin_src emacs-lisp
 ;; `shell-file-name' is used for `execute-shell-command' (leave as default)
@@ -10209,7 +10260,9 @@ Shell has some of the advantages of eshell like ~completing-read~ integration in
      (general-pushnew 'native-complete-at-point completion-at-point-functions)
      (when (boundp 'company-backends)
        (general-pushnew 'company-native-complete company-backends))
-     (gsetq comint-prompt-regexp "^[^#$%»>\\n]*[#$%»>] *"))))
+     ;; (gsetq comint-prompt-regexp noct-shell-prompt-pattern)
+     (gsetq comint-prompt-read-only t
+            shell-pompt-pattern noct-shell-prompt-pattern))))
 #+end_src
 
 ** Vterm
@@ -10224,7 +10277,7 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
 #+begin_src emacs-lisp
 (defun noct-vterm-setup ()
   "Setup for vterm."
-  (gsetq-local term-prompt-regexp "^[^#$%»>\\n]*[#$%»>] *")
+  (gsetq-local term-prompt-regexp noct-shell-prompt-pattern)
   (toggle-truncate-lines 1))
 
 (use-package vterm
@@ -10245,10 +10298,9 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     "<prior>" nil
     "<next>" nil)
 
-  ;; TODO fix
-  (general-m vterm-mode-map
-    "e" (list #'vterm-previous-prompt :repeat t)
-    "n" (list #'vterm-next-prompt :repeat t))
+  (general-def 'normal vterm-mode-map
+    "E" #'vterm-previous-prompt
+    "N" #'vterm-next-prompt)
 
   (general-def 'normal vterm-mode-map
     "<escape>"
@@ -10311,7 +10363,9 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
          vterm-toggle-evil-state-when-enter nil
          vterm-toggle-evil-state-when-leave nil
          ;; don't create a new buffer if the prompt is not available
-         vterm-toggle-cd-auto-create-buffer nil)
+         vterm-toggle-cd-auto-create-buffer nil
+         ;; vterm-toggle-hide-method 'reset-all-window-configuration
+         vterm-toggle-hide-method 'bury-all-vterm-buffer)
 
   ;; (cl-defun noct-tmux-select-or-create (number &optional (session "emacs"))
   ;;     "Select the tmux window with NUMBER, cerating it if it does not exist.
