@@ -3507,7 +3507,6 @@ This only works with orderless and for the first component of the search."
   (general-def embark-variable-map "h" #'helpful-variable)
 
   (general-def 'normal embark-collect-mode-map
-    "w" #'wgrep-change-to-wgrep-mode
     "RET" #'embark-act)
 
   (general-def embark-become-file+buffer-map
@@ -3520,7 +3519,9 @@ This only works with orderless and for the first component of the search."
     ;; so detected
     "b" #'consult-buffer)
 
-  (noct-handle-popup (rx "*Embark Actions*"))
+
+  ;; FXIME
+  (noct-handle-popup-same-window (rx "*Embark Actions*"))
   ;; automatically show available actions with which-key
   ;; (general-after 'which-key
   ;;   (gsetq embark-action-indicator
@@ -3529,16 +3530,16 @@ This only works with orderless and for the first component of the search."
   ;;            #'which-key--hide-popup-ignore-command)
   ;;          embark-become-indicator embark-action-indicator))
 
-  (noct-handle-window (rx "*Embark Collect" (0+ any))
-    '(display-buffer-same-window)))
+  (noct-handle-popup-same-window (rx "*Embark")))
 
-;; (use-package embark-consult
-;;   :after (embark consult)
-;;   :demand t
-;;   ;; if you want to have consult previews as you move around an
-;;   ;; auto-updating embark collect buffer
-;;   :ghook
-;;   ('embark-collect-mode-hook #'embark-consult-preview-minor-mode))
+;; required to use embark and consult
+(use-package embark-consult
+  :after (embark consult)
+  :demand t
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :ghook
+  ('embark-collect-mode-hook #'embark-consult-preview-minor-mode))
 #+end_src
 
 ** Marginalia
@@ -3577,7 +3578,7 @@ Sets missing metadata for completions (pairs well with embark even if not using 
 (use-package wgrep
   ;; necessary to create autoload
   :general
-  (general-def grep-mode-map "w" #'wgrep-change-to-wgrep-mode)
+  (general-def 'normal grep-mode-map "w" #'wgrep-change-to-wgrep-mode)
   :config
   (general-def 'normal wgrep-mode-map
     "RET" #'wgrep-finish-edit))
