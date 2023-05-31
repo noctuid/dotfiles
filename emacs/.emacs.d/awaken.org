@@ -2790,8 +2790,6 @@ Select candidate as soon as there is only one (like the headlong package but for
     "M-d" #'ivy-dispatching-done
     "M-c" #'ivy-occur)
 
-  (general-def 'normal "?" #'ivy-resume)
-
   (ivy-set-actions
    t
    `(("h" (lambda (x) (helpful-command (intern x))) "helpful")
@@ -3303,7 +3301,7 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
          vertico-scroll-margin 0
          vertico-cycle t)
 
-  (general-s "." #'vertico-repeat)
+  (general-def 'normal "?" #'vertico-repeat)
 
   (general-add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
   (general-s
