@@ -615,20 +615,19 @@ Install, load, and configure =straight.el=:
 (setq straight-recipe-overrides nil)
 
 ;; Install and load straight.el
-;; https://github.com/raxod502/straight.el#getting-started
+;; https://github.com/radian-software/straight.el#bootstrapping-straightel
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el"
-                         user-emacs-directory))
-      (bootstrap-version 5))
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
-  ;; (benchmark 1 `(load ,bootstrap-file nil 'nomessage))
+;; (benchmark 1 `(load ,bootstrap-file nil 'nomessage))
   (load bootstrap-file nil 'nomessage))
 
 (defvar noct-straight-packages nil

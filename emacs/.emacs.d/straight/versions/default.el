@@ -296,7 +296,7 @@
  ("spacemacs-theme" . "dfe06629f8211ccd9933fc0d457019401ecbe594")
  ("sphinx-doc.el" . "1eda612a44ef027e5229895daa77db99a21b8801")
  ("spinner" . "634529bb3173e09b37499f636de70abf29d9fa8a")
- ("straight.el" . "039e5c9a9b5c00749602afb41341e9e77ba09429")
+ ("straight.el" . "4701c9af1a63a7f583bdbb11d45571302105da31")
  ("stripe-buffer" . "c252080f55cb78c951b19ebab9687f6d00237baf")
  ("stutter.el" . "daa7b6373593b197baae0636abf1820f5d0b064e")
  ("svg-lib" . "31085bbf247f0467e2f6af948085610248fce6c5")
