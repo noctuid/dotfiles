@@ -191,6 +191,9 @@ in
     # dark mode
     NSGlobalDomain.AppleInterfaceStyle = "Dark";
 
+    # ** Menu Bar
+    NSGlobalDomain._HIHideMenuBar = true;
+
     # ** Dock, Mission Control
     dock = {
         autohide = true;
