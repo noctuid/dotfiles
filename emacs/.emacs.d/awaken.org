@@ -2161,8 +2161,9 @@ I've switched away from putting this function in a hook because it can be jarrin
   :straight (:host github :repo "WJCFerguson/textsize")
   :general
   ('normal
-   "C-=" #'textsize-increment
-   "C--" #'textsize-decrement)
+   "C--" #'textsize-decrement
+   "C-+" #'textsize-increment
+   "C-=" #'textsize-reset)
   :init
   (general-after-gui
     (gsetq textsize-default-points 10)
