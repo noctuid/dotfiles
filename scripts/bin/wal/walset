@@ -80,6 +80,11 @@ wal_steam -w &> /dev/null &
 echo "Setting Emacs colors"
 emacsclient -a false -e t &> /dev/null \
 	&& emacsclient --eval '(noct-ewal)' &> /dev/null &
+emacsclient -socket-name=dirvish -a false -e t &> /dev/null \
+	&& emacsclient -socket-name=dirvish --eval '(noct-ewal)' &> /dev/null &
+emacsclient -socket-name=shell-menu -a false -e t &> /dev/null \
+	&& emacsclient -socket-name=shell-menu --eval '(noct-ewal)' &> /dev/null &
+
 
 # reload colors for pywalfox/firefox
 echo "Setting pywalfox colors"
