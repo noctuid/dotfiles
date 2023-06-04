@@ -123,23 +123,6 @@ filtered-packages ++ [
 # * Blog/Static Websites
   hugo
 
-# * Image Editing/Conversion
-  # gimp-with-plugins
-  imagemagick
-  gifsicle
-  graphicsmagick
-  # better to use system package for GPU-intensive packages
-  # waifu2x-converter-cpp
-  # TODO waifu2x-ncnn-vulka
-  # TODO soryu
-
-  # png compression
-  oxipng
-  # lossy png compression (huge size savings)
-  pngquant
-  # cwebp - convert to webp
-  libwebp
-
 # * Torrents
   # use system version since systemd service
   # transmission

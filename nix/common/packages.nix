@@ -136,6 +136,7 @@ with pkgs; [
 
   # format parsing
   jq
+  fq
   miller
 
 # * Disk Usage
@@ -169,6 +170,27 @@ with pkgs; [
 # * Video/Images
   # better to use distro package
   # mpv
+
+# * Image Editing/Conversion
+  # https://github.com/fawick/speedtest-resize
+  # extremely fast thumbnail creation for dirvish
+  vips
+
+  # gimp-with-plugins
+  imagemagick
+  gifsicle
+  graphicsmagick
+  # better to use system package for GPU packages
+  # waifu2x-converter-cpp
+  # TODO waifu2x-ncnn-vulka
+  # TODO soryu
+
+  # png compression
+  oxipng
+  # lossy png compression (huge size savings)
+  pngquant
+  # cwebp - convert to webp
+  libwebp
 
 # * File Type Support and Conversion
   pandoc
