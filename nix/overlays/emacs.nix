@@ -88,7 +88,7 @@ self: super: rec {
   # for WSL with weston
   emacsPgtk =
     (emacsGitNoctuidGeneric.override {
-      # pgtk since wslg uses weston (at least bydefault)
+      # pgtk since wslg uses weston (at least by default)
       withX = false;
       withPgtk = true;
     });
@@ -96,5 +96,7 @@ self: super: rec {
     ((super.emacsPackagesFor emacsPgtk).emacsWithPackages (epkgs: [
       # necessary to install through nix to get libenchant integration working
       epkgs.jinx
+      # not needed but prevents need to compile on first run
+      epkgs.vterm
     ]));
 }
