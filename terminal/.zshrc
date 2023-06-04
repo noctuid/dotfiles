@@ -75,6 +75,7 @@ if $NOCT_INSTANT_PROMPT && \
 fi
 
 # * Plugins
+# https://github.com/romkatv/zsh-bench/blob/master/doc/linux-desktop.md
 if [[ ! -f ~/.zinit/bin/zinit.zsh ]]; then
 	echo "Installing zinit..."
 	git clone https://github.com/zdharma-continuum/zinit.git ~/.zinit/bin
@@ -178,7 +179,7 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	zstyle ':fzf-tab:complete:*:*' fzf-preview 'less ${(Q)realpath}'
 	export LESSOPEN='|fzf_preview %s'
 	# but don't preview options and subcommands
-	zstyle ':fzf-tab:complete:*:options' fzf-preview 
+	zstyle ':fzf-tab:complete:*:options' fzf-preview
 	zstyle ':fzf-tab:complete:*:argument-1' fzf-preview
 
 	# ** Commands/Other
@@ -199,6 +200,19 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	# let you know you could have used an alias
 	zinit ice wait lucid
 	zinit light "MichaelAquilina/zsh-you-should-use"
+	# show message after command output in case there is a lot of command output
+	export YSU_MESSAGE_POSITION="after"
+	# there are a bunch of these:
+	# https://github.com/akash329d/zsh-alias-finder
+	# https://github.com/djui/alias-tips
+	# https://github.com/sei40kr/zsh-fast-alias-tips
+	# https://github.com/jedahan/ripz (dead)
+	# https://github.com/molovo/tipz
+
+	# interactive jq; awesome
+	zinit ice wait lucid \
+		  atload"bindkey \"^j\" jq-complete"
+	zinit light "reegnz/jq-zsh-plugin"
 
 	# ** Interesting but not useful for me at the moment
 	# Tarrasch/zsh-autoenv
