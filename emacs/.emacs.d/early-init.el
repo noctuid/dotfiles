@@ -20,6 +20,9 @@
 (let ((gap (or (getenv "WM_GAP") "15")))
   (push (cons 'internal-border-width (string-to-number gap)) default-frame-alist))
 
+;; active and inactive alpha
+(push '(alpha . (85 . 50)) default-frame-alist)
+
 ;; no titlebar
 ;; added in a patch; see my emacs.nix overlay
 (when (eq system-type 'darwin)
