@@ -926,7 +926,7 @@ rn() {
 # ** Media
 # *** Music
 # cd ripping
-alias rip='abcde'
+alias cdrip='abcde'
 
 # could potentially use this instead of mpdcron
 alias mpdstats='beet mpdstats'
