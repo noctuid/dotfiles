@@ -6665,6 +6665,11 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
 #+end_src
 
 * Other Major Mode Configuration
+** AHK
+#+begin_src emacs-lisp
+(use-package ahk-mode)
+#+end_src
+
 ** Alda
 #+begin_src emacs-lisp
 (use-package alda-mode
@@ -7190,6 +7195,11 @@ Used for =*Warnings*= buffer, for example.
 ** Sxhkdrc Mode
 #+begin_src emacs-lisp
 (use-package sxhkdrc-mode)
+#+end_src
+
+** Systemd
+#+begin_src emacs-lisp
+(use-package systemd)
 #+end_src
 
 ** Udev
