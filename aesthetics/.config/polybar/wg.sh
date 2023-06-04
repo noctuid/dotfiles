@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # show icon depending on whether or not wireguard is in use
 
-# shellcheck disable=SC1090
-source ~/.cache/wal/colors.sh
+if [[ -f ~/.cache/wal/colors.sh ]]; then
+	# shellcheck disable=SC1090
+	source ~/.cache/wal/colors.sh
+fi
+
 # shellcheck disable=SC2154
 dark_red=$color1
 # shellcheck disable=SC2154
