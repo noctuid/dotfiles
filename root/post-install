@@ -185,6 +185,7 @@ is_chroot() {
 	[[ $(stat -c %d:%i /) != $(stat -c %d:%i /proc/1/root/.) ]]
 }
 
+# TODO this doesn't work
 # TODO maybe check if group before installing in install_package; fcitx-im is
 # only group in ./packages currently
 group_installed() {
@@ -269,9 +270,11 @@ update_mirror_list() {
 install_paru() {
 	if ! pacman -Q paru-bin &> /dev/null; then
 		echo "Installing paru."
-		if ! group_installed base_devel; then
-			pacman -S --noconfirm --needed base-devel
-		fi
+		# doesn't work
+		# if ! group_installed base_devel; then
+		# 	pacman -S --noconfirm --needed base-devel
+		# fi
+		pacman -S --noconfirm --needed base-devel
 		pac_install git
 		build_dir="$uhome"/build/paru-bin
 		if [[ -d "$build_dir" ]]; then
@@ -282,7 +285,7 @@ install_paru() {
 		chown "$user":"$user" "$build_dir" \
 			&& cd "$build_dir" \
 			&& sudo -u "$user" makepkg --noconfirm -fsr \
-			&& pacman --noconfirm -U -- *.pkg.tar.xz
+			&& pacman --noconfirm -U -- *.pkg.tar*
 	fi
 }
 
