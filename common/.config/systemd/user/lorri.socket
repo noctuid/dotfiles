@@ -1,0 +1,10 @@
+# https://github.com/nix-community/lorri/blob/canon/contrib/lorri.socket
+[Unit]
+Description=Socket for Lorri Daemon
+
+[Socket]
+ListenStream=%t/lorri/daemon.socket
+RuntimeDirectory=lorri
+
+[Install]
+WantedBy=sockets.target

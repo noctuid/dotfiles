@@ -53,8 +53,9 @@ user_services_setup() {
 	if ! is_chroot; then
 		echo "Configuring user systemd services."
 		# --preserve-env to avoid dbus error
-		sudo --preserve-env -u "$user" systemctl --user start udiskie
-		sudo --preserve-env -u "$user" systemctl --user enable udiskie
+		sudo --preserve-env -u "$user" systemctl --user enable --now udiskie
+		sudo --preserve-env -u "$user" \
+			 systemctl --user enable --now lorri.socket
 		# fails and have custom run script
 		sudo --preserve-env -u "$user" systemctl --user disable dunst
 		# TODO emacs, mpd, and mpd-notification block login for a long time

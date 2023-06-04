@@ -59,7 +59,12 @@ with pkgs; [
   # powershell
 
   direnv
+  # nix-direnv is supposedly fast... but it takes ~2 seconds for just python and
+  # poetry vs instant for lorri
+  # it does not currently support flakes directly:
+  # https://github.com/nix-community/lorri/issues/84
   nix-direnv
+  lorri
 
   tmux
 
