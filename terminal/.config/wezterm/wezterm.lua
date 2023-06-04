@@ -15,14 +15,26 @@ end
 
 local home = wezterm.home_dir;
 
+config.default_prog = { '/usr/bin/env', 'zsh' }
+
 -- * Appearance
 -- fine if this doesn't exist as wezterm as default fallback
 config.font = wezterm.font 'Delugia'
 
--- these won't fail even if the files/directories don't exist
-wezterm.add_to_config_reload_watch_list(home.."/.cache/wal/wezterm-wal.toml")
-config.color_scheme_dirs = {home.."/.cache/wal"}
-config.color_scheme = "wezterm-wal"
+local file_exists
+function file_exists(name)
+   local f = io.open(name, "r")
+   return f ~= nil and io.close(f)
+end
+
+local wezterm_wal = home.."/.cache/wal/wezterm-wal.toml"
+if file_exists(wezterm_wal) then
+   wezterm.add_to_config_reload_watch_list()
+   config.color_scheme_dirs = {home.."/.cache/wal"}
+   config.color_scheme = 'wezterm-wal'
+else
+   config.color_scheme = 'GruvboxDark'
+end
 
 config.use_fancy_tab_bar = false
 config.hide_tab_bar_if_only_one_tab = true
@@ -129,11 +141,6 @@ config.keys = {
    },
 
    -- ** Copy/Paste
-   {
-      key = 'c',
-      mods = 'CTRL',
-      action = act.CopyTo 'ClipboardAndPrimarySelection',
-   },
    -- hooray global paste (as it's broken in ranger)
    {
       key = 'y',
