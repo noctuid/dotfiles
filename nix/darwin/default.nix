@@ -88,7 +88,8 @@ in
     })
     pkgs.cascadia-code
     pkgs.office-code-pro
-    pkgs.font-awesome
+    # doesn't include brands, so installing brew version also
+    pkgs.font-awesome-latest
   ];
 
   # * Homebrew
@@ -126,6 +127,8 @@ in
       # not packaged for nix
       "font-delugia-complete"
       "sf-symbols"
+      # need for brands, but doesn't have up-to-date free (so using nix too)
+      "font-fontawesome"
 
       # keyboard layout editing
       "ukelele"
