@@ -20,8 +20,9 @@
 (let ((gap (or (getenv "WM_GAP") "15")))
   (push (cons 'internal-border-width (string-to-number gap)) default-frame-alist))
 
+;; unfortunately Emacs has no way to exclude text from being transparent
 ;; active and inactive alpha
-(push '(alpha . (85 . 50)) default-frame-alist)
+(push '(alpha . (85 . 85)) default-frame-alist)
 
 ;; no titlebar
 ;; added in a patch; see my emacs.nix overlay
