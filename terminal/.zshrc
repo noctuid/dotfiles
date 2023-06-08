@@ -244,7 +244,7 @@ export LESS_TERMCAP_ue=$'\E[0m'                 # end underline
 export LESS_TERMCAP_us=$'\E[01;32m'             # begin underline
 
 # ** Cursor
-if [[ -z $INSIDE_EMACS ]] ;then
+if [[ -z $INSIDE_EMACS ]]; then
 	# use block cursor for normal mode only
 	# using wincent/terminus in init.vim for switching
 	zle-keymap-select() {
@@ -1549,6 +1549,39 @@ if $NOCT_INSTANT_PROMPT \
 		&& typeset -f p10k-instant-prompt-finalize > /dev/null \
 		&& (( ! ${+functions[p10k-instant-prompt-finalize]} )); then
 	p10k-instant-prompt-finalize
+fi
+
+# * Vterm Integration
+vterm_printf() {
+    if [ -n "$TMUX" ] && ([ "${TERM%%-*}" = "tmux" ] \
+							  || [ "${TERM%%-*}" = "screen" ]); then
+        # Tell tmux to pass the escape sequences through
+        printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+    elif [ "${TERM%%-*}" = "screen" ]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+        printf "\eP\e]%s\007\e\\" "$1"
+    else
+        printf "\e]%s\e\\" "$1"
+    fi
+}
+
+# https://github.com/romkatv/powerlevel10k/issues/2294#issuecomment-1535767681
+# https://github.com/akermu/emacs-libvterm/blob/master/etc/emacs-vterm-zsh.sh
+emacs_vterm_precmd() {
+	if [[ $INSIDE_EMACS == vterm ]]; then
+		# sync current working directory with Emacs
+		vterm_printf "51;A$USER@$HOST:$PWD" >$TTY
+		# change buffer title based on shell information (don't want as I am
+		# relying on buffer title being consistent)
+		# print -Pn "\e]2;%2~$\a"
+	fi
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd emacs_vterm_precmd
+
+if [[ $INSIDE_EMACS == vterm ]]; then
+	# make clear fully clear buffer instead of leaving some lines
+	alias clear='vterm_printf "51;Evterm-clear-scrollback";tput clear'
 fi
 
 # * Direnv

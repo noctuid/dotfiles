@@ -10303,7 +10303,10 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
   :config
   (gsetq vterm-shell "zsh"
          ;; increase scrollback
-         vterm-max-scrollback 10000)
+         vterm-max-scrollback 10000
+         ;; because I'm not printing the characters it expects in my prompt (see
+         ;; .zshrc); just use regexp
+         vterm-use-vterm-prompt-detection-method nil)
 
   (general-def vterm-mode-map
     "<prior>" nil
@@ -10347,7 +10350,19 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     (noct-defun noct-vterm-send-c-w ()
       "Send <escape> key."
       (interactive)
-      (vterm-send-key "w" nil nil t))))
+      (vterm-send-key "w" nil nil t)))
+
+  ;; don't trigger my C-j keybinding
+  (general-add-advice
+   'vterm-send-return
+   :override
+   (noct-defun noct-vterm-send-C-m ()
+     "Like `vterm-send-return' but always d `C-m'."
+     (interactive)
+     (deactivate-mark)
+     (when vterm--term
+       (process-send-string vterm--process "\C-m")))))
+
 
 (defvar vterm-buffer-name)
 (defun noct-vterm-select-or-create (&optional number)
