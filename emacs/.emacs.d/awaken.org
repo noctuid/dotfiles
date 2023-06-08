@@ -1021,7 +1021,9 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
      :local-repo "~/src/forks/evil-collection"
      :fork t)))
 (use-package evil-collection
-  ;; :config
+  :config
+  ;; e.g. binds in eshell normal mode
+  (gsetq evil-collection-key-blacklist '("C-n"))
   ;; TODO now using these for window management
   ;; (defun noct-make-evil-collection-translations (mode mode-keymaps &rest _rest)
   ;;   (when mode-keymaps
