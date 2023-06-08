@@ -88,8 +88,6 @@ in
     })
     pkgs.cascadia-code
     pkgs.office-code-pro
-    # doesn't include brands, so installing brew version also
-    pkgs.font-awesome-latest
   ];
 
   # * Homebrew
@@ -127,7 +125,8 @@ in
       # not packaged for nix
       "font-delugia-complete"
       "sf-symbols"
-      # need for brands, but doesn't have up-to-date free (so using nix too)
+      # has all fonts up-to-date (nix package currently doesn't have
+      # brands/solids)
       "font-fontawesome"
 
       # keyboard layout editing
@@ -296,6 +295,7 @@ in
             "${configDir}/skhd/skhdrc"
           ];
           KeepAlive = true;
+          RunAtLoad = true;
           ProcessType = "Interactive";
           EnvironmentVariables = {
             # NOTE: not necessary; will get PATH from non-interactive shell
@@ -317,6 +317,41 @@ in
           };
           StandardOutPath = "${cacheDir}/skhd.log";
           StandardErrorPath = "${cacheDir}/skhd.log";
+        };
+      };
+
+      launchd.agents.sketchybar = {
+        enable = true;
+        config = {
+          ProgramArguments = [
+            "${pkgs.sketchybar}/bin/sketchybar"
+            "-c"
+            "${configDir}/sketchybar/sketchybarrc"
+          ];
+          EnvironmentVariables = {
+            # a lot of this is necessary (sketchybar, grep, sed, ps,
+            # memory_pressure, system_profiler, sysctl, etc.)
+            PATH = pkgs.lib.concatStringsSep ":" [
+              "/run/current-system/sw/bin"
+
+              "/nix/var/nix/profiles/default/"
+              "${homeDir}/.nix-profile/bin"
+
+              "/bin"
+              "/sbin"
+              "/usr/bin"
+              "/usr/sbin"
+              "/usr/local/bin"
+              "${homeDir}/.local/bin"
+
+              "${homeDir}/bin"
+            ];
+          };
+          KeepAlive = true;
+          RunAtLoad = true;
+          ProcessType = "Interactive";
+          StandardOutPath = "${cacheDir}/sketchybar.log";
+          StandardErrorPath = "${cacheDir}/sketchybar.log";
         };
       };
 
