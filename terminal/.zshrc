@@ -549,9 +549,11 @@ fi
 #    completion
 
 # *** FASD
-# have a (any), s (show), z (cd), etc.
-eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
-alias z='fasd_cd -d'
+if hash fasd 2> /dev/null; then
+	# have a (any), s (show), z (cd), etc.
+	eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
+	alias z='fasd_cd -d'
+fi
 
 # *** FZF
 # http://owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
