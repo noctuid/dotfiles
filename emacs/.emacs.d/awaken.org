@@ -1284,13 +1284,6 @@ I generally avoid =:exit t= hydras; =which-key= is automatic and good enough alr
          hydra-lv t))
 #+end_src
 
-** Computer Local Setup
-#+begin_src emacs-lisp
-(let ((local-file (expand-file-name "lisp/local.el" user-emacs-directory)))
-  (when (file-exists-p local-file)
-    (load-file local-file)))
-#+end_src
-
 ** Other Constants
 #+begin_src emacs-lisp
 (defun noct-mode-line-height ()
@@ -10905,6 +10898,14 @@ Saves to a temp file and puts the filename in the kill ring."
     (message filename)))
 
 (general-s "S" #'screenshot-svg)
+#+end_src
+
+* Computer Local Setup
+Load at end so can override configuration.
+#+begin_src emacs-lisp
+(let ((local-file (expand-file-name "lisp/local.el" user-emacs-directory)))
+  (when (file-exists-p local-file)
+    (load-file local-file)))
 #+end_src
 
 * Removed
