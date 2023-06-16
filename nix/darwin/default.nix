@@ -122,6 +122,9 @@ in
 
     ];
     casks = [
+      # includes docker-compose
+      "docker"
+
       # not packaged for nix
       "font-delugia-complete"
       "sf-symbols"
