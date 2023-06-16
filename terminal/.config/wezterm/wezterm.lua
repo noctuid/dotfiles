@@ -236,4 +236,10 @@ config.key_tables = {
    copy_mode = copy_mode
 }
 
+-- * Local Configuration
+if pcall(require, 'local') then
+   local local_config = require 'local'
+   local_config.apply_to_config(config)
+end
+
 return config
