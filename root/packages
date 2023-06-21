@@ -429,6 +429,12 @@ requests pip
 python-mpd pip
 pylast pip
 
+# * Brightness
+# light in official repos has not worked for a long time
+light-git aur
+# for external monitors
+ddcutil
+
 # * Downloading
 yt-dlp
 gallery-dl-git aur
@@ -742,8 +748,6 @@ xorg-xlsfonts
 xorg-xsetroot
 xorg-xev
 xorg-xbacklight
-# light in official repos has not worked for a long time
-light-git aur
 # clipboard
 xsel
 xclip

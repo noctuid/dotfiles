@@ -27,16 +27,15 @@ any + F11
 
 # * General Global Hotkeys
 # ** Brightness
-# light is currently orphaned, but xbacklight does not work
 XF86MonBrightness{Down,Up}
-	light {-U,-A} 10
+	bright {-,+} 10
 	# xbacklight {-dec,-inc} 10
 
 {mod2,super+control} + n
-	light -S 1
+	bright 1
 
 {mod2,super+control} + e
-	light -S 100
+	bright 100
 
 # ** Media/Volume
 XF86Audio{Lower,Raise}Volume
