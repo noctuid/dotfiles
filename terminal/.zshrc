@@ -211,8 +211,12 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 
 	# interactive jq; awesome
 	zinit ice wait lucid \
-		  atload"bindkey \"^j\" jq-complete"
+		  atload"bindkey '^j' jq-complete"
 	zinit light "reegnz/jq-zsh-plugin"
+
+	zinit ice wait lucid \
+		  atload"alias rt='cd-gitroot'"
+	zinit light "mollifier/cd-gitroot"
 
 	# ** Interesting but not useful for me at the moment
 	# Tarrasch/zsh-autoenv
