@@ -1493,6 +1493,11 @@ add-printer() { # name uri
 	lpadmin -p "$name" -E -v "$uri"
 }
 
+# ** Programming
+m() {
+	(cd-gitroot && make "$@")
+}
+
 # * Kitty Fix
 # should be able to read terminfo correctly
 bindkey '\e[H'  beginning-of-line
