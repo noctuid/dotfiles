@@ -8879,14 +8879,14 @@ select = [
   ;; (gsetq python-shell-interpreter "ptpython"
   ;;        python-shell-interpreter-args "")
 
-  (general-m python-mode-map
+  (general-m python-base-mode-map
     "b" #'python-shell-send-buffer
     "d" #'python-shell-send-defun
     ;; "l" 'python-shell-send-line
     ;; "m" #'python-shell-switch-to-shell
     ";" #'python-shell-switch-to-shell)
 
-  (general-def 'visual python-mode-map
+  (general-def 'visual python-base-mode-map
     ;; eva[l]
     "l" #'python-shell-send-region)
 
@@ -8906,7 +8906,7 @@ Better than default LSP equivalent.
 #+begin_src emacs-lisp
 (use-package pydoc
   :general
-  (general-m python-mode-map
+  (general-m python-base-mode-map
     "h" #'pydoc-at-point
     "/" #'pydoc))
 #+end_src
@@ -8917,7 +8917,7 @@ Currently requires running =make= for setup and is not on MELPA.
 (use-package pylookup
   :straight (pylookup :host github :repo "tsgates/pylookup")
   :general
-  (general-m python-mode-map
+  (general-m python-base-mode-map
     "H" #'pylookup-lookup-at-pount
     "?" #'pylookup-lookup))
 #+end_src
@@ -8928,14 +8928,18 @@ Currently requires running =make= for setup and is not on MELPA.
 ;; work as expected.(for all multi-line strings)
 (use-package python-docstring
   :ghook 'python-base-mode-hook
-  :blackout t)
+  :blackout t
+  :config
+  ;; doesn't indent correctly... but fill-paragraph is worse?
+  ;; (general-def python-docstring-mode-map "M-q" nil)
+  )
 
 ;; allows inserting reST docstring skeleton
 (use-package sphinx-doc
   :ghook 'python-base-mode-hook
   :blackout t
   :config
-  (general-m python-mode-map
+  (general-m python-base-mode-map
     "s" #'sphinx-doc))
 #+end_src
 
@@ -8969,7 +8973,7 @@ $ autoflake --remove-all-unused-imports -i unused_imports.py"
     (py-isort-buffer)
     (lsp-format-buffer))
 
-  (general-def 'normal python-mode-map
+  (general-def 'normal python-base-mode-map
     "m=" #'noct-python-format-buffer))
 #+end_src
 
@@ -8977,7 +8981,7 @@ $ autoflake --remove-all-unused-imports -i unused_imports.py"
 *** Pytest
 #+begin_src emacs-lisp
 (use-package pytest
-  :general (general-m python-mode-map "t" #'pytest-all)
+  :general (general-m python-base-mode-map "t" #'pytest-all)
   :config
   (gsetq pytest-cmd-flags "-x -s -vv"))
 #+end_src
@@ -9033,7 +9037,7 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
 #+begin_src emacs-lisp
 (use-package pyvenv
   :general
-  (general-m python-mode-map
+  (general-m python-base-mode-map
     "v" #'pyvenv-workon
     "V" #'pyvenv-deactivate))
 
