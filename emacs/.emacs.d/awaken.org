@@ -3416,7 +3416,8 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
             "--line-number "
             ;; adding these to default
             "--hidden "
-            "--no-ignore "
+            ;; add back ignore too often
+            ;; "--no-ignore "
             "--max-columns-preview "))
   (gsetq consult-ripgrep-args (concat noct-ripgrep-args "."))
 
