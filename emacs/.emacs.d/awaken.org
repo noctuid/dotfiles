@@ -164,6 +164,10 @@ Necessary to be able to use ~(setf (map-elt ...) ...)~, for example.
   "^[^#$%»>\\n]*[#$%»>] *"
   "Prompt pattern for my shell.")
 
+(defconst noct-emacs-from-nix
+  (string-match-p "/nix/store" invocation-directory)
+  "Whether the current Emacs was installed through Nix.")
+
 (defun noct-blog-dir-p (file)
   "Return whether the current file is in my blog post directory."
   (file-in-directory-p
@@ -6600,7 +6604,9 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
  #+begin_src emacs-lisp
 (use-package jinx
   ;; must be installed through nix to work with Emacs installed through nix
-  :straight nil
+  :straight `(:type ,(if noct-emacs-from-nix
+                         'built-in
+                       'git))
   ;; necessary when installed through nix
   :autoload global-jinx-mode
   :init
