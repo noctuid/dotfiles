@@ -7301,7 +7301,18 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
   ;; :init
   ;; this does not load apheleia until file save
   ;; (apheleia-global-mode)
-  )
+  :config
+  (defun compro-pet-black ()
+    (if-let ((root (when (fboundp 'pet-virtualenv-root)
+                     (pet-virtualenv-root)))
+             (executable (concat root "bin/black"))
+             (exists (file-executable-p executable)))
+        `(,executable "-")
+      "cat"))
+  (setf (alist-get 'black apheleia-formatters) '((compro-pet-black)))
+  (general-add-hook 'python-base-mode-hook
+                    (noct-defun noct-set-formatter-to-black ()
+                      (setq-local apheleia-formatter 'black))))
 #+end_src
 
 *** Docker
