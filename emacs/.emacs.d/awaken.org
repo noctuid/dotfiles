@@ -5264,7 +5264,7 @@ Automatic two-spacing and capitalization.
                                bol))
                        (line-beginning-position))
          ;; condition will take place with point before snippet
-         (looking-at (rx (and alpha (or eol "  "))))))
+         (looking-at (rx (and alpha (or eol "\"" "'" "  "))))))
 
   ;; auto-capitalize
   (let ((char ?a))
