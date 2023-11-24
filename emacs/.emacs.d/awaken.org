@@ -1709,7 +1709,7 @@ Don't backup remote directories or encrypted files."
 ** Bookmarks
 #+begin_src emacs-lisp
 (general-s
-  "m" #'bookmark-set
+  "M" #'bookmark-set
   "'" #'bookmark-jump)
 #+end_src
 
