@@ -8873,8 +8873,9 @@ select = [
 *** REPL
 #+begin_src emacs-lisp
 (general-with-package 'python
-  (gsetq python-shell-interpreter "ipython"
-         python-shell-interpreter-args "-i --simple-prompt --no-color-info")
+  ;; just let pet set; ipython doesn't support older python versions either
+  ;; (gsetq python-shell-interpreter "ipython"
+  ;;        python-shell-interpreter-args "-i --simple-prompt --no-color-info")
   (when (eq system-type 'darwin)
     ;; breaks things on OSX
     (gsetq python-shell-completion-native-enable nil))
@@ -9032,10 +9033,10 @@ Setup
 - ~hatch env create~ (~hatch env prune~ if errors then recreate)
 - ~hatch run x~
 
-*** Pyenv and Auto-Virtualenv
+*** Pyenv and Auto-Virtualenv and Emacs Pet
 Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = true= in the poetry config.toml so autoenv and pyright can easily use virtual environments created by hatch.
 
-[[https://github.com/wyuenho/emacs-pet][emacs-pet]] makes this unnecessary (automatically handling a lot of different project types), though it currently requires external dependencies, and auto-virtualenv is working well enough currently for my use-case.
+[[https://github.com/wyuenho/emacs-pet][emacs-pet]] makes this unnecessary (automatically handling a lot of different project types).  I prefer pet's default precedence order, so I switched.  Detection by <root>/.venv seems to work fine without external dependencies, but I've also installed =dasel=.
 
 #+begin_src emacs-lisp
 (use-package pyvenv
@@ -9049,9 +9050,14 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
 ;; I am already using pyenv (elpy is not needed as a dependency for
 ;; auto-virtualenv)
 (use-package auto-virtualenv
+  ;; using pet instead now
+  :disabled t
   :gfhook ('python-base-mode-hook #'auto-virtualenv-set-virtualenv))
-#+end_src
 
+;; prefers .venv over pyenv from .python-version unlike auto-virtualenv
+(use-package pet
+  :gfhook ('python-base-mode-hook nil -10))
+#+end_src
 
 ** R (ESS)
 #+begin_src emacs-lisp
