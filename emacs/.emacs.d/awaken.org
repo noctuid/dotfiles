@@ -6049,6 +6049,8 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
 (noct-handle-popup-same-window magit-log-select-mode)
 (noct-handle-popup-other-window magit-revision-mode)
 (noct-handle-popup-other-window-no-select magit-diff-mode)
+(noct-handle-popup-same-window magit-process-mode)
+(noct-handle-popup-same-window magit-stash-mode)
 #+end_src
 
 *** Keybindings
