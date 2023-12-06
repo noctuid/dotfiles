@@ -1253,7 +1253,7 @@ android_rsync() {
 		  --partial --whole-file --sparse "$@"
 }
 
-# seems beter with adbfs but still slow
+# seems better with adbfs but still slow
 syncandmus() {
 	if ! mountpoint -q "$ANDROID_MOUNT_DIR"; then
 		echo "Please mountand."
@@ -1265,7 +1265,7 @@ syncandmus() {
 	android_rsync ~/.mpd/playlists/ "$and_music_dir"
 }
 
-# *** adb-sync
+# *** better adb-sync
 adb_get_sd_card_dir() {
 	# changing file system label (e.g. with exfatlabel) does not change the
 	# android mountpoint; using this meh workaround to mark the sd card dir
@@ -1286,8 +1286,9 @@ syncaegis() {
 	fi
 
 	# encrypted 2FA tokens
-	adb-sync --reverse "${1:-/sdcard}"/Aegis ~/database/move/phone/internal/
-	adb-sync --reverse "${1:-/sdcard}"/Aegis ~/ag-sys/backup/
+	adbsync pull "${1:-/sdcard}"/Aegis ~/database/move/phone/internal/
+	adbsync pull "${1:-/sdcard}"/Aegis ~/ag-sys/backup/
+	adbsync push ~/database/move/phone/internal/Aegis/ "${1:-/sdcard}"/Aegis/
 }
 
 # intentionally not using --delete (do it manually)
@@ -1295,7 +1296,10 @@ syncaegis() {
 # trailing slash on dest dir results in dir// (but this doesn't matter)
 # TODO adb-sync doesn't work with certain characters in filename:
 # https://github.com/google/adb-sync/issues/34
-syncphone() {
+# NOTE: same for better adbysync (can't have colons)
+syncphone() ( # <expect sd card?>
+	set -e
+
 	if ! mountpoint -q ~/database; then
 		echo "Please mountdatab."
 		return 1
@@ -1306,77 +1310,112 @@ syncphone() {
 	mkdir -p ~/database/move/phone/internal || return 1
 
 	local internal external
-	# /storage/emulated/0
+	# links to /storage/emulated/0
 	internal=/sdcard
-	external=$(adb_get_sd_card_dir)
+	maybe_external=$(adb_get_sd_card_dir)
+	expect_sdcard=${1:-false}
 
-	if [[ -z "$external" ]]; then
-		echo "Please ensure the sd card is mounted and has an 'is_external_sd'
-file in it."
-		return 1
+	if [[ -z $maybe_external ]]; then
+		if $expect_sdcard; then
+			echo "Please ensure the sd card is mounted and has an 'is_external_sd'
+	file in it."
+			return 1
+		else
+			maybe_external="$internal"
+		fi
 	fi
+
+
+	# TODO make a command to do both
 	# Two Way
-	adb-sync --two-way ~/wallpaper/phone/ "$internal"/Wallpaper/
-	adb-sync --two-way ~/database/ringtones/ "$internal"/Ringtones/
-	adb-sync --two-way ~/ag-sys/library/android/ "$external"/books
-	adb-sync --two-way ~/database/meditations/ "$external"/meditations/
-	adb-sync --copy-links --two-way ~/ag-sys/orgzly/ "$external"/orgzly/
+	# pull first to prefer what's on phone for same file
+	adbsync pull "$internal"/wallpaper/ ~/wallpaper/phone/
+	adbsync push ~/wallpaper/phone/ "$internal"/wallpaper/
+
+	adbsync pull "$internal"/Ringtones/ ~/database/ringtones/
+	adbsync push ~/database/ringtones/ "$internal"/Ringtones/
+
+	adbsync pull "$maybe_external"/Books ~/database/library/android/
+	adbsync push ~/database/library/android/ "$maybe_external"/Books/
+
+	adbsync pull "$maybe_external"/meditations/ ~/database/meditations/
+	adbsync push ~/database/meditations/ "$maybe_external"/meditations/
+
+	adbsync --copy-links pull "$maybe_external"/orgzly/ ~/ag-sys/orgzly/
+	adbsync --copy-links push ~/ag-sys/orgzly/ "$maybe_external"/orgzly/
+
+	syncaegis
+
+	# cytoid charts
+	adbsync pull "$internal"/Cytoid ~/database/move/phone/internal/
+	adbsync push ~/database/move/phone/internal/Cytoid/ "$internal"/Cytoid/
+
+	# stats and preferences backup
+	adbsync pull "$internal"/gmmp ~/database/move/phone/internal
+	adbsync push ~/database/move/phone/internal/gmmp/ "$internal"/gmmp/
+
+	adbsync pull "$internal"/Signal ~/database/move/phone/internal/
+	adbsync push ~/database/move/phone/internal/Signal/ "$internal"/Signal/
+
+	adbsync pull "$internal"/Tachiyomi/backup/ ~/ag-sys/backup/tachiyomi/
+	adbsync pull "$internal"/Tachiyomi ~/database/move/phone/internal/
+	adbsync push ~/database/move/phone/internal/Tachiyomi/ "$internal"/Tachiyomi
+
+	adbsync pull "$internal"/tagmo ~/database/move/phone/internal/
+	adbsync push ~/database/move/phone/internal/tagmo/ "$internal"/tagmo
+
+	# sync back notes
+	adbsync pull "$internal"/Documents ~/database/move/phone/internal/
+	adbsync push ~/database/move/phone/internal/Documents/ "$internal"/Documents
+
+	# general location for other manual or automatic backups (e.g. k9, loop,
+	# dashchan, slide, moonreader, and podcast addict)
+	adbsync pull "$internal"/backup ~/database/move/phone/internal/
+	adbsync push ~/database/move/phone/internal/backup/ "$internal"/backup/
+
+	# not including AnkiDroid (using its service to sync/backup data)
 
 
 	# One Way - To Phone
-	# music
-	adb-sync --copy-links ~/music-android/* "$external"/Music/
+	# FIXME music
+	# adbsync --copy-links push ~/music-android/ "$maybe_external"/Music/
 	# TODO check if this is actually used
-	adb-sync ~/.mpd/playlists/ "$internal"/Playlists/
+	# adbsync ~/.mpd/playlists/ "$internal"/Playlists/
 
-	adb-sync ~/ag-sys/life/back.pdf "$internal"/
+	adbsync push ~/ag-sys/else/life/back.pdf "$internal"/
 
 
-	# One Way - To Computer
-	syncaegis
-
-	# TODO exclude .thumbnails
+	# One Way - To Computer (to eventually delete off phone)
 	# photos
-	adb-sync --reverse "$internal"/DCIM ~/database/move/phone/internal/
-	adb-sync --reverse "$external"/DCIM ~/database/move/phone/internal/
+	adbsync --exclude ".thumbnails" --exclude "Camera/.inflight_lowres" \
+			pull "$internal"/DCIM ~/database/move/phone/internal/
+	if [[ $internal != $maybe_external ]]; then
+		adbsync --exclude ".thumbnails" --exclude "Camera/.inflight_lowres" \
+				pull "$maybe_external"/DCIM ~/database/move/phone/internal/
+	fi
 
 	# videos (e.g. NewPipe)
-	adb-sync --reverse "$internal"/Movies ~/database/move/phone/internal/
-	adb-sync --reverse "$internal"/Pictures ~/database/move/phone/internal/
-	adb-sync --reverse "$internal"/CamScanner ~/database/move/phone/internal/
-	adb-sync --reverse "$internal"/OpenNoteScanner \
+	adbsync --exclude ".thumbnails" pull \
+			"$internal"/Movies ~/database/move/phone/internal/
+	adbsync --exclude ".thumbnails" pull \
+			"$internal"/Pictures ~/database/move/phone/internal/
+	adbsync pull "$internal"/CamScanner ~/database/move/phone/internal/
+	adbsync pull "$internal"/OpenNoteScanner \
 			 ~/database/move/phone/internal/
 
 	# other downloads
-	adb-sync --reverse "$internal"/Download ~/database/move/phone/internal/
+	adbsync pull "$internal"/Download ~/database/move/phone/internal/
+	adbsync pull "$maybe_external"/Download ~/database/move/phone/internal/
 	# downloaded photos
-	adb-sync --reverse "$internal"/Clover ~/database/move/phone/internal/
+	adbsync pull "$internal"/Clover ~/database/move/phone/internal/
+ )
 
-	adb-sync --reverse "$internal"/Cytoid ~/database/move/phone/internal/
-
-	adb-sync --reverse "$internal"/Signal ~/database/move/phone/internal/
-
-	adb-sync --reverse "$internal"/Tachiyomi/backup/ ~/ag-sys/backup/tachiyomi/
-	adb-sync --reverse "$internal"/Tachiyomi ~/database/move/phone/internal/
-
-	# stats and preferences backup
-	adb-sync --reverse "$internal"/gmmp ~/database/move/phone/internal
-
-	# general location for other manual backups (e.g. k9, loop, dashchan, slide,
-	# and moonreader)
-	adb-sync --reverse "$internal"/backup ~/database/move/phone/internal/
-
-	# sync back notes (now on sd card so restore for new phone is unnecessary)
-	# can't use glob
-	adb-sync --reverse "$external"/notes.txt ~/ag-sys/backup/to-clean/
-	adb-sync --reverse "$external"/pots.txt ~/ag-sys/backup/to-clean/
-}
-
+# syncphone should handle; don't need to copy over everything
 # just for copying over all internal things
-newphonerestore() {
-	internal=/sdcard
-	adb-sync ~/database/move/phone/internal/ "$internal"/
-}
+# newphonerestore() {
+# 	internal=/sdcard
+# 	adb-sync ~/database/move/phone/internal/ "$internal"/
+# }
 
 # ** Keyboard
 # https://kaleidoscope.readthedocs.io/en/latest/setup_toolchain.html

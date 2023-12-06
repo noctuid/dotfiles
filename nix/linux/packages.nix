@@ -345,7 +345,6 @@ filtered-packages ++ [
 # * Android
   # for adb
   android-tools
-  adb-sync
 
 # * Chat
   discord

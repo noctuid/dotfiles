@@ -762,7 +762,7 @@ warpd-git aur
 # * Android
 # for adb
 android-tools
-adb-sync-git aur
+better-adb-sync-git aur
 
 # /* Local Variables:
 # /* mode: conf-unix
