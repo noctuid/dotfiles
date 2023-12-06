@@ -765,6 +765,74 @@ Principles:
   :prefix ",")
 #+end_src
 
+** Setup.el
+#+begin_src emacs-lisp
+(use-package setup
+  :config
+  (setup-define :straight
+    (lambda (recipe)
+      `(unless (straight-use-package ',recipe)
+         ,(setup-quit)))
+    :documentation
+    "Install RECIPE with `straight-use-package'.
+This macro can be used as HEAD, and will replace itself with the
+first RECIPE's package."
+    :repeatable t
+    :shorthand (lambda (sexp)
+                 (let ((recipe (cadr sexp)))
+                   (if (consp recipe)
+                       (car recipe)
+                     recipe))))
+
+  (defmacro noct-use (arg1 &rest args)
+    (declare (indent 1))
+    `(setup (:straight ,arg1)
+       ,@args))
+
+  ;; https://www.emacswiki.org/emacs/SetupEl#h5o-4
+  (defmacro defsetup (name signature &rest body)
+    "Shorthand for `setup-define'.
+NAME is the name of the local macro.  SIGNATURE is used as the
+argument list for FN.  If BODY starts with a string, use this as
+the value for :documentation.  Any following keywords are passed
+as OPTS to `setup-define'."
+    (declare (debug defun))
+    (let (opts)
+      (when (stringp (car body))
+        (setq opts (nconc (list :documentation (pop body))
+                          opts)))
+      (while (keywordp (car body))
+        (let* ((prop (pop body))
+               (val `',(pop body)))
+          (setq opts (nconc (list prop val) opts))))
+      `(setup-define ,name
+         (cl-function (lambda ,signature ,@body))
+         ,@opts))))
+
+#+end_src
+
+** Once.el
+ #+begin_src emacs-lisp
+(use-package once
+  :straight `(once :host github :repo "emacs-magus/once"
+                   ,@(if noct-personal-computer-p
+                         (list :protocol 'ssh
+                               :local-repo "~/src/emacs/once")
+                       (list :protcol nil))
+                   :files (:defaults "once-setup/*.el"))
+  :demand t
+  :init
+  (gsetq once-shorthand t)
+  ;; (require 'once-incrementally)
+  ;; (once-enable-incremental-loading)
+  (eval-and-compile
+    ;; must set before loading
+    (setq once-setup-keyword-aliases
+          '(":once-x-require" ":require-once"
+            ":once-require-incrementally" ":require-incrementally")))
+  (require 'once-setup))
+#+end_src
+
 ** On.el - Extra Hooks
 #+begin_src emacs-lisp
 (use-package on
@@ -7922,8 +7990,8 @@ I am using the =treesit-auto= package to automate the process of installing the 
 #+begin_src emacs-lisp
 (use-package treesit-auto
   ;; some things that don't work: yasnippet association
-  :disabled t
-  :init
+  :demand t
+  :config
   (gsetq treesit-auto-install 'prompt)
   ;; use treesitter where possible
   (global-treesit-auto-mode)
@@ -9172,18 +9240,12 @@ TODO
 ;; (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
 #+end_src
 
-*** TypeScript
-#+begin_src emacs-lisp
-(use-package typescript-mode
-  :gfhook #'lsp)
-#+end_src
-
 *** Web
-TODO should I switch to =tsx-ts-mode= now?
 #+begin_src emacs-lisp
 (use-package web-mode
   ;; web-mode gives better syntax highlighting than just typescript-mode (and
   ;; supports jsx and tsx)
+  :disabled t
   :mode ("\\.[tj]sx\\'" . web-mode)
   :gfhook
   #'lsp
@@ -9196,6 +9258,31 @@ TODO should I switch to =tsx-ts-mode= now?
    ;; - incorrectly affects === inside {}
    web-mode-enable-auto-quoting nil))
 #+end_src
+
+*** TypeScript
+#+begin_src emacs-lisp
+(use-package typescript-ts-mode
+  :gfhook #'lsp)
+
+;; some extra functionality; main just using for auto-close
+(use-package jtsx
+  :straight (jtsx :host github :repo "llemaitre19/jtsx")
+  :mode (("\\.jsx?\\'" . jtsx-jsx-mode)
+         ("\\.tsx?\\'" . jtsx-tsx-mode))
+  :gfhook
+  ('jtsx-jsx-mode-hook #'lsp)
+  ('jtsx-tsx-mode-hook #'lsp))
+#+end_src
+
+*** Tailwind CSS
+May need to manually ~lsp-install-server~ first.
+ #+begin_src emacs-lisp
+(noct-use lsp-tailwindcss
+  (gsetq lsp-tailwindcss-add-on-mode t
+         lsp-tailwindcss-major-modes
+         '(typescript-ts-mode jtsx-jsx-mode jtsx-tsx-mode))
+  (:require-once 'lsp-mode))
+ #+end_src
 
 * Miscellaneous
 ** Backup Each Save
