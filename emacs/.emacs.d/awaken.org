@@ -5456,9 +5456,8 @@ Still experimental.
   (things-define-pair 'things-paren "(" ")")
   (things-evil-define paren things-paren :last-key "p" :keys "(")
 
-  ;; FIXME
-  ;; (things-define-pair 'things-bracket (regexp-quote "[") (regexp-quote "]"))
-  ;; (things-evil-define bracket things-bracket :last-key "p" :keys "[")
+  (things-define-pair 'things-bracket "[" "]")
+  (things-evil-define bracket things-bracket :last-key "p" :keys "[")
 
   (things-define-pair 'things-curly "{" "}")
   (things-evil-define curly things-curly :last-key "p" :keys "{")
@@ -5470,7 +5469,8 @@ Still experimental.
   (things-evil-define comma things-comma :last-key "p" :keys ",")
 
   (things-evil-define anyblock (things-paren
-                                ;; things-bracket
+                                things-bracket
+                                things-angle
                                 things-curly)
                       :last-key "p" :keys "d"))
 #+end_src
