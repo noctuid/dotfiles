@@ -11,12 +11,6 @@
 source ~/.cache/wal/colors.sh
 
 print_volume() {
-	# to /dev/null to prevent printing this error which happens occasionally:
-	# amixer: Control sysdefault:0 element read error: Invalid argument
-	headphones=$(amixer -c 0 contents 2> /dev/null \
-					 | grep "Headphone Jack'" -A 2 \
-					 | awk -F "=" 'NR==3 { print $2 }')
-
 	percent=$(pamixer --get-volume)
 
 	if [[ -v color1 ]] && [[ -v color12 ]]; then
@@ -37,7 +31,8 @@ print_volume() {
 		icon=""
 	elif pactl info | grep --quiet "Default Sink:.*hdmi"; then
 		icon=""
-	elif [[ $headphones == on ]]; then
+	elif pactl list sinks | grep --quiet 'Active Port: analog-output-headphones'
+	then
 		icon=""
 	else
 		if [[ $percent -lt 34 ]]; then
