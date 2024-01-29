@@ -2,6 +2,9 @@
 
 # packages for personal laptop
 
+# NOTE: libgl through nix break steam, which attempts to use it
+# may just switch to ./minimal-packages.nix
+
 with pkgs;
 let
   # generally it's not worth trying to install anything that needs to run on GPU
@@ -11,30 +14,30 @@ let
   # this approach: https://github.com/guibou/nixGL/issues/44#issuecomment-1361524862
   # alt approach: https://github.com/guibou/nixGL/issues/16#issuecomment-903188923
   # need prime-run when using Nvidia and optimus-manager
-  nixGLPrimeWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
-    mkdir "$out"
-    ln -s ${pkg}/* "$out"
-    rm -f "$out"/bin
-    mkdir "$out"/bin
-    for binary in ${pkg}/bin/*; do
-        wrapped_binary=$out/bin/$(basename "$binary")
-        echo "exec prime-run \"${lib.getExe nixgl.auto.nixGLDefault}\" \
-             \"$binary\" \"\$@\"" > "$wrapped_binary"
-        chmod +x "$wrapped_binary"
-    done
-  '';
-  nixGLIntelWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
-    mkdir "$out"
-    ln -s ${pkg}/* "$out"
-    rm -f "$out"/bin
-    mkdir "$out"/bin
-    for binary in ${pkg}/bin/*; do
-        wrapped_binary=$out/bin/$(basename "$binary")
-        echo "exec \"${lib.getExe nixgl.nixGLIntel}\" \"$binary\" \"\$@\"" \
-             > "$wrapped_binary"
-        chmod +x "$wrapped_binary"
-    done
-  '';
+  # nixGLPrimeWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
+  #   mkdir "$out"
+  #   ln -s ${pkg}/* "$out"
+  #   rm -f "$out"/bin
+  #   mkdir "$out"/bin
+  #   for binary in ${pkg}/bin/*; do
+  #       wrapped_binary=$out/bin/$(basename "$binary")
+  #       echo "exec prime-run \"${lib.getExe nixgl.auto.nixGLDefault}\" \
+  #            \"$binary\" \"\$@\"" > "$wrapped_binary"
+  #       chmod +x "$wrapped_binary"
+  #   done
+  # '';
+  # nixGLIntelWrap = pkg: pkgs.runCommand "${pkg.name}-nixgl-wrapper" {} ''
+  #   mkdir "$out"
+  #   ln -s ${pkg}/* "$out"
+  #   rm -f "$out"/bin
+  #   mkdir "$out"/bin
+  #   for binary in ${pkg}/bin/*; do
+  #       wrapped_binary=$out/bin/$(basename "$binary")
+  #       echo "exec \"${lib.getExe nixgl.nixGLIntel}\" \"$binary\" \"\$@\"" \
+  #            > "$wrapped_binary"
+  #       chmod +x "$wrapped_binary"
+  #   done
+  # '';
   common-packages = import ../common/packages.nix { pkgs = pkgs; };
   # packages to remove since we need to wrap them with nixGL
   remove-packages = [ kitty mpv ];
@@ -43,11 +46,11 @@ let
 in
 filtered-packages ++ [
   # required to run a lot of things...
-  nixgl.auto.nixGLDefault
-  nixgl.nixGLIntel
+  # nixgl.auto.nixGLDefault
+  # nixgl.nixGLIntel
 
   # other wrappers will break ueberzug
-  (nixGLIntelWrap kitty)
+  # (nixGLIntelWrap kitty)
 
 # * Filesystem Support
   exfatprogs
@@ -108,11 +111,12 @@ filtered-packages ++ [
   # (nixGLIntelWrap firefox)
   # TODO still crashes
   # (nixGLIntelWrap ungoogled-chromium)
-  (nixGLIntelWrap qutebrowser)
+  # (nixGLIntelWrap qutebrowser)
 
-# * Wine
-  wine
-  winetricks
+# # * Wine
+  # bad idea; don't want to mix
+  # wine
+  # winetricks
 
 # * Doc, PPT, etc. Editing/File Conversion
   libreoffice

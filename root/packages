@@ -76,8 +76,8 @@ steam-native-runtime
 intel-ucode
 
 # ** Nvidia
-# having both installed has not caused me issues
-nvidia-xrun-git aur
+# having both installed has not caused me issues (but xrun is now orphaned)
+# nvidia-xrun-git aur
 optimus-manager-git aur
 # not currently using
 bbswitch-dkms
@@ -162,6 +162,9 @@ ranger
 ffmpegthumbnailer
 # ranger info (alternatively exiftool)
 mediainfo
+
+# sometimes useful in ranger
+dragon-drop-git aur
 
 # for fzf_preview script with fzf-tab
 lesspipe
@@ -333,7 +336,8 @@ hdparm
 rng-tools
 
 # * Keyboard Remapping
-# xcape nix
+# fallback in combo with klfc; not using normally
+xcape
 # klfc cabal
 klfc-bin aur
 kanata aur
@@ -360,6 +364,9 @@ aspell-en
 nuspell
 enchant
 sdcv
+stardict-wordnet aur
+stardict-wikt-en-all aur
+stardict-oald aur
 
 # nix does not provide /usr/share/dict/words
 # NixOS has an option: https://github.com/NixOS/nixpkgs/issues/16545
@@ -391,6 +398,8 @@ pipewire
 pipewire-pulse
 # parametric eq using pipewire
 jamesdsp-git aur
+
+spotify aur
 
 # for amixer and alsamixer
 alsa-utils
@@ -496,6 +505,9 @@ office-code-pro aur
 phallus-fonts-git aur
 nerd-fonts-complete aur
 
+# favorite bitmap
+cozette-otb aur
+
 # other languages
 noto-fonts-cjk
 otf-ipafont
@@ -533,7 +545,7 @@ unorm npm
 # * Appearance/Theming
 polybar-git aur
 setroot aur
-xtitle-git aur
+xtitle aur
 numix-gtk-theme
 numix-cursor-theme-git aur
 
@@ -607,7 +619,7 @@ tree-sitter
 
 docker
 docker-compose
-nvidia-container-runtime aur
+# nvidia-container-runtime aur
 
 # ** Licensing
 harvey pip
@@ -627,7 +639,8 @@ go
 pyenv
 python-pip
 
-# build system
+# build/etc. system
+python-poetry
 python-hatch
 # required for hatch but for some reason not included
 python-tomli-w
@@ -647,20 +660,10 @@ ptpython aur
 python-ipdb
 
 # *** Linting
-# error linter
-python-pyflakes
-# style linting; previously called pep8
-python-pycodestyle
-# complexity checker
-python-mccabe
-# docstring style checker
-python-pydocstyle
-# wraps pyflakes, pycodestyle, and mccabe
-flake8
 # more warnings
-python-pylint
-# type hint linting
-mypy
+# python-pylint
+# type hint linting (mainly using pyright now)
+# mypy
 # "Ruff can be used to replace Flake8 (plus dozens of plugins), isort,
 # pydocstyle, yesqa, eradicate, pyupgrade, and autoflake, all while executing
 # tens or hundreds of times faster than any individual tool."
@@ -668,16 +671,7 @@ ruff
 ruff-lsp
 
 # *** Formatting
-# sort imports
-python-isort
-
-# remove unused variables and imports using pyflakes
-python-autoflake aur
-
-# formatting
-# yapf
-# less configurable; deterministic
-python-black
+# ruff-format
 
 # pre-commit hook configuration
 python-pre-commit aur

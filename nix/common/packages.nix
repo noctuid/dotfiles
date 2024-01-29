@@ -119,7 +119,6 @@ with pkgs; [
   neofetch
 
   # ls alternatives
-  exa
   lsd
 
   bat

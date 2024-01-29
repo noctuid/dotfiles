@@ -327,11 +327,13 @@ install_nix_packages() { # <update?>
 		sudo -u "$user" nix-channel \
 			 --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
 		sudo -u "$user" nix-channel --update
-
+		systemctl enable nix-daemon
 	fi
 	cd "$uhome"/dotfiles/nix || return 1
-	if [[ -n $1 ]]; then
+	if [[ $1 == update ]]; then
 		sudo -u "$user" nix flake update
+	elif [[ -n $1 ]]; then
+		sudo -u "$user" nix flake update "$@"
 	fi
 	# impure is required to be able to use nixgl
 	sudo -u "$user" nix run "path:.#homeConfigurations.noct.activationPackage" \
@@ -617,7 +619,8 @@ update_user_groups() { # <user>
 	user=$1
 	echo "Updating ${user}'s groups."
 	# https://wiki.archlinux.org/index.php/users_and_groups#Group_list
-	usermod --append --groups users,wheel,uucp,games,lock,input,uinput "$user"
+	usermod --groups users,wheel,uucp,games,lock,input,uinput,kvm,libvirt,nix-users \
+			--append "$user"
 }
 
 validate_user() { # <user>

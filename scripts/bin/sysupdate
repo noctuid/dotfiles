@@ -3,5 +3,5 @@
 # shellcheck disable=SC1090
 source ~/bin/helpers/mount_commands.sh || exit 1
 mountefi || exit 1
-paru --newsonupgrade -Syu || exit 1
-mkinitcpio --allpresets
+paru --newsonupgrade -Syu --ignore emacs-git
+sudo mkinitcpio --allpresets
