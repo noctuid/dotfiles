@@ -119,6 +119,7 @@ arkenfox-user.js
 
 # * VCS
 git
+github-cli
 
 # * SSH
 openssh

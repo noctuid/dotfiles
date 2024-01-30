@@ -26,3 +26,7 @@
 [safe]
 	# allow other users to edit dotfiles
 	directory = /home/noctuid/dotfiles
+[credential "https://github.com"]
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = !gh auth git-credential
