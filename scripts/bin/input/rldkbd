@@ -6,10 +6,19 @@ xdotool keyup control alt shift super Mode_switch Hyper_L Super_R
 # * TrackPoint Settings
 # enable tap to click on touch pad
 xinput set-prop "Elan Touchpad" "libinput Tapping Enabled" 1
+# I set primary to laptop screen
+primary=$(xrandr | awk '/primary/ {print $1}')
+# map touch screen input to touch screen display only (or clicking on the right
+# side of the touch screen can put the pointer on the other monitor, for
+# example)
+xinput --map-to-output "Wacom Pen and multitouch sensor Finger" "$primary"
 
 # * Keyboard Layout
 if [[ $1 == klfc ]]; then
 	rldkbd-klfc "$2"
+	# disable repeat for
+	# https://github.com/39aldo39/klfc/issues/10
+	xset -r 25
 else
 	rldkanata
 	# wait for startup
@@ -18,10 +27,8 @@ fi
 
 # * Repeat Rate
 # faster key repeat rate and shorter delay (default is 660 25)
-# https://github.com/39aldo39/klfc/issues/10
 # 300ms wait, 50 repeats per second
 # seems like must come after kanata
-xset -r 25
 xset r rate 300 50
 
 # * Hotkey Daemon(s)

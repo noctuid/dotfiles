@@ -3,9 +3,33 @@
 ;; key names: https://github.com/jtroo/kanata/blob/main/src/keys/mod.rs
 
 (defcfg
+ ;; too much logging by default; most of X logs; maybe add back when switch to
+ ;; service
+ log-layer-changes no
  linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd:/dev/trackpoint)
 
 (defvar ht 200)
+
+(defalias
+  ~ S-`
+  und S--
+  ;; left/right paren
+  lpr S-9
+  rpr S-0
+  ! S-1
+  at S-2
+  # S-3
+  $ S-4
+  % S-5
+  ^ S-6
+  & S-7
+  * S-8
+  | S-\
+  ;; default + is kp plus
+  + S-=
+  { S-[
+  ;; default } doesn't work
+  } S-])
 
 (defalias
   ;; layers
@@ -19,15 +43,15 @@
   ;; escape/shift
   e/S (tap-hold-press 1 $ht esc lsft)
 
-  bracket/hotkey (tap-hold-press 1 $ht [ C-lmet)
+  bracket/hotkey (tap-hold-press 1 $ht [ (multi lctl lmet))
   ;; may want to repeat backspace in rare cases
   bspc/nav (tap-hold-press $ht $ht bspc @ext)
-  paren/super (tap-hold-press 1 $ht S-9 lmet)
+  paren/super (tap-hold-press 1 $ht @lpr lmet)
 
   ;; return/altgr
   r/G (tap-hold-press 1 $ht ret @agr)
   ;; open brace/alt
-  p/A (tap-hold-press 1 $ht S-[ lalt))
+  p/A (tap-hold-press 1 $ht @{ lalt))
 
 (defoverrides
  ;; on extend layer
@@ -80,9 +104,8 @@
   cbs C-bspc
   st S-tab
   ct C-tab
-  ;; NOTE: this will still fallthrough to dual-role shift when held without
-  ;; special handling
-  cst C-S-tab)
+  ;; don't remember what I wanted to use shift with, but it's here
+  cst (tap-hold-press 1 $ht C-S-tab lsft))
 
 (deflayer extend
   _    _    _    _    _    _    _    _    _    _    _     _    _    _
@@ -92,24 +115,6 @@
   _    _    @st  @cst @ct       _    _    _    _
   _ _ _
   _)
-
-(defalias
-  ~ S-`
-  und S--
-  rpr S-0
-  ! S-1
-  at S-2
-  # S-3
-  $ S-4
-  % S-5
-  ^ S-6
-  & S-7
-  * S-8
-  | S-\
-  ;; default + is kp plus
-  + S-=
-  ;; default } doesn't work
-  } S-])
 
 (deflayer altgr
   _    _    _    _    _    _    _    _    _    _    _    _    _    _

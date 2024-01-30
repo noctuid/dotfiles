@@ -1,0 +1,2 @@
+# https://github.com/jtroo/kanata/blob/main/docs/setup-linux.md
+# KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
