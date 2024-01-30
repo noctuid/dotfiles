@@ -1,5 +1,5 @@
 mountefi() {
-	if [[ ! -d /boot/efi/EFI ]]; then
+	if  ! mountpoint -q /boot/efi; then
 		sudo mount /dev/disk/by-label/SYSTEM /boot/efi
 	else
 		echo "EFI partition already mounted."

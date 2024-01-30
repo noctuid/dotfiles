@@ -891,10 +891,12 @@ fi
 case $1 in
 	non-chroot) "$basedir"/extra-setup non_chroot "$user";;
 	root-config) copy_root_config_files;;
-	boot) "$basedir"/extra-setup refind_setup \
-				&& "$basedir"/extra-setup initramfs_setup;;
-	fix) copy_root_config_files \
+	# SEE ./boot/README.org for bootloader troubleshooting steps
+	fix|refind|boot) copy_root_config_files \
 			   && "$basedir"/extra-setup refind_setup \
+			   && "$basedir"/extra-setup initramfs_setup;;
+	systemd-boot) copy_root_config_files \
+			   && "$basedir"/extra-setup systemd_boot_setup \
 			   && "$basedir"/extra-setup initramfs_setup;;
 	user) configure_secondary_user "$2";;
 	emacs) install_emacs_lucid true;;

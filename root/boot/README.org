@@ -1,0 +1,45 @@
+* Partition Setup
+:PROPERTIES:
+:ID:       04179dea-0c5a-451a-be60-3d54ae3852f7
+:END:
+Not sure all these matter but:
+- My boot partition is labeled =boot= and has the =bls_boot= flag for systemd-boot (ea00 in gdisk) (refind doesn't need)
+- My boot partition's /filesystem/ is also labeled =boot= (refind uses fs not partition label! can check or set with ~e2label /boot~)
+- My efi partition is fat32, is labeled =SYSTEM=, and has the =boot= and =esp= flags (don't know if they are necessary for refind)
+
+* Fixing Broken Bootloader
+Windows likes to break the bootloader.
+
+First steps:
+- Disable fast startup in power settings (what the power button does)
+- Disable windows bootloader and partition in boot order
+
+If refind doesn't load after this (will just keep going back to boot options or bios), you'll need to reinstall it.
+
+- Launch Arch live usb
+- Get partition overview: =lsblk -o name,label,mountpoint,size=
+- Mount partitions under /mnt, example:
+ #+begin_src sh
+cryptsetup open /dev/disk/by-label/cryptlinux cryptlinux
+mount /dev/cryptlinux_group/root /mnt
+mount /dev/cryptlinux_group/var /mnt/var
+mount /dev/cryptlinux_group/home /mnt/home
+mount LABEL=boot /mnt/boot
+mount LABEL=SYSTEM /mnt/boot/efi
+ #+end_src
+
+- ~arch-chroot /mnt~
+- Cd to post-install directory
+- E.g. run ~./post-install fix~ (for refind) or ~./post-install systemd-boot~
+- ~exit~
+- ~umount -R /mnt~
+- ~reboot~
+
+* Troubleshooting
+If this doesn't work, check that the partition setup is as above, and Windows hasn't screwed up the EFI partition in some other way.
+
+I don't remember if some bootloaders require the EFI partition to be gpt instead of mbr but I've converted partitions in the past with gdisk (~gdisk /dev/sd<X>~ then =w= if no warnings; otherwise =q= to quit).
+
+You can use either parted or gdisk to change flags , e.g. ~parted /dev/sd<X> 1 set boot on~ (replace boot with esp to set esp flag). For partition type, ~gdisk /dev/sdb~ followed by =t 1 ea00 w= would make =/dev/sdb1= usable as the XBOOTLDR partition for systemd-boot (shows up =bls_boot= label in gparted).
+
+*One more thing*: Make sure you don't have anything under =/boot/efi= when the esp is unmounted.  I had refind configuration that was screwing things up.  Make sure the refind conguration is only on the esp and at =/boot/refind_linux.conf=.

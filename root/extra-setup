@@ -78,6 +78,7 @@ all_service_setup() {
 }
 
 # * rEFInd
+# SEE ./boot/README.org for bootloader troubleshooting steps
 refind_setup() {
 	if ! mountpoint -q /boot/efi; then
 		mount LABEL=SYSTEM /boot/efi
@@ -90,6 +91,16 @@ refind_setup() {
 		echo "ESP Partition must be mounted to run refind-install!"
 		return 1
 	fi
+}
+
+# * systemd-boot
+# SEE ./boot/README.org for bootloader troubleshooting steps
+systemd_boot_setup() {
+	if ! mountpoint -q /boot/efi; then
+		mount LABEL=SYSTEM /boot/efi
+	fi
+	# will already complain if esp not detected (so will refind)
+	bootctl --esp-path=/boot/efi --boot-path=/boot install
 }
 
 # * initramfs
