@@ -2090,7 +2090,13 @@ Obvious ones:
 ** Save Place
 #+begin_src emacs-lisp
 (noct-after-buffer
-  (save-place-mode))
+  (save-place-mode)
+  ;; save history after 10 seconds of idle time
+  ;; if not idle, save every 5 minutes
+  (noct-run-at-active-interval (* 5 60) 10
+    (noct-silently
+      (when save-place-mode
+        (save-place-kill-emacs-hook)))))
 #+end_src
 
 ** So Long
