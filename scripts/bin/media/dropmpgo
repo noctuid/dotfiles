@@ -16,7 +16,7 @@ if [[ -z $1 ]]; then
 	# shellcheck disable=SC2016
 	dropdown -n mpgosel \
 			 --post-create-hook "sed -i '1d' $queue && unmap \$wid" \
-			 kitty mpgoin "$path" "$mpgoargs"
+			 wezterm start --always-new-process -- mpgoin "$path" "$mpgoargs"
 else
-	dropdown -n mpgosel kitty mpgosel "$@"
+	dropdown -n mpgosel wezterm start --always-new-process -- mpgosel "$@"
 fi
