@@ -7906,11 +7906,8 @@ Don't immediately jump to the symbol at the point."
 NOTE: Have had issues where I've accidentally added a folder (e.g. my home folder), causing freezing and other issues.  Use ~lsp-workspace-folders-remove~ to fix issues like this.
 #+begin_src emacs-lisp
 (use-package lsp-mode
-  ;; :init
   ;; https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization
-  ;; doesn't work for pyright?
-  ;; https://github.com/emacs-lsp/lsp-pyright/issues/75
-  ;; (gsetq lsp-use-plists t)
+  ;; set in ./early-init.el
   :config
   (gsetq
    ;; https://github.com/emacs-lsp/lsp-mode#performance
@@ -7919,21 +7916,6 @@ NOTE: Have had issues where I've accidentally added a folder (e.g. my home folde
    lsp-headerline-breadcrumb-enable nil)
 
   (noct-handle-popup-other-window (rx "*lsp-help*"))
-
-  ;; (satch-shove lsp-file-watch-ignored-directories
-  ;;              '("[/\\\\]\\__pycache__\\'"
-  ;;                "[/\\\\]\\.mypy_cache\\'"
-  ;;                "[/\\\\]\\.venv\\'"))
-
-  (general-pushnew
-   "[/\\\\]\\__pycache__\\'"
-   lsp-file-watch-ignored-directories)
-  (general-pushnew
-   "[/\\\\]\\.mypy_cache\\'"
-   lsp-file-watch-ignored-directories)
-  (general-pushnew
-   "[/\\\\]\\.venv\\'"
-   lsp-file-watch-ignored-directories)
 
   (general-def 'normal lsp-mode-map
     "N" #'lsp-describe-thing-at-point
@@ -7986,6 +7968,73 @@ NOTE: Have had issues where I've accidentally added a folder (e.g. my home folde
       (funcall fn checker property)))
 
 (advice-add 'flycheck-checker-get :around #'yyoncho-flycheck-checker-get)
+#+end_src
+
+*** LSP Booster
+ #+begin_src emacs-lisp
+(use-package emacs-lsp-booster
+  :when (executable-find "cargo")
+  ;; no elisp code but using straight to clone; hack
+  :straight (emacs-lsp-booster :host github :repo "blahgeek/emacs-lsp-booster")
+  :init
+  (let* ((booster-dir (straight--repos-dir "emacs-lsp-booster"))
+         (booster-release-dir (file-name-concat booster-dir "target/release/"))
+         (booster (file-name-concat booster-release-dir "emacs-lsp-booster"))
+         (booster-dest "~/.local/bin/emacs-lsp-booster"))
+    ;; modified from
+    ;; https://github.com/Gavinok/emacs.d/blob/1650fda3bda259579563adf6b7252b45bb605d82/init.el#L2276
+    ;; pushing to exec-path will not work (won't be in exec-path for lsp); move
+    ;; to something already in path instead
+    (unless (file-exists-p booster-dest)
+      (let ((default-directory booster-dir))
+        (message "Building emacs-lsp-booster")
+        (make-process
+         :name "Building emacs-lsp-booster"
+         :buffer "*EMACS-LSP-BOOSTER-BUILD*"
+         :command (list "cargo" "build" "--release")
+         :sentinel
+         `(lambda (process event)
+            ;; TODO switch to using `process-status' instead of `event'
+            (with-current-buffer (process-buffer process)
+              (ansi-color-apply-on-region (point-min) (point-max)))
+            (pcase event
+              ("finished\n"
+               (message "Installed emacs-lsp-booster")
+               ;; allow existing (in case multiple emacs instances start at once)
+               (copy-file ,booster ,booster-dest t))
+              ((or "open from host-name\n" "open\n" "run\n"))
+              (_ (error "Unhandled case %s for event from Building emacs-lsp-booster"))))))))
+
+  (defun lsp-booster--advice-json-parse (old-fn &rest args)
+    "Try to parse bytecode instead of json."
+    (or
+     (when (equal (following-char) ?#)
+       (let ((bytecode (read (current-buffer))))
+         (when (byte-code-function-p bytecode)
+           (funcall bytecode))))
+     (apply old-fn args)))
+  (advice-add (if (progn (require 'json)
+                         (fboundp 'json-parse-buffer))
+                  'json-parse-buffer
+                'json-read)
+              :around
+              #'lsp-booster--advice-json-parse)
+
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+    "Prepend emacs-lsp-booster command to lsp CMD."
+    (let ((orig-result (funcall old-fn cmd test?)))
+      (if (and (not test?) ;; for check lsp-server-present?
+               ;; see lsp-resolve-final-command, it would add extra shell wrapper
+               (not (file-remote-p default-directory))
+               lsp-use-plists
+               (not (functionp 'json-rpc-connection)) ;; native json-rpc
+               (executable-find "emacs-lsp-booster"))
+          (progn
+            (message "Using emacs-lsp-booster for %s!" orig-result)
+            (cons "emacs-lsp-booster" orig-result))
+        orig-result)))
+  (advice-add 'lsp-resolve-final-command
+              :around #'lsp-booster--advice-final-command))
 #+end_src
 
 *** Tree Sitter

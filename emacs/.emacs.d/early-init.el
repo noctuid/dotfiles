@@ -101,3 +101,6 @@ If no fonts have been found, return nil."
 (unless after-init-time
   ;; prevent flash of unstyled modeline at startup
   (setq-default mode-line-format nil))
+
+;; * Early LSP Configuration
+(setenv "LSP_USE_PLISTS" "true")
