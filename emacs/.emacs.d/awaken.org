@@ -7356,6 +7356,12 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 (use-package yaml-mode)
 #+end_src
 
+** TOML Mode
+ #+begin_src emacs-lisp
+(use-package toml-ts-mode
+  :gfhook #'lsp)
+ #+end_src
+
 * Programming
 ** General and Prog Mode
 *** Apheleia
