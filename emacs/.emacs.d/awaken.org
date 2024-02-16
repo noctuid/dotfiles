@@ -7252,6 +7252,12 @@ Matching is done case-insensitively."
             (--all? (string-match it heading) regexps))))
 #+end_src
 
+**** Org Reveal
+#+begin_src emacs-lisp
+(use-package org-reveal
+  :init (require 'ox-reveal))
+#+end_src
+
 ** Pentadactyl
 #+begin_src emacs-lisp
 (use-package dactyl-mode
