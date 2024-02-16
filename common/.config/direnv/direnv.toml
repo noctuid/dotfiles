@@ -1,0 +1,2 @@
+[global]
+load_dotenv = true
