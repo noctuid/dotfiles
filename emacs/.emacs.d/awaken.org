@@ -10373,6 +10373,25 @@ Liked songs is not a playlist.
     "gr" #'pass-update-buffer))
 #+end_src
 
+** Proced
+#+begin_src emacs-lisp
+(defun noct-proced-setup ()
+  (visual-line-mode -1)
+  ;; needs to be set after above
+  (setq truncate-lines t)
+  ;; not global; has to be run in buffer
+  (proced-toggle-auto-update t))
+
+(use-package proced
+  ;; [h]top replacement
+  ;; have bound globally to modifier + p which makes more sense
+  :general (general-s "h" #'proced)
+  :gfhook #'noct-proced-setup
+  :config
+  (gsetq proced-auto-update-interval 2)
+  (evil-collection-init 'proced))
+#+end_src
+
 ** Shell
 Shell has some of the advantages of eshell like ~completing-read~ integration in ~term-line-mode~, but it supports zsh and other shells.  Plugins like autosuggestions won't work in line mode (and at least with this basic configuration autosuggestions don't seem to work in char-mode either for fish or zsh).  Obviously, it can't execute emacs lisp.  It can run it on a remote host, but the shell has to be available there.
 
