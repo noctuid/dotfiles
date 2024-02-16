@@ -4007,7 +4007,8 @@ See [[https://github.com/rnkn/olivetti/issues/12][here]].
   :config
   (general-def '(insert normal)
     "C-l" #'winner-undo
-    "C-S-l" #'winner-redo))
+    "C-S-l" #'winner-redo
+    "C-M-L" #'winner-redo))
 #+end_src
 
 ** Auto Balance Windows
