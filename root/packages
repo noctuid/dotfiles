@@ -190,8 +190,6 @@ pv
 # for coreutils commands (e.g. cp, dd)
 progress
 
-fasd
-
 # random/fun
 cowsay
 fortune-mod

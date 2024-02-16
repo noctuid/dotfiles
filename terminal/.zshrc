@@ -218,6 +218,11 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 		  atload"alias rt='cd-gitroot'"
 	zinit light "mollifier/cd-gitroot"
 
+	zinit ice wait lucid
+	# fasd is archived and unavailable for brew
+	# https://github.com/Homebrew/homebrew-core/pull/112791
+	zinit light "whjvenyl/fasd"
+
 	# ** Interesting but not useful for me at the moment
 	# Tarrasch/zsh-autoenv
 	# https://github.com/zpm-zsh/autoenv
