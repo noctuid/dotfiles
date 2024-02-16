@@ -7383,17 +7383,26 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
   ;; this does not load apheleia until file save
   ;; (apheleia-global-mode)
   :config
-  (defun compro-pet-black ()
-    (if-let ((root (when (fboundp 'pet-virtualenv-root)
-                     (pet-virtualenv-root)))
-             (executable (concat root "bin/black"))
-             (exists (file-executable-p executable)))
-        `(,executable "-")
-      "cat"))
-  (setf (alist-get 'black apheleia-formatters) '((compro-pet-black)))
-  (general-add-hook 'python-base-mode-hook
-                    (noct-defun noct-set-formatter-to-black ()
-                      (setq-local apheleia-formatter 'black))))
+  (defun noct-pet-ruff-or-black ()
+    (let* ((root (when (fboundp 'pet-virtualenv-root)
+                   ;; not using `pet-executable-find' because want .venv version
+                   ;; over pre-commit venv version
+                   (pet-virtualenv-root)))
+           (local-ruff (when root (file-name-concat root "bin/ruff")))
+           (local-black (when root (file-name-concat root "bin/black"))))
+      (cond ((and local-ruff (file-executable-p local-ruff))
+             (list local-ruff "format" "--silent" "-"))
+            ((and local-black (file-executable-p local-black))
+             (list local-black "-"))
+            ((executable-find "ruff")
+             (list "ruff" "format" "--silent" "-"))
+            ((executable-find "black")
+             (list "black" "-"))
+            (t
+             (list "cat")))))
+  (setf (alist-get 'noct-ruff-or-black apheleia-formatters)
+        '((noct-pet-ruff-or-black)))
+  (general-pushnew '(python-ts-mode . noct-ruff-or-black) apheleia-mode-alist))
 #+end_src
 
 *** Docker
@@ -8923,10 +8932,10 @@ TODO:
 (noct-defun noct-lsp-pyright ()
   "Require lsp-pyright and run `lsp'."
   (require 'lsp-pyright)
-  (setq yyoncho-flycheck-local-cache
-        '((lsp . ((next-checkers
-                   .
-                   (python-pylint python-mypy))))))
+  ;; (setq yyoncho-flycheck-local-cache
+  ;;       '((lsp . ((next-checkers
+  ;;                  .
+  ;;                  (python-pylint python-mypy))))))
   (lsp))
 
 (use-package python
@@ -9203,7 +9212,25 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
 
 ;; prefers .venv over pyenv from .python-version unlike auto-virtualenv
 (use-package pet
-  :gfhook ('python-base-mode-hook nil -10))
+  :gfhook
+  ('python-base-mode-hook
+   ;; only set needed variables
+   (noct-defun noct-pet-setup ()
+     (gsetq-local python-shell-interpreter (pet-executable-find "python"))
+     (gsetq-local dap-python-executable python-shell-interpreter)
+     (gsetq-local python-shell-virtualenv-root (pet-virtualenv-root))
+
+     (gsetq-local lsp-pyright-python-executable-cmd python-shell-interpreter)
+     (gsetq-local lsp-pyright-venv-path python-shell-virtualenv-root)
+
+     (gsetq-local lsp-ruff-lsp-python-path python-shell-interpreter)
+     ;; prefer ruff from project virtualenv over pre-commit virtualenv
+     (let ((venv-ruff (file-name-concat python-shell-virtualenv-root "bin/ruff")))
+       (gsetq-local lsp-ruff-lsp-ruff-path
+                    (vector (if (file-executable-p venv-ruff)
+                                venv-ruff
+                              (or (pet-executable-find "ruff") "ruff"))))))
+   -10))
 #+end_src
 
 ** R (ESS)
