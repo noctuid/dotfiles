@@ -80,17 +80,18 @@ Only source blocks that meet these requirements will be tangled:
   "Tangle org init FILE if it has not already been tangled.
 If LOAD is non-nil, load it as well.  If RETANGLE is non-nil,
 tangle FILE even if it is not newer than the current tangled
-file. If  COMPILE is non-nil, and the uncompiled file is newer,
-compile it.  If DEMOTE-ERRORS is non-nil, wrap each source block
-with `with-demoted-errors'.
+file.
+
+If COMPILE is non-nil, and the uncompiled file is newer, compile it.  If
+DEMOTE-ERRORS is non-nil, wrap each source block with `with-demoted-errors'.
 
 If both LOAD and COMPILE are specified, load the compiled version
-of FILE if it is newer than the tangled version. Otherwise load
+of FILE if it is newer than the tangled version.  Otherwise load
 the tangled version (since this is much faster than compiling and
 then loading).
 
-Only compile if COMPILE is non-nil and LOAD is nil. In this case,
-load the tangled init FILE first. Compiling after loading ensures
+Only compile if COMPILE is non-nil and LOAD is nil.  In this case,
+load the tangled init FILE first.  Compiling after loading ensures
 that all required functionality is available (have to add
 everything under ~/.emacs.d/straight/build to `load-path' in an
 `eval-when-compile', run `straight-use-package-mode' so :straight
@@ -125,11 +126,18 @@ loaded)."
                 ;; using `not' and this order because of the behavior of
                 ;; `file-newer-than-file-p' when a file does not exist
                 (not (file-newer-than-file-p init-compiled init-tangled)))
+           ;; loading not to load but so that have everything need to compile
+           ;; (e.g. package manager config)
            (load-file init-tangled)
-           (byte-compile-file init-tangled)))))
+           (byte-compile-file init-tangled)
+           ;; immediately native compile; native compilation doesn't seem
+           ;; to speed up
+           ;; (when (native-comp-available-p)
+           ;;   (native-compile init-compiled))
+           ))))
 
 (defun noct-tangle-awaken (&optional load compile retangle demote-errors)
-  "Tangle awaken.org.
+  "Tangle literate Emacs configuration.
 LOAD, COMPILE, RETANGLE, and DEMOTE-ERRORS are passed to
 `noct-tangle-org-init'."
   (interactive)
@@ -139,6 +147,12 @@ LOAD, COMPILE, RETANGLE, and DEMOTE-ERRORS are passed to
   (when (file-exists-p noct-unclean-init-file)
     (noct-tangle-org-init noct-unclean-init-file load compile retangle
                           demote-errors)))
+
+(defun noct-compile-awaken ()
+  "Tangle and compile literate Emacs configuration.
+Only tangle/compile when out-of-date."
+  (interactive)
+  (noct-tangle-awaken nil t))
 
 (provide 'noct-util)
 ;;; noct-util.el ends here

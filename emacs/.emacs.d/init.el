@@ -122,7 +122,7 @@ Only tangle when the current Emacs instance is the newest one."
                                        load-path)
                                  (require 'noct-util)
                                  ;; with current config compiling does save some time: ~0.1s
-                                 (noct-tangle-awaken nil t))
+                                 (noct-compile-awaken))
                              ((error debug)
                               (delete-file noct-tangle-lock-file))))
                          (lambda (_)
@@ -194,7 +194,7 @@ Start Emacs with --record-requires to populate. This still needs work.")
       inhibit-message t)
 
 (defconst noct-load-compiled
-  (not (noct-command-line-flag-specified-p "--no-compile"))
+  (not (noct-command-line-flag-specified-p "--ignore-compiled"))
   "Whether to load compiled init files if they exist and are newer.")
 
 (defvar noct-with-demoted-errors nil)
@@ -217,6 +217,7 @@ Start Emacs with --record-requires to populate. This still needs work.")
          (when (file-exists-p unclean-stable-file)
            (load-file unclean-stable-file))))
       ((noct-command-line-flag-specified-p "--profile-dotemacs")
+       (noct-tangle-awaken nil nil noct-retangle)
        (load-file (expand-file-name
                    "straight/build/profile-dotemacs/profile-dotemacs.elc"
                    user-emacs-directory))
@@ -229,6 +230,8 @@ Start Emacs with --record-requires to populate. This still needs work.")
                                                      user-emacs-directory)
              profile-dotemacs-low-percentage 1)
        (profile-dotemacs))
+      ((noct-command-line-flag-specified-p "--check-compile")
+       (noct-compile-awaken))
       (t
        (noct-tangle-awaken t noct-load-compiled noct-retangle)))
 
@@ -259,3 +262,7 @@ Start Emacs with --record-requires to populate. This still needs work.")
            (not noct-keep-benchmarking))
   (benchmark-init/deactivate)
   (benchmark-init/show-durations-tree))
+
+;; * Check for Native Compile
+(unless (native-comp-available-p)
+  (warn "Native compilation not available"))

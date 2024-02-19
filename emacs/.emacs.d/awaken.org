@@ -727,6 +727,8 @@ Principles:
 
 (eval-and-compile
   (defalias 'gsetq #'general-setq)
+  ;; TODO replace with `satch-opt'
+  (defalias 'opt #'general-setq)
   (defalias 'gsetq-local #'general-setq-local)
   (defalias 'gsetq-default #'general-setq-default))
 
@@ -769,24 +771,59 @@ Principles:
 #+begin_src emacs-lisp
 (use-package setup
   :config
+  ;; this is not :straight from the wiki, which is broken at the time of writing
   (setup-define :straight
-    (lambda (recipe)
-      `(unless (straight-use-package ',recipe)
-         ,(setup-quit)))
+    (lambda (&rest recipe)
+      `(condition-case err
+           (straight-use-package ',recipe)
+         (error
+          (display-warning
+           'noct-error
+           (format "Straight package installation failed: %S" err))
+          ;; don't run any of the setup.el block when straight fails
+          ,(setup-quit))))
     :documentation
     "Install RECIPE with `straight-use-package'.
 This macro can be used as HEAD, and will replace itself with the
-first RECIPE's package."
+RECIPE's package."
+    :repeatable nil
+    :shorthand #'cadr)
+
+  (setup-define :config
+    (lambda (&rest body)
+      `(once-with-eval-after-load ',(setup-get 'feature) ,@body))
+    :documentation
+    "Evaluate BODY once (with once.el), when current feature loads."
+    :debug '(body)
+	:indent 0)
+
+  (setup-define :blackout
+    (lambda (&optional mode replacement)
+      `(blackout ',(if (memq mode '(nil t))
+                       (setup-get 'feature)
+                     mode)
+                 ,replacement))
+    :documentation "Blackout MODE or the current feature with REPLACEMENT."
+    :repeatable nil
+	:indent 0)
+
+  ;; https://www.emacswiki.org/emacs/SetupEl#h5o-7
+  (setup-define :autoload
+    (lambda (func)
+      (let ((fn (if (memq (car-safe func) '(quote function))
+                    (cadr func)
+                  func)))
+        `(unless (fboundp (quote ,fn))
+           (autoload (function ,fn) ,(symbol-name (setup-get 'feature)) nil t))))
+    :documentation "Autoload FUNC if not already bound."
     :repeatable t
-    :shorthand (lambda (sexp)
-                 (let ((recipe (cadr sexp)))
-                   (if (consp recipe)
-                       (car recipe)
-                     recipe))))
+    :signature '(FUNC ...))
 
   (defmacro noct-use (arg1 &rest args)
     (declare (indent 1))
-    `(setup (:straight ,arg1)
+    `(setup ,(if (listp arg1)
+                 arg1
+               `(:straight ,arg1))
        ,@args))
 
   ;; https://www.emacswiki.org/emacs/SetupEl#h5o-4
@@ -3317,30 +3354,6 @@ file-finding commands)."
   :config
   ;; use prescient sorting for company
   (company-prescient-mode))
-
-(use-package ivy-prescient
-  :after ivy
-  :demand t
-  :config
-  ;; use prescient only for sorting
-  (gsetq ivy-prescient-enable-filtering nil
-         ivy-prescient-sort-commands
-         ;; add `counsel-grep', `counsel-yank-pop', etc.
-         '(:not
-           swiper swiper-isearch counsel-yank-pop
-           counsel-grep counsel-outline worf-goto counsel-org-goto
-           counsel-semantic-or-imenu counsel-rg
-           consult-line consult-imenu consult-yank-from-kill-ring
-           consult-ripgrep consult-org-heading consult-compile-error
-           consult-flycheck affe-grep))
-  (ivy-prescient-mode))
-
-(use-package vertico-prescient
-  :after vertico
-  :demand t
-  :config
-  (gsetq vertico-prescient-enable-filtering nil)
-  (vertico-prescient-mode))
 #+end_src
 
 ** Restricto
@@ -3353,73 +3366,87 @@ file-finding commands)."
 ** Vertico
 I've switched to vertico due to some weird display issues with selectrum. Vertico is very simple and just works, and selectrum is now deprecated in favor of it.
 #+begin_src emacs-lisp
-(use-package vertico
-  ;; specify to get extensions
-  :straight (vertico :files (:defaults "extensions/*.el"))
-  :init
-  ;; run vertico on first completing-read
-  (autoload 'vertico--advice "vertico")
+(straight-override-recipe
+ '(vertico
+   ;; specify to get extensions
+   :files (:defaults "extensions/*.el")))
+
+;; TODO because vertico-prescient relies on vertico?
+;; - if vertico-prescient comes before vertico recipe override, adds 7-10
+;;   seconds to my init time
+;; - will get warning for two recipes if don't use straight-override-recipes
+;;   for vertico (doesn't happen with corfu)
+;; I assume this won't be an issue when I switch to elpaca since it processes at
+;; the end
+
+(noct-use vertico-prescient
+  (:require-once "vertico")
+  (:config
+    (opt vertico-prescient-enable-filtering nil)
+    (vertico-prescient-mode)))
+
+(noct-use vertico
+  (:autoload 'vertico--advice)
   (define-minor-mode vertico-mode
     "VERTical Interactive COmpletion."
     :global t :group 'vertico
-    (if vertico-mode
-        (progn
-          (advice-add #'completing-read-default :around #'vertico--advice)
-          (advice-add #'completing-read-multiple :around #'vertico--advice))
-      (advice-remove #'completing-read-default #'vertico--advice)
-      (advice-remove #'completing-read-multiple #'vertico--advice)))
+    (dolist (fun '(completing-read-default completing-read-multiple))
+      (if vertico-mode
+          (advice-add fun :around #'vertico--advice)
+        (advice-remove fun #'vertico--advice))))
   (vertico-mode)
-  :config
-  (gsetq vertico-count 10
+  (:config
+    (opt vertico-count 10
          vertico-scroll-margin 0
          vertico-cycle t)
 
-  (general-def 'normal "?" #'vertico-repeat)
+    (general-def 'normal "?" #'vertico-repeat)
 
-  (general-add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
-  (general-s
-    "." #'vertico-repeat-last
-    ;; select previous session to repeat
-    "," #'vertico-repeat-select)
+    (general-add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+    (general-s
+      "." #'vertico-repeat-last
+      ;; select previous session to repeat
+      "," #'vertico-repeat-select)
 
-  ;; maybe mess with more but pretty broken; minibuffer is best
-  ;; (gsetq vertico-buffer-display-action
-  ;;        `(display-buffer-in-side-window
-  ;;          (window-height . ,(+ 3 vertico-count))
-  ;;          (side . top)))
+    ;; maybe mess with more but pretty broken; minibuffer is best
+    ;; (opt vertico-buffer-display-action
+    ;;        `(display-buffer-in-side-window
+    ;;          (window-height . ,(+ 3 vertico-count))
+    ;;          (side . top)))
 
-  (vertico-indexed-mode)
-  ;; make numbers look the same as selectrum
-  (set-face-attribute 'vertico-indexed nil
-                      :height 1.0
-                      :inherit 'minibuffer-prompt)
+    (vertico-indexed-mode)
+    ;; make numbers look the same as selectrum
+    (set-face-attribute 'vertico-indexed nil
+                        :height 1.0
+                        :inherit 'minibuffer-prompt)
 
-  (vertico-multiform-mode)
+    (vertico-multiform-mode)
 
-  (defmacro noct-generate-vertico-select-index (index)
-    "Return a named function to run `vertico-directory-enter' for INDEX."
-    `(noct-defun ,(intern (format "noct-vertico-enter %s" index)) ()
-       ,(format "Call `vertico-directory-enter' for index %s." index)
-       (interactive)
-       (let ((vertico--index ,index))
-         (vertico-directory-enter))))
+    (defmacro noct-generate-vertico-select-index (index)
+      "Return a named function to run `vertico-directory-enter' for INDEX."
+      `(noct-defun ,(intern (format "noct-vertico-enter %s" index)) ()
+         ,(format "Call `vertico-directory-enter' for index %s." index)
+         (interactive)
+         (let ((vertico--index ,index))
+           (vertico-directory-enter))))
 
-  ;; start indexing at 1
-  (gsetq vertico-indexed-start 1)
+    ;; start indexing at 1
+    (opt vertico-indexed-start 1)
 
-  (general-def vertico-map
-    "<prior>" #'vertico-scroll-down
-    "<next>" #'vertico-scroll-up
-    "M-a" (noct-generate-vertico-select-index 0)
-    "M-r" (noct-generate-vertico-select-index 1)
-    "M-s" (noct-generate-vertico-select-index 2)
-    "M-t" (noct-generate-vertico-select-index 3)
-    "M-d" (noct-generate-vertico-select-index 4)
-    "M-h" (noct-generate-vertico-select-index 5)
-    "M-n" (noct-generate-vertico-select-index 6)
-    "M-e" (noct-generate-vertico-select-index 7)
-    "M-i" (noct-generate-vertico-select-index 8)
-    "M-o" (noct-generate-vertico-select-index 9)))
+    (general-def vertico-map
+      "<prior>" #'vertico-scroll-down
+      "<next>" #'vertico-scroll-up
+      "C-n" #'vertico-next-group
+      "M-a" (noct-generate-vertico-select-index 0)
+      "M-r" (noct-generate-vertico-select-index 1)
+      "M-s" (noct-generate-vertico-select-index 2)
+      "M-t" (noct-generate-vertico-select-index 3)
+      "M-d" (noct-generate-vertico-select-index 4)
+      "M-h" (noct-generate-vertico-select-index 5)
+      "M-n" (noct-generate-vertico-select-index 6)
+      "M-e" (noct-generate-vertico-select-index 7)
+      "M-i" (noct-generate-vertico-select-index 8)
+      "M-o" (noct-generate-vertico-select-index 9))))
 #+end_src
 
 ** Consult
@@ -4265,8 +4292,8 @@ Useful if constantly switching between only a few files in a project. I don't no
 Alternatively, there is the builtin ~project-find-file~, [[https://github.com/technomancy/find-file-in-project][find-file-in-project]], and [[https://github.com/h/find-file-in-repository][find-file-in-repository]]. Projectile has a lot of other useful commands though.
 
 #+begin_src emacs-lisp
-(use-package projectile
-  :general
+(noct-use projectile
+  (:blackout)
   (general-spc
     "p" #'projectile-find-file
     "P" #'projectile-find-file-in-known-projects
@@ -4279,7 +4306,10 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
   (general-t
     "S" #'projectile-replace
     "T" #'projectile-test-project)
-  :init
+
+  ;; I don't use the mode line; no reason to calculate
+  (opt projectile-dynamic-mode-line nil)
+
   ;; this allows using `xref-find-references' without typing directory
   (defun noct-projectile-try (dir)
     "Function for `project-find-functions' using projectile."
@@ -4287,11 +4317,11 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
       (when-let ((root (projectile-project-root dir)))
         (cons 'transient root))))
 
-  (general-with 'project
+  (once-with 'project
     (general-pushnew #'noct-projectile-try project-find-functions))
-  :blackout t
-  :config
-  (gsetq projectile-enable-caching t
+
+  (:config
+    (opt projectile-enable-caching t
          projectile-project-test-cmd "make test"
          projectile-completion-system 'default
          projectile-project-search-path '("~/src")
@@ -4300,27 +4330,29 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
          ;; project for me
          projectile-project-root-files nil)
 
-  (defun noct-switch-to-project-root ()
-    (interactive)
-    (let ((projectile-switch-project-action 'projectile-dired))
-      (call-interactively #'projectile-switch-project)))
+    (defun noct-switch-to-project-root ()
+      (interactive)
+      (let ((projectile-switch-project-action 'projectile-dired))
+        (call-interactively #'projectile-switch-project)))
 
-  (defun noct-projectile-switch-and-vc ()
-    "Switch project and run `projectile-vc'"
-    (interactive)
-    (let ((projectile-switch-project-action 'projectile-vc))
-      (call-interactively #'projectile-switch-project)))
+    (defun noct-projectile-switch-and-vc ()
+      "Switch project and run `projectile-vc'"
+      (interactive)
+      (let ((projectile-switch-project-action 'projectile-vc))
+        (call-interactively #'projectile-switch-project)))
 
-  (projectile-mode)
+    (projectile-mode)
 
-  (projectile-cleanup-known-projects)
+    (projectile-cleanup-known-projects)
 
-  (projectile-register-project-type
-   'emacs '("Cask")
-   :compile "make compile"
-   :test "make test"
-   :test-prefix "test-"
-   :test-suffix ".el"))
+    (projectile-register-project-type
+     'emacs '("Cask")
+     :compile "make compile"
+     :test "make test"
+     :test-prefix "test-"
+     :test-suffix ".el")))
+
+
 #+end_src
 
 * UI/Appearance/Visual/Formatting
@@ -4742,11 +4774,13 @@ Smartparens' version is unfortunately too slow.
 
 ;; missing a lot of faces (like dired)
 (use-package rose-pine-emacs
+  :no-require t
   :straight (rose-pine-emacs
              :host github
              :repo "thongpv87/rose-pine-emacs"))
 
-(use-package catppuccin-theme)
+;; do I understand why straight is building nord in catppuccin directory? no
+;; (use-package catppuccin-theme)
 #+end_src
 
 *** Pywal
@@ -7109,27 +7143,21 @@ Show invisible things when point is on them in org (e.g. links).  I have currenl
 
 **** Ox Hugo
 #+begin_src emacs-lisp
-(use-package ox-hugo
-  :init
+(noct-use ox-hugo
   (general-add-advice 'after-find-file
                       :before
                       (noct-defun noct-maybe-enable-org-hugo-auto-export
                           (&rest _)
                         (when (noct-blog-dir-p buffer-file-name)
                           (org-hugo-auto-export-mode))))
-  (general-with 'ox
-    (require 'ox-hugo)))
+  (:require-once "ox" 'ox-hugo))
+
 #+end_src
 
 **** Org Cv
 #+begin_src emacs-lisp
-(use-package ox-moderncv
-  :straight (ox-moderncv :host gitlab :repo "Titan-C/org-cv")
-  :init
-  (general-with 'ox
-    (require 'ox-moderncv)
-    (require 'ox-altacv)
-    (require 'ox-awesomecv)))
+(noct-use (:straight ox-moderncv :host gitlab :repo "Titan-C/org-cv")
+  (:require-once "ox" 'ox-moderncv 'ox-altacv 'ox-awesomcv))
 #+end_src
 
 **** Orglink
@@ -7254,8 +7282,8 @@ Matching is done case-insensitively."
 
 **** Org Reveal
 #+begin_src emacs-lisp
-(use-package org-reveal
-  :init (require 'ox-reveal))
+(noct-use org-reveal
+  (:require-once "ox" 'ox-reveal))
 #+end_src
 
 ** Pentadactyl
@@ -7993,11 +8021,9 @@ NOTE: Have had issues where I've accidentally added a folder (e.g. my home folde
 
 *** LSP Booster
  #+begin_src emacs-lisp
-(use-package emacs-lsp-booster
-  :when (executable-find "cargo")
-  ;; no elisp code but using straight to clone; hack
-  :straight (emacs-lsp-booster :host github :repo "blahgeek/emacs-lsp-booster")
-  :init
+(noct-use (:and (executable-find "cargo")
+                ;; no elisp code but using straight to clone; hack
+                (:straight emacs-lsp-booster :host github :repo "blahgeek/emacs-lsp-booster"))
   (let* ((booster-dir (straight--repos-dir "emacs-lsp-booster"))
          (booster-release-dir (file-name-concat booster-dir "target/release/"))
          (booster (file-name-concat booster-release-dir "emacs-lsp-booster"))
@@ -8848,6 +8874,7 @@ TODO
 *** GHC
 #+begin_src emacs-lisp
 (use-package ghc
+  :disabled t
   :ghook ('haskell-mode-hook #'ghc-init)
   :config
   (general-m haskell-mode-map
@@ -8859,6 +8886,7 @@ TODO
 *** Company GHC
 #+begin_src emacs-lisp
 (use-package company-ghc
+  :disabled t
   :after (company haskell-mode)
   :config
   (general-pushnew '(company-ghc :with company-yasnippet) company-backends))
