@@ -7170,8 +7170,8 @@ Show invisible things when point is on them in org (e.g. links).  I have currenl
 
 **** Org Cv
 #+begin_src emacs-lisp
-(noct-use (:straight ox-moderncv :host gitlab :repo "Titan-C/org-cv")
-  (:require-once "ox" 'ox-moderncv 'ox-altacv 'ox-awesomcv))
+(noct-use (:straight org-cv :host gitlab :repo "Titan-C/org-cv")
+  (:require-once "ox" 'ox-moderncv 'ox-altacv 'ox-awesomecv))
 #+end_src
 
 **** Orglink
