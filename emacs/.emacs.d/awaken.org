@@ -819,6 +819,20 @@ RECIPE's package."
     :repeatable t
     :signature '(FUNC ...))
 
+  ;; alternative version of :file-match that supports specifying mode
+  (setup-define :mode
+    (lambda (pat &optional mode)
+      (let ((mode (or mode (setup-get 'mode))))
+        `(cl-pushnew (cons ,pat ',mode) auto-mode-alist)))
+    :repeatable nil)
+
+  ;; TODO use satch-add-hook
+  (setup-define :hooks
+    (lambda (hooks &optional funcs &rest args)
+      (let ((funcs (or funcs `#',(setup-get 'func))))
+        `(general-add-hook ,hooks ,funcs ,@args)))
+    :repeatable nil)
+
   (defmacro noct-use (arg1 &rest args)
     (declare (indent 1))
     `(setup ,(if (listp arg1)
@@ -7574,14 +7588,15 @@ If it doesn't have an extension, try to guess one."
 *** Envrc (Direnv Integration)
 Envrc has a clear advantage over direnv.el in that it sets environment variables buffer-locally.  For nix, I am just using [[https://github.com/nix-community/nix-direnv][nix-direnv]] for persistence.  If performance ever becomes an issue, I will try [[https://github.com/nix-community/lorri][lorri]] (which uses a daemon), but for now it is fine.
  #+begin_src emacs-lisp
-(use-package envrc
-  :when (executable-find "direnv")
-  :ghook ('on-first-file-hook #'envrc-global-mode)
-  :config
-  ;; https://github.com/doomemacs/doomemacs/blob/master/modules/tools/direnv/config.el
-  ;; Ensure babel's execution environment matches the host buffer's.
-  (advice-add #'org-babel-execute-src-block
-              :around #'envrc-propagate-environment))
+(noct-use (:and (executable-find "direnv")
+                (:straight envrc))
+  (:hooks 'on-first-file-hook #'envrc-global-mode)
+  (:mode (rx ".env" string-end) envrc-file-mode)
+  (:config
+    ;; https://github.com/doomemacs/doomemacs/blob/master/modules/tools/direnv/config.el
+    ;; Ensure babel's execution environment matches the host buffer's.
+    (general-add-advice 'org-babel-execute-src-block
+                        :around #'envrc-propagate-environment)))
  #+end_src
 
 *** Prog Mode Setup
