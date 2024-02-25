@@ -833,6 +833,15 @@ RECIPE's package."
         `(general-add-hook ,hooks ,funcs ,@args)))
     :repeatable nil)
 
+  (setup-define :fhooks
+    (lambda (arg1 &optional arg2 &rest args)
+      (let ((hooks (if arg2
+                       arg1
+                     `',(setup-get 'hook)))
+            (funcs (or arg2 arg1)))
+        `(general-add-hook ,hooks ,funcs ,@args)))
+    :repeatable nil)
+
   (defmacro noct-use (arg1 &rest args)
     (declare (indent 1))
     `(setup ,(if (listp arg1)
@@ -10152,102 +10161,122 @@ Dirvish replaces multiple packages:
 - Can replace dired-k, dired-git-info, and diff-hl-dired-mode (though my experience with diff-hl was much better than dired-k)
 
 #+begin_src emacs-lisp
-(use-package dirvish
-  :general
+(noct-use dirvish
   (general-s "r" #'dirvish)
-  :gfhook
-  (nil (noct-disable display-line-numbers-mode))
+  (:fhooks (noct-disable display-line-numbers-mode))
   ;; truncate long file names instead of wrapping
-  ('dirvish-find-entry-hook
-   (lambda (&rest _) (setq-local truncate-lines t)))
-  ('dirvish-preview-setup-hook (noct-defun noct-dirvish-preview-setup ()
-                                 (display-line-numbers-mode -1)
-                                 (setq-local mode-line-format nil
-                                             truncate-lines t)))
-  :init
-  (general-after 'dired
-    (require 'dirvish))
-  :config
-  ;; (gsetq dirvish-bookmarks-alist)
+  (:fhooks 'dirvish-find-entry-hook
+           (lambda (&rest _) (gsetq-local truncate-lines t)))
+  (:fhooks 'dirvish-preview-setup-hook (noct-defun noct-dirvish-preview-setup ()
+                                         (display-line-numbers-mode -1)
+                                         (gsetq-local mode-line-format nil
+                                                      truncate-lines t)))
+  (:require-once 'dired)
+  (:config
+    ;; (gsetq dirvish-bookmarks-alist)
 
-  (dirvish-define-attribute symlink-arrow
-    "Show -> on symlinks but not full target."
-    :when (and dired-hide-details-mode
-               (default-value 'dired-hide-details-hide-symlink-targets))
-    (when (< (+ f-end 4) l-end)
-      (let ((ov (make-overlay (+ f-end 4) l-end)))
-        (overlay-put ov 'invisible t) ov)))
+    (dirvish-define-attribute symlink-arrow
+      "Show -> on symlinks but not full target."
+      :when (and dired-hide-details-mode
+                 (default-value 'dired-hide-details-hide-symlink-targets))
+      (when (< (+ f-end 4) l-end)
+        (let ((ov (make-overlay (+ f-end 4) l-end)))
+          (overlay-put ov 'invisible t) ov)))
 
-  (general-pushnew (cons (list "png" "jpg" "jpeg" "webp") (list "mvi" "%f"))
-                   dirvish-open-with-programs)
+    (general-pushnew (cons (list "png" "jpg" "jpeg" "webp") (list "mvi" "%f"))
+                     dirvish-open-with-programs)
 
-  (gsetq dirvish-yank-overwrite-existing-files 'never
-         dirvish-attributes '(all-the-icons file-size vc-state symlink-arrow)
-         dirvish-yank-new-name-style 'append-to-filename
-         dirvish-yank-new-name-style 'append-to-ext
-         dirvish-mode-line-position 'global
-         dirvish-mode-line-format
-         '(:left
-           (" " file-modes " " file-link-number " " file-user ":" file-group " "
-            symlink omit vc-info)
-           :right
-           (sort yank index))
-         dirvish-header-line-format
-         '(:left
-           (path symlink)
-           :right
-           (free-space))
-         dirvish-layout-recipes
-         (list '(0 0 0.8)
-               '(0 0 0.4)
-               dirvish-default-layout))
+    (gsetq dirvish-yank-overwrite-existing-files 'never
+           dirvish-attributes '(all-the-icons file-size vc-state symlink-arrow)
+           dirvish-yank-new-name-style 'append-to-filename
+           dirvish-yank-new-name-style 'append-to-ext
+           dirvish-mode-line-position 'global
+           dirvish-mode-line-format
+           '(:left
+             (" " file-modes " " file-link-number " " file-user ":" file-group " "
+              symlink omit vc-info)
+             :right
+             (sort yank index))
+           dirvish-header-line-format
+           '(:left
+             (path symlink)
+             :right
+             (free-space))
+           dirvish-layout-recipes
+           (list '(0 0 0.8)
+                 '(0 0 0.4)
+                 dirvish-default-layout))
 
-  (general-after-gui
-    (gsetq dirvish-header-line-height
-           (cons (noct-mode-line-height)
-                 (noct-mode-line-height))
-           dirvish-mode-line-height
-           (cons (noct-smaller-mode-line-height)
-                 (noct-smaller-mode-line-height))))
+    ;; TODO once-gui
+    (general-after-gui
+      (gsetq dirvish-header-line-height
+             (cons (noct-mode-line-height)
+                   (noct-mode-line-height))
+             dirvish-mode-line-height
+             (cons (noct-smaller-mode-line-height)
+                   (noct-smaller-mode-line-height))))
 
-  (when (ignore-errors (ewal-load-colors))
-    (set-face-attribute 'dirvish-hl-line nil
-                        :background (ewal-get-color 'green -5)))
+    (when (ignore-errors (ewal-load-colors))
+      (set-face-attribute 'dirvish-hl-line nil
+                          :background (ewal-get-color 'green -5)))
 
-  (general-def 'normal dired-mode-map
-    ;; https://github.com/alexluigit/dirvish/issues/186
-    "i" #'dired-find-file
+    (general-def 'normal dired-mode-map
+      "q" #'dirvish-quit
 
-    "a" #'dirvish-dispatch
+      ;; https://github.com/alexluigit/dirvish/issues/186
+      "i" #'dired-find-file
 
-    "l" #'dirvish-history-go-backward
-    "L" #'dirvish-history-go-forward
-    "b" #'dirvish-history-jump
+      "a" #'dirvish-dispatch
 
-	"M" #'dirvish-layout-switch
+      "l" #'dirvish-history-go-backward
+      "L" #'dirvish-history-go-forward
+      "b" #'dirvish-history-jump
 
-    "z" #'dirvish-setup-menu
+	  "M" #'dirvish-layout-switch
 
-    "yp" #'dirvish-copy-file-path
-    "yn" #'dirvish-copy-file-name
-    "yd" #'dirvish-copy-file-directory
+      "z" #'dirvish-setup-menu
 
-    "pp" #'dirvish-yank
-    "pm" #'dirvish-move
-    "pl" #'dirvish-symlink
-    "pL" #'dirvish-relative-symlink
-    "ph" #'dirvish-hardlink
+      "yp" #'dirvish-copy-file-path
+      "yn" #'dirvish-copy-file-name
+      "yd" #'dirvish-copy-file-directory
 
-    "o" #'dirvish-quicksort
+      "pp" #'dirvish-yank
+      "pm" #'dirvish-move
+      "pl" #'dirvish-symlink
+      "pL" #'dirvish-relative-symlink
+      "ph" #'dirvish-hardlink
 
-    "du" #'dirvish-total-file-size)
+      "o" #'dirvish-quicksort
 
-  (dirvish-override-dired-mode)
-  ;; find-file preview
-  (dirvish-peek-mode))
+      "du" #'dirvish-total-file-size)
+
+    (dirvish-override-dired-mode)
+    ;; find-file preview
+    (dirvish-peek-mode)
+
+    ;; override thumbnail generation to use faster vips
+    (dirvish-define-preview image (file ext preview-window)
+      "Preview image files.
+Require: `vipsthumbnail'"
+      :require ("vipsthumbnail")
+      (when (member ext dirvish-image-exts)
+        (let* ((w (dirvish-media--img-size preview-window))
+               (h (dirvish-media--img-size preview-window 'height))
+               (cache (dirvish-media--cache-path file (format "images/%s" w) ".jpg")))
+          (cond
+           ((file-exists-p cache)
+            `(img . ,(create-image cache nil nil :max-width w :max-height h)))
+           ;; ((and (< (file-attribute-size (file-attributes file)) 250000)
+           ;;       (member ext '("jpg" "jpeg" "png" "ico" "icns" "bmp" "svg")))
+           ;;  `(img . ,(create-image file nil nil :max-width w :max-height h)))
+           (t `(cache . ("vipsthumbnail",file "--size" ,(format "%sx" w)
+                         "--output" ,cache)))))))))
 #+end_src
 
 ** Emacs Everywhere
+:PROPERTIES:
+:ID:       730336f0-f552-4ee6-bf7b-2847e48f16ea
+:END:
 #+begin_src emacs-lisp
 (use-package emacs-everywhere
   :config
