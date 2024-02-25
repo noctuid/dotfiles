@@ -3,15 +3,16 @@
 :ID:       04179dea-0c5a-451a-be60-3d54ae3852f7
 :END:
 Not sure all these matter but:
-- My boot partition is labeled =boot= and has the =bls_boot= flag for systemd-boot (ea00 in gdisk) (refind doesn't need)
-- My boot partition's /filesystem/ is also labeled =boot= (refind uses fs not partition label! can check or set with ~e2label /boot~)
+- My boot partition is labeled =proboot= and has the =bls_boot= flag for systemd-boot (ea00 in gdisk) (refind doesn't need)
+- My boot partition's /filesystem/ is also labeled =proboot= (refind uses fs not partition label! can check or set with ~e2label /dev/<device>~)
+  - labeling in gparted labels the filesystem... is there a partition label separate from this?
 - My efi partition is fat32, is labeled =SYSTEM=, and has the =boot= and =esp= flags (don't know if they are necessary for refind)
 
 * Fixing Broken Bootloader
 Windows likes to break the bootloader.
 
 First steps:
-- Disable fast startup in power settings (what the power button does)
+- Disable fast startup in power settings ("what the power button does" section)
 - Disable windows bootloader and partition in boot order
 
 If refind doesn't load after this (will just keep going back to boot options or bios), you'll need to reinstall it.
@@ -36,10 +37,28 @@ mount LABEL=SYSTEM /mnt/boot/efi
 - ~reboot~
 
 * Troubleshooting
+:PROPERTIES:
+:ID:       42afcd53-c73f-4ee1-a407-3df6e4818758
+:END:
+Make sure to try both entries in refind (have had SYSTEM entry not work after refind-install due to a typo in =refind.conf= but the /boot entry defined from =refind_linux.conf= did work).
+
 If this doesn't work, check that the partition setup is as above, and Windows hasn't screwed up the EFI partition in some other way.
 
-I don't remember if some bootloaders require the EFI partition to be gpt instead of mbr but I've converted partitions in the past with gdisk (~gdisk /dev/sd<X>~ then =w= if no warnings; otherwise =q= to quit).
+I don't remember if some bootloaders require the EFI partition to be gpt instead of mbr but I've converted partitions in the past with gdisk (~gdisk /dev/sd<X>~ then =w= if no warnings; otherwise =q= to quit).  This should not be the problem for any existing partitions.
 
-You can use either parted or gdisk to change flags , e.g. ~parted /dev/sd<X> 1 set boot on~ (replace boot with esp to set esp flag). For partition type, ~gdisk /dev/sdb~ followed by =t 1 ea00 w= would make =/dev/sdb1= usable as the XBOOTLDR partition for systemd-boot (shows up =bls_boot= label in gparted).
+Check the following (for systemd-boot orinstallation will error):
+- ~fdisk -l~ should show the type of the esp partition as "EFI System" (not something like "Microsoft Basic Data")
+- ~parted /dev/<device>~ then ~print~ should show =boot= (not sure if necessary) and =esp= flags on the esp partition and =boot_bls= on the boot partition
 
-*One more thing*: Make sure you don't have anything under =/boot/efi= when the esp is unmounted.  I had refind configuration that was screwing things up.  Make sure the refind conguration is only on the esp and at =/boot/refind_linux.conf=.
+You can use either parted or gdisk to change flags, e.g. ~parted /dev/sd<X> 1 set boot on~ (replace boot with esp to set esp flag).  (Remember to exclude the p for nvme drives, e.g. ~parted /dev/nvme1n1 2...~ not ~p2~).  For partition type, ~gdisk /dev/sdb~ followed by =t 1 ea00 w= would make =/dev/sdb1= usable as the XBOOTLDR partition for systemd-boot (shows up =bls_boot= flag in gparted).  =t 1 ef00 w= would set the type to EFI system partition (think this is the same as =esp= flag but would need to double-check).
+
+*One more thing*: Make sure you don't have anything under =/boot/efi= when the esp is unmounted (or under =/boot= when the boot partition is unmounted).  I had refind configuration that was screwing things up.  Make sure the refind configuration is only on the esp and at =/boot/refind_linux.conf=.  For some reason after ~refind-install~ and exiting the chroot, I've seen refind configuration in both places (though it the configuration was the same in that case).
+
+* Moving Partitions (Including ESP and Boot) to New Drive
+- Partition and copy data to new drive
+- Update fstab and bootloader config
+- Mount root, home, boot, and esp, e.g.to =/mnt=
+- Run ~post-install move-boot /mnt~ to install update boot config and install refind there
+- Resync data to mounted home a final time if anything has changed
+- Follow the troubleshooting steps above if something goes wrong after reboot
+- See personal notes for more information

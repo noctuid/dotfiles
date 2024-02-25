@@ -59,12 +59,14 @@ luks_header_backup_file() {
 }
 
 # https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions
+# NOTE: will mount with name luks_label, but label will be actual label
 luks_create() {
 	partition=$1
 	label=$2
 	if [[ $# -ne 2 ]]; then
 		echo 'Two arguments required: /path/to/disk-or-partition new-label'
 		echo 'e.g. luks_create /dev/sdz some-label'
+		echo 'An unformatted partition is fine'
 		return 1
 	elif [[ ! -e $partition ]]; then
 		echo "Error: $partition does not exist."
@@ -134,7 +136,6 @@ luks_create() {
 
 	echo "Create an lvm volume group on $partition? (y/n)"
 	if ! confirm_do echo; then
-
 		echo 'Make the new LUKS partition a single ext4 partition? (y/n)'
 		confirm_do echo || return 0
 		if ! sudo cryptsetup open "$partition" luks_"$label"; then
@@ -355,6 +356,10 @@ backup_rsync() {
 	# long flags to make easier to read
 	# no --delete or --delete-excluded; --update
 	# not using --numeric-ids for now
+	# --links - copy symlinks as symlinks
+	# --hard-links - make them hardlinked on the destination
+	# --update - skip files that are newer on dest (doesn't matter when moving
+	#   date for first time or as long as you don't modify a backup)
 	rsync --verbose --info=progress2 --human-readable --ignore-errors \
 		  --recursive --links --hard-links \
 		  --perms --times --group --owner --acls --xattrs \

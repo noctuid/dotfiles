@@ -817,6 +817,33 @@ nix_user_setup() {
 	home-manager switch --flake '<flake-uri>#jdoe'
 }
 
+# * Move Boot Helper
+move_boot() {  # <root>
+	local root
+	root=$1
+	if [[ -z $root ]]; then
+		echo "One argument required: target root directory (e.g. /mnt)"
+		exit 1
+	fi
+	if [[ ! -d $root ]]; then
+		echo "$root is not a directory"
+		exit 1
+	fi
+	echo "This will take the following actions:"
+	echo "- Copy the fstab to $root/etc/fstab"
+	echo "- Copy all configuration under boot to $root/boot"
+	echo "- Run refind-install --root $root to install at esp at $root/boot/efi"
+	prompt_continue
+	if ! mountpoint -q "$root"/boot/efi; then
+		echo "Please mount ESP partition, so refind.conf can be copied to it."
+		exit 1
+	fi
+	echo "Copying relevant config files to $root"
+	cp -R "$basedir"/boot "$root"/
+	cp "$basedir"/etc/fstab "$root"/etc/fstab
+	sudo refind-install --root "$root"
+}
+
 # * Main
 default() {
 	validate_user "$user"
@@ -898,6 +925,7 @@ case $1 in
 	systemd-boot) copy_root_config_files \
 			   && "$basedir"/extra-setup systemd_boot_setup \
 			   && "$basedir"/extra-setup initramfs_setup;;
+	move-boot|move_boot) move_boot "$2";;
 	user) configure_secondary_user "$2";;
 	emacs) install_emacs_lucid true;;
 	nix) install_nix_packages "$2";;
