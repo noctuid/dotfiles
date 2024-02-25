@@ -1,21 +1,44 @@
 { pkgs }:
 
-# the amount of trouble I've had with using nix packages, this exists as
-# fallback that only includes packages that meet one of the following criteria:
+# have had too many problems using GUI (opengl) nix packages and with mixing and
+# matching arch and nix packages
 
+# so only install these types of packages:
+# - nix-related packages
 # - any packages not in AUR
 # - some packages in AUR if don't need latest version
 # - emacs (for patches, exact control over which version, etc.)
 
-# TODO common packages are probably safe enough to include here
-# remove graphical packages from common? currently only zathura maybe pinentry
-
 with pkgs; [
-  # if don't include common
+# * Nix-Related
+  rnix-lsp
+  statix
+  # to index store to be able to use nix-locate
+  nix-index
+
+# * Emacs
   emacsNoctuidWithPackages
+  # not whether this is needed
+  jansson
+
+# * CLI
+  direnv
+  nix-direnv
+  lorri
+  # aur package and out-of-date
+  pistol
+
+# * Matrix
+  # non-git aur package is orhpaned
+  # will need to verify all other devices through panctl
+  # > list-devices - see available devices
+  # > start-verification tab tab <device to verify>
+  # confirm on other device
+  # > confirm verification <same args>
+  pantalaimon
 
 # * Torrents
-  nodePackages.webtorrent-cli
+  # nodePackages.webtorrent-cli
 
 # * Mouse Tools
   # prefer warpd over keynav though don't really use
@@ -23,7 +46,7 @@ with pkgs; [
   # warpd
 
 # * Sound/Music
-  jamesdsp
+  # jamesdsp
 
 # * Hotkey Daemon
   # have had issues with aur package in past

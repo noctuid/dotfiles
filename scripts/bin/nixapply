@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+cd ~/dotfiles/nix || return 1
+
+if [[ $1 == update ]]; then
+    nix flake update
+elif [[ -n $1 ]]; then
+    nix flake update "$@"
+fi
+
+# impure is required to be able to use nixgl
+# nix run "path:.#homeConfigurations.noct.activationPackage" \
+#         --impure
+
+nix run "path:.#homeConfigurations.noct.activationPackage" --show-trace

@@ -25,7 +25,8 @@
   # let home-manager install and manage itself
   programs.home-manager.enable = true;
 
-  home.packages = pkgs.callPackage ./packages.nix {};
+  # home.packages = pkgs.callPackage ./packages.nix {};
+  home.packages = pkgs.callPackage ./minimal-packages.nix {};
 
   # creates ~/.icons/default/index.theme
   home.pointerCursor = {

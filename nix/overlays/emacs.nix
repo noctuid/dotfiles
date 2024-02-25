@@ -9,7 +9,7 @@
 
 self: super: rec {
   # configuration shared for all systems
-  emacsGitNoctuidGeneric = super.emacsGit.override {
+  emacsGitNoctuidGeneric = super.emacs-git.override {
     withSQLite3 = true;
     withWebP = true;
     withImageMagick = true;

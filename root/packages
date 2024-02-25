@@ -163,6 +163,8 @@ ranger
 ffmpegthumbnailer
 # ranger info (alternatively exiftool)
 mediainfo
+# scope.sh replacement (out-of-date)
+# pistol
 
 # sometimes useful in ranger
 dragon-drop-git aur
@@ -204,14 +206,17 @@ restic
 detox
 
 # alternate ls
-exa
+eza
 lsd
 
 bat
 bat-extras
 delta
+difftastic
 
 jq
+fq
+miller
 
 # * Editors
 # emacs is installed directly in post-install
@@ -282,6 +287,8 @@ oxipng
 pngquant
 # cwebp - convert to webp
 libwebp
+# fast thumbnail generation for dirvish
+libvips
 
 # * Torrents
 # includes trasmission-show (used for ranger)
@@ -583,7 +590,8 @@ unbound
 expat
 # https://wiki.archlinux.org/index.php/DNSCrypt
 dnscrypt-proxy
-hostblock-bin aur
+# orphaned
+# hostblock-bin aur
 kwakd aur
 
 # * Archive related
@@ -637,6 +645,7 @@ go
 # ** Python
 pyenv
 python-pip
+pyton-pipx
 
 # build/etc. system
 python-poetry
@@ -696,7 +705,8 @@ sbcl-bin ros
 phantomjs-bin aur
 
 # ** Fennel
-fennel-git aur
+fennel
+fnlfmt
 
 # ** Racket
 racket
@@ -716,6 +726,7 @@ pnpm npm
 
 # ** Lua
 lua-language-server
+luacheck
 
 # * Screenshots
 # screenshots

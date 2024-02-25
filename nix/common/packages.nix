@@ -34,9 +34,6 @@ with pkgs; [
   # for github auth token
   gh
 
-  # to grab specific emacs config files from github
-  subversion
-
 # * Terminals
   # backup
   kitty
