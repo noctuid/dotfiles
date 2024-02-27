@@ -1340,7 +1340,7 @@ syncphone() ( # <expect sd card?>
 	adbsync pull "$internal"/Ringtones/ ~/database/ringtones/
 	adbsync push ~/database/ringtones/ "$internal"/Ringtones/
 
-	adbsync pull "$maybe_external"/Books ~/database/library/android/
+	adbsync pull "$maybe_external"/Books/ ~/database/library/android/
 	adbsync push ~/database/library/android/ "$maybe_external"/Books/
 
 	adbsync pull "$maybe_external"/meditations/ ~/database/meditations/
