@@ -603,6 +603,8 @@ zip
 p7zip
 # frontend for archive extraction, creation, etc.
 atool
+# handles non utf-8 archives, handles e.g. cbz fine by default, etc.
+unarchiver
 
 # * MTPFS
 # the worst filesystem

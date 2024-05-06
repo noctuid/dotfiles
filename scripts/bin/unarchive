@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+for archive in "$@"; do
+    unar -force-directory -force-rename "$archive"
+done
+

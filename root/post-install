@@ -928,6 +928,8 @@ case $1 in
 	move-boot|move_boot) move_boot "$2";;
 	user) configure_secondary_user "$2";;
 	emacs) install_emacs_lucid true;;
-	nix) install_nix_packages "$2";;
+	nix) \
+		echo "You may want to use nixapply instead" \
+		install_nix_packages "$2";;
 	*) default 2>&1 | tee "$log";;
 esac
