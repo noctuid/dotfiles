@@ -11,6 +11,9 @@ save-position-on-quit
 # disable screen blanking while video playing (default)
 # stop-screensaver
 
+# so doesn't disappear if toggle video; using gui window for audio
+force-window=yes
+
 # ** Video
 # use settings from builtin gpu-hq profile
 # https://wiki.archlinux.org/index.php/mpv#High_quality_configurations
