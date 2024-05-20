@@ -3,5 +3,18 @@
 # shellcheck disable=SC1090
 source ~/bin/helpers/mount_commands.sh || exit 1
 mountefi || exit 1
-paru --newsonupgrade -Syu --ignore emacs-git
+
+# emacs takes a long time to build and can't just upgrade because build with
+# custom options (paru will use defaults)
+paru --newsonupgrade -Syu \
+     --ignore emacs-git,optimus-manager-git,yay-git,babashka-bin
+# if cancel above aur upgrades, at least need to update optimus-manager or
+# starting X can break
+paru -S optimus-manager-git
+# also annoying when babashka breaks; yay as fallback aur helper
+paru -S yay-git babashka-bin
+
+# do always to be safe
 sudo mkinitcpio --allpresets
+
+# NOTE: need to rldkbd after successful upgrate to get trackpad working again
