@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# probably won't use this much (will just stay in hybrid mode)
+# pretty much only use nvidia mode; too many issues hybrid mode; would use
+# integrated only for battery saving
+# arg: (integrated|hybrid|nvidia)
 
 echo "Run 'sudo prime-switch' after X stops."
 echo "Press anything to continue"

@@ -11,6 +11,7 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
 
 if monitor_is_hidpi; then
 	export MONITOR_IS_HIDPI=true
+	export POLYBAR_DPI=192
 
 	export QT_ENABLE_HIGHDPI_SCALING=1
 
@@ -24,6 +25,7 @@ if monitor_is_hidpi; then
 	# export GDK_DPI_SCALE=0.5
 else
 	export MONITOR_IS_HIDPI=false
+	export POLYBAR_DPI=96
 fi
 
 # * WM and Polybar
