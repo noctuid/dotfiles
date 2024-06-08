@@ -25,7 +25,7 @@ yay aur
 nix
 
 # * Booatloader
-refind-efi
+refind
 
 # * Internet
 iwd
@@ -40,7 +40,7 @@ nm-connection-editor
 linux-zen
 # required for modules (e.g. nvidia-dmks)
 linux-zen-headers
-mkinitcpio-colors-git
+mkinitcpio-colors-git aur
 
 # * Window Manager
 herbstluftwm
@@ -55,7 +55,7 @@ exfatprogs
 
 # * Input
 # scim -> ibus -> fcitx -> fcitx5
-fcitx5-im
+fcitx5-im group
 fcitx5-mozc
 # latex input
 fcitx5-table-other
@@ -84,6 +84,8 @@ bbswitch-dkms
 # intel-virtual-output
 xf86-video-intel
 nvidia-dkms
+# for prime-run
+nvidia-prime
 # WAITING switch to nvidia-open-dkms when get new graphics card and it is stable
 # contains opengl and vulkan drivers; contains file to blacklist nouveau
 nvidia-utils
@@ -98,7 +100,7 @@ vulkan-tools
 
 # * Security
 wireguard-tools
-wireguard-dkms
+wireguard-dkms aur
 # encryption
 # veracrypt
 # srm (TODO remove? already have shred from coreutils)
@@ -111,11 +113,11 @@ passff-host
 # sandboxing
 firejail
 
-keybase
-kbfs
+keybase-bin aur
+kbfs aur
 
 # includes updater and cleaner
-arkenfox-user.js
+arkenfox-user.js aur
 
 # * VCS
 git
@@ -173,7 +175,8 @@ dragon-drop-git aur
 lesspipe
 
 # for kitty image preview
-python-pillow-simd aur
+# python-pillow-simd aur
+
 # terminal graphics
 chafa
 # alternate to w3m image preview
@@ -211,25 +214,27 @@ lsd
 
 bat
 bat-extras
-delta
+git-delta
 difftastic
 
 jq
 fq
 miller
+xidel-bin aur
 
 # * Editors
 # emacs is installed directly in post-install
 # emacs-git-shallow aur
 gvim
 neovim
-pynvim pip
-nvimpager-git aur
+# currently fails to build
+# nvimpager-git aur
 vimpager-git aur
 # see ./post-install script; using emacs lucid
 jansson
 # evm gem
-cask aur
+# requires emacs from main repo (and I use emacs-git)
+# cask aur
 
 # * Browsers
 firefox
@@ -260,7 +265,7 @@ winetricks
 libreoffice-fresh
 unoconv
 pandoc-cli
-wkhtmltopdf
+wkhtmltopdf-static aur
 # for pdfunite, pdftotext (ranger preview), etc.
 poppler
 # for ranger previews
@@ -280,7 +285,8 @@ imagemagick
 gifsicle
 graphicsmagick
 waifu2x-ncnn-vulkan aur
-soryu-git aur
+# currently fails to build
+# soryu-git aur
 # png compression
 oxipng
 # lossy png compression (huge size savings)
@@ -397,7 +403,7 @@ msmtp
 msmtp-mta
 
 # used for formail to get header information
-procmail
+procmail aur
 
 # * Sound/Music
 pipewire
@@ -419,34 +425,34 @@ mopidy-local aur
 mopidy-mpd aur
 # for playerctl
 mopidy-mpris aur
-mopidy-spotify aur
+# currently broken
+# mopidy-spotify aur
 mpd-notification aur
 mpc
-# playerctl nix
+playerctl
 # vimus nix nixpkgs.haskellPackages.vimus
 # backup client
 ncmpcpp
 # cd ripping
-abcde
+abcde aur
 # abcde optional dependences needed
 glyr
-perl-musicbrainz-discid aur
-perl-webservice-musicbrainz aur
+# abcde-musicbrainz-meta aur
+# perl-musicbrainz-discid aur
+# perl-webservice-musicbrainz aur
 cdrtools
 
 # I think this fixed wine audio for me (don't remember for certain)
 lib32-alsa-plugins
 
 beets
-# TODO lib so will always install
-pyacoustid pip
-requests pip
-python-mpd pip
-pylast pip
+# https://docs.beets.io/en/latest/plugins/chroma.html
+python-pyacoustid
+python-mpd2
+python-requests
 
 # * Brightness
-# light in official repos has not worked for a long time
-light-git aur
+acpilight
 # for external monitors
 ddcutil
 
@@ -490,6 +496,9 @@ dunst
 rofi
 
 # * Fonts
+# used in polybar
+otf-cascadia-code
+# main font
 ttf-delugia-code aur
 
 # includes cantarell, ubuntu, droid, gsfonts, liberation, noto, etc.
@@ -509,7 +518,7 @@ office-code-pro aur
 # hack-font nix
 # for uushi
 phallus-fonts-git aur
-nerd-fonts-complete aur
+nerd-fonts group
 
 # favorite bitmap
 cozette-otb aur
@@ -550,9 +559,10 @@ unorm npm
 
 # * Appearance/Theming
 polybar-git aur
-setroot aur
+# aur build failing; installing through nix
+# setroot aur
 xtitle aur
-numix-gtk-theme
+numix-gtk-theme-git aur
 numix-cursor-theme-git aur
 
 # for icons
@@ -565,7 +575,7 @@ python-pywal
 python-wal-steam-git aur
 wpgtk-git aur
 # pywal support for fixefox
-pywalfox pip
+pywalfox pipx
 # gtk theme used by wpgtk; icon theme isn't in aur (use wpg-install.sh)
 gtk-theme-flat-color-git aur
 # live reload gtk theme
@@ -575,7 +585,8 @@ xsettingsd
 neofetch
 disfetch aur
 uwufetch-git aur
-sysfetch-git aur
+# currently fails to build
+# sysfetch-git aur
 nerdfetch aur
 
 # ascii art
@@ -603,7 +614,8 @@ zip
 p7zip
 # frontend for archive extraction, creation, etc.
 atool
-# handles non utf-8 archives, handles e.g. cbz fine by default, etc.
+# handles non utf-8 archives (atool and ouch clobber the names), handles
+# e.g. cbz fine by default, etc.
 unarchiver
 
 # * MTPFS
@@ -631,7 +643,7 @@ docker-compose
 # nvidia-container-runtime aur
 
 # ** Licensing
-harvey pip
+harvey pipx
 
 # ** Clojure
 clojure
@@ -647,7 +659,7 @@ go
 # ** Python
 pyenv
 python-pip
-pyton-pipx
+python-pipx
 
 # build/etc. system
 python-poetry
@@ -702,9 +714,11 @@ ruby
 
 # ** Common Lisp
 roswell aur
-sbcl-bin ros
+# TODO roswell is messed up
+# sbcl-bin ros
 # for cl minispec
-phantomjs-bin aur
+# no longer exists and phantomjs is orphaned
+# phantomjs-bin aur
 
 # ** Fennel
 fennel

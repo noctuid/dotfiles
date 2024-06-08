@@ -8,6 +8,9 @@ Not sure all these matter but:
   - labeling in gparted labels the filesystem... is there a partition label separate from this?
 - My efi partition is fat32, is labeled =SYSTEM=, and has the =boot= and =esp= flags (don't know if they are necessary for refind)
 
+* Fixing Completely Broken System
+If you happen to have turned off your computer because it completely froze during an update (before hitting yes to continue) due to a newly introduced NVIDIA driver issue and now bash, pacman, and all basic binaries are 0-length and you can't chroot into the system from a live usb... Well it's time for a new install!  See [[../README.org]].
+
 * Fixing Broken Bootloader
 Windows likes to break the bootloader.
 
@@ -21,6 +24,8 @@ If refind doesn't load after this (will just keep going back to boot options or 
 - Get partition overview: =lsblk -o name,label,mountpoint,size=
 - Mount partitions under /mnt, example:
  #+begin_src sh
+# NOTE: this is example and will need to be adjusted depending oncurrent setup
+# (e.g. to prolinux)
 cryptsetup open /dev/disk/by-label/cryptlinux cryptlinux
 mount /dev/cryptlinux_group/root /mnt
 mount /dev/cryptlinux_group/var /mnt/var

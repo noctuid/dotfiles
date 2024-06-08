@@ -3,14 +3,89 @@
 # all commands should be able to be run multiple times and should fail
 # harmlessly if required software isn't installed
 
+# * Argument Parsing
+print_option_help() {
+	echo "usage: extra-setup [options] [operation]
+
+options:
+	-t or --timestamp <timestamp>
+	   Optional timestamp to use for log files (to share them with post-install)
+
+	-h or --help
+	   Print this help text.
+
+primary operations:
+	all
+	   Perform all configuration
+
+	non-chroot
+	   Do configuration that can't be done in a chroot and nothing else (e.g.
+	   enabling systemd user services and ufw and dns).
+
+	all_service_setup
+	  Enable both user and global services
+
+	systemd_boot_setup
+	  Configure/setup systemd boot (not called by default since I use refind)
+
+	*
+	   Run any specific function
+"
+}
+
+timestamp=$(date +%FT%T)
+while getopts t:h-: opt
+do
+	case $opt in
+		t) timestamp=$OPTARG;;
+		-)
+			if [[ $OPTARG =~ ^(arg-with-no-opts)$ ]] || \
+				   [[ $OPTARG == *=* ]]; then
+				OPTION=${OPTARG%%=*}
+				OPTARG=${OPTARG#*=}
+			else
+				OPTION=$OPTARG
+				# shellcheck disable=SC2124
+				OPTARG=${@:$OPTIND:1}
+				((OPTIND++))
+			fi
+			case $OPTION in
+				timestamp) timestamp=$OPTARG;;
+				help) print_option_help && exit 0;;
+				*) print_option_help && exit 1;;
+			esac;;
+		h) print_option_help && exit 0;;
+		*) print_option_help && exit 1;;
+	esac
+done
+shift "$((OPTIND-1))"
+
+# * Variables and Helpers
 mkdir -p /tmp/build
 
 # only necessary if not using salt to more easily see which failed
 basedir="$(dirname "$(realpath "$0")")"
-failure_log="$basedir"/failure_log.txt
+failure_log="$basedir"/failure_log_"$timestamp".txt
 
-fail_configure() {
+fail_echo() {
 	echo "$1" | tee --append "$failure_log"
+}
+
+subsection_echo() {
+	echo
+	echo "** extra-setup: $*"
+}
+
+run_reporting_failure() {
+	if ! "$@"; then
+		fail_echo "Failed: $*"
+		return 1
+	fi
+}
+
+run_subsection() {
+	subsection_echo "$@"
+	run_reporting_failure "$@"
 }
 
 is_chroot() {
@@ -20,11 +95,13 @@ is_chroot() {
 # * Services
 # ** Normal Services
 service_setup() {
+	local user
 	user=$1
 	echo "Configuring systemd services."
 	systemctl enable rngd
 	systemctl enable fstrim.timer
-	systemctl disable netctl
+	# doesn't exist anymore
+	# systemctl disable netctl
 	systemctl disable NetworkManager
 	systemctl mask NetworkManager
 	systemctl enable connman
@@ -48,10 +125,14 @@ service_setup() {
 }
 
 # ** User Services
+# TODO still get dbus error with --preserve-env; need to add a version that
+# doesn't expect to run as root
 user_services_setup() {
+	local user
 	user=$1
 	if ! is_chroot; then
 		echo "Configuring user systemd services."
+		echo "THIS IS CURRENTLY BROKEN: Run as user instead"
 		# --preserve-env to avoid dbus error
 		sudo --preserve-env -u "$user" systemctl --user enable --now udiskie
 		sudo --preserve-env -u "$user" \
@@ -72,6 +153,7 @@ user_services_setup() {
 
 # ** All Services
 all_service_setup() {
+	local user
 	user=$1
 	service_setup "$user"
 	user_services_setup "$user"
@@ -109,18 +191,10 @@ initramfs_setup() {
 	mkinitcpio --allpresets
 }
 
-# * Kmonad
-kmonad_setup() {
-	echo "Setting up uinput permissions for kmonad"
-	user=$1
-	groupadd uinput
-	usermod -aG input "$user"
-	usermod -aG uinput "$user"
-}
-
 # * Console Colors
 vt_colors_setup() {
 	echo "Configuring vt colors."
+	local uhome
 	uhome=$1
 	setcolors "$uhome"/dotfiles/aesthetics/vt_colors/solarized
 }
@@ -143,6 +217,7 @@ freetype_setup() {
 # * Lambda Fortunes
 lambda_txt_setup() {
 	echo "Configuring fortune."
+	local uhome
 	uhome=$1
 	cp "$uhome"/dotfiles/.data/lambda /usr/share/fortune/lambda
 	strfile /usr/share/fortune/lambda
@@ -151,6 +226,7 @@ lambda_txt_setup() {
 # * Fcron
 fcron_setup() {
 	echo "Configuring fcron globally."
+	local uhome
 	uhome=$1
 	sed "s:uhome:$uhome:g" "$uhome"/dotfiles/common/sudo_fcrontab | fcrontab -
 	systemctl enable fcron
@@ -158,6 +234,7 @@ fcron_setup() {
 
 fcron_user_setup() {
 	echo "Configuring fcron for user."
+	local user
 	user=$1
 	# could also use fcrontab -u "$user"
 	sudo -u "$user" fcrontab /home/"$user"/dotfiles/common/fcrontab
@@ -166,10 +243,11 @@ fcron_user_setup() {
 # * UFW
 # shellcheck disable=SC2120
 ufw_setup() {
+	local force
 	force=$1
 	if ! is_chroot; then
-		# only do this once; don't want to alter current configuration if already
-		# enabled
+		# only do this once; don't want to alter current configuration if
+		# already enabled
 		if [[ -n "$force" ]] || ! ufw status | grep -q "Status: active"; then
 			echo "Configuring UFW."
 			# https://wiki.archlinux.org/index.php/Uncomplicated_Firewall#Basic_configuration
@@ -190,6 +268,7 @@ ufw_setup() {
 # transmission user created when installing packae
 transmission_setup() {
 	echo "Configuring transmission."
+	local user
 	user=$1
 	# make download directory and watch directory
 	mkdir -p /home/transmission/{Downloads,torrents}
@@ -239,8 +318,12 @@ noptions edns0 single-request-reopen" \
 
 # * Ranger Devicons
 # no AUR package
+# TODO this fails because installation method is different now
+# git clone https://github.com/alexanderjeurissen/ranger_devicons \
+# 	~/.config/ranger/plugins/ranger_devicons
 ranger_devicons_setup() {
 	echo "Configuring ranger devicons."
+	local uhome build_dir
 	uhome=$1
 	build_dir=/tmp/build/ranger_devicons
 	mkdir -p /tmp/build
@@ -262,28 +345,18 @@ connman_setup() {
 	connmanctl enable wifi
 }
 
-# * Nix
-nix_setup() {
-	user=$1
-	# archlinx-nix now does pretty much all setup automatically when installing
-	# nix from aur
-	# note that reboot is required for everything to work without changes
-	# (daemon must be running; must manually source /etc/profile.d/nix.sh if
-	# haven't rebooted)
-	sudo -u "$user" nix-channel --add http://nixos.org/channels/nixpkgs-unstable
-	sudo -u "$user" nix-channel --update
-}
-
 # * Arkenfox
 arkenfox_setup() {
+	local user uhome
 	user=$1
+	uhome=/home/"$user"
 	if pgrep firefox > /dev/null; then
 		echo "Please close firefox before running arkenfox's cleaner" >&2
 		return 1
 	fi
 	# arkenfox-updater can detect profile, but cleaner must be run in profile
 	# directory
-	cd ~/.mozilla/firefox/"$user".normal || return 1
+	cd "$uhome"/.mozilla/firefox/"$user".normal || return 1
 	arkenfox-updater
 	arkenfox-cleaner
 }
@@ -296,9 +369,11 @@ pywalfox_setup() {
 
 # * QMK
 qmk_setup() {
-	qmk setup || return 1
-	qmk config user.keyboard=splitkb/kyria/rev3 || return 1
-	qmk config user.keymap=noctuid || return 1
+	local user
+	user=$1
+	sudo -u "$user" qmk setup || return 1
+	sudo -u "$user" qmk config user.keyboard=splitkb/kyria/rev3 || return 1
+	sudo -u "$user" qmk config user.keymap=noctuid || return 1
 }
 
 # * All
@@ -312,51 +387,33 @@ all() {
 		echo "In chroot. Not calling systemctl daemon-reload."
 	fi
 
-	service_setup "$user" \
-		|| fail_configure "Systemd service setup failed."
-	user_services_setup "$user" \
-		|| fail_configure "Systemd user service setup failed."
-	refind_setup \
-		|| fail_configure "Refind setup failed."
-	initramfs_setup \
-		|| fail_configure "Mkinitcpio/Initramfs setup failed."
-	kmonad_setup "$user" \
-		|| fail_configure "Kmonad setup failed."
-	vt_colors_setup "$uhome" \
-		|| fail_configure "Setting vt colors failed."
-	freetype_setup \
-		|| fail_configure "Font configuration setup failed."
-	lambda_txt_setup "$uhome" \
-		|| fail_configure "Lambda.txt fortune setup failed."
-	fcron_setup "$uhome" \
-		|| fail_configure "Fcron setup failed."
-	fcron_user_setup "$user" \
-		|| fail_configure "Fcron user setup failed."
-	# shellcheck disable=SC2119
-	ufw_setup \
-		|| fail_configure "UFW setup failed."
-	transmission_setup "$user" \
-		|| fail_configure "Transmission setup failed."
-	# dns_setup \
-		# 	|| fail_configure "DNS setup failed."
-	ranger_devicons_setup "$uhome" \
-		|| fail_configure "Ranger devicons setup failed."
-	udiskie_setup || fail_configure "Udiskie setup failed."
-	connman_setup || fail_configure "Connman setup failed."
-	nix_setup "$user" || fail_configure "Nix setup failed."
-	arkenfox_setup "$user" || fail_configure "Arkenfox setup failed"
-	pywalfox_setup || fail_configure "Pywalfox setup failed."
-	qmk_setup || fail_configure "QMK setup failed."
+	run_subsection service_setup "$user"
+	run_subsection user_services_setup "$user"
+	run_subsection refind_setup
+	run_subsection initramfs_setup
+	run_subsection vt_colors_setup "$uhome"
+	run_subsection freetype_setup
+	run_subsection lambda_txt_setup "$uhome"
+	run_subsection fcron_setup "$uhome"
+	run_subsection fcron_user_setup "$user"
+	run_subsection ufw_setup
+	run_subsection transmission_setup "$user"
+	# run_subsection dns_setup
+	run_subsection ranger_devicons_setup "$uhome"
+	run_subsection udiskie_setup
+	run_subsection connman_setup
+	run_subsection arkenfox_setup "$user"
+	run_subsection pywalfox_setup
+	run_subsection qmk_setup "$user"
 }
 
 # * Non-chroot
 non_chroot() {
 	user=$1
 	systemctl daemon-reload
-	user_services_setup "$user"
-	# shellcheck disable=SC2119
-	ufw_setup
-	dns_setup
+	run_subsection user_services_setup "$user"
+	run_subsection ufw_setup
+	run_subsection dns_setup
 }
 
 # * Main

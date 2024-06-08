@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # TODO
-# - just remove salt stuff completely
-# - tlp config (charging rates)
-# - aur problems (aur helper issues, slowness, etc.)
-# - evm doesn't work
+# - biggest issue - need to fix or find better way to install aur packages; some
+#    aur packages fail to install because of permission issues (stardict-oald);
+#    warpd-git is another example of a package that installed fine as my user
+# - other aur problems (aur helper issues, slowness, etc.)
+# - should be able to easily cancel entire thing -
+#   https://stackoverflow.com/questions/32145643/how-to-use-ctrlc-to-stop-whole-script-not-just-current-command
+# - evm doesn't work - maybe just remove
 # - https://stackoverflow.com/questions/30421986/why-does-npm-list-g-lead-to-npm-err-missing-error
 
 # Goal: idempotent post-install setup script
@@ -37,10 +40,6 @@
 #     again on the new installation with the non-chroot operation (also does
 #     some other extra configuration)
 
-# Using salt mainly for nice messaging (shows which sections failed, how many,
-# etc.); have made optional because of problems with salt (once had difficultly
-# installing it; once had other issues that were difficult to debug), so not
-# using by default
 
 # potential salt alternatives
 # https://github.com/shawndellysse/farch
@@ -56,19 +55,18 @@
 
 # * Constants
 basedir="$(dirname "$(realpath "$0")")"
-log="$basedir"/log.txt
-failure_log="$basedir"/failure_log.txt
+timestamp=$(date +%FT%T)
+log="$basedir"/log_"$timestamp".org
+failure_log="$basedir"/failure_log_"$timestamp".txt
 
 builduser=noctuidbuilder
 
 # * Argument Parsing
-# can use tzselect to find
+# NOTE: can use tzselect to find
 timezone=America/New_York
 hostname=bahamut
 user=noctuid
 uhome=/home/"$user"
-log_level=info
-use_salt=false
 force_reflector=false
 
 print_option_help() {
@@ -90,16 +88,6 @@ options:
 	   for building/installing packages.
 	   Current value: $user
 
-	-l or --log-level <level>
-	   Log level to pass to salt-call's --log-level. Keep in mind that setting a
-	   lower log level than the default may make debugginging difficult or
-	   impossible.
-	   Current value: $log_level
-
-	-s or --use-salt
-	   If specified, use salt for configuration/setup.
-	   Current value: $use_salt
-
 	-f or --force-reflector
 	   If specified, force updating mirror list with reflector even if it has
 	   been updated before.
@@ -108,41 +96,61 @@ options:
 	-h or --help
 	   Print this help text.
 
-operations:
+primary operations:
 	non-chroot
 	   Do configuration that can't be done in a chroot and nothing else (e.g.
-	   enabling systemd services and ufw). Meant to be run once after first boot
-	   of system be done in a chroot. If this action is not specified, this
-	   configuration will still be done if it is necessary and if not in a
-	   chroot.
+	   enabling systemd user services and ufw, using nix which requires daemon
+	   running, etc.). Meant to be run once after first boot of system be done
+	   in a chroot. If this action is not specified, this configuration will
+	   still be done if it is necessary and if not in a chroot.
 
 	root-config
 	   Just copy root config files from $uhome/dotfiles to /
 
-	boot
-	   Generate initramfs and (re)install bootloader.
+	boot|fix|refind
+	   Copy root config files then generate initramfs and (re)install refind
 
-	fix
-	   Same as calling with root-config and then boot.
+	config
+	   Copy root config files and also restow
 
 	emacs
 	   Install or update lucid Emacs master with native compilation
 
+	nix optional:<update|flake inputs to update>
+	   Configure/setup nix and install packages/apply home-manager configuration
+
+	basic
+	   Run basic setup (sudo, timezone, locale, hostname, user groups)
+
+	install
+	   Install all packages
+
+	*
+	   Run any specific function
+
 	<no option/ default>
-	   Do all setup."
+	   Do all setup (like running basic, config, install, and then the
+	   extra-setup script)
+
+other operations not part of default setup:
+	move-boot <root mount>
+	   Helper for installing bootloader to new root/boot partitions
+
+	user <username>
+	   Helper to create another user using main user's dotfiles but without
+	   access to main user's files
+"
 }
 
-while getopts t:H:u:l:nsfh-: opt
+while getopts t:H:u:fh-: opt
 do
 	case $opt in
 		t) timezone=$OPTARG;;
 		H) hostname=$OPTARG;;
 		u) user=$OPTARG;;
-		l) log_level=$OPTARG;;
-		s) use_salt=true;;
 		f) force_reflector=true;;
 		-)
-			if [[ $OPTARG =~ ^(use-salt)$ ]] || \
+			if [[ $OPTARG =~ ^(force-reflector)$ ]] || \
 				   [[ $OPTARG == *=* ]]; then
 				OPTION=${OPTARG%%=*}
 				OPTARG=${OPTARG#*=}
@@ -156,8 +164,6 @@ do
 				timezone) timezone=$OPTARG;;
 				hostname) hostname=$OPTARG;;
 				user) user=$OPTARG;;
-				log-level) log_level=$OPTARG;;
-				use-salt) use_salt=true;;
 				force-reflector) force_reflector=true;;
 				help) print_option_help && exit 0;;
 				*) print_option_help && exit 1;;
@@ -166,6 +172,7 @@ do
 		*) print_option_help && exit 1;;
 	esac
 done
+shift "$((OPTIND-1))"
 
 # * Helpers
 prompt_continue() {
@@ -176,36 +183,68 @@ prompt_continue() {
 	fi
 }
 
+section_echo() {
+	echo
+	echo "* post-install: $*"
+}
+
+subsection_echo() {
+	echo
+	echo "** post-install: $*"
+}
+
 # for more easily readable log when not using salt
 fail_echo() {
 	echo "$1" | tee --append "$failure_log"
+}
+
+run_reporting_failure() {
+	if ! "$@"; then
+		fail_echo "Failed: $*"
+		return 1
+	fi
+}
+
+run_section() {
+	section_echo "$@"
+	run_reporting_failure "$@"
+}
+
+run_subsection() {
+	subsection_echo "$@"
+	run_reporting_failure "$@"
 }
 
 is_chroot() {
 	[[ $(stat -c %d:%i /) != $(stat -c %d:%i /proc/1/root/.) ]]
 }
 
-# TODO this doesn't work
-# TODO maybe check if group before installing in install_package; fcitx-im is
-# only group in ./packages currently
 group_installed() {
 	pacman --sync --groups "$1" | while read -r line; do
-		pacman --query "$(echo "$line" | awk '{print $2}')" || return 1
+		pacman --query "$(echo "$line" | awk '{print $2}')" &> /dev/null \
+			|| return 1
 	done
 }
 
 # * Basic Setup
 # ** Sudo
+user_has_password() {  # <user>
+	passwd --status "$1" | awk '{if ($2 == "P") {exit 0} else {exit 1}}'
+}
+
 sudo_setup() {
-	if passwd --status root | awk '$2 == "NP" {exit 1}'; then
+	if ! user_has_password root; then
 		echo "Please set a password for root:"
 		passwd root || return 1
 	fi
-	echo "Updating sudo configuration."
+	echo "Updating sudo configuration:
+- Disable password timeout
+- Allow root to execute any command
+- Allow users in wheel group to use sudo
+- Create $builduser if necessary (can't login as)
+- Allow $builduser to execute pacman without password
+"
 	# set up /etc/sudoers
-	# - allow root to execute any command
-	# - allow users in wheel group to use sudo
-	# - allow $builduser to execute pacman without password
 	if ! id -u "$builduser" &> /dev/null; then
 		useradd --system --create-home \
 				--shell /sbin/nologin "$builduser" || return 1
@@ -220,7 +259,7 @@ $builduser ALL= NOPASSWD: /usr/bin/pacman" | EDITOR='tee' visudo
 
 # ** Time
 time_setup() {
-	echo "Updating timezone and clock."
+	echo "Updating timezone (to $timezone) and clock."
 	ln -sf /usr/share/zoneinfo/"$timezone" /etc/localtime \
 		&& hwclock --systohc --utc
 	# using ntpd instead
@@ -239,7 +278,7 @@ locale_setup() {
 
 # ** Hostname
 hostname_setup() {
-	echo "Updating hostname."
+	echo "Updating hostname to $hostname."
 	hostnamectl set-hostname "$hostname"
 }
 
@@ -253,6 +292,8 @@ pac_install() {
 }
 
 update_mirror_list() {
+	# needs rsync for rsync mirrors
+	pac_install rsync
 	pac_install reflector || return 1
 	echo "Updating mirrorlist with reflector."
 	cd /etc/pacman.d || return 1
@@ -276,6 +317,7 @@ install_paru() {
 		# fi
 		pacman -S --noconfirm --needed base-devel
 		pac_install git
+		local build_dir
 		build_dir="$uhome"/build/paru-bin
 		if [[ -d "$build_dir" ]]; then
 			rm -rf "$build_dir"
@@ -290,17 +332,24 @@ install_paru() {
 }
 
 install_emacs_lucid() {
-	echo "Installing emacs-git with lucid toolkit and native comp."
+	local emacs_recipe build_dir
 	emacs_recipe=emacs-git
 	if [[ -n $1 ]] || ! pacman -Q "$emacs_recipe" &> /dev/null; then
-		cd /tmp \
+		echo "Installing emacs-git with lucid toolkit and native comp."
+		build_dir="$uhome/build/$emacs_recipe"
+		if [[ -d "$build_dir" ]]; then
+			rm -rf "$build_dir"
+		fi
+		mkdir -p "$build_dir"
+		cd "$build_dir" \
 			&& paru --getpkgbuild "$emacs_recipe" \
-			&& sudo chown "$user" "$emacs_recipe" \
+			&& chown -R "$user" "$emacs_recipe" \
 			&& cd "$emacs_recipe" \
 			&& sed --in-place --regexp-extended 's/(^LUCID=)/\1YES/' PKGBUILD \
 			&& sed --in-place --regexp-extended 's/(^FAST_BOOT=)/\1YES/' PKGBUILD \
 			&& sed --in-place --regexp-extended 's/(^JIT=)/\1YES/' PKGBUILD \
-			&& sudo -u "$user" makepkg --noconfirm --syncdeps --install
+			&& sudo -u "$user" makepkg --noconfirm --syncdeps \
+			&& pacman --noconfirm -U -- *.pkg.tar*
 	fi
 }
 
@@ -317,27 +366,26 @@ home_config_setup() { # <user>
 # ** Nix
 # undecided whether it is a good idea to mix pacman and nix as a lot of
 # applications have issues (see OpenGL workarounds in linux packages file)
+# NOTE that reboot is required for everything to work without changes
+# (daemon must be running; must manually source /etc/profile.d/nix.sh if
+# haven't rebooted)
 install_nix_packages() { # <update?>
+	if is_chroot; then
+		fail_echo "In chroot, not attempting to set up nix"
+		return 1
+	fi
 	if ! pacman -Q nix; then
 		pacman -S nix
-		sudo -u "$user" nix-channel \
-			 --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+		sudo -u "$user" nix-channel --add \
+			 https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
 		sudo -u "$user" nix-channel \
 			 --add http://nixos.org/channels/nixpkgs-unstable nixpkgs
 		sudo -u "$user" nix-channel \
 			 --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
 		sudo -u "$user" nix-channel --update
-		systemctl enable nix-daemon
+		systemctl enable --now nix-daemon
 	fi
-	cd "$uhome"/dotfiles/nix || return 1
-	if [[ $1 == update ]]; then
-		sudo -u "$user" nix flake update
-	elif [[ -n $1 ]]; then
-		sudo -u "$user" nix flake update "$@"
-	fi
-	# impure is required to be able to use nixgl
-	sudo -u "$user" nix run "path:.#homeConfigurations.noct.activationPackage" \
-		 --impure
+	sudo -u "$user" "$uhome"/dotfiles/scripts/bin/nixapply
 }
 
 # ** EVM
@@ -350,13 +398,13 @@ install_evm() {
 
 # ** All
 install_installers() {
-	# TODO install_nix
-	install_evm
-	install_package python-pip
-	install_package ruby
-	install_package go
-	install_package npm
-	install_package "roswell aur" "$user"
+	run_subsection install_evm
+	run_subsection install_package python-pip
+	run_subsection install_package python-pipx
+	run_subsection install_package ruby
+	run_subsection install_package go
+	run_subsection install_package npm
+	run_subsection install_package "roswell aur" "$user"
 }
 
 # * MPV Scripts
@@ -364,6 +412,7 @@ install_installers() {
 
 # NOTE only works with official mpv, not mpv-git
 install_internal_mpv_script() { # name script_dir
+	local name script_dir
 	name=$1
 	script_dir=$2
 	mkdir -p "$script_dir"
@@ -371,6 +420,7 @@ install_internal_mpv_script() { # name script_dir
 }
 
 install_raw_mpv_script() { # url script_dir
+	local url script_dir
 	url=$1
 	script_dir=$2
 	mkdir -p "$script_dir"
@@ -378,6 +428,7 @@ install_raw_mpv_script() { # url script_dir
 }
 
 install_mpv_script_from_release() { # url script_dir
+	local url script_dir
 	url=$1
 	script_dir=$2
 	mkdir -p "$script_dir"
@@ -388,6 +439,7 @@ install_mpv_script_from_release() { # url script_dir
 }
 
 install_mpv_script() { # url clone_dir script_dir names
+	local url clone_dir script_dir names
 	url=$1
 	clone_dir=$2
 	script_dir=$3
@@ -461,6 +513,7 @@ install_mpv_scripts() {
 		"$uhome"/.config/mpv/scripts
 
 	# conditionally loading
+	local nightedt_dir
 	nightedt_dir="$uhome"/.config/mpv/scripts/nightedt-mpv-scripts
 	if [[ ! -d $nightedt_dir ]]; then
 		git clone https://github.com/nightedt/mpv-scripts \
@@ -486,147 +539,24 @@ install_mpv_scripts() {
 	chown -R "$user":"$user" "$uhome"/.config/mpv/{scripts,shaders}
 }
 
-# * Salt
-setup_salt() {
-	pac_install salt
-	# clear previous files; fine if fails
-	rm -r /srv/salt &> /dev/null
-	mkdir -p /srv/salt
-	# cd to the directory of this script
-	cd "$basedir" || exit 1
-	cp ./top.sls /srv/salt
-	cp ./user_groups.sls /srv/salt
-	cp ./root_config.sls /srv/salt
-	cp ./packages.sls /srv/salt
-	cp ./pre_service_setup.sls /srv/salt
-	cp ./services.sls /srv/salt
-	cp ./setup.sls /srv/salt
-	cp ./extra-setup /srv/salt
-	# TODO xdg used for user services
-	# I don't think display is used at all
-	# nor is dbus... can probably remvoe all of these
-
-	sed -i -e "s/set user =/set user = '$user'/g" /srv/salt/setup.sls
-	# sed -i -e "s/set user =/set user = '$user'/g" \
-		# 	-e "s;set xdg =;set xdg = '$XDG_RUNTIME_DIR';g" \
-		# 	-e "s/set display =/set display = '$DISPLAY'/g" \
-		# 	-e "s;set dbus =;set dbus = '$DBUS_SESSION_BUS_ADDRESS';g" \
-		# 	/srv/salt/setup.sls
-	cp -r ./etc /srv/salt
-	cp -r ./boot /srv/salt
-	cp -r ./usr /srv/salt
-	cp -r ./var /srv/salt
-	# can't use alternative separator here
-	sed -i "/^ *\//d" \
-		/srv/salt/var/lib/transmission/.config/transmission-daemon/settings.json
-	# overwrite any example configuration files
-	cp -r ../.root/etc /srv/salt
-}
-
-generate_packages_sls() {
-	# TODO alternatively could use templating for each package type:
-	# https://docs.saltstack.com/en/latest/topics/tutorials/states_pt3.html
-	# shellcheck disable=SC2188
-	> "$basedir"/packages.sls
-	while read -r line; do
-		if [[ -z $line ]] || [[ $line =~ \# ]]; then
-			continue
-		fi
-
-		package=$(echo "$line" | awk '{print $1}')
-		method=$(echo "$line" | awk '{print $2}')
-		method=${method:-pac}
-		nix_path=$(echo "$line" | awk '{print $3}')
-
-		echo "$package-pkg:" >> "$basedir"/packages.sls
-		# 		if [[ $method == pac ]]; then
-		# 			echo "  pkg.installed:
-		#     - pkgs:
-		#         - $package
-		# " >> "$basedir"/packages.sls
-		if [[ $method == pac ]]; then
-			echo "  cmd.run:
-    - name: pacman --noconfirm -S $package
-    - unless: pacman -Q $package
-" >> "$basedir"/packages.sls
-		elif [[ $method == aur ]]; then
-			echo "  cmd.run:
-    - name: paru --noconfirm -S $package
-    - unless: pacman -Q $package
-    - runas: $builduser
-" >> "$basedir"/packages.sls
-		elif [[ $method == nix ]]; then
-			# TODO -require? install nix where?
-			echo "  cmd.run:
-	- runas: $user
-    - name: nix-env -iA $nix_path
-    - unless: nix-env -q $package
-" >> "$basedir"/packages.sls
-		elif [[ $method == ros ]]; then
-			echo "  cmd.run:
-    - name: ros install $package
-    - unless: ros list installed | grep $package
-    - require:
-        - roswell-pkg
-" >> "$basedir"/packages.sls
-		elif [[ $method == pip ]]; then
-			echo "  cmd.run:
-    - name: pip install $package
-    - unless: pip list | grep ^$package
-    - require:
-        - python-pip-pkg
-" >> "$basedir"/packages.sls
-		elif [[ $method == gem ]]; then
-			echo "  cmd.run:
-    - runas: $user
-    - name: $method install $package
-    - unless: gem list -i \"^$package\$\"
-    - require:
-        - ruby-pkg
-" >> "$basedir"/packages.sls
-		elif [[ $method == go ]]; then
-			echo "  cmd.run:
-    - runas: $user
-    - name: $method get $package
-    - unless: go list '...' | grep $package
-    - require:
-        - go-pkg
-" >> "$basedir"/packages.sls
-		elif [[ $method == evm ]]; then
-			# - require:
-			# - $method-pkg
-			# - runas: $user
-			echo "  cmd.run:
-    - name: $uhome/.evm/bin/evm install $package
-    - unless: $uhome/.evm/bin/evm list | grep \"$package \[I\]\"
-" >> "$basedir"/packages.sls
-		elif [[ $method == npm ]]; then
-			# currently only using for commands and npm list is weird
-			echo "  cmd.run:
-    - name: npm install -g $package
-    - unless: npm --global --depth 0 list | grep --quiet $package
-    - require:
-        - $method-pkg
-" >> "$basedir"/packages.sls
-		fi
-	done < "$basedir"/packages
-}
-
 # * No Salt
-# ** User Groups
+# ** User Groups and Secondary Users
 update_user_groups() { # <user>
-	local user
+	local user groups group
 	user=$1
+	groups=(users wheel uucp games lock input uinput kvm video libvirt nix-users)
 	echo "Updating ${user}'s groups."
 	# https://wiki.archlinux.org/index.php/users_and_groups#Group_list
-	usermod --groups users,wheel,uucp,games,lock,input,uinput,kvm,libvirt,nix-users \
-			--append "$user"
+	for group in "${groups[@]}"; do
+		getent group "$group" &> /dev/null || groupadd "$group"
+		usermod --groups "$group" --append "$user"
+	done
 }
 
 validate_user() { # <user>
 	local user
 	user=$1
-	if ! id -u "$user"; then
+	if ! id -u "$user" &> /dev/null; then
 		echo "Please create $user:
 - useradd --create-home $user
 - passwd $user
@@ -667,7 +597,7 @@ share_directory_with_secondary_user() { # <dirname under home> <user2> <git repo
 }
 
 configure_secondary_user() { # <user>
-	local user2
+	local user2 uhome2
 	user2=$1
 	uhome2=/home/$user2
 	validate_user "$user2"
@@ -735,26 +665,25 @@ copy_root_config_files() {
 }
 
 # ** Package Installation
+# NOTE: this no longer handles nix
 install_package() {
+	local line package method
 	line=$1
 	package=$(echo "$line" | awk '{print $1}')
 	method=$(echo "$line" | awk '{print $2}')
 	method=${method:-pac}
-	nix_path=$(echo "$line" | awk '{print $3}')
 
 	if [[ $method == pac ]]; then
 		pac_install "$package"
+	elif [[ $method == group ]]; then
+		if ! group_installed "$package"; then
+			pac_install "$package"
+		fi
 	elif [[ $method == aur ]]; then
 		if ! pacman --query "$package" &> /dev/null; then
 			echo "Installing $package."
 			sudo -u "$builduser" paru --noconfirm -S "$package" \
 				|| fail_echo "Failed: sudo -u \"$builduser\" paru --noconfirm -S $package"
-		fi
-	elif [[ $method == nix ]]; then
-		if ! nix-env --query "$package"; then
-			echo "Installing $package."
-			nix-env -iA "$nix_path" \
-				|| fail_echo "Failed: nix-env -iA $nix_path"
 		fi
 	elif [[ $method == ros ]]; then
 		if ! ros list installed | grep --quiet "$package"; then
@@ -762,11 +691,11 @@ install_package() {
 			ros install "$package" \
 				|| fail_echo "Failed: ros install $package"
 		fi
-	elif [[ $method == pip ]]; then
-		if ! pip list | grep --quiet "^$package"; then
+	elif [[ $method == pipx ]]; then
+		if ! sudo -u "$user" pipx list --short | grep --quiet "^$package"; then
 			echo "Installing $package."
-			pip install "$package" \
-				|| fail_echo "Failed: pip install $package"
+			sudo -u "$user" pipx install "$package" \
+				|| fail_echo "Failed: pipx install $package"
 		fi
 	elif [[ $method == gem ]]; then
 		if ! gem list --installed "^$package$" &> /dev/null; then
@@ -777,8 +706,8 @@ install_package() {
 	elif [[ $method == go ]]; then
 		if ! go list '...' | grep --quiet "$package"; then
 			echo "Installing $package."
-			go get "$package" \
-				|| fail_echo "Failed: go get $package"
+			go install "$package"@latest \
+				|| fail_echo "Failed: go install $package"
 		fi
 	elif [[ $method == evm ]]; then
 		if ! evm list | grep --quiet "$package [I]"; then
@@ -796,25 +725,34 @@ install_package() {
 }
 
 install_packages() {
-	echo "Installing packages."
+	run_section install_installers
+
+	run_section update_mirror_list
+	if ! run_section install_paru; then
+		fail_echo "Failed to install paru. Aborting."
+		exit 1
+	fi
+
+	echo
+	echo "* post-install: Installing packages."
 	while read -r line; do
 		if [[ -z $line ]] || [[ $line =~ \# ]]; then
 			continue
 		fi
-		install_package "$line"
+		run_subsection install_package "$line"
 	done < "$basedir"/packages
-	install_emacs_lucid
+	run_subsection install_emacs_lucid
+
+	if ! is_chroot; then
+		run_section install_nix_packages
+	fi
+	run_section install_mpv_scripts
 }
 
 # ** Program Configuration
 configure_packages() {
-	echo "Configuring packages."
-	"$basedir"/extra-setup all "$user"
-}
-
-# ** Nix User Packages (Home Manager)
-nix_user_setup() {
-	home-manager switch --flake '<flake-uri>#jdoe'
+	section_echo "Configuring packages"
+	"$basedir"/extra-setup --timestamp "$timestamp" all "$user"
 }
 
 # * Move Boot Helper
@@ -845,23 +783,33 @@ move_boot() {  # <root>
 }
 
 # * Main
-default() {
-	validate_user "$user"
+basic_setup() {
+	run_section sudo_setup
+	run_section time_setup
+	run_section locale_setup
+	run_section hostname_setup
+	run_section update_user_groups "$user"
+}
 
+config_setup() {
+	run_section home_config_setup "$user"
+	run_section copy_root_config_files
+}
+
+full_setup() {
 	echo "Prerequisites:
 - Inside chroot (or on existing installation that should be updated)
 - Internet connection
 - Base system has already been installed (system-install)
 - $user has been created (give the user a password before rebooting)
-- /home/\$user/dotfiles is in place and up to date
+- /home/\$user/dotfiles is in place and up-to-date
 - Extra keys have been signed (check these are up to date) (see ./pacman-keys)
+- Strongly recommended: Run pacman -Syu first for new installation
 
 Current variables:
 - Timezone: $timezone
 - Hostname: $hostname
 - Username: $user
-- Log level: $log_level
-- Using salt?: $use_salt
 - Force reflector update?: $force_reflector
 
 Please make sure that the ESP is already mounted under /boot/efi if installing a
@@ -872,64 +820,80 @@ For more information, rerun with --help flag.
 See $log and $failure_log for info after run."
 	prompt_continue
 
-	echo "Performing basic setup..."
-	sudo_setup || fail_echo "Failed to update sudo configuration."
-	time_setup || fail_echo "Failed to update timezone/clock."
-	locale_setup || fail_echo "Failed to update locale configuration."
-	hostname_setup || fail_echo "Failed to set hostname."
+	basic_setup
+	config_setup
+	install_packages
+	configure_packages
+}
 
-	home_config_setup "$user" || fail_echo "Failed to setup dotfiles with stow."
+non_chroot_setup() {
+	install_nix_packages
+	"$basedir"/extra-setup --timestamp "$timestamp" non_chroot "$user"
+}
 
-	update_mirror_list || fail_echo "Failed to update pacman mirror list."
-	if ! install_paru; then
-		fail_echo "Failed to install paru. Aborting."
-		exit 1
-	fi
-	install_installers
+before_echo() {
+	echo "* Running operation: ${*:-full_setup}
+Logging
+- All output to: $log
+- Failures to: $failure_log"
+}
 
-	if $use_salt; then
-		echo "Installing and running salt."
-		generate_packages_sls
-		setup_salt
-		salt-call --log-level "$log_level" --local state.apply
+after_echo() {
+	echo
+	echo "* Summary"
+	if [[ -f $failure_log ]]; then
+		echo "Failures (logged to ${failure_log}):
+$(< "$failure_log")
+"
 	else
-		update_user_groups "$user" || fail_echo "Failed to update user groups."
-		copy_root_config_files || fail_echo "Failed to copy root config files."
-		install_packages
-		install_nix_packages
-		install_mpv_scripts
-		configure_packages
+		echo "No failures"
+	fi
+	echo "Full log output logged to: $log"
+	if is_chroot; then
+		echo "Detected you are in a chroot.
+To finish installation, reboot and run: sudo post-install non-chroot"
 	fi
 
-	if is_chroot; then
-		echo "Chroot detected. To finish installation, reboot and run this
-script again with --enable-services."
+	wireguard_interface=$(networkctl 2> /dev/null | awk '$3 ~ /wireguard/ {print $2}')
+	if [[ -z $wireguard_interface ]]; then
+		echo "Please follow instructions in vpnup to set up wireguard"
 	fi
 }
 
-if [[ $EUID -ne 0 ]]; then
-	echo "Please run this script as root."
-	exit 1
-fi
+main() {
+	if [[ $EUID -ne 0 ]]; then
+		echo "Please run this script as root."
+		exit 1
+	fi
 
-# shellcheck disable=SC2188
-> "$failure_log"
+	validate_user "$user"
 
-case $1 in
-	non-chroot) "$basedir"/extra-setup non_chroot "$user";;
-	root-config) copy_root_config_files;;
-	# SEE ./boot/README.org for bootloader troubleshooting steps
-	fix|refind|boot) copy_root_config_files \
-			   && "$basedir"/extra-setup refind_setup \
-			   && "$basedir"/extra-setup initramfs_setup;;
-	systemd-boot) copy_root_config_files \
-			   && "$basedir"/extra-setup systemd_boot_setup \
-			   && "$basedir"/extra-setup initramfs_setup;;
-	move-boot|move_boot) move_boot "$2";;
-	user) configure_secondary_user "$2";;
-	emacs) install_emacs_lucid true;;
-	nix) \
-		echo "You may want to use nixapply instead" \
-		install_nix_packages "$2";;
-	*) default 2>&1 | tee "$log";;
-esac
+	before_echo "$@"
+
+	case $1 in
+		non-chroot) non_chroot_setup;;
+		root-config) copy_root_config_files;;
+		# SEE ./boot/README.org for bootloader troubleshooting steps
+		fix|refind|boot) copy_root_config_files \
+			&& "$basedir"/extra-setup --timestamp "$timestamp" refind_setup \
+			&& "$basedir"/extra-setup --timestamp "$timestamp" initramfs_setup;;
+		systemd-boot) copy_root_config_files \
+			&& "$basedir"/extra-setup --timestamp "$timestamp" systemd_boot_setup \
+			&& "$basedir"/extra-setup --timestamp "$timestamp" initramfs_setup;;
+		emacs) install_emacs_lucid true;;
+		nix) \
+			echo "You may want to use nixapply instead" \
+			&& install_nix_packages "$2";;
+		basic) basic_setup;;
+		config) config_setup;;
+		install) install_packages;;
+		"") full_setup;;
+		move-boot|move_boot) move_boot "$2";;
+		user) configure_secondary_user "$2";;
+		*) "$@";;
+	esac
+
+	after_echo
+}
+
+main "$@" 2>&1 | tee "$log"

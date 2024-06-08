@@ -25,6 +25,7 @@ if [[ -z $NVIDIA_XRUN ]]; then
 	# necessary for laptop screen to not be black and to show up in xrandr
 	# --listmonitors in nvidia mode (but not hybrid mode); prime-offload maybe
 	# used to run it, but it does not currently
+	echo "Running xrandr auto"
 	xrandr --auto
 fi
 
@@ -42,7 +43,10 @@ fi
 # current laptop even when connected to HDMI when starting X but may need to be
 # changed if I start using displayport or thunderbolt
 primary=$(xrandr --listmonitors | awk 'NR>1 && !/HDMI/ {print $NF; exit}')
+echo "Available monitors: $(xrandr --listmonitors)"
+echo "Primary output: $primary"
 xrandr --output "$primary" --primary
+
 # NOTE: the consequence of setting the primary monitor incorrectly is that
 # autorandr --change will fail; I'm calling autorandr separately in
 # herbstluftwm's autostart (so herbstluftwm-specific changes will be triggered)

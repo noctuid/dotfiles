@@ -28,6 +28,9 @@ with pkgs; [
   # aur package and out-of-date
   pistol
 
+  # aur package doesn't build
+  setroot
+
 # * Matrix
   # non-git aur package is orhpaned
   # will need to verify all other devices through panctl

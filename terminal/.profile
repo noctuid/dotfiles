@@ -122,6 +122,8 @@ done <<< "$pathdirs"
 # systemctl --user --no-block start mpd
 
 [[ ! -s ~/.mpd/pid ]] && nohup mpd &> /tmp/mpd.log &
+# won't start again if already running
+playerctld daemon
 
 # * Startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then

@@ -5,7 +5,6 @@
 
 # NOTE: only works with single external monitor and only on herbstluftwm (see
 # hc_monitor_setup)
-# NOTE: light is currently orphaned, but xbacklight does not work
 
 BRIGHTNESS_CODE=10
 BUS_CACHE_FILE=/tmp/ddcutil_bus_"$DISPLAY"
@@ -32,13 +31,8 @@ set_brightness() {
 	if [[ -n $bus ]] && use_external_monitor; then
 		ddcutil setvcp --bus "$bus" "$BRIGHTNESS_CODE" "$@"
 	else
-		if [[ $1 == - ]]; then
-			light -U "$2"
-		elif [[ $1 == + ]]; then
-			light -A "$2"
-		else
-			light -S "$1"
-		fi
+		# this is actually acpilight
+		xbacklight "$1$2"
 	fi
 }
 

@@ -1,0 +1,20 @@
+* Pre-Install
+- Either wipe the root/var partitions or move e.g. =/opt=, =/usr=, =/var=, =/lib= , =/lib64=, and =/etc= to somewhere else as backup (boot is okay to keep though will need to delete old image to be able to install intel-ucode).  I also deleted =bin= and =sbin= symlinks.
+- Mount partitions including boot and ESP (see boot README for example)
+- Connect to the internet (e.g. with ~iwctl~)
+- Dotfiles should be in place (should be able to run the scripts in this directory)
+- Run the =./system-install= script to pacstrap and then chroot into the system
+
+* Inside Chroot
+- Create your user: ~useradd --create-home <user>~
+- Set your user's password: ~password <user>~
+- Recommended: ~pacman -Syu~
+- Validate then run ~./pacman-keys~
+- ~./post-install~
+
+* After Reboot
+- ~sudo post-install non-chroot~
+- Examine failure log and fix any issues
+
+* Size Issues
+If nix is just monstrously large, see nixshrink.
