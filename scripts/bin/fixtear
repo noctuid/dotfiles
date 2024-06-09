@@ -2,10 +2,8 @@
 # https://wiki.archlinux.org/title/NVIDIA/Troubleshooting#Avoid_screen_tearing
 # fixes screen tearing (tested and this works if applied correctly)
 
-# had to run this with monitor connected then disconnect monitor then reconnect
-# just sticking with that because it's easy, otherwise would need to specify
-# both displays:
-# https://wiki.archlinux.org/title/NVIDIA/Troubleshooting#Multi-monitor
-nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
-
+# nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
 # can validate with: nvidia-settings --query CurrentMetaMode
+
+nvidia-settings --assign CurrentMetaMode="DPY-2: nvidia-auto-select +3840+0 { ForceFullCompositionPipeline=On}" \
+                echo "Make sure to run with external monitor/tv connected"
