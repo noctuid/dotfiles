@@ -51,7 +51,7 @@ XF86AudioPlay
 
 # play/pause last used player (requires playerctl daemon)
 {mod2,super+control} + o
-	playerctl play-pause
+	playerctl play-pause --ignore-player=spotify,mopidy,mpd
 
 # next/prev
 # any because prev is accessed with shift
