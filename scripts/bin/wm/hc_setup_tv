@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# set up monitor/tv just as dedicated tag/desktop/workspace for videos, games,
+# presentations, etc.
+
+hc() {
+	herbstclient "$@"
+}
+
+# if switch to tag on another monitor, focus that monitor
+hc set swap_monitors_to_get_tag off
+hc rule label=mpv-move class='mpv' fullscreen=on monitor=1
+if [[ $(hc attr tags.focus.index) == 9 ]]; then
+	# can't be the index the other monitor is on (0 default)
+	hc use_index 1
+fi
+hc chain , focus_monitor 1 , unlock_tag , use_index 9 \
+	, lock_tag , focus_monitor 0
+# set new monitor's wallpaper to black (flickers if don't explicitly set)
+walrestore
+dunstrun

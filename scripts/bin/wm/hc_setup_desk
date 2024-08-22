@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# setup external display so can put any tag on any monitor
+
+hc() {
+	herbstclient "$@"
+}
+
+# currently only have 1 monitor, but that might change
+new_count=$1
+hc set swap_monitors_to_get_tag on
+if (( new_count == 2 )); then
+    # default to index 9/tag 10
+    hc chain , focus_monitor 1 , use_index 9 , focus_monitor 0
+fi
+# use headphones not monitor speakers
+audio_switch analog
+# set wallpaper for all monitors
+walrestore true
+polybar_all_monitors
+# show notifications on focused monitor rather than always on primary
+dunstrun true
+
+# enable redshift on all monitors;
+# TODO redshift freaks out when being killed
+# xrestart redshift -c ~/.config/redshift-all.conf

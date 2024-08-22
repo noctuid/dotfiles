@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+polybar --list-monitors | awk -F ':' '!/primary/ {print $1}' \
+    | while read -r monitor; do
+    POLYBAR_MONITOR=$monitor xrestart -n polybar-"$monitor" polybar \
+                                herbstluftwm
+done

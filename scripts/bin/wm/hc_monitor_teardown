@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+echo "Undoing multi-monitor config"
+herbstclient unrule mpv-move 2> /dev/null
+# TODO don't kill main polybar? (barely noticeable though)
+# kill other polybar
+pkill polybar
+xrestart polybar herbstluftwm
+dunstrun true
+# restart redshift
