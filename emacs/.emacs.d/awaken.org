@@ -735,7 +735,7 @@ Principles:
 ;; NOTE may rename these based on purpose and do find and replace if ever decide
 ;; to change the keybindings
 (general-create-definer general-spc
-  :states 'normal
+  :states '(normal visual)
   :keymaps 'override
   :prefix "SPC")
 
@@ -3742,10 +3742,10 @@ Sets missing metadata for completions (pairs well with embark even if not using 
        (find-file (expand-file-name "awaken.org"  user-emacs-directory)))
       ;; org agenda/todo
       ("log"
-       (find-file "~/ag-sys/notes/log.org"))
+       (find-file "~/ag-sys/notes/tasks.org"))
       ;; programming and personal notes
       ("notes"
-       (find-file "~/ag-sys/notes/life.org"))
+       (find-file "~/ag-sys/notes/journal.org"))
       ;; programming projects
       ("prog"
        (find-file "~/src"))
@@ -3872,8 +3872,8 @@ Globbing is used to find a matching file."
     "H" (noct-find-file "~/ag-sys/notes/medical_history.org")
     "i" (noct-find-file "~/ag-sys/else/interaction.org")
     "I" (noct-find-file "~/ag-sys/else/scrawl/prose/general/ideas.org")
-    "j" (noct-find-file "~/ag-sys/else/japanese/japanese.org")
-    "J" (noct-find-file "~/ag-sys/notes/journal.org")
+    "j" (noct-find-file "~/ag-sys/notes/journal.org")
+    "J" (noct-find-file "~/ag-sys/else/japanese/japanese.org")
     ;; pretty useful log file since most programs are started from sxhkd
     "K" (noct-defun noct-find-sxhkd-log ()
           (find-file (format "/tmp/sxhkd_%s.log" (getenv "DISPLAY"))))
@@ -3885,8 +3885,9 @@ Globbing is used to find a matching file."
     "q" (noct-find-file "~/.config/qutebrowser/config.py")
     "r" (noct-find-file "README.org")
     "R" (noct-find-file "~/.config/ranger/rc.conf")
-    "t" (noct-find-file "~/.config/tridactyl/tridactylrc")
-    "T" (noct-find-file "~/.config/tmux/tmux.conf")
+    "t" (noct-find-file "~/ag-sys/notes/tasks.org")
+    "SPC" (noct-find-file "~/ag-sys/notes/tasks.org")
+    "T" (noct-find-file "~/.config/tridactyl/tridactylrc")
     "v" (noct-find-file "~/.config/mpv/history.log")
     "V" (noct-find-file "~/.config/nvim/init.vim")
     "w" (noct-find-file "~/ag-sys/else/workflow.org")
@@ -3916,12 +3917,17 @@ Globbing is used to find a matching file."
        "t" (noct-find-file (expand-file-name "todo.org" user-emacs-directory))
        "T" (noct-find-file "~/test-emacs/.emacs.d/init.el")))
     ;; "log"
+    ("log"
+     (general-comma
+       "," (noct-find-file "~/ag-sys/notes/tasks.org")
+       "f" (noct-find-file "~/ag-sys/notes/tasks.org")
+       "t" (noct-find-file "~/ag-sys/notes/tasks.org")))
     ("notes"
      (general-comma
        "," (noct-find-file "~/ag-sys/notes/20xx.org")
-       "f" (noct-find-file "~/ag-sys/notes/20xx.org")
+       "f" (noct-find-file "~/ag-sys/notes/journal.org")
        "s" (noct-find-file "~/ag-sys/else/interaction.org")
-       "t" (noct-find-file "~/ag-sys/else/workflow.org")))
+       "t" (noct-find-file "~/ag-sys/notes/tasks.org")))
     ("prog"
      (general-comma
        "," #'noct-goto-main
@@ -7045,12 +7051,17 @@ All of my org config is in unclean.org.  I will gradually move it here.
 
 *** Setup
 #+begin_src emacs-lisp
+(defun noct-org-setup ()
+  ;; don't auto indent with o/O (I don't use indentation in org mode)
+  (gsetq evil-auto-indent nil))
+
 (use-package org-contrib)
 (use-package org
   :defer-incrementally
   calendar find-func format-spec org-macs org-compat org-faces org-entities
   org-list org-pcomplete org-src org-footnote org-macro ob org org-agenda
   org-capture
+  :gfhook #'noct-org-setup
   :init
   ;; (cl-pushnew org-modules 'ol-man)
 
@@ -7080,6 +7091,7 @@ All of my org config is in unclean.org.  I will gradually move it here.
          org-use-sub-superscripts '{}
          ;; until org-appear is fixed
          org-descriptive-links nil
+         org-id-link-to-org-use-id t
          ;; never show blank line when folding
          org-cycle-separator-lines 0
          ;; don't indent headings or text below them
@@ -7094,6 +7106,293 @@ All of my org config is in unclean.org.  I will gradually move it here.
 
   ;; open file links in the same window
   (setf (map-elt org-link-frame-setup 'file) #'find-file))
+#+end_src
+
+*** Todo States
+#+begin_src emacs-lisp
+(general-with 'org
+  (gsetq org-enforce-todo-dependencies t
+         org-enforce-todo-checkbox-dependencies t)
+
+  (general-m org-mode-map
+    "t" #'org-todo
+    "o" #'org-insert-todo-heading-respect-content
+    "," #'org-priority
+    "E" #'org-priority-up
+    "N" #'org-priority-down))
+#+end_src
+
+*** Basic Navigation, Outline, and Folding
+#+begin_src emacs-lisp
+(general-with 'org
+  ;; affects `org-beggining-of-line' and `org-end-of-line' even though not using
+  ;; C-a and C-e for them
+  (gsetq org-special-ctrl-a/e t)
+
+  (general-def '(insert normal) org-mode-map
+    [remap evil-beginning-of-visual-line] #'org-beginning-of-line
+    [remap evil-end-of-visual-line] #'org-end-of-line)
+
+  (defun noct-beginning-of-visible-heading ()
+    (interactive)
+    (org-back-to-heading)
+    (evil-insert-state))
+
+  (defun noct-org-toggle-fold ()
+    (interactive)
+    (if (invisible-p (point))
+        (org-reveal)
+      (evil-toggle-fold)))
+
+  (general-def 'normal org-mode-map
+    "H" #'noct-beginning-of-visible-heading
+    "^" #'org-beginning-of-line
+    "$" #'org-end-of-line
+    "<tab>"  #'noct-org-toggle-fold
+    ;; promoting/demoting headings, list items, and deleting/inserting table
+    ;; columns
+    "<" #'org-shiftmetaleft
+    ">" #'org-shiftmetaright)
+
+  (general-def 'normal org-mode-map
+    :infix "z"
+    ;; unlike zr also shows all drawers
+    "R" #'org-fold-show-all
+    "M" #'outline-hide-body)
+
+  (general-m org-mode-map
+    ;; navigation/ heading alteration
+    "<tab>" #'org-cycle
+    ;; not necessary if I end up binding something to C-c C-c
+    "m" #'org-toggle-checkbox
+    ;; convert from list item to heading
+    "8" #'org-ctrl-c-star
+    ;; convert from heading to list item
+    "-" #'org-ctrl-c-minus
+    "/" #'org-sparse-tree
+    ;; narroW
+    "w" #'org-narrow-to-subtree
+    "W" #'widen))
+#+end_src
+
+*** Tags and Properties
+https://orgmode.org/manual/Tag-searches.html#Tag-searches
+#+begin_src emacs-lisp
+(general-with 'org
+  (general-m org-mode-map
+    ;; can use C-c C-c on heading
+    ";" #'org-set-tags-command
+    "P" #'org-set-property))
+#+end_src
+
+*** Capturing/Refiling/Archiving
+#+begin_src emacs-lisp
+(general-with 'org
+  (gsetq org-default-notes-file "~/ag-sys/notes/tasks.org"
+         org-refile-targets
+         '((nil :maxlevel . 5))
+         ;; show full paths
+         org-refile-use-outline-path t
+         ;; show all subheadings immediately
+         org-outline-path-complete-in-steps nil)
+
+  ;; universal prefix to visit template; twice to go to last stored capture item
+  ;; in its buffer for log day (adding things to log without going there)
+  (general-spc "SPC" #'org-capture)
+
+  (general-m org-mode-map
+    "r" #'org-refile
+    "A" #'org-archive-subtree-default-with-confirmation)
+
+  (general-def 'normal org-capture-mode-map
+    "RET" #'org-capture-finalize
+    "q" #'org-capture-kill
+    "m r" #'org-capture-refile)
+  (general-def org-capture-mode-map
+    [remap evil-save-and-close] #'org-capture-finalize
+    [remap evil-save-modified-and-close] #'org-capture-finalize
+    [remap evil-quit] #'org-capture-kill)
+
+  (defun noct-org-capture-reuse-window-advice (fun &rest args)
+    (cl-letf (((symbol-function 'switch-to-buffer-other-window)
+               #'switch-to-buffer)
+              ((symbol-function 'delete-other-windows)
+               #'ignore))
+      (apply fun args)))
+  (general-add-advice 'org-capture
+                      :around #'noct-org-capture-reuse-window-advice)
+  ;; TODO doesn't work?
+  (noct-handle-popup (rx "*Org Select*"))
+
+  (defun noct-org-capture-setup ()
+    (evil-insert-state nil))
+  (general-add-hook 'org-capture-mode-hook #'noct-org-capture-setup))
+#+end_src
+
+*** Capture Templates
+http://orgmode.org/manual/Capture-templates.html#Capture-templates
+http://orgmode.org/manual/Template-elements.html#Template-elements
+#+begin_src emacs-lisp
+(noct-use org-reverse-datetree)
+
+(general-with 'org
+  (defconst noct-org-created-property-and-drawer
+    ;; %(org-insert-time-stamp (org-read-date nil t \"\") t t)
+    ":PROPERTIES:
+:CREATED: %U
+:ID: %(org-id-new)
+:END:"
+    "String for capture templates to insert the creation time.
+Only used for new headline entries.")
+
+  (defun noct-todo-heading-template (keyword prompt)
+    "Return a string template for a heading with the todo KEYWORD.
+Prompt for a heading title with the PROMPT string."
+    (format "* %s %%?\n%s\n%%i\n"
+            keyword
+            noct-org-created-property-and-drawer))
+
+  (defun noct-goto-todo-end ()
+    "Go to end of current project's todo file."
+    (noct-goto-todo)
+    (goto-char (point-max)))
+
+  (defvar noct-pre-capture-heading "")
+  (defun noct-store-org-heading-name (&rest _)
+    (let ((heading (org-get-heading t)))
+      (setq noct-pre-capture-heading
+            (if heading
+                (substring-no-properties heading)
+              ""))))
+  (general-add-advice 'org-capture :before #'noct-store-org-heading-name)
+
+  (gsetq org-capture-templates
+         ;; I manually set the deadline and/or schedule in the capture buffer
+         `(("t" "Actionable Todo" entry
+            (file+headline "~/ag-sys/notes/tasks.org" "Tasks")
+            ,(noct-todo-heading-template "TODO" "todo description"))
+           ("i" "Inbox Todo" entry
+            (file+headline "~/ag-sys/notes/tasks.org" "Inbox")
+            ,(noct-todo-heading-template "TODO" "todo description"))
+           ("p" "Project" entry
+            (file+headline "~/ag-sys/notes/tasks.org" "Inbox")
+            ,(noct-todo-heading-template "PROJECT" "project name/description"))
+           ("e" "Calendar event" entry
+            (file+headline "~/ag-sys/notes/tasks.org" "Inbox")
+            ,(noct-todo-heading-template "EVENT" "event description"))
+           ("h" "Copy as hot list item" entry
+            ;; TODO find a way to automatically insert link with org superlinks
+            (file+headline "~/ag-sys/notes/tasks.org" "Hot List")
+            "* %(symbol-value 'noct-pre-capture-heading)\n%?")
+           ("j" "Journal entry" plain
+            (file+datetree "~/ag-sys/notes/journal.org")
+            "%?")
+           ("f" "Feature or bug" entry
+            #'noct-goto-todo-end
+            ,(noct-todo-heading-template "TODO" "feature/bug description"))
+           ("c" "Note for the clocked in task" item
+            ;; (clock) doesn't work for this
+            (file+function "~/ag-sys/notes/tasks.org"
+                           org-clock-jump-to-current-clock)
+            "- %?"
+            ;; since newest clock is on top, put newest note on top
+            ;; TODO could be confusing in org agenda since it's the opposite
+            ;; no
+            ;; :prepend t
+            )
+           ("s" "Sleep log" plain
+            (file+function "~/ag-sys/else/sleep.org"
+                           org-reverse-datetree-goto-date-in-file)
+            "%?")
+           ;; use %a and %:keywords if start capturing mail
+           ;; also %^g
+           )))
+;; if ever add something specific to mail
+;; (setq org-capture-templates-contexts
+;;       '(("p" (in-mode . "message-mode"))))
+#+end_src
+
+*** Scheduling/Deadlines/Timestamps
+#+begin_src emacs-lisp
+(general-with 'org
+  (defun noct-org-time-stamp ()
+    "Insert a timestamp directly after the current heading.
+If there is already a timestamp, edit it instead of creating a new one."
+    (interactive)
+    (save-excursion
+      (org-back-to-heading t)
+      (forward-line)
+      (if (org-at-timestamp-p)
+          (org-time-stamp nil)
+        (evil-insert-newline-above)
+        (org-insert-time-stamp (current-time)))))
+
+  (general-m org-mode-map
+    ;; date-based event (e.g. appointment or meeting; only shows up on that day
+    ;; in the agenda)
+    "." #'noct-org-time-stamp
+    ;; to schedule when should start working on a project/task (shows up in
+    ;; agenda starting that day and until completed)
+    "s" #'org-schedule
+    ;; to set a date by which a task/project must be completed (shows up in
+    ;; agenda `org-deadline-warning-days' (14) or the specified number of
+    ;; warning days in the timestamp before and until completed)
+    "d" #'org-deadline))
+#+end_src
+
+*** Org Sorting
+#+begin_src emacs-lisp
+(general-with 'org
+  (gsetq org-priority-default (string-to-char "D"))
+
+  ;; TODO don't expand headings
+  (defun noct-org-sort-key ()
+    "Return value for sorting by priority, breaking ties with todo keyword pos."
+    (let* ((todo-keyword (org-entry-get (point) "TODO"))
+           (todo (cl-dolist (keywords org-todo-sets 99)
+                   (when-let ((index (cl-position todo-keyword keywords
+                                                  :test #'equal)))
+                     (cl-return-from nil index))))
+           (priority (org-entry-get (point) "PRIORITY"))
+           (priority (if priority
+                         (string-to-char priority)
+                       (string-to-char "D"))))
+      (format "%03d %02d" priority todo)))
+
+  (defun noct-org-sort ()
+    "Sort subheadings of parent heading by priority then todo state."
+    (interactive)
+    ;; marker doesn't work
+    (let ((id (org-id-get-create)))
+      (unwind-protect
+          (progn
+            ;; (ignore-errors
+            ;;   (org-sort-entries nil ?f #'noct-org-sort-key))
+            (save-excursion
+              (outline-up-heading 1)
+              (ignore-errors
+                (org-sort-entries nil ?f #'noct-org-sort-key))))
+        (org-id-goto id))))
+
+  ;; automatically resort after priority/todo state changes
+
+  (general-add-hook 'org-after-todo-state-change-hook
+                    #'noct-org-sort)
+  ;; (general-remove-hook 'org-after-refile-insert-hook
+  ;;                      #'noct-org-sort)
+  ;; TODO get refile sorting working
+  (general-add-advice 'org-priority :after #'noct-org-sort))
+#+end_src
+
+*** Tables
+#+begin_src emacs-lisp
+(use-package org-table
+  :straight nil
+  ;; always show table headers
+  ;; massively slows down scrolling etc in awaken
+  ;; :ghook ('org-mode-hook #'org-table-header-line-mode)
+  ;; org tables in other modes
+  :general (noct-toggle-map "T" #'orgtbl-mode))
 #+end_src
 
 *** Org Src
@@ -7113,6 +7412,10 @@ All of my org config is in unclean.org.  I will gradually move it here.
   (org-edit-src-save)
   (org-edit-src-exit))
 
+(general-with 'org
+  (general-m org-mode-map
+    "'" #'noct-org-edit-special))
+
 (general-with 'org-src
   (blackout 'org-src-mode " λ")
 
@@ -7129,17 +7432,17 @@ All of my org config is in unclean.org.  I will gradually move it here.
     [remap save-buffer] #'org-edit-src-save))
 #+end_src
 
-*** Keybindings
-**** Basic Navigation
+*** Org Export
 #+begin_src emacs-lisp
 (general-with 'org
-  ;; affects `org-beggining-of-line' and `org-end-of-line' even though not using
-  ;; C-a and C-e for them
-  (gsetq org-special-ctrl-a/e t)
+  (general-m org-mode-map "x" #'org-export-dispatch))
+#+end_src
 
-  (general-def '(insert normal) org-mode-map
-    [remap evil-beginning-of-visual-line] #'org-beginning-of-line
-    [remap evil-end-of-visual-line] #'org-end-of-line ))
+*** Org Undo Granularity
+#+begin_src emacs-lisp
+(general-with 'org
+  (noct-add-undo-bounds 'org-yank)
+  (noct-add-undo-bounds 'org-fill-paragraph))
 #+end_src
 
 *** External/Contrib
@@ -7309,6 +7612,24 @@ Matching is done case-insensitively."
 #+begin_src emacs-lisp
 (noct-use org-reveal
   (:require-once "ox" 'ox-reveal))
+#+end_src
+
+**** Org Superlinks
+#+begin_src emacs-lisp
+(use-package org-super-links
+  :straight
+  (org-super-links :type git
+                   :host github
+                   :repo "toshism/org-super-links"
+                   :branch "develop")
+  :general
+  (general-t "y" #'org-super-links-store-link)
+  :init
+  (general-with 'org
+    ;; org superlinks currently autoloads this...
+    (general-advice-add 'org-capture
+                        :before #'org-super-links-store-link)
+    (general-m org-mode-map "p" #'org-super-links-insert-link)))
 #+end_src
 
 ** Pentadactyl
@@ -9824,7 +10145,7 @@ If a region is active, toggle marking all files in the region."
     "m" (noct-dired-alt-file "~/move/")
     "p" (noct-dired-alt-file "~/ag-sys/else/scrawl/prose/pots/")
     "P" (noct-dired-alt-file "~/ag-sys/prog/")
-    "s" (noct-dired-alt-file "~/school/")
+    "s" (noct-dired-alt-file "~/.emacs.d/straight/")
     "S" (noct-dired-alt-file "~/move/Screenshots/")
     "w" (noct-dired-alt-file "~/wallpaper/")))
 #+end_src
