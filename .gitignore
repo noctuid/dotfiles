@@ -11,3 +11,5 @@ dunstrc
 # using a template to generate
 /aesthetics/.config/tridactyl/themes/custom.css
 **/.config/autorandr/current
+root/*log*.org
+root/*log*.txt
