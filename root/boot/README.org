@@ -11,6 +11,13 @@ Not sure all these matter but:
 * Fixing Completely Broken System
 If you happen to have turned off your computer because it completely froze during an update (before hitting yes to continue) due to a newly introduced NVIDIA driver issue and now bash, pacman, and all basic binaries are 0-length and you can't chroot into the system from a live usb... Well it's time for a new install!  See [[../README.org]].
 
+* Bootloader Caveats
+At the time of writing
+- refind-install does not always work/correctly detect the right ESP partition and will also overwrite the refind.conf (but not refind_linux.conf)
+- systemd-boot requires boot/esp flags on esp partition and bls_boot on separate boot partition
+- systemd-boot does not support the boot (XBOOTLDR) and esp partitions being on separate physical disks
+- grub does not support argon2id/argon2i PBKDFs for LUKS (there is an aur package with support); I don't currently use grub anywhere though
+
 * Fixing Broken Bootloader
 Windows likes to break the bootloader.
 
@@ -38,8 +45,28 @@ mount LABEL=SYSTEM /mnt/boot/efi
 - Cd to post-install directory
 - E.g. run ~./post-install fix~ (for refind) or ~./post-install systemd-boot~
 - ~exit~
+- [[#validate-refind-installation][Validate rEFInd Installation]]
 - ~umount -R /mnt~
 - ~reboot~
+
+* Validate rEFInd Installation
+- Check if ESP is still mounted: ~umount /mnt/boot/efi~
+- If refind-install unmounted the esp and installed itself to the boot partition, you will need to explicitly specify the esp and reinstall or manually copy the files; delete any files on the boot partition
+
+Here are the files that should be on the ESP for refind to work:
+- <esp>/EFI/refind/refind_x64.efi
+- <esp>/EFI/refind/drivers_x64; should include the drivers for the boot partition filesystem (e.g. drivers_x64/ext4_x64.efi)
+- Verify that <esp>/EFI/refind/refind.conf is your configuration not the sample
+- Verify that <boot>/refind_linux.conf is right
+For apperance:
+- <esp>/EFI/refind/icons
+- <esp>/EFI/refind/themes
+
+These files (excluding your configuration) can be copied from =/usr/share/refind=.
+
+Check the output of ~efibootmgr~ to confirm that there is an entry for refind, that it is for the esp partition, and that it is first in the boot order.
+
+If there is not an entry, you can manually add one with ~efibootmgr --create --disk /dev/sdX --part Y --loader /EFI/refind/refind_x64.efi --label "rEFInd Boot Manager" --unicode~ where disk/part is for the esp (not boot) partition.
 
 * Troubleshooting
 :PROPERTIES:
@@ -53,11 +80,11 @@ I don't remember if some bootloaders require the EFI partition to be gpt instead
 
 Check the following (for systemd-boot orinstallation will error):
 - ~fdisk -l~ should show the type of the esp partition as "EFI System" (not something like "Microsoft Basic Data")
-- ~parted /dev/<device>~ then ~print~ should show =boot= (not sure if necessary) and =esp= flags on the esp partition and =boot_bls= on the boot partition
+- ~parted /dev/<device>~ (e.g. =/dev/sdc= not =/dev/sdc1=) then ~print~ should show =boot= (not sure if necessary) and =esp= flags on the esp partition and =boot_bls= on the boot partition
 
-You can use either parted or gdisk to change flags, e.g. ~parted /dev/sd<X> 1 set boot on~ (replace boot with esp to set esp flag).  (Remember to exclude the p for nvme drives, e.g. ~parted /dev/nvme1n1 2...~ not ~p2~).  For partition type, ~gdisk /dev/sdb~ followed by =t 1 ea00 w= would make =/dev/sdb1= usable as the XBOOTLDR partition for systemd-boot (shows up =bls_boot= flag in gparted).  =t 1 ef00 w= would set the type to EFI system partition (think this is the same as =esp= flag but would need to double-check).
+You can use either parted or gdisk to change flags, e.g. ~parted /dev/sd<X> set 1 boot on~ (replace boot with esp to set esp flag).  Remember to exclude the p for nvme drives, e.g. ~parted /dev/nvme1n1 set 2...~ not ~p2~.  For normal drives, an example command would ge ~parted /dev/sdc set 1 boot on~.  For partition type, ~gdisk /dev/sdb~ followed by =t RET 1 RET ea00 RET w RET y RET= would make =/dev/sdb1= usable as the XBOOTLDR partition for systemd-boot (shows up =bls_boot= flag in gparted).  =t RET 1 RET ef00 RET w RET y RET= would set the type to EFI system partition (think this is the same as =esp= flag but would need to double-check).
 
-*One more thing*: Make sure you don't have anything under =/boot/efi= when the esp is unmounted (or under =/boot= when the boot partition is unmounted).  I had refind configuration that was screwing things up.  Make sure the refind configuration is only on the esp and at =/boot/refind_linux.conf=.  For some reason after ~refind-install~ and exiting the chroot, I've seen refind configuration in both places (though it the configuration was the same in that case).
+*One more thing*: Make sure you don't have anything under =/boot/efi= when the esp is unmounted (or under =/boot= when the boot partition is unmounted).  ~refind-install~ can sometimes install itself to the incorrect partition, see [[#validate-refind-installation][Validate rEFInd Installation]].
 
 * Moving Partitions (Including ESP and Boot) to New Drive
 - Partition and copy data to new drive

@@ -44,6 +44,8 @@ ip=$(echo "$ip_port" | awk -F ":" '{print $1}')
 port=$(echo "$ip_port" | awk -F ":" '{print $2}')
 # allow connecting to vpn
 sudo ufw allow out to "$ip" port "$port" proto udp
+# allow connecting to local network (router, server, etc.)
+sudo ufw allow out to 192.168.10.0/16
 
 # allow traffic only on wireguard interface
 sudo ufw allow out on "$interface"

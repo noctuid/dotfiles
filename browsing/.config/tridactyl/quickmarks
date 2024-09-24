@@ -17,6 +17,9 @@ bind 'r tabopen https://reddit.com/
 bind 'w js tri.excmds.tabopen(`https://web.archive.org/web/*/${document.location.href}`)
 bind 'y tabopen https://youtube.com/
 
+" open webui
+bind 'o jsb tri.native.run('echo "$BAHSERVER:3000"').then(result => tri.excmds.tabopen(result.content))
+
 " to get to login page (e.g. airport/hotel)
 " https://github.com/tridactyl/tridactyl/issues/2002
 bind 'z jsb tri.native.run("ip route | awk '/default/ {print $3}'").then(result => tri.excmds.tabopen(result.content))

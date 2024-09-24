@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+models=$(find ~/llm -type f -name "*.gguf" -size +1M)
+selected_model=$(echo "$models" | fzf)
+
+if [[ -z $selected_model ]]; then
+    exit
+fi
+
+contextsize=8192
+
+case $1 in
+    16k) contextsize=16384;;
+    32k) contextsize=32768;;
+    *) echo "Unsupported context size, ignoring."
+esac
+
+gpulayers=80
+if [[ -n $2 ]]; then
+    gpulayers=$2
+fi
+
+# NOTE:
+# - I had to specifically choose the index of my graphics card to get this to
+#   work (ended up running GUI to figure out correct flags)
+# - I'm only running in vram for now (high gpulayers)
+koboldcpp --port 5001 --usecublas normal 0 \
+          --contextsize "$contextsize" --gpulayers "$gpulayers" \
+          --model "$selected_model"

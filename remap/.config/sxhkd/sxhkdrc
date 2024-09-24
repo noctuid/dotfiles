@@ -136,6 +136,9 @@ super + b
 
 # ** Terminals, Dropdowns, etc.
 {mod2,super+control} + Return
+	wezterm
+
+{mod2,super+control+shift} + Return
 	kitty
 
 {mod2,super+control} + s

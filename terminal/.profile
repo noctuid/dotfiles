@@ -70,6 +70,8 @@ export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv
 # temporary for testing
 export PATH="$HOME/.tmuxifier/bin:$PATH"
 
+export BAHSERVER=129.168.1.229
+
 # * Setting PATH
 pathdirs="
 # personal scripts
@@ -77,10 +79,11 @@ $HOME/bin
 $HOME/ebin
 $HOME/bin/dunst
 $HOME/bin/input
-$HOME/bin/net
-$HOME/bin/not_mine
+$HOME/bin/llm
 $HOME/bin/media
 $HOME/bin/music
+$HOME/bin/net
+$HOME/bin/not_mine
 $HOME/bin/video
 $HOME/bin/wal
 $HOME/bin/wm
@@ -128,8 +131,10 @@ playerctld daemon
 # * Startx on login if tty1
 if [[ $(tty) == /dev/tty1 ]]; then
 	startx
-elif [[ $- == *i* ]]; then
-	# check if interactive
+elif [[ $- == *i* ]] && [[ -f /etc/hostname ]] \
+		 && [[ $(< /etc/hostname) != *server ]]; then
+	# check if interactive or on server: zsh on server messes up TRAMP (because
+	# of prompt, but this was easier to get working)
 	zsh
 fi
 

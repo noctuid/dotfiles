@@ -5,5 +5,5 @@
 # nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
 # can validate with: nvidia-settings --query CurrentMetaMode
 
-nvidia-settings --assign CurrentMetaMode="DPY-2: nvidia-auto-select +3840+0 { ForceFullCompositionPipeline=On}" \
-                echo "Make sure to run with external monitor/tv connected"
+echo "Make sure to run with external monitor/tv connected"
+nvidia-settings --assign CurrentMetaMode="DPY-2: nvidia-auto-select +3840+0 { ForceFullCompositionPipeline=On}"

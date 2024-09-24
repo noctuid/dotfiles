@@ -1,16 +1,24 @@
 * Pre-Install
 - Either wipe the root/var partitions or move e.g. =/opt=, =/usr=, =/var=, =/lib= , =/lib64=, and =/etc= to somewhere else as backup (boot is okay to keep though will need to delete old image to be able to install intel-ucode).  I also deleted =bin= and =sbin= symlinks.
 - Mount partitions including boot and ESP (see boot README for example)
+  - Make sure ESP's label is =SYSTEM=
 - Connect to the internet (e.g. with ~iwctl~)
 - Dotfiles should be in place (should be able to run the scripts in this directory)
+- If you don't have dotfiles locally:
+  - You probably want to wait to clone into home until creating the user/home directory (you can clone somewhere else and clone again later) or you will at least need to ~chown -R <user>:<user> <home-dir>~ later before running the post-install script
+  - ~git clone https://github.com/noctuid/dotfiles <path>~
 - Run the =./system-install= script to pacstrap and then chroot into the system
 
 * Inside Chroot
 - Create your user: ~useradd --create-home <user>~
 - Set your user's password: ~password <user>~
 - Recommended: ~pacman -Syu~
+
+- Clone dotfiles again if necessary (with ~sudo -u <user>~), cd into, and ~git submodule update --init --recursive~
 - Validate then run ~./pacman-keys~
 - ~./post-install~
+For server:
+- ~post-install --server~ instead
 
 * After Reboot
 - ~sudo post-install non-chroot~
@@ -18,3 +26,12 @@
 
 * Size Issues
 If nix is just monstrously large, see nixshrink.
+
+* Why Bash?
+The script is in place and working.
+
+I had tried SaltStack, but it ended up being extra work without real benefit, and when I needed to use it for a fresh install, I couldn't since there was an issue with installing it.  I didn't try Ansible or any other similar software, but the post-install process doesn't need very complicated logic.
+
+If I had to do it from scratch I might try aconfmgr or rebos because I'd prefer something more declarative on the surface, but I might just still use bash.  I would rather use something like this than to use an entirely different distro like NixOS, which I now have a much more negative opinion on after trying multiple times, after using nix more with Arch (where dealing with opengl applications and other complications ranges from painful to a nightmare), and after using nix-darwin for everything for maybe a year on my work laptpop.
+
+Ideal?  No, but so far it's been the least hassle for me.

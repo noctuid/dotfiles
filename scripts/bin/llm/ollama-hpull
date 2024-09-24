@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+
+while getopts t: opt
+do
+    case $opt in
+        t) template=templates/"$OPTARG".txt;;
+        *) echo "Bad option" && exit 1;;
+    esac
+done
+shift "$((OPTIND-1))"
+
+hf_url=$1
+specific_file=$2
+model_name=$(basename "$hf_url" .git)
+model_file="$model_name"-Modelfile
+
+cd ~/llm || exit 1
+
+# TODO add submodule initially or later? (don't think there's any point in
+# submodules, so would be better to just have list of what models I want and
+# then run this for all of them)
+pull_model() (
+    if [[ ! -d $model_name ]]; then
+        echo "Pulling $model_name"
+        if [[ -n $specific_file ]]; then
+            echo "Pulling $specific_file"
+            # skip lfs files and only pull specific e.g. GGUF file
+            GIT_LFS_SKIP_SMUDGE=1 git clone "$hf_url"
+            cd "$model_name" || exit 1
+            git lfs pull --include "$specific_file"
+        else
+            git clone "$hf_url"
+            cd "$model_name" || exit 1
+            git lfs pull
+        fi
+    fi
+)
+
+create_model_file() {
+    if [[ ! -f $model_file ]]; then
+        echo "Creating Modelfile"
+        import_path="./$model_name"
+        if [[ -n $specific_file ]]; then
+            import_path="$import_path/$specific_file"
+        fi
+        echo "FROM $import_path" > "$model_file"
+        if [[ -n $template ]]; then
+            cat "$template" >> "$model_file"
+        fi
+    fi
+}
+
+
+create_ollama_model(){
+    if ! ollama ls | grep --quiet "$model_name"; then
+        echo "Creating ollama model"
+        ollama create -f "$model_file" "$model_name"
+    fi
+}
+
+pull_model
+create_model_file
+create_ollama_model
