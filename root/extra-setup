@@ -8,6 +8,9 @@ print_option_help() {
 	echo "usage: extra-setup [options] [operation]
 
 options:
+	-s or --server <true|false>
+	   Whether to perform server configuration instead (default: false)
+
 	-t or --timestamp <timestamp>
 	   Optional timestamp to use for log files (to share them with post-install)
 
@@ -34,10 +37,12 @@ primary operations:
 }
 
 timestamp=$(date +%FT%T)
-while getopts t:h-: opt
+server=false
+while getopts t:s:h-: opt
 do
 	case $opt in
 		t) timestamp=$OPTARG;;
+		s) server=$OPTARG;;
 		-)
 			if [[ $OPTARG =~ ^(arg-with-no-opts)$ ]] || \
 				   [[ $OPTARG == *=* ]]; then
@@ -51,6 +56,7 @@ do
 			fi
 			case $OPTION in
 				timestamp) timestamp=$OPTARG;;
+				server) server=$OPTARG;;
 				help) print_option_help && exit 0;;
 				*) print_option_help && exit 1;;
 			esac;;
@@ -110,18 +116,24 @@ service_setup() {
 	systemctl enable iwd
 	systemctl enable kwakd
 	systemctl enable ntpd
-	systemctl enable tlp
 	# tlp requires these to be masked
 	systemctl mask systemd-rfkill.service systemd-rfkill.socket
 	# enabled in fcron_setup
 	# systemctl enable fcron
 	systemctl enable ufw
-	systemctl enable resume@"$user"
 	systemctl enable preload
 	systemctl enable systemd-modules-load
 	# printing/printer discovery
 	systemctl enable cups
 	systemctl enable avahi-daemon
+
+	if $server; then
+		systemctl disable optimus-manager
+		systemctl mask optimus-manager
+	else
+		systemctl enable resume@"$user"
+		systemctl enable tlp
+	fi
 }
 
 # ** User Services
@@ -318,20 +330,18 @@ noptions edns0 single-request-reopen" \
 
 # * Ranger Devicons
 # no AUR package
-# TODO this fails because installation method is different now
-# git clone https://github.com/alexanderjeurissen/ranger_devicons \
-# 	~/.config/ranger/plugins/ranger_devicons
 ranger_devicons_setup() {
-	echo "Configuring ranger devicons."
-	local uhome build_dir
-	uhome=$1
-	build_dir=/tmp/build/ranger_devicons
-	mkdir -p /tmp/build
-	if [[ ! -d "$build_dir" ]]; then
-		git clone https://github.com/alexanderjeurissen/ranger_devicons \
-			"$build_dir"
+	echo "Installing ranger devicons."
+	local user uhome devicons_dir
+	user=$1
+	uhome=/home/"$user"
+	devicons_dir="$uhome"/.config/ranger/plugins/ranger_devicons
+	if [[ ! -d $devicons_dir ]]; then
+		sudo -u "$user" mkdir -p "$uhome"/.config/ranger/plugins
+		sudo -u "$user" \
+			 git clone https://github.com/alexanderjeurissen/ranger_devicons \
+			"$devicons_dir"
 	fi
-	cd "$build_dir" && HOME="$uhome" make install
 }
 
 # * Udiskie
@@ -371,9 +381,24 @@ pywalfox_setup() {
 qmk_setup() {
 	local user
 	user=$1
+	qmk_dir=/home/"$user"/qmk_firmware
+	if [[ ! -d $qmk_dir ]]; then
+		sudo -u "$user" git clone -b "feature/noctuid-kyria" \
+			https://github.com/noctuid/qmk_firmware "$qmk_dir"
+	fi
 	sudo -u "$user" qmk setup || return 1
 	sudo -u "$user" qmk config user.keyboard=splitkb/kyria/rev3 || return 1
 	sudo -u "$user" qmk config user.keymap=noctuid || return 1
+}
+
+# * LLM
+ollama_setup() {
+	if $server; then
+		pacman -S ollama-rocm
+		systemctl enable ollama
+	else
+		pacman -S ollama-cuda
+	fi
 }
 
 # * All
@@ -399,12 +424,12 @@ all() {
 	run_subsection ufw_setup
 	run_subsection transmission_setup "$user"
 	# run_subsection dns_setup
-	run_subsection ranger_devicons_setup "$uhome"
+	run_subsection ranger_devicons_setup "$user"
 	run_subsection udiskie_setup
-	run_subsection connman_setup
 	run_subsection arkenfox_setup "$user"
 	run_subsection pywalfox_setup
 	run_subsection qmk_setup "$user"
+	run_subsection ollama_setup
 }
 
 # * Non-chroot
@@ -412,6 +437,7 @@ non_chroot() {
 	user=$1
 	systemctl daemon-reload
 	run_subsection user_services_setup "$user"
+	run_subsection connman_setup
 	run_subsection ufw_setup
 	run_subsection dns_setup
 }

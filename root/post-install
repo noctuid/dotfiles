@@ -68,12 +68,16 @@ hostname=bahamut
 user=noctuid
 uhome=/home/"$user"
 force_reflector=false
+server=false
 
 print_option_help() {
 	echo "
 usage: post-install [options] [operation]
 
 options:
+	-s or --server
+	   Use server config
+
 	-t or --timezone <timezone>
 	   Timezone to set. For example: --timezone \"America/New_York\"
 	   You can use tzselect to find your timezone.
@@ -142,15 +146,21 @@ other operations not part of default setup:
 "
 }
 
-while getopts t:H:u:fh-: opt
+server_config() {
+	server=true
+	hostname=bahamut-server
+}
+
+while getopts t:H:u:fsh-: opt
 do
 	case $opt in
 		t) timezone=$OPTARG;;
 		H) hostname=$OPTARG;;
 		u) user=$OPTARG;;
 		f) force_reflector=true;;
+		s) server_config;;
 		-)
-			if [[ $OPTARG =~ ^(force-reflector)$ ]] || \
+			if [[ $OPTARG =~ ^(force-reflector|server)$ ]] || \
 				   [[ $OPTARG == *=* ]]; then
 				OPTION=${OPTARG%%=*}
 				OPTARG=${OPTARG#*=}
@@ -165,6 +175,7 @@ do
 				hostname) hostname=$OPTARG;;
 				user) user=$OPTARG;;
 				force-reflector) force_reflector=true;;
+				server) server_config;;
 				help) print_option_help && exit 0;;
 				*) print_option_help && exit 1;;
 			esac;;
@@ -279,7 +290,11 @@ locale_setup() {
 # ** Hostname
 hostname_setup() {
 	echo "Updating hostname to $hostname."
-	hostnamectl set-hostname "$hostname"
+	if systemctl is-system-running --quiet; then
+		hostnamectl set-hostname "$hostname"
+	else
+		echo "$hostname" > /etc/host
+	fi
 }
 
 # * Pacman/AUR
@@ -356,7 +371,7 @@ install_emacs_lucid() {
 # * Home Config Setup
 home_config_setup() { # <user>
 	echo "Symlinking user config files."
-	cp "$uhome"/bin/restow /usr/local/bin
+	cp "$uhome"/dotfiles/scripts/bin/restow /usr/local/bin
 	pac_install stow \
 		&& sudo -u "$1" restow
 	rm /usr/local/bin/restow
@@ -662,6 +677,9 @@ copy_root_config_files() {
 	# remove comments
 	sed -i "/^ *\//d" \
 		/var/lib/transmission/.config/transmission-daemon/settings.json
+	if $server; then
+		cp -R "$basedir"/server/boot "$basedir"/server/etc /
+	fi
 }
 
 # ** Package Installation
@@ -743,7 +761,7 @@ install_packages() {
 	done < "$basedir"/packages
 	run_subsection install_emacs_lucid
 
-	if ! is_chroot; then
+	if ! is_chroot && ! $server; then
 		run_section install_nix_packages
 	fi
 	run_section install_mpv_scripts
@@ -752,7 +770,7 @@ install_packages() {
 # ** Program Configuration
 configure_packages() {
 	section_echo "Configuring packages"
-	"$basedir"/extra-setup --timestamp "$timestamp" all "$user"
+	"$basedir"/extra-setup --server "$server" --timestamp "$timestamp" all "$user"
 }
 
 # * Move Boot Helper
@@ -796,7 +814,7 @@ config_setup() {
 	run_section copy_root_config_files
 }
 
-full_setup() {
+echo_prereqs() {
 	echo "Prerequisites:
 - Inside chroot (or on existing installation that should be updated)
 - Internet connection
@@ -818,6 +836,10 @@ new system.
 For more information, rerun with --help flag.
 
 See $log and $failure_log for info after run."
+}
+
+full_setup() {
+	echo_prereqs
 	prompt_continue
 
 	basic_setup

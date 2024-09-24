@@ -24,7 +24,7 @@ yay aur
 # * Nix
 nix
 
-# * Booatloader
+# * Bootloader
 refind
 
 # * Internet
@@ -46,12 +46,14 @@ mkinitcpio-colors-git aur
 herbstluftwm
 bspwm
 
-# * Filesystem Support
+# * Filesystem Support/Related
 ntfs-3g
 dosfstools
 # exfat-utils
 # for creating partitions with gparted (alternative to exfat-utils)
 exfatprogs
+bcachefs-tools
+lvm2
 
 # * Input
 # scim -> ibus -> fcitx -> fcitx5
@@ -61,7 +63,7 @@ fcitx5-mozc
 fcitx5-table-other
 
 # * Games
-unnamed-sdvx-clone-git aur
+unnamed-sdvx-clone aur
 
 # * Graphics/Drivers/Steam
 steam
@@ -74,8 +76,10 @@ steam-native-runtime
 
 # ** Microcode
 intel-ucode
+amd-ucode
 
 # ** Nvidia
+nvidia-dkms
 # having both installed has not caused me issues (but xrun is now orphaned)
 # nvidia-xrun-git aur
 optimus-manager-git aur
@@ -83,7 +87,6 @@ optimus-manager-git aur
 bbswitch-dkms
 # intel-virtual-output
 xf86-video-intel
-nvidia-dkms
 # for prime-run
 nvidia-prime
 # WAITING switch to nvidia-open-dkms when get new graphics card and it is stable
@@ -97,6 +100,10 @@ lib32-nvidia-utils
 vulkan-icd-loader
 # for testing vulkan
 vulkan-tools
+
+# ** Amd
+xf86-video-amdgpu
+vulkan-radeon
 
 # * Security
 wireguard-tools
@@ -317,7 +324,7 @@ ppsspp
 dolphin-emu
 
 # * General Utilities
-mlocate
+plocate
 # to find what files in use that are preventing unmounting
 lsof
 # hardware info
@@ -510,7 +517,7 @@ otf-font-awesome
 # monospace fonts
 otf-fira-mono
 ttf-inconsolata
-ttf-inconsolata-g aur
+# ttf-inconsolata-g aur
 # otf-inconsolata-lgc aur
 office-code-pro aur
 # fails to install
@@ -558,7 +565,7 @@ otfcc-c2q npm
 unorm npm
 
 # * Appearance/Theming
-polybar-git aur
+polybar
 # aur build failing; installing through nix
 # setroot aur
 xtitle aur

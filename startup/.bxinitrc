@@ -4,6 +4,10 @@
 
 basedir="$(dirname "$(realpath "$0")")"
 
+is_server() {
+	[[ $(< /etc/hostname) == *server ]]
+}
+
 # * Defaults
 # from default /etc/X11/xinit/xinitrc
 if [[ -d /etc/X11/xinit/xinitrc.d ]]; then
@@ -18,7 +22,8 @@ fi
 xrdb -load ~/.Xresources
 
 # * Optimus Manager
-if [[ -z $NVIDIA_XRUN ]]; then
+if [[ -z $NVIDIA_XRUN ]] && ! is_server \
+	   && systemctl is-active --quiet optimus-manager; then
 	# NOTE: this must come first to prevent black screen issue when switching
 	prime-offload
 
@@ -42,10 +47,12 @@ fi
 # pick the first monitor that is not HDMI as the primary; this works on my
 # current laptop even when connected to HDMI when starting X but may need to be
 # changed if I start using displayport or thunderbolt
-primary=$(xrandr --listmonitors | awk 'NR>1 && !/HDMI/ {print $NF; exit}')
-echo "Available monitors: $(xrandr --listmonitors)"
-echo "Primary output: $primary"
-xrandr --output "$primary" --primary
+if ! is_server; then
+	primary=$(xrandr --listmonitors | awk 'NR>1 && !/HDMI/ {print $NF; exit}')
+	echo "Available monitors: $(xrandr --listmonitors)"
+	echo "Primary output: $primary"
+	xrandr --output "$primary" --primary
+fi
 
 # NOTE: the consequence of setting the primary monitor incorrectly is that
 # autorandr --change will fail; I'm calling autorandr separately in

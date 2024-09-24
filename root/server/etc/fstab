@@ -1,0 +1,25 @@
+# -*- mode: conf-space; -*-
+# /etc/fstab: static file system information
+# <file system>	<dir>	<type>	<options>	<dump>	<fsck>
+# https://wiki.archlinux.org/index.php/Fstab
+# https://wiki.archlinux.org/index.php/Security#Mount_options
+# https://wiki.archlinux.org/index.php/Fstab#atime_options
+# not using discard:
+# https://wiki.archlinux.org/index.php/Solid_State_Drive#Periodic_TRIM
+
+# don't remount root; https://wiki.archlinux.org/index.php/Improve_boot_performance#Filesystem_mounts
+
+LABEL=svboot /boot ext4 defaults,noatime,nodev,nosuid,noexec 0 2
+
+# https://old.reddit.com/r/bcachefs/comments/1b3uv59/booting_into_a_subvolume_and_rollback/
+# https://github.com/util-linux/util-linux/issues/2834
+# /dev/mapper/svcrypt /home bcachefs rw,X-mount.subdir=home 0 0
+
+# LVM
+# I sometimes sort by atime; relatime is default
+/dev/svcrypt_group/home /home ext4 defaults,relatime,lazytime,nodev,nosuid 0 2
+/dev/svcrypt_group/swap none swap defaults 0 0
+
+# have less ram on desktop than desktop currently
+# tmpfs /tmp tmpfs nodev,nosuid,size=8G 0 0
+# nodev,nosuid are also defaults for /dev/shm

@@ -1,8 +1,11 @@
 * Pre-Install
 - Either wipe the root/var partitions or move e.g. =/opt=, =/usr=, =/var=, =/lib= , =/lib64=, and =/etc= to somewhere else as backup (boot is okay to keep though will need to delete old image to be able to install intel-ucode).  I also deleted =bin= and =sbin= symlinks.
 - Mount partitions including boot and ESP (see boot README for example)
+  - Make sure ESP's label is =SYSTEM=
 - Connect to the internet (e.g. with ~iwctl~)
 - Dotfiles should be in place (should be able to run the scripts in this directory)
+- If you don't have dotfiles locally: ~git clone https://github.com/noctuid/dotfiles <mount>/home/noctuid/dotfiles~
+- You may want to wait to clone until creating the user or you will at least need to ~chown -R <user>:<user> <home-dir>~
 - Run the =./system-install= script to pacstrap and then chroot into the system
 
 * Inside Chroot
@@ -11,6 +14,9 @@
 - Recommended: ~pacman -Syu~
 - Validate then run ~./pacman-keys~
 - ~./post-install~
+
+For server:
+- ~post-install --server~ instead
 
 * After Reboot
 - ~sudo post-install non-chroot~
