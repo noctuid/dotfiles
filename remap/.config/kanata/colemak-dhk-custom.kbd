@@ -8,7 +8,7 @@
  log-layer-changes no
  linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd:/dev/trackpoint)
 
-(defvar ht 200)
+(defvar ht 400)
 
 (defalias
   ~ S-`

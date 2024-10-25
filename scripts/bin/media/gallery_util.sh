@@ -34,6 +34,7 @@ take_gallery_dir() { # <url>
 	if [[ $tags == null ]]; then
 		tags=
 	fi
+	title=${title:0:200}
 	takedir "./$site/$title/$tags"
 }
 

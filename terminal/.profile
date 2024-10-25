@@ -19,6 +19,9 @@ export BROWSER=firefox
 # keep SHELL as bash (e.g. Emacs tries to execute commands with zsh otherwise)
 # export SHELL=/bin/zsh
 
+# chromium for tidal
+export PLAYERCTL_MUSIC_PLAYERS=spotify,chromium,mpd
+
 export SOURCE=$HOME/src
 
 # fix locale issues for packages installed with nix (e.g. rofi and xtitle)

@@ -1,2 +1,6 @@
 #!/usr/bin/env bash
-prime-run firejail --noprofile --blacklist=/sys/class/hidraw/ steam
+# prime-run firejail --noprofile \
+#           --blacklist=/sys/class/hidraw/ \
+#           --blacklist="$HOME/.nix-profile" \
+#           steam
+steam-native

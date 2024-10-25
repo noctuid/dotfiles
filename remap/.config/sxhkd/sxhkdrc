@@ -161,7 +161,7 @@ super + b
 	max_dropdown -n ranger wezterm start --workspace ranger zsh -c "ranger; zsh -i"
 
 {mod2,super+control} + d
-	max_dropdown -n ranger emacsclient --socket-name=dirvish -ce "(dirvish)"
+	max_dropdown -n dirvish emacsclient --socket-name=dirvish -ce "(noct-dirvish-frame)"
 
 {mod2,super+control} + p
 	max_dropdown -n proced emacsclient -ce "(noct-with-q-to-exit (proced) (delete-other-windows))"
@@ -173,8 +173,9 @@ super + b
 {mod2,super+control} + alt + v
 	dropmplast
 
+# use separate server to avoid binding del to delete the whole buffer in normal server
 {mod2,super+control} + i
-	emacsclient --eval "(emacs-everywhere)"
+	emacsclient --socket-name=everywhere --eval "(emacs-everywhere)"
 
 # [k]alc
 {mod2,super+control} + k

@@ -1,10 +1,11 @@
-personal_ws-1.1 en 73 
+personal_ws-1.1 en 74 
 NixOS
 Vencent
 accessor
 accessors
 alist
 args
+aspell
 autoload
 avy
 backend
@@ -61,6 +62,7 @@ shellcheck
 sonification
 sonified
 sonify
+spell-fu
 stackoverflow
 subsequence
 sudoedit
