@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
 # mainly to fix connection issues
 
-if ! systemctl is-active --quiet wg-quick@"$1"; then
-	echo "wg-quick@$1 is not active"
-	exit 1
+if [[ -n $1 ]]; then
+	service=wg-quick@"$1"
+	if ! systemctl is-active --quiet "$service"; then
+		echo "$service is not active"
+		exit 1
+	fi
+else
+    service=$(systemctl --type=service --state=active | \
+                  awk '/wg-quick/ {print $1; exit}')
+    if [[ -z "$service" ]]; then
+        echo "No active wireguard services"
+        exit 1
+    fi
 fi
 
 # leave firewall rules in place when restarting
 sudo systemctl stop transmission || exit 1
 pkill WebTorrent
 sudo systemctl restart connman iwd
-sudo systemctl restart wg-quick@"$1"
+sudo systemctl restart "$service"

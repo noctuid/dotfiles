@@ -2,8 +2,19 @@
 sudo systemctl stop transmission || exit 1
 pkill WebTorrent
 
+service=wg-quick@"$1"
+if [[ -z $1 ]]; then
+    service=$(systemctl --type=service --state=active | \
+                  awk '/wg-quick/ {gsub(/● /,""); print $1; exit}')
+    if [[ -z "$service" ]]; then
+        echo "No active wireguard services"
+        exit
+    fi
+fi
+
 # * Disconnect from vpn
-sudo systemctl disable --now wg-quick@"$1" || exit 1
+echo "Stopping $service"
+sudo systemctl disable --now "$service"|| exit 1
 
 # * Reset resolv.conf
 # TODO

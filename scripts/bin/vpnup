@@ -14,19 +14,15 @@
 # it's blocked
 
 interface=$1
-
+config=$1.conf
 if [[ -z $interface ]]; then
-	echo "Please specify the server (e.g. $ vpnup <wireguard-server-name>)."
-	exit 1
-fi
-
-# * Rename Interface
-original_interface=$2
-if [[ -n $original_interface ]]; then
-	# interface name must be <15 characters; some default mullvad interface
-	# names do not meet this requirement, so provide a way to rename them
-	sudo cp /etc/wireguard/"$original_interface".conf \
-		 /etc/wireguard/"$interface".conf
+	# NOTE: config name max length is ~15 characters
+	config=$(sudo ls /etc/wireguard | fzf)
+	if [[ -z $config ]]; then
+		echo "No wireguard config specified"
+		exit 1
+	fi
+	interface="${config%.*}"
 fi
 
 # * Block non-vpn traffic
@@ -39,7 +35,7 @@ sudo ufw default deny outgoing
 sudo ufw default deny incoming
 
 # VPN ip/port
-ip_port=$(sudo awk '/Endpoint =/ {print $3}' /etc/wireguard/"$interface".conf)
+ip_port=$(sudo awk '/Endpoint =/ {print $3}' /etc/wireguard/"$config")
 ip=$(echo "$ip_port" | awk -F ":" '{print $1}')
 port=$(echo "$ip_port" | awk -F ":" '{print $2}')
 # allow connecting to vpn
@@ -64,10 +60,10 @@ sudo ufw enable
 sudo chattr -i /etc/resolv.conf
 
 # wg-quick up "$interface"
-systemctl enable --now wg-quick@"$interface"
+sudo systemctl enable --now wg-quick@"$interface"
 
 # TODO why is this not automatic anymore?
-dns=$(sudo awk '/DNS =/ {print $3}' /etc/wireguard/"$interface".conf)
+dns=$(sudo awk '/DNS =/ {print $3}' /etc/wireguard/"$config")
 echo "nameserver $dns" | sudo tee /etc/resolv.conf
 
 # prevent changes to resolv.conf
