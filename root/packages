@@ -642,7 +642,7 @@ fzf
 fd
 
 # * Programming
-mise
+mise aur
 
 # ** General
 editorconfig-core-c
@@ -673,7 +673,9 @@ python-pip
 python-pipx
 
 # build/etc. system
-python-poetry
+# python-poetry
+poetry pipx
+
 python-hatch
 # required for hatch but for some reason not included
 python-tomli-w
@@ -795,7 +797,7 @@ warpd-git aur
 android-tools
 better-adb-sync-git aur
 
-# * LLM
+# * LLM/AI
 laptop ollama-cuda
 server ollama-rocm
 
@@ -803,6 +805,8 @@ server ollama-rocm
 server koboldcpp-hipblas aur
 # needed for koboldcpp GUI
 server python-customtkinter aur
+
+stabilitymatrix-bin aur
 
 # * Ligthing
 openrgb

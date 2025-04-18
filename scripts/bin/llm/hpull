@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+repo=$(echo "$1" \
+           | awk -F '/' 'NF>2{print $(NF-1) "/" $NF; next} NF==2{print $0}')
+file_pattern=${2:-"*"}
+revision=${3:-main}
+
+models_dir=~/llm/models
+model=$(basename "$repo")
+
+if ! hash huggingface-cli &> /dev/null; then
+    pipx install 'huggingface_hub[cli,hf_transfer]'
+fi
+# if [[ -n $file_pattern ]]; then
+#     HF_HUB_ENABLE_HF_TRANSFER=1 \
+#         huggingface-cli download "$repo" --revision "$revision" \
+#         --include "$file_pattern" \
+#         --local-dir "$models_dir/$model"
+# else
+#     HF_HUB_ENABLE_HF_TRANSFER=1 \
+#         huggingface-cli download "$repo" --revision "$revision" \
+#         --local-dir "$models_dir/$model"
+
+# fi
+
+HF_HUB_ENABLE_HF_TRANSFER=1 \
+    huggingface-cli download "$repo" --revision "$revision" \
+    --include "$file_pattern" \
+    --local-dir "$models_dir/$model"

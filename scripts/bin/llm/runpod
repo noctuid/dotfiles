@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# TODO would probably be better to copy over whole file (would make it easy
+# to change config while running)
+
+# ssh_host=$1
+# ssh_port=$2
+ssh_host=$(echo "$1" | awk '{print $2}')
+ssh_port=$(echo "$1" | awk '{print $4}')
+repo=${2:-mistralai/Mistral-Large-Instruct-2411}
+revision=${3:-main}
+# context=${4:-41984}
+context=${4:-32768}
+
+# cache_mode="Q4"
+cache_mode="FP16"
+model=$(basename "$repo")
+api_key=$(awk '/api_key:/ {print $2}' ~/build/tabbyAPI/api_tokens.yml)
+admin_key=$(awk '/admin_key:/ {print $2}' ~/build/tabbyAPI/api_tokens.yml)
+
+
+# TODO tensor parallel?
+# TODO cd /workspace?
+ssh "$ssh_host" -p "$ssh_port" -i ~/.ssh/id_ed25519 << EOF
+# install and configure tabbyAPI
+git clone https://github.com/theroyallab/tabbyAPI
+cp tabbyAPI/config_sample.yml tabbyAPI/config.yml
+sed -i 's/inline_model_loading: false/inline_model_loading: true/' \
+    tabbyAPI/config.yml
+sed -i "s/max_seq_len:/max_seq_len: $context/" tabbyAPI/config.yml
+sed -i "s/cache_mode: FP16/cache_mode: $cache_mode/" tabbyAPI/config.yml
+sed -i -E "s;(^\s*model_name:);\1 $model;" tabbyAPI/config.yml
+echo "api_key: $api_key" > tabbyAPI/api_tokens.yml
+echo "admin_key: $admin_key" >> tabbyAPI/api_tokens.yml
+
+# download model
+pip install 'huggingface_hub[cli,hf_transfer]'
+# TODO why was this suddenly necessary?
+pip install hf_transfer
+HF_HUB_ENABLE_HF_TRANSFER=1 \
+    huggingface-cli download "$repo" \
+    --revision "$revision" \
+    --local-dir tabbyAPI/models/"$model"
+
+# couldn't get working: https://docs.runpod.io/pods/configuration/expose-ports
+wget https://github.com/cloudflare/cloudflared/releases/download/2025.4.0/cloudflared-linux-386 
+chmod +x cloudflared-linux-386
+EOF
+
+wezterm cli split-pane --right -- \
+        ssh "$ssh_host" -p "$ssh_port" -i ~/.ssh/id_ed25519 \
+        ./tabbyAPI/start.sh --gpu-lib cu121
+
+wezterm cli activate-pane-direction left
+
+ssh "$ssh_host" -p "$ssh_port" -i ~/.ssh/id_ed25519 \
+    ./cloudflared-linux-386 tunnel --url 127.0.0.1:5000 2>&1 \
+                        | grep "Your quick Tunnel" --after 2
+

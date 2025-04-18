@@ -279,8 +279,14 @@ ufw_setup() {
 				ufw allow from 192.168.0.0/16 to any port 443
 				# open webui
 				ufw allow from 192.168.0.0/16 to any port 3000
+				# tabbyapi
+				ufw allow from 192.168.0.0/16 to any port 5000
 				# kobold
 				ufw allow from 192.168.0.0/16 to any port 5001
+				# mik
+				ufw allow from 192.168.0.0/16 to any port 8585
+				ufw allow from 192.168.0.0/16 to any port 8586
+				ufw allow from 192.168.0.0/16 to any port 8587
 			fi
 			ufw enable
 		fi

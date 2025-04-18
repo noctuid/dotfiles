@@ -10,19 +10,38 @@ contextsize=8192
 
 case $1 in
     16k) contextsize=16384;;
+    24k) contextsize=24576;;
     32k) contextsize=32768;;
     *) echo "Unsupported context size, ignoring."
 esac
 
-gpulayers=80
+gpulayers=1000
 if [[ -n $2 ]]; then
     gpulayers=$2
+fi
+
+cert_dir=~/llm/kobold
+cert_pem="$cert_dir"/certificate.pem
+key_pem="$cert_dir"/privatekey.pem
+if [[ ! -f $cert_pem ]]; then
+    mkdir -p ~/llm/kobold
+    # -noenc since kobold needs unencrypted key
+    echo "Generating a ssl certificate for koboldcpp"
+    read -r -p "Input the server ip: " server_ip
+    openssl req -newkey rsa:4096 -x509 -sha512 -days 365 -noenc \
+            -addext "subjectAltName = IP:$server_ip" \
+            -out "$cert_pem" -keyout "$key_pem"
+    echo "Set the envar NODE_EXTRA_CA_CERTS to $cert_pem on connecting computer"
+    sleep 3
 fi
 
 # NOTE:
 # - I had to specifically choose the index of my graphics card to get this to
 #   work (ended up running GUI to figure out correct flags)
 # - I'm only running in vram for now (high gpulayers)
-koboldcpp --port 5001 --usecublas normal 0 \
+# - flash attention reduces context memory usage and increases performance
+# - increasing blas batch size (currently?) messes up context shifting
+koboldcpp --port 5001 --usecublas normal 0 --flashattention \
           --contextsize "$contextsize" --gpulayers "$gpulayers" \
+          --ssl "$cert_pem" "$key_pem" \
           --model "$selected_model"

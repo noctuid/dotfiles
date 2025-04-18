@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+tabby_dir="$HOME"/llm/tabbyAPI
+
+models=$(find "$tabby_dir"/models -maxdepth 1 -type d -printf "%f\n")
+selected_model=$(echo "$models" | fzf)
+
+if [[ -z $selected_model ]]; then
+    exit
+fi
+
+sed -i -E "s;(^\s*model_name:).*$;\1 $selected_model;" "$tabby_dir"/config.yml
+
+contextsize=8192
+
+case $1 in
+    16k) contextsize=16384;;
+    24k) contextsize=24576;;
+    32k) contextsize=32768;;
+    *) echo "Unsupported context size, ignoring."
+esac
+
+config="$tabby_dir"/config.yml
+if [[ ! -f $config ]]; then
+    cp "$tabby_dir"/config_sample.yml "$config"
+    sed -i -E "s;(^\s*uvloop:).*$;\1 true;" "$config"
+    # allow local network connections
+    sed -i -E "s;(^\s*host:).*$;\1 0.0.0.0;" "$config"
+    sed -i -E "s;(^\s*log_generation_params:).*$;\1 true;" "$config"
+    sed -i 's/inline_model_loading: false/inline_model_loading: true/' "$config"
+fi
+sed -i -E "s;(^\s*model_name:).*$;\1 $selected_model;" "$config"
+sed -i -E "s;(^\s*max_seq_len:).*$;\1 $contextsize;" "$config"
+# sed -i "s/cache_mode: FP16/cache_mode: $cache_mode/" "$config"
+
+
+PYTORCH_HIP_ALLOC_CONF=expandable_segments:True \
+    ~/llm/tabbyAPI/start.sh --gpu-lib amd

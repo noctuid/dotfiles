@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
+silly_dir="$HOME"/build/SillyTavern-Launcher/SillyTavern
+export NODE_EXTRA_CA_CERTS="$silly_dir"/certs/cert.pem
+sed -i -E 's/port: 8000/port: 8001/' "$silly_dir"/config.yaml
 ~/build/SillyTavern-Launcher/SillyTavern/start.sh

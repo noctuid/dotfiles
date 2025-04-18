@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+if ! hash open-webui; then
+    basedir="$(dirname "$(realpath "$0")")"
+    cd "$basedir"/open-webui || exit 1
+    # it doesn't support the latest python version
+    mise trust
+    mise install
+    pipx install open-webui
+fi
+
+export WEBUI_AUTH=false
+export ENABLE_SIGNUP=false
+# DOCS_DIR
+# RAG_EMBEDDING_MODEL_AUTO_UPDATE: true
+# RAG_EMBEDDING_MODEL: "mixedbread-ai/mxbai-embed-large-v1"
+open-webui serve

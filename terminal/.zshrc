@@ -1644,6 +1644,12 @@ if hash direnv 2> /dev/null; then
 	eval "$(direnv hook zsh)"
 fi
 
+# * Mise
+if hash mise 2> /dev/null; then
+	# have a (any), s (show), z (cd), etc.
+	eval "$(mise activate zsh)"
+fi
+
 # * End Profiling
 if [[ -n $NOCT_PROFILE_ZSH ]]; then
 	zprof

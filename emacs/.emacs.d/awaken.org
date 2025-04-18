@@ -3877,7 +3877,7 @@ Globbing is used to find a matching file."
     ;; pretty useful log file since most programs are started from sxhkd
     "K" (noct-defun noct-find-sxhkd-log ()
           (find-file (format "/tmp/sxhkd_%s.log" (getenv "DISPLAY"))))
-    "l" (noct-find-file "~/ag-sys/notes/log.org")
+    "l" (noct-find-file "~/ag-sys/notes/llm.org")
     "L" (noct-find-file "~/ag-sys/notes/life.org")
     "m" (noct-find-file "~/ag-sys/notes/mind.org")
     "M" #'noct-goto-messages
@@ -3887,6 +3887,7 @@ Globbing is used to find a matching file."
     "R" (noct-find-file "~/.config/ranger/rc.conf")
     "t" (noct-find-file "~/ag-sys/notes/tasks.org")
     "SPC" (noct-find-file "~/ag-sys/notes/tasks.org")
+    "S-SPC" (noct-find-file "~/ag-sys/notes/log.org")
     "T" (noct-find-file "~/.config/tridactyl/tridactylrc")
     "v" (noct-find-file "~/.config/mpv/history.log")
     "V" (noct-find-file "~/.config/nvim/init.vim")
@@ -10757,14 +10758,64 @@ TODO
 (use-package gptel
   :straight (gptel :host github :repo "karthink/gptel")
   :general
-  (general-s "RET" #'gptel)
+  (general-s
+    "RET" #'gptel
+    "C-<return>" #'gptel-send
+    "S-<return>" #'gptel-rewrite)
   (general-def 'normal gptel-mode-map "RET" #'gptel-send)
   (general-def 'visual "RET" #'gptel-send)
   :config
   (gsetq gptel-api-key #'noct-get-openai-key
-         gptel-default-mode 'org-mode)
+         gptel-default-mode 'org-mode
+         gptel-use-header-line nil)
 
-  (noct-handle-popup-same-window (rx "*ChatGPT")))
+  ;; doesn't work? and not good idea if response is too long
+  ;; (defun dylan-next-org-heading ()
+  ;;   "Move to the next org heading."
+  ;;   (interactive)
+  ;;   (when (eq major-mode 'org-mode)
+  ;;     (org-next-visible-heading 1)
+  ;;     (org-end-of-line)))
+  ;; (general-add-hook 'gptel-post-response-hook #'dylan-next-org-heading)
+
+  (defun noct-get-openrouter-key ()
+    "Return openapi key."
+    (password-store-get-field "openrouter" "gptel-apikey"))
+
+  (defun noct-get-featherless-key ()
+    "Return openapi key."
+    (password-store-get-field "featherless" "gptel-apikey"))
+
+  (gptel-make-openai "Openrouter"
+    :host "openrouter.ai"
+    :endpoint "/v1/chat/completions"
+    :stream t
+    :key #'noct-get-openrouter-key
+    :models '(openai/gpt-4o-mini))
+
+  (gsetq gptel-backend
+         (gptel-make-openai "Featherless"
+           :host "api.featherless.ai"
+           :endpoint "/v1/chat/completions"
+           :stream t
+           :key #'noct-get-featherless-key
+           :models '(deepseek-ai/DeepSeek-V3-0324
+                     Qwen/Qwen2.5-Coder-32B-Instruct
+                     all-hands/openhands-lm-32b-v0.1
+                     meta-llama/Llama-3.3-70B-Instruct
+                     deepseek-ai/DeepSeek-R1
+                     mistralai/Mistral-Small-3.1-24B-Instruct-2503)))
+
+  (gsetq gptel-model 'deepseek-ai/DeepSeek-V3-0324)
+
+  (noct-handle-popup-same-window (rx "*ChatGPT"))
+  (noct-handle-popup-same-window (rx "*Openrouter"))
+  (noct-handle-popup-same-window (rx "*Featherless"))
+  ;; for rewrite diff
+  (noct-handle-popup-same-window (rx "*Diff"))
+
+  (general-m 'normal gptel-mode-map
+    "m" #'gptel-menu))
  #+end_src
 
 *** Chatgpt Shell
