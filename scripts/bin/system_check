@@ -1,24 +1,32 @@
 #!/usr/bin/env bash
 # running this every 3 minutes with cron
 
-# battery check
-battery_level=$(acpi | sed --regexp-extended \
-						   --expression 's/Battery [0-9]+://' \
-						   --expression 's/[^0-9]*([0-9]+)%.*$/\1/')
-if [[ $battery_level -le 30 ]]; then
-	notify-send "Battery low" "Battery level is $battery_level%!"
-elif [[ $battery_level -le 20 ]]; then
-	for _ in {1..3}; do
-		notify-send -u low "Battery low"
-	done
-	notify-send -u critical "Battery low: $battery_level%"
+
+charging=false
+if [[ -d /sys/class/power_supply/BAT0 ]]; then
+    status=$(cat /sys/class/power_supply/BAT0/status)
+    if [[ $status == Charging ]]; then
+        charging=true
+    fi
 fi
 
+if ! $charging; then
+    # battery check
+    battery_level=$(acpi | sed --regexp-extended \
+                            --expression 's/Battery [0-9]+://' \
+                            --expression 's/[^0-9]*([0-9]+)%.*$/\1/')
+    if [[ $battery_level -le 30 ]]; then
+        notify-send -u critical "Battery low" \
+                    "Battery level is $battery_level%!"
+    fi
+fi
+
+# TODO not sure how to pick same temp; current laptop always goes high
 # cpu temp check
 cpu_temp=$(acpi -t | awk '{printf "%d", $4}')
-if [[ $cpu_temp -ge 80 ]]; then
-	notify-send "CPU temperature is $cpu_temp°C"
-fi
+# if [[ $cpu_temp -ge 80 ]]; then
+# 	notify-send "CPU temperature is $cpu_temp°C"
+# fi
 
 # high ram usage
 ram_percent=$(free | awk '/Mem/ {printf("%d", $3/$2 * 100)}')
