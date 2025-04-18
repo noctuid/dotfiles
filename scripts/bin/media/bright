@@ -12,7 +12,7 @@ BUS_CACHE_FILE=/tmp/ddcutil_bus_"$DISPLAY"
 # ddcutil doesn't require giving bus number, but it is very slow for it to
 # figure it out automatically every time
 get_capable_monitor_bus() {
-	if [[ -f "$BUS_CACHE_FILE" ]]; then
+	if [[ -s "$BUS_CACHE_FILE" ]]; then
 		echo -n "$(< "$BUS_CACHE_FILE")"
 	else
 		bus=$(ddcutil detect \
