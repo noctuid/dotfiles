@@ -2062,10 +2062,9 @@ Obvious ones:
 (use-package profiler
   :straight (:type built-in)
   :general (general-s
-             :infix "p"
-             "p" #'profiler-start
-             "r" #'profiler-report
-             "s" #'profiler-stop))
+             "C-p" #'profiler-start
+             "C-r" #'profiler-report
+             "C-s" #'profiler-stop))
 #+end_src
 
 ** Recentf
