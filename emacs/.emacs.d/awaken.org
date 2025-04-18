@@ -8942,6 +8942,15 @@ TODO look at what provides and bind useful keys; see how find usages compares
 ;; (setq cljr-add-ns-to-blank-clj-files nil) ; disable clj-refactor adding ns to blank files
 #+end_src
 
+** Csv
+#+begin_src emacs-lisp
+(noct-use csv-mode
+  (:fhooks 'csv-mode-hook #'csv-align-mode)
+  (:fhooks 'csv-mode-hook #'csv-header-line)
+  (:fhooks 'csv-mode-hook (noct-disable visual-line-mode))
+  (:fhooks 'csv-mode-hook (noct-disable visual-fill-column-mode)))
+#+end_src
+
 ** Emacs Lisp
 *** Setup
 #+begin_src emacs-lisp
