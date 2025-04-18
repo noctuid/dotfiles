@@ -10234,7 +10234,13 @@ If a region is active, toggle marking all files in the region."
     (interactive)
     (noct-dired-async-run "cwebp_autoname -mt -near_lossless 60"))
 
+  (defun noct-mat2 ()
+    "Convert selected images or image at point to a -near_lossless 60 webp."
+    (interactive)
+    (noct-dired-async-run "mat2"))
+
   (general-def 'normal dired-mode-map
+    "cm" #'noct-mat2
     "ct" #'noct-dired-unoconv-to-txt
     "cP" #'noct-dired-unoconv-to-pdf
     "cp" #'noct-dired-pandoc

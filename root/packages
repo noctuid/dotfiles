@@ -169,12 +169,18 @@ zsh
 tmux
 
 ranger
-# for ranger video preview
+# https://github.com/hunkyburrito/xdg-desktop-portal-termfilechooser
+
+
+# for ranger/dirvish video preview
 ffmpegthumbnailer
-# ranger info (alternatively exiftool)
+# ranger info (alternatively exiftool), dirvish info
 mediainfo
 # scope.sh replacement (out-of-date)
 # pistol
+
+# metadata removal
+mat2
 
 # sometimes useful in ranger
 dragon-drop-git aur
@@ -268,13 +274,15 @@ winetricks
 # wine-staging
 # wine-git aur
 # winetricks-git aur
+# much easier wine management
+bottles aur
 
 # * DOC, PPT, etc. Editing/Conversion
 libreoffice-fresh
 unoconv
 pandoc-cli
 wkhtmltopdf-static aur
-# for pdfunite, pdftotext (ranger preview), etc.
+# for pdfunite, pdftotext (ranger preview, one dirvish preview method), etc.
 poppler
 # for ranger previews
 odt2txt
@@ -796,6 +804,8 @@ warpd-git aur
 # for adb
 android-tools
 better-adb-sync-git aur
+BetterADBSync pipx
+scrcpy
 
 # * LLM/AI
 laptop ollama-cuda
