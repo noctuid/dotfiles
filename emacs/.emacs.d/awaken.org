@@ -7598,6 +7598,20 @@ Make org links work everywhere.
                       :after #'noct--org-modern-upate-label-face))
 #+end_src
 
+**** Org Node
+ #+begin_src emacs-lisp
+(use-package org-node
+  :straight (org-node
+             :type git :host github :repo "meedstrom/org-node")
+  :general (general-spc
+             "RET" #'org-node-find
+             "DEL" #'org-node-insert-link)
+  :after org
+  :config
+  (gsetq org-node-alter-candidates t)
+  (org-node-cache-mode))
+ #+end_src
+
 **** Org Ql
 #+begin_src emacs-lisp
 (use-package org-ql
