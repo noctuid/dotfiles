@@ -109,6 +109,7 @@ $HOME/.evm/bin
 $HOME/dotfiles/root
 # some pip packages install executables here (e.g. pywalfox)
 $HOME/.local/bin
+$HOME/.cargo/bin
 "
 
 while read -r dir; do

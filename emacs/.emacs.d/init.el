@@ -53,9 +53,11 @@
       ;; don't want emacs touching this file
       custom-file (expand-file-name "custom.el" user-emacs-directory)
       ;; no GUI prompts
-      use-dialog-box nil)
-
-(defalias 'yes-or-no-p #'y-or-n-p)
+      use-dialog-box nil
+      ;; new way to type y instead of yes
+      ;; not recommended, but I've never accidentally triggered one-letter
+      ;; confirmation
+      use-short-answers t)
 
 ;; ** Command Line Flag Checking
 (defun noct-command-line-flag-specified-p (flag)
@@ -107,6 +109,7 @@ Only tangle when the current Emacs instance is the newest one."
   (interactive)
   ;; TODO this could possibly check as another instance was creating
   ;; TODO create lock file /once/ that delete when exit emacs instead?
+  ;; TODO lock-file and related?
   (unless (file-exists-p noct-tangle-lock-file)
     (with-temp-buffer (write-file noct-tangle-lock-file))
     (condition-case e
@@ -243,7 +246,6 @@ Start Emacs with --record-requires to populate. This still needs work.")
           (lambda ()
             (run-with-timer 1 nil (lambda ()
                                     (setq inhibit-message nil)))))
-
 
 ;; * End Require Recording
 (defconst noct-keep-benchmarking

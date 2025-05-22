@@ -4,7 +4,7 @@
 
 # [[./todo.org]]
 
-# I'm using ~org-sort-entries~ (with =a=) for sorting many subheadings.
+# I'm using ~org-sort-entries~ (with =a=) for sorting many subheadings.  In others, I'm grouping related subheadings.
 
 #+begin_quote
 He could code anything--but life is short, and most significant systems were terribly large.   So Pham learned to hack about with the leviathans of the past.
@@ -748,10 +748,6 @@ Principles:
   :states 'motion
   :prefix "r")
 
-(general-create-definer general-rr
-  :states 'motion
-  :prefix "rr")
-
 ;; TODO rename to something else
 (general-create-definer general-s
   :keymaps '(insert normal)
@@ -1297,12 +1293,7 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
   (general-def 'emacs "<escape>" #'evil-normal-state)
 
   ;; change xall
-  (evil-ex-define-cmd "xa[ll]" #'save-buffers-kill-terminal)
-
-  ;; overwriting these keys later
-  (general-rr
-    "/" #'evil-ex-search-forward
-    "?" #'evil-ex-search-backward))
+  (evil-ex-define-cmd "xa[ll]" #'save-buffers-kill-terminal))
 
 ;; camelCase word (not a remap but affects word keybindings)
 (global-subword-mode)
@@ -1311,9 +1302,10 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
 
 **** Colemak Swaps
 #+begin_src emacs-lisp
-(general-with 'evil
-  (evil-redirect-digit-argument evil-motion-state-map
-                                "0" #'evil-beginning-of-visual-line)
+(once-with 'evil
+  ;; dead
+  ;; (evil-redirect-digit-argument evil-motion-state-map
+  ;;                               "0" #'evil-beginning-of-visual-line)
 
   ;; swap visual and real line movement commands
   (general-def 'motion
@@ -1338,7 +1330,24 @@ I prefer to distinguish mode by cursor color/shape instead of having to look at 
   ;; l for "[l]ast"
   (general-def 'motion
     "l" #'evil-jump-backward
-    "L" #'evil-jump-forward))
+    "L" #'evil-jump-forward)
+
+  (defun noct-evil-line-advice (oldfun &rest args)
+    "Set a jump point for numbered line jumps (>1 line)."
+    (let ((old-pos (point)))
+      (apply oldfun args)
+      (when (> (abs (- (line-number-at-pos old-pos)
+                       (line-number-at-pos (point))))
+               1)
+        (save-excursion
+          (goto-char old-pos)
+          (evil-set-jump)))))
+
+  (general-advice-add '(evil-next-line
+                        evil-previous-line
+                        evil-next-visual-line
+                        evil-previous-visual-line)
+                      :around #'noct-evil-line-advice))
 #+end_src
 
 **** Escape Everywhere
@@ -1431,62 +1440,6 @@ This should be run in a graphical frame."
   (round (* 0.0078125 (noct-default-monitor-width))))
 #+end_src
 
-** Unpackaged
-See [[https://github.com/alphapapa/unpackaged.el#reload-a-packages-features][unpackaged]].
-
-#+begin_src emacs-lisp
-;; modified to work with straight
-;; TODO currently breaks things
-(defun unpackaged/reload-package (package &optional allp)
-  "Reload PACKAGE's features.
-If ALLP is non-nil (interactively, with prefix), load all of its
-features; otherwise only load ones that were already loaded.
-
-This is useful to reload a package after upgrading it.  Since a
-package may provide multiple features, to reload it properly
-would require either restarting Emacs or manually unloading and
-reloading each loaded feature.  This automates that process.
-
-Note that this unloads all of the package's symbols before
-reloading.  Any data stored in those symbols will be lost, so if
-the package would normally save that data, e.g. when a mode is
-deactivated or when Emacs exits, the user should do so before
-using this command."
-  (interactive
-   (list (intern (completing-read "Package: "
-                                  noct-straight-packages nil t))
-         current-prefix-arg))
-  ;; This finds features in the currently installed version of PACKAGE, so if
-  ;; it provided other features in an older version, those are not unloaded.
-  (when (yes-or-no-p
-         (format "Unload all of %s's symbols and reload its features? " package))
-    (let* ((package-name (symbol-name package))
-           (package-dir (file-name-directory
-                         (locate-file package-name load-path (get-load-suffixes))))
-           (package-files (directory-files package-dir 'full (rx ".el" eos)))
-           (package-features
-            (cl-loop for file in package-files
-                     when
-                     (with-temp-buffer
-                       (insert-file-contents file)
-                       (when (re-search-forward
-                              (rx bol "(provide" (1+ space)) nil t)
-                         (goto-char (match-beginning 0))
-                         (cadadr (read (current-buffer)))))
-                     collect it)))
-      (unless allp
-        (setf package-features (seq-intersection package-features features)))
-      (dolist (feature package-features)
-        (ignore-errors
-          ;; Ignore error in case it's not loaded.
-          (unload-feature feature 'force)))
-      (dolist (feature package-features)
-        (require feature))
-      (message "Reloaded: %s" (mapconcat #'symbol-name package-features " ")))))
-
-;; (general-s "s." #'unpackaged/reload-package)
-#+end_src
-
 * Basic and Builtin Functionality
 ** General Settings
 #+begin_src emacs-lisp
@@ -1561,6 +1514,9 @@ using this command."
 
 ** General Keybindings
 #+begin_src emacs-lisp
+;; allow binding <C-i> differntly from tab
+(general-def input-decode-map "C-i" [C-i])
+
 ;; worse keybinding but sometimes I use on OSX
 (general-def "C-v" #'yank)
 
@@ -2263,16 +2219,71 @@ I've switched away from putting this function in a hook because it can be jarrin
     "w" #'tabulated-list-next-column
     "b" #'tabulated-list-previous-column))
 
-;; for forge, for example
+;; for mpdel, for example
 (use-package tablist
   :ghook ('tabulated-list-mode-hook #'tablist-minor-mode)
   :config
   (general-def 'normal tablist-minor-mode-map
-    "s" #'tablist-edit-filter
-    "g/" tablist-mode-filter-map))
+    ;; "s" #'tablist-edit-filter
+    "g/" tablist-mode-filter-map
+    "," #'tablist-mark-forward)
+
+  (defun noct-tablist-mark-toggle ()
+    "Toggle marking the tablist entry on the current line."
+    (interactive)
+    (let ((marked-re (tablist-marker-regexp))
+          (not-marked-re
+           (let ((tablist-marker-char ?\s))
+             (tablist-marker-regexp))))
+      (save-excursion
+        (beginning-of-line)
+        (cond
+         ((looking-at marked-re)
+          (tablist-unmark-backward -1))
+         ((looking-at not-marked-re)
+          (tablist-put-mark))))))
+
+  (defun noct-tablist-marks-toggle (&optional arg interactive)
+    "Toggle marking ARG entries forward.
+
+ARG is interpreted as a prefix-arg.  If interactive is non-nil,
+maybe use the active region instead of ARG.
+
+See `tablist-put-mark' for how entries are marked."
+    (interactive (list current-prefix-arg t))
+    (cond
+     ;; Mark files in the active region.
+     ((and interactive (use-region-p))
+      (save-excursion
+        ;; store end first because moving point can change region-end with evil
+        ;; at least
+        (let ((end  (save-excursion
+                      (goto-char (region-end))
+                      (beginning-of-line)
+                      (point))))
+          (goto-char (region-beginning))
+          (beginning-of-line)
+          (tablist-repeat-over-lines
+           (1+ (count-lines
+                (point)
+                end))
+           #'noct-tablist-mark-toggle))))
+     ;; Mark the current (or next ARG) files.
+     (t
+      (tablist-repeat-over-lines
+       (prefix-numeric-value arg)
+       #'noct-tablist-mark-toggle))))
+
+  (general-def '(normal visual) tablist-minor-mode-map
+    "," #'noct-tablist-marks-toggle))
+
+(use-package navigel
+  :config
+  (general-def 'normal navigel-tablist-mode-map
+    "h" #'navigel-open-parent))
 #+end_src
 
-** Text Scaling Keybindings
+** Text Scaling Keybindings | Textsize
 #+begin_src emacs-lisp
 ;; (general-def 'normal
 ;;   "C-=" #'text-scale-increase
@@ -2366,7 +2377,7 @@ I've switched away from putting this function in a hook because it can be jarrin
 #+begin_src emacs-lisp
 (use-package avy
   :config
-  (gsetq avy-keys '(?a ?r ?s ?t ?d ?h ?n ?e ?i ?o ?w ?f ?p ?l ?u ?y)
+  (gsetq avy-keys '(?a ?r ?s ?t ?d ?h ?o ?w ?f ?p ?l ?u ?y ?x ?c ?, ?. ?n ?e ?i)
          avy-all-windows nil
          ;; decrease timeout
          avy-timeout-seconds 0.2)
@@ -2667,6 +2678,7 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
 #+end_src
 
 ** Cape
+TODO add cape-history
 #+begin_src emacs-lisp
 ;; TODO something makes company unusable... should only be used with corfu?
 
@@ -3150,12 +3162,7 @@ This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I m
 
 ** Manual Completion
 #+begin_src emacs-lisp
-;; used for completion in vim
-(general-def 'insert "C-n" #'complete-symbol)
-
-(general-def
-  :keymaps noct-minibuffer-maps
-  "C-n" #'complete-symbol)
+(general-def 'insert "<C-i>" #'complete-symbol)
 #+end_src
 
 ** Orderless
@@ -3465,7 +3472,8 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
 
     (general-add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
     (general-s
-      "." #'vertico-repeat-last
+      ;; have as ?
+      ;; "." #'vertico-repeat
       ;; select previous session to repeat
       "," #'vertico-repeat-select)
 
@@ -3747,70 +3755,6 @@ Sets missing metadata for completions (pairs well with embark even if not using 
 #+end_src
 
 * Group/Session Management/Navigation
-** Framegroups
-#+begin_src emacs-lisp
-(use-package framegroups
-  :straight `(framegroups :host github :repo "noctuid/framegroups.el"
-                          ,@(if noct-personal-computer-p
-                                (list :protocol 'ssh
-                                      :local-repo "~/src/emacs/framegroups")
-                              (list :protcol nil)))
-  :general
-  ;; TODO bind globally on middle mouse on primary computer
-  (general-spc
-    "," #'noct-framegroup-setup
-    ;; "l" #'fg-switch-to-last-frame
-    "a" (noct-c (fg-switch-to-frame "emacs"))
-    "r" (noct-c (fg-switch-to-frame "log"))
-    "s" (noct-c (fg-switch-to-frame "notes"))
-    "t" (noct-c (fg-switch-to-frame "prog"))
-    "d" (noct-c (fg-switch-to-frame "config"))
-    "h" (noct-c (fg-switch-to-frame "blog"))
-    "n" (noct-c (fg-switch-to-frame "wr"))
-    "e" (noct-c (fg-switch-to-frame "cons"))
-    "i" (noct-c (fg-switch-to-frame "mail"))
-    "o" (noct-c (fg-switch-to-frame "music")))
-  :config
-  (defun noct-framegroup-setup (name &rest _)
-    "Set up main framegroups."
-    (interactive)
-    (pcase name
-      ;; emacs configuration
-      ("emacs"
-       (find-file (expand-file-name "awaken.org"  user-emacs-directory)))
-      ;; org agenda/todo
-      ("log"
-       (find-file "~/ag-sys/notes/tasks.org"))
-      ;; programming and personal notes
-      ("notes"
-       (find-file "~/ag-sys/notes/journal.org"))
-      ;; programming projects
-      ("prog"
-       (find-file "~/src"))
-      ;; dotfiles
-      ("config"
-       (find-file "~/.profile"))
-      ;; blog
-      ("blog"
-       (find-file (getenv "BLOG")))
-      ;; writing
-      ("wr"
-       (find-file "~/ag-sys/else/scrawl/prose/tr/draft.org"))
-      ;; ebooks and more notes
-      ("cons"
-       (find-file "~/ag-sys/else/consume/books.org"))
-      ("mail"
-       (mu4e))
-      ("music"
-       (mingus))))
-
-  (general-add-hook 'fg-create-hook #'noct-framegroup-setup))
-#+end_src
-
-** TODO Tab Bar Mode
-- ~tab-bar-history-mode~ as replacement for ~winner~?
-- need to add helpers for naming; not very usable out of the box
-
 ** TODO Desktop.el
 start recentf desktop-after-read-hook
 #+begin_src emacs-lisp
@@ -3903,8 +3847,6 @@ Globbing is used to find a matching file."
     "c" #'noct-goto-backtrace
     "d" #'projectile-edit-dir-locals
     "e" (noct-find-file (expand-file-name "awaken.org" user-emacs-directory))
-    "E" (noct-find-file (expand-file-name "lisp/.private.el.gpg"
-                                          user-emacs-directory))
     "g" (noct-find-file "~/ag-sys/else/gaming/games.org")
     "h" (noct-find-file "~/ag-sys/notes/health.org")
     "H" (noct-find-file "~/ag-sys/notes/medical_history.org")
@@ -4019,14 +3961,73 @@ Globbing is used to find a matching file."
        "m" (noct-find-file "~/ag-sys/else/consume/music.org")))))
 #+end_src
 
-*** Hook
+** Tab Bar Mode
 #+begin_src emacs-lisp
-(when noct-personal-computer-p
-  (general-with-package 'framegroups
-    (general-add-hook '(fg-create-hook fg-after-switch-hook)
-                      (list #'noct-bind-general-quickmarks
-                            #'noct-bind-group-quickmarks)
-                      t)))
+(defun noct-group-setup (name &rest _)
+  "Set up main groups."
+  (interactive)
+  (pcase name
+    ;; emacs configuration
+    ("emacs"
+     (find-file (expand-file-name "awaken.org"  user-emacs-directory)))
+    ;; org agenda/todo
+    ("log"
+     (find-file "~/ag-sys/notes/tasks.org"))
+    ;; programming and personal notes
+    ("notes"
+     (find-file "~/ag-sys/notes/journal.org"))
+    ;; programming projects
+    ("prog"
+     (find-file "~/src"))
+    ;; dotfiles
+    ("config"
+     (find-file "~/.profile"))
+    ;; blog
+    ("blog"
+     (find-file (getenv "BLOG")))
+    ;; writing
+    ("wr"
+     (find-file "~/ag-sys/else/scrawl/prose/tr/draft.org"))
+    ;; ebooks and more notes
+    ("cons"
+     (find-file "~/ag-sys/else/consume/books.org"))
+    ("mail"
+     (mu4e))
+    ("music"
+     (mingus))))
+
+(defun noct-tab-select (name)
+  "`tab-bar-switch-to-tab' but with extra setup."
+  (let ((tab-index (tab-bar--tab-index-by-name name)))
+    (if tab-index
+        (tab-bar-select-tab (1+ tab-index))
+      (tab-bar-new-tab)
+      (tab-bar-rename-tab name)
+      (noct-group-setup name)))
+  (noct-bind-general-quickmarks)
+  (noct-bind-group-quickmarks name))
+
+(gsetq tab-bar-show nil)
+
+(tab-bar-mode)
+(tab-bar-history-mode)
+
+(general-def '(insert normal)
+  "C-l" #'tab-bar-history-back
+  "C-S-l" #'tab-bar-history-forward
+  "C-M-L" #'tab-bar-history-forward)
+
+(general-spc
+  "a" (noct-c (noct-tab-select "emacs"))
+  "r" (noct-c (noct-tab-select "log"))
+  "s" (noct-c (noct-tab-select "notes"))
+  "t" (noct-c (noct-tab-select "prog"))
+  "d" (noct-c (noct-tab-select "config"))
+  "h" (noct-c (noct-tab-select "blog"))
+  "n" (noct-c (noct-tab-select "wr"))
+  "e" (noct-c (noct-tab-select "cons"))
+  "i" (noct-c (noct-tab-select "mail"))
+  "o" (noct-c (noct-tab-select "music")))
 #+end_src
 
 * Window Management/Navigation
@@ -4098,18 +4099,6 @@ See [[https://github.com/rnkn/olivetti/issues/12][here]].
 
 (general-add-advice 'split-window-right
                     :filter-args #'rnkn-split-window-right-ignore)
-#+end_src
-
-** Winner
-#+begin_src emacs-lisp
-(use-package winner
-  :init
-  (noct-after-window (winner-mode))
-  :config
-  (general-def '(insert normal)
-    "C-l" #'winner-undo
-    "C-S-l" #'winner-redo
-    "C-M-L" #'winner-redo))
 #+end_src
 
 ** Auto Balance Windows
@@ -5385,7 +5374,6 @@ TODO number incrementing
   (general-def 'normal yas-minor-mode-map
     [remap yas-expand] #'ignore)
 
-  (general-def input-decode-map "C-i" [C-i])
   (general-def 'insert yas-minor-mode-map
     "<C-i>" #'yas-expand)
 
@@ -5687,38 +5675,45 @@ Still experimental.
 
 *** Evil Snipe and Easy Motion
 Make these bindings:
-- =f= and =F= in normal - 2-char sneak (avy)
+- =h= - ~avy-goto-word-or-subword-1~
+- =f= in normal - directionless 2-char sneak (avy)
+- =F= - avy lines (though normally just use relative line numbers)
 - =r[fFtT]= in normal/visual/operator - 2-char sneak (avy)
-- =rr[fFtT]= in normal/visual/operator - default f/t with snipe improvements (no avy)
-- =[fFtT]= in visual/operator - same as above
+- =r*= - other easymotion keys
+- =s[fFtT]= in normal and =[fFtT]= in visual/operator - default f/t with snipe improvements (no avy)
 - =[xXzZ]= in visual/operator - 2-char seek (no avy)
 
-The logic behind these bindings is that I already don't have =t= in normal state and use 2-char seeks much more often than I would 1-char seeks in normal state. However, when using operators, I generally am not looking far ahead (deletion, for example, is normally used with a text object for larger selections and not with a motion to some arbitrary character), so it makes sense to keep the default behavior of =[fFtT]= in the visual and operator states (but with snipe's improvements, e.g. scope increased to visible buffer). If I did want a 2-char seek, I could use =[xXzZ]= (the default snipe keys for this purpose). =r[fFtT]= keys are consistent with other =r= keys (i.e. they remotely move somewhere using avy).
+The logic behind these bindings is that I already don't have =t= in normal state and use 2-char seeks much more often than I would 1-char seeks in normal state. However, when using operators, I generally am not looking far ahead (deletion, for example, is normally used with a text object for larger selections and not with a motion to some arbitrary character), so it makes sense to keep the default behavior of =[fFtT]= in the visual and operator states (but with snipe's improvements, e.g. scope increased to visible buffer). If I did want a 2-char non-avy seek, I could use =[xXzZ]= (the default snipe keys for this purpose). =r[fFtT]= keys are consistent with other =r= keys (i.e. they remotely move somewhere using avy).
 
 **** Evil Snipe
 #+begin_src emacs-lisp
 (use-package evil-snipe
   :commands (noct-snipe-2-f noct-snipe-2-F noct-snipe-2-t noct-snipe-2-T)
   :general
-  ;; if need in normal state instead of 2-letter (usually don't)
-  (general-r
-    "f" #'evil-snipe-f
-    "F" #'evil-snipe-F)
-  (general-rr
+  ;; move some default keys to s that I override with more used commands
+  (general-def 'normal
+    :prefix "s"
     "t" #'evil-snipe-t
-    "T" #'evil-snipe-T)
+    "T" #'evil-snipe-T
+    "f" #'evil-snipe-f
+    "F" #'evil-snipe-F
+    "n" #'evil-next-line
+    "e" #'evil-previous-line
+    "/" #'evil-ex-search-forward
+    "?" #'evil-ex-search-backward
+    ";" #'evil-snipe-repeat
+    "," #'evil-snipe-repeat-reverse)
   (general-def '(operator visual)
+    "f" #'evil-snipe-f
+    "F" #'evil-snipe-F
     "t" #'evil-snipe-t
     "T" #'evil-snipe-T
     "z" #'evil-snipe-z
     "Z" #'evil-snipe-Z)
-  ;; to keep `lispyville-delete-char-or-splice' for now
+  ;; to keep `lispyville-delete-char-or-splice' in visual for now
   (general-def 'operator
     "x" #'evil-snipe-x
     "X" #'evil-snipe-X)
-  (general-r
-    ";" #'evil-snipe-repeat
-    "," #'evil-snipe-repeat-reverse)
   :blackout t
   :blackout evil-snipe-override-mode
   :blackout evil-snipe-override-local-mode
@@ -5767,52 +5762,59 @@ TODO Use things.el instead.
 (use-package evil-easymotion
   :general
   (general-def 'motion
-    ;; not sure this any different from `avy-goto-word-or-subword-1' with
-    ;; `global-subword-mode' enabled
-    "h" #'evil-avy-goto-word-1
+    "h" #'evil-avy-goto-word-or-subword-1
     ;;"f" #'noct-sneak-forward-f
     "f" #'evil-avy-goto-char-2
     ;; "F" #'noct-sneak-backward-F
     ;; not sure what to bind this to
     "F" #'evil-avy-goto-line)
 
-  (general-def 'normal "?" #'evil-avy-goto-char-timer)
+  ;; (general-def 'normal "?" #'evil-avy-goto-char-timer)
 
   (general-r
+    "f" #'noct-sneak-forward-f
+    "F" #'noct-sneak-backward-F
     "t" #'noct-sneak-forward-exclusive-t
     "T" #'noct-sneak-backward-exclusive-T)
 
-  ;; TODO combine next two statements when general supports modifier prefixes
   (general-r
     "n" #'evilem-next-line
     "e" #'evilem-prev-line
     ;; too many candidates to be that useful
     ;; "w" #'evilem-forward-word-begin
-    ;; so useful it might even warrant a single letter keybinding (e.g.
-    ;; replacing f keybinding)
-    "w" #'evil-avy-goto-word-or-subword-1
-    "W" #'evilem-forward-WORD-begin
-    "b" #'evilem-backward-word-begin
-    "B" #'evilem-backward-WORD-begin
-    "s" #'evilem-sentence-nav-forward
-    "S" #'evilem-sentence-nav-backward
-    "p" #'evilem-forward-paragraph
-    "P" #'evilem-backward-paragraph)
+    ;; "b" #'evilem-backward-word-begin
+    "w" #'evilem-forward-WORD-begin
+    "b" #'evilem-backward-WORD-begin
+    ;; NOTE: this IS different from `avy-goto-word-or-subword-1' with
+    ;; `global-subword-mode' enabled; the subword one works with CamelCase
+    "h" #'evil-avy-goto-word-1
+    ;; "s" #'evilem-sentence-nav-forward
+    ;; "S" #'evilem-sentence-nav-backward
+    ;; "s" #'evilem-sentence-forward-begin
+    ;; "S" #'evilem-sentence-backward-begin
+    "s" #'evilem-any-sentence-begin
+    ;; "p" #'evilem-forward-paragraph
+    ;; "P" #'evilem-backward-paragraph
+    "p" #'evilem-any-paragraph)
 
   ;; can't use control since can't distinguish certain keys (can rebind in
   ;; `input-decode' map to get working, though will only work for GUI)
   (general-def '(insert emacs)
-    "M-n" #'evilem-next-line
-    "M-e" #'evilem-prev-line
-    "M-w" #'evilem-forward-word-begin
-    "M-W" #'evilem-forward-WORD-begin
-    ;; don't override backward word
+    ;; "M-n" #'evilem-next-line
+    ;; "M-e" #'evilem-prev-line
+    "M-w" #'evilem-forward-WORD-begin
+    ;; "M-W" #'evilem-forward-WORD-begin
+    ;; NOTE: don't override backward word
     ;; "M-b" #'evilem-backward-word-begin
     "M-B" #'evilem-backward-WORD-begin
-    "M-s" #'evilem-sentence-nav-forward
-    "M-S" #'evilem-sentence-nav-backward
-    "M-p" #'evilem-forward-paragraph
-    "M-P" #'evilem-backward-paragraph)
+    ;; "M-s" #'evilem-sentence-nav-forward
+    ;; "M-S" #'evilem-sentence-nav-backward
+    ;; NOTE: interferes with completion selection keybinding
+    ;; "M-s" #'evilem-sentence-forward-begin
+    ;; "M-S" #'evilem-sentence-backward-begin
+    "M-p" #'evilem-any-paragraph
+    ;; "M-P" #'evilem-backward-paragraph
+    )
 
   :config
   (evilem-make-motion noct-sneak-forward-f #'evil-snipe-repeat
@@ -5867,6 +5869,14 @@ TODO Use things.el instead.
                       #'evil-backward-word-begin)
   (evilem-make-motion evilem-backward-WORD-begin
                       #'evil-backward-WORD-begin)
+
+  (evilem-make-motion evilem-any-sentence-begin
+                      #'evil-forward-sentence-begin
+                      :initial-point #'window-start)
+
+  (evilem-make-motion evilem-any-paragraph
+                      #'evil-forward-paragraph
+                      :initial-point #'window-start)
 
   (evilem-make-motion evilem-forward-paragraph
                       #'evil-forward-paragraph)
@@ -6050,11 +6060,12 @@ Try with lsp or smart jump (if in a prog-mode buffer) then with hyperbole."
 #+end_src
 
 ** Git Gutter
-This is the only package that allows in-buffer hunk staging that I'm aware of. It slows Emacs to a crawl in large files with a lot of unstaged changes (like this one). I plan on eventually switching to diff-hl, which has saner live updating.
+This is the only package that allows in-buffer hunk staging that I'm aware of. It slows Emacs to a crawl in large files with a lot of unstaged changes (like this one).
 
-Update: Git gutter seems to be faster than previously.
+Update: Git gutter seems to be faster than previously, but diff-hl is much faster and now supports not just staged faces but staging.
 #+begin_src emacs-lisp
 (use-package git-gutter
+  :disabled t
   :ghook ('find-file-hook #'noct-maybe-enable-git-gutter)
   :general
   (general-t
@@ -6095,10 +6106,9 @@ Update: Git gutter seems to be faster than previously.
 #+end_src
 
 ** Diff HL
-Diff-hl is nice but currently doesn't support staging hunks.  Diff-hl also has a dired mode that seems to be faster than dired k.
+Diff-hl also has a dired mode that seems to be faster than dired k.
 #+begin_src emacs-lisp
 (use-package diff-hl
-  :disabled t
   :blackout t
   ;; TODO defer, e.g. `find-file-hook'
   ;; :ghook ('dired-mode-hook #'diff-hl-dired-mode)
@@ -6108,20 +6118,43 @@ Diff-hl is nice but currently doesn't support staging hunks.  Diff-hl also has a
   :config
   (gsetq diff-hl-show-staged-changes nil)
 
-  (general-def noct-toggle-map "D" #'diff-hl)
+  (general-def noct-toggle-map "D" #'diff-hl-mode)
 
-  (general-t
+  (general-def 'normal
     "gn" (list #'diff-hl-next-hunk :jump t)
     "ge" (list #'diff-hl-previous-hunk :jump t))
 
-  (with-eval-after-load 'magit
+  (general-def 'operator
+    "h" '(menu-item
+          ""
+          nil
+          :filter
+          (lambda (&optional _)
+            (when (or (memq evil-this-operator
+                            (list (key-binding [remap evil-delete])
+                                  #'evil-delete)))
+              (setq evil-inhibit-operator t)
+              #'diff-hl-stage-current-hunk)))
+    "o" '(menu-item
+          ""
+          nil
+          :filter
+          (lambda (&optional _)
+            (when (or (memq evil-this-operator
+                            (list (key-binding [remap evil-delete])
+                                  #'evil-delete)))
+              (setq evil-inhibit-operator t)
+              #'diff-hl-revert-hunk))))
+  (once-with 'magit
     (general-add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
     (general-add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
+  (noct-handle-popup-same-window (rx "*diff-hl*"))
+
   ;; stole colors from orderless
-  (set-face-background 'diff-hl-change "#72a4ff")
-  (set-face-background 'diff-hl-insert "#90d800")
-  (set-face-background 'diff-hl-delete "#ed92f8")
+  ;; (set-face-background 'diff-hl-change "#72a4ff")
+  ;; (set-face-background 'diff-hl-insert "#90d800")
+  ;; (set-face-background 'diff-hl-delete "#ed92f8")
 
   ;; TODO need a better solution than this
   ;; (defun noct-change-diff-location ()
@@ -6147,8 +6180,9 @@ Diff-hl is nice but currently doesn't support staging hunks.  Diff-hl also has a
   (general-spc
     "." #'magit-find-git-config-file
     "G" #'magit-find-file)
+  (general-def 'normal "ga" #'magit-file-stage)
   (general-t
-    "ga" #'magit-stage-file
+    ;; "ga" #'magit-file-stage
     "gr" #'magit-rebase-interactive
     "gl" #'magit-log-all
     "gL" #'magit-log-buffer-file
@@ -6316,9 +6350,9 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
     "R" #'magit-file-rename
     "T" #'magit-tag
     ;; "T" #'magit-notes
-    "s" #'magit-stage-file
+    "s" #'magit-stage
     "S" #'magit-stage-modified
-    "u" #'magit-unstage-file
+    "u" #'magit-unstage
     "U" #'magit-unstage-all
     ;; swap revert and revert-no-commit
     "v" #'magit-revert
@@ -6340,8 +6374,8 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
     "v" #'evil-visual-line)
 
   (general-def 'visual magit-mode-map
-    "s" #'magit-stage-file
-    "u" #'magit-unstage-file)
+    "s" #'magit-stage
+    "u" #'magit-unstage)
 
   (general-def 'normal magit-log-mode-map
     "q" #'magit-log-bury-buffer
@@ -6375,8 +6409,7 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
 
 *** Git Commit
 #+begin_src emacs-lisp
-(use-package git-commit
-  :config
+(general-with 'git-commit
   ;; so `fill-paragraph' works correctly for bullet points
   (gsetq git-commit-major-mode #'org-mode)
   (general-add-hook 'git-commit-mode-hook
@@ -6813,6 +6846,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false positives than aspell so far, and I will probably switch to it completely and remove the rest of my spelling config.  ~jinx-correct~ doesn't have avy support, but it will jump to the closest word, which is good enough if you just fix all visible issues at once
  #+begin_src emacs-lisp
 (use-package jinx
+  :disabled t
   ;; must be installed through nix to work with Emacs installed through nix
   :straight `(:type ,(if noct-emacs-from-nix
                          'built-in
@@ -7156,7 +7190,7 @@ All of my org config is in unclean.org.  I will gradually move it here.
          ;; gray all but last star in heading
          org-hide-leading-stars t
          ;; hide italics/bold/etc. markers
-         org-hide-emphasis-markers t
+         org-hide-emphasis-markers nil
          ;; show entities as their symbol (e.g. show \euro as €)
          org-pretty-entities t
          ;; require {} for sub/superscript after ^/_
@@ -7331,7 +7365,8 @@ Prompt for a heading title with the PROMPT string."
 
   (defvar noct-pre-capture-heading "")
   (defun noct-store-org-heading-name (&rest _)
-    (let ((heading (org-get-heading t)))
+    (let ((heading (when (eq major-mode 'org-mode)
+                     (org-get-heading t))))
       (setq noct-pre-capture-heading
             (if heading
                 (substring-no-properties heading)
@@ -7475,8 +7510,8 @@ If there is already a timestamp, edit it instead of creating a new one."
   (unless (ignore-errors (org-edit-special))
     ;; broken
     ;; (org-in-src-block-p)
-    (org-babel-next-src-block))
-  (org-edit-special))
+    (org-babel-next-src-block)
+    (org-edit-special)))
 
 (defun noct-org-src-exit-save ()
   "To prevent the source buffer from being marked as edited."
@@ -7539,6 +7574,16 @@ Show invisible things when point is on them in org (e.g. links).  I have currenl
   :config
   (gsetq org-appear-trigger 'manual
          org-appear-autolinks t))
+#+end_src
+
+**** Org Block Capf
+Use by typing < then ~complete-symbol~.
+#+begin_src emacs-lisp
+(noct-use org-block-capf
+  (gsetq org-block-capf-auto-indent nil)
+  (general-add-hook
+   'org-mode-hook
+   #'org-block-capf-add-to-completion-at-point-functions))
 #+end_src
 
 **** Ox Hugo
@@ -7875,8 +7920,17 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 #+begin_src emacs-lisp
 (use-package docker
   :config
-  (noct-handle-popup "*docker")
-  (noct-handle-popup "* docker"))
+  (noct-handle-popup-same-window "*docker")
+  (noct-handle-popup-same-window "* docker"))
+
+;; TODO bind
+;; docker-container-kill
+;; docker-container-restart
+;; docker-container-rm
+;; docker-container-inspect
+;; docker-container-attach
+;; docker-container-shells
+;; docker-container-logs
 
 (use-package dockerfile-mode)
 
@@ -7968,11 +8022,21 @@ hints.")
   (noct-after-buffer (editorconfig-mode))
   :blackout t
   :config
-  (defun doom--editorconfig--smart-detection-a (orig-fn)
+  ;; (gsetq editorconfig-trim-whitespaces-mode 'ws-butler-mode)
+
+  ;; https://github.com/doomemacs/doomemacs/blob/35dc13632b3177b9efedad212f2180f69e756853/modules/tools/editorconfig/config.el#L27
+  (general-pushnew
+   (rx "."
+       (or "zip" (and (or "ppt" "doc" "xls") "x"))
+       string-end)
+   editorconfig-exclude-regexps)
+
+  (defun doom--editorconfig--smart-detection-a (orig-fn &rest args)
     "Retrieve the properties for the current file.
 If it doesn't have an extension, try to guess one."
     (let ((buffer-file-name
            (if (and (not (bound-and-true-p org-src-mode))
+                    buffer-file-name
                     (file-name-extension buffer-file-name))
                buffer-file-name
              (format "%s%s" (buffer-file-name (buffer-base-buffer))
@@ -7980,19 +8044,14 @@ If it doesn't have an extension, try to guess one."
                                                doom-+editorconfig-mode-alist))))
                          (concat "." ext)
                        "")))))
-      (funcall orig-fn)))
+      (apply orig-fn args)))
+  ;; (general-add-advice '(
+  ;;                       ;; editorconfig-get-properties
+  ;;                       ;; editorconfig-core-get-properties
+  ;;                       editorconfig-call-get-properties-function)
+  ;;                     :around #'doom--editorconfig--smart-detection-a)
   ;; extend doom's configuration to also work for org src blocks
-  (general-add-advice 'editorconfig-apply
-                      :around #'doom--editorconfig--smart-detection-a)
   (general-add-hook 'org-src-mode-hook #'editorconfig-apply)
-
-  (defun doom-+editorconfig-disable-ws-butler-maybe-h (props)
-    "Disable `ws-butler-mode' if trim_trailing_whitespace is true."
-    (when (and (equal (gethash 'trim_trailing_whitespace props) "true")
-               (bound-and-true-p ws-butler-mode))
-      (ws-butler-mode -1)))
-  (general-add-hook 'editorconfig-after-apply-functions
-                    #'doom-+editorconfig-disable-ws-butler-maybe-h)
 
   (defun doom-+editorconfig-disable-indent-detection-h (props)
     "Inhibit `dtrt-indent' if indent_style or indent_size is configured."
@@ -8539,6 +8598,12 @@ I am using the =treesit-auto= package to automate the process of installing the 
         (treesit-auto--prompt-to-install-package 'bash))
       (bash-ts-mode)))
   (add-hook 'sh-mode-hook #'noct-maybe-enable-bash-ts-mode))
+#+end_src
+
+*** Restclient
+#+begin_src emacs-lisp
+(noct-use restclient
+  (:mode "\\.http\\'"))
 #+end_src
 
 ** Lisps (General)
@@ -9432,6 +9497,7 @@ TODO:
 (noct-defun noct-lsp-pyright ()
   "Require lsp-pyright and run `lsp'."
   (require 'lsp-pyright)
+  (require 'lsp-ruff)
   ;; (setq yyoncho-flycheck-local-cache
   ;;       '((lsp . ((next-checkers
   ;;                  .
@@ -9484,12 +9550,7 @@ select = [
 # format = "github"
  #+end_src
 
- #+begin_src emacs-lisp
-(use-package lsp-ruff-lsp
-  :straight nil
-  :after lsp-mode
-  :demand t)
- #+end_src
+See ~noct-lsp-pyright~.
 
 *** LPY
 #+begin_src emacs-lisp
@@ -9716,6 +9777,7 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
   ('python-base-mode-hook
    ;; only set needed variables
    (noct-defun noct-pet-setup ()
+	 ;; TODO need to fix for mise
      (gsetq-local python-shell-interpreter (pet-executable-find "python"))
      (gsetq-local dap-python-executable python-shell-interpreter)
      (gsetq-local python-shell-virtualenv-root (pet-virtualenv-root))
@@ -9882,7 +9944,10 @@ Backup files on every save to prevent ever losing work.
   :config
   (gsetq backup-each-save-mirror-location "~/.emacs-backups"
          ;; backup TRAMP files
-         backup-each-save-remote-files t))
+         backup-each-save-remote-files t
+         ;; increase to cover largest text files?
+         ;; backup-each-save-size-limit 1500000
+         ))
 #+end_src
 
 ** Benchmark Init
@@ -10556,7 +10621,7 @@ Show entire path for a directory (or chain of directories) that only contains a 
   (defun dired-narrow--completion-styles-filter (filter)
     "Return whether `completion-styles' FILTER matches the current dired file."
     (completion-all-completions filter (list (dired-utils-get-filename 'no-dir))
-                                nil nil))
+                                nil (length filter)))
 
   (defun dired-narrow-completion-styles ()
     "Narrow a dired buffer to the files matching a `completion-styles' query."
@@ -10581,7 +10646,7 @@ Show entire path for a directory (or chain of directories) that only contains a 
     "," #'trashed-mark
     "u" #'trashed-do-restore)
 
-  (noct-handle-popup "Trash Can"))
+  (noct-handle-popup-same-window "Trash Can"))
 #+end_src
 
 *** Dirvish
@@ -10609,33 +10674,36 @@ Dirvish replaces multiple packages:
 #+begin_src emacs-lisp
 (noct-use dirvish
   (general-s "r" #'dirvish)
-  (:fhooks (noct-disable display-line-numbers-mode))
+  ;; (:fhooks (noct-disable display-line-numbers-mode))
   ;; truncate long file names instead of wrapping
-  (:fhooks 'dirvish-find-entry-hook
-           (lambda (&rest _) (gsetq-local truncate-lines t)))
-  (:fhooks 'dirvish-preview-setup-hook (noct-defun noct-dirvish-preview-setup ()
-                                         (display-line-numbers-mode -1)
-                                         (gsetq-local mode-line-format nil
-                                                      truncate-lines t)))
+  ;; (:fhooks 'dirvish-find-entry-hook
+  ;;          (lambda (&rest _) (gsetq-local truncate-lines t)))
+  ;; (:fhooks 'dirvish-preview-setup-hook
+  ;;          (noct-defun noct-dirvish-preview-setup ()
+  ;;            (display-line-numbers-mode -1)
+  ;;            (gsetq-local mode-line-format nil
+  ;;                         truncate-lines t)))
   (:require-once 'dired)
   (:config
+    (require 'dirvish-extras)
+
     ;; (gsetq dirvish-bookmarks-alist)
 
-    (dirvish-define-attribute symlink-arrow
-      "Show -> on symlinks but not full target."
-      :when (and dired-hide-details-mode
-                 (default-value 'dired-hide-details-hide-symlink-targets))
-      (when (< (+ f-end 4) l-end)
-        (let ((ov (make-overlay (+ f-end 4) l-end)))
-          (overlay-put ov 'invisible t) ov)))
-
-    (general-pushnew (cons (list "png" "jpg" "jpeg" "webp") (list "mvi" "%f"))
-                     dirvish-open-with-programs)
+    ;; TODO fix symlink-arrow or don't, do I really need inline?
+    ;; (dirvish-define-attribute symlink-arrow
+    ;;   "Show -> on symlinks but not full target."
+    ;;   :when (and dired-hide-details-mode
+    ;;              (default-value 'dired-hide-details-hide-symlink-targets))
+    ;;   (when (< (+ f-end 4) l-end)
+    ;;     (let ((ov (make-overlay (+ f-end 4) l-end)))
+    ;;       (overlay-put ov 'invisible t) ov)))
 
     (gsetq dirvish-yank-overwrite-existing-files 'never
-           dirvish-attributes '(all-the-icons file-size vc-state symlink-arrow)
+           dirvish-attributes '(all-the-icons file-size vc-state)
+           ;; dirvish-attributes '(all-the-icons file-size vc-state symlink-arrow)
+
+           ;; not 'append-to-ext
            dirvish-yank-new-name-style 'append-to-filename
-           dirvish-yank-new-name-style 'append-to-ext
            dirvish-mode-line-position 'global
            dirvish-mode-line-format
            '(:left
@@ -10698,25 +10766,47 @@ Dirvish replaces multiple packages:
 
     (dirvish-override-dired-mode)
     ;; find-file preview
-    (dirvish-peek-mode)
+    (dirvish-peek-mode)))
+#+end_src
 
-    ;; override thumbnail generation to use faster vips
-    (dirvish-define-preview image (file ext preview-window)
-      "Preview image files.
-Require: `vipsthumbnail'"
-      :require ("vipsthumbnail")
-      (when (member ext dirvish-image-exts)
-        (let* ((w (dirvish-media--img-size preview-window))
-               (h (dirvish-media--img-size preview-window 'height))
-               (cache (dirvish-media--cache-path file (format "images/%s" w) ".jpg")))
-          (cond
-           ((file-exists-p cache)
-            `(img . ,(create-image cache nil nil :max-width w :max-height h)))
-           ;; ((and (< (file-attribute-size (file-attributes file)) 250000)
-           ;;       (member ext '("jpg" "jpeg" "png" "ico" "icns" "bmp" "svg")))
-           ;;  `(img . ,(create-image file nil nil :max-width w :max-height h)))
-           (t `(cache . ("vipsthumbnail",file "--size" ,(format "%sx" w)
-                         "--output" ,cache)))))))))
+**** Dirvish Tabs
+#+begin_src emacs-lisp
+(defun noct-dirvish-frame ()
+  "Setup an Emacs frame dedicated to dirvish."
+  (dirvish)
+
+  ;; # TODO preview never shows when daemon just started; dired-find-file and dired-jump open new window
+  ;; # TODO need to run dired-jump first for subsequent runs to fix this...
+  ;; # can run dirvish manually to fix... should work from first launch
+  ;; TODO completely messed up first time
+  (general-after-init
+    (dirvish)
+    (tab-bar-mode))
+  (defun noct-goto-dirvish-tab (num)
+    ;; tabs are 1-indexed
+    (let* ((tabs (funcall tab-bar-tabs-function))
+           (tab-count (length tabs)))
+      (if (<= num tab-count)
+          (tab-select num)
+        (tab-new-to num)
+        (dirvish))))
+  (general-def 'normal dired-mode-map
+    :prefix "m"
+    "a" (noct-c (noct-goto-dirvish-tab 1))
+    "r" (noct-c (noct-goto-dirvish-tab 2))
+    "s" (noct-c (noct-goto-dirvish-tab 3))
+    "t" (noct-c (noct-goto-dirvish-tab 4))
+    "d" (noct-c (noct-goto-dirvish-tab 5))
+    "h" (noct-c (noct-goto-dirvish-tab 6))
+    "n" (noct-c (noct-goto-dirvish-tab 7))
+    "e" (noct-c (noct-goto-dirvish-tab 8))
+    "i" (noct-c (noct-goto-dirvish-tab 9))
+    "o" (noct-c (noct-goto-dirvish-tab 10))))
+#+end_src
+
+** Ebuku
+#+begin_src emacs-lisp
+(noct-use ebuku)
 #+end_src
 
 ** Emacs Everywhere
@@ -10777,6 +10867,7 @@ TODO
          (remove 'eshell-postoutput-scroll-to-bottom
                  eshell-output-filter-functions)))
 
+;; TODO any point when using eat?
 (use-package stutter
   :straight (stutter :host github :repo "Stebalien/stutter.el")
   :ghook 'eshell-mode-hook)
@@ -10922,6 +11013,7 @@ TODO
            :stream t
            :key #'noct-get-featherless-key
            :models '(deepseek-ai/DeepSeek-V3-0324
+                     mistralai/Devstral-Small-2505
                      Qwen/Qwen2.5-Coder-32B-Instruct
                      all-hands/openhands-lm-32b-v0.1
                      meta-llama/Llama-3.3-70B-Instruct
@@ -10936,7 +11028,8 @@ TODO
   ;; for rewrite diff
   (noct-handle-popup-same-window (rx "*Diff"))
 
-  (general-m 'normal gptel-mode-map
+  (general-m 'normal gptel-mode
+    :definer 'minor-mode
     "m" #'gptel-menu))
  #+end_src
 

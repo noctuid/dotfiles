@@ -105,3 +105,7 @@ If no fonts have been found, return nil."
 
 ;; * Early LSP Configuration
 (setenv "LSP_USE_PLISTS" "true")
+
+;; * Silence lexical binding warning
+;; don't show warning buffer for; tons of packages are missing it
+(setq warning-suppress-types '((files)))
