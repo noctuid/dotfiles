@@ -98,6 +98,47 @@ is_chroot() {
 	[[ $(stat -c %d:%i /) != $(stat -c %d:%i /proc/1/root/.) ]]
 }
 
+_take() {
+	mkdir -p "$1" || return 1
+	cd "$1" || return 1
+}
+
+_curl() {
+	# curl --silent "$@"
+	curl --progress-bar "$@"
+}
+
+_download_github_dir() (
+	if ! hash jq 2> /dev/null; then
+		_errm "Jq must be installed to download github directory"
+	fi
+
+	local repo path destdir item
+	repo=$1
+	path=$2
+	destdir=$3
+	_take "$destdir" || return 1
+	_curl "https://api.github.com/repos/$repo/contents/$path" \
+		| jq --compact-output '.[]' | while read -r item; do
+		local file_type name
+		file_type=$(echo "$item" | jq --raw-output '.type')
+		name=$(echo "$item" | jq --raw-output '.name')
+		case $file_type in
+			file)
+				local download_url
+				download_url=$(echo "$item" | jq --raw-output '.download_url')
+				echo "Downloading $name to $PWD"
+				_curl "$download_url" > "$name" 2> /dev/null
+				;;
+			dir)
+				local new_repo_path
+				new_repo_path=$(echo "$item" | jq --raw-output '.path')
+				_download_github_dir "$repo" "$new_repo_path" "$name"
+				;;
+		esac
+	done
+)
+
 # * Services
 # ** Normal Services
 service_setup() {
@@ -159,6 +200,11 @@ user_services_setup() {
 		# systemctl --user enable mpd-notification
 		# systemctl --user start psd
 		# systemctl --user enable psd
+
+		# prevent xdg autostart for uwsm
+		# systemctl --user mask wayland-session-xdg-autostart@hyprland.target
+		# this is the one that works or both are needed
+		# systemctl --user mask systemctl --user mask xdg-desktop-autostart.target
 	else
 		echo "In chroot. Not enabling user services."
 	fi
@@ -317,9 +363,8 @@ transmission_setup() {
 # * DNS
 # not doing this until after reboot because will break DNS resolution unless can
 # start unbound and dnscrypt-proxy successfully
-dns_setup() {
-	echo "Configuring DNS."
-	# unbound
+unbound_setup() {
+	echo "Configuring DNS to use unbound"
 	# don't need to manually create unbound user
 	curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
 	# needed for auto-trust-anchor-file
@@ -334,10 +379,10 @@ noptions edns0 single-request-reopen" \
 	chattr +i /etc/resolv.conf
 	systemctl enable unbound
 	systemctl restart unbound
+	# https://wiki.archlinux.org/title/Unbound#Testing_validation
+}
 
-	# https://wiki.archlinux.org/index.php/unbound#Testing_validation
-	# https://wiki.archlinux.org/index.php/Resolv.conf#Testing
-	# to test if dnscrypt is working, need to stop all proxies
+dnscrypt_proxy_setup() {
 	# https://wiki.archlinux.org/index.php/DNSCrypt#dnscrypt_runs_with_root_privileges
 	if ! id -u dnscrypt-user &>/dev/null; then
 		useradd --system --home-dir /var/dnscrypt --create-home \
@@ -396,6 +441,31 @@ pywalfox_setup() {
 	pywalfox install
 }
 
+# * Spicetify Setup
+spotify_setup() {
+	local uhome
+	uhome=$1
+	spotify_location="$uhome"/.local/share/spotify-launcher/install/usr/bin
+	if [[ ! -d $spotify_location ]]; then
+		spotify-launcher
+	fi
+
+	comfy_theme_dir=$uhome/.config/spicetify/Themes/Comfy
+	if [[ ! -d $comfy_theme_dir ]]; then
+		echo "Downloading Comfy theme"
+		_download_github_dir Comfy-Themes/Spicetify Comfy "$comfy_theme_dir"
+	fi
+	# https://github.com/Comfy-Themes/Spicetify
+	spicetify config spotify_path "$spotify_location"
+	spicetify config current_theme Comfy
+	spicetify config color_scheme rose-pine-moon
+	spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1 ""
+	spicetify backup
+	spicetify apply
+	# later
+	# pywal-spicetify Comfy
+}
+
 # * QMK
 qmk_setup() {
 	local user
@@ -451,11 +521,14 @@ all() {
 # * Non-chroot
 non_chroot() {
 	user=$1
+	uhome=/home/"$user"
 	systemctl daemon-reload
 	run_subsection user_services_setup "$user"
 	run_subsection connman_setup
 	run_subsection ufw_setup
-	run_subsection dns_setup
+	run_subsection unbound_setup
+	# run_subsection dnscrypt_proxy_setup
+	run_subsection spotify_setup "$uhome"
 }
 
 # * Main

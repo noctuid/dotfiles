@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+monitor_info=$(hyprctl -j monitors)
+monitor_count=$(echo "$monitor_info" | jq 'length')
+desk_setup=$(echo "$monitor_info" | jq 'any(.[]; .model == "Gigabyte M32U")')
+
+if [[ $desk_setup != true ]] && ((monitor_count > 1)); then
+    screen=eDP-1
+    external=$(echo "$monitor_info" \
+                   | jq --raw-output "map(select(.name? != \"$screen\")) | .[0].name")
+    case $1 in
+        10) hyprctl dispatch focusmonitor "$external" || exit 1;;
+        previous) exit;;
+        *) hyprctl dispatch focusmonitor "$screen" || exit 1;;
+    esac
+fi
+hyprctl dispatch focusworkspaceoncurrentmonitor "$1"

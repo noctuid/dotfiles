@@ -4341,7 +4341,7 @@ Useful if constantly switching between only a few files in a project. I don't no
   :ghook ('ibuffer-mode-hook nil nil nil t))
 #+end_src
 
-** Outline/Outshine
+** Outline | Outshine | Outli
 #+begin_src emacs-lisp
 (use-package outline
   :ghook ('(prog-mode-hook conf-mode-hook) #'outline-minor-mode)
@@ -4352,8 +4352,41 @@ Useful if constantly switching between only a few files in a project. I don't no
     "TAB" #'outline-toggle-children))
 
 (use-package outshine
+  :disabled t
   :blackout t
   :ghook 'outline-minor-mode-hook)
+
+(noct-use ( :straight outli
+            :host github
+            :repo "jdtsmith/outli")
+  (gsetq outli-speed-commands
+         '(("Outline Navigation")
+           ("k" . outline-next-visible-heading)
+           ("K" . outline-previous-visible-heading)
+           ("n" . outline-forward-same-level)
+           ("e" . outline-backward-same-level)
+           ("h" . outline-up-heading)
+           ("i" . outline-next-heading)
+           ("Outline Visibility")
+           ("c" . outline-cycle)
+           ("C" . outline-cycle-buffer)
+           ("w" . outli-toggle-narrow-to-subtree)
+           ("W" . widen)
+           ;; ("h" . outline-hide-sublevels)
+           ("1" . (outline-hide-sublevels 1))
+           ("2" . (outline-hide-sublevels 2))
+           ("3" . (outline-hide-sublevels 3))
+           ("4" . (outline-hide-sublevels 4))
+           ("5" . (outline-hide-sublevels 5))
+           ("Outline Structure Editing")
+           ("E" . outline-move-subtree-up)
+           ("N" . outline-move-subtree-down)
+           ("<" . outline-demote)
+           (">" . outline-promote)
+           ("o" . outli-insert-heading-respect-content)
+           ("v" . outline-mark-subtree)
+           ("?" . outli-speed-command-help)))
+  (:hooks '(prog-mode-hook text-mode-hook)))
 #+end_src
 
 ** Projectile
@@ -9321,9 +9354,33 @@ TODO
 *** TODO HaRe
 *** TODO SHM
 *** TODO Hasktags
+
+** Hyprlang
+#+begin_src emacs-lisp
+(noct-use hyprlang-ts-mode
+  ;; it doesn't have autoload cookie
+  (:autoload 'hyprlang-ts-mode)
+  (:mode "hypr/.*\\.conf\\'")
+  ;; FIXME not work
+  (:fhooks (noct-defun noct-hyprlang-setup ()
+             (indent-tabs-mode -1)))
+  (general-pushnew
+   '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang")
+   treesit-language-source-alist))
+#+end_src
+
 ** JSON
 #+begin_src emacs-lisp
-(use-package json-mode)
+(noct-use json-mode
+  (:mode "\\.jsonc\\'" jsonc-mode))
+#+end_src
+
+** KDL
+#+begin_src emacs-lisp
+(noct-use (:straight kdl-ts-mode :host github :repo "merrickluo/kdl-ts-mode")
+  (general-pushnew
+   '(kdl "https://github.com/tree-sitter-grammars/tree-sitter-kdl")
+   treesit-language-source-alist))
 #+end_src
 
 ** Kmonad
@@ -10129,6 +10186,7 @@ If a region is active, toggle marking all files in the region."
     "um" #'dired-unmark
     "uv" #'dired-unmark-all-marks
 
+    "cn" #'dired-create-empty-file
     ;; make directory
     "cd" #'dired-create-directory
 
@@ -10292,7 +10350,7 @@ If a region is active, toggle marking all files in the region."
     (noct-dired-async-run "mat2"))
 
   (general-def 'normal dired-mode-map
-    "cm" #'noct-mat2
+    "cM" #'noct-mat2
     "ct" #'noct-dired-unoconv-to-txt
     "cP" #'noct-dired-unoconv-to-pdf
     "cp" #'noct-dired-pandoc
@@ -10410,9 +10468,6 @@ Change current user to root.  Is this really necessary with my =sd= keybinding?
   ;; TODO broken?
   :general ('normal dired-mode-map "zs" #'dired-toggle-sudo))
 #+end_src
-
-*** FASD
-Pretty much just using fasd in terminal at the moment, but maybe this package will be useful in the future.
 
 *** TODO File Opening (External)
 https://github.com/Vifon/dired-rifle.el

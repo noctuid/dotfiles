@@ -13,3 +13,6 @@
 [submodule "refind-catppuccin"]
 	path = root/boot/efi/EFI/refind/themes/catppuccin
 	url = https://github.com/catppuccin/refind
+[submodule "mpv-playlistmanager"]
+	path = media/.config/mvi/repos/mpv-playlistmanager
+	url = https://github.com/jonniek/mpv-playlistmanager

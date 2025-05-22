@@ -47,3 +47,5 @@ configuration {
 // @theme "~/.cache/wal/colors-rofi-dark.rasi"
 // light theme
 @theme "~/.cache/wal/colors-rofi-light.rasi"
+
+element-icon { size: 1.25 em; }

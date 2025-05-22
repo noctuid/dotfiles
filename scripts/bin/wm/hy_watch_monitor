@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+teardown() {
+    echo "Running teardown"
+    makoctl mode -r tv
+    pkill systemd-inhibit
+    # remove temporary window rules
+    hyprctl reload
+}
+
+desk_setup() {
+    echo "Running desk setup configuration"
+    # show notifications on focused output
+    makoctl mode -r tv
+
+    sleep 2
+    swww img --outputs "$1" ~/.cache/wallpaper
+
+    sleep 3
+    # kill after even more sleep; sometimes an issue where will get multiple
+    # bars on other monitor otherwise
+    # show waybar on all outputs
+    sed --in-place --regexp-extended \
+        "s/(^\s*)\"output\":.*/\1\"output\": \"\",/" \
+        ~/.config/waybar/config.jsonc
+    killall -SIGUSR2 waybar
+
+    systemd-inhibit --what=idle --who=Caffeine --why=Caffeine --mode=block sleep inf &
+}
+
+tv_setup() {
+    echo "Running tv setup configuration"
+    # don't show waybar on this output
+    sed --in-place --regexp-extended \
+        "s/(^\s*)\"output\":.*/\1\"output\": \"!$1\",/" \
+        ~/.config/waybar/config.jsonc
+    killall -SIGUSR2 waybar
+    # show notifications on laptop screen
+    makoctl mode -a tv
+
+    hyprctl dispatch focusmonitor "$1"
+    hyprctl dispatch focusworkspaceoncurrentmonitor 10
+    # looks like there is a bug where if you use silent, switching to the
+    # workspace won't focus the new window
+    hyprctl keyword windowrule "workspace 10,class:^mpv\$"
+    hyprctl keyword windowrule "fullscreen,class:^mpv\$"
+
+    sleep 2
+    swww img --outputs "$1" ~/wallpaper/black.jpg
+}
+
+startup() {
+    monitor_info=$(hyprctl -j monitors)
+    monitor_count=$(echo "$monitor_info" | jq 'length')
+    desk_setup=$(echo "$monitor_info" | jq 'any(.[]; .model == "Gigabyte M32U")')
+    screen=eDP-1
+
+
+    if (( monitor_count > 1 )); then
+        external=$(echo "$monitor_info" \
+                    | jq --raw-output "map(select(.name? != \"$screen\")) | .[0].name")
+        if [[ $desk_setup == true ]]; then
+            desk_setup "$external"
+        else
+            tv_setup "$external"
+        fi
+    fi
+}
+
+startup
+
+# monitoradded>>HDMI-A-1
+# monitoraddedv2>>1,HDMI-A-1,LG Electronics LG TV SSCR2 0x01010101
+socket="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+while read -r event; do
+    case $event in
+        "monitoraddedv2>>"*) ;;
+        "monitorremoved>>"*) teardown ; continue;;
+        *) continue;;
+    esac
+    output=$(echo "$event" | awk -F "," '{print $2}')
+    name=$(echo "$event" | awk -F "," '{print $3}')
+    echo "$event"
+
+    if [[ $name == *"Gigabyte M32U"* ]]; then
+        desk_setup "$output"
+    else
+        tv_setup "$output"
+    fi
+done < <(socat -U - UNIX-CONNECT:"$socket")

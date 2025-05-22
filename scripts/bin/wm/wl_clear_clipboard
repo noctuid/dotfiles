@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# clear the clipboard after a minute
+sleep 60
+wl-copy --clear
+echo "Cleared clipboard"

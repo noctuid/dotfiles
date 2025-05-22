@@ -1,0 +1,15 @@
+[Unit]
+Description=Swww
+PartOf=graphical-session.target
+Requires=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swww-daemon
+Slice=session.slice
+Restart=always
+
+[Install]
+WantedBy=graphical-session.target

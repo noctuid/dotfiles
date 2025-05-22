@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# allow resolv.conf to be changed
+sudo chattr -i /etc/resolv.conf
+
+echo "$*" | sudo tee /etc/resolv.conf
+
+# prevent changes to resolv.conf
+sudo chattr +i /etc/resolv.conf

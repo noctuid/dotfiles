@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+artist=$(playerctl --player=spotify,chromium,mpd metadata artist 2> /dev/null)
+song=$(playerctl --player=spotify,chromium,mpd metadata title 2> /dev/null)
+if [[ -n $artist ]] && [[ -n $song ]]; then
+	echo "$artist - $song"
+elif [[ -n $song ]]; then
+	 echo "$song"
+else
+	exit 1
+fi

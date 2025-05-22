@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+   # hide special workspace by showing underling (with
+   # hide_special_on_workspace_change true)
+   hyprctl dispatch workspace +0
+else
+    tdrop -a auto_hide
+fi

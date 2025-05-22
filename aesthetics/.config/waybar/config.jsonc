@@ -1,0 +1,261 @@
+{
+    "output": "",
+    // "layer": "top", // Waybar at top layer
+    // "position": "bottom", // Waybar position (top|bottom|left|right)
+    "reload_style_on_change": true,
+    "height": 38, // Waybar height (to be removed for auto height)
+    "spacing": 9,
+    // Choose the order of the modules
+    "modules-left": [
+        "custom/icon",
+        "hyprland/workspaces",
+        // "niri/workspaces",
+        // "sway/workspaces",
+        // "sway/mode",
+        "custom/hy_icon",
+        "hyprland/submap",
+        // "mpris"
+        "custom/playerctl"
+    ],
+    "modules-center": [
+        "custom/hyprland_title"
+        // "hyprland/window",
+        // "niri/window",
+        // "sway/window"
+    ],
+    "modules-right": [
+        "pulseaudio",
+        "memory",
+        "cpu",
+        "temperature",
+        "custom/brightness",
+        // "backlight",
+        "network",
+        "systemd-failed-units",
+        "privacy",
+        "custom/wg",
+        "idle_inhibitor",
+        "custom/date",
+        "tray",
+        "battery"
+    ],
+    // Left
+    "custom/icon": {
+        "format": ""
+    },
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "6": "",
+            "7": "",
+            "8": "",
+            "9": "",
+            "10": "",
+            // "active": "",
+            "default": ""
+        },
+        "persistent-workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+        }
+    },
+    "custom/hy_icon": {
+        "exec": "hy_icon"
+    },
+    "niri/workspaces": {
+        "all-outputs": true,
+        "format": "{icon}",
+        "format-icons": {
+            "zero": "",
+            "one": "",
+            "two": "",
+            "three": "",
+            "four": "",
+            "five": "",
+            "six": "",
+            "seven": "",
+            "eight": "",
+            "nine": ""
+            // "active": "",
+            // "default": ""
+        },
+    },
+    "sway/workspaces": {
+        "all-outputs": true,
+        "format": "{icon}",
+        "format-icons": {
+            "0": "",
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "6": "",
+            "7": "",
+            "8": "",
+            "9": "",
+            "term": "",
+            "termlong": "",
+            "mpgo": "",
+            "yazi": ""
+        },
+        "persistent-workspaces": {
+            "0": [],
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+        }
+    },
+    "custom/playerctl": {
+        "exec": "song_scroll"
+    },
+    "mpris": {
+        "format": "{status_icon} {artist} - {title}",
+        "status-icons": {
+            "playing": "",
+            "paused": ""
+        },
+        "ignored-players": ["firefox", "mpv"]
+    },
+    "custom/hyprland_title": {
+        "exec": "title_scroll"
+    },
+    // Right
+    "pulseaudio": {
+        // "scroll-step": 1, // %, can be a float
+        // "format": "<span rise=\"-500\">{icon}</span> {volume}% {format_source}",
+        "format": "{icon} {volume}%{format_source}",
+        "format-bluetooth": "{icon} {volume}%{format_source}",
+        "format-bluetooth-muted": " {volume}%{format_source}",
+        "format-muted": " {volume}%{format_source}",
+        "format-source": "",
+        "format-source-muted": "",
+        // "format-source": "{volume}% ",
+        // "format-source-muted": "",
+        "format-icons": {
+            "hdmi": "",
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+    "memory": {
+        // can't give a class
+        // https://github.com/Alexays/Waybar/issues/2111
+        // related: https://github.com/Alexays/Waybar/issues/215
+        "format": "<span size=\"12pt\" rise=\"-1500\"> </span>{}%"
+        // "format": "{}%"
+    },
+    "cpu": {
+        "format": "<span size=\"14pt\" rise=\"-1500\" ></span>{usage}%",
+        "interval": 3
+    },
+    "temperature": {
+        "critical-threshold": 85,
+        "format": "",
+        "format-critical": "{temperatureC}°C"
+    },
+    // "backlight": {
+    //     "format": "<span size=\"17pt\" rise=\"-3500\">{icon}</span>{percent}%",
+    //     "format-icons": ["", "", "", "", "", "", "", "", ""]
+    // },
+    "custom/brightness": {
+        "exec": "bright get_percentage",
+        "return-type": "json",
+        "format": "<span size=\"19.5pt\">{icon}</span>",
+        "interval": 2,
+        "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+    "network": {
+        "format-wifi": "<span size=\"13pt\">{icon}</span>",
+        "format-disconnected": "<span size=\"18pt\"></span>",
+        "format-icons": ["", "", ""],
+        "format-ethernet": "{ipaddr}/{cidr} ",
+        "format-disconnected": ""
+    },
+    "systemd-failed-units": {
+        "format": "{nr_failed}"
+    },
+    "privacy": {
+        "icon-spacing": 4,
+        "icon-size": 18,
+        "transition-duration": 250,
+        "modules": [
+            {
+                "type": "screenshare",
+                "tooltip": true,
+                "tooltip-icon-size": 24
+            },
+            {
+                "type": "audio-out",
+                "tooltip": true,
+                "tooltip-icon-size": 24
+            },
+            {
+                "type": "audio-in",
+                "tooltip": true,
+                "tooltip-icon-size": 24
+            }
+        ]
+    },
+    "custom/wg": {
+        "exec": "~/.config/polybar/wg.sh",
+        "interval": 2
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+    "custom/date": {
+        "exec": "~/.config/polybar/date.sh",
+        "interval": 3,
+        "format": "{}"
+    },
+    "tray": {
+        // "icon-size": 21,
+        "spacing": 10,
+        // "icons": {
+        //   "blueman": "bluetooth",
+        //   "TelegramDesktop": "$HOME/.local/share/icons/hicolor/16x16/apps/telegram.png"
+        // }
+    },
+    "battery": {
+        "states": {
+            "warning": 35,
+            "critical": 20
+        },
+        "format-discharging": "<span size=\"12pt\" rise=\"-1750\">{icon}</span> {capacity}%",
+        "format-icons": ["","", "", "", ""],
+        "format-charging": "",
+        // "format-not-charging": "",
+        "format": "",
+        "format-full": ""
+    }
+}

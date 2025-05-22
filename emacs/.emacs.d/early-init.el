@@ -22,7 +22,8 @@
 
 ;; unfortunately Emacs has no way to exclude text from being transparent
 ;; active and inactive alpha
-(push '(alpha . (85 . 85)) default-frame-alist)
+(unless (string= (getenv "XDG_SESSION_TYPE") "wayland")
+  (push '(alpha . (85 . 85)) default-frame-alist))
 
 ;; no titlebar
 ;; added in a patch; see my emacs.nix overlay

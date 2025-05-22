@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# https://wiki.hyprland.org/Configuring/Uncommon-tips--tricks/#toggle-animationsbluretc-hotkey
+animation_on=$(hyprctl getoption animations:enabled | awk 'NR==1{print $2}')
+if [[ $animation_on == 1 ]] || [[ $1 == on ]]; then
+    hyprctl --batch "\
+        keyword misc:vfr true;\
+        keyword animations:enabled 0;\
+        keyword decoration:shadow:enabled 0;\
+        keyword decoration:blur:enabled 0;\
+        keyword general:gaps_in 0;\
+        keyword general:gaps_out 0;\
+        keyword general:border_size 1;\
+        keyword decoration:rounding 0"
+    hyprctl keyword windowrule "immediate,class:^(gamescope|steam_app).*"
+else
+    # this will run hyprctl reload on startup (clearing window rules)
+    systemctl --user restart hy_watch_monitor
+fi

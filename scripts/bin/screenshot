@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # get window title
 # remove punctuation (e.g. "/") and replace whitespace with underscores
@@ -7,10 +7,32 @@ title=$(xtitle | \
 date=$(date +%FT%T)
 outfile="$HOME/move/screenshots/${date}_-_${title}.png"
 
-if [[ $1 == select ]]; then
-	maim --hidecursor --select "$outfile"
-elif [[ $1 == current_window ]]; then
-	maim --hidecursor --window "$(xdotool getactivewindow)" "$outfile"
+if [[ "${XDG_SESSION_TYPE}" == wayland ]]; then
+	grab_active_window() {
+		local active_window box
+		active_window=$(hyprctl -j activewindow)
+		box=$(echo "$active_window" \
+				  | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' \
+				  | cut -f1,2 -d' ')
+		echo -n "$box"
+	}
+
+	if [[ $1 == select ]]; then
+		grim -g "$(slurp)" "$outfile" || exit 1
+	elif [[ $1 == current_window ]]; then
+		grim -g "$(grab_active_window)" "$outfile" || exit 1
+	else
+		grim "$outfile" || exit 1
+	fi
+	wl-copy --type image/png < "$outfile"
 else
-	maim --hidecursor "$outfile"
+	if [[ $1 == select ]]; then
+		maim --hidecursor --select "$outfile"
+	elif [[ $1 == current_window ]]; then
+		maim --hidecursor --window "$(xdotool getactivewindow)" "$outfile"
+	else
+		maim --hidecursor "$outfile"
+	fi
 fi
+
+notify-send "Saved screenshot"

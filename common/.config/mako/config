@@ -1,0 +1,18 @@
+font=Delugia 13
+max-icon-size=256
+width=450
+# this is the max height
+height=200
+border-size=3
+border-radius=5
+
+sort=-time
+layer=overlay
+# increase from 5
+max-history=10
+default-timeout=5000
+
+include=~/.cache/wal/mako
+
+[mode=tv]
+output=eDP-1

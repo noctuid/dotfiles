@@ -368,6 +368,28 @@ install_emacs_lucid() {
 	fi
 }
 
+install_emacs_pgtk() {
+	local emacs_recipe build_dir
+	emacs_recipe=emacs-git
+	if [[ -n $1 ]] || ! pacman -Q "$emacs_recipe" &> /dev/null; then
+		echo "Installing emacs-git with pgtk and native comp."
+		build_dir="$uhome/build/$emacs_recipe"
+		if [[ -d "$build_dir" ]]; then
+			rm -rf "$build_dir"
+		fi
+		mkdir -p "$build_dir"
+		cd "$build_dir" \
+			&& paru --getpkgbuild "$emacs_recipe" \
+			&& chown -R "$user" "$emacs_recipe" \
+			&& cd "$emacs_recipe" \
+			&& sed --in-place --regexp-extended 's/(^PGTK=)/\1YES/' PKGBUILD \
+			&& sed --in-place --regexp-extended 's/(^FAST_BOOT=)/\1YES/' PKGBUILD \
+			&& sed --in-place --regexp-extended 's/(^JIT=)/\1YES/' PKGBUILD \
+			&& sudo -u "$user" makepkg --noconfirm --syncdeps \
+			&& pacman --noconfirm -U -- *.pkg.tar*
+	fi
+}
+
 # * Home Config Setup
 home_config_setup() { # <user>
 	echo "Symlinking user config files."
@@ -922,7 +944,8 @@ main() {
 		systemd-boot|gummi) copy_root_config_files \
 			&& "$basedir"/extra-setup --timestamp "$timestamp" initramfs_setup \
 			&& "$basedir"/extra-setup --timestamp "$timestamp" systemd_boot_setup;;
-		emacs) install_emacs_lucid true;;
+		lucid) install_emacs_lucid true;;
+		pgtk) install_emacs_pgtk true;;
 		nix) \
 			echo "You may want to use nixapply instead" \
 			&& install_nix_packages "$2";;

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# idea from https://knrdl.github.io/posts/wayland-clipboard-clean/
+# but without relying on pgrep
+
+clear_pid=
+
+wl-paste --watch echo "New clip" | while read -r _; do
+    if [[ -n $clear_pid ]]; then
+        kill $clear_pid 2> /dev/null
+    fi
+    wl_clear_clipboard &
+    clear_pid=$!
+done

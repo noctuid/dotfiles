@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
-# spotify cannot auto detect
-spotify --force-device-scale-factor=2
+if [[ "${XDG_SESSION_TYPE}" == wayland ]]; then
+    spotify-launcher
+else
+    # spotify cannot auto detect
+    spotify --force-device-scale-factor=2
+fi

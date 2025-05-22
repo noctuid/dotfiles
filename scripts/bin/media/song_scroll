@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # exec so will work with xrestart script
-# 
-exec zscroll -b " " -d 0.3 \
-		-M "mpcq status" \
-		-m "playing" "-b ' '" \
-		-m "paused" "-b ' ' -s false" \
-		-u true "mpcq current"
+exec zscroll --before-text " " --delay 0.3 \
+     -M "song_status" \
+     -m "PlayingOn" "--before-text '  '" \
+     -m "PlayingOff" "--before-text ' '" \
+     -m "Paused" "--before-text ' ' --scroll false" \
+     --update-check true 'song_title'

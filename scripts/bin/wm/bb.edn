@@ -1,0 +1,2 @@
+{:paths ["." ".."]
+ :deps  {org.babashka/json {:mvn/version "0.1.6"}}}

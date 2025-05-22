@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # use fzf or completing-read to select a directory to run ./mpgo in
 
-# selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | fzf)
-selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | esel)
+selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | fzf)
+# TODO fixme; or not?
+# selected=$(find ~/move/Screenshots -mindepth 1 -maxdepth 1 -type d | esel | head -n 1)
+# TODO limit to one line? some output from this must have been creating insane
+# nested oldboy directory
+
 if [[ -n $selected ]]; then
 	if [[ ! -d $selected ]]; then
 		if [[ ! $selected =~ ^"$HOME"/move/Screenshots ]]; then
@@ -10,6 +14,5 @@ if [[ -n $selected ]]; then
 		fi
 		mkdir -p "$selected" || exit 1
 	fi
-
-    (cd "$selected" && mpgo "$@")
+	(cd "$selected" && mpgo "$@")
 fi

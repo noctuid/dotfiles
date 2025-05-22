@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+is_server() {
+    [[ $(< /etc/hostname) == *server ]]
+}
+
+# * Optimus Manager
+# should support wayland now
+if ! is_server \
+       && systemctl is-active --quiet optimus-manager; then
+    prime-offload
+fi
+
+# * Environment Variables
+# see ~/.config/uwsm
+
+# * Daemons
+nohup dyn_emacsclient -e 0 &> /tmp/emacs_daemon_wayland.log &
+
+if ! pgrep -x kanata > /dev/null; then
+    rldkanata
+fi
+
+fcitx5 &
+
+if uwsm check is-active; then
+    systemctl --user --no-block start mako
+    systemctl --user --no-block start hypridle
+    systemctl --user --no-block start waybar
+    # have created service manually
+    systemctl --user --no-block start swww
+
+    if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+        uwsm-app -t service -u hy_watch_monitor.service hy_watch_monitor
+    elif [[ -n $SWAYSOCK ]]; then
+        uwsm-app -t service -u scroll_watch_monitor.service scroll_watch_monitor
+    fi
+
+    if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+        # hyprland specific
+        systemctl --user --no-block start hyprsunset
+    else
+        uswm-app -t service -u wl-gammarelay-rs wl-gammarelay-rs
+    fi
+    uwsm-app -t service -u wl_watch_clipboard.service wl_watch_clipboard
+else
+    mako &
+    hypridle &
+    waybar &
+    swww-daemon &
+
+    if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+        hy_watch_monitor &
+    elif [[ -n $SWAYSOCK ]]; then
+        scroll_watch_monitor &
+    fi
+
+    if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+        # hyprland specific
+        hyprsunset &
+    else
+        wl-gammarelay-rs &
+    fi
+
+    wl_watch_clipboard &
+fi
+
+if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+    # https://wiki.hyprland.org/Hypr-Ecosystem/hyprpolkitagent/
+    # authentication daemon
+    systemctl --user start hyprpolkitagent
+fi
+

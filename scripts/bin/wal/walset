@@ -2,6 +2,12 @@
 # wrapper script for setting wallpaper and updating pywal colors
 # this requires that the last argument be the file
 
+# other projects since pywal is dead
+# - https://github.com/eylles/pywal16 - what am currently using with wpgtk
+# - https://lib.rs/crates/wallust - https://github.com/deviantfero/wpgtk/issues/303
+# - https://github.com/InioX/matugen
+# - https://github.com/danihek/hellwal
+
 # TODO optionally auto adjust (-A); doesn't always look great and current config
 #      files don't all take advantage of different colors
 # TODO optionally shuffle colors
@@ -30,6 +36,7 @@ echo "Setting wallpaper"
 bgset "$@" &
 
 wallpaper=$(realpath "${@: -1}")
+ln -sf "$wallpaper" ~/.cache/wallpaper
 
 # * Update Pywal Colors
 # handles terminals, polybar, xrdb
@@ -50,27 +57,42 @@ echo "Applying colorscheme with wpg"
 # (and even with --no-reload)
 wpg -n -s "$wallpaper" || exit 1
 
-# * Fix Xresources
-# wpg merges user .Xresources afterwards (and mine contains default colors)
-# redo colors
-echo "Re-updating .Xresources as workaround (e.g. for polybar)"
-xrdb -merge ~/.cache/wal/colors.Xresources
-pkill -USR1 -x polybar &
+# * Vesktop
+mkdir -p ~/.config/vesktop/themes
+ln -sf ~/.cache/wal/colors-discord.css \
+   ~/.config/vesktop/themes/pywal-vencord.theme.css
 
-# * Update Colors for Applications Pywal Doesn't
-wm=$(get_wm)
-if [[ $wm == bspwm ]]; then
-	echo "Setting bspwm colors"
-	bspwm_set_wal_colors &
-elif [[ $wm == herbstluftwm ]]; then
-	echo "Setting herbstluftwm colors"
-	hc_set_wal_colors &
+# * Fix Xresources
+if [[ "${XDG_SESSION_TYPE}" != wayland ]]; then
+	# wpg merges user .Xresources afterwards (and mine contains default colors)
+	# redo colors
+	echo "Re-updating .Xresources as workaround (e.g. for polybar)"
+	xrdb -merge ~/.cache/wal/colors.Xresources
+	pkill -USR1 -x polybar &
 fi
 
-echo "Setting Dunst colors"
-# nohup since will continue running; will not work when called from dired
-# without this
-nohup dunstrun &> /dev/null &
+# * Update Colors for Applications Pywal Doesn't
+if [[ "${XDG_SESSION_TYPE}" != wayland ]]; then
+	wm=$(get_wm)
+	if [[ $wm == bspwm ]]; then
+		echo "Setting bspwm colors"
+		bspwm_set_wal_colors &
+	elif [[ $wm == herbstluftwm ]]; then
+		echo "Setting herbstluftwm colors"
+		hc_set_wal_colors &
+	fi
+
+	echo "Setting Dunst colors"
+	# nohup since will continue running; will not work when called from dired
+	# without this
+	nohup dunstrun &> /dev/null &
+else
+	if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+		hy_set_wal_colors
+	fi
+	killall -SIGUSR2 waybar
+	makoctl reload
+fi
 
 # requires steam restart
 echo "Setting Steam colors"
@@ -78,13 +100,17 @@ wal_steam -w &> /dev/null &
 
 # reload emacs color scheme
 echo "Setting Emacs colors"
-emacsclient -a false -e t &> /dev/null \
-	&& emacsclient --eval '(noct-ewal)' &> /dev/null &
-emacsclient -socket-name=dirvish -a false -e t &> /dev/null \
-	&& emacsclient -socket-name=dirvish --eval '(noct-ewal)' &> /dev/null &
-emacsclient -socket-name=shell-menu -a false -e t &> /dev/null \
-	&& emacsclient -socket-name=shell-menu --eval '(noct-ewal)' &> /dev/null &
+dyn_emacsclient -a false -e t &> /dev/null \
+	&& dyn_emacsclient --eval '(noct-ewal)' &> /dev/null &
+sockets=(dirvish waydirvish shell-menu wayeverywhere waygnus)
+for socket in "${sockets[@]}"; do
+	dyn_emacsclient --socket-name="$socket" -a false -e t &> /dev/null \
+		&& dyn_emacsclient --socket-name="$socket" --eval '(noct-ewal)' \
+		&> /dev/null &
+done
 
+echo "Setting spotify colors"
+pywal-spicetify Comfy &
 
 # reload colors for pywalfox/firefox
 echo "Setting pywalfox colors"
@@ -104,10 +130,12 @@ fi
 # xsetroot -cursor_name heart -bg "$background" -fg "$background" &
 
 # * Set Lockscreen
-# cache for i3lock-color
-# slowest and least immediately important; start last
-echo "Setting lockscreen"
-betterlockscreen --update "$wallpaper" &
+if [[ "${XDG_SESSION_TYPE}" != wayland ]]; then
+	# cache for i3lock-color
+	# slowest and least immediately important; start last
+	echo "Setting lockscreen"
+	betterlockscreen --update "$wallpaper" &
+fi
 
 # necessary to use with dired-do-async-shell-command, for example, so all
 # processes complete

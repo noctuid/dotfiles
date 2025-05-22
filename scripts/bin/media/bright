@@ -22,7 +22,16 @@ get_capable_monitor_bus() {
 }
 
 use_external_monitor() {
-	(($(herbstclient attr monitors.focus.index) > 0))
+	if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+		output=$(hyprctl -j monitors \
+					 | jq --raw-output "map(select(.focused)) | .[0].name")
+		[[ $output != eDP-1 ]]
+	elif [[ -n $SWAYSOCK ]]; then
+		# implement as needed
+		 false
+	else
+		(($(herbstclient attr monitors.focus.index) > 0))
+	fi
 }
 
 set_brightness() {
@@ -36,4 +45,26 @@ set_brightness() {
 	fi
 }
 
-set_brightness "$@"
+get_brightness() {
+	local bus
+	bus=$(get_capable_monitor_bus)
+	if [[ -n $bus ]] && use_external_monitor; then
+		ddcutil getvcp --bus "$bus" "$BRIGHTNESS_CODE" \
+			| awk 'match($0, /current value =[[:space:]]*([0-9]+)/, level) {
+			print level[1]
+			}'
+	else
+		# this is actually acpilight
+		xbacklight -get
+	fi
+}
+
+get_brightness_percentage() {
+	echo "{\"percentage\": $(get_brightness)}"
+}
+
+case $1 in
+	get) get_brightness;;
+	get_percentage) get_brightness_percentage;;
+	*) set_brightness "$@";
+esac

@@ -44,7 +44,11 @@ print_volume() {
 		fi
 	fi
 
-	echo "%{F$color}$icon $percent%%{F-}"
+	if [[ "${XDG_SESSION_TYPE}" == wayland ]]; then
+		echo "$icon $percent%"
+	else
+		echo "%{F$color}$icon $percent%%{F-}"
+	fi
 }
 
 print_volume

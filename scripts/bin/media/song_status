@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+players="spotify,chromium,mpd"
+status=$(playerctl --player=$players status 2> /dev/null)
+shuffle=$(playerctl --player=$players shuffle 2> /dev/null)
+
+echo -n "$status$shuffle"

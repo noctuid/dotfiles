@@ -11,6 +11,11 @@
   [cmd]
   (-> (sh cmd) :out trim))
 
+(defn sh-success?
+  "Return the trimmed output of a command."
+  [cmd]
+  (-> (sh cmd) :exit zero?))
+
 (defn cmd-reader
   "Return the output of a command as a stream using io/reader."
   [cmd]

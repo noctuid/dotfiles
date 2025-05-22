@@ -11,7 +11,7 @@ if [[ -n $1 ]]; then
 	clipboard=$1
 	shift
 else
-	clipboard=$(xsel -b)
+	clipboard=$(get_clipboard)
 fi
 
 mpv_flags=(

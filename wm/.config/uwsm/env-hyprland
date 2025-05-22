@@ -1,0 +1,20 @@
+# -*- mode: sh -*-
+# use hyprcursor
+export HYPRCURSOR_THEME=Nordzy-hyprcursors
+export HYPRCURSOR_SIZE=24
+
+# because have force_zero_scaling = true
+# for steam
+# will not affect non-xwayland GTK applications
+export GDK_SCALE=2
+
+# https://wiki.hyprland.org/Configuring/Multi-GPU/
+# use integrated graphics as primary renderer
+# integrated as primary; causes lag on external monitor
+# export AQ_DRM_DEVICES="/dev/dri/card1:/dev/dri/card0"
+# nvidia first; no performance issues, wayland wezterm breaks
+export AQ_DRM_DEVICES="/dev/dri/card0:/dev/dri/card1"
+
+# untested
+# https://wiki.hyprland.org/Nvidia/#va-api-hardware-video-acceleration
+

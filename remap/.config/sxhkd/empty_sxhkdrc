@@ -27,14 +27,14 @@ c
 	chromium
 
 semicolon ; e
-	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
+	LC_CTYPE=ja_JP.UTF-8 dyn_emacsclient -c -a ""
 
 v
-	LC_CTYPE=ja_JP.UTF-8 emacsclient -c -a ""
+	LC_CTYPE=ja_JP.UTF-8 dyn_emacsclient -c -a ""
 
 m
 	spotify --force-device-scale-factor=2
 
 # ** Dropdowns
 k
-	dropdown -n calc emacsclient -ce "(progn (calc) (delete-other-windows))"
+	dropdown -n calc dyn_emacsclient -ce "(progn (calc) (delete-other-windows))"

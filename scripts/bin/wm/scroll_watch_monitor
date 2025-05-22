@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+# TODO extract common parts
+
+teardown() {
+    echo "Running teardown"
+    makoctl mode -r tv
+    pkill systemd-inhibit
+
+    # TODO can't run because will result in another message, causing infinitely
+    # running teardown
+    # remove temporary window rules
+    # smsg reload
+}
+
+desk_setup() {
+    echo "Running desk setup configuration"
+    # show notifications on focused output
+    makoctl mode -r tv
+
+    sleep 2
+    swww img --outputs "$1" ~/.cache/wallpaper
+
+    sleep 3
+    # kill after even more sleep; sometimes an issue where will get multiple
+    # bars on other monitor otherwise
+    # show waybar on all outputs
+    sed --in-place --regexp-extended \
+        "s/(^\s*)\"output\":.*/\1\"output\": \"\",/" \
+        ~/.config/waybar/config.jsonc
+    killall -SIGUSR2 waybar
+
+    systemd-inhibit --what=idle --who=Caffeine --why=Caffeine --mode=block sleep inf &
+}
+
+tv_setup() {
+    echo "Running tv setup configuration"
+    # don't show waybar on this output
+    sed --in-place --regexp-extended \
+        "s/(^\s*)\"output\":.*/\1\"output\": \"!$1\",/" \
+        ~/.config/waybar/config.jsonc
+    killall -SIGUSR2 waybar
+    # show notifications on laptop screen
+    makoctl mode -a tv
+
+    # TODO
+    # hyprctl dispatch focusmonitor "$output"
+    # hyprctl dispatch focusworkspaceoncurrentmonitor 10
+
+    smsg 'for_window [app_id="^mpv$"] fullscreen enable, move window workspace 9'
+
+    sleep 2
+    swww img --outputs "$1" ~/wallpaper/black.jpg
+}
+
+# event doesn't provide any info
+while read -r _; do
+    outputs=$(smsg --raw --type get_outputs)
+    monitor_count=$(echo "$outputs" | jq 'length')
+    if (( monitor_count > 1 )); then
+        screen=eDP-1
+        external=$(echo "$outputs" \
+                       | jq --raw-output "map(select(.name? != \"$screen\")) | .[0].name")
+
+        desk_setup=$(echo "$outputs" | jq 'any(.[]; .model == "Gigabyte M32U")')
+        if [[ $desk_setup == true ]]; then
+            desk_setup "$external"
+        else
+            tv_setup "$external"
+        fi
+    else
+        teardown
+    fi
+done < <(smsg --raw --monitor --type subscribe '["output"]' )

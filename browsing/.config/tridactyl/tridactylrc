@@ -144,6 +144,12 @@ sanitize tridactylsync tridacytllocal
 " * About:config and user.js
 " see ../../.mozilla/firefox/noctuid.normal/user-overrides.js
 
+" * Passthrough
+" NOTE: blacklistadd should come at top of config
+" (https://github.com/tridactyl/tridactyl/issues/1292#issuecomment-2754904807)
+bind , mode ignore
+bind --mode=ignore <esc> mode normal
+
 " * Settings
 " ** Appearance
 " ./themes/custom.css
@@ -181,7 +187,7 @@ setmode ignore allowautofocus true
 " seturl raw.githubusercontent.com csp clobber
 
 " ** Editor
-set editorcmd emacsclient -a "" -c "+%l:%c" "%f"
+set editorcmd dyn_emacsclient -a "" -c "+%l:%c" "%f"
 
 " ** Hinting
 set hintchars arstdhneiowfpluy
@@ -384,12 +390,12 @@ bind tw saveas ~/database/move/
 
 " this works
 alias mpqueuesafe js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('kitty-mpqueue ' + url))
-bind tv hint -W mpqueuesafe
+bind tq hint -W mpqueuesafe
 " used to work but and above didn't and now it's the opposite...
 " bind tv composite hint -y ; exclaim_quiet "kitty-mpqueue"
 
-alias mpgosafe js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('dropmpgo ' + url))
-bind tV hint -W mpgosafe
+alias mpgosafe js -p { tri.excmds.yank(JS_ARG); tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim_quiet('dropmpgo ' + url))}
+bind tv hint -W mpgosafe
 
 alias transmissionadd js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('transmission-remote -a ' + url))
 bind ta hint -W transmissionadd
@@ -407,9 +413,12 @@ bind ty composite get_current_url | shellescape | !s mvp --force-window
 " bind V composite get_current_url | shellescape | !s mvp --fullscreen
 
 " alias mvigallery js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim('mvigallery ' + url))
-bind tg composite get_current_url | shellescape | !s mvigallery
+bind tG composite get_current_url | shellescape | !s mvigallery
 
-bind tG composite get_current_url | shellescape | !s dlg
+alias dlg js -p tri.excmds.shellescape(JS_ARG).then(url => tri.excmds.exclaim_quiet('dlg ' + url))
+" bind tg composite get_current_url | shellescape | !s dlg
+bind tg composite get_current_url | dlg
+bind td hint -W dlg
 bind tY composite get_current_url | shellescape | !s ytdl
 bind tA composite get_current_url | shellescape | !s ytdl -a
 
@@ -429,11 +438,6 @@ bind gr reloadhard
 
 " ** Zoom
 bind = zoom 1
-
-" * Passthrough
-" TODO blacklistadd
-bind , mode ignore
-bind --mode=ignore <esc> mode normal
 
 " * AutoCmds
 " ** Site Specific
@@ -487,12 +491,15 @@ bindurl youtu((\.be)|(be\.com)) F hint -b -J
 bindurl youtu((\.be)|(be\.com)) tf hint -t -J
 
 " ** Reddit
-autocmd DocStart ^http(s?)://www\.reddit\.com(?!/poll) urlmodify -t www old
+autocmd DocStart ^http(s?)://www\.reddit\.com/(?!poll|media|gallery) urlmodify -t www old
 
 " ** Twitter
 " so I don't have to login to view things
 " https://github.com/glacambre/.dotfiles/blob/ce464f5dee258a912d3ab319857aaaea838f7e7d/default/.config/tridactyl/tridactylrc#L11
 autocmd DocStart ^http(s?)://twitter\.com urlmodify -t twitter.com nitter.net
+
+" ** privacy guides
+autocmd DocStart ^http(s?)://www\.privacytools\.io urlmodify -t privacytools.io privacyguides.org
 
 " * Local Config
 source ~/.config/tridactyl/local

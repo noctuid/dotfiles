@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# hypothetically this would be used to use a different emacs binary, though I
+# don't have it setup correctly
+
+if [[ "${XDG_SESSION_TYPE}" == wayland ]]; then
+    emacsclient "$@"
+else
+    # x_emacsclient "$@"
+    emacsclient "$@"
+fi

@@ -1,0 +1,39 @@
+[manager]
+ratio = [ 1, 3, 5 ]
+show_hidden = true
+# defaults
+sort_dir_first = true
+sort_sensitive = false
+show_symlink = true
+linemode = "size"
+
+[preview]
+# tab_size        = 2
+max_width       = 6000
+# max_height      = 10000
+# image_delay = 0
+
+[opener]
+edit = [
+  { run = '$EDITOR "$@"', block = true },
+]
+rifle = [
+  { run = 'rifle "$@"', orphan = true },
+]
+
+[open]
+rules = [
+  { name = "bulk-rename.txt", use = "edit" },
+  { name = "*", use = "rifle" },
+]
+
+# https://github.com/yazi-rs/plugins/tree/main/git.yazi#setup
+[[plugin.prepend_fetchers]]
+id   = "git"
+name = "*"
+run  = "git"
+
+[[plugin.prepend_fetchers]]
+id   = "git"
+name = "*/"
+run  = "git"

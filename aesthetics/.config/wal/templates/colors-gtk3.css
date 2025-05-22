@@ -1,0 +1,22 @@
+@define-color background rgb({background.rgb});
+@define-color backgroundAlpha rgba({background.rgb},0.5);
+
+@define-color foreground rgb({foreground.rgb});
+@define-color foregroundAlpha rgba({foreground.rgb},0.5);
+
+@define-color my-dark-red rgb({color1.rgb});
+@define-color my-red rgb({color9.rgb});
+
+@define-color my-dark-green rgb({color2.rgb});
+@define-color my-green rgb({color10.rgb});
+
+@define-color my-yellow rgb({color3.rgb});
+
+@define-color my-dark-blue rgb({color4.rgb});
+@define-color my-blue rgb({color12.rgb});
+
+@define-color my-dark-magenta rgb({color5.rgb});
+@define-color my-magenta rgb({color13.rgb});
+
+@define-color my-dark-cyan rgb({color6.rgb});
+@define-color my-cyan rgb({color14.rgb});

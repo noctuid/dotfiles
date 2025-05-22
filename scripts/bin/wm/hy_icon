@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+print_info() {
+    local prefix window_count fullscreen icon
+    prefix=$1
+    window_count=$(hyprctl -j activeworkspace | jq '.windows')
+    fullscreen=$(hyprctl -j activewindow | jq '.fullscreen')
+
+    icon=
+    if (( fullscreen == 1 )); then
+        # monocle mimic
+        icon=
+    else
+        layout=$(hyprctl -j getoption general:layout \
+                     | jq --raw-output ".str")
+        if [[ $layout == master ]]; then
+            icon=
+        fi
+    fi
+
+    echo "$prefix$icon $window_count"
+}
+
+print_info
+
+prefix=""
+last_info=""
+socket="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+while read -r event; do
+    case $event in
+        fullscreen*|activewindow*) ;;
+        "activespecial>>special"*) prefix=" ";;
+        "activespecial>>,"*) prefix="";;
+        *) continue;;
+    esac
+    new_info=$(print_info "$prefix")
+    if [[ $new_info != "$last_info" ]]; then
+        echo "$new_info"
+        last_info="$new_info"
+    fi
+done < <(socat -U - UNIX-CONNECT:"$socket")

@@ -143,8 +143,9 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	zinit ice wait lucid multisrc"shell/*.zsh"
 	zinit light "junegunn/fzf"
 
-	zinit ice wait lucid
-	zinit light "wookayin/fzf-fasd"
+	# switched to zoxide
+	# zinit ice wait lucid
+	# zinit light "wookayin/fzf-fasd"
 
 	# directory selection with fuzzy search; nice complement to fasd
 	zinit ice wait lucid
@@ -219,9 +220,11 @@ if [[ -f ~/.zinit/bin/zinit.zsh ]]; then
 	zinit light "mollifier/cd-gitroot"
 
 	zinit ice wait lucid
-	# fasd is archived and unavailable for brew
-	# https://github.com/Homebrew/homebrew-core/pull/112791
-	zinit light "whjvenyl/fasd"
+
+	# switched to zoxide
+	# # fasd is archived and unavailable for brew
+	# # https://github.com/Homebrew/homebrew-core/pull/112791
+	# zinit light "whjvenyl/fasd"
 
 	# ** Interesting but not useful for me at the moment
 	# Tarrasch/zsh-autoenv
@@ -557,11 +560,16 @@ fi
 # 3. f<keys> auto-enter navigation in file manager (e.g. deer and blscd) or tab
 #    completion
 
-# *** FASD
-if hash fasd 2> /dev/null; then
-	# have a (any), s (show), z (cd), etc.
-	eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
-	alias z='fasd_cd -d'
+# *** Zoxide (previously FASD)
+# if hash fasd 2> /dev/null; then
+# 	# have a (any), s (show), z (cd), etc.
+# 	eval "$(fasd --init posix-alias zsh-hook zsh-ccomp zsh-ccomp-install)"
+# 	alias z='fasd_cd -d'
+# fi
+
+if hash zoxide 2> /dev/null; then
+	eval "$(zoxide init zsh)"
+	alias f='__zoxide_zi'
 fi
 
 # *** FZF
@@ -810,7 +818,7 @@ alias help='run-help'
 
 alias e="$EDITOR"
 
-alias stop_emacs='emacsclient --eval "(let (kill-emacs-hook) (kill-emacs))"'
+alias stop_emacs='dyn_emacsclient --eval "(let (kill-emacs-hook) (kill-emacs))"'
 
 # b is for bang!
 b() {
@@ -841,9 +849,9 @@ alias hack='hexdump -c /dev/urandom'
 alias pg='pgrep -l'
 alias stl='sudo systemctl'
 # use spacemacs config (not symlinking to home with stow)
-alias spacemacs="env HOME=$HOME/spacemacs emacs"
-alias testemacs="env HOME=$HOME/test-emacs emacs"
-alias doom="env HOME=$HOME/doom emacs"
+alias spacemacs="env HOME=$HOME/spacemacs dyn_emacs"
+alias testemacs="env HOME=$HOME/test-emacs dyn_emacs"
+alias doom="env HOME=$HOME/doom dyn_emacs"
 
 alias checkclass='xprop | grep WM_CLASS'
 
@@ -1573,6 +1581,13 @@ fi
 
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
+# https://github.com/Sonico98/yazi-prompt.sh
+prompt_yazi() {
+	if [[ -n $YAZI_LEVEL ]]; then
+		p10k segment -f 005 -i '' -t 'Yazi'
+	fi
+}
+
 typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
 	os_icon
 	background_jobs
@@ -1582,6 +1597,7 @@ typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
 	status                    # and exit status
 	newline                   # \n
 	virtualenv                # python virtual environment
+	yazi                      # if inside yazi
 	prompt_char               # prompt symbol
 )
 # just enable everything when run p10k configure

@@ -1,0 +1,14 @@
+# -*- mode: sh -*-
+# enable native wayland for most electron apps
+# works for electron >28
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
+# https://wiki.archlinux.org/title/Hardware_video_acceleration#Configuring_VA-API
+# https://wiki.hyprland.org/Nvidia/
+# very noticeably improves performances
+export LIBVA_DRIVER_NAME=nvidia
+export __GLX_VENDOR_LIBRARY_NAME=nvidia
+
+# don't need/want to export on waylad
+export GTK_IM_MODULE=
+export QT_IM_MODULE=

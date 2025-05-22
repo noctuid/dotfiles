@@ -1,0 +1,451 @@
+# default config:
+# https://github.com/sxyazi/yazi/blob/shipped/yazi-config/preset/keymap-default.toml
+
+# Issues:
+# - shell history https://github.com/sxyazi/yazi/issues/873
+# - does not pass files in sort order
+
+# As needed
+# needs yazi-git, which doesn't build for me currently:
+# https://github.com/DreamMaoMao/keyjump.yazi
+# default + mtime + user/group is fine for now
+# https://github.com/imsi32/yatline.yazi
+# https://github.com/hunkyburrito/xdg-desktop-portal-termfilechooser?tab=readme-ov-file#installation
+# https://github.com/TD-Sky/sudo.yazi
+# if want to copy file (contents) to clipboard
+# https://github.com/orhnk/system-clipboard.yazi
+# out of date:
+# https://github.com/grappas/wl-clipboard.yazi
+# don't currently need interactive rg:
+# https://gitee.com/DreamMaoMao/fg.yazi
+
+# * Basic Navigation
+[[manager.prepend_keymap]]
+on = "q"
+run = "close"
+
+[[manager.prepend_keymap]]
+on = "e"
+run = "arrow -1"
+
+[[manager.prepend_keymap]]
+on = "n"
+run = "arrow 1"
+
+[[manager.prepend_keymap]]
+on   = [ "N" ]
+run  = "plugin first-non-directory"
+desc = "Jumps to the first file"
+
+[[manager.prepend_keymap]]
+on   = "i"
+run  = "plugin smart-enter"
+desc = "Enter the child directory, or open the file"
+
+[[manager.prepend_keymap]]
+on = "l"
+run = "back"
+
+[[manager.prepend_keymap]]
+on   = ["t", "p"]
+run  = "plugin fzf"
+
+[[manager.prepend_keymap]]
+on   = ["t", "f"]
+run  = "plugin zoxide"
+
+[[manager.prepend_keymap]]
+on   = "f"
+run  = "filter --smart"
+
+# unfortunately doesn't work very well (keeps previous letters on jump)
+[[manager.prepend_keymap]]
+on   = "F"
+run  = "plugin smart-filter"
+
+# [[manager.prepend_keymap]]
+# on   = "F"
+# run  = "plugin jump-to-char"
+# desc = "Jump to char"
+
+# [[manager.prepend_keymap]]
+# on   = "F"
+# run  = "plugin keyjump"
+
+# * Quickmarks
+[[manager.prepend_keymap]]
+on = ["g", "/"]
+run = "cd /"
+
+[[manager.prepend_keymap]]
+on = ["g", "b"]
+run = "cd /bin"
+
+[[manager.prepend_keymap]]
+on = ["g", "e"]
+run = "cd /etc"
+
+[[manager.prepend_keymap]]
+on = ["g", "m"]
+run = "cd /media"
+
+[[manager.prepend_keymap]]
+on = ["g", "M"]
+run = "cd /mnt"
+
+[[manager.prepend_keymap]]
+on = ["g", "o"]
+run = "cd /opt"
+
+[[manager.prepend_keymap]]
+on = ["g", "t"]
+run = "cd /tmp"
+
+[[manager.prepend_keymap]]
+on = ["g", "u"]
+run = "cd /usr"
+
+[[manager.prepend_keymap]]
+on = ["g", "v"]
+run = "cd /var"
+
+[[manager.prepend_keymap]]
+on = ["'", "a"]
+run = "cd ~/ag-sys"
+
+[[manager.prepend_keymap]]
+on = ["'", "b"]
+run = "cd ~/dotfiles/scripts/bin"
+
+[[manager.prepend_keymap]]
+on = ["'", "c"]
+run = "cd ~/src"
+
+[[manager.prepend_keymap]]
+on = ["'", "d"]
+run = "cd ~/database"
+
+[[manager.prepend_keymap]]
+on = ["'", "e"]
+run = "cd ~/.emacs.d"
+
+[[manager.prepend_keymap]]
+on = ["'", "E"]
+run = "cd ~/ag-sys/else"
+
+[[manager.prepend_keymap]]
+on = ["'", "f"]
+run = "cd ~/dotfiles"
+
+[[manager.prepend_keymap]]
+on = ["'", "h"]
+run = "cd ~/database/pictures/help-and-guides"
+
+[[manager.prepend_keymap]]
+on = ["'", "l"]
+run = "cd ~/database/library"
+
+[[manager.prepend_keymap]]
+on = ["'", "m"]
+run = "cd ~/move"
+
+[[manager.prepend_keymap]]
+on = ["'", "s"]
+run = "cd ~/move/screenshots"
+
+[[manager.prepend_keymap]]
+on = ["'", "S"]
+run = "cd ~/move/Screenshots"
+
+[[manager.prepend_keymap]]
+on = ["'", "w"]
+run = "cd ~/wallpaper"
+
+# * Marking/Yanking/Moving/Deleting
+[[manager.prepend_keymap]]
+on = ","
+run = ["toggle", "arrow 1"]
+
+[[manager.prepend_keymap]]
+on = "v"
+run = "toggle_all"
+
+[[manager.prepend_keymap]]
+on = ["u", "m"]
+run = "toggle --state=off"
+
+[[manager.prepend_keymap]]
+on = ["u", "v"]
+run = "toggle_all --state=off"
+
+[[manager.prepend_keymap]]
+on = ["u", "y"]
+run = "unyank"
+
+[[manager.prepend_keymap]]
+on = "V"
+run = "visual_mode"
+
+[[manager.prepend_keymap]]
+on = ["y", "y"]
+run = "yank"
+
+[[manager.prepend_keymap]]
+on = ["y", "p"]
+run = "copy path"
+
+[[manager.prepend_keymap]]
+on = ["y", "d"]
+run = "copy dirname"
+
+[[manager.prepend_keymap]]
+on = ["y", "n"]
+run = "copy filename"
+
+[[manager.prepend_keymap]]
+on = ["y", "."]
+run = "copy name_without_ext"
+
+# or just x
+[[manager.prepend_keymap]]
+on = ["d", "d"]
+run = "yank --cut"
+
+[[manager.prepend_keymap]]
+on = ["d", "i"]
+run = "remove"
+desc = "Trash"
+
+[[manager.prepend_keymap]]
+on   = ["u", "d"]
+run  =  "plugin restore"
+
+# don't allow real deletion
+[[manager.prepend_keymap]]
+on = ["D"]
+run = "noop"
+
+[[manager.prepend_keymap]]
+on = ["p", "p"]
+run = "paste"
+
+[[manager.prepend_keymap]]
+on = ["p", "l"]
+run = "link"
+
+[[manager.prepend_keymap]]
+on = ["p", "L"]
+run = "link --relative"
+
+[[manager.prepend_keymap]]
+on = ["p", "h"]
+run = "hardlink"
+
+# * Create/Rename
+[[manager.prepend_keymap]]
+on = ["c", "c"]
+run = "rename --empty=stem --cursor=start"
+
+[[manager.prepend_keymap]]
+on = "a"
+run = "rename --cursor=end"
+
+[[manager.prepend_keymap]]
+on = "I"
+run = "rename --cursor=start"
+
+[[manager.prepend_keymap]]
+on = ["c", "n"]
+run = "create"
+desc = "Create file OR directory"
+
+[[manager.prepend_keymap]]
+on = ["c", "d"]
+run = "create --dir"
+desc = "Create directory"
+
+# * Find
+# s - file names with fd
+
+[[manager.prepend_keymap]]
+on = "k"
+run = "find_arrow"
+
+[[manager.prepend_keymap]]
+on = "K"
+run = "find_arrow --previous"
+
+# * Tabs
+# TODO don't like that tabs aren't like in ranger
+# (in ranger you can open tab 8 without having 7 tabs open, and closing tabs doesn't affect tab numbers)
+[[manager.prepend_keymap]]
+on = ["t", "t"]
+run = "tab_create --current"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "a"]
+run = "plugin smart-switch 0"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "r"]
+run = "plugin smart-switch 1"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "s"]
+run = "plugin smart-switch 2"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "t"]
+run = "plugin smart-switch 3"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "d"]
+run = "plugin smart-switch 4"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "h"]
+run = "plugin smart-switch 5"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "n"]
+run = "plugin smart-switch 6"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "e"]
+run = "plugin smart-switch 7"
+
+[[manager.prepend_keymap]]
+on = ["<Space>", "i"]
+run = "plugin smart-switch 8"
+
+# it only supports 9 tabs
+# [[manager.prepend_keymap]]
+# on = ["<Space>", "o"]
+# run = "plugin smart-switch 9"
+
+# * Sort
+[[manager.prepend_keymap]]
+on = ["o", "n"]
+run = "sort --reverse=no natural"
+
+[[manager.prepend_keymap]]
+on = ["o", "N"]
+run = "sort --reverse=yes natural"
+
+[[manager.prepend_keymap]]
+on = ["o", "m"]
+run = "sort --reverse=no mtime"
+
+[[manager.prepend_keymap]]
+on = ["o", "M"]
+run = "sort --reverse=yes mtime"
+
+[[manager.prepend_keymap]]
+on = ["o", "b"]
+run = "sort --reverse=no btime"
+
+[[manager.prepend_keymap]]
+on = ["o", "B"]
+run = "sort --reverse=yes btime"
+
+[[manager.prepend_keymap]]
+on = ["o", "s"]
+run = "sort --reverse=no size"
+
+[[manager.prepend_keymap]]
+on = ["o", "S"]
+run = "sort --reverse=yes size"
+
+[[manager.prepend_keymap]]
+on = ["o", "r"]
+run = "sort random"
+
+# * Misc
+# w is already tasks
+# Tab is spot
+# . - toggle hidden
+
+[[manager.prepend_keymap]]
+on = ["d", "u"]
+run = "plugin what-size"
+
+# * Shell
+[[manager.prepend_keymap]]
+on   = "<C-s>"
+run  = 'suspend'
+
+[[manager.prepend_keymap]]
+on   = "S"
+run  = 'shell "zsh" --block'
+desc = "Open shell here"
+
+[[manager.prepend_keymap]]
+on = "<Enter>"
+run = 'shell --block --interactive'
+
+[[manager.prepend_keymap]]
+on = ["c", "w"]
+run = "shell --orphan 'walset \"$0\"'"
+desc = "Set wallpaper and update pywal colors"
+
+[[manager.prepend_keymap]]
+on = ["c", "b"]
+run = "shell 'bgset \"$0\"'"
+desc = "Set wallpaper"
+
+[[manager.prepend_keymap]]
+on   = [ "c", "m" ]
+run  = "plugin chmod"
+desc = "Chmod on selected files"
+
+[[manager.prepend_keymap]]
+on   = [ "c", "M" ]
+run  = "shell 'mat2 \"$@\"'"
+
+# sanitize permissions
+[[manager.prepend_keymap]]
+on   = [ "c", "s" ]
+run  = ["shell --block 'sudo chown -R \"$USER:$USER\" \"$@\"'", "shell --block 'sudo chmod -R u=rwX,go=rX \"$@\"'"]
+
+[[manager.prepend_keymap]]
+on   = [ "c", "u" ]
+run  = "shell 'upscale \"$@\"'"
+
+[[manager.prepend_keymap]]
+on   = [ "c", "U" ]
+run  = "shell 'upscale \"$@\"' 10"
+
+[[manager.prepend_keymap]]
+on   = [ "c", "X" ]
+run  = "shell 'upscale \"$@\"' 20"
+
+[[manager.prepend_keymap]]
+on   = "O"
+run  = ["copy path", "shell 'dropmpgo'"]
+
+[[manager.prepend_keymap]]
+on = ["u", "n"]
+run = 'shell "udiskie-umount \"$@\""'
+
+[[manager.prepend_keymap]]
+on = ["u", "N"]
+run = 'shell "udiskie-umount --all"'
+
+[[manager.prepend_keymap]]
+on = ["u", "x"]
+run = 'shell "unarchive \"$@\""'
+
+[[manager.prepend_keymap]]
+on = ["t", "x"]
+run = 'shell "unarchive \"$@\" && rm \"$@\""'
+
+[[manager.prepend_keymap]]
+on = ["c", "a"]
+run = "plugin ouch"
+desc = "Compress with ouch"
+
+# * Input Keybindings
+[[input.prepend_keymap]]
+on   = "<Esc>"
+run  = "close"
+desc = "Cancel input"

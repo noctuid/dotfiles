@@ -4,19 +4,25 @@
 # can hide/show while video running to see output
 # once video quits, window will exit, and tdrop will recreate
 
-if [[ -z $1 ]]; then
-	queue=/tmp/mpv-queue
-	# play from queue file if no argument
-	shuffled_videos=$(shuf $queue)
-	random_media=$(echo "$shuffled_videos" | head -n 1)
-	path=$(echo "$random_media" | jq --raw-output .path)
-	mpgoargs=$(echo "$random_media" | jq --raw-output .mpgoargs)
-	# write in new order to prepare to delete line 1
-	echo "$shuffled_videos" > $queue
-	# shellcheck disable=SC2016
-	dropdown -n mpgosel \
-			 --post-create-hook "sed -i '1d' $queue && unmap \$wid" \
-			 wezterm start --always-new-process -- mpgoin "$path" "$mpgoargs"
+if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+	hyprctl dispatch togglespecialworkspace mpgo
+elif [[ -n $SWAYSOCK ]]; then
+	scroll_toggle mpgo wezterm start --always-new-process --workspace waympgo mpgosel
 else
-	dropdown -n mpgosel wezterm start --always-new-process -- mpgosel "$@"
+	if [[ -z $1 ]]; then
+		queue=/tmp/mpv-queue
+		# play from queue file if no argument
+		shuffled_videos=$(shuf $queue)
+		random_media=$(echo "$shuffled_videos" | head -n 1)
+		path=$(echo "$random_media" | jq --raw-output .path)
+		mpgoargs=$(echo "$random_media" | jq --raw-output .mpgoargs)
+		# write in new order to prepare to delete line 1
+		echo "$shuffled_videos" > $queue
+		# shellcheck disable=SC2016
+		dropdown -n mpgosel \
+				--post-create-hook "sed -i '1d' $queue && unmap \$wid" \
+				wezterm start --always-new-process -- mpgoin "$path" "$mpgoargs"
+	else
+		dropdown -n mpgosel wezterm start --always-new-process -- mpgosel "$@"
+	fi
 fi

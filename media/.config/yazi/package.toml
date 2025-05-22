@@ -1,0 +1,62 @@
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-enter"
+rev = "5186af7"
+hash = "aef2b1a805b80cce573bb766f1459d88"
+
+[[plugin.deps]]
+use = "lpanebr/yazi-plugins:first-non-directory"
+rev = "ca18a2c"
+hash = "5c20ffa5171dab34042e03d273dddc5b"
+
+[[plugin.deps]]
+use = "imsi32/yatline"
+rev = "2ecf715"
+hash = "38e2ea4703ea606d4eef574e8e8b8fd7"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:chmod"
+rev = "864a021"
+hash = "2f1053f89d1a301a648ab181d0948e38"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:smart-filter"
+rev = "864a021"
+hash = "f0c4b41b5d19a3144958383333eff6e7"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:git"
+rev = "864a021"
+hash = "e0ada736ea676c2bbb3ec705a49526ef"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:jump-to-char"
+rev = "864a021"
+hash = "a670c03eb3760812e044a24f94cedc55"
+
+[[plugin.deps]]
+use = "Rolv-Apneseth/starship"
+rev = "6fde3b2"
+hash = "7ddb7a790746fd91ecdd0350cc5a5d8c"
+
+[[plugin.deps]]
+use = "boydaihungst/restore"
+rev = "539aad5"
+hash = "fd162085ec09fef4b4060c92bba31994"
+
+[[plugin.deps]]
+use = "pirafrank/what-size"
+rev = "f1c6b69"
+hash = "6e789212eb41d937bab04877ca361099"
+
+[[plugin.deps]]
+use = "ndtoan96/ouch"
+rev = "2496cd9"
+hash = "5b9dea47776a30946cfbf83232d18fb1"
+
+[[plugin.deps]]
+use = "DreamMaoMao/keyjump"
+rev = "2cf7963"
+hash = "b68f6cfcbea6971ad65c39ba91112b0f"
+
+[flavor]
+deps = []

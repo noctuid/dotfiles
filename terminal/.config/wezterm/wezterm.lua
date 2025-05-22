@@ -17,6 +17,20 @@ local home = wezterm.home_dir;
 
 config.default_prog = { '/usr/bin/env', 'zsh' }
 
+-- :( https://github.com/wezterm/wezterm/issues/6645
+if os.getenv("HYPRLAND_INSTANCE_SIGNATURE") then
+    config.enable_wayland = false
+    config.font_size = 24
+end
+-- https://wezterm.org/config/lua/config/tiling_desktop_environments.html
+config.tiling_desktop_environments = {
+    'X11 bspwm',
+    -- need to check name
+    'X11 herbstluftwm',
+    --- need for font resize not to resize window and mess things up
+    'X11 Hyprland :D',
+}
+
 -- * Appearance
 -- fine if this doesn't exist as wezterm as default fallback
 config.font = wezterm.font 'Delugia'
@@ -98,6 +112,11 @@ end)
 -- * Keybindings
 config.disable_default_key_bindings = true
 config.keys = {
+   {
+       key = ';',
+       mods = 'CTRL',
+       action = act.ShowDebugOverlay
+   },
    -- ** Panes
    {
       key = '\'',

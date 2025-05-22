@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# need to manually set scaling since running through xwayland and have
+# force_zero_scaling = true
+QT_SCALE_FACTOR=2 zoom

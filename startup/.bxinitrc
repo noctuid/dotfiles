@@ -66,7 +66,7 @@ source ~/bin/helpers/xenv.sh
 # * Emacs
 # start now that used environment variables have been sourced
 # start emacs daemon if it isn't running (ALTERNATE_EDITOR empty)
-nohup emacsclient -e 0 &> /tmp/emacs_daemon.log &
+nohup dyn_emacsclient -e 0 &> /tmp/emacs_daemon_"$DISPLAY".log &
 
 # * HiDPI
 if [[ -n $MONITOR_IS_HIDPI ]]; then
@@ -121,12 +121,6 @@ unclutter -idle 1 -b
 # use lockscreen script as screen saver
 # ~/bin/lockscreen (or ../scripts/bin/lockscreen)
 xss-lock lockscreen &
-
-# * Fonts
-# TODO remove all custom fonts or switch to ~/.local/share/fonts
-# https://wiki.archlinux.org/index.php/fonts#Manual_installation
-xset +fp ~/.fonts
-xset fp rehash
 
 # * Wpg/Pywal and Wallpaper
 if [[ -z $NO_WAL ]]; then

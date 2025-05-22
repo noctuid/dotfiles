@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+workspace=$1
+info=$(smsg --raw --type get_workspaces \
+           | jq ".[] | select(.name == \"$workspace\")")
+
+outputs=$(smsg --raw --type get_outputs)
+desk_setup=$(echo "$outputs" | jq 'any(.[]; .model == "Gigabyte M32U")')
+monitor_count=$(echo "$outputs" | jq 'length')
+
+if [[ -z $info ]]; then
+    smsg "workspace $workspace"
+    exit
+fi
+
+# this is the wiki recommendation, but it doesn't work on empty window
+# smsg "[workspace=\"^$workspace\$\"] move workspace to output current;
+# workspace $workspace"
+output=$(smsg --raw --type get_outputs \
+             | jq --raw-output '.[] | select(.focused) | .name')
+
+if [[ $desk_setup != true ]] && ((monitor_count > 1)); then
+    screen=eDP-1
+    external=$(echo "$outputs" \
+                        | jq --raw-output "map(select(.name? != \"$screen\")) | .[0].name")
+    case $workspace in
+        9) smsg "workspace 9; move workspace to output \"$external\"; focus output\"$external\"" || exit 1;;
+        *) smsg "workspace $workspace; move workspace to output \"$screen\"" || exit 1;;
+    esac
+    exit
+fi
+
+smsg "workspace $workspace; move workspace to output \"$output\""

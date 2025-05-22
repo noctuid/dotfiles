@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# see ./dyn_emacsclient
+if [[ "${XDG_SESSION_TYPE}" == wayland ]]; then
+    emacs "$@"
+else
+    emacs "$@"
+fi

@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-xrestart kanata -c ~/.config/kanata/colemak-dhk-custom.kbd
+pkill -x kanata
+kanata -c ~/.config/kanata/colemak-dhk-custom.kbd &

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# get window title
+
+hyprctl -j activewindow | jq --raw-output '.title'

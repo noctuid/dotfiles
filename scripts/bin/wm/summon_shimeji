@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+shimeji=$(shimejictl prototypes list | tail -n+2 | fzf)
+if [[ -n $shimeji ]]; then
+   shimejictl summon "$shimeji"
+fi

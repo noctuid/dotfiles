@@ -1,21 +1,53 @@
-#!/usr/bin/env -S bb -cp ${HOME}/bin
+#!/usr/bin/env -S bb
 
 (ns wm.hc-open-app-for-tag
   "Open the main app for the current tag/desktop."
   (:require
    [babashka.process :refer [shell]]
-   [bb.util :refer [sh-out]]))
+   [babashka.json :as json]
+   [bb.util :refer [sh-out sh-success?]]
+   [clojure.string :as str]))
 
 (defn -main
   "Open the main app for the current tag/desktop."
   []
-  (let [tag (sh-out ["herbstclient" "attr" "tags.focus.index"])]
-    (case tag
-      "0" (shell "vspotify")
-      "2" (shell "vfox")
-      "3" (shell "chromium --enable-features=WebUIDarkMode --force-dark-mode")
-      "4" (shell "nsteam")
-      (shell "emacsclient -c -a ''"))))
+  (if (= (System/getenv "XDG_SESSION_TYPE") "wayland")
+    (let [workspace (cond (not (empty? (System/getenv "HYPRLAND_INSTANCE_SIGNATURE")))
+                          (get (json/read-str
+                                (sh-out ["hyprctl" "-j" "activeworkspace"]))
+                               :name)
+                          ;; swaymsg -t get_workspaces | jq -r '.[] | select(.focused==true).name'
+                          (not (empty? (System/getenv "SWAYSOCK")))
+                          (->> (json/read-str
+                                (sh-out ["smsg" "--type" "get_workspaces"]))
+                               (filter #(get % :focused) )
+                               first
+                               :name
+                               (Long/parseLong)
+                               inc
+                               str)
+                          ;; TODO
+                          (sh-success? ["niri" "msg" "version"])
+                          (->> (sh-out ["niri" "msg" "workspaces"])
+                               str/split-lines
+                               (keep #(str/starts-with? " *" %))
+                               ;; first
+                               ))]
+      (case workspace
+        "1" (shell "vspotify")
+        "3" (shell "vfox")
+        "4" (shell "chromium --enable-features=WebUIDarkMode --force-dark-mode --enable-features=UseOzonePlatform --ozone-platform=wayland")
+        "5" (shell "nsteam")
+        "6" (shell "vesktop")
+        (shell "dyn_emacsclient -c -a ''")))
+    (let [tag (sh-out ["herbstclient" "attr" "tags.focus.index"])]
+      (print "fail")
+      (case tag
+        "0" (shell "vspotify")
+        "2" (shell "vfox")
+        "3" (shell "chromium --enable-features=WebUIDarkMode --force-dark-mode")
+        "4" (shell "nsteam")
+        (shell "dyn_emacsclient -c -a ''")))))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (-main))

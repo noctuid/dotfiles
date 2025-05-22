@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2154
+
+if [[ -f ~/.cache/wal/colors.sh ]]; then
+	# shellcheck disable=SC1090
+	source ~/.cache/wal/colors.sh
+
+	hyprctl keyword general:col.inactive_border "rgb(${background:1})"
+	# yellow for active borders
+	hyprctl keyword general:col.active_border "rgb(${color3:1})"
+fi

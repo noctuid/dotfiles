@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
-# exec so will work with xrestart script
-exec zscroll -d 0.2 -l 100 -b "| " -a " |" -u true "xtitle"
+if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+    exec zscroll -d 0.2 -l 85 -b "| " -a " |" -u true "hy_title"
+else
+    # exec so will work with xrestart script
+    exec zscroll -d 0.2 -l 100 -b "| " -a " |" -u true "xtitle"
+fi

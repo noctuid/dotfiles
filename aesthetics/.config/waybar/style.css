@@ -1,0 +1,120 @@
+@import url('../../.cache/wal/colors-gtk3.css');
+
+* {
+    font-family: Cascadia Code, "Font Awesome 6 Free", "Font Awesome 6 Brands", "Siji";
+    font-size: 13px;
+}
+
+.modules-left {
+    padding-left: 15px;
+}
+
+.modules-right {
+    padding-right: 15px;
+}
+
+window#waybar {
+    background-color: @background;
+    color: @my-cyan;
+    border: 3px solid @my-yellow;
+    border-radius: 0px 0px 5px 5px;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+#custom-icon {
+    color: @my-red;
+    font-family: "Siji";
+    font-size: 25px;
+}
+
+#workspaces button {
+    color: @foreground;
+    margin: 6px 0px 6px 2px;
+    padding: 0px;
+}
+
+#workspaces button.empty {
+    color: #555;
+}
+
+#workspaces button.active {
+    margin-bottom: 0px;
+    border-bottom: 6px solid @my-yellow;
+}
+
+/* sway uses focused not active */
+#workspaces button.focused {
+    margin-bottom: 0px;
+    border-bottom: 6px solid @my-yellow;
+}
+
+#workspaces button.urgent {
+    color: @my-dark-red;
+}
+
+#mpris {
+    color: @my-green;
+}
+
+#custom-playerctl {
+    color: @my-green;
+}
+
+#battery.full {
+    color: @my-green;
+}
+
+#battery.charging {
+    color: @my-blue;
+}
+
+#battery.discharging {
+    color: @my-red;
+}
+
+#battery.warning {
+    color: @my-yellow;
+}
+
+#battery.critical {
+    color: @my-dark-red;
+}
+
+#memory {
+    color: @my-magenta;
+}
+
+#cpu {
+    color: @my-magenta;
+}
+
+#temperature {
+    color: @my-red;
+}
+
+#backlight {
+    color: @my-yellow;
+}
+
+#custom-brightness {
+    color: @my-yellow;
+}
+
+#pulseaudio {
+    color: @my-blue;
+}
+
+#pulseaudio.muted {
+    color: @my-dark-red;
+}
+
+#network {
+    color: @my-dark-cyan;
+    font-family: "Siji";
+}
+
+#custom-date {
+    color: @my-dark-magenta;
+    font-size: 14px;
+}

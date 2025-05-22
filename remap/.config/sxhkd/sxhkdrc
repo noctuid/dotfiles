@@ -90,7 +90,7 @@ Print
 
 # TODO get this to work
 {mod2,super+control} + (
-	emacsclient -c
+	dyn_emacsclient -c
 
 # use latest good emacs configuration
 {mod2,super+control} + alt + t
@@ -103,7 +103,7 @@ Print
 	emacs --with-demoted-errors
 
 # {mod2,super+control} + b
-# 	emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
+# 	dyn_emacsclient -ce "(noct:with-q-to-exit (toggle-frame-fullscreen) (counsel-buku))"
 
 {mod2,super+control} + l
 	lockscreen
@@ -143,13 +143,13 @@ super + b
 
 {mod2,super+control} + s
 	dropdown wezterm connect unix
-	# dropdown emacsclient -c -e "(let (display-buffer-alist) (vterm) (delete-other-windows))"
+	# dropdown dyn_emacsclient -c -e "(let (display-buffer-alist) (vterm) (delete-other-windows))"
 
 {mod2,super+control} + c
 	dropdown -n longcommands wezterm connect --workspace longcommands unix
 
 {mod2,super+control} + semicolon
-	dropdown -n vtermlongcommands emacsclient -ce '(noct-with-reuse-window (noct-vterm-select-or-create "long"))'
+	dropdown -n vtermlongcommands dyn_emacsclient -ce '(noct-with-reuse-window (noct-vterm-select-or-create "long"))'
 
 # test key
 {mod2,super+control} + S
@@ -161,10 +161,10 @@ super + b
 	max_dropdown -n ranger wezterm start --workspace ranger zsh -c "ranger; zsh -i"
 
 {mod2,super+control} + d
-	max_dropdown -n dirvish emacsclient --socket-name=dirvish -ce "(noct-dirvish-frame)"
+	max_dropdown -n dirvish dyn_emacsclient --socket-name=dirvish -ce "(noct-dirvish-frame)"
 
 {mod2,super+control} + p
-	max_dropdown -n proced emacsclient -ce "(noct-with-q-to-exit (proced) (delete-other-windows))"
+	max_dropdown -n proced dyn_emacsclient -ce "(noct-with-q-to-exit (proced) (delete-other-windows))"
 
 # [v]ideo
 {mod2,super+control} + v
@@ -175,36 +175,36 @@ super + b
 
 # use separate server to avoid binding del to delete the whole buffer in normal server
 {mod2,super+control} + i
-	emacsclient --socket-name=everywhere --eval "(emacs-everywhere)"
+	dyn_emacsclient --socket-name=everywhere --eval "(emacs-everywhere)"
 
 # [k]alc
 {mod2,super+control} + k
-	dropdown -n calc emacsclient -ce "(progn (calc) (delete-other-windows))"
+	dropdown -n calc dyn_emacsclient -ce "(progn (calc) (delete-other-windows))"
 
 {mod2,super+control} + slash
-	max_dropdown -n woman emacsclient -ce "(noct-with-global-completing-read (woman))"
+	max_dropdown -n woman dyn_emacsclient -ce "(noct-with-global-completing-read (woman))"
 
 # {mod2,super+control} + m
 # 	some mpd client
 
 {mod2,super+control} + alt + m
-	max_dropdown -n mu4e emacsclient -ce "(mu4e)"
+	max_dropdown -n mu4e dyn_emacsclient -ce "(mu4e)"
 
 {mod2,super+control} + g
 	gnus
 
 {mod2,super+control} + apostrophe
-	emacsclient -ce "(noct-ement-connect-or-list-rooms)"
+	dyn_emacsclient -ce "(noct-ement-connect-or-list-rooms)"
 
 {mod2,super+control} + x
-	emacsclient -ce "(noct-xprop)"
+	dyn_emacsclient -ce "(noct-xprop)"
 
 {mod2,super+control} + X
-	emacsclient -ce '(noct-xwininfo)'
+	dyn_emacsclient -ce '(noct-xwininfo)'
 
 # other commands
 super + space
-	max_dropdown -n shell-menu emacsclient --socket-name=shell-menu -ce '(noct-shell-menu)'
+	max_dropdown -n shell-menu dyn_emacsclient --socket-name=shell-menu -ce '(noct-shell-menu)'
 
 # ** Dunst
 {mod2,super+control} + comma
@@ -212,10 +212,6 @@ super + space
 
 {mod2,super+control} + alt + comma
 	dunstctl history-pop
-
-# * Mouse
-button9
-	wm_action hide_all
 
 # ** Modifiers
 # NOTE: this is the old method for making my trackpoint buttons act as modifier keys

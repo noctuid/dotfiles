@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-pkill -x picom
-pkill -x polybar
-# pkill -x firefox
-bspc config top_padding 0
+if [[ -n $HYPRLAND_INSTANCE_SIGNATURE ]]; then
+    hy_toggle_performance on
+else
+    pkill -x picom
+    pkill -x polybar
+    # pkill -x firefox
+    bspc config top_padding 0
+fi

@@ -11,15 +11,28 @@
 
 with pkgs; [
 # * Nix-Related
-  rnix-lsp
+  nil
   statix
   # to index store to be able to use nix-locate
   nix-index
 
 # * Emacs
-  emacsNoctuidWithPackages
-  # not whether this is needed
-  jansson
+  # emacsNoctuidWithPackages
+  # this doesn't really work well due to the multiple binaries
+  # https://www.danielcorin.com/til/nix/managing-multiple-tool-versions/
+  # https://discourse.nixos.org/t/install-multiple-versions-of-a-package-each-with-its-own-binary/19287
+  # (writeShellScriptBin "x_emacs" ''
+  #   exec "${emacsNoctuidWithPackages}/bin/emacs" "$@"
+  # '')
+  # # seems this can end up using the pgtk emacs
+  # (writeShellScriptBin "x_emacsclient" ''
+  #   exec "${emacsNoctuidWithPackages}/bin/emacsclient" "$@"
+  # '')
+
+  emacsPgtkWithPackages
+
+  # json parsing is now builtin (>=30.1); don't need jansson anymore
+  # jansson
 
 # * CLI
   direnv
@@ -38,7 +51,8 @@ with pkgs; [
   # > start-verification tab tab <device to verify>
   # confirm on other device
   # > confirm verification <same args>
-  pantalaimon
+  # currently a security error
+  # pantalaimon
 
 # * Torrents
   # nodePackages.webtorrent-cli
@@ -59,11 +73,6 @@ with pkgs; [
   # wrapper around i3lock-color
   # TODO password fails
   # betterlockscreen
-
-# * Appearance/Theming
-  # wpgtk is aur only; makes sense to also use pywal from nix
-  pywal
-  wpgtk
 
 # * X11
   unclutter-xfixes

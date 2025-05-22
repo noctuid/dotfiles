@@ -10,7 +10,7 @@ export XDG_DOWNLOAD_DIR=$HOME/move
 export ALTERNATE_EDITOR=
 # using no flags actually seems preferable; use GUI with X running and also
 # works in framebuffer (emacsclient -t doesn't work in framebuffer terminal)
-export EDITOR=emacsclient
+export EDITOR=dyn_emacsclient
 # doesn't work for python (pyright) so commented for now
 # export LSP_USE_PLISTS=true
 export PAGER=vimpager
@@ -51,6 +51,7 @@ export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/gnupg/S.gpg-agent.ssh"
 # gpg-connect-agent updatestartuptty /bye >/dev/null
 
 # Japanese input
+# TODO https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
@@ -127,13 +128,17 @@ done <<< "$pathdirs"
 # systemctl --user --no-block start emacs
 # systemctl --user --no-block start mpd
 
-[[ ! -s ~/.mpd/pid ]] && nohup mpd &> /tmp/mpd.log &
+# [[ ! -s ~/.mpd/pid ]] && nohup mpd &> /tmp/mpd.log &
 # won't start again if already running
 playerctld daemon
 
 # * Startx on login if tty1
-if [[ $(tty) == /dev/tty1 ]]; then
+current_tty=$(tty)
+if [[ $current_tty == /dev/tty1 ]]; then
 	startx
+elif [[ $current_tty == /dev/tty2 ]]; then
+	# uwsm check may-start requires tty1
+	exec uwsm start hyprland.desktop
 elif [[ $- == *i* ]] && [[ -f /etc/hostname ]] \
 		 && [[ $(< /etc/hostname) != *server ]]; then
 	# check if interactive or on server: zsh on server messes up TRAMP (because

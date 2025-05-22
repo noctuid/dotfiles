@@ -67,6 +67,8 @@ unnamed-sdvx-clone aur
 
 # * Graphics/Drivers/Steam
 steam
+gamescope
+gamemode
 lib32-curl
 # opengl
 mesa
@@ -136,7 +138,7 @@ openssh
 
 # * Power Management/Battery
 acpi
-tlp
+# tlp
 # for thinkpad charging/discharging rates
 acpi_call-dkms
 
@@ -159,7 +161,8 @@ avahi
 nss-mdns
 
 # * Terminals
-wezterm
+# last release is super old
+wezterm-git aur
 kitty
 
 # * Shell/TUI/CLI
@@ -167,6 +170,10 @@ kitty
 zsh
 
 tmux
+
+yazi
+# used in yazi
+starship
 
 ranger
 # https://github.com/hunkyburrito/xdg-desktop-portal-termfilechooser
@@ -252,6 +259,7 @@ jansson
 
 # * Browsers
 firefox
+mullvad-browser-bin aur
 qutebrowser
 profile-cleaner aur
 chromium
@@ -259,8 +267,13 @@ chromium
 w3m
 # - flashplugin
 
+# * Messaging
+# element
+vesktop-bin aur
+
 # * Video/Images
 mpv
+# syncplay
 # control mpv with playerclt
 mpv-mpris
 pqiv
@@ -300,7 +313,7 @@ gimp
 imagemagick
 gifsicle
 graphicsmagick
-waifu2x-ncnn-vulkan aur
+waifu2x-ncnn-vulkan
 # currently fails to build
 # soryu-git aur
 # png compression
@@ -428,6 +441,7 @@ pipewire-pulse
 jamesdsp-git aur
 
 spotify aur
+spotify-launcher
 
 # for amixer and alsamixer
 alsa-utils
@@ -468,7 +482,8 @@ python-mpd2
 python-requests
 
 # * Brightness
-acpilight
+brightnessctl
+acpilight aur
 # for external monitors
 ddcutil
 
@@ -491,6 +506,8 @@ python-pygments
 
 # * Hotkey Daemon
 sxhkd
+# it exist now but is annoying
+# swhkd-git aur
 # xchainkeys nix
 hkd-git aur
 
@@ -509,7 +526,7 @@ dunst
 
 # * Launchers
 # bemenu
-rofi
+rofi-wayland
 
 # * Fonts
 # used in polybar
@@ -587,17 +604,21 @@ numix-icon-theme-git aur
 # for framebuffer colors
 setcolors-git aur
 # colorscheme generation/setup from wallpaper
-python-pywal
+# python-pywal
+python-pywal16 aur
 python-wal-steam-git aur
 wpgtk-git aur
-# pywal support for fixefox
-pywalfox pipx
+spicetify-cli aur
+pywal-spicetify aur
+# pywal support for firefox; does not work installed through uv or pipx!
+python-pywalfox aur
 # gtk theme used by wpgtk; icon theme isn't in aur (use wpg-install.sh)
 gtk-theme-flat-color-git aur
 # live reload gtk theme
 xsettingsd
 
 # display colors and system statistics
+fastfetch
 neofetch
 disfetch aur
 uwufetch-git aur
@@ -633,6 +654,8 @@ atool
 # handles non utf-8 archives (atool and ouch clobber the names), handles
 # e.g. cbz fine by default, etc.
 unarchiver
+# still use with yazi
+ouch
 
 # * MTPFS
 # the worst filesystem
@@ -650,7 +673,7 @@ fzf
 fd
 
 # * Programming
-mise aur
+mise
 
 # ** General
 editorconfig-core-c
@@ -734,7 +757,7 @@ ruby
 # rust-nightly-bin aur
 
 # ** Common Lisp
-roswell aur
+roswell
 # TODO roswell is messed up
 # sbcl-bin ros
 # for cl minispec
@@ -754,7 +777,6 @@ shellcheck
 
 # ** Web - JavaScript, TypeScript, etc.
 nodejs
-nvm aur
 npm
 typescript
 typescript-language-server
@@ -771,8 +793,48 @@ maim
 # selection
 slop
 
+# wayland
+grim
+slurp
+
 # * Bookmarking
 buku-git aur
+
+# * Wayland
+wev
+wl-clipboard
+
+uwsm
+
+hyprland-git aur
+hyprcursor-git aur
+hyprlock
+hypridle
+# authentication agent
+hyprpolkitagent
+nordzy-hyprcursors aur
+# for hyprpm
+cpio
+# e.g. for opening file picker/screen sharing
+xdg-desktop-portal-hyprland
+# portal-hyprland doesn't implement a file picker; this does (e.g. for steam)
+xdg-desktop-portal-gtk
+# needed to screenshare outside xwayland if app is running in xwayland
+xwaylandvideobridge aur
+
+# qt support (required for e.g. obs)
+qt5-wayland
+qt6-wayland
+
+hyprsunset
+# for non-hyprland
+wl-gammarelay-rs aur
+
+# ags-hyprpanel-git aur
+waybar
+
+# notifications
+mako
 
 # * X Related
 # automatic xrandr setup based on connected devices

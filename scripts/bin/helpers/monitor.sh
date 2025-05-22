@@ -32,7 +32,7 @@ monitor_get_height() { # [monitor]
 	local geometry height
 	geometry=$(monitor_get_geometry "$1")
 	height="${geometry#*x}"
-	echo ${height%%+*}
+	echo "${height%%+*}"
 }
 
 monitor_fraction_of() { # <decimal number> <total>

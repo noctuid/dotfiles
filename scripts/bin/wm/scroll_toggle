@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# like special/scratch workspace
+
+workspace=$1
+shift
+
+current=$(smsg --raw --type get_workspaces \
+              | jq --raw-output '.[] | select(.focused).name')
+
+if [[ $current == "$workspace" ]]; then
+    smsg workspace back_and_forth
+    exit
+fi
+
+# can't use get_workspaces, doesn't have node info
+info=$(smsg --type get_tree --raw | jq "
+          recurse(.nodes[]?)
+          | select(.name == \"$workspace\" and .type == \"workspace\")")
+
+scroll_switch_workspace "$workspace"
+
+if [[ -z $info ]] || (( $(echo "$info" | jq '(.nodes + .floating_nodes) | length') == 0)); then
+    "$@"
+fi
+
