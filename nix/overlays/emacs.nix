@@ -12,7 +12,6 @@ self: super: rec {
   emacsGitNoctuidGeneric = super.emacs-git.override {
     withSQLite3 = true;
     withWebP = true;
-    withImageMagick = true;
     # have to force this; lib.version check wrong or because emacsGit?
     withTreeSitter = true;
   };
@@ -101,7 +100,6 @@ self: super: rec {
           "--disable-build-details"
           "--with-modules"
           "--with-native-compilation"
-          "--with-imagemagick"
         ];
       });
 }

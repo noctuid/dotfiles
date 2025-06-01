@@ -89,9 +89,9 @@ My configuration may not meet these requirements at this point in time, but thes
 - Intelligent handling of errors in init file
   - Localize recoverable errors and convert them to warnings whenever possible (e.g. if a package fails to install, warn and don't run its configuration). This means wrapping anything that requires a package to be loaded in a ~with-eval-after-load~ (usually via ~use-package~ or ~general-with-package~).
   - Isolate sections (source blocks) where possible, so that one section failing will not affect other sections. When there is some non-recoverable error somewhere in my init (e.g. ~(call-to-misspelled-function)~), I can start Emacs with =--with-demoted-errors= (flag I'm handling in =./init.el=) to demote errors for every source block. This means that I can still use Emacs with most of my configuration to fix my init file without needing to switch to a stable configuration or a different editor.
-  - Use a stable init file for errors that break everything (e.g. missing/extra parens). I'm automatically saving my configuration when it successfully loads with a =-stable.el= suffix, and I can load this configuration by specifying =--stable=. As for package breakage, straight can handle locking versions/commits (next bullet).
-  - Use ~straight-freeze-versions~ to be able to recover with ~straight-thaw-versions~ if package updates break things.
-  - Don't assume that any packages besides the core packages (e.g. =straight=, =use-package=, =general=, and =evil=) have been loaded. Sections should otherwise be independent and reorderable.
+  - Use a stable init file for errors that break everything (e.g. missing/extra parens). I'm automatically saving my configuration when it successfully loads with a =-stable.el= suffix, and I can load this configuration by specifying =--stable=. As for package breakage, straight and elpaca can handle locking versions/commits (next bullet).
+  - Use package lock files to be able to recover with if package updates break things.
+  - Don't assume that any packages besides the core packages (e.g. =elpaca=, =use-package=, =setup=, =general=, and =evil=) have been loaded. Sections should otherwise be independent and reorderable.
   - Conditionally load non-portable functionality to prevent errors when using on other computers. Don't rely on unpushed functionality in personal packages (I was really bad about this in the past).
 - Idempotency
   - Make configuration idempotent, so that any part can be run again without issues. It isn't as important to be able to reload the whole file in Emacs as it is for other software since it's more normal to just incrementally eval whatever you're working on.
@@ -102,7 +102,7 @@ My configuration may not meet these requirements at this point in time, but thes
   - Document issues and the purpose of any code that might not be immediately clear later. All non-trivial functions should have docstrings.
   - Use one big org file for fast/easy navigation.
 
-I have some more package-specific guidelines listed in the use-package, straight.el, and general.el sections below.
+I have some more package-specific guidelines listed in the use-package, elpaca, and general.el sections below.
 
 ** Style Guidelines
 - Sharp quote all functions (including commands in keybindings).
@@ -558,17 +558,17 @@ Currently, I only use =package.el= if I want to use the package list buffer. I g
                          ("melpa" . "https://melpa.org/packages/")))
 #+end_src
 
-** =straight.el= and =use-package.el=
-When I first tried Emacs, I thought the idea of using centralized package repositories was interesting but was annoyed when packages I wanted to use weren't (yet) in any package archive. Alternatives like =el-get= and =quelpa= weren't quite what I wanted. =straight.el= is nice in that it fully replaces =package.el= for me while still making use of recipes from elpa, melpa, and emacsmirror. This means that while you can specify your own recipe, it's usually not necessary.
+** elpaca and =use-package.el=
+When I first tried Emacs, I thought the idea of using centralized package repositories was interesting but was annoyed when packages I wanted to use weren't (yet) in any package archive. Alternatives like =el-get= and =quelpa= weren't quite what I wanted. =straight.el= and elpaca are nice in that they fully replace =package.el= for me while still making use of recipes from elpa, melpa, etc. This means that while you can specify your own recipe, it's usually not necessary.
 
-I use straight to compile/autoload my personal local packages (=straight.el= makes this easy since they are treated the same way as other packages). I also occasionally use it to contribute to packages (by directly working with the downloaded repo). Even if I didn't use it for development, having the git repos available locally is useful for many reasons. It's great to have READMEs and other files available locally, to be able to use git blame, and to be able to switch to or lock any commit.
+I use elpaca to compile/autoload my personal local packages. I also occasionally use it to contribute to packages (by directly working with the downloaded repo). Even if I didn't use it for development, having the git repos available locally is useful for many reasons. It's great to have READMEs and other files available locally, to be able to use git blame, and to be able to switch to or lock any commit.
 
 Since ~setq~, ~add-hook~, and ~evil-define-key~ can all be used before the specified settings, hooks, and keymaps exist, I previously preferred to use them outside of ~use-package~. I didn't like nesting these inside of ~use-package~ especially for more complicated packages where my configuration is split across many headings. On the other hand, this can potentially affect startup time. I considered writing my configuration so that headings could be /optionally/ tangled into a previous =:config= section or to optionally tangle headings into a new ~with-eval-after-load~ call (specifically ~general-with-package~ provided by general.el). I decided this would be too convoluted/misleading and am now just using ~general-with-package~ manually. I've stopped being bothered with the nesting.
 
 Here are the guidelines I follow for using ~use-package~ keywords and the order I use them in.
 
 Package installation:
-- =:straight= to specify recipes for custom or local packages (don't use ~straight-override-recipe~ when using =:straight= for clarity as it will inherit from the default recipe when used before the use-package statement or it will be too late if used after the use-package statement)
+- =:ensure= (from elpaca) to specify recipes for custom or local packages
 
 Package loading:
 - =:disabled= for disabled packages (e.g. unused themes)
@@ -594,67 +594,78 @@ Package configuration:
 
 In the =:config= section, I generally put settings (~setq~ then any face configuration then ~add-hook~), then keybindings, then enabling any modes, and then any other configuration.
 
-*** Straight
-Install, load, and configure =straight.el=:
-#+begin_src emacs-lisp
-(setq straight-repository-branch "develop"
-      ;; default
-      straight-enable-use-package-integration t
-      ;; check for modifications (to determine whether a package needs to be
-      ;; rebuilt) using `after-save-hook' instead of during startup or always
-      ;; rebuilding packages (https://github.com/raxod502/straight.el/issues/41)
-      ;; drops loading straight from ~0.88s to ~0.05s for me; needs to be set
-      ;; before loading straight
-      straight-check-for-modifications '(check-on-save find-when-checking)
-      ;; install packages by default (like use-package's `use-package-always-ensure')
-      straight-use-package-by-default t
-      ;; store all autoloads in one file; default t
-      ;; doesn't significantly affect init time for me
-      straight-cache-autoloads t
-      ;; used for :fork so don't need to specify settings
-      straight-host-usernames '((github . "noctuid")
-                                (gitlab . "noctuid")))
+*** Elpaca
+ #+begin_src emacs-lisp
+(defun noct-get-nix-emacs-date ()
+  "Extract date as number from --prefix path in `system-configuration-options'."
+  (when-let ((path (and (string-match "--prefix=\\([^ ]+\\)"
+                                      system-configuration-options)
+                        (match-string 1 system-configuration-options)))
+             (date (and (string-match "emacs-git-\\([0-9]\\{8\\}\\)[^0-9]" path)
+                        (match-string 1 path))))
+    (string-to-number date)))
 
-;; reset recipe overrides (for reloading config)
-(setq straight-recipe-overrides nil)
+(when noct-personal-computer-p
+  (when-let ((emacs-date (noct-get-nix-emacs-date)))
+    (setq elpaca-core-date (list emacs-date))))
 
-;; Install and load straight.el
-;; https://github.com/radian-software/straight.el#bootstrapping-straightel
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-;; (benchmark 1 `(load ,bootstrap-file nil 'nomessage))
-  (load bootstrap-file nil 'nomessage))
+(defvar elpaca-installer-version 0.11)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1 :inherit ignore
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (<= emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
 
-(defvar noct-straight-packages nil
-  "List of packages `straight-use-package' is successful for.")
+(elpaca elpaca-use-package
+  ;; Enable Elpaca support for use-package's :ensure keyword.
+  (elpaca-use-package-mode)
+  ;; :ensure by defualt
+  (setq use-package-always-ensure t))
+(elpaca-wait)
 
-(defun noct-straight-use-package (orig-fun &rest args)
-  "Store a package in `noct-straight-packages' on success."
-  (when (apply orig-fun args)
-    (push (if (listp (car args))
-              (caar args)
-            (car args))
-          noct-straight-packages)))
-(advice-add 'straight-use-package :around #'noct-straight-use-package)
-;; need to do this early again to prevent "org version mismatch" error
-(straight-use-package 'org)
-#+end_src
+(defmacro noct-elpaca-after-init (&rest body)
+  "Run BODY after emacs initialization.
+If after emacs initialization already, run BODY now."
+  (declare (indent 0) (debug t))
+  `(if elpaca-after-init-time
+       (progn ,@body)
+     (general-add-hook 'elpaca-after-init-hook (lambda () ,@body))))
+ #+end_src
 
 *** Use-package
-Install =use-package.el= with optional dependencies and configure:
 #+begin_src emacs-lisp
-;; install use-package
-(straight-use-package 'use-package)
-
 ;; don't require `use-package' when loading compiled file; saves a millisecond
 ;; or 2; compiling now saves ~0.1s overall (maybe another 0.1s after general
 ;; rewrite)
@@ -665,34 +676,37 @@ Install =use-package.el= with optional dependencies and configure:
   ;; entire init file before compiling already
   (setq use-package-always-defer t)
 
-  (defun noct-package-available-p (package keywords)
-    "Return whether PACKAGE is in `noct-straight-packages'.
-Also return non-nil if KEYWORDS contains :straight nil."
-    (or (and (memq :straight keywords)
-             (null (plist-get keywords :straight)))
-        ;; must be quoted so doesn't check at expansion time
-        `(memq ',package noct-straight-packages)))
+  ;; (defun noct-package-available-p (package keywords)
+  ;;     "Return whether PACKAGE is in `noct-straight-packages'.
+  ;; Also return non-nil if KEYWORDS contains :straight nil."
+  ;;     (or (and (memq :straight keywords)
+  ;;              (null (plist-get keywords :straight)))
+  ;;         ;; must be quoted so doesn't check at expansion time
+  ;;         `(memq ',package noct-straight-packages)))
 
   ;; don't do anything if installation fails; like
   ;; `use-package-check-before-init' but works for :config and other keywords;
   ;; recording `straight-use-package' return values instead of using
   ;; `locate-library' since it was adding an extra 0.15 seconds to init
-  (cl-pushnew '(:when
-                noct-package-available-p
-                t)
-              use-package-defaults
-              :test #'equal))
+  ;; (cl-pushnew '(:when
+  ;;               noct-package-available-p
+  ;;               t)
+  ;;             use-package-defaults
+  ;;             :test #'equal)
+  )
 
 ;; demote installation errors to messages
 ;; this variable is no longer changed by straight
 ;; (advice-add use-package-ensure-function :around #'noct-use-package-ensure)
-(when (bound-and-true-p noct-with-demoted-errors)
-  (advice-add 'straight-use-package :around #'noct-inhibit-error-advice))
+
+;; NOTE: this method is no longer usable with elpaca
+;; (when (bound-and-true-p noct-with-demoted-errors)
+;;   (advice-add 'straight-use-package :around #'noct-inhibit-error-advice))
 ;; can test with something like this:
 ;; (use-package does-not-exist)
 
 (use-package blackout
-  :straight (blackout :host github :repo "raxod502/blackout")
+  :ensure (:host github :repo "raxod502/blackout")
   :demand t)
 #+end_src
 
@@ -709,16 +723,20 @@ Principles:
 - Use =:general= and =:ghook= keywords for keybindings and hooks meant to load packages.
 - Use ~general-with-package~ instead of ~use-package~ if the ~use-package~ statement would only have =:config= and not install the package (like ~with-eval-after-load~ but allows automatically recording the package name with keybindings and settings). All general functions should appear in either a ~general-with-package~ or a ~use-package~ statement if there is a specific, corresponding package.
 #+begin_src emacs-lisp
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(general :protocol ssh :local-repo "~/src/emacs/general")))
 (use-package general
+  :ensure `(general
+            ;; need to use in rest of config
+            :wait t
+            ,@(when noct-personal-computer-p
+                (list :repo "~/src/emacs/general")))
   :demand t)
 
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(annalist :protocol ssh :local-repo "~/src/emacs/annalist")))
 (use-package annalist
+  :ensure `(annalist
+            ;; need to use in rest of config
+            :wait t
+            ,@(when noct-personal-computer-p
+                (list :repo "~/src/emacs/annalist")))
   :gfhook
   ('annalist-describe-hook #'noct-bind-q-to-quit)
   ('annalist-describe-hook (noct-disable visual-fill-column-mode)))
@@ -766,25 +784,53 @@ Principles:
 ** Setup.el
 #+begin_src emacs-lisp
 (use-package setup
+  :ensure (:wait t)
+  :demand t
   :config
-  ;; this is not :straight from the wiki, which is broken at the time of writing
-  (setup-define :straight
-    (lambda (&rest recipe)
-      `(condition-case err
-           (straight-use-package ',recipe)
-         (error
-          (display-warning
-           'noct-error
-           (format "Straight package installation failed: %S" err))
-          ;; don't run any of the setup.el block when straight fails
-          ,(setup-quit))))
-    :documentation
-    "Install RECIPE with `straight-use-package'.
-This macro can be used as HEAD, and will replace itself with the
-RECIPE's package."
-    :repeatable nil
+  ;; from wiki
+  (defun setup-wrap-to-install-package (body _name)
+    "Wrap BODY in an `elpaca' block if necessary.
+The body is wrapped in an `elpaca' block if `setup-attributes'
+contains an alist with the key `elpaca'."
+    (if (assq 'elpaca setup-attributes)
+        `(elpaca ,(cdr (assq 'elpaca setup-attributes)) ,@(macroexp-unprogn body))
+      body))
+  ;; Add the wrapper function
+  (add-to-list 'setup-modifier-list #'setup-wrap-to-install-package)
+  (setup-define :elpaca
+    (lambda (order &rest recipe)
+      (push (cond
+	         ((eq order t) `(elpaca . ,(setup-get 'feature)))
+	         ((eq order nil) '(elpaca . nil))
+	         (`(elpaca . (,order ,@recipe))))
+	        setup-attributes)
+      ;; If the macro wouldn't return nil, it would try to insert the result of
+      ;; `push' which is the new value of the modified list. As this value usually
+      ;; cannot be evaluated, it is better to return nil which the byte compiler
+      ;; would optimize away anyway.
+      nil)
+    :documentation "Install ORDER with `elpaca'.
+The ORDER can be used to deduce the feature context."
     :shorthand #'cadr)
 
+  ;; personal/not wiki
+  ;; infers feature name unlike builtin :require
+  (setup-define :demand
+    (lambda (&rest features)
+      (if features
+          `(progn ,@(mapcar
+                     (lambda (feature)
+                       `(unless (require (',(or feature (setup-get 'feature))
+                                          nil t))
+                          ,(setup-quit)))
+                     features))
+        `(unless (require ',(setup-get 'feature) nil t)
+           ,(setup-quit))))
+    :documentation "Try to require FEATURE, or stop evaluating body.
+The first FEATURE can be used to deduce the feature context."
+    :repeatable nil)
+
+  ;; personal/not wiki
   (setup-define :config
     (lambda (&rest body)
       `(once-with-eval-after-load ',(setup-get 'feature) ,@body))
@@ -822,6 +868,7 @@ RECIPE's package."
         `(cl-pushnew (cons ,pat ',mode) auto-mode-alist)))
     :repeatable nil)
 
+  ;; personal/not wiki
   ;; TODO use satch-add-hook
   (setup-define :hooks
     (lambda (hooks &optional funcs &rest args)
@@ -829,6 +876,7 @@ RECIPE's package."
         `(general-add-hook ,hooks ,funcs ,@args)))
     :repeatable nil)
 
+  ;; personal/not wiki
   (setup-define :fhooks
     (lambda (arg1 &optional arg2 &rest args)
       (let ((hooks (if arg2
@@ -841,8 +889,10 @@ RECIPE's package."
   (defmacro noct-use (arg1 &rest args)
     (declare (indent 1))
     `(setup ,(if (listp arg1)
-                 arg1
-               `(:straight ,arg1))
+                 (if (eq (car arg1) :no-install)
+                     (cadr arg1)
+                   arg1)
+               `(:elpaca ,arg1))
        ,@args))
 
   ;; https://www.emacswiki.org/emacs/SetupEl#h5o-4
@@ -864,81 +914,76 @@ as OPTS to `setup-define'."
       `(setup-define ,name
          (cl-function (lambda ,signature ,@body))
          ,@opts))))
-
 #+end_src
 
 ** Once.el
  #+begin_src emacs-lisp
-(use-package once
-  :straight `(once :host github :repo "emacs-magus/once"
-                   ,@(if noct-personal-computer-p
-                         (list :protocol 'ssh
-                               :local-repo "~/src/emacs/once")
-                       (list :protcol nil))
-                   :files (:defaults "once-setup/*.el"))
-  :demand t
-  :init
+(noct-use ( :elpaca once
+            :wait t
+            :host github :repo "emacs-magus/once"
+            :files (:defaults "once-setup/*.el"))
+  (:demand)
   (gsetq once-shorthand t)
   ;; (require 'once-incrementally)
   ;; (once-enable-incremental-loading)
   (eval-and-compile
     ;; must set before loading
-    (setq once-setup-keyword-aliases
-          '(":once-x-require" ":require-once"
-            ":once-require-incrementally" ":require-incrementally")))
+    (gsetq once-setup-keyword-aliases
+           '(":once-x-require" ":require-once"
+             ":once-require-incrementally" ":require-incrementally")))
   (require 'once-setup))
 #+end_src
 
 ** On.el - Extra Hooks
 #+begin_src emacs-lisp
-(use-package on
-  :straight (:host github :repo "ajgrf/on.el")
-  :demand t)
+(noct-use ( :elpaca on
+            :host github :repo "ajgrf/on.el")
+  (:demand)
 
-(defvar noct-elisp-scratch-hook nil
-  "Hook run when scratch buffer switches from fundamental to emacs-lisp mode.
+  (defvar noct-elisp-scratch-hook nil
+    "Hook run when scratch buffer switches from fundamental to emacs-lisp mode.
 Can't use `after-change-major-mode-hook' hook since that triggers during init.")
 
-;; TODO remove other after one is called
-(defmacro noct-after-buffer (&rest body)
-  "Run BODY once after switching buffers or when finding a file.
+  ;; TODO remove other after one is called
+  (defmacro noct-after-buffer (&rest body)
+    "Run BODY once after switching buffers or when finding a file.
 Doom uses a lot. Additionally run once in `noct-elisp-scratch-hook', so
 BODY run if I switch the scratch buffer to elisp."
-  (declare (indent defun))
-  `(let ((fun (lambda (&rest _)
-                ,@body)))
-     (general-add-hook '(on-switch-buffer-hook
-                         noct-elisp-scratch-hook) fun nil nil t)
-     (general-add-advice 'after-find-file :before fun nil t)))
+    (declare (indent defun))
+    `(let ((fun (lambda (&rest _)
+                  ,@body)))
+       (general-add-hook '(on-switch-buffer-hook
+                           noct-elisp-scratch-hook) fun nil nil t)
+       (general-add-advice 'after-find-file :before fun nil t)))
 
-(defmacro noct-after-window (&rest body)
-  "Run BODY once after switching windows or when finding a file."
-  (declare (indent defun))
-  `(let ((fun (lambda (&rest _)
-                ,@body)))
-     (general-add-hook 'on-switch-window-hook fun nil nil t)
-     (general-add-advice 'after-find-file :before fun nil t)))
+  (defmacro noct-after-window (&rest body)
+    "Run BODY once after switching windows or when finding a file."
+    (declare (indent defun))
+    `(let ((fun (lambda (&rest _)
+                  ,@body)))
+       (general-add-hook 'on-switch-window-hook fun nil nil t)
+       (general-add-advice 'after-find-file :before fun nil t)))
 
-(defmacro noct-pre-command-or-post-file (&rest body)
-  "Run BODY once in `pre-command-hook' or when finding a file."
-  (declare (indent defun))
-  `(let ((fun (lambda (&rest _)
-                ,@body)))
-     (general-add-hook 'pre-command-hook fun nil nil t)
-     (general-add-advice 'after-find-file :before fun nil t)))
+  (defmacro noct-pre-command-or-post-file (&rest body)
+    "Run BODY once in `pre-command-hook' or when finding a file."
+    (declare (indent defun))
+    `(let ((fun (lambda (&rest _)
+                  ,@body)))
+       (general-add-hook 'pre-command-hook fun nil nil t)
+       (general-add-advice 'after-find-file :before fun nil t)))
 
-(defmacro noct-post-insert-and-writable (&rest body)
-  "Run BODY in `evil-insert-state-entry-hook' for the first writable buffer."
-  (declare (indent defun))
-  `(progn
-     (general-add-hook 'evil-insert-state-entry-hook
-                       (lambda ()
-                         (unless buffer-read-only
-                           ,@body
-                           t))
-                       nil
-                       nil
-                       #'identity)))
+  (defmacro noct-post-insert-and-writable (&rest body)
+    "Run BODY in `evil-insert-state-entry-hook' for the first writable buffer."
+    (declare (indent defun))
+    `(progn
+       (general-add-hook 'evil-insert-state-entry-hook
+                         (lambda ()
+                           (unless buffer-read-only
+                             ,@body
+                             t))
+                         nil
+                         nil
+                         #'identity))))
 #+end_src
 
 ** Doom Helpers
@@ -1093,20 +1138,22 @@ If this is a daemon session, load them all immediately instead."
 
 ** Memoize
 #+begin_src emacs-lisp
-(use-package memoize)
+(noct-use (:elpaca memoize :wait t)
+  (:demand))
 #+end_src
 
 ** No Littering
 Consistently sets the paths for various configuration, history, temporary, etc. files created by Emacs packages (e.g. =savehist-file=).
 #+begin_src emacs-lisp
-(use-package no-littering
-  :demand t)
+(noct-use (:elpaca no-littering :wait t)
+  (:demand))
 #+end_src
 
 ** Evil and Evil Collection
 *** Setup
 #+begin_src emacs-lisp
 (use-package evil
+  :ensure (:wait t)
   :init
   (gsetq evil-overriding-maps nil
          evil-intercept-maps nil
@@ -1142,13 +1189,12 @@ Consistently sets the paths for various configuration, history, temporary, etc. 
     ;; trying out since don't normally use `universal-argument' in insert
     "C-u" #'evil-delete-back-to-indentation))
 
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(evil-collection
-     :protocol ssh
-     :local-repo "~/src/forks/evil-collection"
-     :fork t)))
 (use-package evil-collection
+  :ensure `(evil-collection
+            :host github
+            :repo "emacs-evil/evil-collection"
+            ,@(when noct-personal-computer-p
+                (list :repo "~/src/forks/evil-collection")))
   :config
   ;; e.g. binds in eshell normal mode
   (gsetq evil-collection-key-blacklist '("C-n"))
@@ -1398,21 +1444,36 @@ in `evil-repeat-info' and clear variables."
   (general-add-advice 'evil-repeat-stop :override #'noct-evil-repeat-stop))
 #+end_src
 
-** =straight.el= Keybindings
-Now that =general.el= and =evil= are installed, I set up some keybindings for interactive usage of =straight.el=.
+** elpaca Keybindings
 #+begin_src emacs-lisp
+(defun noct-elpaca-lock ()
+  (interactive)
+  (elpaca-write-lock-file
+   (expand-file-name "elpaca/elpaca-lock" user-emacs-directory)))
+
+(general-s "P" #'elpaca-manager)
+(general-s "L" #'elpaca-log)
 (general-s :infix "s"
-  "p" #'straight-pull-package-and-deps
-  "P" #'straight-pull-recipe-repositories
-  "a" #'straight-pull-all
-  "r" #'straight-rebuild-package
-  "R" #'straight-rebuild-all
-  "c" #'straight-check-all
-  "f" #'straight-freeze-versions
-  "t" #'straight-thaw-versions
-  "u" #'straight-use-package
-  "n" #'straight-normalize-package
-  "N" #'straight-normalize-all)
+  "l" #'elpaca-log
+  ;; completing read for package
+  "i" #'elpaca-info
+  ;; try for session
+  "u" #'elpaca-try
+  "p" #'elpaca-update
+  "a" #'elpaca-update-all
+  "r" #'elpaca-rebuild
+  "v" #'elpaca-visit
+  "b" #'elpaca-browse
+  ;; https://github.com/progfolio/elpaca/issues/24#issuecomment-2629569714
+  ;; https://github.com/progfolio/elpaca/issues/447
+  "L" #'noct-elpaca-lock)
+(general-with-package 'evil-collection
+  (general-add-hook 'elpaca-ui-mode-hook #'evil-normalize-keymaps)
+  ;; p - pull, u - unmark, r -rebuild, x - execute, s - search, etc.
+  ;; ~/src/forks/evil-collection/modes/elpaca/evil-collection-elpaca.el
+  (evil-collection-init 'elpaca))
+
+(noct-handle-popup-same-window "*elpaca-info*")
 #+end_src
 
 ** Hydra
@@ -1516,6 +1577,7 @@ This should be run in a graphical frame."
 #+begin_src emacs-lisp
 ;; allow binding <C-i> differntly from tab
 (general-def input-decode-map "C-i" [C-i])
+(general-def input-decode-map "C-m" [C-m])
 
 ;; worse keybinding but sometimes I use on OSX
 (general-def "C-v" #'yank)
@@ -1683,7 +1745,6 @@ duplicates/fallback variants included here.")
 I avoided ligatures for a long time, but at this point, I don't see a reason to avoid them.  I'm not going to use =prettify-symbols-mode= to prettify lambda as a single character, and I never use most of these symbols, but some of them look pretty nice without getting in the way (e.g. elisp comments: =;;=, double colon, www, ellipsis, etc.).  These don't affect editing like prettifying lambda to a single character does.
 #+begin_src emacs-lisp
 (use-package ligature
-  :straight (:host github :repo "mickeynp/ligature.el")
   :defer-incrementally t
   :config
   (ligature-set-ligatures t '("www" "..."))
@@ -1731,8 +1792,8 @@ I avoided ligatures for a long time, but at this point, I don't see a reason to 
 ** Auto Compression
 Automatically uncompress (for editing) and recompress (when saving) compressed files (e.g. =.gz= files).
 #+begin_src emacs-lisp
-(use-package jka-compr
-  :init (auto-compression-mode))
+(noct-use (:no-install jka-compr-hook)
+  (auto-compression-mode))
 #+end_src
 
 ** Auto Revert
@@ -1874,8 +1935,7 @@ Persist minibuffer and search history.
        history-delete-duplicates t)
 
 (use-package savehist
-  ;; doesn't actually seem to be necessary for savehist?
-  :straight (:type built-in)
+  :ensure nil
   :defer-incrementally custom
   :init
   ;; this and :defer-incrementally is how doom loads it
@@ -2015,18 +2075,18 @@ Obvious ones:
 
 ** Profiling
 #+begin_src emacs-lisp
-(use-package profiler
-  :straight (:type built-in)
-  :general (general-s
-             "C-p" #'profiler-start
-             "C-r" #'profiler-report
-             "C-s" #'profiler-stop))
+(noct-use (:no-install profiler)
+  (general-s
+    "C-p" #'profiler-start
+    "C-r" #'profiler-report
+    "C-s" #'profiler-stop))
 #+end_src
 
 ** Recentf
 #+begin_src emacs-lisp
 ;; ivy also automatically enables recentf-mode
 (use-package recentf
+  :ensure nil
   :defer-incrementally (easymenu tree-widget timer)
   :init
   (general-add-advice '(after-find-file consult-buffer)
@@ -2084,20 +2144,21 @@ Obvious ones:
 ** Repeat Mode
 #+begin_src emacs-lisp
 ;; TODO make it shut up when starting
-(use-package repeat
-  ;; :once 'pre-command-hook
-  :ghook ('pre-command-hook nil nil nil t))
+(noct-use (:no-install repeat)
+  (:once 'pre-command-hook))
 #+end_src
 
 ** Reload
  #+begin_src emacs-lisp
-(use-package reload
-  :straight (:host github :repo "progfolio/reload.el"))
+(noct-use
+    (:elpaca reload :host github :repo "progfolio/reload.el"))
  #+end_src
 
 ** Reveal
 #+begin_src emacs-lisp
+;; TODO once-buffer
 (use-package reveal
+  :ensure nil
   :init
   (noct-after-buffer (global-reveal-mode)))
 #+end_src
@@ -2212,12 +2273,12 @@ I've switched away from putting this function in a hook because it can be jarrin
 
 ** Tabulated List Mode and Tablist Mode
 #+begin_src emacs-lisp
-(use-package tabulated-list
-  :config
-  (general-def 'normal tabulated-list-mode-map
-    "o" #'tabulated-list-sort
-    "w" #'tabulated-list-next-column
-    "b" #'tabulated-list-previous-column))
+(noct-use (:no-install tabulated-list)
+  (:config
+    (general-def 'normal tabulated-list-mode-map
+      "o" #'tabulated-list-sort
+      "w" #'tabulated-list-next-column
+      "b" #'tabulated-list-previous-column)))
 
 ;; for mpdel, for example
 (use-package tablist
@@ -2300,8 +2361,6 @@ See `tablist-put-mark' for how entries are marked."
 ;; automatically change text size everywhere based on resolution (e.g. to get
 ;; same size on different sized monitors)
 (use-package textsize
-  ;; for some reason straight claims the recipe is malformed otherwise
-  :straight (:host github :repo "WJCFerguson/textsize")
   :general
   ('normal
    "C--" #'textsize-decrement
@@ -2357,7 +2416,10 @@ See `tablist-put-mark' for how entries are marked."
   (general-spc "?" #'affe-grep)
   :config
   (require 'orderless)
-  (gsetq affe-regexp-function #'orderless-pattern-compiler
+  (defun affe-orderless-regexp-compiler (input _type _ignorecase)
+    (setq input (cdr (orderless-compile input)))
+    (cons input (apply-partially #'orderless--highlight input t)))
+  (gsetq affe-regexp-function #'affe-orderless-regexp-compiler
          affe-highlight-function #'orderless--highlight
          affe-grep-command (concat "rg "
                                    "--null "
@@ -2572,7 +2634,7 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
 #+begin_src emacs-lisp
 (use-package corfu
   ;; to get extensions
-  :straight (corfu :files (:defaults "extensions/*.el"))
+  :ensure (:files (:defaults "extensions/*.el"))
   :ghook
   ;; for shell also
   'comint-mode-hook
@@ -2644,14 +2706,11 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
                       (when (bound-and-true-p corfu--candidates)
                         (corfu-quit)))))
 
-;; TODO merged into main
+;; TODO merged into main as corfu-popupinfo
 ;; looks cool but not that useful; don't normally need docs during completion;
 ;; more distracting than beneficial
 (use-package corfu-doc
   :disabled t
-  :straight (corfu-doc
-             :host github
-             :repo "galeo/corfu-doc")
   :ghook 'corfu-mode-hook
   :config
   ;; increase delay
@@ -2760,7 +2819,7 @@ Helper library for fuzzy matching/finding (used by ivy, for example).
 TODO don't delete old window/mess up things
 #+begin_src emacs-lisp
 (use-package frog-menu
-  :straight (frog-menu :host github :repo "clemera/frog-menu")
+  :ensure (:host github :repo "clemera/frog-menu")
   :config
   (general-after 'avy
     (gsetq frog-menu-avy-keys avy-keys))
@@ -2920,7 +2979,11 @@ Select candidate as soon as there is only one (like the headlong package but for
          ;; collections
          ivy-dynamic-exhibit-delay-ms 50
          ivy-use-selectable-prompt t
-         ivy-count-format "%d/%d ")
+         ivy-count-format "%d/%d "
+         ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’
+         ivy-use-virtual-buffers t
+         ivy-virtual-abbreviate 'full)
+
   ;; ivy-sort-functions-alist
   ;; ivy-initial-inputs-alist
 
@@ -3427,33 +3490,28 @@ file-finding commands)."
 ** Restricto
 #+begin_src emacs-lisp
 (use-package restricto
-  :straight (restricto :host github :repo "oantolin/restricto")
-  :general ('insert minibuffer-completion-map "S-SPC" #'restricto-narrow))
+  :ensure (:host github :repo "oantolin/restricto")
+  :general ( :keymaps noct-minibuffer-maps
+             ;; clear prompt but limit to current candidates
+             "S-<backspace>" #'restricto-narrow)
+  ;; :config
+  ;; necessary to use widen
+  ;; (restricto-mode)
+  )
 #+end_src
 
 ** Vertico
 I've switched to vertico due to some weird display issues with selectrum. Vertico is very simple and just works, and selectrum is now deprecated in favor of it.
 #+begin_src emacs-lisp
-(straight-override-recipe
- '(vertico
-   ;; specify to get extensions
-   :files (:defaults "extensions/*.el")))
-
-;; TODO because vertico-prescient relies on vertico?
-;; - if vertico-prescient comes before vertico recipe override, adds 7-10
-;;   seconds to my init time
-;; - will get warning for two recipes if don't use straight-override-recipes
-;;   for vertico (doesn't happen with corfu)
-;; I assume this won't be an issue when I switch to elpaca since it processes at
-;; the end
-
 (noct-use vertico-prescient
   (:require-once "vertico")
   (:config
     (opt vertico-prescient-enable-filtering nil)
     (vertico-prescient-mode)))
 
-(noct-use vertico
+(noct-use ( :elpaca vertico
+            ;; to get extensions
+            :files (:defaults "extensions/*.el"))
   (:autoload 'vertico--advice)
   (define-minor-mode vertico-mode
     "VERTical Interactive COmpletion."
@@ -3522,6 +3580,8 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
 #+begin_src emacs-lisp
 (use-package consult
   :general
+  (general-def
+    [remap yank-pop] #'consult-yank-pop)
   (general-def 'normal
     "g/" #'consult-keep-lines)
   (general-spc
@@ -3534,6 +3594,8 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
           (or (eq major-mode 'org-mode)
               (bound-and-true-p poly-org-mode))
           #'consult-org-heading)
+    ;; multi-buffer (of same major mode in projcet)
+    "Y" #'consult-imenu-multi
     ;; works inside or outside project already
     "/" #'consult-ripgrep)
   ("C-S-y" #'consult-yank-from-kill-ring)
@@ -3542,11 +3604,7 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
   (general-m "C" #'consult-compile-error)
   (help-map "a" #'consult-apropos
             "i" #'consult-info)
-  ('normal "/" (list :def (if (or (not (boundp 'no-native-compile))
-                                  (not no-native-compile))
-                              #'consult-line
-                            #'noct-consult-ripgrep-or-line)
-                     :jump t))
+  ('normal "/" (list :def #'consult-line :jump t))
   :config
   ;; TODO move this somewhere else
   (gsetq org-imenu-depth 10)
@@ -3587,57 +3645,45 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
             "--path-separator / "
             "--smart-case "
             "--no-heading "
+            "--with-filename "
             "--line-number "
+            "--search-zip "
             ;; adding these to default
             "--hidden "
-            ;; add back ignore too often
+            ;; add back manually if need
             ;; "--no-ignore "
             "--max-columns-preview "))
-  (gsetq consult-ripgrep-args (concat noct-ripgrep-args "."))
 
   (defun noct-consult-find-fd (&optional dir initial)
     "Run `consult-find' using fd."
     (interactive "P")
-    (let ((dir (or dir (ignore-errors (projectile-project-root)) default-directory))
+    (let ((dir (or dir
+                   (ignore-errors (projectile-project-root))
+                   default-directory))
           (consult-find-command
            (concat "fd --hidden --no-ignore --exclude .git --color=never "
                    "--full-path ARG OPTS")))
       (consult-find dir initial)))
 
-  (defcustom noct-consult-ripgrep-or-line-limit 1000000
-    "Buffer size threshold for `noct-consult-ripgrep-or-line'.
-When the number of characters in a buffer exceeds this threshold,
-`consult-ripgrep' will be used instead of `consult-line'."
-    :type 'integer)
-
-  (defun noct-consult-ripgrep-or-line ()
-    "Call `consult-line' for small buffers or `consult-ripgrep' for large files."
-    (interactive)
-    (if (or (not buffer-file-name)
-            (buffer-narrowed-p)
-            (ignore-errors
-              (file-remote-p buffer-file-name))
-            (jka-compr-get-compression-info buffer-file-name)
-            (<= (buffer-size)
-                (/ noct-consult-ripgrep-or-line-limit
-                   (if (eq major-mode 'org-mode) 4 1))))
-        (consult-line)
-      (when (file-writable-p buffer-file-name)
-        (save-buffer))
-      (let ((consult-ripgrep-command
-             (concat noct-ripgrep-args
-                     ;; add back filename to get parsing to work
-                     "--with-filename "
-                     ".")))
-        (consult-ripgrep))))
+  (defun noct-consult-find-ripgrep (&optional dir initial)
+    "Run `consult-find' using ripgrep."
+    (interactive "P")
+    (let ((dir (or dir
+                   (ignore-errors (projectile-project-root))
+                   default-directory))
+          (consult-find-command
+           (concat "ripgrep"
+                   noct-ripgrep-args
+                   ".")))
+      (consult-find dir initial)))
 
   (defun noct-consult-line-evil-history (&rest _)
     "Add latest `consult-line' search pattern to the evil search history ring.
 This only works with orderless and for the first component of the search."
     (when (and (bound-and-true-p evil-mode)
                (eq evil-search-module 'evil-search))
-      (let ((pattern (car (orderless-pattern-compiler
-                           (car consult--line-history)))))
+      (let ((pattern (cadr (orderless-compile
+                            (car consult--line-history)))))
         (add-to-history 'evil-ex-search-history pattern)
         (setq evil-ex-search-pattern (list pattern t t))
         (setq evil-ex-search-direction 'forward)
@@ -3717,9 +3763,6 @@ Sets missing metadata for completions (pairs well with embark even if not using 
 
 #+begin_src emacs-lisp
 (use-package all-the-icons-completion
-  :straight (all-the-icons-completion
-             :host github
-             :repo "iyefrat/all-the-icons-completion")
   :ghook
   ('marginalia-mode-hook #'all-the-icons-completion-marginalia-setup))
 
@@ -3761,7 +3804,7 @@ start recentf desktop-after-read-hook
 ;; TODO desktop isn't a package; this is in loaddefs
 (use-package destkop
   :disabled t
-  :straight (:type built-in)
+  :ensure nil
   :init (desktop-save-mode)
   :config
   (gsetq desktop-restore-frames nil)
@@ -3849,7 +3892,8 @@ Globbing is used to find a matching file."
     "e" (noct-find-file (expand-file-name "awaken.org" user-emacs-directory))
     "g" (noct-find-file "~/ag-sys/else/gaming/games.org")
     "h" (noct-find-file "~/ag-sys/notes/health.org")
-    "H" (noct-find-file "~/ag-sys/notes/medical_history.org")
+    "H" (noct-find-file "~/ag-sys/notes/health.csv")
+    "C-h" (noct-find-file "~/ag-sys/notes/medical_history.org")
     "i" (noct-find-file "~/ag-sys/else/interaction.org")
     "I" (noct-find-file "~/ag-sys/else/scrawl/prose/general/ideas.org")
     "j" (noct-find-file "~/ag-sys/notes/journal.org")
@@ -4139,14 +4183,6 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
 
 *** Setup
 #+begin_src emacs-lisp
-(use-package ivy
-  ;; it would make more sense for this to be in counsel
-  ;; :general (general-spc "f" #'ivy-switch-buffer)
-  :config
-  ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’
-  (gsetq ivy-use-virtual-buffers t
-         ivy-virtual-abbreviate 'full))
-
 (use-package swiper
   :config
   (gsetq swiper-goto-start-of-match t))
@@ -4160,12 +4196,7 @@ It's a bit hard to decide how to organize counsel, ivy, and swiper since they're
 
 *** Locate/Find/FD/FZF
 #+begin_src emacs-lisp
-(use-package counsel
-  :general
-  (general-spc
-    "z" #'noct-ripgrep-fzf
-    "Z" #'noct-fd-fzf)
-  :config
+(general-with-package 'counsel
   (defun noct-fd-fzf (&optional initial-input)
     "Run `counsel-fzf' using fd as fzf's default command."
     (interactive)
@@ -4320,6 +4351,7 @@ Useful if constantly switching between only a few files in a project. I don't no
 *** Setup
 #+begin_src emacs-lisp
 (use-package ibuffer
+  :ensure nil
   :general
   (general-s "b" #'ibuffer))
 #+end_src
@@ -4333,6 +4365,7 @@ Useful if constantly switching between only a few files in a project. I don't no
 ** Outline | Outshine | Outli
 #+begin_src emacs-lisp
 (use-package outline
+  :ensure nil
   :ghook ('(prog-mode-hook conf-mode-hook) #'outline-minor-mode)
   :blackout outline-minor-mode
   :config
@@ -4345,7 +4378,7 @@ Useful if constantly switching between only a few files in a project. I don't no
   :blackout t
   :ghook 'outline-minor-mode-hook)
 
-(noct-use ( :straight outli
+(noct-use ( :elpaca outli
             :host github
             :repo "jdtsmith/outli")
   (gsetq outli-speed-commands
@@ -4528,7 +4561,7 @@ A helper library for inserting icons (used by other packages in my config).
 ** Mode Line
 *** Any Mode Line
 #+begin_src emacs-lisp
-(general-after-init
+(noct-elpaca-after-init
   (column-number-mode)
   (size-indication-mode))
 #+end_src
@@ -4566,7 +4599,7 @@ A helper library for inserting icons (used by other packages in my config).
                  (list (propertize (make-string 300 ?─)
                                    ;; use default background color
                                    'face 'default)))
-  (general-after-init
+  (noct-elpaca-after-init
     (general-add-advice
      'doom-modeline-set-modeline
      :override #'noct-set-doom-modeline-advice)
@@ -4645,68 +4678,6 @@ A helper library for inserting icons (used by other packages in my config).
                         :around #'noct-doom-modeline--font-height)))
 #+end_src
 
-*** Fallback Mode Line
-Default modeline if doom-modeline is not installed.
-#+begin_src emacs-lisp
-(unless (memq 'doom-modeline noct-straight-packages)
-  ;; http://emacs-fu.blogspot.com/2011/08/customizing-mode-line.html
-  (gsetq-default mode-line-format
-                 (list
-                  ;; error message about full memory
-                  "%e"
-                  ;; space on left (or - if term)
-                  mode-line-front-space
-                  ;; report multilingual input; e.g. U: for utf-8
-                  mode-line-mule-info
-                  ;; for emacsclient frame identification
-                  mode-line-client
-                  ;; ** if modified, -- if not, %% if RO, %- if RO and modified
-                  mode-line-modified
-                  ;; indicates a remote buffer
-                  mode-line-remote
-                  mode-line-frame-identification
-                  mode-line-buffer-identification
-                  "   "
-                  ;; current group
-                  '(:eval (when (fboundp 'fg-mode-line-string)
-                            (fg-mode-line-string)))
-                  ;; line and column
-                  "(" ;; '%02' to set to 2 chars at least; prevents flickering
-                  (propertize "%02l" 'face 'font-lock-type-face) ","
-                  (propertize "%02c" 'face 'font-lock-type-face)
-                  ") "
-
-                  ;; relative position, size of file
-                  "["
-                  (propertize "%p" 'face 'font-lock-constant-face)
-                  "/"
-                  (propertize "%I" 'face 'font-lock-constant-face)
-                  "] "
-
-                  ;; the current major mode for the buffer.
-                  "["
-                  '(:eval (propertize "%m" 'face 'font-lock-string-face
-                                      'help-echo buffer-file-coding-system))
-                  "] "
-
-                  '(:eval (when (bound-and-true-p org-mode-line-string)
-                            (concat "Clock: <"
-                                    (string-trim-left org-mode-line-string)
-                                    "> ")))
-
-                  '(:eval (when (bound-and-true-p auto-compile-mode)
-                            (mode-line-auto-compile-control)))
-
-                  ;; instead of mode-line-modes; eval is necessary for it to be
-                  ;; up-to-date
-                  '(:eval minor-mode-alist)
-
-                  ;; fill with ' '
-                  "% "))
-
-  (force-mode-line-update))
-#+end_src
-
 ** Emojify
 Display and insert emojis.
  #+begin_src emacs-lisp
@@ -4745,6 +4716,7 @@ Highlights escaped characters.
 ;; glitchy; both sometimes disappear (when messages in echo area); sometimes
 ;; slow; not using for now
 (use-package mini-frame
+  :disabled
   :config
   ;; TODO border color
   (gsetq mini-frame-color-shift-step 0
@@ -4755,9 +4727,9 @@ Highlights escaped characters.
            (left . 0.5))))
 
 (use-package maple-minibuffer
-  :straight (maple-minibuffer
-             :host github
-             :repo "honmaple/emacs-maple-minibuffer")
+  :disabled t
+  :ensure ( :host github
+            :repo "honmaple/emacs-maple-minibuffer")
   :config
   (setq maple-minibuffer:position-type 'frame-top-center
         maple-minibuffer:border-color
@@ -4783,6 +4755,7 @@ This will colorize something like #F3A111. I am enabling this locally in files w
 Smartparens' version is unfortunately too slow.
 #+begin_src emacs-lisp
 (use-package paren
+  :ensure nil
   :init
   (noct-after-buffer (show-paren-mode))
   :config (gsetq show-paren-delay 0))
@@ -4821,14 +4794,14 @@ Smartparens' version is unfortunately too slow.
 
 ;; dead
 ;; (use-package gruvbox-dark-theme
-;;   :straight (gruvbox-dark-theme
+;;   :ensure (
 ;;              :host github
 ;;              :repo "d125q/gruvbox-dark-emacs")
 ;;   :init (load-theme 'gruvbox-dark t))
 
 (use-package lenlen-theme
   :disabled t
-  :ghook ('after-init-hook (lambda () (require 'lenlen-theme))))
+  :ghook ('elpaca-after-init-hook (lambda () (require 'lenlen-theme))))
 
 (use-package solarized-theme)
 
@@ -4864,10 +4837,10 @@ Smartparens' version is unfortunately too slow.
 
 ;; missing a lot of faces (like dired)
 (use-package rose-pine-emacs
+  :disabled t
   :no-require t
-  :straight (rose-pine-emacs
-             :host github
-             :repo "thongpv87/rose-pine-emacs"))
+  :ensure ( :host github
+            :repo "thongpv87/rose-pine-emacs"))
 
 ;; do I understand why straight is building nord in catppuccin directory? no
 ;; (use-package catppuccin-theme)
@@ -4919,12 +4892,6 @@ Smartparens' version is unfortunately too slow.
                                 ,(ewal-get-color 'foreground)))))
      `(frog-menu-posframe-background-face
        ((t (:background ,(ewal-get-color 'background))))))))
-
-;; takes 0.02-0.03 seconds; not that much but only do for daemon
-;; also happens to be a good way to distinguish the two
-(when (and (daemonp)
-           (ignore-errors (ewal-load-colors)))
-  (noct-ewal))
 #+end_src
 
 **** Xresources
@@ -4965,16 +4932,24 @@ Smartparens' version is unfortunately too slow.
     catppuccin
     rose-pine-mone))
 
-(unless (or (featurep 'circadian)
-            (bound-and-true-p ewal-base-palette))
-  ;; 0.2 seconds
-  ;; (load-theme 'doom-spacegrey t)
-  (if (daemonp)
-      ;; faster even though it pulls in dash
-      (load-theme 'gruvbox-dark-soft t)
-    ;; fastest
-    ;; (load-theme 'tao-yin t)
-    (load-theme 'doom-opera t)))
+(defun noct-set-default-theme ()
+  (interactive)
+  (if (and (daemonp)
+           (ignore-errors (ewal-load-colors)))
+      ;; takes 0.02-0.03 seconds; not that much but only do for daemon
+      ;; also happens to be a good way to distinguish the two
+      (noct-ewal)
+    (unless (featurep 'circadian)
+      ;; 0.2 seconds
+      ;; (load-theme 'doom-spacegrey t)
+      (if (daemonp)
+          ;; faster even though it pulls in dash
+          (load-theme 'gruvbox-dark-soft t)
+        ;; fastest
+        ;; (load-theme 'tao-yin t)
+        (load-theme 'doom-opera t)))))
+
+(general-add-hook 'elpaca-after-init-hook #'noct-set-default-theme)
 #+end_src
 
 ** Visual Fill Column
@@ -5004,6 +4979,7 @@ Soft wrap lines at =fill-column=.
 ;; http://ergoemacs.org/emacs/whitespace-mode.html
 ;; http://www.emacswiki.org/emacs/WhiteSpace
 (use-package whitespace
+  :ensure nil
   :defer-incrementally t
   :general (noct-toggle-map "w" #'whitespace-mode)
   :blackout t
@@ -5037,13 +5013,11 @@ Soft wrap lines at =fill-column=.
 ;; TODO eventually switch to more generic narrowing solution
 (use-package rect-ext
   :disabled t
-  :straight `(rect-ext
-              :host github
-              :repo "noctuid/rect-ext.el"
-              ,@(if noct-personal-computer-p
-                    (list :protcol 'ssh
-                          :local-repo "~/src/emacs/rectangle-ext/")
-                  (list :protocol nil)))
+  :ensure `(rect-ext
+            :host github
+            :repo "noctuid/rect-ext.el"
+            ,@(when noct-personal-computer-p
+                (list :repo "~/src/emacs/rectangle-ext/")))
   :general
   ('normal
    [remap evil-ex] #'rect-ext-evil-ex))
@@ -5297,11 +5271,14 @@ Have =C-w= and =C-<backspace>= delete whitespace before deleting words when ther
   ('override
    [remap backward-kill-word]
    (general-predicate-dispatch #'backward-kill-word
-     (looking-back (rx (1+ space))
+     (looking-back (rx (or (1+ space)
+                           bol))
                    (line-beginning-position))
      #'hungry-delete-backward
      (bound-and-true-p lispyville-mode)
-     #'lispyville-delete-backward-word)))
+     #'lispyville-delete-backward-word
+     (bound-and-true-p puni-mode)
+     #'puni-backward-kill-word)))
 #+end_src
 
 ** Smart Parens
@@ -5311,6 +5288,9 @@ Have =C-w= and =C-<backspace>= delete whitespace before deleting words when ther
 
 #+begin_src emacs-lisp
 (use-package smartparens
+  ;; after updating it causes major input lag
+  ;; https://github.com/Fuco1/smartparens/issues/1209
+  :disabled t
   :init
   ;; NOTE could also do evil-insert-entry-hook, but this is okay since I'm not
   ;; using smartparens in the scratch buffer
@@ -5337,6 +5317,71 @@ Have =C-w= and =C-<backspace>= delete whitespace before deleting words when ther
     (sp-local-pair "/*" "*/"
                    :post-handlers '(:add ("* ||\n[i]" "RET")
                                     ("\n * ||\n[i]" "*")))))
+#+end_src
+
+** Puni
+#+begin_src emacs-lisp
+(noct-use puni
+  ;; `puni-global-mode' already handles autoloading so it's only loaded after a
+  ;; key that calls; for now only use in prog mode though
+  ;; puni commands
+  ;; M-d - kill forward word
+  ;; C-k - kill line
+  ;; C-S-k - backward kill line
+  ;; (puni-global-mode)
+  (general-add-hook 'prog-mode-hook #'puni-mode))
+#+end_src
+
+** Electric Quote/Pair Mode
+
+#+begin_src emacs-lisp
+(setup electric
+  (general-add-hook 'text-mode-hook #'electric-quote-local-mode))
+
+(setup elec-pair
+  (defun noct-inhibit-pair (_char)
+    "Inhibit pairing in text modes when after or before a word character."
+    (and (derived-mode-p 'text-mode)
+         (or
+          (memq (char-syntax (char-before (- (point) 1))) '(?w ?.))
+          (memq (char-syntax (following-char)) '(?w)))))
+
+  ;; good riddance
+  (setq electric-pair-preserve-balance nil
+        electric-pair-inhibit-predicate #'noct-inhibit-pair)
+
+  (electric-pair-mode)
+
+  (general-add-hook '(minibuffer-setup-hook
+                      minibuffer-inactive-mode-hook)
+                    (noct-disable electric-pair-local-mode)))
+
+
+;; https://old.reddit.com/r/emacs/comments/144n5ht/how_can_i_get_proper_electricpairmode_pairing_for/
+;; NOTE: had issues trying to modify syntax table (inhibit doesn't work
+;; correctly with nesting)
+(setup org
+
+  ;; https://emacs.stackexchange.com/questions/2538/how-to-define-additional-mode-specific-pairs-for-electric-pair-mode
+  (defun itsjeyd-add-org-pairs ()
+    (gsetq-local electric-pair-pairs
+                 (append electric-pair-pairs
+                         '((?/ . ?/)
+                           (?* . ?*)
+                           (?+ . ?+)
+                           (?~ . ?~)
+                           (?= . ?=))))
+    (gsetq-local electric-pair-text-pairs electric-pair-pairs))
+
+  ;; make my inhibit function apply to the above variables
+  (defun noct-no-unconditional-pairing (orig-fun &rest args)
+    "Return ORIG-FUN's result but with 3rd element set to nil."
+    (let ((result (apply orig-fun args)))
+      (list (car result) (cadr result) nil (cadddr result))))
+  (general-add-advice 'electric-pair-syntax-info :around
+                      #'noct-no-unconditional-pairing)
+
+  (:fhooks #'itsjeyd-add-org-pairs))
 #+end_src
 
 ** Snippets
@@ -5538,7 +5583,7 @@ Undo tree is a great package but is unmaintained and extremely buggy. Even after
 *** Vundo
 #+begin_src emacs-lisp
 (use-package vundo
-  :straight (vundo :host github :repo "casouri/vundo")
+  :ensure (:host github :repo "casouri/vundo")
   :general (general-t "u" #'vundo)
   :config
   (gsetq vundo-glyph-alist vundo-unicode-symbols
@@ -5560,7 +5605,7 @@ Undo tree is a great package but is unmaintained and extremely buggy. Even after
 Currently trying with vundo only.
 #+begin_src emacs-lisp
 (use-package undo-hl
-  :straight (:host github :repo "casouri/undo-hl")
+  :ensure (:host github :repo "casouri/undo-hl")
   :init
   ;; https://github.com/casouri/vundo/pull/44#issuecomment-1139127706
   (defvar ideasman42-real-vundo-buf nil)
@@ -5585,12 +5630,22 @@ Currently trying with vundo only.
                       (makunbound 'ideasman42-real-vundo-buf)))
   :config
   (gsetq undo-hl-undo-commands
-         (list #'vundo-backward
-               #'vundo-forward
-               #'vundo-next
-               #'vundo-previous
-               #'vundo-stem-root
-               #'vundo-stem-end)
+         (list
+          ;; defaults, though I'm currently only using with vundo
+          #'undo
+          #'undo-only
+          #'undo-redo
+          #'undo-fu-only-undo
+          #'undo-fu-only-redo
+          #'evil-undo
+          #'evil-redo
+          ;; vundo
+          #'vundo-backward
+          #'vundo-forward
+          #'vundo-next
+          #'vundo-previous
+          #'vundo-stem-root
+          #'vundo-stem-end)
          undo-hl-flash-duration 0.1))
 #+end_src
 
@@ -5605,16 +5660,14 @@ Currently trying with vundo only.
 Still experimental.
 #+begin_src emacs-lisp
 (use-package things
-  :straight `(things
-              :host github
-              :repo "noctuid/things.el"
-              ,@(if noct-personal-computer-p
-                    (list :protcol 'ssh
-                          :local-repo "~/src/emacs/things")
-                  (list :protocol nil))))
+  :ensure `(things
+            :host github
+            :repo "noctuid/things.el"
+            ,@(when noct-personal-computer-p
+                (list :repo "~/src/emacs/things"))))
 
 (use-package things-evil
-  :straight nil
+  :ensure nil
   :ghook
   ('(evil-operator-state-entry-hook
      evil-visual-state-entry-hook)
@@ -5885,13 +5938,8 @@ TODO Use things.el instead.
 #+end_src
 
 *** Sentence Navigation
-Needs to be updated to use =things.el= and needs to have more tests.
+Needs to be updated to use =things.el= and needs to have more tests.  And I write two-spaced sentences now.
 #+begin_src emacs-lisp
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(sentence-navigation
-     :protocol ssh
-     :local-repo "~/src/emacs/sentence-navigation")))
 (use-package sentence-navigation
   :disabled t
   :general
@@ -5913,15 +5961,11 @@ Needs to be updated to use =things.el= and needs to have more tests.
 *** Column Text Object
 Needs to be updated to use =things.el= and needs to have more tests.
 #+begin_src emacs-lisp
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(evil-textobj-column
-     :protocol ssh
-     :local-repo "~/src/emacs/evil-textobj-column")))
 (use-package evil-textobj-column
-  :straight (evil-textobj-column
-             :host github
-             :repo "noctuid/evil-textobj-column")
+  :ensure `( :host github
+             :repo "noctuid/evil-textobj-column"
+             ,@(when noct-personal-computer-p
+                 (list :repo "~/src/emacs/evil-textobj-column")))
   :general ('inner
             "k" #'evil-textobj-column-word
             "K" #'evil-textobj-column-WORD))
@@ -5941,7 +5985,7 @@ This package is unfortunately unmaintained.
 (use-package evil-numbers
   ;; use version that supports g C-a
   ;; https://github.com/janpath/evil-numbers/issues/3
-  :straight (evil-numbers :host github :repo "janpath/evil-numbers")
+  :ensure (:host github :repo "janpath/evil-numbers")
   :general ('normal
             "C-a" #'evil-numbers/inc-at-pt
             "C-x" #'evil-numbers/dec-at-pt
@@ -5987,12 +6031,11 @@ This package is unfortunately unmaintained.
 
 ** Link Hint
 #+begin_src emacs-lisp
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(link-hint
-     :protocol ssh
-     :local-repo  "~/src/emacs/link-hint/")))
 (use-package link-hint
+  :ensure `( :host github
+             :repo "noctuid/link-hint.el"
+             ,@(when noct-personal-computer-p
+                 (list :repo "~/src/emacs/link-hint")))
   :general
   (general-t
     "f" #'link-hint-open-link
@@ -6030,6 +6073,7 @@ Try with lsp or smart jump (if in a prog-mode buffer) then with hyperbole."
   (gsetq link-hint-action-fallback-commands (list :open #'noct-open)))
 
 (use-package browse-url
+  :ensure nil
   :config
   (gsetq browse-url-generic-program (getenv "BROWSER")
          browse-url-browser-function #'browse-url-generic))
@@ -6043,7 +6087,7 @@ Try with lsp or smart jump (if in a prog-mode buffer) then with hyperbole."
 (use-package git-modes)
 
 (use-package gitignore-mode
-  :straight nil
+  :ensure nil
   :mode "/.dockerignore\\'")
 #+end_src
 
@@ -6116,7 +6160,9 @@ Diff-hl also has a dired mode that seems to be faster than dired k.
   (global-diff-hl-mode)
   (diff-hl-flydiff-mode)
   :config
-  (gsetq diff-hl-show-staged-changes nil)
+  (gsetq diff-hl-show-staged-changes nil
+         ;; do not want repeat map
+         diff-hl-command-map nil)
 
   (general-def noct-toggle-map "D" #'diff-hl-mode)
 
@@ -6501,6 +6547,8 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
 Currently broken for github.
 #+begin_src emacs-lisp
 (use-package git-commit-insert-issue
+  ;; depends on bitbucket which is no longer in melpa?
+  :disabled t
   :ghook 'git-commit-mode-hook)
 #+end_src
 
@@ -6721,6 +6769,8 @@ For typographical editing (not fixing typos).
 #+begin_src emacs-lisp
 ;; it's way too slow; not using for highlighting
 (use-package flyspell
+  :disabled t
+  :ensure nil
   ;; :ghook
   ;; ('text-mode-hook #'turn-on-flyspell)
   ;; ;; will check just comments and strings
@@ -6743,6 +6793,7 @@ This makes things less convenient (there are some cases where mispellings aren't
 **** Flyspell Correct
 #+begin_src emacs-lisp
 (use-package flyspell-correct
+  :disabled t
   :config
   ;; https://github.com/clemera/frog-menu#example
   (defun frog-menu-flyspell-correct (candidates word)
@@ -6799,9 +6850,8 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+begin_src emacs-lisp
 (use-package flycheck-hunspell
   :disabled t
-  :straight (flycheck-hunspell
-             :host github
-             :repo "leotaku/flycheck-hunspell")
+  :ensure ( :host github
+            :repo "leotaku/flycheck-hunspell")
   :after flycheck
   :demand t
   :config
@@ -6813,6 +6863,7 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 *** Ispell
 #+begin_src emacs-lisp
 (use-package ispell
+  :ensure nil
   :config
 
   ;; http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
@@ -6843,20 +6894,37 @@ pressing \".\" before selecting the word. Otherwise, correct it."
 #+end_src
 
 *** Jinx
-Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false positives than aspell so far, and I will probably switch to it completely and remove the rest of my spelling config.  ~jinx-correct~ doesn't have avy support, but it will jump to the closest word, which is good enough if you just fix all visible issues at once
+Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false positives than aspell so far.  It's so much better than anything else, I will probably remove all other packages.
  #+begin_src emacs-lisp
-(use-package jinx
-  :disabled t
-  ;; must be installed through nix to work with Emacs installed through nix
-  :straight `(:type ,(if noct-emacs-from-nix
-                         'built-in
-                       'git))
-  ;; necessary when installed through nix
-  :autoload global-jinx-mode
-  :init
+;; must be installed through nix to work with Emacs installed through nix
+(if noct-emacs-from-nix
+    ;; necessary when installed through nix
+    (autoload 'global-jinx-mode "jinx")
+  (elpaca jinx))
+(setup jinx
   (noct-after-buffer (global-jinx-mode))
-  :config
-  (general-r "s" #'jinx-correct))
+  (:config
+    (defun noct-avy-jinx-correct ()
+      (interactive)
+      (let (positions
+            prev-pos
+            (win-end (window-end))
+            (avy-action (lambda (pos)
+                          (goto-char pos)
+                          (jinx-correct-nearest))))
+        (save-excursion
+          (goto-char (window-start))
+          (setq prev-pos (point))
+          (while (progn
+                   (ignore-errors (jinx-next 1))
+                   (and (> (point) prev-pos)
+                        (<= (point) win-end)))
+            (setq prev-pos (point))
+            (push (point) positions)))
+        (when positions
+          (avy-process positions))))
+    (general-r "s" #'noct-avy-jinx-correct)))
+
  #+end_src
 
 *** Spell Fu
@@ -6929,7 +6997,7 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
 ** Apropos
 #+begin_src emacs-lisp
 (use-package apropos
-  :straight (:type built-in)
+  :ensure nil
   :init
   ;; TODO can this be put in :config?
   (noct-handle-popup apropos-mode)
@@ -6949,7 +7017,7 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
 ** Conf Mode
 #+begin_src emacs-lisp
 (use-package conf-mode
-  :straight (:type built-in)
+  :ensure nil
   :mode ("rc\\'" . conf-unix-mode)
   :gfhook
   ('(conf-unix-mode-hook conf-xdefaults-mode-hook) #'outline-minor-mode))
@@ -6958,7 +7026,7 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
 ** Comint
 #+begin_src emacs-lisp
 (use-package comint
-  :straight (:type built-in)
+  :ensure nil
   :config
   (general-def 'insert comint-mode-map
     ;; history
@@ -7005,6 +7073,7 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
 ** Diff Mode
 #+begin_src emacs-lisp
 (use-package diff-mode
+  :ensure nil
   :config
   (general-def 'normal diff-mode-map
     "q" #'quit-window))
@@ -7030,12 +7099,13 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
     :definer 'minor-mode
     "q" #'quit-window)
 
-  (noct-handle-popup helpful-mode))
+  (noct-handle-popup-same-window helpful-mode))
 #+end_src
 
 ** Info mode
 #+begin_src emacs-lisp
 (use-package info
+  :ensure nil
   :config
   (general-pushnew (expand-file-name "info" user-emacs-directory)
                    Info-additional-directory-list)
@@ -7116,7 +7186,7 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
   ;;                   nil
   ;;                   nil
   ;;                   #'identity)
-  (general-add-hook 'after-init-hook
+  (general-add-hook 'elpaca-after-init-hook
                     (lambda (&rest _)
                       (when-let ((messages-buffer (get-buffer "*Messages*")))
                         (with-current-buffer messages-buffer
@@ -7325,8 +7395,11 @@ https://orgmode.org/manual/Tag-searches.html#Tag-searches
               ((symbol-function 'delete-other-windows)
                #'ignore))
       (apply fun args)))
-  (general-add-advice 'org-capture
-                      :around #'noct-org-capture-reuse-window-advice)
+  ;; no longer works
+  ;; (general-add-advice 'org-capture
+  ;;                     :around #'noct-org-capture-reuse-window-advice)
+  (noct-handle-popup-same-window (rx "CAPTURE"))
+
   ;; TODO doesn't work?
   (noct-handle-popup (rx "*Org Select*"))
 
@@ -7494,7 +7567,7 @@ If there is already a timestamp, edit it instead of creating a new one."
 *** Tables
 #+begin_src emacs-lisp
 (use-package org-table
-  :straight nil
+  :ensure nil
   ;; always show table headers
   ;; massively slows down scrolling etc in awaken
   ;; :ghook ('org-mode-hook #'org-table-header-line-mode)
@@ -7579,7 +7652,9 @@ Show invisible things when point is on them in org (e.g. links).  I have currenl
 **** Org Block Capf
 Use by typing < then ~complete-symbol~.
 #+begin_src emacs-lisp
-(noct-use org-block-capf
+(noct-use ( :elpaca org-block-capf
+            :host github
+            :repo "xenodium/org-block-capf")
   (gsetq org-block-capf-auto-indent nil)
   (general-add-hook
    'org-mode-hook
@@ -7601,8 +7676,8 @@ Use by typing < then ~complete-symbol~.
 
 **** Org Cv
 #+begin_src emacs-lisp
-(noct-use (:straight org-cv :host gitlab :repo "Titan-C/org-cv")
-  (:require-once "ox" 'ox-moderncv 'ox-altacv 'ox-awesomecv))
+;; (noct-use (:elpaca org-cv :host gitlab :repo "Titan-C/org-cv")
+;;   (:require-once "ox" 'ox-moderncv 'ox-altacv 'ox-awesomecv))
 #+end_src
 
 **** Orglink
@@ -7619,9 +7694,6 @@ Make org links work everywhere.
 **** Org Make ToC
  #+begin_src emacs-lisp
 (use-package org-make-toc
-  :straight (org-make-toc :host github
-                          :repo "noctuid/org-make-toc"
-                          :branch "feature/auto-insert-custom-ids")
   :config (gsetq org-make-toc-insert-custom-ids t))
  #+end_src
 
@@ -7632,6 +7704,7 @@ Make org links work everywhere.
   'org-mode-hook
   ('org-agenda-finalize-hook #'org-modern-agenda)
   :config
+  ;; this is different from `org-hide-heading-stars', which I prefer
   (gsetq org-modern-hide-stars nil
          org-modern-star
          ["●"
@@ -7679,8 +7752,6 @@ Make org links work everywhere.
 **** Org Node
  #+begin_src emacs-lisp
 (use-package org-node
-  :straight (org-node
-             :type git :host github :repo "meedstrom/org-node")
   :general (general-spc
              "RET" #'org-node-find
              "DEL" #'org-node-insert-link)
@@ -7741,14 +7812,14 @@ Matching is done case-insensitively."
 
 **** Org Reveal
 #+begin_src emacs-lisp
-(noct-use org-reveal
+(noct-use ox-reveal
   (:require-once "ox" 'ox-reveal))
 #+end_src
 
 **** Org Superlinks
 #+begin_src emacs-lisp
 (use-package org-super-links
-  :straight
+  :ensure
   (org-super-links :type git
                    :host github
                    :repo "toshism/org-super-links"
@@ -7843,13 +7914,13 @@ Used for =*Warnings*= buffer, for example.
 ** Woman and Man
 #+begin_src emacs-lisp
 (use-package woman
-  :straight nil
+  :ensure nil
   :general (general-s "w" #'woman)
   :init
   (noct-handle-popup woman-mode))
 
 (use-package man
-  :straight nil
+  :ensure nil
   :init
   ;; TODO doesn't work
   (noct-handle-popup-same-window Man-mode)
@@ -7876,6 +7947,7 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 ** TOML Mode
  #+begin_src emacs-lisp
 (use-package toml-ts-mode
+  :ensure nil
   :gfhook #'lsp)
  #+end_src
 
@@ -7886,7 +7958,6 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 ;; really nice apart from this
 ;; https://github.com/raxod502/apheleia/issues/2
 (use-package apheleia
-  :straight (apheleia :host github :repo "raxod502/apheleia")
   :general
   (noct-toggle-map "h" #'apheleia-mode)
   (general-t "=" #'apheleia-format-buffer)
@@ -7937,8 +8008,8 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 ;; /docker:user@container:/path/to/file
 ;; /podman:user@container:/path/to/file
 ;; now builtin
-(use-package tramp-container
-  :straight (:type built-in))
+(noct-use (:no-install tramp-container)
+  (:require-once 'tramp))
 #+end_src
 
 *** Dtrt Indent
@@ -8066,7 +8137,7 @@ If it doesn't have an extension, try to guess one."
 Envrc has a clear advantage over direnv.el in that it sets environment variables buffer-locally.  For nix, I am just using [[https://github.com/nix-community/nix-direnv][nix-direnv]] for persistence.  If performance ever becomes an issue, I will try [[https://github.com/nix-community/lorri][lorri]] (which uses a daemon), but for now it is fine.
  #+begin_src emacs-lisp
 (noct-use (:and (executable-find "direnv")
-                (:straight envrc))
+                (:elpaca envrc))
   (:hooks 'on-first-file-hook #'envrc-global-mode)
   (:mode (rx ".env" string-end) envrc-file-mode)
   (:config
@@ -8101,17 +8172,6 @@ Envrc has a clear advantage over direnv.el in that it sets environment variables
 (use-package makefile-executor
   :general
   (general-t "m" #'makefile-executor-execute-project-target))
-#+end_src
-
-*** TODO Taskrunner
-=helm-make= doesn't work projectwide. Makefile-executor does but is slow. This seems promising, but it doesn't work at all for me.
-#+begin_src emacs-lisp
-;; https://github.com/emacs-taskrunner/ivy-taskrunner/issues/2
-(use-package taskrunner)
-(use-package ivy-taskrunner
-  :straight (ivy-taskrunner
-             :host github
-             :repo "emacs-taskrunner/ivy-taskrunner"))
 #+end_src
 
 *** Semantic
@@ -8168,16 +8228,26 @@ See [[https://github.com/company-mode/company-mode/issues/525][this issue]].
 
 **** Eldoc
 #+begin_src emacs-lisp
-;; deferred incrementally by other packages
-(use-package eldoc
-  :blackout t
-  :config
-  (gsetq eldoc-idle-delay 0.1)
+;; https://github.com/progfolio/elpaca/issues/236
+;; https://github.com/progfolio/elpaca/issues/398
+;; Unload built-in eldoc
+(unload-feature 'eldoc t)
+;; Workaround custom.el initialization for global-eldoc-mode.
+;; Not sure about setting this globally.
+;; Might want to move it into a custom build step which
+;; replaces `elpaca--activate-package` for eldoc.
+(setq custom-delayed-init-variables '())
+(defvar global-eldoc-mode nil)
 
-  (global-eldoc-mode))
+;; deferred incrementally by other packages
+(noct-use eldoc
+  (:blackout)
+  (:config
+    (gsetq eldoc-idle-delay 0.1)
+    (global-eldoc-mode)))
 #+end_src
 
-**** Higlight Numbers
+**** Highlight Numbers
 #+begin_src emacs-lisp
 (use-package highlight-numbers
   :ghook 'prog-mode-hook)
@@ -8324,6 +8394,8 @@ Compared to other flycheck frontends, pos tip is pretty slow and can cause signi
 #+end_src
 
 **** Flycheck Inline
+Will probably remove completely in favor of sideline.
+
 Seems fast but the addition of extra lines is jarring. I've updated the display function to show over the line after the error. It now handles multiple error messages (at the end of the buffer too).
 #+begin_src emacs-lisp
 (defun noct-maybe-flycheck-inline ()
@@ -8332,6 +8404,8 @@ Seems fast but the addition of extra lines is jarring. I've updated the display 
     (flycheck-inline-mode)))
 
 (use-package flycheck-inline
+  ;; having errors on current version
+  :disabled t
   :ghook ('flycheck-mode-hook #'noct-maybe-flycheck-inline)
   :config
   ;; NOTE: unicode prefix makes it shift the line down slightly
@@ -8409,6 +8483,21 @@ Return the displayed phantom."
   )
 #+end_src
 
+**** Flycheck Sideline
+5th flycheck frontend is the charm?
+#+begin_src emacs-lisp
+(noct-use sideline
+  (gsetq sideline-backends-right '(sideline-flycheck))
+  (:hooks 'flycheck-mode-hook)
+  (:hooks 'lsp-mode-hook
+          (noct-defun disable-sideline-flycheck ()
+            (gsetq-local sideline-backends-right
+                         (remove 'sideline-flycheck sideline-backends-right)))))
+
+(noct-use sideline-flycheck
+  (:hooks 'flycheck-mode-hook #'sideline-flycheck-setup))
+#+end_src
+
 **** TODO Flycheck Posframe
 Looks very nice but has various bugs (last character in message sometimes doesn't show, posframe often appears as empty, etc.).
 #+begin_src emacs-lisp
@@ -8417,9 +8506,6 @@ Looks very nice but has various bugs (last character in message sometimes doesn'
   :ghook 'flycheck-mode-hook
   :config (flycheck-posframe-configure-pretty-defaults))
 #+end_src
-
-**** TODO LSP Sideline
-https://github.com/emacs-lsp/lsp-ui/issues/437
 
 *** Xref
 #+begin_src emacs-lisp
@@ -8513,37 +8599,14 @@ NOTE: Have had issues where I've accidentally added a folder (e.g. my home folde
 
 *** LSP Booster
  #+begin_src emacs-lisp
-(noct-use (:and (executable-find "cargo")
-                ;; no elisp code but using straight to clone; hack
-                (:straight emacs-lsp-booster :host github :repo "blahgeek/emacs-lsp-booster"))
-  (let* ((booster-dir (straight--repos-dir "emacs-lsp-booster"))
-         (booster-release-dir (file-name-concat booster-dir "target/release/"))
-         (booster (file-name-concat booster-release-dir "emacs-lsp-booster"))
-         (booster-dest "~/.local/bin/emacs-lsp-booster"))
-    ;; modified from
-    ;; https://github.com/Gavinok/emacs.d/blob/1650fda3bda259579563adf6b7252b45bb605d82/init.el#L2276
-    ;; pushing to exec-path will not work (won't be in exec-path for lsp); move
-    ;; to something already in path instead
-    (unless (file-exists-p booster-dest)
-      (let ((default-directory booster-dir))
-        (message "Building emacs-lsp-booster")
-        (make-process
-         :name "Building emacs-lsp-booster"
-         :buffer "*EMACS-LSP-BOOSTER-BUILD*"
-         :command (list "cargo" "build" "--release")
-         :sentinel
-         `(lambda (process event)
-            ;; TODO switch to using `process-status' instead of `event'
-            (with-current-buffer (process-buffer process)
-              (ansi-color-apply-on-region (point-min) (point-max)))
-            (pcase event
-              ("finished\n"
-               (message "Installed emacs-lsp-booster")
-               ;; allow existing (in case multiple emacs instances start at once)
-               (copy-file ,booster ,booster-dest t))
-              ((or "open from host-name\n" "open\n" "run\n"))
-              (_ (error "Unhandled case %s for event from Building emacs-lsp-booster"))))))))
+(defun noct-try-install-emacs-lsp-booster ()
+  (unless (or (executable-find "emacs-lsp-booster")
+              (not (executable-find "cargo")))
+    (shell-command "cargo install emacs-lsp-booster")))
 
+(noct-try-install-emacs-lsp-booster)
+
+(when (executable-find "emacs-lsp-booster")
   (defun lsp-booster--advice-json-parse (old-fn &rest args)
     "Try to parse bytecode instead of json."
     (or
@@ -8569,11 +8632,14 @@ NOTE: Have had issues where I've accidentally added a folder (e.g. my home folde
                (not (functionp 'json-rpc-connection)) ;; native json-rpc
                (executable-find "emacs-lsp-booster"))
           (progn
+            ;; resolve command from exec-path (in case not found in $PATH)
+            (when-let ((command-from-exec-path (executable-find (car orig-result))))
+              (setcar orig-result command-from-exec-path))
             (message "Using emacs-lsp-booster for %s!" orig-result)
             (cons "emacs-lsp-booster" orig-result))
         orig-result)))
-  (advice-add 'lsp-resolve-final-command
-              :around #'lsp-booster--advice-final-command))
+  (advice-add 'lsp-resolve-final-command :around
+              #'lsp-booster--advice-final-command))
 #+end_src
 
 *** Tree Sitter
@@ -8583,21 +8649,24 @@ Now there are new tree sitter major modes like =python-ts-mode=.  Luckily, =pyth
 
 I am using the =treesit-auto= package to automate the process of installing the grammars and activating the tree sitter major modes when possible.
 #+begin_src emacs-lisp
-(use-package treesit-auto
+(noct-use ( :elpaca treesit-auto
+            :host github
+            :repo "noctuid/treesit-auto"
+            :branch "bind-around-set-auto-mode-0")
   ;; some things that don't work: yasnippet association
-  :demand t
-  :config
-  (gsetq treesit-auto-install 'prompt)
-  ;; use treesitter where possible
-  (global-treesit-auto-mode)
+  (:demand)
+  (:config
+    (gsetq treesit-auto-install 'prompt)
+    ;; use treesitter where possible
+    (global-treesit-auto-mode)
 
-  (defun noct-maybe-enable-bash-ts-mode ()
-    (when (and (eq major-mode 'sh-mode)
-               (eq sh-shell 'bash))
-      (unless (treesit-ready-p 'bash t)
-        (treesit-auto--prompt-to-install-package 'bash))
-      (bash-ts-mode)))
-  (add-hook 'sh-mode-hook #'noct-maybe-enable-bash-ts-mode))
+    (defun noct-maybe-enable-bash-ts-mode ()
+      (when (and (eq major-mode 'sh-mode)
+                 (eq sh-shell 'bash))
+        (unless (treesit-ready-p 'bash t)
+          (treesit-auto--prompt-to-install-package 'bash))
+        (bash-ts-mode)))
+    (general-add-hook 'sh-mode-hook #'noct-maybe-enable-bash-ts-mode)))
 #+end_src
 
 *** Restclient
@@ -8613,14 +8682,13 @@ TODO
 - probably split this section up
 
 #+begin_src emacs-lisp
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(lispy
-     :local-repo "~/src/forks/lispy"
-     :protocol ssh
-     :fork t)))
 ;; TODO why is hydra/lv loaded?! (even if never load lispy)
 (use-package lispy
+  :ensure `(lispy
+            :host github
+            :repo "abo-abo/lispy"
+            ,@(when noct-personal-computer-p
+                (list :repo "~/src/forks/lispy")))
   :defer-incrementally
   (mode-local
    lispy-tags
@@ -8812,12 +8880,12 @@ This ensures that cider's evaluations fringe indicators are up-to-date."
 
 *** Lispyville
 #+begin_src emacs-lisp
-(when noct-personal-computer-p
-  (straight-override-recipe
-   '(lispyville
-     :protocol ssh
-     :local-repo "~/src/emacs/lispyville/")))
 (use-package lispyville
+  :ensure `(lispyville
+            :host github
+            :repo "noctuid/lispyville"
+            ,@(when noct-personal-computer-p
+                (list :repo "~/src/emacs/lispyville/")))
   :ghook 'lispy-mode-hook
   :blackout ((lispyville-mode . (lispyville-mode-line-string " 🍙" " 🍙")))
   :config
@@ -8862,6 +8930,7 @@ For quasi-quoted expressions.
 ** C
 #+begin_src emacs-lisp
 (use-package cc-mode
+  :ensure nil
   :config
   (gsetq-default c-basic-offset 4)
   (setf (alist-get 'other c-default-style) "linux")
@@ -9105,7 +9174,7 @@ TODO look at what provides and bind useful keys; see how find usages compares
 *** Setup
 #+begin_src emacs-lisp
 (use-package elisp-mode
-  :straight (:type built-in)
+  :ensure nil
   :config
   ;; increase docstring fill column
   (gsetq emacs-lisp-docstring-fill-column 80)
@@ -9239,16 +9308,6 @@ Builtin indentation should be better...
 
 (general-add-hook '(find-file-hook emacs-lisp-mode-hook)
                   #'noct-elisp-indent-setup)
-#+end_src
-
-*** Cl-lib Highlight
-Highlight =cl= functions that aren't prefixed with =cl-=.
-#+begin_src emacs-lisp
-(use-package cl-lib-highlight
-  ;; elisp-mode is loaded before emacs-lisp-buffer
-  ;; :after elisp-mode
-  :ghook ('emacs-lisp-mode-hook #'cl-lib-highlight-initialize nil nil t)
-  :config (cl-lib-highlight-warn-cl-initialize))
 #+end_src
 
 *** Highlight Defined
@@ -9426,12 +9485,12 @@ TODO
   ;; it doesn't have autoload cookie
   (:autoload 'hyprlang-ts-mode)
   (:mode "hypr/.*\\.conf\\'")
-  ;; FIXME not work
   (:fhooks (noct-defun noct-hyprlang-setup ()
              (indent-tabs-mode -1)))
-  (general-pushnew
-   '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang")
-   treesit-language-source-alist))
+  (once-with 'treesit
+    (general-pushnew
+     '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang")
+     treesit-language-source-alist)))
 #+end_src
 
 ** JSON
@@ -9442,16 +9501,17 @@ TODO
 
 ** KDL
 #+begin_src emacs-lisp
-(noct-use (:straight kdl-ts-mode :host github :repo "merrickluo/kdl-ts-mode")
-  (general-pushnew
-   '(kdl "https://github.com/tree-sitter-grammars/tree-sitter-kdl")
-   treesit-language-source-alist))
+(noct-use (:elpaca kdl-ts-mode :host github :repo "merrickluo/kdl-ts-mode")
+  (once-with 'treesit
+    (general-pushnew
+     '(kdl "https://github.com/tree-sitter-grammars/tree-sitter-kdl")
+     treesit-language-source-alist)))
 #+end_src
 
 ** Kmonad
 #+begin_src emacs-lisp
 (use-package kbd-mode
-  :straight (kbd-mode :host github :repo "kmonad/kbd-mode")
+  :ensure (:host github :repo "kmonad/kbd-mode")
   :config
   (put 'deflayer 'lisp-indent-function 'defun))
 #+end_src
@@ -9558,7 +9618,6 @@ See ~noct-lsp-pyright~.
 
 (use-package lpy
   :disabled t
-  :straight (lpy :host github :repo "abo-abo/lpy")
   :ghook 'python-base-mode-hook
   :config
   (general-def lpy-mode-map
@@ -9630,17 +9689,6 @@ Better than default LSP equivalent.
   (general-m python-base-mode-map
     "h" #'pydoc-at-point
     "/" #'pydoc))
-#+end_src
-
-*** TODO Pylookup
-Currently requires running =make= for setup and is not on MELPA.
-#+begin_src emacs-lisp
-(use-package pylookup
-  :straight (pylookup :host github :repo "tsgates/pylookup")
-  :general
-  (general-m python-base-mode-map
-    "H" #'pylookup-lookup-at-pount
-    "?" #'pylookup-lookup))
 #+end_src
 
 *** Docstrings
@@ -9829,6 +9877,7 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
     (lsp)))
 
 (use-package sh-script
+  :ensure nil
   :gfhook ('sh-base-mode-hook #'noct-sh-mode-setup)
   :config
   ;; TODO make issues
@@ -9861,9 +9910,8 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
 (use-package txr-mode
   ;; it requires user local file
   :disabled t
-  :straight (txr-mode
-             :host github
-             :repo "piotrklibert/txr-mode"))
+  :ensure ( :host github
+            :repo "piotrklibert/txr-mode"))
 #+end_src
 
 ** Web, JavaScript, TypeScript
@@ -9913,11 +9961,11 @@ TODO
 *** TypeScript
 #+begin_src emacs-lisp
 (use-package typescript-ts-mode
+  :ensure nil
   :gfhook #'lsp)
 
 ;; some extra functionality; main just using for auto-close
 (use-package jtsx
-  :straight (jtsx :host github :repo "llemaitre19/jtsx")
   :mode (("\\.jsx?\\'" . jtsx-jsx-mode)
          ("\\.tsx?\\'" . jtsx-tsx-mode))
   :gfhook
@@ -10110,7 +10158,8 @@ point (in that order)."
 ** Profile Dotemacs
 This is installed here and manually (and temporarily) enabled in my =init.el=.
 #+begin_src emacs-lisp
-(use-package profile-dotemacs)
+(noct-use ( :elpaca profile-dotemacs
+            :host github :repo "raxod502/profile-dotemacs"))
 #+end_src
 
 ** Memory Usage
@@ -10152,7 +10201,7 @@ Like abacus experts, emacs experts continue to leave the mousers in the dust.  B
   (evil-set-initial-state 'calc-mode 'insert))
 
 (use-package calc
-  :straight nil
+  :ensure nil
   :general
   (general-s "k" #'calc)
   :config
@@ -10176,7 +10225,7 @@ TODO ls alternative that does correct sorting
 
 #+begin_src emacs-lisp
 (use-package dired
-  :straight (:type built-in)
+  :ensure nil
   :general ('normal "-" #'dired-jump)
   :gfhook
   ;; automatically refresh
@@ -10330,7 +10379,7 @@ If a region is active, toggle marking all files in the region."
     "m" (noct-dired-alt-file "~/move/")
     "p" (noct-dired-alt-file "~/ag-sys/else/scrawl/prose/pots/")
     "P" (noct-dired-alt-file "~/ag-sys/prog/")
-    "s" (noct-dired-alt-file "~/.emacs.d/straight/")
+    "s" (noct-dired-alt-file "~/.emacs.d/elpaca/")
     "S" (noct-dired-alt-file "~/move/Screenshots/")
     "w" (noct-dired-alt-file "~/wallpaper/")))
 #+end_src
@@ -10578,6 +10627,7 @@ TODO support passing list of marked files as argument instead of opening program
 *** Wdired
 #+begin_src emacs-lisp
 (use-package wdired
+  :ensure nil
   :after dired
   :general ('normal dired-mode-map "w" #'wdired-change-to-wdired-mode)
   :config
@@ -10779,7 +10829,7 @@ Dirvish replaces multiple packages:
   ;; # TODO need to run dired-jump first for subsequent runs to fix this...
   ;; # can run dirvish manually to fix... should work from first launch
   ;; TODO completely messed up first time
-  (general-after-init
+  (noct-elpaca-after-init
     (dirvish)
     (tab-bar-mode))
   (defun noct-goto-dirvish-tab (num)
@@ -10850,6 +10900,7 @@ TODO
 
 #+begin_src emacs-lisp
 (use-package eshell
+  :ensure nil
   :general
   (general-s "e" #'eshell)
   :config
@@ -10869,7 +10920,7 @@ TODO
 
 ;; TODO any point when using eat?
 (use-package stutter
-  :straight (stutter :host github :repo "Stebalien/stutter.el")
+  :ensure (:host github :repo "Stebalien/stutter.el")
   :ghook 'eshell-mode-hook)
 
 (use-package eshell-syntax-highlighting
@@ -10939,23 +10990,48 @@ TODO
     "q" #'quit-window))
  #+end_src
 
-** GPT and AI
-*** Get API Key
+** LLM
+*** Helpers
  #+begin_src emacs-lisp
-(defun noct-get-openai-key ()
+(defmemoize noct-get-openai-key ()
   "Return openapi key."
   (password-store-get-field "openai" "apikey"))
+
+(defmemoize noct-get-openrouter-key ()
+  "Return openapi key."
+  (password-store-get-field "openrouter" "gptel-apikey"))
+
+(defmemoize noct-get-featherless-key ()
+  "Return openapi key."
+  (password-store-get-field "featherless" "gptel-apikey"))
+
+(defconst noct-openrouter-models
+  '(anthropic/claude-sonnet-4
+    openai/gpt-4.1
+    openai/gpt-4o-mini
+    google/gemini-2.5-pro-preview
+    deepseek/deepseek-chat-v3-0324:free
+    deepseek/deepseek-r1-0528:free))
+
+(defconst noct-featherless-models
+  '(deepseek-ai/DeepSeek-V3-0324
+    deepseek-ai/DeepSeek-R1-0528
+    mistralai/Devstral-Small-2505
+    Qwen/Qwen2.5-Coder-32B-Instruct
+    all-hands/openhands-lm-32b-v0.1
+    meta-llama/Llama-3.3-70B-Instruct
+    mistralai/Mistral-Small-3.1-24B-Instruct-2503))
  #+end_src
 
 *** DALL-E
  #+begin_src emacs-lisp
 (use-package openai
-  :straight (openai :host github :repo "emacs-openai/openai")
+  :ensure (:host github :repo "emacs-openai/openai")
   :config
   (setq openai-key (noct-get-openai-key)))
 
 (use-package dall-e
-  :straight (dall-e :host github :repo "emacs-openai/dall-e")
+  :ensure (:host github :repo "emacs-openai/dall-e")
   :config
   (gsetq dall-e-n 3
          dall-e-size "1024x1024")
@@ -10969,7 +11045,6 @@ TODO
 *** Gptel
  #+begin_src emacs-lisp
 (use-package gptel
-  :straight (gptel :host github :repo "karthink/gptel")
   :general
   (general-s
     "RET" #'gptel
@@ -10978,8 +11053,7 @@ TODO
   (general-def 'normal gptel-mode-map "RET" #'gptel-send)
   (general-def 'visual "RET" #'gptel-send)
   :config
-  (gsetq gptel-api-key #'noct-get-openai-key
-         gptel-default-mode 'org-mode
+  (gsetq gptel-default-mode 'org-mode
          gptel-use-header-line nil)
 
   ;; doesn't work? and not good idea if response is too long
@@ -10991,36 +11065,23 @@ TODO
   ;;     (org-end-of-line)))
   ;; (general-add-hook 'gptel-post-response-hook #'dylan-next-org-heading)
 
-  (defun noct-get-openrouter-key ()
-    "Return openapi key."
-    (password-store-get-field "openrouter" "gptel-apikey"))
+  (when noct-personal-computer-p
+    (gptel-make-openai "Openrouter"
+      :host "openrouter.ai"
+      :endpoint "/v1/chat/completions"
+      :stream t
+      :key #'noct-get-openrouter-key
+      :models noct-openrouter-models)
 
-  (defun noct-get-featherless-key ()
-    "Return openapi key."
-    (password-store-get-field "featherless" "gptel-apikey"))
+    (gsetq gptel-backend
+           (gptel-make-openai "Featherless"
+             :host "api.featherless.ai"
+             :endpoint "/v1/chat/completions"
+             :stream t
+             :key #'noct-get-featherless-key
+             :models noct-featherless-models))
 
-  (gptel-make-openai "Openrouter"
-    :host "openrouter.ai"
-    :endpoint "/v1/chat/completions"
-    :stream t
-    :key #'noct-get-openrouter-key
-    :models '(openai/gpt-4o-mini))
-
-  (gsetq gptel-backend
-         (gptel-make-openai "Featherless"
-           :host "api.featherless.ai"
-           :endpoint "/v1/chat/completions"
-           :stream t
-           :key #'noct-get-featherless-key
-           :models '(deepseek-ai/DeepSeek-V3-0324
-                     mistralai/Devstral-Small-2505
-                     Qwen/Qwen2.5-Coder-32B-Instruct
-                     all-hands/openhands-lm-32b-v0.1
-                     meta-llama/Llama-3.3-70B-Instruct
-                     deepseek-ai/DeepSeek-R1
-                     mistralai/Mistral-Small-3.1-24B-Instruct-2503)))
-
-  (gsetq gptel-model 'deepseek-ai/DeepSeek-V3-0324)
+    (gsetq gptel-model (car noct-featherless-models)))
 
   (noct-handle-popup-same-window (rx "*ChatGPT"))
   (noct-handle-popup-same-window (rx "*Openrouter"))
@@ -11031,7 +11092,101 @@ TODO
   (general-m 'normal gptel-mode
     :definer 'minor-mode
     "m" #'gptel-menu))
+
+(noct-use ( :elpaca gptel-quick
+            :host github
+            :repo "karthink/gptel-quick")
+  (gsetq gptel-quick-timeout 20)
+  ;; + - generate longer summary
+  ;; M-RET - switch to chat buffer
+  (general-s "N" #'gptel-quick))
  #+end_src
+
+*** Minuet
+#+begin_src emacs-lisp
+(noct-use minuet
+  (general-s
+    "<C-m>" #'minuet-complete-with-minibuffer)
+  (:config
+    (defun noct-minuet-use-featherless ()
+      (interactive)
+      ;; too slow
+      ;; (plist-put minuet-openai-fim-compatible-options
+      ;;            :model "mistralai/Devstral-Small-2505")
+      ;; (plist-put minuet-openai-fim-compatible-options
+      ;;            :name "Devstral")
+      ;; also slow
+      (plist-put minuet-openai-fim-compatible-options
+                 :model "Qwen/Qwen2.5-Coder-7B-Instruct")
+      (plist-put minuet-openai-fim-compatible-options
+                 :name "Qwen Coder 2.5 7B")
+      (plist-put minuet-openai-fim-compatible-options
+                 :end-point "https://api.featherless.ai/v1/completions")
+      (plist-put minuet-openai-fim-compatible-options
+                 :api-key #'noct-get-featherless-key))
+
+    ;; slower even with small model
+    (defun noct-minuet-use-local ()
+      (plist-put minuet-openai-fim-compatible-options
+                 ;; :model "koboldcpp/qwen2.5-coder-7b-instruct-q5_k_m"
+                 :model "koboldcpp/qwen2.5-coder-1.5b-instruct-q5_k_m")
+      (plist-put minuet-openai-fim-compatible-options
+                 :name "Qwen")
+      (plist-put minuet-openai-fim-compatible-options
+                 :end-point "https://localhost:5001/v1/completions"))
+
+    (defun noct-minuet-use-openrouter ()
+      (plist-put minuet-openai-fim-compatible-options
+                 :model "mistralai/codestral-2501")
+      (plist-put minuet-openai-fim-compatible-options
+                 :name "Codestral")
+      (plist-put minuet-openai-fim-compatible-options
+                 :end-point "https://openrouter.ai/api/v1/completions")
+      (plist-put minuet-openai-fim-compatible-options
+                 :api-key #'noct-get-openrouter-key))
+
+    (noct-minuet-use-openrouter)))
+#+end_src
+
+*** Aider
+#+begin_src emacs-lisp
+(defun noct-try-install-aider ()
+  (unless (or (executable-find "aider")
+              (not (executable-find "uv")))
+    (shell-command (concat "uv tool install --force --python python3.12 "
+                           "--with pip aider-chat@latest"))))
+
+(noct-try-install-aider)
+
+(noct-use aidermacs
+  (gsetq aidermacs-default-model "openai/deepseek-ai/DeepSeek-V3-0324"
+         ;; no ediff
+         aidermacs-show-diff-after-change nil)
+  ;; (setq aidermacs-backend 'vterm)
+  (setenv "AIDER_MODEL" "openai/deepseek-ai/DeepSeek-V3-0324")
+  (setenv "AIDER_OPENAI_API_BASE" "https://api.featherless.ai/v1")
+
+  (noct-handle-popup-same-window (rx "*aidermacs"))
+
+  (general-add-hook
+   'aidermacs-before-run-backend-hook
+   (noct-defun aidermacs-setup ()
+     (setenv "AIDER_OPENAI_API_KEY" (noct-get-featherless-key))))
+
+  ;; this is easier with aider.el
+  (defun noct-change-default-aidermacs-model ()
+    (interactive)
+    (let ((model (completing-read "Model: " noct-featherless-models)))
+      (gsetq aidermacs-default-model (format "openai/%s" model))))
+
+  (general-def '(normal insert)
+    :prefix "C-c"
+    "a" #'aidermacs-transient-menu
+    "o" #'noct-change-default-aidermacs-model)
+
+  (general-m aidermacs-comint-mode-map
+    "m" #'aidermacs-transient-menu))
+#+end_src
 
 *** Chatgpt Shell
 #+begin_src emacs-lisp
@@ -11132,6 +11287,7 @@ Liked songs is not a playlist.
   (proced-toggle-auto-update t))
 
 (use-package proced
+  :ensure nil
   ;; [h]top replacement
   ;; have bound globally to modifier + p which makes more sense
   :general (general-s "h" #'proced)
@@ -11260,9 +11416,6 @@ It might be cool to eventually replace a dedicated terminal emulator with vterm.
     (vterm)))
 
 (use-package vterm-toggle
-  :straight (vterm-toggle
-             :host github
-             :repo "jixiuf/vterm-toggle")
   :general
   ('normal 'override "T" #'vterm-toggle-cd)
   :init
