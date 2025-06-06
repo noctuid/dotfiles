@@ -7,7 +7,7 @@
 # I'm using ~org-sort-entries~ (with =a=) for sorting many subheadings.  In others, I'm grouping related subheadings.
 
 #+begin_quote
-He could code anything--but life is short, and most significant systems were terribly large.   So Pham learned to hack about with the leviathans of the past.
+He could code anything--but life is short, and most significant systems were terribly large.  So Pham learned to hack about with the leviathans of the past.
 #+end_quote
 
 * Initial Notes
@@ -609,6 +609,13 @@ In the =:config= section, I generally put settings (~setq~ then any face configu
   (when-let ((emacs-date (noct-get-nix-emacs-date)))
     (setq elpaca-core-date (list emacs-date))))
 
+;; NOTE: this is intentionally different from where `noct-elpaca-lock' writes to
+(defconst noct-elpaca-lock-file
+  (expand-file-name "elpaca-lock" user-emacs-directory))
+
+(when (file-exists-p noct-elpaca-lock-file)
+  (setq elpaca-lock-file noct-elpaca-lock-file))
+
 (defvar elpaca-installer-version 0.11)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -756,6 +763,12 @@ Principles:
   :states '(normal visual)
   :keymaps 'override
   :prefix "SPC")
+
+(general-create-definer general-cc
+  :states '(normal insert)
+  ;; don’t want prefix in e.g. vterm insert
+  ;; :keymaps 'override
+  :prefix "C-c")
 
 (general-create-definer general-t
   :states 'normal
@@ -1460,6 +1473,8 @@ in `evil-repeat-info' and clear variables."
   ;; try for session
   "u" #'elpaca-try
   "p" #'elpaca-update
+  ;; update recipe repositories equivalent
+  "P" #'elpaca-update-menus
   "a" #'elpaca-update-all
   "r" #'elpaca-rebuild
   "v" #'elpaca-visit
@@ -1575,9 +1590,10 @@ This should be run in a graphical frame."
 
 ** General Keybindings
 #+begin_src emacs-lisp
-;; allow binding <C-i> differntly from tab
-(general-def input-decode-map "C-i" [C-i])
-(general-def input-decode-map "C-m" [C-m])
+;; allow binding <C-i> differently from tab
+(general-def input-decode-map
+  "C-i" [C-i]
+  "C-m" [C-m])
 
 ;; worse keybinding but sometimes I use on OSX
 (general-def "C-v" #'yank)
@@ -2477,6 +2493,7 @@ See `tablist-put-mark' for how entries are marked."
 *** Setup
 #+begin_src emacs-lisp
 (use-package company
+  :disabled t
   :ghook
   ('comint-mode-hook (noct-disable company-mode))
   ('eshell-mode-hook (noct-disable company-mode))
@@ -2632,100 +2649,109 @@ Looks nice and replaces =company-quickhelp= as well. The default company fronten
 
 ** Corfu
 #+begin_src emacs-lisp
-(use-package corfu
-  ;; to get extensions
-  :ensure (:files (:defaults "extensions/*.el"))
-  :ghook
-  ;; for shell also
-  'comint-mode-hook
-  'eshell-mode-hook
-  ('minibuffer-setup-hook
-   (noct-defun corfu-enable-in-minibuffer ()
-     "Enable corfu in the minibuffer if `completion-at-point' is bound."
-     (when (where-is-internal #'completion-at-point (list (current-local-map)))
-       (corfu-mode))))
-  :init
-  ;; (noct-post-insert-and-writable
-  ;;   (global-corfu-mode))
-  ;; need different key
+(noct-use corfu-prescient
+  (:require-once "corfu")
+  (:config
+    (opt corfu-prescient-enable-filtering nil)
+    (corfu-prescient-mode)))
+
+(noct-use ( :elpaca corfu
+            ;; include extensions
+            :files (:defaults "extensions/*.el"))
+  (noct-post-insert-and-writable
+    (global-corfu-mode))
   (general-def noct-toggle-map "F" #'corfu-mode)
-  :config
-  (gsetq corfu-auto t
-         corfu-auto-delay 0.15
-         corfu-auto-prefix 1)
+  (:config
+    (gsetq global-corfu-minibuffer
+           (lambda ()
+             (and (not (or (bound-and-true-p mct--active)
+                           (bound-and-true-p vertico--input)
+                           (eq (current-local-map) read-passwd-map)))
+                  (where-is-internal #'completion-at-point
+                                     (list (current-local-map))))))
+    (gsetq corfu-auto t
+           corfu-auto-delay 0.15
+           corfu-auto-prefix 1
+           corfu-bar-width 0.3)
 
-  (general-def corfu-map
-    ;; explicit selection only for now
-    "RET" nil
-    "<down>" nil
-    "<up>" nil)
+    (defun corfu-move-to-minibuffer ()
+      (interactive)
+      (pcase completion-in-region--data
+        (`(,beg ,end ,table ,pred ,extras)
+         (let ((completion-extra-properties extras)
+               completion-cycle-threshold completion-cycling)
+           (consult-completion-in-region beg end table pred)))))
+    (add-to-list 'corfu-continue-commands #'corfu-move-to-minibuffer)
 
-  (corfu-indexed-mode)
-  (set-face-attribute 'corfu-indexed nil :height 1.0)
+    (general-def corfu-map
+      "M-SPC" #'corfu-insert-separator
+      ;; explicit selection only for now
+      "RET" nil
+      "<down>" nil
+      "<up>" nil)
+    ;; to override vertico C-m mapping
+    (general-def 'insert corfu-map "<C-M>" #'corfu-move-to-minibuffer)
 
-  (defmacro noct-generate-corfu-select-index (index)
-    "Return a named function to run `corfu-complete' for INDEX"
-    `(noct-defun ,(intern (format "noct-corfu-complete-%s" index)) ()
-       ,(format "Call `corfu-complete' for index %s." index)
-       (interactive)
-       (let ((corfu--index ,index))
-         (corfu-complete))))
+    ;; doesn't have a `company-quick-access-keys' equivalent
+    (corfu-indexed-mode)
+    (gsetq corfu-indexed-start 1)
 
-  (general-def corfu-map
-    "M-a" (noct-generate-corfu-select-index 0)
-    "M-r" (noct-generate-corfu-select-index 1)
-    "M-s" (noct-generate-corfu-select-index 2)
-    "M-t" (noct-generate-corfu-select-index 3)
-    "M-d" (noct-generate-corfu-select-index 4)
-    "M-h" (noct-generate-corfu-select-index 5)
-    "M-n" (noct-generate-corfu-select-index 6)
-    "M-e" (noct-generate-corfu-select-index 7)
-    "M-i" (noct-generate-corfu-select-index 8)
-    "M-o" (noct-generate-corfu-select-index 9))
+    (set-face-attribute 'corfu-indexed nil :height 1.0)
+    (when (bound-and-true-p ewal-base-palette)
+      (set-face-attribute 'corfu-indexed nil :background
+                          (ewal-get-color 'background))
+      (set-face-attribute 'corfu-indexed nil :foreground
+                          (ewal-get-color 'blue))
+      (set-face-attribute 'corfu-border nil :background
+                          (ewal-get-color 'yellow))
+      (set-face-attribute 'corfu-bar nil :background
+                          (ewal-get-color 'cursor)))
 
-  ;; don't require multiple escape presses to exit minibuffer
-  (general-def :keymaps noct-minibuffer-maps
-    "<escape>" (noct-defun corfu-quit-minibuffer ()
-                 "`escape-quit-minibuffer' but quit corfu if active."
-                 (interactive)
-                 (when (and (boundp 'corfu--frame)
-                            (frame-live-p corfu--frame))
-                   (corfu-quit))
-                 (keyboard-escape-quit)))
+    (defmacro noct-generate-corfu-select-index (index)
+      "Return a named function to run `corfu-complete' for INDEX"
+      `(noct-defun ,(intern (format "noct-corfu-complete-%s" index)) ()
+         ,(format "Call `corfu-complete' for index %s." index)
+         (interactive)
+         (let ((corfu--index ,index))
+           (corfu-complete))))
 
-  ;; sort by recency (but not frecency)
-  (corfu-history-mode)
-  (general-with 'savehist
-    (general-pushnew 'corfu-history savehist-additional-variables))
+    (general-def corfu-map
+      "M-a" (noct-generate-corfu-select-index 0)
+      "M-r" (noct-generate-corfu-select-index 1)
+      "M-s" (noct-generate-corfu-select-index 2)
+      "M-t" (noct-generate-corfu-select-index 3)
+      "M-d" (noct-generate-corfu-select-index 4)
+      "M-h" (noct-generate-corfu-select-index 5)
+      "M-n" (noct-generate-corfu-select-index 6)
+      "M-e" (noct-generate-corfu-select-index 7)
+      "M-i" (noct-generate-corfu-select-index 8)
+      "M-o" (noct-generate-corfu-select-index 9))
 
-  ;; don't do this... some how deletes buffer contents first time
-  (general-add-hook 'evil-normal-state-entry-hook
-                    (defun noct-maybe-corfu-quit ()
-                      ;; check necessary... or entire buffer contents will be
-                      ;; deleted first time enter minibuffer
-                      (when (bound-and-true-p corfu--candidates)
-                        (corfu-quit)))))
+    ;; don't require multiple escape presses to exit minibuffer
+    (general-def :keymaps noct-minibuffer-maps
+      "<escape>" (noct-defun corfu-quit-minibuffer ()
+                   "`escape-quit-minibuffer' but quit corfu if active."
+                   (interactive)
+                   (when (and (boundp 'corfu--frame)
+                              (frame-live-p corfu--frame))
+                     (corfu-quit))
+                   (keyboard-escape-quit)))
 
-;; TODO merged into main as corfu-popupinfo
-;; looks cool but not that useful; don't normally need docs during completion;
-;; more distracting than beneficial
-(use-package corfu-doc
-  :disabled t
-  :ghook 'corfu-mode-hook
-  :config
-  ;; increase delay
-  (gsetq corfu-doc-delay 0.2))
+    ;; sort by recency (but not frecency)
+    (corfu-history-mode)
+    (general-with 'savehist
+      (general-pushnew 'corfu-history savehist-additional-variables))
 
-;; TODO way too big on one computer
-(use-package kind-icon
-  :disabled t
-  :after corfu
-  :demand t
-  :config
-  ;; to compute blended backgrounds correctly
-  (gsetq kind-icon-default-face 'corfu-default)
+    ;; looks cool but not that useful; don't normally need docs during completion;
+    ;; potentially more distracting than beneficial, but the default delay makes
+    ;; it not an issue
+    (general-add-hook 'corfu-mode-hook #'corfu-popupinfo-mode)))
 
-  (general-pushnew #'kind-icon-margin-formatter corfu-margin-formatters))
+(noct-use kind-icon
+  (:require-once "corfu")
+  (:config
+    (gsetq kind-icon-default-face 'corfu-default)
+    (general-pushnew #'kind-icon-margin-formatter corfu-margin-formatters)))
 #+end_src
 
 ** Pcompl Args
@@ -2779,15 +2805,6 @@ TODO add cape-history
   :init
   ;; (general-pushnew #'cape-file completion-at-point-functions)
   ;; (general-pushnew #'cape-dabbrev completion-at-point-functions)
-
-  ;; https://github.com/minad/corfu#completing-with-corfu-in-the-minibuffer
-  ;; Silence the pcomplete capf, no errors or messages!
-  (general-add-advice 'pcomplete-completions-at-point
-                      :around #'cape-wrap-silent)
-  ;; Ensure that pcomplete does not write to the buffer
-  ;; and behaves as a pure `completion-at-point-function'.
-  (general-advice-add 'pcomplete-completions-at-point
-                      :around #'cape-wrap-purify)
 
   ;; company adapter examples
   ;; (setq-local completion-at-point-functions
@@ -3223,11 +3240,6 @@ This is a really basic ~counsel-buku~. =buku_run= has various issues for me. I m
               :caller 'counsel-buku)))
 #+end_src
 
-** Manual Completion
-#+begin_src emacs-lisp
-(general-def 'insert "<C-i>" #'complete-symbol)
-#+end_src
-
 ** Orderless
 One notable difference between using orderless (or prescient) and some older fuzzy matchers/plugins is that space does not act as =.*=.  Spaces (by default) separate components, all of which must match.  You can still use space the same way as before (type different parts of a file path separated by space, for example), but now order does not matter.  This allows you to refine your query as needed without having to delete and re-enter a more specific query.
 
@@ -3526,6 +3538,12 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
          vertico-scroll-margin 0
          vertico-cycle t)
 
+    (defun noct-consult-complete-symbol ()
+      (interactive)
+      (let ((completion-in-region-function #'consult-completion-in-region))
+        (call-interactively #'complete-symbol)))
+    (general-def 'insert "<C-m>" #'noct-consult-complete-symbol)
+
     (general-def 'normal "?" #'vertico-repeat)
 
     (general-add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
@@ -3699,18 +3717,22 @@ This only works with orderless and for the first component of the search."
 
 ** Embark
 #+begin_src emacs-lisp
+;; TODO bind q quit
+;; already has toggle quit
+;; embark-general-map
 (use-package embark
   :general
-  (:keymaps noct-minibuffer-maps
-   "M-x" #'embark-export
-   "M-c" #'embark-act
-   "C-l" #'embark-become)
+  ( :keymaps noct-minibuffer-maps
+    "M-x" #'embark-export
+    "M-c" #'embark-act
+    "C-l" #'embark-become)
+  ('(normal insert) "M-c" #'embark-act)
   :config
   ;; after prefix, press `C-h' to get completing read interface for keybindings
   ;; for that prefix
   (gsetq prefix-help-command #'embark-prefix-help-command)
 
-  (gsetq embark-cycle-key (kbd "C-n"))
+  (gsetq embark-cycle-key "C-n")
 
   (general-def embark-general-map "y" #'kill-new)
 
@@ -3735,9 +3757,13 @@ This only works with orderless and for the first component of the search."
     ;; so detected
     "b" #'consult-buffer)
 
+  (general-def embark-become-match-map
+    "r" #'consult-ripgrep)
 
-  ;; FXIME
-  (noct-handle-popup-same-window (rx "*Embark Actions*"))
+  ;; FIXME
+  (noct-handle-popup-same-window (rx
+                                  (0+ any)
+                                  "*Embark Actions*"))
   ;; automatically show available actions with which-key
   ;; (general-after 'which-key
   ;;   (gsetq embark-action-indicator
@@ -3748,14 +3774,13 @@ This only works with orderless and for the first component of the search."
 
   (noct-handle-popup-same-window (rx "*Embark")))
 
+
 ;; required to use embark and consult
-(use-package embark-consult
-  :after (embark consult)
-  :demand t
+;; embark automatically loads
+(noct-use embark-consult
   ;; if you want to have consult previews as you move around an
   ;; auto-updating embark collect buffer
-  :ghook
-  ('embark-collect-mode-hook #'embark-consult-preview-minor-mode))
+  (:hooks 'embark-collect-mode-hook #'consult-preview-at-point-mode))
 #+end_src
 
 ** Marginalia
@@ -3882,6 +3907,15 @@ Globbing is used to find a matching file."
 *** General Quickmarks
 #+begin_src emacs-lisp
 (defun noct-bind-general-quickmarks (&rest _)
+  (defun noct-org-jump-to-datetree-today-smart (&optional file-path)
+    "Jump to today's heading or to FILE-PATH if it is not the current buffer."
+    (interactive)
+    (let ((target-file
+           (or file-path (expand-file-name "~/ag-sys/notes/journal.org"))))
+      (if (string= (buffer-file-name) target-file)
+          (org-datetree-find-date-create (calendar-current-date))
+        (find-file target-file))))
+
   (general-comma
     "a" (noct-find-file "~/ag-sys/else/arch_and_program_info.org")
     "A" (noct-find-file "~/ag-sys/else/accts.org.gpg")
@@ -3896,7 +3930,7 @@ Globbing is used to find a matching file."
     "C-h" (noct-find-file "~/ag-sys/notes/medical_history.org")
     "i" (noct-find-file "~/ag-sys/else/interaction.org")
     "I" (noct-find-file "~/ag-sys/else/scrawl/prose/general/ideas.org")
-    "j" (noct-find-file "~/ag-sys/notes/journal.org")
+    "j" #'noct-org-jump-to-datetree-today-smart
     "J" (noct-find-file "~/ag-sys/else/japanese/japanese.org")
     ;; pretty useful log file since most programs are started from sxhkd
     "K" (noct-defun noct-find-sxhkd-log ()
@@ -4055,6 +4089,12 @@ Globbing is used to find a matching file."
 
 (tab-bar-mode)
 (tab-bar-history-mode)
+
+;; don't allow tab cycling only jumping to specific tab
+(general-def tab-bar-mode-map
+  "C-<tab>" nil
+  "C-S-<tab>" nil
+  "C-S-<iso-lefttab>" nil)
 
 (general-def '(insert normal)
   "C-l" #'tab-bar-history-back
@@ -4408,7 +4448,10 @@ Useful if constantly switching between only a few files in a project. I don't no
            ("o" . outli-insert-heading-respect-content)
            ("v" . outline-mark-subtree)
            ("?" . outli-speed-command-help)))
-  (:hooks '(prog-mode-hook text-mode-hook)))
+  (:hooks '(prog-mode-hook text-mode-hook))
+  (:config
+    (general-def '(outline-mode-map outli-mode-map)
+      "<backtab>" nil)))
 #+end_src
 
 ** Projectile
@@ -4417,6 +4460,8 @@ Alternatively, there is the builtin ~project-find-file~, [[https://github.com/te
 #+begin_src emacs-lisp
 (noct-use projectile
   (:blackout)
+  (autoload 'noct-switch-to-project-root "projectile")
+  (autoload 'noct-projectile-switch-and-vc "projectile")
   (general-spc
     "p" #'projectile-find-file
     "P" #'projectile-find-file-in-known-projects
@@ -6226,9 +6271,11 @@ Diff-hl also has a dired mode that seems to be faster than dired k.
   (general-spc
     "." #'magit-find-git-config-file
     "G" #'magit-find-file)
-  (general-def 'normal "ga" #'magit-file-stage)
+  (general-def 'normal
+    :prefix "g"
+    "a" #'magit-file-stage
+    "b" #'magit-blame)
   (general-t
-    ;; "ga" #'magit-file-stage
     "gr" #'magit-rebase-interactive
     "gl" #'magit-log-all
     "gL" #'magit-log-buffer-file
@@ -6236,8 +6283,7 @@ Diff-hl also has a dired mode that seems to be faster than dired k.
     "gg" #'magit-clone
     "gp" #'magit-push
     ;; "gf" #'magit-file-dispatch
-    "gf" #'magit-pull
-    "gb" #'magit-blame)
+    "gf" #'magit-pull)
   :config
   (gsetq magit-diff-refine-hunk t
          magit-display-buffer-function #'display-buffer
@@ -6438,6 +6484,8 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
 
   (general-def 'normal magit-blame-mode
     :definer 'minor-mode
+    ;; SPC G for `magit-find-file' to find files at revision
+    "b" #'magit-blame
     "q" #'magit-blame-quit
     "E" #'magit-blame-previous-chunk
     "N" #'magit-blame-next-chunk
@@ -6904,27 +6952,33 @@ Jinx similar to spell-fu, but is using enchant.  It gives a lot fewer false posi
 (setup jinx
   (noct-after-buffer (global-jinx-mode))
   (:config
+    (defun noct-jinx-overlay-p (overlay)
+      (eq (overlay-get overlay 'category) 'jinx-overlay))
+
     (defun noct-avy-jinx-correct ()
       (interactive)
-      (let (positions
-            prev-pos
-            (win-end (window-end))
-            (avy-action (lambda (pos)
-                          (goto-char pos)
-                          (jinx-correct-nearest))))
-        (save-excursion
-          (goto-char (window-start))
-          (setq prev-pos (point))
-          (while (progn
-                   (ignore-errors (jinx-next 1))
-                   (and (> (point) prev-pos)
-                        (<= (point) win-end)))
+      (if (cl-some #'noct-jinx-overlay-p (overlays-at (point)))
+          (jinx-correct-nearest)
+        (let (positions
+              prev-pos
+              (win-end (window-end))
+              (avy-action (lambda (pos)
+                            (goto-char pos)
+                            (jinx-correct-nearest))))
+          (save-excursion
+            (goto-char (window-start))
             (setq prev-pos (point))
-            (push (point) positions)))
-        (when positions
-          (avy-process positions))))
+            (while (progn
+                     (ignore-errors (jinx-next 1))
+                     (and (> (point) prev-pos)
+                          (<= (point) win-end)))
+              (setq prev-pos (point))
+              (when-let ((jinx-overlay (cl-find-if #'noct-jinx-overlay-p
+                                                   (overlays-at (1- (point))))))
+                (push (overlay-start jinx-overlay) positions))))
+          (when positions
+            (avy-process positions)))))
     (general-r "s" #'noct-avy-jinx-correct)))
-
  #+end_src
 
 *** Spell Fu
@@ -7318,7 +7372,17 @@ All of my org config is in unclean.org.  I will gradually move it here.
     (interactive)
     (if (invisible-p (point))
         (org-reveal)
-      (evil-toggle-fold)))
+      ;; TODO there some issue where `org-folded-p' result can be wrong
+      ;; see `outline-toggle-children@fix-for-org-fold'
+      ;; (evil-toggle-fold)
+      (if (save-excursion
+            (unless (org-at-heading-p)
+              (org-back-to-heading))
+            (invisible-p (line-end-position)))
+          (evil-open-fold)
+        ;; workaround... doesn't hide immediately unless move point out of tree
+        (org-back-to-heading)
+        (org-fold-hide-subtree))))
 
   (general-def 'normal org-mode-map
     "H" #'noct-beginning-of-visible-heading
@@ -7601,6 +7665,8 @@ If there is already a timestamp, edit it instead of creating a new one."
 
   ;; don't indent my source blocks
   (gsetq org-src-preserve-indentation t
+         ;; just switch to the existing buffer
+         org-src-ask-before-returning-to-edit-buffer nil
          org-edit-src-content-indentation 0
          org-edit-src-auto-save-idle-delay auto-save-timeout)
 
@@ -7670,8 +7736,7 @@ Use by typing < then ~complete-symbol~.
                           (&rest _)
                         (when (noct-blog-dir-p buffer-file-name)
                           (org-hugo-auto-export-mode))))
-  (:require-once "ox" 'ox-hugo))
-
+  (:require-once "ox"))
 #+end_src
 
 **** Org Cv
@@ -7813,7 +7878,7 @@ Matching is done case-insensitively."
 **** Org Reveal
 #+begin_src emacs-lisp
 (noct-use ox-reveal
-  (:require-once "ox" 'ox-reveal))
+  (:require-once "ox"))
 #+end_src
 
 **** Org Superlinks
@@ -7832,6 +7897,116 @@ Matching is done case-insensitively."
     (general-advice-add 'org-capture
                         :before #'org-super-links-store-link)
     (general-m org-mode-map "p" #'org-super-links-insert-link)))
+#+end_src
+
+**** Worf
+Worf mode has nice things over speed commands like being able to prefix directional commands with numbers and having sticky commands.
+
+I don't use it so often for basic commands, but it's good if you actually want to do a bunch of stuff in an "org command mode" (e.g. repeatedly moving through headings and reading, e.g. emacs news).
+
+#+begin_src emacs-lisp
+(noct-use ( :elpaca worf
+            :repo "noctuid/worf"
+            :branch "require-hydra")
+  (:hooks 'org-mode-hook)
+  (gsetq org-use-speed-commands nil)
+  (:config
+    (general-def worf-mode-map
+      "[" nil
+      "]" nil
+      "DEL" nil)
+
+    (defun noct-worf-open-below ()
+      "Open a new org heading below the point and move to it, exiting special.
+Add a newline before the heading."
+      (interactive)
+      (worf-add 1)
+      (unless (save-excursion
+                (forward-line -1)
+                (looking-at (rx bol eol)))
+        (save-excursion
+          (end-of-line 0)
+          (evil-open-fold)
+          (open-line 1))))
+
+    (defun noct-heading-end ()
+      "Go to the end of the current heading.
+Normalize whitespace between previous text and following heading (one blank
+line)."
+      (interactive)
+      ;; goes to buffer end if no more headings
+      (outline-next-heading)
+      (while (progn
+               (forward-line -1)
+               (looking-at (rx bol eol))))
+      (delete-blank-lines)
+      (end-of-line)
+      (open-line 1)
+      (forward-line 1))
+
+    (defun noct-worf-toggle ()
+      (interactive)
+      (if (org-at-heading-p)
+          (evil-toggle-fold)
+        (org-cycle)))
+
+    (general-def worf-mode-map
+      :definer 'worf
+      ;; worf definer doesn't support menu items!
+      ;; "TAB" (list #'evil-toggle-fold :predicate #'org-at-heading-p)
+      ;; "TAB" (general-predicate-dispatch #'org-cycle
+      ;;         (org-at-heading-p) #'evil-toggle-fold)
+      "TAB" #'noct-worf-toggle
+      "e" #'worf-up
+      "n" #'worf-down
+      "N" #'org-metadown
+      "E" #'org-metaup
+      "i" #'worf-right
+      "I" (list #'noct-heading-end :worf-plist '(:break t))
+      "l" #'better-jumper-jump-backward
+      "L" #'better-jumper-jump-forward
+      ;; worf's ct randomly has extra empty window open up?
+      ";" #'org-set-tags-command
+      "q" #'org-clock-cancel
+      "'" #'org-edit-special
+      "t" #'worf-todo
+      "d" (list #'org-deadline :worf-plist '(:break t))
+      ;; just use refile instead of worf hydra
+      "r" #'org-refile
+      "w" #'org-narrow-to-subtree    ; lose `worf-keyword'
+      "W" #'widen
+      ;; no reason to use over `worf-todo' for me (which is bound to t)
+      ;; "k" #'worf-keyword
+      "a" (list #'end-of-visual-line :worf-plist '(:break t)) ; lose `worf-add'
+      ;; lose `worf-ace-link' (don't use)
+      "o" (list #'noct-worf-open-below :worf-plist '(:break t))
+      "O" (list #'org-meta-return :worf-plist '(:break t))
+      ;; will generate an id in a properties section for the current header
+      ;; and copy an org link to it to the kill ring
+      "Y" #'worf-copy-heading-id
+      ;; shift heading and all subheadings
+      "<" #'org-shiftmetaleft
+      ">" #'org-shiftmetaright
+      "/" #'org-sparse-tree)
+
+    (defun noct-open-heading-and-parents (&rest _)
+      "Open heading and all its parents."
+      (save-excursion
+        (outline-show-children)
+        (while (ignore-errors (outline-up-heading 1 t))
+          (outline-show-children))))
+
+    (general-add-advice '(consult-org-heading consult-outline) :after
+                        #'noct-open-heading-and-parents)))
+
+;; ct notes:
+;; - tags a-z for quick adding
+;; - q to quit without changing if not assigned to a tag
+;; - tab for a tag not predefined
+;; - ret to accept modified set
+;; - spc to clear all tags for line
+;; - autoexit after first change - org-fast-tag-selection-single-key
+;; - remap c-c to toggle this behaviour
 #+end_src
 
 ** Pentadactyl
@@ -8009,7 +8184,7 @@ I'm not really using xmodmap files anymore. Config taken from [[https://www.emac
 ;; /podman:user@container:/path/to/file
 ;; now builtin
 (noct-use (:no-install tramp-container)
-  (:require-once 'tramp))
+  (:require-once "tramp"))
 #+end_src
 
 *** Dtrt Indent
@@ -8116,6 +8291,7 @@ If it doesn't have an extension, try to guess one."
                          (concat "." ext)
                        "")))))
       (apply orig-fn args)))
+  ;; NOTE: this was causing problems
   ;; (general-add-advice '(
   ;;                       ;; editorconfig-get-properties
   ;;                       ;; editorconfig-core-get-properties
@@ -9571,9 +9747,7 @@ TODO:
 #+end_src
 
 *** Ruff LSP
-[[https://github.com/charliermarsh/ruff][Ruff]] does not replace these (see [[https://beta.ruff.rs/docs/faq/][the FAQ]]):
-- [[https://github.com/psf/black][black]] (is compatible with though)
-- [[https://github.com/python/mypy][mypy]] (ruff is a linter not a type checker)
+[[https://github.com/charliermarsh/ruff][Ruff]] does replace black now.  It is not a type checker (using with pyright, not mypy anymore).
 
 Ruff does not replaces these (at least not as of [2023-03-08 Wed]):
 - [[https://github.com/PyCQA/pylint][pylint]] (see [[https://github.com/charliermarsh/ruff/issues/970][issue 970]])
@@ -9980,7 +10154,7 @@ May need to manually ~lsp-install-server~ first.
   (gsetq lsp-tailwindcss-add-on-mode t
          lsp-tailwindcss-major-modes
          '(typescript-ts-mode jtsx-jsx-mode jtsx-tsx-mode))
-  (:require-once 'lsp-mode))
+  (:require-once "lsp-mode"))
  #+end_src
 
 * Miscellaneous
@@ -10733,7 +10907,7 @@ Dirvish replaces multiple packages:
   ;;            (display-line-numbers-mode -1)
   ;;            (gsetq-local mode-line-format nil
   ;;                         truncate-lines t)))
-  (:require-once 'dired)
+  (:require-once "dired")
   (:config
     (require 'dirvish-extras)
 
@@ -11050,11 +11224,13 @@ TODO
     "RET" #'gptel
     "C-<return>" #'gptel-send
     "S-<return>" #'gptel-rewrite)
+  (general-cc "g" #'gptel-meneu)
   (general-def 'normal gptel-mode-map "RET" #'gptel-send)
   (general-def 'visual "RET" #'gptel-send)
   :config
   (gsetq gptel-default-mode 'org-mode
-         gptel-use-header-line nil)
+         gptel-use-header-line nil
+         gptel-expert-commands t)
 
   ;; doesn't work? and not good idea if response is too long
   ;; (defun dylan-next-org-heading ()
@@ -11068,7 +11244,7 @@ TODO
   (when noct-personal-computer-p
     (gptel-make-openai "Openrouter"
       :host "openrouter.ai"
-      :endpoint "/v1/chat/completions"
+      :endpoint "/api/v1/chat/completions"
       :stream t
       :key #'noct-get-openrouter-key
       :models noct-openrouter-models)
@@ -11088,6 +11264,7 @@ TODO
   (noct-handle-popup-same-window (rx "*Featherless"))
   ;; for rewrite diff
   (noct-handle-popup-same-window (rx "*Diff"))
+  (noct-handle-popup-same-window (rx "*gptel-query*"))
 
   (general-m 'normal gptel-mode
     :definer 'minor-mode
@@ -11101,6 +11278,28 @@ TODO
   ;; M-RET - switch to chat buffer
   (general-s "N" #'gptel-quick))
  #+end_src
+
+*** MCP
+#+begin_src emacs-lisp
+;; https://github.com/lizqwerscott/mcp.el
+(noct-use mcp
+  (general-cc
+    "m" #'mcp-hub)
+  (:require-once "gptel")
+  (:config
+    (gsetq mcp-hub-servers
+           '(("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
+             ("playwright" . ( :command "npx"
+                               :args ("--yes" "@playwright/mcp@latest")))
+             ;; add library documentation
+             ("context7" . ( :command "npx"
+                             :args ("-y" "@upstash/context7-mcp@latest")))
+             ("ddg-search" . (:command "uvx" :args ("duckduckgo-mcp-server")))))
+    (require 'gptel-integrations)
+    (noct-handle-popup-same-window (rx "*Mcp-Hub*"))
+    (noct-elpaca-after-init
+      (mcp-hub-start-all-server))))
+#+end_src
 
 *** Minuet
 #+begin_src emacs-lisp
@@ -11179,8 +11378,7 @@ TODO
     (let ((model (completing-read "Model: " noct-featherless-models)))
       (gsetq aidermacs-default-model (format "openai/%s" model))))
 
-  (general-def '(normal insert)
-    :prefix "C-c"
+  (general-cc
     "a" #'aidermacs-transient-menu
     "o" #'noct-change-default-aidermacs-model)
 
