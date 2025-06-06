@@ -6778,6 +6778,17 @@ Quite slow in larger buffers and not integrated with flycheck. Languagetool itse
          "/usr/share/languagetool:/usr/share/java/languagetool/*"))
 #+end_src
 
+** Powerthesaurus
+#+begin_src emacs-lisp
+(noct-use ( :elpaca powerthesaurus
+            :host github
+            ;; https://github.com/SavchenkoValeriy/emacs-powerthesaurus/issues/40
+            ;; https://github.com/doomelpa/powerthesaurus/pull/1
+            :repo "doomelpa/powerthesaurus")
+  (general-def 'normal text-mode-map "N" #'powerthesaurus-lookup-dwim)
+  (noct-handle-popup-same-window (rx "*Powerthesaurus")))
+#+end_src
+
 ** Typo
 For typographical editing (not fixing typos).
 #+begin_src emacs-lisp
