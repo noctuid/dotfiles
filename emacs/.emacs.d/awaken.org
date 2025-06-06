@@ -11028,6 +11028,35 @@ Dirvish replaces multiple packages:
     "o" (noct-c (noct-goto-dirvish-tab 10))))
 #+end_src
 
+** Epa
+The EasyPG assistant.
+#+begin_src emacs-lisp
+(use-package epa
+  :ensure nil
+  :general (general-s "E" #'epa-list-keys)
+  :config
+  (noct-handle-popup-same-window epa-key-list-mode)
+  (noct-handle-popup-same-window epa-key-mode)
+  (general-def 'normal epa-key-list-mode-map
+    "gr" #'revert-buffer
+    "q" #'epa-exit-buffer
+    "f" #'link-hint-open-link
+    "RET" #'epa-show-key
+    "," #'epa-mark-key))
+
+(noct-use (:no-install epa)
+  (general-s "E" #'epa-list-keys)
+  (:config
+   (noct-handle-popup-same-window epa-key-list-mode)
+   (noct-handle-popup-same-window epa-key-mode)
+   (general-def 'normal epa-key-list-mode-map
+     "gr" #'revert-buffer
+     "q" #'epa-exit-buffer
+     "f" #'link-hint-open-link
+     "RET" #'epa-show-key
+     "," #'epa-mark-key)))
+#+end_src
+
 ** Ebuku
 #+begin_src emacs-lisp
 (noct-use ebuku)
