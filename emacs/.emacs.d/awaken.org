@@ -2096,6 +2096,11 @@ Obvious ones:
     "C-p" #'profiler-start
     "C-r" #'profiler-report
     "C-s" #'profiler-stop))
+
+(noct-use ( :elpaca explain-pause-mode
+            :host github
+            :repo "lastquestion/explain-pause-mode")
+  (general-def noct-toggle-map "e" #'explain-pause-mode))
 #+end_src
 
 ** Recentf
