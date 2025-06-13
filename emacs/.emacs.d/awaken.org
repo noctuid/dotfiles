@@ -1591,9 +1591,10 @@ This should be run in a graphical frame."
 ** General Keybindings
 #+begin_src emacs-lisp
 ;; allow binding <C-i> differently from tab
-(general-def input-decode-map
-  "C-i" [C-i]
-  "C-m" [C-m])
+(noct-elpaca-after-init
+  (general-def input-decode-map
+    "C-i" [C-i]
+    "C-m" [C-m]))
 
 ;; worse keybinding but sometimes I use on OSX
 (general-def "C-v" #'yank)
@@ -3673,9 +3674,11 @@ I've switched to vertico due to some weird display issues with selectrum. Vertic
             "--search-zip "
             ;; adding these to default
             "--hidden "
+            "--max-columns-preview "
             ;; add back manually if need
             ;; "--no-ignore "
-            "--max-columns-preview "))
+            ))
+  (gsetq consult-ripgrep-args noct-ripgrep-args)
 
   (defun noct-consult-find-fd (&optional dir initial)
     "Run `consult-find' using fd."
@@ -5398,7 +5401,9 @@ Have =C-w= and =C-<backspace>= delete whitespace before deleting words when ther
 
   ;; good riddance
   (setq electric-pair-preserve-balance nil
-        electric-pair-inhibit-predicate #'noct-inhibit-pair)
+        electric-pair-inhibit-predicate #'noct-inhibit-pair
+        ;; don't jump to closing over whitespace
+        electric-pair-skip-whitespace nil)
 
   (electric-pair-mode)
 
@@ -6596,8 +6601,8 @@ Show GPG information when examining a commit (see [[https://github.com/magit/mag
   :ghook 'magit-mode-hook)
 #+end_src
 
-** TODO Git Commit Insert Issue
-Currently broken for github.
+** Git Commit Insert Issue
+Currently broken for github, but it’s no longer needed since forge supports it.
 #+begin_src emacs-lisp
 (use-package git-commit-insert-issue
   ;; depends on bitbucket which is no longer in melpa?
