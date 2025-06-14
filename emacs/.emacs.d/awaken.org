@@ -8220,7 +8220,7 @@ This should be set by editorconfig if it successfully sets
 indent_style/indent_size.")
 
 (defun doom-detect-indentation-h ()
-  (unless (or (not after-init-time)
+  (unless (or (not elpaca-after-init-time)
               doom-inhibit-indent-detection
               doom-large-file-p
               (memq major-mode doom-detect-indentation-excluded-modes)
@@ -8229,6 +8229,9 @@ indent_style/indent_size.")
     (dtrt-indent-mode +1)))
 
 (use-package dtrt-indent
+  ;; TODO re-evaluate later (including performance), but would rather rely on
+  ;; editorconfig than guessing; check latest doom config if end up using
+  :disabled t
   :ghook ('(change-major-mode-after-body-hook read-only-mode-hook)
           'doom-detect-indentation-h)
   :blackout " ›"
@@ -8574,9 +8577,6 @@ This is a maintained fork of =electric-spacing=.
     "n" #'flycheck-next-error
     "e" #'flycheck-previous-error)
 
-  (general-def 'normal flycheck-error-list-mode
-    "q" #'quit-window)
-
   (noct-handle-popup flycheck-error-list-mode))
 #+end_src
 
@@ -8846,16 +8846,50 @@ Now there are new tree sitter major modes like =python-ts-mode=.  Luckily, =pyth
 
 I am using the =treesit-auto= package to automate the process of installing the grammars and activating the tree sitter major modes when possible.
 #+begin_src emacs-lisp
-(noct-use ( :elpaca treesit-auto
-            :host github
-            :repo "noctuid/treesit-auto"
-            :branch "bind-around-set-auto-mode-0")
+(noct-use treesit-auto
   ;; some things that don't work: yasnippet association
   (:demand)
   (:config
     (gsetq treesit-auto-install 'prompt)
-    ;; use treesitter where possible
-    (global-treesit-auto-mode)
+    ;; avoid due to performance issues
+    ;; https://github.com/renzmann/treesit-auto/issues/84
+    ;; (global-treesit-auto-mode)
+
+    ;; (treesit-auto--build-major-mode-remap-alist) - also slow
+
+    ;; INSTEAD manually run `treesit-auto-install-all' once and
+    ;; just manually set `major-mode-remap-alist'
+    (gsetq major-mode-remap-alist
+           '(((yaml-mode . yaml-ts-mode)
+              (typescript-mode . typescript-ts-mode)
+              (typescript-tsx-mode . tsx-ts-mode)
+              (toml-mode . toml-ts-mode)
+              (conf-toml-mode . toml-ts-mode)
+              ;; (rust-mode . rust-ts-mode)
+              (ruby-mode . ruby-ts-mode)
+              (python-mode . python-ts-mode)
+              (markdown-mode . markdown-ts-mode)
+              (poly-markdown-mode . markdown-ts-mode)
+              (lua-mode . lua-ts-mode)
+              (js-json-mode . json-ts-mode)
+              (js2-mode . js-ts-mode)
+              (javascript-mode . js-ts-mode)
+              (js-mode . js-ts-mode)
+              (java-mode . java-ts-mode)
+              (sgml-mode . html-ts-mode)
+              (mhtml-mode . html-ts-mode)
+              (heex-mode . heex-ts-mode)
+              (go-mod-mode . go-mod-ts-mode)
+              (go-mode . go-ts-mode)
+              (elixir-mode . elixir-ts-mode)
+              (dockerfile-mode . dockerfile-ts-mode)
+              (css-mode . css-ts-mode)
+              (c++-mode . c++-ts-mode)
+              (cmake-mode . cmake-ts-mode)
+              (csharp-mode . csharp-ts-mode)
+              (c-mode . c-ts-mode)
+              ;; (sh-mode . bash-ts-mode)
+              )))
 
     (defun noct-maybe-enable-bash-ts-mode ()
       (when (and (eq major-mode 'sh-mode)
@@ -9579,9 +9613,11 @@ This will only run `ielm-return' when at the end of the buffer."
 
   (defun noct-maybe-disable-flycheck-emacs-lisp-checkdoc ()
     (when (and buffer-file-name
-               (string= (file-name-nondirectory buffer-file-name) "init.el"))
+               (member (file-name-nondirectory buffer-file-name)
+                       (list "init.el" "early-init.el" "awaken.el" "local.el")))
       (noct-disable-flycheck-emacs-lisp-checkdoc)))
-  (general-add-hook 'find-file-hook #'noct-maybe-disable-flycheck-emacs-lisp-checkdoc))
+  (general-add-hook 'emacs-lisp-mode-hook
+                    #'noct-maybe-disable-flycheck-emacs-lisp-checkdoc))
 #+end_src
 
 ** Fennel
@@ -9879,11 +9915,11 @@ See ~noct-lsp-pyright~.
 *** Pydoc
 Better than default LSP equivalent.
 #+begin_src emacs-lisp
-(use-package pydoc
-  :general
-  (general-m python-base-mode-map
-    "h" #'pydoc-at-point
-    "/" #'pydoc))
+(noct-use pydoc
+  (once-with 'python
+    (general-m python-base-mode-map
+      "h" #'pydoc-at-point
+      "/" #'pydoc)))
 #+end_src
 
 *** Docstrings
@@ -9900,11 +9936,14 @@ Better than default LSP equivalent.
 
 ;; allows inserting reST docstring skeleton
 (use-package sphinx-doc
+  ;; TODO switch to generic docstr package
+  :disabled t
   :ghook 'python-base-mode-hook
   :blackout t
   :config
-  (general-m python-base-mode-map
-    "s" #'sphinx-doc))
+  (once-with 'python
+    (general-m python-base-mode-map
+      "s" #'sphinx-doc)))
 #+end_src
 
 *** Formatting
@@ -9942,13 +9981,6 @@ $ autoflake --remove-all-unused-imports -i unused_imports.py"
 #+end_src
 
 *** TODO Debugger
-*** Pytest
-#+begin_src emacs-lisp
-(use-package pytest
-  :general (general-m python-base-mode-map "t" #'pytest-all)
-  :config
-  (gsetq pytest-cmd-flags "-x -s -vv"))
-#+end_src
 
 *** TODO Pycoverage
 Needs extra setup (need to pip install cov2emacs that is in source directory).
@@ -9999,11 +10031,11 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
 [[https://github.com/wyuenho/emacs-pet][emacs-pet]] makes this unnecessary (automatically handling a lot of different project types).  I prefer pet's default precedence order, so I switched.  Detection by <root>/.venv seems to work fine without external dependencies, but I've also installed =dasel=.
 
 #+begin_src emacs-lisp
-(use-package pyvenv
-  :general
-  (general-m python-base-mode-map
-    "v" #'pyvenv-workon
-    "V" #'pyvenv-deactivate))
+(noct-use pyvenv
+  (once-with 'python
+    (general-m python-base-mode-map
+      "v" #'pyvenv-workon
+      "V" #'pyvenv-deactivate)))
 
 ;; tries name from .python-version and <project root>/(\.venv|\.virtualenv|venv)
 ;; see also https://github.com/robert-zaremba/auto-virtualenvwrapper.el
@@ -10014,6 +10046,14 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
   :disabled t
   :gfhook ('python-base-mode-hook #'auto-virtualenv-set-virtualenv))
 
+;; avoid `pet-executable-find', which is slower and because don't want
+;; executables from pre-commit venv normally
+(defun noct-py-executable-find (venv executable)
+  (let ((path (file-name-concat venv "bin" executable)))
+    (if (file-executable-p path)
+        path
+      executable)))
+
 ;; prefers .venv over pyenv from .python-version unlike auto-virtualenv
 (use-package pet
   :gfhook
@@ -10021,20 +10061,19 @@ Have ~export HATCH_ENV_TYPE_VIRTUAL_PATH=.venv~ in =.profile= and =in_project = 
    ;; only set needed variables
    (noct-defun noct-pet-setup ()
 	 ;; TODO need to fix for mise
-     (gsetq-local python-shell-interpreter (pet-executable-find "python"))
-     (gsetq-local dap-python-executable python-shell-interpreter)
-     (gsetq-local python-shell-virtualenv-root (pet-virtualenv-root))
+     (let* ((venv (pet-virtualenv-root))
+            (python-path (noct-py-executable-find venv "python")))
+       (gsetq-local python-shell-virtualenv-root venv)
+       (gsetq-local python-shell-interpreter python-path)
+       (gsetq-local dap-python-executable python-path)
 
-     (gsetq-local lsp-pyright-python-executable-cmd python-shell-interpreter)
-     (gsetq-local lsp-pyright-venv-path python-shell-virtualenv-root)
+       (gsetq-local lsp-pyright-python-executable-cmd python-path)
+       (gsetq-local lsp-pyright-venv-path venv)
 
-     (gsetq-local lsp-ruff-lsp-python-path python-shell-interpreter)
-     ;; prefer ruff from project virtualenv over pre-commit virtualenv
-     (let ((venv-ruff (file-name-concat python-shell-virtualenv-root "bin/ruff")))
-       (gsetq-local lsp-ruff-lsp-ruff-path
-                    (vector (if (file-executable-p venv-ruff)
-                                venv-ruff
-                              (or (pet-executable-find "ruff") "ruff"))))))
+       (gsetq-local lsp-ruff-python-path python-path)
+       (gsetq-local lsp-ruff-server-command
+                    (list (noct-py-executable-find venv "ruff")
+                          "server"))))
    -10))
 #+end_src
 
@@ -11275,7 +11314,6 @@ TODO
     "C-<return>" #'gptel-send
     "S-<return>" #'gptel-rewrite)
   (general-cc "g" #'gptel-meneu)
-  (general-def 'normal gptel-mode-map "RET" #'gptel-send)
   (general-def 'visual "RET" #'gptel-send)
   :config
   (gsetq gptel-default-mode 'org-mode
@@ -11318,7 +11356,9 @@ TODO
 
   (general-m 'normal gptel-mode
     :definer 'minor-mode
-    "m" #'gptel-menu))
+    "m" #'gptel-menu)
+
+  (general-def 'normal gptel-mode-map "RET" #'gptel-send))
 
 (noct-use ( :elpaca gptel-quick
             :host github
@@ -11328,6 +11368,13 @@ TODO
   ;; M-RET - switch to chat buffer
   (general-s "N" #'gptel-quick))
  #+end_src
+
+*** Gptel Magit
+#+begin_src emacs-lisp
+(noct-use (:and (not noct-personal-computer-p)
+                gptel-magit)
+  (:hooks 'magit-mode-hook #'gptel-magit-install))
+#+end_src
 
 *** MCP
 #+begin_src emacs-lisp
@@ -11432,8 +11479,9 @@ TODO
     "a" #'aidermacs-transient-menu
     "o" #'noct-change-default-aidermacs-model)
 
-  (general-m aidermacs-comint-mode-map
-    "m" #'aidermacs-transient-menu))
+  (:config
+    (general-m aidermacs-comint-mode-map
+      "m" #'aidermacs-transient-menu)))
 #+end_src
 
 *** Chatgpt Shell
