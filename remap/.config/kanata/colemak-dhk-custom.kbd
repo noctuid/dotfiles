@@ -35,6 +35,8 @@
   ;; layers
   ext (layer-toggle extend)
   agr (layer-toggle altgr)
+  agL (layer-switch altgr)
+  col (layer-switch colemak-dhk)
 
   ;; dual-role thumbkeys
   ;; using 1 as tap-timeout for all to essentially disable double tap to repeat
@@ -118,10 +120,10 @@
 
 (deflayer altgr
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    `    =    ]    @und \    _    @at  -    @rpr @}   @!   _    _
+  @agL `    =    ]    @und \    _    @at  -    @rpr @}   @!   _    _
   caps 1    2    3    4    @|   _    @&   7    8    9    0    _
   _    @~   @#   5    @^   _    _    @$   6    @*   @+   @%   _
-  _    _    _    _    _         _    _    _    _
+  _    _    _    @col _         _    _    _    _
   _ _ _
   _)
 
