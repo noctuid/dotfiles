@@ -338,16 +338,21 @@ restic_bk() {
 	restic --verbose backup "$@"
 }
 
-restic_prune() {
+restic_forget() {
+    echo "This needs testing before remove --dry-run"
 	# rules are essentially the same for restic as for borg
 	# the main difference is that borg will go backwards since last kept backup;
 	# for example, with --keep-yearly 1, if the last backup of the year is
 	# already included because of another rule, borg will keep a snapshot from
 	# the previous year but restic considers the rule already satisfied
 	repo=$1
-	# TODO make consistent with borg?
-	restic forget --repo "$repo" --prune --host "$(hostname)" \
-		   --keep-within-duration 7d --keep-weekly 5 --keep-monthly 2 \
+	# --keep-x - for the last n <x time period> which have one or more
+	# --snapshots, keep only the most recent one for each <x period>
+	# TODO test how --group-by works before removing --dry-run; do I need to
+	# remove grouping even when setting host?
+	# TODO switch to --keep-within for all?
+	restic forget --repo "$repo" --dry-run --prune --host "$(hostname)" \
+		   --keep-within-duration 7d --keep-weekly 5 --keep-monthly 12 \
 		   --keep-yearly 4
 }
 
@@ -392,6 +397,13 @@ backup_tree_dirs="
 $HOME/anime
 # won't include in full remote backup; can rerip if necessary
 $HOME/music
+# large repos that don't need backup
+$HOME/wallpaper/github
+/home/transmission
+$HOME/My Games
+$HOME/GOG Games
+$HOME/database/gaming/games
+$HOME/sdvx
 "
 
 backup_tree_dirs() {
@@ -503,9 +515,57 @@ borg_small() {
 
 # * Restic
 # ** Full Backup
+_restic_full_backup() { # <repo>
+	restic_bk --repo "$1" \
+			  --exclude-if-present=".backup_tree_only" \
+			  --exclude-if-present=".no_backup" \
+			  --exclude-file="$HOME/.zsh/restic_common_exclude.txt" \
+			  --exclude-file="$HOME/.zsh/restic_exclude_anywhere.txt" \
+			  ~/
+}
+
+_restic_half_backup() { # <repo>
+	restic_bk --repo "$1" \
+			  --exclude-if-present=".backup_tree_only" \
+			  --exclude-if-present=".no_backup" \
+			  --exclude-if-present=".no_remote_backup" \
+			  --exclude-if-present=".no_half_backup" \
+			  --exclude-file="$HOME/.zsh/restic_common_exclude.txt" \
+			  --exclude-file="$HOME/.zsh/restic_half_exclude.txt" \
+			  --exclude-file="$HOME/.zsh/restic_exclude_anywhere.txt" \
+			  ~/
+}
+
+_restic_full_dispatch() { # <remote/half?> <repo>
+	half=$1
+	repo=$2
+	if $half; then
+		if _restic_half_backup "$repo"; then
+			notify-send --icon=trophy-gold \
+						"Half/remote backup to $repo completed successfully."
+		else
+			notify-send --icon=face-angry "Half/remote backup to $repo failed."
+		fi
+	else
+		if _restic_full_backup "$repo"; then
+			notify-send --icon=trophy-gold \
+						"Full backup to $repo completed successfully."
+		else
+			notify-send --icon=face-angry "Full backup to $repo failed."
+		fi
+	fi
+}
+
 restic_full() {
-	local check_data
+	local check_data half
+	half=false
 	check_data=false
+	# mainly for testing
+	if [[ $1 == --half ]]; then
+		echo "half"
+		half=true
+		shift
+	fi
 	if [[ $1 =~ ^(-c|--check)$ ]]; then
 		check_data=false
 		shift
@@ -513,19 +573,37 @@ restic_full() {
 	if [[ $# -ne 1 ]]; then
 		echo 'One argument is required: /path/to/backup_drive_dir'
 		return 1
-	elif [[ ! -d $1 ]];then
+	fi
+
+	local remote
+	remote=false
+	if echo "$1" | grep --quiet "^b2:"; then
+		remote=true
+        half=true
+        echo "Remote backup not impl. Update exclude files, restic_init, test."
+        return 1
+	fi
+
+	if ! $remote && [[ ! -d $1 ]]; then
 		echo "Error. Directory $1 does not exist."
 		return 1
 	fi
 
 	local backup_dir
 	backup_dir="$(remove_trailing_slash "$1")"/home
-	mkdir -p "$backup_dir"
+	if ! $remote; then
+		mkdir -p "$backup_dir"
+	fi
 
 	# restic does not support unencrypted backups, but this is not a must have
 	# https://github.com/restic/restic/issues/1018
-	# would prefer to just use LUKS on the entire backup drive so can unlock
-	# once instead of having to type password every time want to do anything
+	# would prefer to just use LUKS on the entire backup drive (for local
+	# backup) so can unlock once instead of having to type password every time
+	# want to do anything
+	# TODO adjust restic_init for backblaze
+	# TODO use max compression when initializing for b2?
+	# probably not
+	# https://forum.restic.net/t/odd-repo-size-with-max-compression/5004/2
 	restic_init "$backup_dir"
 
 	# TODO test how long normal check takes
@@ -543,19 +621,8 @@ restic_full() {
 		fi
 	fi
 
-	cd ~/ || return 1
 	pre_backup
-	# TODO if remote --exclude-if-present=".no_remote_backup"
-	if restic_bk --repo "$backup_dir" \
-				 --exclude-if-present=".backup_tree_only" \
-				 --exclude-if-present=".no_backup" \
-				 --exclude-file=".zsh/restic_full_exclude.txt" \
-				 ~/
-	then
-		notify-send --icon=trophy-gold 'Full backup completed successfully.'
-	else
-		notify-send --icon=face-angry 'Full backup failed.'
-	fi
+	_restic_full_dispatch "$half" "$backup_dir"
 }
 
 # * Specific
@@ -573,23 +640,21 @@ borgbase_small() {
 }
 
 # ** Home
-# bigseagate() {
-# 	mountdatab || return 1
-# 	mountbigseagate || return 1
-# 	borg_ome ~/backup_mount/bigseagate
-# }
+bigseagate() {
+	mountdatab || return 1
+	mountbigseagate || return 1
+	restic_full ~/backup_mount/bigseagate
+}
 
 fivewd() {
 	mountdatab || return 1
 	restic_full /media/fivewd
 }
 
-# * Remote Backup
-# consider using append-only? (probably not)
-# use stronger compression
-# sshfs or usre@host:path
-# have to use rclone for most cloud services (or a vps)
-# rsync.net has a borg deal but is comparatively expensive
+bksandisk() {
+    mountdatab || return 1
+    restic_full "/media/Extreme SSD"
+}
 
 # * External Drives/Smartctl
 # may not use since the drive died

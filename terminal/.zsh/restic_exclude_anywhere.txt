@@ -1,0 +1,19 @@
+# -*- mode: conf-space; -*-
+# exclude these in any directory
+**/_no_backup
+**/.cask
+**/.venv
+**/sandbox
+**/node_modules
+# fine to keep as it is not huge like .emacs-backups
+# **/.emacs_backup
+**/nixpkgs
+**/src/Kaleidoscope
+**/forks/melpa
+**/forks/org-mode
+**/.Trash
+**/.Trash-1000
+# files
+**/*.safetensors
+**/*.ckpt
+**/*.vae.pt

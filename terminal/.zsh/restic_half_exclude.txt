@@ -1,0 +1,12 @@
+# -*- mode: conf-space; -*-
+# all camera/my photos/videos in different folder (some in phone backup)
+$HOME/database/pictures
+$HOME/database/move
+# phone backup
+# TODO clean
+!$HOME/database/move/phone
+
+# include all text files at least
+!**/*.org
+!**/*.txt
+!**/*.json

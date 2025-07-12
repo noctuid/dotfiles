@@ -1,7 +1,15 @@
 # -*- mode: conf-space; -*-
-# NOTE: update ~/.config/safe-rm when update this (only have major folders there)
+# RESTIC HOME BACKUP CONFIG
 
-# NOTE: unlike borg, this way of exclude then include is efficient in terms of scanning/walking (e.g. it will only scan the directories in home explicitly included with !)
+# this is for directories that should be included (by negative exclusion rules)
+# in both remote and local backunps
+# see also
+# - ./restic_half_exclude.txt
+# - ./restic_exclude_anywhere.txt
+
+# NOTE: unlike borg, this way of exclude then include is efficient in terms of
+# scanning/walking (e.g. it will only scan the directories in home explicitly
+# included with !)
 
 # exclude everything in home then add back specific directories
 # using this syntax is better than listing each directory as a root because they
@@ -13,6 +21,11 @@ $HOME/*
 # intentionally not backing this up
 # !$HOME/.emacs-backups
 !$HOME/.emacs.d
+# don't include all repos (can redownload; have lockfile)
+$HOME/.emacs.d/straight/repos
+$HOME/.emacs.d/elpaca
+# downloaded lsp servers
+$HOME/.emacs.d/var/lsp/server
 !$HOME/.enhancd
 !$HOME/.fasd
 !$HOME/.fonts
@@ -26,6 +39,8 @@ $HOME/*
 # memory card and game settings
 !$HOME/.local/share/dolphin-emu
 !$HOME/.local/share/iwctl/history
+# playlists and index
+!$HOME/.local/share/mopidy
 !$HOME/.local/share/nix/repl-history
 !$HOME/.local/share/nyxt/history
 !$HOME/.local/share/qutebrowser/cmd-history
@@ -34,8 +49,8 @@ $HOME/*
 !$HOME/.local/share/qutebrowser/sessions
 # bookmarks and history
 !$HOME/.local/share/zathura
-# TODO rethink including; older mail is elsewhere; this is currently small though
-!$HOME/.mail
+# don't need; mail is already online
+# !$HOME/.mail
 # for my firefox profile
 !$HOME/.mozilla
 !$HOME/.mpd/database
@@ -62,13 +77,24 @@ $HOME/*
 !$HOME/ag-sys
 # no point backing up
 # !$HOME/anime
+
+# additional exclude rules in ./restic_remote_exclude.txt
 !$HOME/database
+# can redump if needed
+$HOME/database/gaming/games
+$HOME/database/move/gallery
+$HOME/database/move/ytdl
+$HOME/database/move/var
 !$HOME/Documents
 !$HOME/dotfiles
 !$HOME/Downloads
 !$HOME/move
-!$HOME/music
-# just a directory of symlinks for what should be synced to phone
+# large and not a big deal to lose
+$HOME/move/Screenshots
+# don't need to include, can rerip if necessary
+# !$HOME/music
+# just a directory of symlinks for what should be synced to phone (including
+# even though not including music directory since small)
 !$HOME/music-android
 !$HOME/Pictures
 !$HOME/ps_vita
@@ -77,25 +103,16 @@ $HOME/*
 # !$HOME/sdvx
 !$HOME/src
 !$HOME/usb-backup
+!$HOME/qmk_firmware/keyboards/splitkb/kyria/keymaps/noctuid
 # !$HOME/vboxshare
 # mostly empty
 !$HOME/Videos
 # TODO get rid of
 !$HOME/vimwiki
-# TODO mayb eadd after cleaning up
+# TODO maybe add after cleaning up
 # !$HOME/VirtualBox VMs
 !$HOME/wallpaper
+# too big; leave out; anything used will be symlinked into favorites, and the
+# tree listing is backed up in backup.zsh
+$HOME/wallpaper/github
 !$HOME/work
-
-# * Exclude These Anywhere
-**/_no_backup
-**/.cask
-**/sandbox
-**/node_modules
-# fine to keep as it is not huge like .emacs-backups
-# **/.emacs_backup
-**/nixpkgs
-**/forks/melpa
-**/forks/org-mode
-**/.Trash
-**/.Trash-1000
