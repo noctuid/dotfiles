@@ -1140,6 +1140,7 @@ alias ipup="ip link show up | awk -F ':' '/state UP/ {print $2}'"
 backupresolv() {
 	sudo chattr -i /etc/resolv.conf
 	sudo cp ~/dotfiles/.root/etc/resolv.conf.backup /etc/resolv.conf
+	sudo resolvconf -u
 	sudo chattr +i /etc/resolv.conf
 }
 
@@ -1149,6 +1150,7 @@ fixresolv() {
 nameserver 127.0.0.1
 options edns0 single-request-reopen" \
 		| sudo tee /etc/resolv.conf
+	sudo resolvconf -u
 	sudo chattr +i /etc/resolv.conf
 }
 
@@ -1159,6 +1161,7 @@ defaultresolv() {
 	sudo chattr -i /etc/resolv.conf
 	echo -e "nameserver $default_route" \
 		| sudo tee /etc/resolv.conf
+	sudo resolvconf -u
 	sudo chattr +i /etc/resolv.conf
 }
 

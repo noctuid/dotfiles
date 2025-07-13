@@ -376,6 +376,7 @@ unbound_setup() {
 nameserver 127.0.0.1
 noptions edns0 single-request-reopen" \
 		 > /etc/resolv.conf
+    sudo resolvconf -u
 	chattr +i /etc/resolv.conf
 	systemctl enable unbound
 	systemctl restart unbound
