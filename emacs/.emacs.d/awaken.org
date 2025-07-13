@@ -1870,6 +1870,13 @@ Don't backup remote directories or encrypted files."
        kept-old-versions 20
        ;; backup files under version control too
        vc-make-backup-files t)
+
+;; what no-littering does except store in same place as backup-each-save
+(gsetq backup-directory-alist
+       `((,(concat "\\`" (file-name-as-directory temporary-file-directory)))
+         ("\\`/tmp/" . nil)
+         ("\\`/dev/shm/" . nil)
+         ("." . "~/.emacs-backups/normal-backup")))
 #+end_src
 
 ** Bookmarks
