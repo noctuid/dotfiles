@@ -12,70 +12,70 @@ include "linux-with-alt-and-altgr"
 strings as usual
 
 # don't shift over numbers
-keycode  41  =  grave         asciitilde   dead_tilde       asciitilde     nul
-keycode  2   =  one           exclam       exclamdown       onesuperior
-keycode  3   =  two           at           masculine        twosuperior    nul
-keycode  4   =  three         numbersign   ordfeminine      threesuperior  Escape
-keycode  5   =  four          dollar       cent             sterling       Control_backslash
-keycode  6   =  five          percent      euro             yen            Control_bracketright
-keycode  7   =  six           asciicircum  hstroke          Hstroke        Control_asciicircum
-keycode  8   =  seven         ampersand    eth              ETH            Control_underscore
-keycode  9   =  eight         asterisk     thorn            THORN          Delete
-keycode  10  =  nine          parenleft    asciitilde       asciitilde
-keycode  11  =  zero          parenright   asciitilde       asciitilde
-keycode  12  =  minus         underscore   asciitilde       asciitilde     Control_underscore
-keycode  13  =  equal         plus         multiply         division
+keycode  41  =  grave  asciitilde  grave  asciitilde
+keycode  2   =  one    exclam      one    exclam
+keycode  3   =  two    at          two    at
+keycode  4   =  three  numbersign  three  numbersign
+keycode  5   =  four   dollar      four   dollar
+keycode  6   =  five   percent     five   percent
+keycode  7   =  six    asciicircum six    asciicircum
+keycode  8   =  seven  ampersand   seven  ampersand
+keycode  9   =  eight  asterisk    eight  asterisk
+keycode  10  =  nine   parenleft   nine   parenleft
+keycode  11  =  zero   parenright  zero   parenright
+keycode  12  =  minus  underscore  minus  underscore
+keycode  13  =  equal  plus        equal  plus
 
-keycode  16  =  q             Q            adiaeresis       Adiaeresis     Control_q
-keycode  17  =  w             W            Control_w        Aring          Control_w
-keycode  18  =  f             F            atilde           Atilde         Control_f
-keycode  19  =  p             P            oslash           Ooblique       Control_p
-keycode  20  =  b             B            asciitilde       asciitilde     Control_b
-keycode  21  =  bracketleft   braceleft    asciitilde       asciitilde     Escape
-keycode  22  =  j             J            asciitilde       asciitilde     Control_j
-keycode  23  =  l             L            PageDown         asciitilde     Control_l
-keycode  24  =  u             U            Home             Uacute         Control_u
-keycode  25  =  y             Y            End              Udiaeresis     Control_y
-keycode  26  =  semicolon     colon        PageUp           Odiaeresis
-keycode  27  =  apostrophe    quotedbl     otilde           Otilde
-keycode  43  =  backslash     bar          asciitilde       asciitilde     Control_backslash
+keycode  16  =  q            Q         q            Q
+keycode  17  =  w            W         w            W
+keycode  18  =  f            F         e            E
+keycode  19  =  p            P         r            R
+keycode  20  =  b            B         t            T
+keycode  21  =  bracketleft  braceleft y            Y
+keycode  22  =  j            J         u            U
+keycode  23  =  l            L         i            I
+keycode  24  =  u            U         o            O
+keycode  25  =  y            Y         p            P
+keycode  26  =  semicolon    colon     bracketleft  braceleft
+keycode  27  =  apostrophe   quotedbl  bracketright braceright
+keycode  43  =  backslash    bar       backslash    bar
 
-keycode  30  =  a             A            aacute           Aacute         Control_a
-keycode  31  =  r             R            dead_grave       asciitilde     Control_r
-keycode  32  =  s             S            ssharp           asciitilde     Control_s
-keycode  33  =  t             T            asciitilde       asciitilde     Control_t
-keycode  34  =  g             G            asciitilde       asciitilde     Control_g
-keycode  35  =  Return        braceright   asciitilde       asciitilde      Control_bracketright
-keycode  36  =  k             K            asciitilde       asciitilde     Control_k
-keycode  37  =  n             N            Down             Ntilde         Control_n
-keycode  38  =  e             E            Up               Eacute         Control_e
-keycode  39  =  i             I            Right            Iacute         Control_i
-keycode  40  =  o             O            PageUp           Oacute         Control_o
+keycode  30  =  a           A          a          A
+keycode  31  =  r           R          s          S
+keycode  32  =  s           S          d          D
+keycode  33  =  t           T          f          F
+keycode  34  =  g           G          g          G
+keycode  35  =  Return      braceright h          H
+keycode  36  =  k           K          j          J
+keycode  37  =  n           N          k          K
+keycode  38  =  e           E          l          L
+keycode  39  =  i           I          semicolon  colon
+keycode  40  =  o           O          apostrophe quotedbl
 # replace enter with '
-keycode  28  =  apostrophe    quotedbl     otilde           Otilde
+keycode  28  =  apostrophe  quotedbl   Return     Return
 
-keycode  86  =  minus         underscore   asciitilde       asciitilde     Control_underscore
-keycode  44  =  x             X            dead_circumflex  asciitilde     Control_x
-keycode  45  =  c             C            ccedilla         Ccedilla       Control_c
-keycode  46  =  d             D            dead_diaeresis   asciitilde     Control_d
-keycode  47  =  v             V            oe               OE             Control_v
-keycode  48  =  z             Z            ae               AE             Control_z
-keycode  49  =  slash         question     questiondown     asciitilde     Delete
-keycode  50  =  m             M            PageDown         asciitilde     Control_m
-keycode  51  =  h             H            Left             asciitilde     Control_h
-keycode  52  =  comma         less         dead_cedilla     asciitilde
-keycode  53  =  period        greater      asciitilde       asciitilde
-# make right shift /
-keycode  54  =  slash         question     questiondown     asciitilde     Delete
+keycode  44  =  x       X        z      Z
+keycode  45  =  c       C        x      X
+keycode  46  =  d       D        c      C
+keycode  47  =  v       V        v      V
+keycode  48  =  z       Z        b      B
+keycode  49  =  slash   question n      N
+keycode  50  =  m       M        m      M
+keycode  51  =  h       H        comma  less
+keycode  52  =  comma   less     period greater
+keycode  53  =  period  greater slash question
+# make right shift /; I don't use rsft in qmk
+keycode  54  =  slash   question
 
-keycode  57  =  space         space        space            nobreakspace   nul
+keycode  57  =  space space space space
 
-! caps layer
+# qwerty layer (removed nav layer, so this isn't really useful anymore)
 keycode  58 = AltGr
 
 keycode   1 = Escape
 keycode  14 = Delete
-keycode  15 = Tab
+# Tab to switch layout to qwerty so can use QMK keyboard
+keycode  15 = AltGr_Lock
 # keycode  28 = Return
         # alt     keycode  28 = Meta_Control_m
 keycode  29 = Control
