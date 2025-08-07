@@ -67,6 +67,7 @@ unnamed-sdvx-clone aur
 
 # * Graphics/Drivers/Steam
 steam
+cartridges
 gamescope
 gamemode
 lib32-curl
@@ -82,11 +83,6 @@ amd-ucode
 
 # ** Nvidia
 nvidia-dkms
-# having both installed has not caused me issues (but xrun is now orphaned)
-# nvidia-xrun-git aur
-optimus-manager-git aur
-# not currently using
-bbswitch-dkms
 # intel-virtual-output
 xf86-video-intel
 # for prime-run
@@ -806,8 +802,8 @@ wl-clipboard
 
 uwsm
 
-hyprland-git aur
-hyprcursor-git aur
+hyprland
+hyprcursor
 hyprlock
 hypridle
 # authentication agent

@@ -52,7 +52,7 @@ export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/gnupg/S.gpg-agent.ssh"
 
 # Japanese input
 # TODO https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland
-export GTK_IM_MODULE=fcitx
+# export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
 
@@ -136,10 +136,12 @@ playerctld daemon
 # * Startx on login if tty1
 current_tty=$(tty)
 if [[ $current_tty == /dev/tty1 ]]; then
-	startx
-elif [[ $current_tty == /dev/tty2 ]]; then
 	# uwsm check may-start requires tty1
-	exec uwsm start hyprland.desktop
+	if uwsm check may-start; then
+		exec uwsm start hyprland.desktop
+	fi
+elif [[ $current_tty == /dev/tty2 ]]; then
+	startx
 elif [[ $- == *i* ]] && [[ -f /etc/hostname ]] \
 		 && [[ $(< /etc/hostname) != *server ]]; then
 	# check if interactive or on server: zsh on server messes up TRAMP (because

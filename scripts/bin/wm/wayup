@@ -21,7 +21,8 @@ if ! pgrep -x kanata > /dev/null; then
     rldkanata
 fi
 
-fcitx5 &
+# causes ( to be typed as 9 sometimes
+# fcitx5 &
 
 if uwsm check is-active; then
     systemctl --user --no-block start mako

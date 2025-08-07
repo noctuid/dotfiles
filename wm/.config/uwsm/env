@@ -3,11 +3,21 @@
 # works for electron >28
 export ELECTRON_OZONE_PLATFORM_HINT=auto
 
+# https://wiki.archlinux.org/title/NVIDIA#Wayland_configuration
 # https://wiki.archlinux.org/title/Hardware_video_acceleration#Configuring_VA-API
-# https://wiki.hyprland.org/Nvidia/
+# https://wiki.hypr.land/Nvidia/
 # very noticeably improves performances
 export LIBVA_DRIVER_NAME=nvidia
+
+# https://download.nvidia.com/XFree86/Linux-x86_64/435.17/README/primerenderoffload.html
+# these are what prime-run sets:
+# enumerate NVIDIA GPU first (most vulkan applications will use the first; also
+# tells GLX to use the first NVIDIA GPU screen)
+export __NV_PRIME_RENDER_OFFLOAD=1
 export __GLX_VENDOR_LIBRARY_NAME=nvidia
+# only report NVIDIA gpu to vulkan applications
+export __VK_LAYER_NV_optimus=NVIDIA_only
+# arch already enables nvidia-suspend, hibernate, and resume services
 
 # don't need/want to export on waylad
 export GTK_IM_MODULE=

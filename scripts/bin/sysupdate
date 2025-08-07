@@ -10,7 +10,8 @@ paru --newsonupgrade -Syu \
      --ignore emacs-git,optimus-manager-git,yay-git,babashka-bin
 # if cancel above aur upgrades, at least need to update optimus-manager or
 # starting X can break
-paru -S optimus-manager-git
+# no longer using
+# paru -S optimus-manager-git
 # also annoying when babashka breaks; yay as fallback aur helper
 paru -S yay-git babashka-bin
 
