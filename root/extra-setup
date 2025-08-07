@@ -479,6 +479,7 @@ qmk_setup() {
 	sudo -u "$user" qmk setup --yes || return 1
 	sudo -u "$user" qmk config user.keyboard=splitkb/kyria/rev3 || return 1
 	sudo -u "$user" qmk config user.keymap=noctuid || return 1
+	sudo -u "$user" qmk config user.overlay_dir="/home/$user/src/forks/qmk_userpace"
 }
 
 # * LLM

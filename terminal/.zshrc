@@ -498,6 +498,10 @@ bindkey '^H' backward-kill-word
 bindkey "\C-a" beginning-of-line
 bindkey "\C-k" vi-kill-eol
 
+# keep these Emacs keybindings
+bindkey '^[f' forward-word
+bindkey '^[b' backward-word
+
 # ** Clipboard
 # using https://github.com/kutsan/zsh-system-clipboard
 bindkey '^y' zsh-system-clipboard-vicmd-vi-put-before
@@ -1503,6 +1507,12 @@ kyria() {
 		qmk compile || return 1
 	fi
 	qmk flash
+}
+
+halcyon() {
+	qmk compile -kb "splitkb/halcyon/kyria/rev4" -km noctuid_hlc \
+		-e HLC_CIRQUE_TRACKPAD=1 -e TARGET=splitkb_halcyon_kyria_noctuid
+	qmk flash -kb "splitkb/halcyon/kyria/rev4" -km noctuid_hlc -e HLC_CIRQUE_TRACKPAD=1
 }
 
 # ** Other Functions
