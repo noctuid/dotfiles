@@ -247,6 +247,8 @@
         // }
     },
     "battery": {
+		// decrease from 60
+		"interval": 15,
         "states": {
             "warning": 35,
             "critical": 20
