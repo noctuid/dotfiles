@@ -44,3 +44,11 @@ Status:children_add(function()
 		" ",
 	}
 end, 500, Status.RIGHT)
+
+-- free space
+-- https://github.com/sxyazi/yazi/issues/2493
+Status:children_add(function()
+    local command = "df -kh .|awk '!/^Filesystem/{printf \" %s free\", $(NF-2)}'"
+    local info = ui.Span(io.popen(command):read('*a')):fg("green")
+    return info
+end, 1500, Header.RIGHT)
