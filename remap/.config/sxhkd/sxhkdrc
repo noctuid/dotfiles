@@ -175,7 +175,7 @@ super + b
 
 # use separate server to avoid binding del to delete the whole buffer in normal server
 {mod2,super+control} + i
-	dyn_emacsclient --socket-name=everywhere --eval "(emacs-everywhere)"
+	dyn_emacsclient --socket-name=everywhere -ce "(emacs-everywhere)"
 
 # [k]alc
 {mod2,super+control} + k
