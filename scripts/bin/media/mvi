@@ -1,5 +1,3 @@
 #!/usr/bin/env bash
 
-# prime-run just sets environment variables (so it doesn't matter if not using
-# hybrid mode)
-prime-run mpv --config-dir="$HOME"/.config/mvi "$@"
+maybe_on_gpu mpv --config-dir="$HOME"/.config/mvi "$@"

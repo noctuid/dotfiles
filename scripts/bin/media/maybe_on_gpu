@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+disable_nvidia=false
+if lsmod | grep --quiet nouveau || $disable_nvidia; then
+	"$@"
+else
+    # prime-run just sets environment variables (so it doesn't matter if not
+    # using hybrid mode)
+    prime-run "$@"
+fi

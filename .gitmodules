@@ -16,3 +16,6 @@
 [submodule "mpv-playlistmanager"]
 	path = media/.config/mvi/repos/mpv-playlistmanager
 	url = https://github.com/jonniek/mpv-playlistmanager
+[submodule "media/.config/mpv/repos/ArtCNN"]
+	path = media/.config/mpv/repos/ArtCNN
+	url = https://github.com/Artoriuz/ArtCNN

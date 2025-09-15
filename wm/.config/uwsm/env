@@ -3,21 +3,34 @@
 # works for electron >28
 export ELECTRON_OZONE_PLATFORM_HINT=auto
 
-# https://wiki.archlinux.org/title/NVIDIA#Wayland_configuration
-# https://wiki.archlinux.org/title/Hardware_video_acceleration#Configuring_VA-API
-# https://wiki.hypr.land/Nvidia/
-# very noticeably improves performances
-export LIBVA_DRIVER_NAME=nvidia
+modules=$(lsmod)
+if echo "$modules" | grep --quiet nouveau; then
+    export LIBVA_DRIVER_NAME=nouveau
+elif echo "$modules" | grep --quiet nvidia; then
+    # https://wiki.archlinux.org/title/NVIDIA#Wayland_configuration
+    # https://wiki.archlinux.org/title/Hardware_video_acceleration#Configuring_VA-API
+    # https://wiki.hypr.land/Nvidia/
+    # arch already enables nvidia-suspend, hibernate, and resume services
 
-# https://download.nvidia.com/XFree86/Linux-x86_64/435.17/README/primerenderoffload.html
-# these are what prime-run sets:
-# enumerate NVIDIA GPU first (most vulkan applications will use the first; also
-# tells GLX to use the first NVIDIA GPU screen)
-export __NV_PRIME_RENDER_OFFLOAD=1
-export __GLX_VENDOR_LIBRARY_NAME=nvidia
-# only report NVIDIA gpu to vulkan applications
-export __VK_LAYER_NV_optimus=NVIDIA_only
-# arch already enables nvidia-suspend, hibernate, and resume services
+    # very noticeably improves performances
+    # hardware acceleration
+    export LIBVA_DRIVER_NAME=nvidia
+    # https://wiki.hypr.land/Nvidia/#va-api-hardware-video-acceleration
+    export NVD_BACKEND=direct
+    # https://wiki.hypr.land/Configuring/Environment-variables/#nvidia-specific
+    # https://wiki.hypr.land/Configuring/Environment-variables/#nvidia-specific
+    # export GBM_BACKEND=nvidia-drm
+
+    # if want to run everything on GPU in hybrid mode (I don't):'
+    # https://download.nvidia.com/XFree86/Linux-x86_64/435.17/README/primerenderoffload.html
+    # these are what prime-run sets:
+    # enumerate NVIDIA GPU first (most vulkan applications will use the first;
+    # also tells GLX to use the first NVIDIA GPU screen)
+    # export __NV_PRIME_RENDER_OFFLOAD=1
+    # export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    # only report NVIDIA gpu to vulkan applications
+    # export __VK_LAYER_NV_optimus=NVIDIA_only
+fi
 
 # don't need/want to export on waylad
 export GTK_IM_MODULE=

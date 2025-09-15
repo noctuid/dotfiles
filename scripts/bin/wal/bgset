@@ -18,15 +18,14 @@
   [args]
   (let [options               (butlast args)
         full-wallpaper-path   (str (absolutize (last args)))
-        cached-wallpaper-path (str (System/getenv "HOME") ".cache/wallpaper")
+        cached-wallpaper-path (str (System/getenv "HOME") "/.cache/wallpaper")
         args                  (conj (vec options) full-wallpaper-path)]
     ;; store options in edn file (more control than --store and --restore)
     (with-open [w (io/writer setroot-store-path)]
       (binding [*out* w]
         (pr-edn args)))
-    ;; TODO why does this not work...
-    ;; (delete-if-exists cached-wallpaper-path)
-    ;; (create-sym-link full-wallpaper-path cached-wallpaper-path)
+    (delete-if-exists cached-wallpaper-path)
+    (create-sym-link cached-wallpaper-path full-wallpaper-path)
     (if (= (System/getenv "XDG_SESSION_TYPE") "wayland")
       (sh ["swww" "img" full-wallpaper-path])
       (setroot-multi-monitor args))))

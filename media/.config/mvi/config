@@ -8,9 +8,11 @@ loop-playlist=inf
 # disappear and be unrecoverable
 force-window=yes
 
-profile=gpu-hq
-# TODO messes up on some images (transparency? think it's some other property)
-# gpu-api=vulkan
+vo=gpu-next
+profile=high-quality
+gpu-api=vulkan
+# don't think need for images but do sometimes play videos in mvi
+hwdec=auto
 
 screenshot-template="./%tY.%tm.%td_%tH:%tM:%tS"
 
@@ -32,43 +34,11 @@ dither-depth=auto
 correct-downscaling
 sigmoid-upscaling
 
-# https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/#external-shaders
-# https://artoriuz.github.io/mpv_upscaling.html
-# https://iamscum.wordpress.com/guides/videoplayback-guide/mpv-conf/
-
 # use the scaler even if video/image is not resized
 no-scaler-resizes-only
 
-# scale=ewa_lanczos
-scale=ewa_lanczossharp
-
-# nnedi3 and fsrcnnx both make a huge difference
-# fsrcnnx looks sharper and a little better to me
-glsl-shaders="~~/shaders/FSRCNNX_x2_56-16-4-1.glsl"
-dscale=mitchell
-cscale=spline64
-
-[fsrcnnx]
-glsl-shaders="~~/shaders/FSRCNNX_x2_56-16-4-1.glsl"
-dscale=mitchell
-cscale=spline64
-
-[no-shaders]
-glsl-shaders=
-dscale=mitchell
-cscale=spline64
-
-[anime-4k]
-# doesn't seem to do much, at least not for images
-glsl-shaders="~~/shaders/Anime4K_Adaptive_v1.0RC2.glsl"
-cscale=mitchell
-dscale=mitchell
-
-# [nnedi3]
-# 4x; glitchy
-# glsl-shaders="~~/shaders/nnedi3-nns64-win8x4.hook"
-# dscale=mitchell
-# cscale=spline64
+# see mpv input.conf for more info on scalers
+glsl-shaders="~~/shaders/ArtCNN_C4F32_DS.glsl"
 
 # * Extension-specific
 [extension.gif]
@@ -86,4 +56,7 @@ osc=no
 
 [extension.jpeg]
 profile=extension.jpg
+osc=no
+
+[extension.webp]
 osc=no

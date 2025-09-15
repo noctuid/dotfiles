@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+monitor_info=$(hyprctl -j monitors)
+monitor_count=$(echo "$monitor_info" | jq 'length')
+desk_setup=$(echo "$monitor_info" | jq 'any(.[]; .model == "Gigabyte M32U")')
+
+if [[ $desk_setup != true ]] && ((monitor_count > 1)); then
+    exit
+else
+    hyprctl dispatch movecurrentworkspacetomonitor "$@"
+fi

@@ -776,6 +776,11 @@ fonts() {
 # set hardware clock to system time
 alias fixhwclock='sudo hwclock --systohc'
 
+fixtime() {
+	sudo systemctl restart systemd-timesyncd.service
+	# can check with timedatectl status
+}
+
 fixtimezone() {
 	tz=$(curl --silent --fail https://ipapi.co/timezone)
 	echo "$tz"

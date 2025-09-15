@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+
+nvidia_card=$(pactl list cards \
+                  | grep --ignore-case --before-context 10 \
+                         'alsa.card_name.*nvidia' \
+                  | awk '/^\s*object.id =/ {gsub(/"/,""); print $3}')
+# force to hdmi-stereo; profiles off or pro-audio don't show hdmi sink
+pactl set-card-profile "$nvidia_card" output:hdmi-stereo
+
+selected=$(pactl list short sinks | fzf)
+if [[ -n $selected ]]; then
+   sink_num=$(echo "$selected" | awk '{print $1}')
+   echo "Switching to sink $sink_num"
+   pactl set-default-sink "$sink_num"
+fi

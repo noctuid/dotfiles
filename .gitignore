@@ -12,4 +12,5 @@ dunstrc
 /aesthetics/.config/tridactyl/themes/custom.css
 **/.config/autorandr/current
 root/*log*.org
-root/*log*.txt
+# will manually include any that want everywhere
+/emacs/.emacs.d/etc/yasnippet

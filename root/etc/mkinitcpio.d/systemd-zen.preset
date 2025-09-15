@@ -1,0 +1,14 @@
+# custom mkinitcpio file
+ALL_config="/etc/mkinitcpio.conf"
+ALL_kver="/boot/vmlinuz-linux-zen"
+
+PRESETS=('systemd' 'systemd_fallback')
+
+systemd_config="/etc/mkinitcpio-custom-systemd.conf"
+systemd_image="/boot/initramfs-linux-zen-custom-systemd.img"
+systemd_fallback_image="/boot/initramfs-linux-zen-custom-systemd-fallback.img"
+systemd_fallback_options="-S autodetect"
+
+# Local Variables:
+# mode: conf
+# End:

@@ -14,7 +14,7 @@
 # for generating .SRCINFO from PKGBUILD
 pkgbuild-introspection aur
 # for updating pacman mirror list
-reflector
+# reflector
 pkgfile
 # for paccache and other utilities
 pacman-contrib
@@ -27,6 +27,10 @@ nix
 # * Bootloader
 refind
 
+# * Live USB
+# automatic live usb for multiple isos, just copy them into the directory
+ventoy-bin aur
+
 # * Internet
 iwd
 connman
@@ -36,6 +40,9 @@ network-manager-applet
 nm-connection-editor
 
 # * Linux (Zen)
+# needed for dkms to work for normal linux
+linux-headers
+
 # trying after death of linux-ck
 linux-zen
 # required for modules (e.g. nvidia-dmks)
@@ -77,22 +84,29 @@ mesa
 lib32-mesa
 steam-native-runtime
 
-# ** Microcode
+# ** Microcode and Firmware
+fwupd
 intel-ucode
 amd-ucode
 
 # ** Nvidia
-nvidia-dkms
+nvidia-open-dkms
 # intel-virtual-output
 xf86-video-intel
 # for prime-run
 nvidia-prime
-# WAITING switch to nvidia-open-dkms when get new graphics card and it is stable
-# contains opengl and vulkan drivers; contains file to blacklist nouveau
+# contains opengl and vulkan drivers; contains file to blacklist nouveau;
+# contains nvidia-smi
 nvidia-utils
 # see linux zen heading
 # needed for steam
 lib32-nvidia-utils
+nvidia-settings
+egl-wayland
+
+# nouveau
+# vulkan-nouveau
+# lib32-vulkan-nouveau
 
 # ** Vulkan
 vulkan-icd-loader
@@ -285,6 +299,8 @@ winetricks
 # winetricks-git aur
 # much easier wine management
 bottles aur
+# not using yet, but useful if ever needed to run some windows application
+# winboat
 
 # * DOC, PPT, etc. Editing/Conversion
 libreoffice-fresh
@@ -377,7 +393,7 @@ rng-tools
 xcape
 # klfc cabal
 klfc-bin aur
-kanata aur
+kanata-bin aur
 arduino
 qmk
 
@@ -431,6 +447,9 @@ msmtp-mta
 procmail aur
 
 # * Sound/Music
+# required for my intel sound card to be detected
+sof-firmware
+
 pipewire
 pipewire-pulse
 # parametric eq using pipewire
@@ -460,7 +479,7 @@ playerctl
 # backup client
 ncmpcpp
 # cd ripping
-abcde aur
+# abcde aur
 # abcde optional dependences needed
 glyr
 # abcde-musicbrainz-meta aur
@@ -522,7 +541,7 @@ dunst
 
 # * Launchers
 # bemenu
-rofi-wayland
+rofi
 
 # * Fonts
 # used in polybar
@@ -695,6 +714,8 @@ gdb
 go
 
 # ** Python
+# most of this stuff should just be part of the venv
+uv
 pyenv
 python-pip
 python-pipx
@@ -716,7 +737,7 @@ pyright
 
 # *** Repl
 ipython
-ptpython aur
+# ptpython aur
 
 # *** Debugger
 python-ipdb
@@ -736,7 +757,7 @@ ruff-lsp
 # ruff-format
 
 # pre-commit hook configuration
-python-pre-commit aur
+# python-pre-commit aur
 
 # *** Testing
 python-pytest
@@ -817,6 +838,7 @@ xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
 # needed to screenshare outside xwayland if app is running in xwayland
 xwaylandvideobridge aur
+hyprland-protocols
 
 # qt support (required for e.g. obs)
 qt5-wayland

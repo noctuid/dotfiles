@@ -252,10 +252,10 @@ alias mounteightseagate='mount_luks_lvm_backup eightseagate'
 alias umounteightseagate='umount_luks_lvm eightseagate'
 
 mountdatab() {
-	mount_luks database ~/database
+	mount_luks wddatabase ~/database
 }
 umountdatab() {
-	umount_luks database ~/database
+	umount_luks wddatabase ~/database
 }
 
 mountolddatab() {

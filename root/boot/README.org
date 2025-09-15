@@ -8,6 +8,19 @@ Not sure all these matter but:
   - labeling in gparted labels the filesystem... is there a partition label separate from this?
 - My efi partition is fat32, is labeled =SYSTEM=, and has the =boot= and =esp= flags (don't know if they are necessary for refind)
 
+* Moving Drives to new System
+Installing different drivers and configuration changes may be necessary if gpu/cpu have changed (e.g. switching from nvidia to amd).
+- See packages config and uwsm env files
+- See nvidia-card-path.rules and intel-card-path.rules and the places they are used
+- Kanata configuration will need to be updated (though this can be done after switching over)
+- Scaling configuration is mostly automatic, though the configuration for the internal screen may need to be updated
+
+Otherwise, assuming the architecture is the same, a full reinstall is not necessary.
+
+You may need to change settings in the bios (e.g. AHCI not RAID disk mode for Dell, disable secure boot, etc.).
+
+As refind is already installed, you don’t need to run ~refind-install~ again.  Just boot into a live usb and add a boot entry for refind: ~efibootmgr --create --disk /dev/sdX --part Y --loader /EFI/refind/refind_x64.efi --label "rEFInd Boot Manager" --unicode~ (disk could be e.g. =nvme1n1= and partition =2=; partition would not be =p2=).
+
 * Fixing Completely Broken System
 If you happen to have turned off your computer because it completely froze during an update (before hitting yes to continue) due to a newly introduced NVIDIA driver issue and now bash, pacman, and all basic binaries are 0-length and you can't chroot into the system from a live usb... Well it's time for a new install!  See [[../README.org]].
 
@@ -43,7 +56,9 @@ mount LABEL=SYSTEM /mnt/boot/efi
 
 - ~arch-chroot /mnt~
 - Cd to post-install directory
-- E.g. run ~./post-install fix~ (for refind) or ~./post-install systemd-boot~
+- Do one of these:
+  - If refind is already installed on the EFI and you just need a boot entry (and to update the refind config and regnerate initramfs) - ~./post-install refind-boot-entry <disk> <part>~ (e.g. nvme1n1 2; 2 not p2)
+  - For a full boot loader reinstall - e.g. run ~./post-install fix~ (for refind) or ~./post-install systemd-boot~
 - ~exit~
 - [[#validate-refind-installation][Validate rEFInd Installation]]
 - ~umount -R /mnt~

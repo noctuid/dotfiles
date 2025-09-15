@@ -26,7 +26,7 @@ fi
 
 if uwsm check is-active; then
     systemctl --user --no-block start mako
-    systemctl --user --no-block start hypridle
+    # systemctl --user --no-block start hypridle
     systemctl --user --no-block start waybar
     # have created service manually
     systemctl --user --no-block start swww
@@ -46,7 +46,7 @@ if uwsm check is-active; then
     uwsm-app -t service -u wl_watch_clipboard.service wl_watch_clipboard
 else
     mako &
-    hypridle &
+    # hypridle &
     waybar &
     swww-daemon &
 

@@ -941,6 +941,9 @@ main() {
 			&& "$basedir"/extra-setup --timestamp "$timestamp" refind_setup \
 			&& copy_root_config_files \
 			&& "$basedir"/extra-setup --timestamp "$timestamp" initramfs_setup;;
+		refind-boot-entry) copy_root_config_files \
+			&& "$basedir"/extra-setup --timestamp "$timestamp" initramfs_setup \
+			&& "$basedir"/extra-setup --timestamp "$timestamp" refind_boot_entry "$@";;
 		systemd-boot|gummi) copy_root_config_files \
 			&& "$basedir"/extra-setup --timestamp "$timestamp" initramfs_setup \
 			&& "$basedir"/extra-setup --timestamp "$timestamp" systemd_boot_setup;;

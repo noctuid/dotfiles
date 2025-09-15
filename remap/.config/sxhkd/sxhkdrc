@@ -158,7 +158,7 @@ super + b
 # unfortunately ranger does not have wezterm image preview support, and ueberzug
 # does not work with wezterm multiplexing
 {mod2,super+control} + r
-	max_dropdown -n ranger wezterm start --workspace ranger zsh -c "ranger; zsh -i"
+	max_dropdown -n yazi wezterm start --workspace ranger zsh -ic "y; zsh -i"
 
 {mod2,super+control} + d
 	max_dropdown -n dirvish dyn_emacsclient --socket-name=dirvish -ce "(noct-dirvish-frame)"

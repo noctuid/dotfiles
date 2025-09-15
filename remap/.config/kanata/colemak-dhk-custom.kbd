@@ -1,14 +1,23 @@
 ;; kanata keyboard configuration
 ;; docs: https://github.com/jtroo/kanata/blob/main/docs/config.adoc
-;; key names: https://github.com/jtroo/kanata/blob/main/src/keys/mod.rs
+;; key names: https://github.com/jtroo/kanata/blob/a06c41c918bd3a8d79620961375a1b574235a609/parser/src/keys/mod.rs
+;; keycode tester: https://www.toptal.com/developers/keycode
 
-(defcfg
- ;; too much logging by default; most of X logs; maybe add back when switch to
- ;; service
- log-layer-changes no
- linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd:/dev/trackpoint)
+(environment
+ (NOCTUID_COMPUTER "ThinkPad P52")
+ (defcfg
+  log-layer-changes no
+  linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd:/dev/trackpoint))
 
-(defvar ht 400)
+(environment
+ (NOCTUID_COMPUTER "Alienware 16 Area-51 AA16250")
+ (defcfg
+  ;; too much logging by default; most of X logs; maybe add back when switch to
+  ;; service
+  log-layer-changes no
+  linux-dev /dev/input/by-id/usb-DELL_Technologies_Keyboard-event-kbd))
+
+(defvar ht 500)
 
 (defalias
   ~ S-`
@@ -39,7 +48,7 @@
   col (layer-switch colemak-dhk)
 
   ;; dual-role thumbkeys
-  ;; using 1 as tap-timeout for all to essentially disable double tap to repeat
+  ;; using 1 as tap-timeout for most to essentially disable double tap to repeat
   ;; tab/control
   t/C (tap-hold-press 1 $ht tab lctrl)
   ;; escape/shift
@@ -50,6 +59,10 @@
   bspc/nav (tap-hold-press $ht $ht bspc @ext)
   paren/super (tap-hold-press 1 $ht @lpr lmet)
 
+  spc/nav (tap-hold-release $ht $ht spc @ext)
+  hot/cst (tap-hold-press $ht $ht C-S-tab (multi met ctl (layer-while-held colemak-dhk)))
+  sp/ct (tap-hold-press $ht $ht C-tab (multi met (layer-while-held colemak-dhk)))
+
   ;; return/altgr
   r/G (tap-hold-press 1 $ht ret @agr)
   ;; open brace/alt
@@ -59,28 +72,45 @@
  ;; on extend layer
  (lsft next) (prev))
 
-(defsrc
- ;; don't touch function keys
- ;; esc    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
- grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
- tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
- caps a    s    d    f    g    h    j    k    l    ;    '    ret
- lsft z    x    c    v    b    n    m    ,    .    /    ro   rsft
- lctl lmet lalt mhnk spc       henk kana ralt prtsc
- ;; this is trackpoint other (not grabbing touchpad)
- mouseleft mousemid mouseright
- ;; use to toggle kanata "off"
- del)
+(environment
+ (NOCTUID_COMPUTER "ThinkPad P52")
+ (defsrc
+  ;; don't touch function keys
+  ;; esc    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    ro   rsft
+  lctl lmet lalt mhnk spc       henk kana ralt prtsc
+  ;; this is trackpoint other (not grabbing touchpad)
+  mouseleft mousemid mouseright
+  ;; use to toggle kanata "off"
+  del))
 
-;; wide angle-mod
+(environment
+ (NOCTUID_COMPUTER "Alienware 16 Area-51 AA16250")
+ (defsrc
+  ;; don't touch function keys
+  ;; esc    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    up
+  t    tab  q    w    e    r    y    u    i    o    p    [    ]    \
+  g    caps a    s    d    f    h    j    k    l    ;    '    ret
+  b    lsft z    x    c    v    n    m    ,    .    /    ro   rsft
+  ;; bottom row on other computers; dummy key where copilot key would be
+  lctl wkup lmet lalt spc                 ralt rmet kana lft
+  ;; down/right are dummy keys; don't have trackpoint buttons
+  down bspc rght
+  ;; use to toggle kanata "off"
+  del))
+
 (deflayer colemak-dhk
   ;; esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    XX
   XX   q    w    f    p    b    _    j    l    u    y    ;    [    '
   ;; @ext a    r    s    t    g    ret  k    n    e    i    o    '
   XX   a    r    s    t    g    ret  k    n    e    i    o    '
-  XX   x    c    d    v    z    _    m    h    ,    .    /    /
-  mhnk lmet @t/C @e/S spc       @r/G @p/A henk kana
+  @e/S x    c    d    v    z    _    m    h    ,    .    /    /
+  mhnk lmet @t/C @e/S @spc/nav  @r/G @p/A henk kana
   @bracket/hotkey @bspc/nav @paren/super
   (layer-switch kanata-off))
 
@@ -104,17 +134,16 @@
   ;; m0 (setmouse 0 0)
 
   cbs C-bspc
-  st S-tab
   ct C-tab
-  ;; don't remember what I wanted to use shift with, but it's here
-  cst (tap-hold-press 1 $ht C-S-tab lsft))
+  st S-tab)
+
 
 (deflayer extend
   _    _    _    _    _    _    _    _    _    _    _     _    _    _
   _    _    @cbs @ma↑ prnt _    _    brdn pgdn home end   pgup brup _
   _    _    @ma← @ma↓ @ma→ _    _    next down up   rght  pp   _
   _    _    mlft mmid mrgt @mwu @mwd mute left vold volu  _    _
-  _    _    @st  @cst @ct       _    _    _    _
+  _    _    @st @hot/cst @ct @sp/ct  _    _    _
   _ _ _
   _)
 
@@ -123,7 +152,7 @@
   @agL `    =    ]    @und \    _    @at  -    @rpr @}   @!   _    _
   caps 1    2    3    4    @|   _    @&   7    8    9    0    _
   _    @~   @#   5    @^   _    _    @$   6    @*   @+   @%   _
-  _    _    _    @col _         _    _    _    _
+  _    _    _    @col @sp/ct    _    _    _    _
   _ _ _
   _)
 

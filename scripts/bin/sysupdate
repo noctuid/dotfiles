@@ -18,4 +18,4 @@ paru -S yay-git babashka-bin
 # do always to be safe
 sudo mkinitcpio --allpresets
 
-# NOTE: need to rldkbd after successful upgrate to get trackpad working again
+# NOTE: need to rldkbd after successful upgrade to get trackpad working again

@@ -15,23 +15,30 @@ save-position-on-quit
 force-window=yes
 
 # ** Video
-# use settings from builtin gpu-hq profile
+# https://github.com/mpv-player/mpv/wiki/GPU-Next-vs-GPU
+vo=gpu-next
+gpu-api=vulkan
+# if wanted to force intel
+# vulkan-device="Intel(R) Graphics (ARL)"
+
+# use settings from builtin high-quality profile (previously gpu-hq)
 # https://wiki.archlinux.org/index.php/mpv#High_quality_configurations
 # "This loads high quality OpenGL options. Most users can run these without any
 # problems, but they are not enabled by default to avoid causing problems for
 # the few users who cannot run them."
-# I have keybindings to switch between this and low-latency
-profile=gpu-hq
-
-# testing
-gpu-api=vulkan
+# I have keybindings to switch between this and other profiles
+# https://github.com/mpv-player/mpv/blob/master/etc/builtin.conf
+# https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/#internal-scalers
+# ewa_lanczossharp and hermite is default downscaler
+profile=high-quality
 
 # https://github.com/mpv-player/mpv/wiki/Display-synchronization
 # prefer changing audio speed to dropping frames ("a slight change in audio
 # pitch is often less noticeable than dropped frames")
-# TODO this causes av desync
+# causes massive stutter on current setup
 # video-sync=display-resample
-# also see xrandr.lua
+# this requires video-sync=display-*
+# interpolation=yes
 
 # *** Debanding
 # TODO ideal debanding values?
@@ -60,7 +67,14 @@ gpu-api=vulkan
 # discoloration, and you have --hwdec turned on, the first thing you should try
 # is disabling it.
 
-# hwdec=no # default
+# manpage explanation has changed completely:
+# "Hardware decoding is not enabled by default, to keep the out-of-the-box
+# configuration as reliable as possible. However, when using modern hardware,
+# hardware video decoding should work correctly, offering reduced CPU usage, and
+# possibly lower power consumption. On older systems, it may be necessary to use
+# hardware decoding due to insufficient CPU resources; and even on modern
+# systems, sufficiently complex content (eg: 4K60 AV1) may require it.
+hwdec=auto
 
 # ** Screenshots
 # %F is title with removed extension; if include it, some filenames cause errors
@@ -72,7 +86,7 @@ screenshot-format=png
 # ** Subtitles
 # prefered audio/subtitle languages
 alang=ja,jpn,jp,eng,en
-slang=eng,en,enUS
+slang=enm,eng,en,enUS
 # generally fixes subtitles not showing up at first after seeking
 demuxer-mkv-subtitle-preroll=yes
 # subtitle file will be loaded if contains media file name
@@ -117,35 +131,9 @@ osd-font-size=30
 # custom terminal seek bar
 term-osd-bar-chars = "──╼ ·"
 
-# * Best Quality
-# https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/#internal-scalers
-# can look at FPS and dropped frames with I; seems fine with current GPU
-[best]
-scale=ewa_lanczossharp
-dscale=mitchell
-cscale=spline36
-
 # * External Shaders
-# https://artoriuz.github.io/mpv_upscaling.html
-# https://kokomins.wordpress.com/2019/10/14/mpv-config-guide/#external-shaders
-# can't really tell a difference for video
-# generally using fsrcnnx; like it the best for images
-
-[anime-4k]
-glsl-shaders="~~/shaders/Anime4K_Adaptive_v1.0RC2.glsl"
-cscale=mitchell
-dscale=mitchell
-
-[nnedi3]
-glsl-shaders="~~/shaders/nnedi3-nns64-win8x4.hook"
-dscale=mitchell
-cscale=spline64
-
-[fsrcnnx]
-# glsl-shaders="~~/shaders/FSRCNNX_x2_8-0-4-1.glsl"
-glsl-shaders="~~/shaders/FSRCNNX_x2_16-0-4-1.glsl"
-dscale=mitchell
-cscale=spline64
+# see ./input.conf
+glsl-shaders="~~/shaders/ArtCNN_C4F32_DS.glsl"
 
 # * Webm/Gif Settings
 [extension.webm]

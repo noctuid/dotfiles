@@ -234,6 +234,16 @@ refind_setup() {
 	fi
 }
 
+refind_boot_entry() { # <disk> <part>
+    if [[ -z $1 ]] || [[ -z $2 ]]; then
+	    echo "Must specify <disk> <part> (e.g. nvme1n1 2; 2 not p2)"
+        return 1
+    fi
+    efibootmgr --create --disk "$1" --part "$2" \
+               --loader /EFI/refind/refind_x64.efi \
+               --label "rEFInd Boot Manager" --unicode
+}
+
 # * systemd-boot
 # SEE ./boot/README.org for bootloader troubleshooting steps
 systemd_boot_setup() {

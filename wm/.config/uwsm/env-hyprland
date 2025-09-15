@@ -10,14 +10,6 @@ export GDK_SCALE=2
 
 # https://wiki.hyprland.org/Configuring/Multi-GPU/
 # use integrated graphics as primary renderer
-# integrated as primary; external monitor will lag for my current igpu and will
-# get messed up after e.g. switching ttys but a forcerenderreload will fix
-# unlike if internal screen is messed up
-# export AQ_DRM_DEVICES="/dev/dri/card1:/dev/dri/card0"
-# nvidia first; no performance issues, but wayland wezterm breaks and laptop
-# screen freezes/doesn't work after resume from hibernate
-export AQ_DRM_DEVICES="/dev/dri/card0:/dev/dri/card1"
-
-# untested
-# https://wiki.hyprland.org/Nvidia/#va-api-hardware-video-acceleration
-
+# export AQ_DRM_DEVICES="/dev/dri/intel-gpu-card:/dev/dri/nvidia-gpu-card"
+# performance is still better on monitor with nvidia card first
+export AQ_DRM_DEVICES="/dev/dri/nvidia-gpu-card:/dev/dri/intel-gpu-card"

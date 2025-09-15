@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+layout=$(hyprctl -j getoption general:layout \
+             | jq --raw-output ".str")
+if [[ $layout == scrolling ]]; then
+    size=$(hyprctl -j activewindow | jq --compact-output '.size')
+    new_size=$(hyprctl --batch -j "dispatch layoutmsg colresize all 1; activewindow" \
+                   | tail -n +2 | jq --compact-output '.size')
+    if [[ $size == "$new_size" ]]; then
+        hyprctl dispatch layoutmsg fit all
+    fi
+else
+    hyprctl dispatch fullscreen 1
+fi

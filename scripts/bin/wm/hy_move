@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+layout=$(hyprctl -j getoption general:layout \
+                | jq --raw-output ".str")
+if [[ $layout == scrolling ]]; then
+    hyprctl dispatch layoutmsg movewindowto "$1"
+else
+    hyprctl dispatch movewindow "$1"
+fi

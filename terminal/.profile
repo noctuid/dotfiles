@@ -76,6 +76,9 @@ export PATH="$HOME/.tmuxifier/bin:$PATH"
 
 export BAHSERVER=129.168.1.229
 
+NOCTUID_COMPUTER=$(< /sys/class/dmi/id/product_name)
+export NOCTUID_COMPUTER
+
 # * Setting PATH
 pathdirs="
 # personal scripts

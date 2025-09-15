@@ -17,11 +17,19 @@ local home = wezterm.home_dir;
 
 config.default_prog = { '/usr/bin/env', 'zsh' }
 
+-- only an issue if nvidia card is first, which I thankfully no longer need
 -- :( https://github.com/wezterm/wezterm/issues/6645
-if os.getenv("HYPRLAND_INSTANCE_SIGNATURE") then
+if (os.getenv("HYPRLAND_INSTANCE_SIGNATURE")
+    and string.match(os.getenv("AQ_DRM_DEVICES") or "", "^/dev/dri/nvidia"))
+   or (os.getenv("__NV_PRIME_RENDER_OFFLOAD") == "1") then
     config.enable_wayland = false
-    config.font_size = 24
+    config.font_size = 22
+else
+    -- but another bug:
+    -- https://github.com/wezterm/wezterm/issues/7156
+    config.dpi = 384
 end
+
 -- https://wezterm.org/config/lua/config/tiling_desktop_environments.html
 config.tiling_desktop_environments = {
     'X11 bspwm',
@@ -69,7 +77,10 @@ config.window_background_opacity = 0.8
 config.text_background_opacity = 0.8
 
 -- disable titlebar (needed on macOS)
-config.window_decorations = "RESIZE"
+-- sw_vers not on linux
+if os.execute("sw_vers") then
+    config.window_decorations = "RESIZE"
+end
 
 -- * Scrollback
 -- increase scrollback

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# v4l2-ctl -d /dev/videoX -c led1_mode=0
+
+_record() (
+    cd ~/move || exit 1
+    mpv av://v4l2:/dev/video0 --stream-record=test.mkv --profile=low-latency \
+        --untimed --
+)
+
+_record
